@@ -56,7 +56,7 @@ void CDamageManager::ResetDamageStatusAndWheelDamage() {
 // 0x6C25D0
 void CDamageManager::FuckCarCompletely(bool bDontDetachWheel) {
     if (!bDontDetachWheel)
-        SetWheelStatus((eCarWheel)CGeneral::GetRandomNumberInRange(0, eCarWheel::MAX_CARWHEELS), eCarWheelStatus::WHEEL_STATUS_MISSING);
+        SetWheelStatus((eCarWheel)CGeneral::GetRandomNumberInRange((size_t)eCarWheel::MAX_CARWHEELS), eCarWheelStatus::WHEEL_STATUS_MISSING);
 
     for (size_t i = 0; i < eDoors::MAX_DOORS; i++)
         SetDoorStatus((eDoors)i, eDoorStatus::DAMSTATE_NOTPRESENT);
@@ -77,7 +77,7 @@ void CDamageManager::FuckCarCompletely(bool bDontDetachWheel) {
 
 // 0x6C24B0
 bool CDamageManager::ApplyDamage(CAutomobile* vehicle, tComponent compId, float fIntensity, float fColDmgMult) {
-    if (!vehicle->npcFlags.bTakePanelDamage)
+    if (!vehicle->autoFlags.bCanBeVisiblyDamaged)
         return false;
 
     tComponentGroup group{};
@@ -175,8 +175,9 @@ void CDamageManager::ProgressEngineDamage() {
 
 // 0x6C2320
 bool CDamageManager::ProgressDoorDamage(eDoors door, CAutomobile* pAuto) {
-    if ((unsigned)door >= (unsigned)eDoors::MAX_DOORS)
+    if ((uint32)door >= (uint32)eDoors::MAX_DOORS) {
         return false;
+    }
 
     switch (GetDoorStatus(door)) {
     case eDoorStatus::DAMSTATE_OK:
@@ -219,12 +220,12 @@ void CDamageManager::SetAeroplaneCompStatus(uint8 frame, ePanelDamageState statu
 }
 
 // 0x6C22C0
-uint8 CDamageManager::GetEngineStatus() {
+uint32 CDamageManager::GetEngineStatus() {
     return m_nEngineStatus;
 }
 
 // 0x6C22A0
-void CDamageManager::SetEngineStatus(uint8 status) {
+void CDamageManager::SetEngineStatus(uint32 status) {
     m_nEngineStatus = std::min<uint8>(status, 250u);
 }
 
@@ -398,17 +399,13 @@ bool CDamageManager::GetComponentGroup(tComponent nComp, tComponentGroup& outCom
 
 // NOTSA
 void CDamageManager::SetAllWheelsState(eCarWheelStatus state) {
-    constexpr eCarWheel wheels[]{
-        CARWHEEL_FRONT_LEFT,
-        CARWHEEL_REAR_LEFT,
-        CARWHEEL_FRONT_RIGHT,
-        CARWHEEL_REAR_RIGHT
-    };
+    constexpr eCarWheel wheels[]{CAR_WHEEL_FRONT_LEFT, CAR_WHEEL_REAR_LEFT, CAR_WHEEL_FRONT_RIGHT, CAR_WHEEL_REAR_RIGHT};
     for (auto&& wheel : wheels) {
         SetWheelStatus(wheel, state);
     }
 }
 
+// NOTSA
 void CDamageManager::SetDoorStatus(std::initializer_list<eDoors> doors, eDoorStatus status) {
     for (auto&& door : doors) {
         SetDoorStatus(door, status);
@@ -421,6 +418,17 @@ auto CDamageManager::GetAllLightsState() const->std::array<eLightsState, 4> {
         GetLightStatus(eLights::LIGHT_FRONT_RIGHT),
         GetLightStatus(eLights::LIGHT_REAR_LEFT),
         GetLightStatus(eLights::LIGHT_REAR_RIGHT)
+    };
+}
+
+auto CDamageManager::GetAllDoorsStatus() const -> std::array<eDoorStatus, MAX_DOORS> {
+    return {
+        GetDoorStatus(eDoors::DOOR_BONNET),
+        GetDoorStatus(eDoors::DOOR_BOOT),
+        GetDoorStatus(eDoors::DOOR_LEFT_FRONT),
+        GetDoorStatus(eDoors::DOOR_RIGHT_FRONT),
+        GetDoorStatus(eDoors::DOOR_LEFT_REAR),
+        GetDoorStatus(eDoors::DOOR_RIGHT_REAR)
     };
 }
 
@@ -489,7 +497,7 @@ void CDamageManager::SetDoorOpen(eDoors door) {
         SetDoorStatus(door, eDoorStatus::DAMSTATE_OPENED_DAMAGED);
         break;
     case eDoorStatus::DAMSTATE_NOTPRESENT:
-        assert(0 && "Door should be present @ SetDoorOpen");
+        //assert(0 && "Door should be present @ SetDoorOpen");
         break;
     }
 }
@@ -507,7 +515,7 @@ void CDamageManager::SetDoorClosed(eDoors door) {
         SetDoorStatus(door, eDoorStatus::DAMSTATE_DAMAGED);
         break;
     case eDoorStatus::DAMSTATE_NOTPRESENT:
-        assert(0 && "Door should be present @ SetDoorClosed");
+        //assert(0 && "Door should be present @ SetDoorClosed");
         break;
     }
 }

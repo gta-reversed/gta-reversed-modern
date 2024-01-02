@@ -5,6 +5,7 @@
 #include "TheCarGenerators.h"
 #include "Occlusion.h"
 #include "CarCtrl.h"
+#include "TheScripts.h"
 
 bool& CCarGenerator::m_bHotdogVendorPositionOffsetInitialized = *reinterpret_cast<bool*>(0xC2B974);
 CVector& CCarGenerator::m_HotdogVendorPositionOffset = *reinterpret_cast<CVector*>(0xC2B968);
@@ -25,8 +26,7 @@ void CCarGenerator::InjectHooks()
 }
 
 // 0x6F32E0
-bool CCarGenerator::CheckForBlockage(int32 modelId)
-{
+bool CCarGenerator::CheckForBlockage(int32 modelId) {
     auto colModel = CModelInfo::GetModelInfo(modelId)->GetColModel();
     float radius = colModel ? colModel->GetBoundRadius() : 2.0f;
 
@@ -36,24 +36,22 @@ bool CCarGenerator::CheckForBlockage(int32 modelId)
     CVector posn = UncompressLargeVector(m_vecPosn);
     CWorld::FindObjectsKindaColliding(posn, radius, true, &entityCount, 8, objects, false, true, true, false, false);
 
-    for (int32 i = 0; i < entityCount; i++)
-    {
-        auto pEntityColModel = CModelInfo::GetModelInfo(objects[i]->m_nModelIndex)->GetColModel();
-
+    for (auto& obj : std::span{ objects, (size_t)entityCount }) {
+        auto entityColModel = obj->GetModelInfo()->GetColModel();
         if (colModel)
         {
-            if (objects[i]->GetPosition().z + pEntityColModel->GetBoundingBox().m_vecMax.z + 1.0f > posn.z + colModel->GetBoundingBox().m_vecMin.z &&
-                objects[i]->GetPosition().z + pEntityColModel->GetBoundingBox().m_vecMin.z - 1.0f < posn.z + colModel->GetBoundingBox().m_vecMax.z)
-            {
+            if (obj->GetPosition().z + entityColModel->GetBoundingBox().m_vecMax.z + 1.0f > posn.z + colModel->GetBoundingBox().m_vecMin.z &&
+                obj->GetPosition().z + entityColModel->GetBoundingBox().m_vecMin.z - 1.0f < posn.z + colModel->GetBoundingBox().m_vecMax.z
+            ) {
                 bWaitUntilFarFromPlayer = true;
                 return true;
             }
         }
         else
         {
-            if (objects[i]->GetPosition().z + pEntityColModel->GetBoundingBox().m_vecMax.z + 1.0f > posn.z - 1.0f &&
-                objects[i]->GetPosition().z + pEntityColModel->GetBoundingBox().m_vecMin.z - 1.0f < posn.z + 1.0f)
-            {
+            if (obj->GetPosition().z + entityColModel->GetBoundingBox().m_vecMax.z + 1.0f > posn.z - 1.0f &&
+                obj->GetPosition().z + entityColModel->GetBoundingBox().m_vecMin.z - 1.0f < posn.z + 1.0f
+            ) {
                 bWaitUntilFarFromPlayer = true;
                 return true;
             }
@@ -116,7 +114,7 @@ void CCarGenerator::DoInternalProcessing()
     tCarGenPlateText plate{};
     int32 tractorDriverPedType;
 
-    bool nightTime = CClock::ms_nGameClockHours > 21 || CClock::ms_nGameClockHours < 7;
+    bool nightTime = CClock::ClockHoursInRange(21, 7);
     if (!bIgnorePopulationLimit
         && (nightTime && CCarCtrl::NumParkedCars >= 10 || !nightTime && CCarCtrl::NumParkedCars >= 5)
     )
@@ -195,14 +193,14 @@ void CCarGenerator::DoInternalProcessing()
 
         CVector posn = UncompressLargeVector(m_vecPosn);
         baseZ = posn.z;
-        if (baseZ <= -100.0f)
+        if (baseZ <= MAP_Z_LOW_LIMIT)
             baseZ = CWorld::FindGroundZForCoord(posn.x, posn.y);
         vehicle->m_nExtendedRemovalRange = 255;
     }
     else
     {
         CVector posn = UncompressLargeVector(m_vecPosn);
-        if (posn.z > -100.0f)
+        if (posn.z > MAP_Z_LOW_LIMIT)
             posn.z += 1.0f;
         else
             posn.z = 1000.0f;
@@ -239,11 +237,11 @@ void CCarGenerator::DoInternalProcessing()
             break;
         case VEHICLE_TYPE_BIKE:
             vehicle = new CBike(actualModelId, PARKED_VEHICLE);
-            vehicle->AsBike()->bikeFlags.bIsStanding = true;
+            vehicle->AsBike()->bikeFlags.bOnSideStand = true;
             break;
         case VEHICLE_TYPE_BMX:
             vehicle = new CBmx(actualModelId, PARKED_VEHICLE);
-            vehicle->AsBike()->bikeFlags.bIsStanding = true;
+            vehicle->AsBike()->bikeFlags.bOnSideStand = true;
             break;
         case VEHICLE_TYPE_TRAILER:
             vehicle = new CTrailer(actualModelId, PARKED_VEHICLE);
@@ -276,11 +274,10 @@ void CCarGenerator::DoInternalProcessing()
         // 0x6F3BF4
 
         CVector vehPosn = vehicle->GetPosition();
-        CNodeAddress pathLink;
-        ThePaths.FindNodeClosestToCoors(&pathLink, vehPosn.x, vehPosn.y, vehPosn.z, 0, 20.0F, 0, 0, 0, 0, 1);
-        if (pathLink.m_wAreaId != (uint16)-1)
+        CNodeAddress pathLink = ThePaths.FindNodeClosestToCoors(vehPosn, PATH_TYPE_VEH, 20.0F, 0, 0, 0, 0, 1);
+        if (pathLink.IsValid())
         {
-            assert(pathLink.m_wNodeId != (uint16)-1);
+            assert(pathLink.IsValid());
 
             CPathNode& pathNode = ThePaths.m_pPathNodes[pathLink.m_wAreaId][pathLink.m_wNodeId];
             if (pathNode.m_nNumLinks != 0)
@@ -339,6 +336,18 @@ void CCarGenerator::DoInternalProcessing()
     }
     CVisibilityPlugins::SetClumpAlpha(vehicle->m_pRwClump, 0);
     m_nVehicleHandle = GetVehiclePool()->GetRef(vehicle);
+
+    // Originally, R* did a signed comparison between unsigned \r m_nGenerateCount and signed 32bit constant -1.
+    // This made the generated code to always skip the decrementation.
+    // However, this bug does not affect the game at all because all cargens created by the script
+    // are either disabled or infinite.
+#ifdef FIX_BUGS
+    if (m_nGenerateCount < (uint16)-1)
+#else
+    if (m_nGenerateCount < -1)
+#endif
+        m_nGenerateCount--;
+
     m_nNextGenTime = CalcNextGen();
 }
 
@@ -412,7 +421,7 @@ void CCarGenerator::SwitchOff()
 // 0x6F32C0
 void CCarGenerator::SwitchOn()
 {
-    m_nGenerateCount = -1;
+    m_nGenerateCount = (uint16)-1;
     m_nNextGenTime = CalcNextGen();
 }
 

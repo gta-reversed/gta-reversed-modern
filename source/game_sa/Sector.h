@@ -14,11 +14,8 @@ public:
     CPtrListDoubleLink m_dummies;
 
 public:
-    // 0x564040
-    CSector();
-
-    // 0x563130
-    ~CSector();
+    CSector() = default; // 0x564040
+    ~CSector() = default; // 0x563130
 };
 
 VALIDATE_SIZE(CSector, 8);

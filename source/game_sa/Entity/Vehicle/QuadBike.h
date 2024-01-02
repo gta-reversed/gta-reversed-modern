@@ -34,12 +34,14 @@ enum eQuadBikeNodes {
     QUAD_NUM_NODES
 };
 
-class CQuadBike : public CAutomobile {
+class NOTSA_EXPORT_VTABLE CQuadBike : public CAutomobile {
 public:
     tBikeHandlingData* m_pHandling;
-    CRideAnimData      m_sRideAnimData;
+    CRideAnimData      m_sRideAnimData{ ANIM_GROUP_QUAD };
     float              field_9A8[4]; // unused
     uint8              m_nQuadFlags;
+
+    static constexpr auto Type = VEHICLE_TYPE_QUAD;
 
 public:
     CQuadBike(int32 modelIndex, eVehicleCreatedBy createdBy);
@@ -51,7 +53,7 @@ public:
     bool ProcessAI(uint32& extraHandlingFlags) override;
     void ProcessControl() override;
     void ProcessControlInputs(uint8 playerNum) override;
-    void ProcessDrivingAnims(CPed* driver, uint8 bBlend) override;
+    void ProcessDrivingAnims(CPed* driver, bool blend) override;
     void ProcessSuspension() override;
     void ResetSuspension() override;
     void SetupDamageAfterLoad() override;
@@ -69,7 +71,7 @@ private:
     bool ProcessAI_Reversed(uint32& extraHandlingFlags) { return CQuadBike::ProcessAI(extraHandlingFlags); }
     void ProcessControl_Reversed() { CQuadBike::ProcessControl(); }
     void ProcessControlInputs_Reversed(uint8 playerNum) { CQuadBike::ProcessControlInputs(playerNum); }
-    void ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend) { CQuadBike::ProcessDrivingAnims(driver, bBlend); }
+    void ProcessDrivingAnims_Reversed(CPed* driver, bool blend) { CQuadBike::ProcessDrivingAnims(driver, blend); }
     void ProcessSuspension_Reversed() { CQuadBike::ProcessSuspension(); }
     void ResetSuspension_Reversed() { CQuadBike::ResetSuspension(); }
     void SetupDamageAfterLoad_Reversed() { CQuadBike::SetupDamageAfterLoad(); }

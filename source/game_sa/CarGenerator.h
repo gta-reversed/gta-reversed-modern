@@ -29,7 +29,6 @@ public:
     int32 m_nMinDelay;
     int32 m_nMaxDelay;
 };
-
 VALIDATE_SIZE(CFileCarGenerator, 0x30);
 
 class CCarGenerator {
@@ -57,7 +56,7 @@ public:
     // char             _pad12[2];
     uint32       m_nNextGenTime;
     int16        m_nVehicleHandle;
-    int16        m_nGenerateCount; // (0) Don't Spawn , (1 - 32767) Spawn X number of times , (-1) Always Spawn.
+    uint16       m_nGenerateCount; // (0) Don't Spawn , (>0) Spawn X number of times , (0xFFFF) Always Spawn.
     uint8        m_nIplId;
     bool         m_bIsUsed;
     // char             _pad1E[2];

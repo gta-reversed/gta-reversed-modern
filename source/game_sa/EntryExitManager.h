@@ -15,52 +15,65 @@ class QuadTreeNode;
 class CEntryExit;
 class CEntity;
 
-typedef CPool<CEntryExit> CEntryExitsPool;
+typedef CPool<CEntryExit, CEntryExit, true> CEntryExitsPool;
+
+enum ExitEnterState : int32 {
+    EXIT_ENTER_STATE_0,
+    EXIT_ENTER_STATE_1,
+    EXIT_ENTER_STATE_2,
+    EXIT_ENTER_STATE_3,
+    EXIT_ENTER_STATE_4,
+};
 
 class CEntryExitManager {
 public:
-    static CEntryExit* (&ms_entryExitStack)[4]; // static CEntryExit *ms_entryExitStack[4]
-    static bool& ms_bBurglaryHousesEnabled;
-    static int32& ms_oldAreaCode;
-    static CEntity* (&ms_visibleEntityList)[32]; // static CEntity *ms_visibleEntityList[32]
-    static int32& ms_entryExitStackPosn;
-    static bool& ms_bDisabled;
-    static int32& ms_exitEnterState;
-    static CQuadTreeNode*& mp_QuadTree;
-    static CEntryExit*& mp_Active;
-    static CEntryExitsPool*& mp_poolEntryExits;
-    static uint32& ms_numVisibleEntities;
+    static inline CEntryExit* (&ms_entryExitStack)[4] = *(CEntryExit*(*)[4])0x96A71C;
+    static inline bool& ms_bBurglaryHousesEnabled = *(bool*)0x96A730;
+    static inline int32& ms_oldAreaCode = *(int32*)0x96A734;
+    static inline CEntity* (&ms_visibleEntityList)[32] = *(CEntity * (*)[32])0x96A738;
+    static inline uint32& ms_entryExitStackPosn = *(uint32*)0x96A7C4; // No. of enex's on the stack
+    static inline int8& ms_bDisabled = *(int8*)0x96A7C8;
+    static inline int32& ms_exitEnterState = *(int32*)0x96A7CC; // TODO: Some kind of enum, seems to have values [0, 4]
+    static inline CQuadTreeNode*& mp_QuadTree = *(CQuadTreeNode**)0x96A7D0;
+    static inline CEntryExit*& mp_Active = *(CEntryExit**)0x96A7D4;
+    static inline auto& mp_poolEntryExits = StaticRef<CEntryExitsPool*, 0x96A7D8>();
+    static inline int32& ms_numVisibleEntities = *(int32*)0x96A7DC;
 
 public:
     static void InjectHooks();
 
     static void Init();
-    static void Load();
-    static void Save();
-    static void Update();
     static void Shutdown();
     static void ShutdownForRestart();
+    static void Update();
 
+    static int32 AddOne(float entranceX, float entranceY, float entranceZ,
+                        float entranceAngle, float entranceRangeX, float entranceRangeY,
+                        float fUnused,
+                        float exitX, float exitY, float exitZ,
+                        float exitAngle, int32 area, CEntryExit::eFlags flags, int32 skyColor, int32 timeOn, int32 timeOff, int32 numberOfPeds, const char* name);
     static void AddEntryExitToStack(CEntryExit* entryExit);
-    static int32 AddOne(float entranceX, float entranceY, float entranceZ, float entranceAngle, float entranceRangeX, float entranceRangeY, float fUnused, float exitX, float exitY, float exitZ, float exitAngle, int32 area, int32 flags, int32 skyColor, int32 timeOn, int32 timeOff, int32 numberOfPeds, const char* name);
     static void DeleteOne(int32 index);
-    static void EnableBurglaryHouses(bool enable);
-    static CEntity* FindNearestDoor(const CEntryExit& entryExit, float range);
+    static CObject* FindNearestDoor(const CEntryExit& exit, float radius);
     static int32 FindNearestEntryExit(const CVector2D& position, float range, int32 ignoreArea);
-    static CEntryExit* GetEntryExit(int32 index);
+    static void EnableBurglaryHouses(bool enable);
+    static void GetPositionRelativeToOutsideWorld(CVector& pos);
+    static void PostEntryExitsCreation();
+    static void LinkEntryExit(CEntryExit* entryExit);
     static int32 GetEntryExitIndex(const char* name, uint16 enabledFlags, uint16 disabledFlags);
-    static void GetPositionRelativeToOutsideWorld(CVector& positionInOut);
-    static void GotoEntryExit(CEntryExit* entryExit);
+    static void ResetAreaCodeForVisibleObjects();
+    static void SetAreaCodeForVisibleObjects();
+
     static void GotoEntryExitVC(const char* name);
     static void GotoNextEntryExit();
     static void GotoPreviousEntryExit();
-    static void LinkEntryExit(CEntryExit* entryExit);
-    static void PostEntryExitsCreation();
-    static void ResetAreaCodeForVisibleObjects();
-    static void SetAreaCodeForVisibleObjects();
-    static void SetEnabled(int32 index, bool enable);
     static void SetEnabledByName(const char* name, bool enable);
-    static void SetEntryExitFlag(const char* name, uint32 flag, bool enable);
     static void SetEntryExitFlagWithIndex(int32 index, uint32 flag, bool enable);
     static bool WeAreInInteriorTransition();
+
+    static bool Load();
+    static bool Save();
+
+private:
+    static void AddEnExToWorld(CEntryExit* enex);
 };

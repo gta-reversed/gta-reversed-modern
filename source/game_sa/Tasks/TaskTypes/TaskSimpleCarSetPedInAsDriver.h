@@ -6,7 +6,6 @@
 */
 #pragma once
 
-
 #include "TaskSimple.h"
 #include "Vehicle.h"
 #include "TaskUtilityLineUpPedWithCar.h"
@@ -24,14 +23,13 @@ public:
 public:
     static constexpr auto Type = TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER;
 
-    CTaskSimpleCarSetPedInAsDriver(CVehicle *targetVehicle, CTaskUtilityLineUpPedWithCar *utility);
-    ~CTaskSimpleCarSetPedInAsDriver();
+    CTaskSimpleCarSetPedInAsDriver(CVehicle *targetVehicle, CTaskUtilityLineUpPedWithCar *utility = nullptr);
+    CTaskSimpleCarSetPedInAsDriver(CVehicle *targetVehicle, bool warpingInToCar, CTaskUtilityLineUpPedWithCar *utility = nullptr);
+    ~CTaskSimpleCarSetPedInAsDriver() override;
 
-    CTask* Clone() override;
-    eTaskType GetTaskType() override { return TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return false; }
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override { return false; }
     bool ProcessPed(CPed* ped) override;
-
 };
-
 VALIDATE_SIZE(CTaskSimpleCarSetPedInAsDriver, 0x1C);

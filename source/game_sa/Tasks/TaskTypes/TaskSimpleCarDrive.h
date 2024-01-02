@@ -10,14 +10,13 @@ public:
     CVehicle*                     m_pVehicle;
     CAnimBlendAssociation*        m_pAnimCloseDoorRolling;
     CTaskUtilityLineUpPedWithCar* m_pTaskUtilityLineUpPedWithCar;
-    int32                         field_14;
+    CTaskTimer*                   m_TaskTimer;
     int32                         field_18;
     char                          field_1C;
     char                          field_1D;
-    char                          field_1E[2];
     int32                         m_nBoppingStartTime;
     int32                         field_24;
-    int32                         m_nBoppingEndTime;
+    int32                         m_nBoppingEndTime;  // Seemingly not a tick count, but rather the bopping interval
     float                         m_fBoppingProgress; // 0.0 to 1.0
     int32                         m_nBoppingCompletedTimes;
     int32                         m_nHeadBoppingStartTime;
@@ -28,35 +27,48 @@ public:
     int32                         m_nArmBoppingStartTime;
     int32                         m_nTimePassedSinceCarUpSideDown;
     CTaskTimer                    m_copCarStolenTimer;
-    union {
-        struct {
-            uint8 m_b01 : 1;
-            uint8 m_b02 : 1;
-            uint8 m_bUpdateCurrentVehicle : 1; // updates m_pVehicle pointer to the current occupied vehicle by ped
-            uint8 m_b04 : 1;
-        };
-        uint8 m_nFlags;
-    };
-    char _pad[3];
+
+    // Inited according to: 0x63C3AE
+    uint8 m_b01 : 1;
+    uint8 m_b02 : 1;
+    uint8 m_bUpdateCurrentVehicle : 1; // m_bUpdateCurrentVehicle : 1; // updates m_pVehicle pointer to the current occupied vehicle by ped
+    uint8 m_b08 : 1;
+    uint8 m_b10 : 1;
+    uint8 m_b20 : 1;
 
 public:
     static constexpr auto Type = TASK_SIMPLE_CAR_DRIVE;
 
     CTaskSimpleCarDrive() = delete;
+    explicit CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask = {}, bool updateCurrentVehicle = {});
+    ~CTaskSimpleCarDrive() override;
 
-    CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask, bool updateCurrentVehicle);
-
-    eTaskType GetTaskType() override { return TASK_SIMPLE_CAR_DRIVE; }
-    CTask* Clone() override;
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override;
     bool ProcessPed(class CPed* ped) override;
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
+    bool SetPedPosition(CPed* ped) override;
 
-    auto GetVehicle() const { return m_pVehicle; }
+    void TriggerIK(CPed* ped) const;
+    void UpdateBopping();
+    void StartBopping(CPed* ped);
+    void ProcessHeadBopping(CPed* ped, bool a3, float a4);
+    void ProcessArmBopping(CPed* pPed, bool a3, float a4);
+    void ProcessBopping(CPed* ped, bool a3);
+
+    [[nodiscard]] auto GetVehicle() const { return m_pVehicle; }
+
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskSimpleCarDrive* Constructor(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask, bool updateCurrentVehicle);
+    CTaskSimpleCarDrive* Constructor(CVehicle* pVehicle, CTaskUtilityLineUpPedWithCar* pUtilityTask, int8_t bUpdateCurrentVehicle) { this->CTaskSimpleCarDrive::CTaskSimpleCarDrive(pVehicle, pUtilityTask, bUpdateCurrentVehicle); return this; }
+    CTaskSimpleCarDrive* Destructor() { this->CTaskSimpleCarDrive::~CTaskSimpleCarDrive(); return this; }
+    CTask* Clone_Reversed() { return CTaskSimpleCarDrive::Clone(); }
+    eTaskType GetTaskType_Reversed() { return CTaskSimpleCarDrive::GetTaskType(); }
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent const* event) { return CTaskSimpleCarDrive::MakeAbortable(ped, priority, event); }
+    bool ProcessPed_Reversed(CPed* ped) { return CTaskSimpleCarDrive::ProcessPed(ped); }
+    bool SetPedPosition_Reversed(CPed* ped) { return CTaskSimpleCarDrive::SetPedPosition(ped); }
 };
 
 VALIDATE_SIZE(CTaskSimpleCarDrive, 0x60);

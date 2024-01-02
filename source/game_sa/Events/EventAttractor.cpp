@@ -10,8 +10,8 @@ void CEventAttractor::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AF350);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AF4B0);
-    RH_ScopedInstall(CloneEditable_Reversed, 0x4B7440);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AF4B0);
+    RH_ScopedVirtualInstall(CloneEditable, 0x4B7440);
     RH_ScopedInstall(IsEffectActive, 0x4AF460);
 }
 
@@ -23,19 +23,18 @@ void CEventScriptedAttractor::InjectHooks()
     RH_ScopedInstall(Constructor, 0x5FEF40);
 }
 
-CEventAttractor::CEventAttractor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor)
+CEventAttractor::CEventAttractor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor, eTaskType taskType) :
+    CEventEditableResponse{taskType}
 {
     m_2dEffect = effect;
-    m_entity = entity;
+    m_entity   = entity;
     m_bAvoidLookingAtAttractor = bAvoidLookingAtAttractor;
-    if (m_entity)
-        m_entity->RegisterReference(&m_entity);
+    CEntity::SafeRegisterRef(m_entity);
 }
 
 CEventAttractor::~CEventAttractor()
 {
-    if (m_entity)
-        m_entity->CleanUpOldReference(&m_entity);
+    CEntity::SafeCleanUpRef(m_entity);
 }
 
 // 0x4AF350
@@ -69,7 +68,7 @@ bool CEventAttractor::AffectsPed_Reversed(CPed* ped)
             || GetEventType() != EVENT_ATTRACTOR
             || !FindPlayerWanted()->m_nWantedLevel
             && pedAttractor.m_nAttractorType == PED_ATTRACTOR_TRIGGER_SCRIPT
-            && CPopulation::PedMICanBeCreatedAtThisAttractor(ped->m_nModelIndex, pedAttractor.m_szScriptName))
+            && CPopulation::PedMICanBeCreatedAtThisAttractor((eModelID)(ped->m_nModelIndex), pedAttractor.m_szScriptName))
         {
             CTask* activeTask = ped->GetTaskManager().GetActiveTask();
             if (!activeTask
@@ -86,7 +85,7 @@ bool CEventAttractor::AffectsPed_Reversed(CPed* ped)
                     return true;
                 if (!g_ikChainMan.IsLooking(ped)) {
                     uint32 time = CGeneral::GetRandomNumberInRange(2000, 4000);
-                    CVector point = m_entity->GetMatrix() * m_2dEffect->m_vecPosn;
+                    CVector point = m_entity->GetMatrix() * m_2dEffect->m_pos;
                     g_ikChainMan.LookAt("CEventAttractor", ped, 0, time, BONE_UNKNOWN, &point, false, 0.25f, 500, 3, false);
                 }
             }     
@@ -105,7 +104,7 @@ bool CEventAttractor::IsEffectActive(CEntity* entity, const C2dEffect* effect)
 {
     auto modelInfo = CModelInfo::GetModelInfo(entity->m_nModelIndex);
     for (int32 i = 0; i < modelInfo->m_n2dfxCount; i++) {
-        if (effect->m_nType == EFFECT_ATTRACTOR && effect == modelInfo->Get2dEffect(i))
+        if (effect->m_type == EFFECT_ATTRACTOR && effect == modelInfo->Get2dEffect(i))
             return true;
     }
     return false;

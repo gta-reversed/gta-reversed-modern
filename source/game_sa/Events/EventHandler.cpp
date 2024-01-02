@@ -5,6 +5,11 @@
 #include "TaskSimpleStandStill.h"
 #include "TaskComplexInAirAndLand.h"
 #include "TaskComplexStuckInAir.h"
+// #include "TaskComplexSmartFleeEntity.h"
+
+#include "InterestingEvents.h"
+#include "IKChainManager_c.h"
+#include "EventSexyVehicle.h"
 
 void CEventHandler::InjectHooks() {
     RH_ScopedClass(CEventHandler);
@@ -14,81 +19,80 @@ void CEventHandler::InjectHooks() {
 
     RH_ScopedInstall(Flush, 0x4C3790);
     RH_ScopedInstall(FlushImmediately, 0x4C3820);
-    // RH_ScopedInstall(GetCurrentEventType, 0x4B8CC0);
-    // RH_ScopedInstall(HandleEvents, 0x4C3F10);
-    // RH_ScopedInstall(IsKillTaskAppropriate, 0x4BC3E0);
+    RH_ScopedInstall(GetCurrentEventType, 0x4B8CC0, { .reversed = false });
+    RH_ScopedInstall(HandleEvents, 0x4C3F10, { .reversed = false });
+    RH_ScopedInstall(IsKillTaskAppropriate, 0x4BC3E0, { .reversed = false });
     RH_ScopedInstall(IsTemporaryEvent, 0x4BC370);
-    // RH_ScopedInstall(RecordActiveEvent, 0x0);
-    // RH_ScopedInstall(RecordPassiveEvent, 0x0);
-    // RH_ScopedInstall(RegisterKill, 0x4B9340);
-    // RH_ScopedInstall(SetEventResponseTask, 0x4BC600);
-    /*
-    RH_ScopedInstall(ComputeAreaCodesResponse, 0x4BBF50);
-    RH_ScopedInstall(ComputeAttractorResponse, 0x4B9BE0);
-    RH_ScopedInstall(ComputeBuildingCollisionPassiveResponse, 0x0);
-    RH_ScopedInstall(ComputeBuildingCollisionResponse, 0x4BF2B0);
-    RH_ScopedInstall(ComputeCarUpsideDownResponse, 0x4BBC30);
-    RH_ScopedInstall(ComputeChatPartnerResponse, 0x4B98E0);
-    RH_ScopedInstall(ComputeCopCarBeingStolenResponse, 0x4BB740);
-    RH_ScopedInstall(ComputeCreatePartnerTaskResponse, 0x4BB130);
-    RH_ScopedInstall(ComputeDamageResponse, 0x4C0170);
-    RH_ScopedInstall(ComputeDangerResponse, 0x4BC230);
-    RH_ScopedInstall(ComputeDeadPedResponse, 0x4B9470);
-    RH_ScopedInstall(ComputeDeathResponse, 0x4B9400);
-    RH_ScopedInstall(ComputeDontJoinGroupResponse, 0x4BC1D0);
-    RH_ScopedInstall(ComputeDraggedOutCarResponse, 0x4BCC30);
-    RH_ScopedInstall(ComputeFireNearbyResponse, 0x4BBFB0);
-    RH_ScopedInstall(ComputeGotKnockedOverByCarResponse, 0x4C3430);
-    RH_ScopedInstall(ComputeGunAimedAtResponse, 0x4C2840);
-    RH_ScopedInstall(ComputeHighAngerAtPlayerResponse, 0x4BAC10);
-    RH_ScopedInstall(ComputeInWaterResponse, 0x4BAF80);
-    RH_ScopedInstall(ComputeInteriorUseInfoResponse, 0x4BAFE0);
-    RH_ScopedInstall(ComputeKnockOffBikeResponse, 0x4B9FF0);
-    RH_ScopedInstall(ComputeLowAngerAtPlayerResponse, 0x4BAAD0);
-    RH_ScopedInstall(ComputeLowHealthResponse, 0x4BA990);
-    RH_ScopedInstall(ComputeObjectCollisionPassiveResponse, 0x4BBB90);
-    RH_ScopedInstall(ComputeObjectCollisionResponse, 0x4B92B0);
-    RH_ScopedInstall(ComputeOnEscalatorResponse, 0x4BC150);
-    RH_ScopedInstall(ComputeOnFireResponse, 0x4BAD50);
-    RH_ScopedInstall(ComputePassObjectResponse, 0x4BB0C0);
-    RH_ScopedInstall(ComputePedCollisionWithPedResponse, 0x4BDB80);
-    RH_ScopedInstall(ComputePedCollisionWithPlayerResponse, 0x4BE7D0);
-    RH_ScopedInstall(ComputePedEnteredVehicleResponse, 0x4C1590);
-    RH_ScopedInstall(ComputePedFriendResponse, 0x4B9DD0);
-    RH_ScopedInstall(ComputePedSoundQuietResponse, 0x4B9D40);
-    RH_ScopedInstall(ComputePedThreatBadlyLitResponse, 0x4B9C90);
-    RH_ScopedInstall(ComputePedThreatResponse, 0x4C19A0);
-    RH_ScopedInstall(ComputePedToChaseResponse, 0x4C1910);
-    RH_ScopedInstall(ComputePedToFleeResponse, 0x4B9B50);
-    RH_ScopedInstall(ComputePersonalityResponseToDamage, 0x4BF9B0);
-    RH_ScopedInstall(ComputePlayerCollisionWithPedResponse, 0x4B8CE0);
-    RH_ScopedInstall(ComputePlayerWantedLevelResponse, 0x4BB280);
-    RH_ScopedInstall(ComputePotentialPedCollideResponse, 0x4C2610);
-    RH_ScopedInstall(ComputePotentialWalkIntoFireResponse, 0x4BBCD0);
-    RH_ScopedInstall(ComputeReallyLowHealthResponse, 0x4BAA30);
-    RH_ScopedInstall(ComputeReviveResponse, 0x4B97B0);
-    RH_ScopedInstall(ComputeScriptCommandResponse, 0x4BA7C0);
-    RH_ScopedInstall(ComputeSeenCopResponse, 0x4BC050);
-    RH_ScopedInstall(ComputeSeenPanickedPedResponse, 0x4C35F0);
-    RH_ScopedInstall(ComputeSexyPedResponse, 0x4B99F0);
-    RH_ScopedInstall(ComputeSexyVehicleResponse, 0x4B9AA0);
-    RH_ScopedInstall(ComputeShotFiredResponse, 0x4BC710);
-    RH_ScopedInstall(ComputeShotFiredWhizzedByResponse, 0x4BBE30);
-    RH_ScopedInstall(ComputeSignalAtPedResponse, 0x4BB050);
-    RH_ScopedInstall(ComputeSpecialResponse, 0x4BB800);
-    RH_ScopedInstall(ComputeVehicleCollisionResponse, 0x4BD6A0);
-    RH_ScopedInstall(ComputeVehicleDamageResponse, 0x4C2FC0);
-    RH_ScopedInstall(ComputeVehicleDiedResponse, 0x4BA8B0);
-    RH_ScopedInstall(ComputeVehicleHitAndRunResponse, 0x0);
-    RH_ScopedInstall(ComputeVehicleOnFireResponse, 0x4BB2E0);
-    RH_ScopedInstall(ComputeVehiclePotentialCollisionResponse, 0x4C0BD0);
-    RH_ScopedInstall(ComputeVehiclePotentialPassiveCollisionResponse, 0x4B96D0);
-    RH_ScopedInstall(ComputeVehicleToStealResponse, 0x4B9F80);
-    RH_ScopedInstall(ComputeWaterCannonResponse, 0x4BAE30);
-    */
+    // RH_ScopedInstall(RecordActiveEvent, 0x0, { .reversed = false });
+    // RH_ScopedInstall(RecordPassiveEvent, 0x0, { .reversed = false });
+    RH_ScopedInstall(RegisterKill, 0x4B9340, { .reversed = false });
+    RH_ScopedInstall(SetEventResponseTask, 0x4BC600, { .reversed = false });
+   
+    RH_ScopedInstall(ComputeAreaCodesResponse, 0x4BBF50, { .reversed = false });
+    RH_ScopedInstall(ComputeAttractorResponse, 0x4B9BE0, { .reversed = false });
+    // RH_ScopedInstall(ComputeBuildingCollisionPassiveResponse, 0x0, { .reversed = false });
+    RH_ScopedInstall(ComputeBuildingCollisionResponse, 0x4BF2B0, { .reversed = false });
+    RH_ScopedInstall(ComputeCarUpsideDownResponse, 0x4BBC30, { .reversed = false });
+    RH_ScopedInstall(ComputeChatPartnerResponse, 0x4B98E0, { .reversed = false });
+    RH_ScopedInstall(ComputeCopCarBeingStolenResponse, 0x4BB740, { .reversed = false });
+    RH_ScopedInstall(ComputeCreatePartnerTaskResponse, 0x4BB130, { .reversed = false });
+    RH_ScopedInstall(ComputeDamageResponse, 0x4C0170, { .reversed = false });
+    RH_ScopedInstall(ComputeDangerResponse, 0x4BC230, { .reversed = false });
+    RH_ScopedInstall(ComputeDeadPedResponse, 0x4B9470, { .reversed = false });
+    RH_ScopedInstall(ComputeDeathResponse, 0x4B9400, { .reversed = false });
+    RH_ScopedInstall(ComputeDontJoinGroupResponse, 0x4BC1D0, { .reversed = false });
+    RH_ScopedInstall(ComputeDraggedOutCarResponse, 0x4BCC30, { .reversed = false });
+    RH_ScopedInstall(ComputeFireNearbyResponse, 0x4BBFB0, { .reversed = false });
+    RH_ScopedInstall(ComputeGotKnockedOverByCarResponse, 0x4C3430, { .reversed = false });
+    RH_ScopedInstall(ComputeGunAimedAtResponse, 0x4C2840, { .reversed = false });
+    RH_ScopedInstall(ComputeHighAngerAtPlayerResponse, 0x4BAC10, { .reversed = false });
+    RH_ScopedInstall(ComputeInWaterResponse, 0x4BAF80, { .reversed = false });
+    RH_ScopedInstall(ComputeInteriorUseInfoResponse, 0x4BAFE0, { .reversed = false });
+    RH_ScopedInstall(ComputeKnockOffBikeResponse, 0x4B9FF0, { .reversed = false });
+    RH_ScopedInstall(ComputeLowAngerAtPlayerResponse, 0x4BAAD0, { .reversed = false });
+    RH_ScopedInstall(ComputeLowHealthResponse, 0x4BA990, { .reversed = false });
+    RH_ScopedInstall(ComputeObjectCollisionPassiveResponse, 0x4BBB90, { .reversed = false });
+    RH_ScopedInstall(ComputeObjectCollisionResponse, 0x4B92B0, { .reversed = false });
+    RH_ScopedInstall(ComputeOnEscalatorResponse, 0x4BC150, { .reversed = false });
+    RH_ScopedInstall(ComputeOnFireResponse, 0x4BAD50, { .reversed = false });
+    RH_ScopedInstall(ComputePassObjectResponse, 0x4BB0C0, { .reversed = false });
+    RH_ScopedInstall(ComputePedCollisionWithPedResponse, 0x4BDB80, { .reversed = false });
+    RH_ScopedInstall(ComputePedCollisionWithPlayerResponse, 0x4BE7D0, { .reversed = false });
+    RH_ScopedInstall(ComputePedEnteredVehicleResponse, 0x4C1590, { .reversed = false });
+    RH_ScopedInstall(ComputePedFriendResponse, 0x4B9DD0, { .reversed = false });
+    RH_ScopedInstall(ComputePedSoundQuietResponse, 0x4B9D40, { .reversed = false });
+    RH_ScopedInstall(ComputePedThreatBadlyLitResponse, 0x4B9C90, { .reversed = false });
+    RH_ScopedInstall(ComputePedThreatResponse, 0x4C19A0, { .reversed = false });
+    RH_ScopedInstall(ComputePedToChaseResponse, 0x4C1910, { .reversed = false });
+    RH_ScopedInstall(ComputePedToFleeResponse, 0x4B9B50, { .reversed = false });
+    RH_ScopedInstall(ComputePersonalityResponseToDamage, 0x4BF9B0, { .reversed = false });
+    RH_ScopedInstall(ComputePlayerCollisionWithPedResponse, 0x4B8CE0, { .reversed = false });
+    RH_ScopedInstall(ComputePlayerWantedLevelResponse, 0x4BB280, { .reversed = false });
+    RH_ScopedInstall(ComputePotentialPedCollideResponse, 0x4C2610, { .reversed = false });
+    RH_ScopedInstall(ComputePotentialWalkIntoFireResponse, 0x4BBCD0, { .reversed = false });
+    RH_ScopedInstall(ComputeReallyLowHealthResponse, 0x4BAA30, { .reversed = false });
+    RH_ScopedInstall(ComputeReviveResponse, 0x4B97B0, { .reversed = false });
+    RH_ScopedInstall(ComputeScriptCommandResponse, 0x4BA7C0, { .reversed = false });
+    RH_ScopedInstall(ComputeSeenCopResponse, 0x4BC050, { .reversed = false });
+    RH_ScopedInstall(ComputeSeenPanickedPedResponse, 0x4C35F0, { .reversed = false });
+    RH_ScopedInstall(ComputeSexyPedResponse, 0x4B99F0, { .reversed = false });
+    RH_ScopedInstall(ComputeSexyVehicleResponse, 0x4B9AA0, { .reversed = false });
+    RH_ScopedInstall(ComputeShotFiredResponse, 0x4BC710, { .reversed = false });
+    RH_ScopedInstall(ComputeShotFiredWhizzedByResponse, 0x4BBE30, { .reversed = false });
+    RH_ScopedInstall(ComputeSignalAtPedResponse, 0x4BB050, { .reversed = false });
+    RH_ScopedInstall(ComputeSpecialResponse, 0x4BB800, { .reversed = false });
+    RH_ScopedInstall(ComputeVehicleCollisionResponse, 0x4BD6A0, { .reversed = false });
+    RH_ScopedInstall(ComputeVehicleDamageResponse, 0x4C2FC0, { .reversed = false });
+    RH_ScopedInstall(ComputeVehicleDiedResponse, 0x4BA8B0, { .reversed = false });
+    // RH_ScopedInstall(ComputeVehicleHitAndRunResponse, 0x0, { .reversed = false });
+    RH_ScopedInstall(ComputeVehicleOnFireResponse, 0x4BB2E0, { .reversed = false });
+    RH_ScopedInstall(ComputeVehiclePotentialCollisionResponse, 0x4C0BD0, { .reversed = false });
+    RH_ScopedInstall(ComputeVehiclePotentialPassiveCollisionResponse, 0x4B96D0, { .reversed = false });
+    RH_ScopedInstall(ComputeVehicleToStealResponse, 0x4B9F80, { .reversed = false });
+    RH_ScopedInstall(ComputeWaterCannonResponse, 0x4BAE30, { .reversed = false });
 
     // RH_ScopedOverloadedInstall(ComputeEventResponseTask, "0", 0x4C3870, void (CEventHandler::*)(CEvent*, CTask*));
-    // RH_ScopedOverloadedInstall(ComputeEventResponseTask, "1", 0x4C4220, CTask* (CEventHandler::*)(CPed*, CEvent*));
+    RH_ScopedOverloadedInstall(ComputeEventResponseTask, "Ped", 0x4C4220, CTask*(*)(const CPed&, const CEvent&));
 }
 
 // 0x4C3E80
@@ -122,7 +126,7 @@ void CEventHandler::RecordPassiveEvent(const CEvent& event) {
 
 // 0x4B9340
 void CEventHandler::RegisterKill(const CPed* ped, const CEntity* entity, eWeaponType weaponType, bool a4) {
-    plugin::CallMethod<0x4B9340, CEventHandler*, const CPed*, const CEntity*, eWeaponType, bool>(this, ped, entity, weaponType, a4);
+    plugin::Call<0x4B9340, const CPed*, const CEntity*, eWeaponType, bool>(ped, entity, weaponType, a4);
 }
 
 // 0x4BC600
@@ -406,10 +410,9 @@ void CEventHandler::ComputePedToFleeResponse(CEvent* event, CTask* task1, CTask*
     plugin::CallMethod<0x4B9B50, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
 
     /*
-    auto _task1 = static_cast<CTask*>(task1);
-    if (_task1->entity) {
-        m_ped->Say(69, 0, 1.0f, 0, 0, 0);
-        m_eventResponseTask = new CTaskComplexSmartFleeEntity(_task1->entity, 1, 100.0f, -1, 1000, 1.0f);
+    if (auto* ped = static_cast<CEventPedToFlee*>(event)->m_currPedToKill) {
+        m_currPedToKill->Say(69);
+        m_eventResponseTask = new CTaskComplexSmartFleeEntity(ped, 1, 100.0f, -1, 1000, 1.0f);
     }
     */
 }
@@ -492,7 +495,12 @@ void CEventHandler::ComputeSexyPedResponse(CEvent* event, CTask* task1, CTask* t
 
 // 0x4B9AA0
 void CEventHandler::ComputeSexyVehicleResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4B9AA0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+    auto evnt = reinterpret_cast<CEventSexyVehicle*>(event);
+    if (evnt->m_vehicle) {
+        g_InterestingEvents.Add(CInterestingEvents::EType::INTERESTING_EVENT_8, evnt->m_vehicle);
+        m_eventResponseTask = new CTaskSimpleStandStill(5000, false, false, 8.0f);
+        g_ikChainMan.LookAt("CompSexyVhclResp", m_ped, evnt->m_vehicle, 5000, BONE_UNKNOWN, nullptr, true, 0.25f, 500, 3, false);
+    }
 }
 
 // task1 TASK_COMPLEX_CAR_DRIVE_WANDER 711 911 912 911 1204
@@ -534,9 +542,9 @@ void CEventHandler::ComputeVehicleDiedResponse(CEvent* event, CTask* task1, CTas
     plugin::CallMethod<0x4BA8B0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
 }
 
-// TODO: 0x?
+// 0x?
 void CEventHandler::ComputeVehicleHitAndRunResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+    // NOP
 }
 
 // 0x4BB2E0
@@ -566,9 +574,8 @@ void CEventHandler::ComputeWaterCannonResponse(CEvent* event, CTask* task1, CTas
 
 // 0x4C3870
 void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
-    plugin::CallMethod<0x4C3870, CEventHandler*, CEvent*, CTask*>(this, event, task);
+    return plugin::CallMethod<0x4C3870, CEventHandler*, CEvent*, CTask*>(this, event, task);
 
-    /*
     m_physicalResponseTask = nullptr;
     m_eventResponseTask = nullptr;
     m_attackTask = nullptr;
@@ -580,7 +587,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
     if (task1)
         task2 = m_ped->GetTaskManager().GetSimplestActiveTask();
 
-    printf("event: %d task1: %d task2: %d\n", event->GetEventType(), task1->GetTaskType(), task2->GetTaskType()); // NOTSA
+    DEV_LOG("event: {} task1: {} task2: {}", (int32)event->GetEventType(), (int32)task1->GetTaskType(), (int32)task2->GetTaskType()); // NOTSA
 
     switch (event->GetEventType()) {
     case EVENT_VEHICLE_COLLISION:
@@ -663,7 +670,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
         ComputeScriptCommandResponse(event, task1, task2);
         break;
     case EVENT_IN_AIR:
-        if ((m_ped->m_nPedFlags & 1) == 0) { // !m_ped->bIsStanding
+        if (!m_ped->bIsStanding) {
             m_eventResponseTask = new CTaskComplexInAirAndLand(false, false);
         }
         break;
@@ -775,27 +782,22 @@ void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
     default:
         return;
     }
-    */
 }
 
-// should be (const CPed& ped, const CEvent& event);
 // 0x4C4220
-CTask* CEventHandler::ComputeEventResponseTask(CPed* ped, CEvent* event) {
-    return plugin::CallAndReturn<CTask*, 0x4C4220, CPed*, CEvent*>(ped, event);
-    /*
+CTask* CEventHandler::ComputeEventResponseTask(const CPed& ped, const CEvent& e) {
     CTask* task = nullptr;
 
-    CEventHandler handler(ped);
-    handler.ComputeEventResponseTask(event, nullptr);
-    if (handler.m_eventResponseTask) {
-        task = handler.m_eventResponseTask;
-        handler.m_eventResponseTask = nullptr;
+    CEventHandler eh{const_cast<CPed*>(&ped)};
+    eh.ComputeEventResponseTask(const_cast<CEvent*>(&e), nullptr);
+    if (eh.m_eventResponseTask) {
+        task = eh.m_eventResponseTask;
+        eh.m_eventResponseTask = nullptr;
     }
-    handler.Flush();
-    delete handler.m_history.m_tempEvent;
-    delete handler.m_history.m_nonTempEvent;
-    delete handler.m_history.m_storedActiveEvent;
+    eh.Flush();
+    delete eh.m_history.m_tempEvent;
+    delete eh.m_history.m_nonTempEvent;
+    delete eh.m_history.m_storedActiveEvent;
 
     return task;
-    */
 }

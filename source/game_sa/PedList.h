@@ -35,5 +35,6 @@ public:
     void AddMember(CPed* ped);
     void RemoveMemberNoFill(int32 i);
     CPed* Get(int32 i);
+    auto GetPeds() const { return std::span{ m_peds.data(), m_count }; }
 };
 VALIDATE_SIZE(CPedList, 0x7C);

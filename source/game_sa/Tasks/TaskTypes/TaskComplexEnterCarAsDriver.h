@@ -7,22 +7,18 @@
 #pragma once
 
 #include "TaskComplexEnterCar.h"
+#include "Ped.h" // eMoveState
 
 class CTaskComplexEnterCarAsDriver : public CTaskComplexEnterCar {
 public:
     static constexpr auto Type = TASK_COMPLEX_ENTER_CAR_AS_DRIVER;
 
-    CTaskComplexEnterCarAsDriver(CVehicle* targetVehicle);
-    ~CTaskComplexEnterCarAsDriver() {}
+    explicit CTaskComplexEnterCarAsDriver(CVehicle* targetVehicle);
+    CTaskComplexEnterCarAsDriver(CVehicle* targetVehicle, eMoveState moveState);
+    CTaskComplexEnterCarAsDriver(const CTaskComplexEnterCarAsDriver&);
+    ~CTaskComplexEnterCarAsDriver() override = default;
 
-    CTask* Clone() override;
-    eTaskType GetTaskType() override { return TASK_COMPLEX_ENTER_CAR_AS_DRIVER; }
-
-private:
-    friend void InjectHooksMain();
-    static void InjectHooks();
-
-    CTask* Clone_Reversed();
+    eTaskType GetTaskType() const override { return Type; }
+    CTask*    Clone()       const override { return new CTaskComplexEnterCarAsDriver{*this}; }
 };
-
 VALIDATE_SIZE(CTaskComplexEnterCarAsDriver, 0x50);

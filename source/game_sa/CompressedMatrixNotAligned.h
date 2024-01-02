@@ -7,7 +7,7 @@ struct CByteCompressedVector {
     int8 y;
     int8 z;
 
-    CByteCompressedVector() {}
+    CByteCompressedVector() = default;
     CByteCompressedVector(const CVector& vec) {
         x = static_cast<int8>(vec.x * 127.0F);
         y = static_cast<int8>(vec.y * 127.0F);
@@ -24,9 +24,26 @@ public:
     CByteCompressedVector m_vecRight;
     CByteCompressedVector m_vecForward;
 
+private:
+    uint16                align;
+
 public:
     static void InjectHooks();
 
-    void DecompressIntoFullMatrix(CMatrix& matrix);
-    void CompressFromFullMatrix(CMatrix& matrix);
+    void DecompressIntoFullMatrix(CMatrix& matrix) const;
+    void CompressFromFullMatrix(const CMatrix& matrix);
+
+    // @notsa
+    static auto Compress(const CMatrix& matrix) {
+        CCompressedMatrixNotAligned compMatrix{};
+        compMatrix.CompressFromFullMatrix(matrix);
+        return compMatrix;
+    }
+
+    static auto Decompress(const CCompressedMatrixNotAligned& compMatrix) {
+        CMatrix matrix{};
+        compMatrix.DecompressIntoFullMatrix(matrix);
+        return matrix;
+    }
 };
+VALIDATE_SIZE(CCompressedMatrixNotAligned, 20);

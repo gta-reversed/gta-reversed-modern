@@ -6,13 +6,6 @@
 */
 #include "StdInc.h"
 
-bool& CHeli::bPoliceHelisAllowed = *(bool*)0x8D338C;
-uint32& CHeli::TestForNewRandomHelisTimer = *(uint32*)0xC1C960;
-CHeli* (&CHeli::pHelis)[2] = *(CHeli*(*)[2])0xC1C964;
-uint32& CHeli::NumberOfSearchLights = *(uint32*)0xC1C96C;
-bool& CHeli::bHeliControlsCheat = *(bool*)0xC1C970;
-tHeliLight (&CHeli::HeliSearchLights)[4] = *(tHeliLight(*)[4])0xC1C990;
-
 void CHeli::InjectHooks() {
     RH_ScopedClass(CHeli);
     RH_ScopedCategory("Vehicle");
@@ -24,23 +17,70 @@ void CHeli::InjectHooks() {
     RH_ScopedInstall(SwitchPoliceHelis, 0x6C4800);
     RH_ScopedInstall(RenderAllHeliSearchLights, 0x6C7C50);
     RH_ScopedInstall(TestSniperCollision, 0x6C6890);
-    RH_ScopedInstall(Render_Reversed, 0x6C4400);
-    RH_ScopedInstall(Fix_Reversed, 0x6C4530);
-    RH_ScopedInstall(BurstTyre_Reversed, 0x6C4330);
-    RH_ScopedInstall(SetUpWheelColModel_Reversed, 0x6C4320);
+    RH_ScopedVirtualInstall(Render, 0x6C4400);
+    RH_ScopedVirtualInstall(Fix, 0x6C4530);
+    RH_ScopedVirtualInstall(BurstTyre, 0x6C4330);
+    RH_ScopedVirtualInstall(SetUpWheelColModel, 0x6C4320);
 }
 
 // 0x6C4190
-CHeli::CHeli(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile({}) {
-    plugin::CallMethod<0x6C4190, CHeli*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
+CHeli::CHeli(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelIndex, createdBy, true) {
+    m_nVehicleSubType = VEHICLE_TYPE_HELI;
+
+    m_fLeftRightSkid           = 0.0f;
+    m_fSteeringUpDown          = 0.0f;
+    m_fSteeringLeftRight       = 0.0f;
+    m_fAccelerationBreakStatus = 0.0f;
+
+    field_99C = 0;
+    m_fRotorZ = 0;
+    m_fSecondRotorZ = 0;
+
+    m_fMinAltitude = 10.0f;
+    m_fMaxAltitude = 10.0f;
+
+    field_9AC = 10.0f;
+    field_9B4 = 0;
+
+    m_nHeliFlags = m_nHeliFlags & 0xFC;
+    m_fSearchLightIntensity = 0.0f;
+    physicalFlags.bDontCollideWithFlyers = true;
+
+    if (modelIndex == MODEL_HUNTER) {
+        m_damageManager.SetDoorStatus(DOOR_LEFT_FRONT, DAMSTATE_OK);
+        m_doors[DOOR_LEFT_FRONT].m_fOpenAngle = (3.0f * PI) / 10.0f;
+        m_doors[DOOR_LEFT_FRONT].m_fClosedAngle = 0.0f;
+        m_doors[DOOR_LEFT_FRONT].m_nAxis = 1;
+        m_doors[DOOR_LEFT_FRONT].m_nDirn = 19;
+    }
+
+    m_nNumSwatOccupants = 4;
+    m_aSwatState.fill(0);
+
+    m_nSearchLightTimer = CTimer::GetTimeInMS();
+
+    m_aSearchLightHistoryX.fill(0.0f);
+    m_aSearchLightHistoryY.fill(0.0f);
+
+    m_nShootTimer = 0;
+    m_nPoliceShoutTimer = CTimer::GetTimeInMS();
+
+    vehicleFlags.bNeverUseSmallerRemovalRange = true; // 0x6C42BD
+    m_autoPilot.m_ucHeliTargetDist2 = 10;
+
+    m_ppGunflashFx = nullptr;
+    m_nFiringMultiplier = 16;
+
+    field_9B8 = 0;
+    m_bSearchLightEnabled = false;
+    field_A14 = CGeneral::GetRandomNumberInRange(2.f, 8.f);
 }
 
 // 0x6C4340
 CHeli::~CHeli() {
     if (m_ppGunflashFx) {
         for (auto i = 0; i < CVehicle::GetPlaneNumGuns(); i++) {
-            auto& fx = m_ppGunflashFx[i];
-            if (fx) {
+            if (auto& fx = m_ppGunflashFx[i]) {
                 fx->Kill();
                 g_fxMan.DestroyFxSystem(fx);
             }
@@ -64,8 +104,6 @@ void CHeli::InitHelis() {
 
 // 0x6C45B0
 void CHeli::AddHeliSearchLight(const CVector& origin, const CVector& target, float targetRadius, float power, uint32 coronaIndex, uint8 unknownFlag, uint8 drawShadow) {
-    // return ((void(__cdecl*)(const CVector&, const CVector&, float, float, uint32, uint8, uint8))0x6C45B0)(origin, target, targetRadius, power, coronaIndex, unknownFlag, drawShadow);
-
     auto& light = HeliSearchLights[NumberOfSearchLights];
 
     light.m_vecOrigin     = origin;
@@ -86,6 +124,8 @@ void CHeli::PreRenderAlways() {
 
 // 0x6C4650
 void CHeli::Pre_SearchLightCone() {
+    ZoneScoped;
+
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATESRCBLEND,             RWRSTATE(rwBLENDONE));
@@ -100,6 +140,8 @@ void CHeli::Pre_SearchLightCone() {
 
 // 0x6C46E0
 void CHeli::Post_SearchLightCone() {
+    ZoneScoped;
+
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATESRCBLEND,             RWRSTATE(rwBLENDSRCALPHA));
@@ -171,7 +213,7 @@ void CHeli::TestSniperCollision(CVector* origin, CVector* target) {
         const auto mat = (CMatrix*)heli->m_matrix;
         auto out = MultiplyMatrixWithVector(*mat, { -0.43f, 1.49f, 1.5f });
         if (CCollision::DistToLine(origin, target, &out) < 0.8f) {
-            heli->m_fRotationBalance = (float)(rand() < pow(2, 14) - 1) * 0.1f - 0.05f; // 2^14 - 1 = 16383
+            heli->m_fRotationBalance = (float)(CGeneral::GetRandomNumber() < pow(2, 14) - 1) * 0.1f - 0.05f; // 2^14 - 1 = 16383 [-0.05, 0.05]
             heli->BlowUpCar(FindPlayerPed(), false);
             heli->m_nNumSwatOccupants = 0;
         };
@@ -185,11 +227,15 @@ bool CHeli::SendDownSwat() {
 
 // 0x6C79A0
 void CHeli::UpdateHelis() {
+    ZoneScoped;
+
     ((void(__cdecl*)())0x6C79A0)();
 }
 
 // 0x6C7C50
 void CHeli::RenderAllHeliSearchLights() {
+    ZoneScoped;
+
     for (auto& light : HeliSearchLights) {
         SearchLightCone(
             light.m_nCoronaIndex,
@@ -212,7 +258,7 @@ void CHeli::RenderAllHeliSearchLights() {
 }
 
 // 0x6C6D30
-void CHeli::BlowUpCar(CEntity* damager, uint8 bHideExplosion) {
+void CHeli::BlowUpCar(CEntity* damager, bool bHideExplosion) {
     plugin::CallMethod<0x6C6D30, CHeli*, CEntity*, uint8>(this, damager, bHideExplosion);
 }
 
@@ -239,9 +285,9 @@ void CHeli::ProcessControlInputs(uint8 playerNum) {
 
 // 0x6C4400
 void CHeli::Render() {
-    auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
+    auto* mi = GetVehicleModelInfo();
     m_nTimeTillWeNeedThisCar = CTimer::GetTimeInMS() + 3000;
-    mi->AsVehicleModelInfoPtr()->SetVehicleColour(m_nPrimaryColor, m_nSecondaryColor, m_nTertiaryColor, m_nQuaternaryColor);
+    mi->SetVehicleColour(m_nPrimaryColor, m_nSecondaryColor, m_nTertiaryColor, m_nQuaternaryColor);
 
     auto staticRotor = m_aCarNodes[HELI_STATIC_ROTOR];
     RpAtomic* data = nullptr;

@@ -8,7 +8,7 @@ void CEventHitByWaterCannon::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B1290);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1330);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B1330);
 }
 
 // 0x4B1290

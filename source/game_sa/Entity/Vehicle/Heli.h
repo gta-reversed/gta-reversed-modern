@@ -73,36 +73,37 @@ public:
     float        field_9B4; // m_fHeading related
     char         field_9B8;
     int8         m_nNumSwatOccupants;
-    uint8        m_aSwatState[4];
+    std::array<uint8, 4> m_aSwatState;
     CVector      field_9C0;
     int32        f9CC; // unused?
     int32        f9D0; // unused?
     FxSystem_c** m_pParticlesList;
-    float        m_aSearchLightHistoryX[3];
-    float        m_aSearchLightHistoryY[3];
+    std::array<float, 3> m_aSearchLightHistoryX;
+    std::array<float, 3> m_aSearchLightHistoryY;
     uint32       m_nSearchLightTimer;
     CVector      m_vecSearchLightTarget;
     float        m_fSearchLightIntensity;
     uint32       m_nShootTimer;
     uint32       m_nPoliceShoutTimer;
     FxSystem_c** m_ppGunflashFx;
-    int8         m_nFiringMultiplier;
+    uint8        m_nFiringMultiplier;
     bool         m_bSearchLightEnabled;
     float        field_A14;
 
-    static bool& bPoliceHelisAllowed; // 1
-    static uint32& TestForNewRandomHelisTimer;
-    static CHeli* (&pHelis)[2];
-    static uint32& NumberOfSearchLights;
-    static bool& bHeliControlsCheat;
-    static tHeliLight (&HeliSearchLights)[4];
+    static inline bool& bPoliceHelisAllowed                   = *(bool*)0x8D338C; // 1
+    static inline uint32& TestForNewRandomHelisTimer          = *(uint32*)0xC1C960;
+    static inline std::array<CHeli*, 2>& pHelis               = *(std::array<CHeli*, 2>*)0xC1C964;
+    static inline uint32& NumberOfSearchLights                = *(uint32*)0xC1C96C;
+    static inline bool& bHeliControlsCheat                    = *(bool*)0xC1C970;
+    static inline std::array<tHeliLight, 4>& HeliSearchLights = *(std::array<tHeliLight, 4>*)0xC1C990;
+
+    static constexpr auto Type = VEHICLE_TYPE_HELI;
 
 public:
-    CHeli(plugin::dummy_func_t) : CAutomobile(plugin::dummy) { /* todo: remove NOTSA */ }
     CHeli(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CHeli() override; // 0x6C4340, 0x6C4810
 
-    void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override;
+    void BlowUpCar(CEntity* damager, bool bHideExplosion) override;
     void Fix() override;
     bool BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect) override;
     bool SetUpWheelColModel(CColModel* wheelCol) override;
@@ -141,7 +142,8 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) { return CHeli::BlowUpCar(damager, bHideExplosion); }
+    CHeli* Constructor(int32 modelIndex, eVehicleCreatedBy createdBy) { this->CHeli::CHeli(modelIndex, createdBy); return this;}
+    void BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion) { return CHeli::BlowUpCar(damager, bHideExplosion); }
     void Fix_Reversed() { CHeli::Fix(); }
     bool BurstTyre_Reversed(uint8 tyreComponentId, bool bPhysicalEffect) { return CHeli::BurstTyre(tyreComponentId, bPhysicalEffect); }
     bool SetUpWheelColModel_Reversed(CColModel* wheelCol) { return CHeli::SetUpWheelColModel(wheelCol); }

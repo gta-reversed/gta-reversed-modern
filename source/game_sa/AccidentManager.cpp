@@ -45,7 +45,7 @@ void CAccidentManager::ReportAccident(CPed* ped)
             m_Accidents[slotIndex].m_pPed = ped;
             m_Accidents[slotIndex].m_bIsTreated = false;
             m_Accidents[slotIndex].m_bIsRevived = false;
-            ped->RegisterReference(reinterpret_cast<CEntity * *>(&m_Accidents[slotIndex].m_pPed));
+            ped->RegisterReference(reinterpret_cast<CEntity**>(&m_Accidents[slotIndex].m_pPed));
         }
     }
 }
@@ -75,7 +75,7 @@ CAccident* CAccidentManager::GetNearestFreeAccidentExceptThisOne(CVector& posn, 
             && !(thisOne && thisOne == &acc)
             )
         {
-            float distance = DistanceBetweenPoints(posn, acc.m_pPed->GetPosition());
+            float distance = DistanceBetweenPoints(acc.m_pPed->GetPosition(), posn);
             if (distance < minDistance)
             {
                 minDistance = distance;

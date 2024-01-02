@@ -11,16 +11,13 @@
 #include "PathFind.h"
 #include "NodeAddress.h"
 #include "Vector.h"
-#include "Enums/eCarMission.h"
-#include "Enums/eCarDrivingStyle.h"
+#include "eCarMission.h"
+#include "eCarDrivingStyle.h"
 
 class CVehicle;
 class CEntity;
 
 class CAutoPilot {
-public:
-    CAutoPilot();
-
 public:
     CNodeAddress        m_currentAddress;
     CNodeAddress        m_startingRouteNode;
@@ -75,7 +72,7 @@ public:
             uint8 bIsParked : 1;
         } movementFlags;
     };
-    char            m_nStraightLineDistance;
+    uint8           m_nStraightLineDistance;
     uint8           m_ucCarFollowDist;
     uint8           m_ucHeliTargetDist2;
     char            field_50;
@@ -85,18 +82,30 @@ public:
     CNodeAddress    m_aPathFindNodesInfo[8];
     uint16          m_nPathFindNodesCount;
     char            field_8A[2];
-    CVehicle*       m_pTargetCar;
+    CVehicle*       m_pTargetCar; // More like "target entity", see 0x63C5B9
     CEntity*        m_pCarWeMakingSlowDownFor;
     int8            m_vehicleRecordingId;
     bool            m_bPlaneDogfightSomething;
     int16           field_96;
 
-    void SetCarMission(eCarMission carMission) {
-        if (m_nCarMission != MISSION_CRASH_PLANE_AND_BURN && m_nCarMission != MISSION_CRASH_HELI_AND_BURN)
-            m_nCarMission = carMission;
-    }
+    // NOTSA Section
+    void SetTempAction(uint32 action, uint32 timeMs) noexcept;
+    void ClearTempAction() noexcept;
+public:
+    CAutoPilot();
 
     void ModifySpeed(float target);
+    void RemoveOnePathNode();
+
+    void SetCarMission(eCarMission carMission) { // NOTSA | inlined
+        //if (m_nCarMission != MISSION_CRASH_PLANE_AND_BURN && m_nCarMission != MISSION_CRASH_HELI_AND_BURN) // This was here for some reason, yet no explanation... 
+        m_nCarMission = carMission;
+    }
+
+    void SetCarMission(eCarMission carMission, uint32 cruiseSpeed) { // NOTSA
+        m_nCarMission = carMission;
+        m_nCruiseSpeed = cruiseSpeed;
+    }
 };
 
 VALIDATE_SIZE(CAutoPilot, 0x98);

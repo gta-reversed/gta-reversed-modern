@@ -7,12 +7,10 @@ void CEventAcquaintancePed::InjectHooks()
     RH_ScopedClass(CEventAcquaintancePed);
     RH_ScopedCategory("Events");
 
-    CEventAcquaintancePedHate::InjectHooks();
-    CEventAcquaintancePedHateBadlyLit::InjectHooks();
     RH_ScopedInstall(Constructor, 0x4AF820);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AFA30);
-    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4AF970);
-    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4AF8F0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AFA30);
+    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4AF970);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4AF8F0);
 }
 
 void CEventSeenCop::InjectHooks()
@@ -20,20 +18,19 @@ void CEventSeenCop::InjectHooks()
     RH_ScopedClass(CEventSeenCop);
     RH_ScopedCategory("Events");
 
-    RH_ScopedInstall(Constructor, 0x5FF380);
+    RH_ScopedInstall(Constructor1, 0x5FF380);
 }
 
-CEventAcquaintancePed::CEventAcquaintancePed(CPed* ped)
+CEventAcquaintancePed::CEventAcquaintancePed(CPed* ped, eTaskType taskType) :
+    CEventEditableResponse(taskType)
 {
     m_ped = ped;
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventAcquaintancePed::~CEventAcquaintancePed()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 CEventAcquaintancePed* CEventAcquaintancePed::Constructor(CPed* ped)
@@ -77,9 +74,9 @@ bool CEventAcquaintancePed::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
             if (GetEventType() != EVENT_ACQUAINTANCE_PED_RESPECT && GetEventType() != EVENT_ACQUAINTANCE_PED_LIKE)
                 return true;
             CPed* leader = membership.GetLeader();
-            if (leader && leader->IsPlayer()) 
+            if (leader && leader->IsPlayer())
                 return false;
-            return FindPlayerPed()->GetGroup().GetMembership().IsMember(m_ped);
+            return FindPlayerPed()->GetPlayerGroup().GetMembership().IsMember(m_ped);
         }
     }
     return false;
@@ -89,7 +86,7 @@ bool CEventAcquaintancePed::TakesPriorityOver_Reversed(const CEvent& refEvent)
 {
     if (refEvent.GetEventType() == GetEventType()) {
         const auto theRefEvent = static_cast<const CEventAcquaintancePed*>(&refEvent);
-        if (m_ped && m_ped->IsPlayer()) 
+        if (m_ped && m_ped->IsPlayer())
             return theRefEvent->m_ped && !theRefEvent->m_ped->IsPlayer();
         return false;
     }
@@ -102,10 +99,10 @@ void CEventAcquaintancePedHate::InjectHooks()
     RH_ScopedClass(CEventAcquaintancePedHate);
     RH_ScopedCategory("Events");
 
-    RH_ScopedInstall(Constructor, 0x420E70);
+    RH_ScopedInstall(Constructor2, 0x420E70);
 }
 
-CEventAcquaintancePedHate* CEventAcquaintancePedHate::Constructor(CPed* ped)
+CEventAcquaintancePedHate* CEventAcquaintancePedHate::Constructor2(CPed* ped)
 {
     this->CEventAcquaintancePedHate::CEventAcquaintancePedHate(ped);
     return this;
@@ -118,7 +115,7 @@ void CEventAcquaintancePedHateBadlyLit::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x5FF250);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AFA90);
+    RH_ScopedInstall(AffectsPed_Reversed1, 0x4AFA90);
 }
 
 CEventAcquaintancePedHateBadlyLit::CEventAcquaintancePedHateBadlyLit(CPed* ped, int32 startTimeInMs, const CVector& point) : CEventAcquaintancePed(ped)
@@ -143,7 +140,7 @@ bool CEventAcquaintancePedHateBadlyLit::AffectsPed(CPed* ped)
     return CEventAcquaintancePedHateBadlyLit::AffectsPed_Reversed(ped);
 }
 
-bool CEventAcquaintancePedHateBadlyLit::AffectsPed_Reversed(CPed* ped)
+bool CEventAcquaintancePedHateBadlyLit::AffectsPed_Reversed1(CPed* ped)
 {
     if (CEventAcquaintancePed::AffectsPed(ped)) {
         CEvent* currentEvent = ped->GetEventHandlerHistory().GetCurrentEvent();
@@ -161,7 +158,7 @@ bool CEventAcquaintancePedHateBadlyLit::AffectsPed_Reversed(CPed* ped)
     return false;
 }
 
-CEventSeenCop* CEventSeenCop::Constructor(CPed* cop)
+CEventSeenCop* CEventSeenCop::Constructor1(CPed* cop)
 {
     this->CEventSeenCop::CEventSeenCop(cop);
     return this;

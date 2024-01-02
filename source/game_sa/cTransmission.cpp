@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "cTransmission.h"
+#include "CarCtrl.h"
 
 void cTransmission::InjectHooks()
 {
@@ -13,8 +14,6 @@ void cTransmission::InjectHooks()
     RH_ScopedInstall(CalculateDriveAcceleration, 0x6D05E0);
 }
 
-// unused
-//
 // Usage:
 //     auto vehicle = FindPlayerVehicle();
 //     if (vehicle) {
@@ -29,15 +28,16 @@ void cTransmission::DisplayGearRatios()
     static constexpr float magic_0 = 1000.0f / 3600.0f;
     static constexpr float magic = magic_0 / 50.0f;
 
-    for (uint8 i = 0; i <= m_nNumberOfGears; i++)
+    for (size_t i = 0; i <= m_nNumberOfGears; i++)
     {
         tTransmissionGear& gear = m_aGears[i];
-        printf(
-            "%d, max v = %3.2f, up at = %3.2f, down at = %3.2f\n",
+        DEV_LOG(
+            "{} => max v = {:03.2f}, up at = {:03.2f}, down at = {:03.2f}",
             i,
-            (1.0f / magic) * gear.m_maxVelocity,
-            (1.0f / magic) * gear.m_changeUpVelocity,
-            (1.0f / magic) * gear.m_changeDownVelocity);
+            gear.m_maxVelocity / magic,
+            gear.m_changeUpVelocity / magic,
+            gear.m_changeDownVelocity / magic
+        );
     }
 }
 
@@ -75,7 +75,7 @@ void cTransmission::InitGearRatios()
 // 0x6D0530
 void cTransmission::CalculateGearForSimpleCar(float speed, uint8& currentGear)
 {
-    m_currentVelocity = speed;
+    m_fCurrentVelocity = speed;
     tTransmissionGear& gear = m_aGears[currentGear];
     if (speed > gear.m_changeUpVelocity)
     {
@@ -101,7 +101,7 @@ float cTransmission::CalculateDriveAcceleration(const float& gasPedal, uint8& cu
 
     while (currentVelocity <= m_fMaxGearVelocity)
     {
-        m_currentVelocity = currentVelocity;
+        m_fCurrentVelocity = currentVelocity;
         tTransmissionGear& gear = m_aGears[currentGear];
         bool accelerate = false;
         bool shiftToLowerGear = false;
@@ -194,7 +194,7 @@ float cTransmission::CalculateDriveAcceleration(const float& gasPedal, uint8& cu
                         inertiaMultiplier *= TRANSMISSION_NITROS_INERTIA_MULT;
                     }
                     float acceleration = 1.0f - inertiaMultiplier * m_fEngineInertia;
-                    acceleration = clamp<float>(acceleration, 0.1f, 1.0f);
+                    acceleration = std::clamp(acceleration, 0.1f, 1.0f);
                     *a6 = velocityDiffRatio;
                     *a7 = acceleration * (1.0f - TRANSMISSION_SMOOTHER_FRAC) + TRANSMISSION_SMOOTHER_FRAC * *a7;
                     driveAcceleration *= *a7;

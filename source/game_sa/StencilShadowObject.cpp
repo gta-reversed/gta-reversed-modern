@@ -6,10 +6,10 @@ void CStencilShadowObject::InjectHooks() {
     RH_ScopedClass(CStencilShadowObject);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Shutdown, 0x711390);
-    // RH_ScopedInstall(Render, 0x710D50);
-    // RH_ScopedInstall(RenderForVehicle, 0x70FAE0);
-    // RH_ScopedInstall(RenderForObject, 0x710310);
+    RH_ScopedInstall(Shutdown, 0x711390, { .reversed = false });
+    RH_ScopedInstall(Render, 0x710D50, { .reversed = false });
+    RH_ScopedInstall(RenderForVehicle, 0x70FAE0, { .reversed = false });
+    RH_ScopedInstall(RenderForObject, 0x710310, { .reversed = false });
 }
 
 // 0x711280
@@ -48,19 +48,19 @@ bool gRenderStencil() {
 
     // todo:
     const auto depth = RwRasterGetDepth(RwCameraGetRaster(Scene.m_pRwCamera));
-    if ( g_fx.GetFxQuality() < FXQUALITY_MEDIUM || depth < 32 )
+    if ( g_fx.GetFxQuality() < FX_QUALITY_MEDIUM || depth < 32 )
         return false;
 
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,             RWRSTATE(0));
-    RwRenderStateSet(rwRENDERSTATESTENCILENABLE,            RWRSTATE(1u));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,             RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATESTENCILENABLE,            RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATESHADEMODE,                RWRSTATE(1u));
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,                RWRSTATE(0));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,                RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER,            RWRSTATE(0));
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,        RWRSTATE(1u));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,        RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATESRCBLEND,                 RWRSTATE(1u));
     RwRenderStateSet(rwRENDERSTATEDESTBLEND,                RWRSTATE(2u));
-    RwRenderStateSet(rwRENDERSTATESTENCILFUNCTIONMASK,      RWRSTATE(-1u));
-    RwRenderStateSet(rwRENDERSTATESTENCILFUNCTIONWRITEMASK, RWRSTATE(-1u));
+    RwRenderStateSet(rwRENDERSTATESTENCILFUNCTIONMASK,      RWRSTATE(uint32(-1)));
+    RwRenderStateSet(rwRENDERSTATESTENCILFUNCTIONWRITEMASK, RWRSTATE(uint32(-1)));
     RwRenderStateSet(rwRENDERSTATESTENCILFUNCTION,          RWRSTATE(8u));
     RwRenderStateSet(rwRENDERSTATESTENCILFAIL,              RWRSTATE(1u));
     RwRenderStateSet(rwRENDERSTATESTENCILZFAIL,             RWRSTATE(1u));
@@ -79,21 +79,21 @@ bool gRenderStencil() {
     // RenderStencil(black);
 
     // WTF is up with these states?
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,        RWRSTATE(0)); // same state
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,             RWRSTATE(1u));
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,              RWRSTATE(1u));
-    RwRenderStateSet(rwRENDERSTATESTENCILENABLE,            RWRSTATE(0));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,        RWRSTATE(FALSE)); // same state
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,             RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,              RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESTENCILENABLE,            RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATESHADEMODE,                RWRSTATE(2u));
     RwRenderStateSet(rwRENDERSTATECULLMODE,                 RWRSTATE(2u));
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,             RWRSTATE(0));
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,              RWRSTATE(0));
-    RwRenderStateSet(rwRENDERSTATESTENCILENABLE,            RWRSTATE(1u));
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,                RWRSTATE(0));
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,        RWRSTATE(1u)); // same state
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,             RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,              RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATESTENCILENABLE,            RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,                RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,        RWRSTATE(TRUE)); // same state
     RwRenderStateSet(rwRENDERSTATESRCBLEND,                 RWRSTATE(5u));
     RwRenderStateSet(rwRENDERSTATEDESTBLEND,                RWRSTATE(6u));
     RwRenderStateSet(rwRENDERSTATESHADEMODE,                RWRSTATE(1u));
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,            RWRSTATE(0));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,            RWRSTATE(NULL));
     RwRenderStateSet(rwRENDERSTATECULLMODE,                 RWRSTATE(1u));
     RwRenderStateSet(rwRENDERSTATESTENCILFUNCTIONREF,       RWRSTATE(1u));
     RwRenderStateSet(rwRENDERSTATESTENCILFUNCTION,          RWRSTATE(4u));
@@ -108,10 +108,10 @@ bool gRenderStencil() {
     CRect rect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT);
     CSprite2d::DrawRect(rect, color);
 
-    RwRenderStateSet(rwRENDERSTATESTENCILENABLE,            RWRSTATE(0));
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,             RWRSTATE(1u));
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,              RWRSTATE(1u));
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,        RWRSTATE(0));
+    RwRenderStateSet(rwRENDERSTATESTENCILENABLE,            RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,             RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,              RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,        RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATESHADEMODE,                RWRSTATE(2u));
     RwRenderStateSet(rwRENDERSTATECULLMODE,                 RWRSTATE(2u));
 

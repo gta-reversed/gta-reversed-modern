@@ -12,20 +12,21 @@
 
 class CAnimBlendClumpData {
 public:
-    RwLinkList          m_associationsList;
-    int32               m_nNumFrames;
-    CVector*            m_pvecPedPosition;
-    AnimBlendFrameData* m_pFrames;
+    CAnimBlendLink      m_Associations;
+    uint32              m_NumFrames;
+    CVector*            m_PedPosition;
+    AnimBlendFrameData* m_Frames;
 
 public:
-    CAnimBlendClumpData();
+    static void InjectHooks();
 
+    CAnimBlendClumpData();
     ~CAnimBlendClumpData();
+    CAnimBlendClumpData* Constructor() { this->CAnimBlendClumpData::CAnimBlendClumpData(); return this; }
+    CAnimBlendClumpData* Destructor()  { this->CAnimBlendClumpData::~CAnimBlendClumpData(); return this; }
 
     void ForAllFrames(void (*callback)(AnimBlendFrameData*, void*), void* data);
-    //! dummy function
     void ForAllFramesInSPR(void (*callback)(AnimBlendFrameData*, void*), void* data, uint32 a3);
-    //! dummy function
     void LoadFramesIntoSPR();
     void SetNumberOfBones(int32 numBones);
 };

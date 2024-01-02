@@ -8,7 +8,7 @@ class CPedDamageResponse;
 
 class CPedDamageResponseCalculator {
 public:
-    CEntity *      m_pDamager;
+    const CEntity* m_pDamager;
     float          m_fDamageFactor;
     ePedPieceTypes m_bodyPart;
     eWeaponType    m_weaponType;
@@ -17,10 +17,16 @@ public:
     static float& ms_damageFactor;
 
 public:
-    CPedDamageResponseCalculator(CEntity* entity, float fDamage, eWeaponType weaponType, ePedPieceTypes bodyPart, bool bSpeak);
-    ~CPedDamageResponseCalculator() = default;
+    CPedDamageResponseCalculator(const CEntity* entity, float fDamage, eWeaponType weaponType, ePedPieceTypes bodyPart, bool bSpeak);
+    ~CPedDamageResponseCalculator() = default; // 0x4AD420
 
-    void ComputeDamageResponse(CPed* ped, CPedDamageResponse* damageResponse, bool bSpeak);
+    void AccountForPedDamageStats(CPed* ped, CPedDamageResponse& response);
+    void AccountForPedArmour(CPed* ped, CPedDamageResponse& response);
+    void AdjustPedDamage(CPed* ped);
+    bool ComputeWillForceDeath(CPed* ped, CPedDamageResponse& response);
+    void ComputeWillKillPed(CPed* ped, CPedDamageResponse& response, bool bSpeak);
+    bool IsBleedingWeapon(CPed* ped) const;
+    void ComputeDamageResponse(CPed* ped, CPedDamageResponse& response, bool bSpeak);
 
 private:
     friend void InjectHooksMain();

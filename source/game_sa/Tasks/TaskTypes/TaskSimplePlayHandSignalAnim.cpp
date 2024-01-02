@@ -8,13 +8,11 @@ void CTaskSimplePlayHandSignalAnim::InjectHooks() {
     RH_ScopedClass(CTaskSimplePlayHandSignalAnim);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    RH_ScopedInstall(Clone_Reversed, 0x61B980);
-    RH_ScopedInstall(GetId_Reversed, 0x61AEA0);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x61AF50);
     RH_ScopedInstall(ProcessPed_Reversed, 0x61BDA0);
     RH_ScopedInstall(StartAnim, 0x61AF60);
 }
 
+// 0x61AE50
 CTaskSimplePlayHandSignalAnim::CTaskSimplePlayHandSignalAnim(AnimationId animationId, float fBlendFactor, bool bFatHands, bool bHoldLastFrame) : CTaskSimpleAnim(bHoldLastFrame) {
     m_nAnimationBlockIndex = animationId;
     m_pLeftHandObject = nullptr;
@@ -35,27 +33,6 @@ CTaskSimplePlayHandSignalAnim::~CTaskSimplePlayHandSignalAnim() {
         delete m_pRightHandObject;
         --CObject::nNoTempObjects;
     }
-}
-
-CTask* CTaskSimplePlayHandSignalAnim::Clone() {
-    return CTaskSimplePlayHandSignalAnim::Clone_Reversed();
-}
-CTask* CTaskSimplePlayHandSignalAnim::Clone_Reversed() {
-    return new CTaskSimplePlayHandSignalAnim(m_nAnimationBlockIndex, m_fBlendFactor, m_bUseFatHands, m_bHoldLastFrame);
-}
-
-eTaskType CTaskSimplePlayHandSignalAnim::GetTaskType() {
-    return CTaskSimplePlayHandSignalAnim::GetId_Reversed();
-}
-eTaskType CTaskSimplePlayHandSignalAnim::GetId_Reversed() {
-    return TASK_SIMPLE_HANDSIGNAL_ANIM;
-}
-
-bool CTaskSimplePlayHandSignalAnim::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return CTaskSimplePlayHandSignalAnim::MakeAbortable_Reversed(ped, priority, event);
-}
-bool CTaskSimplePlayHandSignalAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return CTaskSimpleAnim::MakeAbortable(ped, priority, event);
 }
 
 bool CTaskSimplePlayHandSignalAnim::ProcessPed(CPed* ped) {
@@ -79,7 +56,7 @@ void CTaskSimplePlayHandSignalAnim::StartAnim(CPed* ped) {
     const AnimationId animId = static_cast<const AnimationId>(CGeneral::GetRandomNumberInRange((int32)ANIM_ID_GSIGN1, (int32)ANIM_ID_GSIGN5 + 1));
 
     // Pointing / weapon logic
-    if (ped->GetEntityThatThisPedIsHolding() || g_ikChainMan.IsArmPointing(0, ped) || ped->GetActiveWeapon().m_nType != eWeaponType::WEAPON_UNARMED) {
+    if (ped->GetEntityThatThisPedIsHolding() || g_ikChainMan.IsArmPointing(0, ped) || ped->GetActiveWeapon().m_Type != eWeaponType::WEAPON_UNARMED) {
         m_pAnim = CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_HANDSIGNALL, animId, m_fBlendFactor);
         m_pAnim->SetFinishCallback(CTaskSimpleAnim::FinishRunAnimCB, this);
 

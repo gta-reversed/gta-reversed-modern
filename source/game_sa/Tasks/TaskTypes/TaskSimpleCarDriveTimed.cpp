@@ -15,7 +15,3 @@ CTaskSimpleCarDriveTimed::CTaskSimpleCarDriveTimed(CVehicle* vehicle, int32 nTim
 bool CTaskSimpleCarDriveTimed::ProcessPed(CPed* ped) {
     return plugin::CallMethodAndReturn<bool, 0x46F610, CTaskSimpleCarDriveTimed*, CPed*>(this, ped);
 }
-
-CTask* CTaskSimpleCarDriveTimed::Clone() {
-    return new CTaskSimpleCarDriveTimed(m_pVehicle, m_nTime);
-}

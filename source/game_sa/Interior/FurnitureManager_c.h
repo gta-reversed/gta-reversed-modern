@@ -11,7 +11,7 @@ class FurnitureManager_c {
 public:
     FurnitureGroup_c m_groups[9];
     FurnitureItem    m_furnitureItem[512];
-    List_c           m_furnitureList;
+    TList_c<void>    m_furnitureList;
 
 public:
     static void InjectHooks();
@@ -28,3 +28,5 @@ public:
     static int32 GetSubGroupId(const char* name);
 };
 VALIDATE_SIZE(FurnitureManager_c, 0x2078);
+
+static inline auto& g_furnitureMan = StaticRef<FurnitureManager_c, 0xBAB380>();

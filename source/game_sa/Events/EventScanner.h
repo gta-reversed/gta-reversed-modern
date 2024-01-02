@@ -24,6 +24,7 @@ public:
 class CVehiclePotentialCollisionScanner {
 public:
     CTaskTimer m_timer;
+    void ScanForVehiclePotentialCollisionEvents(const CPed& ped, CEntity** entities, int32 count);
 };
 
 class CObjectPotentialCollisionScanner {
@@ -57,8 +58,15 @@ public:
     CSexyPedScanner                   m_sexyPedScanner;
     CNearbyFireScanner                m_nearbyFireScanner;
 
-    void ScanForEvents(CPed* ped);
-    void ScanForEventsNow(CPed* ped, bool bDontScan);
+    static inline uint32 m_sDeadPedWalkingTimer = *(uint32*)0xC0B038;
+
+public:
+    CEventScanner();
+    ~CEventScanner() = default;
+
+    void Clear();
+    void ScanForEvents(CPed& ped);
+    void ScanForEventsNow(const CPed& ped, bool bDontScan);
 };
 
 VALIDATE_SIZE(CEventScanner, 0xD4);

@@ -6,7 +6,8 @@
 */
 #pragma once
 
-enum eAudioEvents {
+enum eAudioEvents : int32 {
+    AE_UNDEFINED = -1,
     AE_FRONTEND_START = 0x0,
     AE_FRONTEND_SELECT = 0x1,
     AE_FRONTEND_BACK = 0x2,
@@ -85,18 +86,23 @@ enum eAudioEvents {
     AE_PED_SWIM_DIVE_SPLASH = 0x4B,
     AE_PED_SWIM_WAKE = 0x4C,
     AE_GENERAL_VEHICLE_SOUND = 0x4D,
+
+    // Must keep these together
     AE_CAR_BONNET_OPEN = 0x4E,
     AE_CAR_BOOT_OPEN = 0x4F,
     AE_CAR_FRONT_LEFT_DOOR_OPEN = 0x50,
     AE_CAR_FRONT_RIGHT_DOOR_OPEN = 0x51,
     AE_CAR_REAR_LEFT_DOOR_OPEN = 0x52,
     AE_CAR_REAR_RIGHT_DOOR_OPEN = 0x53,
+
+    // Must keep these together
     AE_CAR_BONNET_CLOSE = 0x54,
     AE_CAR_BOOT_CLOSE = 0x55,
     AE_CAR_FRONT_LEFT_DOOR_CLOSE = 0x56,
     AE_CAR_FRONT_RIGHT_DOOR_CLOSE = 0x57,
     AE_CAR_REAR_LEFT_DOOR_CLOSE = 0x58,
     AE_CAR_REAR_RIGHT_DOOR_CLOSE = 0x59,
+
     AE_TYRE_BURST = 0x5A,
     AE_WINDSCREEN_SHATTER = 0x5B,
     AE_LIGHT_SMASH = 0x5C,

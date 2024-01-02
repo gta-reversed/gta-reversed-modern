@@ -2,7 +2,7 @@
 
 #include "Event.h"
 
-class CEventEditableResponse : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventEditableResponse : public CEvent {
 public:
     bool   m_bAddToEventGroup;
     bool   field_D;
@@ -11,14 +11,14 @@ public:
     uint16 field_12;
 
 public:
-    CEventEditableResponse();
-    ~CEventEditableResponse();
+    CEventEditableResponse(eTaskType taskType = TASK_NONE/*notsa*/);
+    ~CEventEditableResponse() override = default; // 0x4AC480
 
     CEvent* Clone() override;
     bool HasEditableResponse() const override;
     virtual CEventEditableResponse* CloneEditable() = 0;
 
-    bool WillRespond();
+    bool WillRespond() const;
     void InformVehicleOccupants(CPed* ped);
     void InformRespectedFriends(CPed* ped);
     void InformGroup(CPed* ped);
@@ -35,104 +35,4 @@ private:
     CEvent* Clone_Reversed();
     bool HasEditableResponse_Reversed() const { return true; }
 };
-
 VALIDATE_SIZE(CEventEditableResponse, 0x14);
-
-class CEventSpecial : public CEventEditableResponse {
-public:
-    CEventSpecial() {}
-    ~CEventSpecial() {}
-
-    eEventType GetEventType() const override { return EVENT_SPECIAL; }
-    int32 GetEventPriority() const override { return 52; }
-    int32 GetLifeTime() override { return 0; }
-    bool AffectsPed(CPed* ped) override { return true; }
-    CEventSpecial* CloneEditable() override { return new CEventSpecial(); }
-    
-private:
-    friend void InjectHooksMain();
-    static void InjectHooks();
-
-    CEventSpecial* Constructor();
-};
-
-VALIDATE_SIZE(CEventSpecial, 0x14);
-
-class CEventFireNearby : public CEventEditableResponse {
-public:
-    CVector m_position;
-
-    static void InjectHooks();
-
-    CEventFireNearby(const CVector& position);
-    ~CEventFireNearby() {}
-private:
-    CEventFireNearby* Constructor(const CVector& position);
-public:
-    eEventType GetEventType() const override { return EVENT_FIRE_NEARBY; }
-    int32 GetEventPriority() const override { return 17; }
-    int32 GetLifeTime() override { return 0; }
-    bool AffectsPed(CPed* ped) override;
-    bool TakesPriorityOver(const CEvent& refevent) override { return true; }
-    CEventFireNearby* CloneEditable() override { return new CEventFireNearby(m_position); }
-
-private:
-    bool AffectsPed_Reversed(CPed* ped);
-public:
-
-};
-
-VALIDATE_SIZE(CEventFireNearby, 0x20);
-
-class CEventDanger : public CEventEditableResponse {
-public:
-    CEntity* m_dangerFrom;
-    float m_dangerRadius;
-
-    static void InjectHooks();
-
-    CEventDanger(CEntity* dangerFrom, float dangerRadius);
-    ~CEventDanger();
-private:
-    CEventDanger* Constructor(CEntity* dangerFrom, float dangerRadius);
-public:
-    eEventType GetEventType() const override { return EVENT_DANGER; }
-    int32 GetEventPriority() const override { return 20; }
-    int32 GetLifeTime() override { return 0; }
-    bool AffectsPed(CPed* ped) override;
-    bool AffectsPedGroup(CPedGroup* pedGroup) override;
-    CEntity* GetSourceEntity() const override;
-    CEventDanger* CloneEditable() override { return new CEventDanger(m_dangerFrom, m_dangerRadius); }
-private:
-    bool AffectsPed_Reversed(CPed* ped);
-    bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
-    CEntity* GetSourceEntity_Reversed() const;
-};
-
-VALIDATE_SIZE(CEventDanger, 0x1C);
-
-class CEventSeenPanickedPed : public CEventEditableResponse {
-public:
-    CPed* m_ped;
-
-public:
-    CEventSeenPanickedPed(CPed* ped);
-    ~CEventSeenPanickedPed();
-
-    eEventType GetEventType() const override { return EVENT_SEEN_PANICKED_PED; }
-    int32 GetEventPriority() const override { return 13; }
-    int32 GetLifeTime() override { return 0; }
-    bool AffectsPed(CPed* ped) override;
-    CEntity* GetSourceEntity() const override { return m_ped;}
-    CEventSeenPanickedPed* CloneEditable() override { return new CEventSeenPanickedPed(m_ped); }
-
-private:
-    friend void InjectHooksMain();
-    static void InjectHooks();
-
-    CEventSeenPanickedPed* Constructor(CPed* ped);
-
-    bool AffectsPed_Reversed(CPed* ped);
-};
-
-VALIDATE_SIZE(CEventSeenPanickedPed, 0x18);

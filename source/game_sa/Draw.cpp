@@ -21,7 +21,6 @@ void CDraw::InjectHooks() {
 
     RH_ScopedInstall(SetFOV, 0x6FF410);
     RH_ScopedInstall(CalculateAspectRatio, 0x6FF420);
-    RH_ScopedGlobalInstall(DoFade, 0x53E600);
 }
 
 // 0x6FF410
@@ -41,6 +40,8 @@ void CDraw::CalculateAspectRatio() {
 
 // 0x53E600
 void DoFade() {
+    ZoneScoped;
+
     if (CTimer::GetIsPaused())
         return;
 
@@ -63,7 +64,7 @@ void DoFade() {
         }
     }
 
-    if (CDraw::FadeValue != 0) {
+    if (CDraw::IsFading()) {
         CRGBA color(0, 0, 0, 0);
 
         if (!TheCamera.m_bFadeTargetIsSplashScreen) {
@@ -75,6 +76,10 @@ void DoFade() {
             );
         }
 
-        CSprite2d::DrawRect({-5.0f, SCREEN_HEIGHT + 5.0f, SCREEN_WIDTH + 5.0f, -5.0f }, color);
+        #if FIX_BUGS
+        CSprite2d::DrawRect({-5.0f, -5.0f, SCREEN_WIDTH + 5.0f, SCREEN_HEIGHT + 5.0f}, color);
+        #else
+        CSprite2d::DrawRect({-5.0f, SCREEN_HEIGHT + 5.0f, SCREEN_WIDTH + 5.0f, -5.0f}, color);
+        #endif
     }
 }

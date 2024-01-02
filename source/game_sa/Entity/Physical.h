@@ -43,7 +43,7 @@ enum ePhysicalFlags {
     PHYSICAL_INVULNERABLE            = 0x400000,
     PHYSICAL_EXPLOSIONPROOF          = 0x800000,
 
-    PHYSICAL_25                      = 0x1000000,
+    PHYSICAL_DONTCOLLIDEWITHFLYERS   = 0x1000000,
     PHYSICAL_ATTACHEDTOENTITY        = 0x2000000,
     PHYSICAL_27                      = 0x4000000,
     PHYSICAL_TOUCHINGWATER           = 0x8000000,
@@ -61,7 +61,7 @@ enum eEntityAltCollision : uint16 {
     ALT_ENITY_COL_BOAT,
 };
 
-class CPhysical : public CEntity {
+class NOTSA_EXPORT_VTABLE CPhysical : public CEntity {
 public:
     float  field_38;
     uint32 m_nLastCollisionTime;
@@ -80,7 +80,7 @@ public:
             uint32 bOnSolidSurface : 1;
             uint32 bBroken : 1;
             uint32 bProcessCollisionEvenIfStationary : 1; // ref @ 0x6F5CF0
-            uint32 b13 : 1;                               // only used for peds
+            uint32 bSkipLineCol : 1;                               // only used for peds
             uint32 bDontApplySpeed : 1;
             uint32 b15 : 1;
             uint32 bProcessingShift : 1;
@@ -90,7 +90,7 @@ public:
             uint32 bBulletProof : 1;
             uint32 bFireProof : 1;
             uint32 bCollisionProof : 1;
-            uint32 bMeeleProof : 1;
+            uint32 bMeleeProof : 1;
             uint32 bInvulnerable : 1;
             uint32 bExplosionProof : 1;
 
@@ -122,8 +122,7 @@ public:
     CPtrNodeDoubleLink* m_pMovingList;
     uint8               m_nFakePhysics;
     uint8               m_nNumEntitiesCollided;
-    uint8               m_nContactSurface;
-    char                field_BB;
+    eSurfaceType        m_nContactSurface;
     CEntity*            m_apCollidedEntities[6];
     float               m_fMovingSpeed; // ref @ CTheScripts::IsVehicleStopped
     float               m_fDamageIntensity;
@@ -131,7 +130,6 @@ public:
     CVector             m_vecLastCollisionImpactVelocity;
     CVector             m_vecLastCollisionPosn;
     uint16              m_nPieceType;
-    int16               field_FA;
     CPhysical*          m_pAttachedTo;
     CVector             m_vecAttachOffset;
     CVector             m_vecAttachedEntityRotation;
@@ -228,17 +226,22 @@ public:
     bool CheckCollision();
     bool CheckCollision_SimpleCar();
 
-    void ResetMoveSpeed() { m_vecMoveSpeed = CVector(); }
+    CVector& GetMoveSpeed()            { return m_vecMoveSpeed; }
+    void     SetVelocity(CVector velocity) { m_vecMoveSpeed = velocity; } // 0x441130
+    void     ResetMoveSpeed()              { SetVelocity(CVector{}); }
+
+    CVector& GetTurnSpeed() { return m_vecTurnSpeed; }
     void ResetTurnSpeed() { m_vecTurnSpeed = CVector(); }
+
     void ResetFrictionMoveSpeed() { m_vecFrictionMoveSpeed = CVector(); }
     void ResetFrictionTurnSpeed() { m_vecFrictionTurnSpeed = CVector(); }
 
-    float GetMass(const CVector& pos, const CVector& dir) {
+    [[nodiscard]] float GetMass(const CVector& pos, const CVector& dir) const {
         return 1.0f / (CrossProduct(pos, dir).SquaredMagnitude() / m_fTurnMass + 1.0f / m_fMass);
     }
 
 // HELPERS
-    bool IsImmovable() const { return physicalFlags.bDisableZ || physicalFlags.bInfiniteMass || physicalFlags.bDisableMoveForce; }
+    [[nodiscard]] bool IsImmovable() const { return physicalFlags.bDisableZ || physicalFlags.bInfiniteMass || physicalFlags.bDisableMoveForce; }
 
     auto GetCollidingEntities() const { return std::span{ m_apCollidedEntities, m_nNumEntitiesCollided }; }
 

@@ -16,15 +16,6 @@
 #include "LodTimeModelInfo.h"
 #include "PedModelInfo.h"
 
-enum eModelInfoType : uint8 {
-    MODEL_INFO_TYPE_ATOMIC = 1,
-    MODEL_INFO_TYPE_TIME = 3,
-    MODEL_INFO_TYPE_WEAPON = 4,
-    MODEL_INFO_TYPE_CLUMP = 5,
-    MODEL_INFO_TYPE_VEHICLE = 6,
-    MODEL_INFO_TYPE_PED = 7,
-    MODEL_INFO_TYPE_LOD_ATOMIC = 8,
-};
 
 class CModelInfo {
 public:
@@ -99,5 +90,7 @@ public:
     static int32 IsVehicleModelType(int32 index);
 
     static CBaseModelInfo* GetModelInfo(int32 index) { return ms_modelInfoPtrs[index]; }
+    static auto GetPedModelInfo(int32 index) { return GetModelInfo(index)->AsPedModelInfoPtr(); }
+    static auto GetVehicleModelInfo(int32 index) { return GetModelInfo(index)->AsVehicleModelInfoPtr(); }
     static void SetModelInfo(int32 index, CBaseModelInfo* pInfo) { ms_modelInfoPtrs[index] = pInfo; }
 };

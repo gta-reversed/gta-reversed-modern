@@ -11,14 +11,10 @@
 // The sequence of key frames of one animated node
 class CAnimBlendSequence {
 public:
-    CAnimBlendSequence();
-    ~CAnimBlendSequence();
-
-public:
     // thanks to jte for some info
     union {
-        uint16 m_boneId; // IF m_hasBoneIdSet == TRUE
-        uint32 m_hash;   // IF m_hasBoneIdSet == FALSE
+        ePedBones m_boneId; // IF m_hasBoneIdSet == TRUE
+        uint32    m_hash;   // IF m_hasBoneIdSet == FALSE
     };
     union {
         struct {
@@ -27,42 +23,34 @@ public:
             uint16 m_isCompressed : 1;        // Compressed key frames.
             uint16 m_usingExternalMemory : 1; // When this flag is NOT set, you have to loop through all key frames in m_pFrames and free them separately.
             uint16 m_hasBoneIdSet : 1;
-
-            // These remaining flags don't seem to be used anywhere, not even in CAnimBlendNode functions.
-            uint16 m_bf6 : 1;
-            uint16 m_bf7 : 1;
-            uint16 m_b78 : 1;
-
-            uint16 m_bf9 : 1;
-            uint16 m_bf10 : 1;
-            uint16 m_b11 : 1;
-            uint16 m_bf12 : 1;
-            uint16 m_bf13 : 1;
-            uint16 m_b714 : 1;
-            uint16 m_bf15 : 1;
-            uint16 m_bf16 : 1;
         };
         uint16 m_nFlags;
     };
     uint16 m_nFrameCount;
-    void*  m_pFrames;     // Either `CAnimSequenceRootFrameUncompressed` or `CAnimSequenceRootFrameCompressed` depending on `m_isCompressed` (TODO: Im not 99% sure)
+    void*  m_pFrames;
 
 public:
     static void InjectHooks();
 
-    //funcs
-    void CompressKeyframes(uint8* arg1);
-    int32 GetDataSize(bool arg1);
-    bool MoveMemorY();
-    int32 RemoveQuaternionFlips();
-    void RemoveUncompressedData(uint8* arg1);
-    void SetBoneTag(int32 hash);
-    void SetName(const char* string);
-    void SetNumFrames(int32 count, bool arg2, bool arg3, uint8* arg4);
-    void Uncompress(uint8* arg1);
+    CAnimBlendSequence();
+    ~CAnimBlendSequence();
 
-    CAnimSequenceRootFrameUncompressed* GetUncompressedFrame(int32 iFrame); // Can return child frame casted as root frame, the translation shouldn't be accessed then
-    CAnimSequenceRootFrameCompressed* GetCompressedFrame(int32 iFrame); // Can return child frame casted as root frame, the translation shouldn't be accessed then
+    void CompressKeyframes(uint8* frameData);
+    [[nodiscard]] size_t GetDataSize(bool compressed) const;
+    bool MoveMemory();
+    void Print();
+    void RemoveQuaternionFlips();
+    void RemoveUncompressedData(uint8* frameData);
+    void SetBoneTag(int32 boneId);
+    void SetName(const char* string);
+    void SetNumFrames(int32 count, bool root, bool compressed, CAnimBlendSequence* frameData); // root -> isTranslated?
+    void Uncompress(uint8* frameData);
+
+    KeyFrameTrans* GetUncompressedFrame(int32 frame) const;
+    KeyFrameTransCompressed* GetCompressedFrame(int32 frame) const;
+
+    CAnimBlendSequence* Constructor() { this->CAnimBlendSequence::CAnimBlendSequence(); return this; }
+    CAnimBlendSequence* Destructor() { this->CAnimBlendSequence::~CAnimBlendSequence(); return this; }
 };
 
 VALIDATE_SIZE(CAnimBlendSequence, 0xC);

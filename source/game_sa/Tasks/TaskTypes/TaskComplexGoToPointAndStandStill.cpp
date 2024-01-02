@@ -11,21 +11,21 @@ void CTaskComplexGoToPointAndStandStill::InjectHooks() {
     RH_ScopedClass(CTaskComplexGoToPointAndStandStill);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x668120);
-    RH_ScopedInstall(Clone_Reversed, 0x66CEA0);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x66DBA0);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x66DC40);
+    RH_ScopedVirtualInstall(Clone, 0x66CEA0);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x66DBA0);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x66DC40);
     RH_ScopedOverloadedInstall(CreateFirstSubTask, "ped", 0x6682D0, CTask * (CTaskComplexGoToPointAndStandStill::*)(int32, CPed*));
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x668570);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x668570);
     RH_ScopedInstall(GoToPoint, 0x46FE60);
     RH_ScopedInstall(SelectMoveState, 0x668250);
 }
 
 // 0x668120
-CTaskComplexGoToPointAndStandStill::CTaskComplexGoToPointAndStandStill(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint) : CTaskComplex() {
+CTaskComplexGoToPointAndStandStill::CTaskComplexGoToPointAndStandStill(eMoveState moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint) : CTaskComplex() {
     m_moveState           = moveState;
     m_nFlags              = 0;
     m_b01                 = bUnknown;
-    m_bTargetPointUpdated = true;
+    m_bTargetPointUpdated = true; // todo: maybe wrong
     m_bGoToPoint          = bGoToPoint;
 
     if (m_vecTargetPoint != targetPoint || m_fMoveStateRadius != fMoveStateRadius) {
@@ -56,14 +56,8 @@ CTaskComplexGoToPointAndStandStill::~CTaskComplexGoToPointAndStandStill() {
     // NOP
 }
 
-// 0x668120
-CTaskComplexGoToPointAndStandStill* CTaskComplexGoToPointAndStandStill::Constructor(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint) {
-    this->CTaskComplexGoToPointAndStandStill::CTaskComplexGoToPointAndStandStill(moveState, targetPoint, fRadius, fMoveStateRadius, bUnknown, bGoToPoint);
-    return this;
-}
-
 // 0x66CEA0
-CTask* CTaskComplexGoToPointAndStandStill::Clone() {
+CTask* CTaskComplexGoToPointAndStandStill::Clone() const {
     return CTaskComplexGoToPointAndStandStill::Clone_Reversed();
 }
 
@@ -82,7 +76,7 @@ CTask* CTaskComplexGoToPointAndStandStill::ControlSubTask(CPed* ped) {
     return CTaskComplexGoToPointAndStandStill::ControlSubTask_Reversed(ped);
 }
 
-CTask* CTaskComplexGoToPointAndStandStill::Clone_Reversed() {
+CTask* CTaskComplexGoToPointAndStandStill::Clone_Reversed() const {
     return new CTaskComplexGoToPointAndStandStill(m_moveState, m_vecTargetPoint, m_fRadius, m_fMoveStateRadius, m_b01, m_bGoToPoint);
 }
 
@@ -118,7 +112,7 @@ CTask* CTaskComplexGoToPointAndStandStill::ControlSubTask_Reversed(CPed* ped) {
     } else if (m_pSubTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT) {
         auto gotoPointTask = static_cast<CTaskSimpleGoToPoint*>(m_pSubTask);
         if (m_moveState == PEDMOVE_RUN) {
-            SelectMoveState(gotoPointTask, ped, m_fMoveStateRadius, 100000000.0f);
+            SelectMoveState(gotoPointTask, ped, m_fMoveStateRadius, 100'000'000.0f);
         } else if (m_moveState == PEDMOVE_SPRINT) {
             SelectMoveState(gotoPointTask, ped, m_fMoveStateRadius, 10.0f);
         }
@@ -139,10 +133,9 @@ void CTaskComplexGoToPointAndStandStill::GoToPoint(const CVector& targetPoint, f
 
 // 0x668250
 void CTaskComplexGoToPointAndStandStill::SelectMoveState(CTaskSimpleGoToPoint* gotoPointTask, CPed* ped, float fMoveStateRadius, float fRunOrSprintRadius) {
-    CVector2D   vecDistance = ped->GetPosition() - gotoPointTask->m_vecTargetPoint;
-    const float fSquaredMagnitude = vecDistance.SquaredMagnitude();
-    if (fSquaredMagnitude >= fMoveStateRadius * fMoveStateRadius) {
-        if (fSquaredMagnitude >= fRunOrSprintRadius * fRunOrSprintRadius)
+    const float dist = DistanceBetweenPointsSquared2D(gotoPointTask->m_vecTargetPoint, ped->GetPosition());
+    if (dist >= sq(fMoveStateRadius)) {
+        if (dist >= sq(fRunOrSprintRadius))
             gotoPointTask->m_moveState = PEDMOVE_SPRINT;
         else
             gotoPointTask->m_moveState = PEDMOVE_RUN;
@@ -162,7 +155,7 @@ CTask* CTaskComplexGoToPointAndStandStill::CreateFirstSubTask(int32 taskId, CPed
             gotoPointTask->gotoPointFlags.m_b05 = true;
 
         if (m_moveState == PEDMOVE_RUN)
-            SelectMoveState(gotoPointTask, ped, m_fMoveStateRadius, 100000000.0f);
+            SelectMoveState(gotoPointTask, ped, m_fMoveStateRadius, 100'000'000.0f);
 
         else if (m_moveState == PEDMOVE_SPRINT)
             SelectMoveState(gotoPointTask, ped, m_fMoveStateRadius, 10.0f);

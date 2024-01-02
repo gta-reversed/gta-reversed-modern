@@ -5,9 +5,9 @@ void CHandObject::InjectHooks()
     RH_ScopedClass(CHandObject);
     RH_ScopedCategory("Entity/Object");
 
-    RH_ScopedInstall(ProcessControl_Reversed, 0x59EC40);
-    RH_ScopedInstall(PreRender_Reversed, 0x59ECD0);
-    RH_ScopedInstall(Render_Reversed, 0x59EE80);
+    RH_ScopedVirtualInstall(ProcessControl, 0x59EC40);
+    RH_ScopedVirtualInstall(PreRender, 0x59ECD0);
+    RH_ScopedVirtualInstall(Render, 0x59EE80);
 }
 
 CHandObject::CHandObject(int32 handModelIndex, CPed* ped, bool bLeftHand) : CObject()

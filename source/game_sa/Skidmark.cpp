@@ -5,7 +5,7 @@
 #include "Skidmarks.h"
 #include "CustomBuildingDNPipeline.h"
 
-void CSkidmark::Init(uint32 id, CVector posn, eSkidMarkType type, const bool* bloodState) {
+void CSkidmark::Init(uint32 id, CVector posn, eSkidmarkType type, const bool* bloodState) {
     m_nId         = id;
     m_vPosn[0]    = posn;
     m_partDirX[0] = 0.0f;
@@ -13,7 +13,7 @@ void CSkidmark::Init(uint32 id, CVector posn, eSkidMarkType type, const bool* bl
     m_bActive     = true;
     m_nState      = eSkidmarkState::JUST_UPDATED;
     m_nNumParts   = 0;
-    m_nType       = *bloodState ? eSkidMarkType::BLOODY : type;
+    m_nType       = *bloodState ? eSkidmarkType::BLOODY : type;
     m_lastDisappearTimeUpdateMs = CTimer::GetTimeInMS() - 1'000;
 }
 
@@ -42,7 +42,7 @@ void CSkidmark::Update() {
         else if (m_nNumParts >= 9)
             UpdateTime(10'000, 20'000);
         else // 4 - 8 parts
-            UpdateTime(5'000, 10'000); 
+            UpdateTime(5'000, 10'000);
         break;
     }
     case eSkidmarkState::DISAPPEARING: {
@@ -57,20 +57,12 @@ void CSkidmark::Update() {
 CRGBA CSkidmark::GetColor() const {
     const auto GetBaseColor = [this]() -> CRGBA {
         switch (m_nType) {
-        case eSkidMarkType::DEFALT:
-            return { 0, 0, 0, 255 };
-
-        case eSkidMarkType::SANDY:
-            return { 45, 31, 4, 255 };
-
-        case eSkidMarkType::MUDDY:
-            return { 69, 69, 61, 255 };
-
-        case eSkidMarkType::BLOODY:
-            return { 32, 0, 0, 255 };
-
+        case eSkidmarkType::DEFAULT: return { 0, 0, 0, 255 };
+        case eSkidmarkType::SANDY:   return { 45, 31, 4, 255 };
+        case eSkidmarkType::MUDDY:   return { 69, 69, 61, 255 };
+        case eSkidmarkType::BLOODY:  return { 32, 0, 0, 255 };
         default: {
-            assert(0);
+            NOTSA_UNREACHABLE("Unexpected skidmark type %d", (int)m_nType);
             return {};
         }
         }
@@ -146,7 +138,7 @@ void CSkidmark::Render() const {
 
 // see CSkidmarks::RegisterOne
 void CSkidmark::RegisterNewPart(CVector posn, CVector2D dir, float length, bool* bloodState) {
-    if ((m_nType == eSkidMarkType::BLOODY) == *bloodState) {
+    if ((m_nType == eSkidmarkType::BLOODY) == *bloodState) {
         m_bActive = true;
         if (CTimer::GetTimeInMS() - m_lastDisappearTimeUpdateMs <= 100) {
             m_vPosn[m_nNumParts] = posn; // Update existing, because of low delta time

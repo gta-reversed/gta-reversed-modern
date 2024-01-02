@@ -15,8 +15,8 @@ void CTaskSimpleInAir::InjectHooks()
 
     RH_ScopedInstall(Constructor, 0x678CD0);
     RH_ScopedInstall(DeleteAnimCB, 0x678E60);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x680600);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x678DC0);
+    RH_ScopedVirtualInstall(ProcessPed, 0x680600);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x678DC0);
 }
 
 CTaskSimpleInAir* CTaskSimpleInAir::Constructor(bool bUsingJumpGlide, bool bUsingFallGlide, bool bUsingClimbJump)
@@ -28,9 +28,9 @@ CTaskSimpleInAir* CTaskSimpleInAir::Constructor(bool bUsingJumpGlide, bool bUsin
 // 0x678CD0
 CTaskSimpleInAir::CTaskSimpleInAir(bool bUsingJumpGlide, bool bUsingFallGlide, bool bUsingClimbJump) : m_timer()
 {
-    this->m_bUsingJumpGlide = bUsingJumpGlide;
-    this->m_bUsingFallGlide = bUsingFallGlide;
-    this->m_bUsingClimbJump = bUsingClimbJump;
+    m_bUsingJumpGlide = bUsingJumpGlide;
+    m_bUsingFallGlide = bUsingFallGlide;
+    m_bUsingClimbJump = bUsingClimbJump;
 
     m_pAnim = nullptr;
     m_fMinZSpeed = 0.0F;
@@ -46,8 +46,7 @@ CTaskSimpleInAir::~CTaskSimpleInAir()
     if (m_pAnim)
         m_pAnim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
 
-    if (m_pClimbEntity)
-        m_pClimbEntity->CleanUpOldReference(&m_pClimbEntity);
+    CEntity::SafeCleanUpRef(m_pClimbEntity);
 }
 
 // 0x680600
@@ -132,7 +131,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
                 if (moveSpeedForward < maxMoveSpeedForward && m_nProcessCounter < 1000)
                 {
                     ped->ApplyMoveForce(ped->GetForward() * ((maxMoveSpeedForward - moveSpeedForward) * ped->m_fMass));
-                    m_nProcessCounter += CTimer::GetTimeStepInMS();
+                    m_nProcessCounter += (uint32)CTimer::GetTimeStepInMS();
                 }
             }
         }
@@ -183,7 +182,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
             if (m_pAnim && m_bUsingFallGlide)
             {
                 m_pAnim->m_fBlendDelta = -1000.0F;
-                m_pAnim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
+                m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
                 m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
                 m_pAnim = nullptr;
             }
@@ -228,7 +227,7 @@ bool CTaskSimpleInAir::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
         if (m_pAnim)
         {
             m_pAnim->m_fBlendDelta = -8.0F;
-            m_pAnim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
+            m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
             m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
             m_pAnim = nullptr;
         }

@@ -9,8 +9,8 @@ void CPools::InjectHooks() {
     RH_ScopedClass(CPools);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Initialise, 0x550F10);
-    // RH_ScopedInstall(ShutDown, 0x5519F0);
+    RH_ScopedInstall(Initialise, 0x550F10, { .reversed = false });
+    RH_ScopedInstall(ShutDown, 0x5519F0, { .reversed = false });
     RH_ScopedInstall(CheckBuildingAtomics, 0x550170);
     RH_ScopedInstall(CheckPoolsEmpty, 0x551950);
     RH_ScopedInstall(GetObject, 0x550050);
@@ -21,19 +21,22 @@ void CPools::InjectHooks() {
     RH_ScopedInstall(GetVehicleRef, 0x54FFC0);
     RH_ScopedInstall(Load, 0x5D0890);
     RH_ScopedInstall(LoadObjectPool, 0x5D4A40);
-    // RH_ScopedInstall(LoadPedPool, 0x5D2D70);
+    RH_ScopedInstall(LoadPedPool, 0x5D2D70, { .reversed = false });
     RH_ScopedInstall(LoadVehiclePool, 0x5D2A20);
     RH_ScopedInstall(MakeSureSlotInObjectPoolIsEmpty, 0x550080);
     RH_ScopedInstall(Save, 0x5D0880);
-    // RH_ScopedInstall(SaveObjectPool, 0x5D4940);
-    // RH_ScopedInstall(SavePedPool, 0x5D4B40);
-    // RH_ScopedInstall(SaveVehiclePool, 0x5D4800);
+    RH_ScopedInstall(SaveObjectPool, 0x5D4940, { .reversed = false });
+    RH_ScopedInstall(SavePedPool, 0x5D4B40, { .reversed = false });
+    RH_ScopedInstall(SaveVehiclePool, 0x5D4800, { .reversed = false });
 }
 
 // 0x550F10
 void CPools::Initialise() {
+    ZoneScoped;
+
     plugin::Call<0x550F10>();
     /*
+    CMemoryMgr::PushMemId(MEM_POOLS);
     ms_pPtrNodeSingleLinkPool = new CPtrNodeSingleLinkPool(70000, "PtrNode Single");
     ms_pPtrNodeDoubleLinkPool = new CPtrNodeDoubleLinkPool(3200, "PtrNode Double");
     ms_pEntryInfoNodePool     = new CEntryInfoNodePool(500, "EntryInfoNode");
@@ -51,6 +54,7 @@ void CPools::Initialise() {
     ms_pTaskAllocatorPool     = new CTaskAllocatorPool(16, "TaskAllocator");
     ms_pPedIntelligencePool   = new CPedIntelligencePool(140, "PedIntelligence");
     ms_pPedAttractorPool      = new CPedAttractorPool(64, "PedAttractors");
+    CMemoryMgr::PopMemId();
     */
 }
 
@@ -58,7 +62,7 @@ void CPools::Initialise() {
 void CPools::ShutDown() {
     plugin::Call<0x5519F0>();
     /*
-    printf("Shutdown pool started\n");
+    DEV_LOG("Shutdown pool started");
     delete ms_pPtrNodeSingleLinkPool;
     delete ms_pPtrNodeDoubleLinkPool;
     delete ms_pEntryInfoNodePool;
@@ -76,7 +80,7 @@ void CPools::ShutDown() {
     delete ms_pTaskAllocatorPool;
     delete ms_pPedIntelligencePool;
     delete ms_pPedAttractorPool;
-    printf("Shutdown pool done\n");
+    DEV_LOG("Shutdown pool done");
     */
 }
 
@@ -96,9 +100,9 @@ void CPools::CheckPoolsEmpty() {
             continue;
 
         const auto& objPos = obj->GetPosition();
-        printf("Offending object: MI:%d Coors:%f %f %f\n", obj->m_nModelIndex, objPos.x, objPos.y, objPos.z);
+        DEV_LOG("Offending object: MI: {} Coors:{} {} {}", obj->m_nModelIndex, objPos.x, objPos.y, objPos.z);
     }
-    printf("pools have been cleared \n");
+    DEV_LOG("Pools have been cleared!");
 }
 
 // 0x550050
@@ -229,11 +233,11 @@ bool CPools::LoadVehiclePool() {
             break;
         case VEHICLE_TYPE_BIKE:
             vehicle = new CBike(modelId, RANDOM_VEHICLE);
-            vehicle->AsBike()->bikeFlags.bIsStanding = true;
+            vehicle->AsBike()->bikeFlags.bOnSideStand = true;
             break;
         case VEHICLE_TYPE_BMX:
             vehicle = new CBmx(modelId, RANDOM_VEHICLE);
-            vehicle->AsBike()->bikeFlags.bIsStanding = true;
+            vehicle->AsBike()->bikeFlags.bOnSideStand = true;
             break;
         case VEHICLE_TYPE_TRAILER:
             vehicle = new CTrailer(modelId, RANDOM_VEHICLE);

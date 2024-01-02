@@ -18,29 +18,29 @@ public:
     bool                          m_bSensibleLeaveCar;
     bool                          m_bForceGetOut;
     bool                          m_bDie;
-    char                          _pad1;
     CTaskUtilityLineUpPedWithCar* m_pTaskUtilityLineUpPedWithCar;
     uint8                         m_nDoorFlagsSet;
     uint8                         m_nNumGettingInSet;
-    char                          _pad2[2];
     int32                         m_nDieAnimID;
     float                         m_fDieAnimBlendDelta;
     float                         m_fDieAnimSpeed;
     bool                          m_bIsInAir;
-    char                          _pad3[3];
 
 public:
     static constexpr auto Type = TASK_COMPLEX_LEAVE_CAR;
 
-    CTaskComplexLeaveCar(CVehicle* targetVehicle, int32 nTargetDoor, int32 nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut);
-    ~CTaskComplexLeaveCar();
+    explicit CTaskComplexLeaveCar(CVehicle* targetVehicle, int32 nTargetDoor, int32 nDelayTime);
+    explicit CTaskComplexLeaveCar(CVehicle* targetVehicle, int32 nTargetDoor, int32 nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut);
+    CTaskComplexLeaveCar(const CTaskComplexLeaveCar& o); // NOTSA
+    ~CTaskComplexLeaveCar() override;
 
-    CTask*    Clone() override;
-    eTaskType GetTaskType() override { return TASK_COMPLEX_LEAVE_CAR; }
-    bool   MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override { return new CTaskComplexLeaveCar{ *this }; } // 0x63D9E0
+    bool   MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
+    CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 
 private:
     friend void InjectHooksMain();
@@ -48,5 +48,4 @@ private:
 
     CTaskComplexLeaveCar* Constructor(CVehicle* targetVehicle, int32 nTargetDoor, int32 nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut);
 };
-
 VALIDATE_SIZE(CTaskComplexLeaveCar, 0x34);

@@ -4,16 +4,11 @@
 
 COctTreeBase& gOctTreeBase = *(COctTreeBase*)0xBC1290;
 
-// 0x5A7570
-COctTreeBase::COctTreeBase() : COctTree() {
-    // NOP
-}
-
 // 0x5A7710
-bool COctTreeBase::InsertTree(uint8 colorRed, uint8 colorGreen, uint8 colorBlue) {
+bool COctTreeBase::InsertTree(uint8 red, uint8 green, uint8 blue) {
     ms_level = 0;
 
-    if (!COctTree::InsertTree(colorRed, colorGreen, colorBlue))
+    if (!COctTree::InsertTree(red, green, blue))
         return false;
 
     m_nNumBranches--;
@@ -22,19 +17,20 @@ bool COctTreeBase::InsertTree(uint8 colorRed, uint8 colorGreen, uint8 colorBlue)
 }
 
 // 0x5A7280
-void COctTreeBase::FillPalette(uint8* colors) {
+void COctTreeBase::FillPalette(uint8* data) {
     ms_level = 0;
 
     if (m_bHasTransparentPixels) {
-        colors[0] = 0; // red
-        colors[1] = 0; // green
-        colors[2] = 0; // blue
-        colors[3] = 0; // alpha
+        auto* colors = *reinterpret_cast<RwRGBA**>(data);
+        colors->red   = 0;
+        colors->green = 0;
+        colors->blue  = 0;
+        colors->alpha = 0;
 
         ms_level = 1;
     }
 
-    COctTree::FillPalette(colors);
+    COctTree::FillPalette(data);
 }
 
 // 0x5A7260
@@ -48,35 +44,23 @@ void COctTreeBase::Init(int32 numBranches) {
 }
 
 // 0x5A7750
-bool COctTreeBase::Insert(uint8 colorRed, uint8 colorGreen, uint8 colorBlue) {
+bool COctTreeBase::Insert(uint8 red, uint8 green, uint8 blue) {
     while (true) {
         ms_bFailed = false;
 
-        if (InsertTree(colorRed, colorGreen, colorBlue))
+        if (InsertTree(red, green, blue))
             break;
 
         if (ms_bFailed) {
-            gpTmpOctTree = nullptr;
-            ReduceTree();
-            m_nNumBranches += gpTmpOctTree->NoOfChildren() - 1;
-
-            gpTmpOctTree->m_bLastStep = true;
-            gpTmpOctTree->RemoveChildren();
-
-            if (ms_bFailed)
-                continue;
+            Reduce();
+            continue;
         }
 
         return false;
     }
 
     if (m_nNumBranches <= 0) {
-        gpTmpOctTree = nullptr;
-        ReduceTree();
-        m_nNumBranches += gpTmpOctTree->NoOfChildren() - 1;
-
-        gpTmpOctTree->m_bLastStep = true;
-        gpTmpOctTree->RemoveChildren();
+        Reduce();
     }
 
     return true;
@@ -86,12 +70,19 @@ bool COctTreeBase::Insert(uint8 colorRed, uint8 colorGreen, uint8 colorBlue) {
 void COctTreeBase::ReduceBranches(int32 newBranchesCount) {
     const int32 branchesToCount = m_bHasTransparentPixels ? newBranchesCount + 1 : newBranchesCount;
 
-    while (m_nNumBranches < branchesToCount) {
-        gpTmpOctTree = nullptr;
-        ReduceTree();
-        m_nNumBranches += gpTmpOctTree->NoOfChildren() - 1;
-
-        gpTmpOctTree->m_bLastStep = true;
-        gpTmpOctTree->RemoveChildren();
+    // Signed-unsigned conversion check
+    // TODO: Replace this with the overflow-check cast in notsa::script.
+    assert(m_nNumBranches < static_cast<uint32>(std::numeric_limits<int32>::max()));
+    while (static_cast<int32>(m_nNumBranches) < branchesToCount) {
+        Reduce();
     }
+}
+
+void COctTreeBase::Reduce() {
+    gpTmpOctTree = nullptr;
+    ReduceTree();
+    m_nNumBranches += gpTmpOctTree->NoOfChildren() - 1;
+
+    gpTmpOctTree->m_bLastStep = true;
+    gpTmpOctTree->RemoveChildren();
 }

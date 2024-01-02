@@ -12,6 +12,7 @@ class CAEAudioEntity;
 class CEntity;
 
 enum eSoundEnvironment : uint16 {
+    SOUND_DEFAULT                          = 0x0,
     SOUND_FRONT_END                        = 0x1,
     SOUND_UNCANCELLABLE                    = 0x2,
     SOUND_REQUEST_UPDATES                  = 0x4,
@@ -38,7 +39,7 @@ public:
     int16           m_nSoundIdInSlot;
     CAEAudioEntity* m_pBaseAudio;
     CEntity*        m_pPhysicalEntity;
-    uint32          m_nEvent; // see eAudioEvents
+    eAudioEvents    m_nEvent;
     float           m_fMaxVolume;
     float           m_fVolume;
     float           m_fSoundDistance;
@@ -52,7 +53,7 @@ public:
     float           m_fCurrCamDist;
     float           m_fPrevCamDist;
     float           m_fTimeScale;
-    char            m_nIgnoredServiceCycles; // Seemingly never used, but CAESoundManager::Service still checks for that
+    uint8           m_nIgnoredServiceCycles; // Seemingly never used, but CAESoundManager::Service still checks for that
     char            field_55;
     union {
         uint16 m_nEnvironmentFlags;
@@ -97,7 +98,14 @@ public:
 
     CAESound& operator=(const CAESound& sound);
 
-    void Initialise(int16 bankSlotId, int16 sfxId, CAEAudioEntity* baseAudio, CVector posn, float volume, float maxDistance, float speed, float timeScale, uint8 ignoredServiceCycles, eSoundEnvironment environmentFlags, float speedVariability, int16 currPlayPosn);
+    void Initialise(int16 bankSlotId, int16 sfxId, CAEAudioEntity* baseAudio, CVector posn, float volume,
+                    float maxDistance = 1.0f,
+                    float speed = 1.0f,
+                    float timeScale = 1.0f,
+                    uint8 ignoredServiceCycles = 0,
+                    eSoundEnvironment environmentFlags = static_cast<eSoundEnvironment>(0),
+                    float speedVariability = 0,
+                    int16 currPlayPosn = 0);
 
     void  UnregisterWithPhysicalEntity();
     void  StopSound();
@@ -116,7 +124,8 @@ public:
     bool  GetForcedFront() const { return m_bForcedFront; }
     void  SetIndividualEnvironment(uint16 envFlag, uint16 bEnabled); // pass eSoundEnvironment as envFlag
     void  UpdatePlayTime(int16 soundLength, int16 loopStartTime, int16 playProgress);
-    void  GetRelativePosition(CVector* outPos);
+    void GetRelativePosition(CVector& out) const;
+    CVector GetRelativePosition() const { CVector out; GetRelativePosition(out); return out; } // NOTSA
     void  CalculateFrequency();
     void  UpdateFrequency();
     float GetRelativePlaybackFrequencyWithDoppler();

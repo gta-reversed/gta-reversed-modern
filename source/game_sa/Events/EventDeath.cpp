@@ -2,46 +2,19 @@
 
 #include "EventDeath.h"
 
-void CEventDeath::InjectHooks()
-{
-    RH_ScopedClass(CEventDeath);
-    RH_ScopedCategory("Events");
-
-    RH_ScopedInstall(Constructor, 0x4ADDF0);
-    RH_ScopedInstall(Clone_Reversed, 0x4B6E30);
-}
-
-CEventDeath::CEventDeath(bool bDrowning, uint32 deathTimeInMs)
-{
+// 0x4ADE50, `time` should be int32
+CEventDeath::CEventDeath(bool bDrowning, uint32 deathTimeInMs) : CEvent() {
     m_bDrowning = bDrowning;
     m_deathTimeInMs = deathTimeInMs;
 }
 
-// // 0x4ADDF0
-CEventDeath::CEventDeath(bool bDrowning)
-{
+// 0x4ADDF0
+CEventDeath::CEventDeath(bool bDrowning) : CEvent() {
     m_bDrowning = bDrowning;
     m_deathTimeInMs = CTimer::GetTimeInMS();
 }
 
-CEventDeath::~CEventDeath()
-{
-    // nothing here
-}
-
-CEventDeath* CEventDeath::Constructor(bool bDrowning)
-{
-    this->CEventDeath::CEventDeath(bDrowning);
-    return this;
-}
-
 // 0x4B6E30
-CEvent* CEventDeath::Clone()
-{
-    return CEventDeath::Clone_Reversed();
-}
-
-CEvent* CEventDeath::Clone_Reversed()
-{
+CEvent* CEventDeath::Clone() {
     return new CEventDeath(m_bDrowning, m_deathTimeInMs);
 }

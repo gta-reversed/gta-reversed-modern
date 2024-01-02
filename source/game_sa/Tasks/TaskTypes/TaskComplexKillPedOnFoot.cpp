@@ -8,32 +8,31 @@ void CTaskComplexKillPedOnFoot::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x620E30);
 }
 
-CTaskComplexKillPedOnFoot::CTaskComplexKillPedOnFoot(CPed* target, int32 time, int32 pedFlags, int32 delay, int32 chance, int8 a7) : CTaskComplex() {
-    m_bit_1        = true;
-    m_bit_2        = true;
-    m_bit_3        = true;
-    m_bit_4        = false;
-    m_bit_5        = false;
-    m_bit_6        = false;
-    m_bit_7        = false;
-    m_bit_8        = true; // maybe this is unused
-    m_target       = target;
-    m_pedFlags     = pedFlags;
-    m_actionDelay  = delay;
-    m_actionChance = chance;
-    field_20       = a7;
-    m_time         = time;
-
-    if (m_target)
-        m_target->RegisterReference(reinterpret_cast<CEntity**>(&m_target));
-
-    m_startTime = CTimer::GetTimeInMS();
+CTaskComplexKillPedOnFoot::CTaskComplexKillPedOnFoot(
+    CPed* target,
+    int32 time,
+    int32 pedFlags,
+    int32 delay,
+    int32 chance,
+    uint8 nCompetence,
+    bool bWaitForPlayerToBeSafe,
+    bool bWaitingForPlayerToBeSafe
+) :
+    m_bWaitForPlayerToBeSafe{ bWaitForPlayerToBeSafe },
+    m_bWaitingForPlayerToBeSafe{ bWaitingForPlayerToBeSafe },
+    m_target{ target },
+    m_pedFlags{ pedFlags },
+    m_actionDelay{ delay },
+    m_actionChance{ chance },
+    m_nCompetence{ nCompetence },
+    m_time{ time },
+    m_startTime{ CTimer::GetTimeInMS() }
+{
+    CEntity::SafeRegisterRef(m_target);
 }
 
-CTaskComplexKillPedOnFoot::~CTaskComplexKillPedOnFoot()
-{
-    if (m_target)
-        m_target->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_target));
+CTaskComplexKillPedOnFoot::~CTaskComplexKillPedOnFoot() {
+    CEntity::SafeCleanUpRef(m_target);
 }
 
 CTaskComplexKillPedOnFoot* CTaskComplexKillPedOnFoot::Constructor(CPed* target, int32 time, int32 pedFlags, int32 delay, int32 chance, int8 a7) {

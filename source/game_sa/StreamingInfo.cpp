@@ -26,30 +26,19 @@ void CStreamingInfo::Init() {
     m_nCdPosn = 0;
 }
 
-// 0x407480
-// Used to adding `info` to a linked list
-// This is done with the help of `m_nNextIndex` and `m_nPrevIndex`
-// which are just `indices` into `ms_aInfoForModel`.
-void CStreamingInfo::AddToList(CStreamingInfo* listStart) {
-    m_nNextIndex = listStart->m_nNextIndex;
-    m_nPrevIndex = static_cast<ptrdiff_t>(listStart - ms_pArrayBase);
-    listStart->m_nNextIndex = static_cast<ptrdiff_t>(this - ms_pArrayBase);
-    ms_pArrayBase[m_nNextIndex].m_nPrevIndex = listStart->m_nNextIndex;
-}
-
 // 0x407570
-uint32 CStreamingInfo::GetCdPosn() {
+size_t CStreamingInfo::GetCdPosn() const {
     return m_nCdPosn + CStreaming::ms_files[m_nImgId].m_StreamHandle;
 }
 
 // 0x4075E0
-void CStreamingInfo::SetCdPosnAndSize(uint32 CdPosn, uint32 CdSize) {
+void CStreamingInfo::SetCdPosnAndSize(size_t CdPosn, size_t CdSize) {
     m_nCdPosn = CdPosn;
     m_nCdSize = CdSize;
 }
 
 // 0x4075A0
-bool CStreamingInfo::GetCdPosnAndSize(uint32& CdPosn, uint32& CdSize) {
+bool CStreamingInfo::GetCdPosnAndSize(size_t& CdPosn, size_t& CdSize) {
     if (!HasCdPosnAndSize())
         return false;
     CdPosn = GetCdPosn();
@@ -58,12 +47,28 @@ bool CStreamingInfo::GetCdPosnAndSize(uint32& CdPosn, uint32& CdSize) {
 }
 
 // 0x407560
-bool CStreamingInfo::InList() {
-    return m_nNextIndex != -1;
+bool CStreamingInfo::InList() const {
+    // Yeah, that's partially true
+    // Because the way these lists work, items actually always have both `next` and `prev` defined
+    // So, I guess here they just assume that, and "optimize" the check :D
+    return m_nNextIndex != -1 /*notsa => */ && m_nPrevIndex != -1;
+}
+
+// 0x407480
+void CStreamingInfo::AddToList(CStreamingInfo* after) {
+    assert(!InList()); // May not be in a list (As that would corrupt the list)
+
+    m_nNextIndex = after->m_nNextIndex;
+    m_nPrevIndex = static_cast<int16>(after - ms_pArrayBase);
+
+    after->m_nNextIndex = static_cast<int16>(this - ms_pArrayBase);
+    ms_pArrayBase[m_nNextIndex].m_nPrevIndex = after->m_nNextIndex;
 }
 
 // 0x4074E0
 void CStreamingInfo::RemoveFromList() {
+    assert(InList()); // Must be in a list (Otherwise array access is UB)
+
     ms_pArrayBase[m_nNextIndex].m_nPrevIndex = m_nPrevIndex;
     ms_pArrayBase[m_nPrevIndex].m_nNextIndex = m_nNextIndex;
     m_nNextIndex = -1;

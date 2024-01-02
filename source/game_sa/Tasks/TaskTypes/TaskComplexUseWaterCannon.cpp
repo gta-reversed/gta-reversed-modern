@@ -11,10 +11,10 @@ void CTaskComplexUseWaterCannon::InjectHooks()
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x659780);
     //VTABLE
-    RH_ScopedInstall(Clone_Reversed, 0x659D10);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x6597D0);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x6597C0);
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x65A640);
+    RH_ScopedVirtualInstall(Clone, 0x659D10);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x6597D0);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x6597C0);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x65A640);
 }
 
 CTaskComplexUseWaterCannon* CTaskComplexUseWaterCannon::Constructor(CFire* pFire)
@@ -35,8 +35,7 @@ CTaskComplexUseWaterCannon::~CTaskComplexUseWaterCannon()
 }
 
 // 0x659D10
-CTask* CTaskComplexUseWaterCannon::Clone()
-{
+CTask* CTaskComplexUseWaterCannon::Clone() const {
     return Clone_Reversed();
 }
 
@@ -58,8 +57,7 @@ CTask* CTaskComplexUseWaterCannon::ControlSubTask(CPed* ped)
     return ControlSubTask_Reversed(ped);
 }
 
-CTask* CTaskComplexUseWaterCannon::Clone_Reversed()
-{
+CTask* CTaskComplexUseWaterCannon::Clone_Reversed() const {
     return new CTaskComplexUseWaterCannon(m_pFire);
 }
 

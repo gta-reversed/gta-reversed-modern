@@ -5,7 +5,7 @@
 
 void CTaskSimpleDuck::InjectHooks() {
     RH_ScopedClass(CTaskSimpleDuck);
-    RH_ScopedCategory("Tasks/TaskTypes"); // TODO: Change this to the appropriate category!
+    RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x691FC0);
     RH_ScopedInstall(Destructor, 0x692030);

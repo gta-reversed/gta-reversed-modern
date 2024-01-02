@@ -42,10 +42,10 @@ void CVisibilityPlugins::InjectHooks() {
     RH_ScopedInstall(AtomicDestructor, 0x7321A0);
     RH_ScopedInstall(CalculateFadingAtomicAlpha, 0x732500);
 
-    HookInstall(0x732310, ClearAtomicFlag); // Same function in 2 different places.. I don't want to deal with this, so let's static hook it..
-    HookInstall(0x732330, ClearAtomicFlag);
-    HookInstall(0x7322D0, SetAtomicFlag); // Same story..
-    HookInstall(0x7322B0, SetAtomicFlag);
+    RH_ScopedOverloadedInstall(ClearAtomicFlag, "int32", 0x732310, void(*)(RpAtomic*, int32));
+    RH_ScopedOverloadedInstall(ClearAtomicFlag, "uint16", 0x732330, void(*)(RpAtomic*, uint16));
+    RH_ScopedOverloadedInstall(SetAtomicFlag, "int32", 0x7322D0, void(*)(RpAtomic*, int32));
+    RH_ScopedOverloadedInstall(SetAtomicFlag, "uint16", 0x7322B0, void(*)(RpAtomic*, uint16));
 
     RH_ScopedInstall(ClearClumpForAllAtomicsFlag, 0x732350);
     RH_ScopedInstall(ClumpConstructor, 0x732E10);
@@ -61,7 +61,7 @@ void CVisibilityPlugins::InjectHooks() {
     RH_ScopedInstall(GetClumpAlpha, 0x732B20);
     RH_ScopedInstall(GetClumpModelInfo, 0x732AC0);
     RH_ScopedOverloadedInstall(GetDistanceSquaredFromCamera, "0", 0x732C80, float (*)(RwFrame*));
-    RH_ScopedOverloadedInstall(GetDistanceSquaredFromCamera, "1", 0x732CC0, float (*)(CVector*));
+    RH_ScopedOverloadedInstall(GetDistanceSquaredFromCamera, "1", 0x732CC0, float (*)(const CVector*));
     RH_ScopedInstall(GetDotProductWithCameraVector, 0x7326D0);
     RH_ScopedInstall(GetFrameHierarchyId, 0x732A20);
     RH_ScopedInstall(GetModelInfoIndex, 0x732250);
@@ -122,18 +122,24 @@ void CVisibilityPlugins::Initialise() {
     m_alphaList.Init(TOTAL_ALPHA_LISTS);
     m_alphaList.usedListHead.data.m_distance = 0.0f;
     m_alphaList.usedListTail.data.m_distance = 100000000.0f;
+
     m_alphaBoatAtomicList.Init(TOTAL_ALPHA_BOAT_ATOMIC_LISTS);
     m_alphaBoatAtomicList.usedListHead.data.m_distance = 0.0f;
     m_alphaBoatAtomicList.usedListTail.data.m_distance = 100000000.0f;
+
     m_alphaEntityList.Init(TOTAL_ALPHA_ENTITY_LISTS);
     m_alphaEntityList.usedListHead.data.m_distance = 0.0f;
     m_alphaEntityList.usedListTail.data.m_distance = 100000000.0f;
+
     m_alphaUnderwaterEntityList.Init(TOTAL_ALPHA_UNDERWATER_ENTITY_LISTS);
     m_alphaUnderwaterEntityList.usedListHead.data.m_distance = 0.0f;
     m_alphaUnderwaterEntityList.usedListTail.data.m_distance = 100000000.0f;
+
+    // New in SA
     m_alphaReallyDrawLastList.Init(TOTAL_ALPHA_DRAW_LAST_LISTS);
     m_alphaReallyDrawLastList.usedListHead.data.m_distance = 0.0f;
     m_alphaReallyDrawLastList.usedListTail.data.m_distance = 100000000.0f;
+
     ms_weaponPedsForPC.Init(TOTAL_WEAPON_PEDS_FOR_PC);
 }
 
@@ -146,10 +152,12 @@ void CVisibilityPlugins::Shutdown() {
     ms_weaponPedsForPC.Shutdown();
 }
 
+// 0x734530
 void CVisibilityPlugins::InitAlphaAtomicList() {
     m_alphaList.Clear();
 }
 
+// 0x734540
 void CVisibilityPlugins::InitAlphaEntityList() {
     m_alphaEntityList.Clear();
     m_alphaBoatAtomicList.Clear();
@@ -157,6 +165,7 @@ void CVisibilityPlugins::InitAlphaEntityList() {
     m_alphaReallyDrawLastList.Clear();
 }
 
+// 0x733DD0
 bool CVisibilityPlugins::InsertEntityIntoEntityList(CEntity* entity, float distance, void* callback)
 {
     AlphaObjectInfo info{};
@@ -166,15 +175,17 @@ bool CVisibilityPlugins::InsertEntityIntoEntityList(CEntity* entity, float dista
     return m_alphaEntityList.InsertSorted(info);
 }
 
+// 0x733D90
 bool CVisibilityPlugins::InsertEntityIntoUnderwaterEntities(CEntity* entity, float distance)
 {
     AlphaObjectInfo info{};
     info.m_distance = distance;
     info.m_entity = entity;
-    info.m_pCallback = CVisibilityPlugins::RenderEntity;
+    info.m_pCallback = RenderEntity;
     return m_alphaUnderwaterEntityList.InsertSorted(info);
 }
 
+// 0x733E10
 bool CVisibilityPlugins::InsertAtomicIntoReallyDrawLastList(RpAtomic* atomic, float distance) {
     AlphaObjectInfo info{};
     info.m_distance = distance;
@@ -183,23 +194,29 @@ bool CVisibilityPlugins::InsertAtomicIntoReallyDrawLastList(RpAtomic* atomic, fl
     return m_alphaReallyDrawLastList.InsertSorted(info);
 }
 
+// 0x733E50
 bool CVisibilityPlugins::InsertEntityIntoReallyDrawLastList(CEntity* entity, float distance) {
     AlphaObjectInfo info{};
     info.m_distance = distance;
     info.m_entity = entity;
-    info.m_pCallback = CVisibilityPlugins::RenderEntity;
+    info.m_pCallback = RenderEntity;
     return m_alphaReallyDrawLastList.InsertSorted(info);
 }
 
+// todo: Add MI_GASSTATION (see Android)
 // 0x734570
 bool CVisibilityPlugins::InsertEntityIntoSortedList(CEntity* entity, float distance) {
-    if (entity->m_nModelIndex == ModelIndices::MI_GRASSHOUSE && InsertEntityIntoReallyDrawLastList(entity, distance))
-        return true;
+    if (entity->m_nModelIndex == ModelIndices::MI_GRASSHOUSE) {
+        if (InsertEntityIntoReallyDrawLastList(entity, distance)) {
+            return true;
+        }
+    }
 
-    if (entity->m_bUnderwater)
+    if (entity->m_bUnderwater) {
         return InsertEntityIntoUnderwaterEntities(entity, distance);
+    }
 
-    return InsertEntityIntoEntityList(entity, distance, CVisibilityPlugins::RenderEntity);
+    return InsertEntityIntoEntityList(entity, distance, RenderEntity);
 }
 
 #define ATOMICPLG(atomic, var) \
@@ -220,6 +237,7 @@ bool CVisibilityPlugins::InsertEntityIntoSortedList(CEntity* entity, float dista
 #define CLUMPPLGCONST(clump, var) \
     (RWPLUGINOFFSETCONST(tClumpVisibilityPlugin, clump, ms_clumpPluginOffset)->var)
 
+// 0x732E30
 bool CVisibilityPlugins::PluginAttach() {
     ms_atomicPluginOffset = RpAtomicRegisterPlugin(
         sizeof(tAtomicVisibilityPlugin),
@@ -282,7 +300,13 @@ int32 CVisibilityPlugins::CalculateFadingAtomicAlpha(CBaseModelInfo* modelInfo, 
     return static_cast<int32>(modelInfo->m_nAlpha * fFade);
 }
 
+// 0x732330
 void CVisibilityPlugins::ClearAtomicFlag(RpAtomic* atomic, uint16 flag) {
+    ATOMICPLG(atomic, m_flags) &= ~flag;
+}
+
+// 0x732310
+void CVisibilityPlugins::ClearAtomicFlag(RpAtomic* atomic, int32 flag) {
     ATOMICPLG(atomic, m_flags) &= ~flag;
 }
 
@@ -292,43 +316,52 @@ RpAtomic* CVisibilityPlugins::ClearAtomicFlagCB(RpAtomic* atomic, void* data) {
     return atomic;
 }
 
+// 0x732350
 void CVisibilityPlugins::ClearClumpForAllAtomicsFlag(RpClump* clump, uint16 flag) {
     RpClumpForAllAtomics(clump, ClearAtomicFlagCB, (void*)flag);
 }
 
+// 0x732E10
 void* CVisibilityPlugins::ClumpConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
-    CLUMPPLG(object, m_visibilityCallBack) = CVisibilityPlugins::DefaultVisibilityCB;
+    CLUMPPLG(object, m_visibilityCallBack) = DefaultVisibilityCB;
     CLUMPPLG(object, m_alpha) = 255;
     return object;
 }
 
+// 0x732200
 void* CVisibilityPlugins::ClumpCopyConstructor(void* dstObject, const void* srcObject, RwInt32 offsetInObject, RwInt32 sizeInObject) {
     CLUMPPLG(dstObject, m_visibilityCallBack) = CLUMPPLGCONST(srcObject, m_visibilityCallBack);
     return dstObject;
 }
 
+// 0x732220
 void* CVisibilityPlugins::ClumpDestructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
     return object;
 }
 
+// 0x732A30
 int32 CVisibilityPlugins::DefaultVisibilityCB() {
     return 1;
 }
 
+// 0x7321B0
 void* CVisibilityPlugins::FrameConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
     FRAMEPLG(object, m_hierarchyId) = 0;
     return object;
 }
 
+// 0x7321D0
 void* CVisibilityPlugins::FrameCopyConstructor(void* dstObject, const void* srcObject, RwInt32 offsetInObject, RwInt32 sizeInObject) {
     FRAMEPLG(dstObject, m_hierarchyId) = FRAMEPLGCONST(srcObject, m_hierarchyId);
     return dstObject;
 }
 
+// 0x7321F0
 void* CVisibilityPlugins::FrameDestructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
     return object;
 }
 
+// 0x732A40
 bool CVisibilityPlugins::FrustumSphereCB(RpClump* clump) {
     RwSphere sphere{};
     RwFrame* frame = RpClumpGetFrame(clump);
@@ -341,10 +374,12 @@ bool CVisibilityPlugins::FrustumSphereCB(RpClump* clump) {
 }
 
 // The function name is misleading, it returns the flags
+// 0x732370
 uint16 CVisibilityPlugins::GetAtomicId(RpAtomic* atomic) {
     return ATOMICPLG(atomic, m_flags);
 }
 
+// 0x732260
 CAtomicModelInfo* CVisibilityPlugins::GetAtomicModelInfo(RpAtomic* atomic) {
     int16 modelId = ATOMICPLG(atomic, m_modelId);
     if (modelId == -1)
@@ -352,14 +387,17 @@ CAtomicModelInfo* CVisibilityPlugins::GetAtomicModelInfo(RpAtomic* atomic) {
     return CModelInfo::GetModelInfo(modelId)->AsAtomicModelInfoPtr();
 }
 
+// 0x732B20
 int32 CVisibilityPlugins::GetClumpAlpha(RpClump* clump) {
     return CLUMPPLG(clump, m_alpha);
 }
 
+// 0x732AC0
 CClumpModelInfo* CVisibilityPlugins::GetClumpModelInfo(RpClump* clump) {
     return FRAMEPLG(RpClumpGetFrame(clump), m_modelInfo);
 }
 
+// 0x732C80
 float CVisibilityPlugins::GetDistanceSquaredFromCamera(RwFrame* frame) {
     RwMatrix* transformMatrix = RwFrameGetLTM(frame);
     CVector distance;
@@ -367,102 +405,122 @@ float CVisibilityPlugins::GetDistanceSquaredFromCamera(RwFrame* frame) {
     return distance.SquaredMagnitude();
 }
 
-float CVisibilityPlugins::GetDistanceSquaredFromCamera(CVector* pPos) {
-    CVector distance;
-    RwV3dSub(&distance, pPos, ms_pCameraPosn);
+// 0x732CC0
+float CVisibilityPlugins::GetDistanceSquaredFromCamera(const CVector* pos) {
+    CVector distance = *pos - *ms_pCameraPosn;
     return distance.SquaredMagnitude();
 }
 
+// 0x7326D0
 float CVisibilityPlugins::GetDotProductWithCameraVector(RwMatrix* atomicMatrix, RwMatrix* clumpMatrix, uint16 flags) {
     float dotProduct1 = 0.0f;
     float dotProduct2 = *(float*)&atomicMatrix; // really?
-    RwV3d distance;
-    RwV3dSub(&distance, &atomicMatrix->pos, ms_pCameraPosn);
+    CVector distance = atomicMatrix->pos - *ms_pCameraPosn;
     if (flags & (ATOMIC_IS_REAR | ATOMIC_IS_FRONT))
-        dotProduct1 = RwV3dDotProduct(&clumpMatrix->up, &distance);
+        dotProduct1 = DotProduct(clumpMatrix->up, &distance);
     else if (flags & (ATOMIC_IS_RIGHT | ATOMIC_IS_LEFT))
-        dotProduct1 = RwV3dDotProduct(&clumpMatrix->right, &distance);
+        dotProduct1 = DotProduct(clumpMatrix->right, &distance);
+
     if (flags & (ATOMIC_IS_REAR | ATOMIC_IS_LEFT))
         dotProduct1 = -dotProduct1;
+
     if (flags & ATOMIC_VEHCOMP_15) {
-        const float dot = RwV3dDotProduct(&clumpMatrix->at, &distance);
+        const float dot = DotProduct(clumpMatrix->at, &distance);
         if (flags & (ATOMIC_IS_FRONT_DOOR | ATOMIC_IS_REAR_DOOR))
             dotProduct1 += dot * 0.25f;
         else
             dotProduct1 += dot * 2.5f;
     }
+
     if (!(flags & (ATOMIC_IS_FRONT_DOOR | ATOMIC_IS_REAR_DOOR)))
         return dotProduct1;
+
     if (flags & ATOMIC_IS_REAR_DOOR)
-        dotProduct2 = -RwV3dDotProduct(&clumpMatrix->up, &distance);
+        dotProduct2 = -DotProduct(clumpMatrix->up, &distance);
     else if (flags & ATOMIC_IS_FRONT_DOOR)
-        dotProduct2 = RwV3dDotProduct(&clumpMatrix->up, &distance);
+        dotProduct2 = DotProduct(clumpMatrix->up, &distance);
+
     if (dotProduct1 < 0.0f && dotProduct2 < 0.0f)
         return dotProduct1 + dotProduct2;
+
     if (dotProduct1 > 0.0f && dotProduct2 > 0.0f)
         return dotProduct1 + dotProduct2;
+
     return dotProduct1;
 }
 
+// 0x732A20
 int32 CVisibilityPlugins::GetFrameHierarchyId(RwFrame* frame) {
     return FRAMEPLG(frame, m_hierarchyId);
 }
 
+// 0x732250
 int16 CVisibilityPlugins::GetModelInfoIndex(RpAtomic* atomic) {
     return ATOMICPLG(atomic, m_modelId);
 }
 
+// 0x7323A0
 int16 CVisibilityPlugins::GetUserValue(RpAtomic* atomic) {
     return ATOMICPLG(atomic, m_userValue);
 }
 
 // Unused
+// 0x732990
 bool CVisibilityPlugins::IsAtomicVisible(RpAtomic* atomic) {
-    if (atomic->interpolator.flags & rpINTERPOLATORDIRTYSPHERE)
+    if (atomic->interpolator.flags & rpINTERPOLATORDIRTYSPHERE) {
         _rpAtomicResyncInterpolatedSphere(atomic);
+    }
     RwSphere sphere = atomic->boundingSphere;
     RwMatrix* transformMatrix = RwFrameGetMatrix(RpAtomicGetFrame(atomic));
     RwV3d point;
     RwV3dTransformPoints(&point, &sphere.center, 1, transformMatrix);
-    return RwCameraFrustumTestSphere(CVisibilityPlugins::ms_pCamera, &sphere) != rwSPHEREOUTSIDE;
+    return RwCameraFrustumTestSphere(ms_pCamera, &sphere) != rwSPHEREOUTSIDE;
 }
 
-// Unused
+// 0x732AE0
 bool CVisibilityPlugins::IsClumpVisible(RpClump* clump) {
     return plugin::CallAndReturn<bool, 0x732AE0, RpClump*>(clump);
 }
 
+// 0x732480
 void CVisibilityPlugins::RenderAlphaAtomic(RpAtomic* atomic, int32 alpha) {
-    uint8 alphas[152];
-    RpGeometry* geometry = atomic->geometry;
+    uint8 alphas[256]; // OG: ~152
+
+    RpGeometry* geometry = RpAtomicGetGeometry(atomic);
     uint32 geometryFlags = RpGeometryGetFlags(geometry);
     RpGeometrySetFlags(geometry, geometryFlags | rpGEOMETRYMODULATEMATERIALCOLOR);
+
     const int32 numMaterials = RpGeometryGetNumMaterials(geometry);
     for (int32 i = 0; i < numMaterials; i++) {
         RpMaterial* material = RpGeometryGetMaterial(geometry, i);
-        RwRGBA* color = RpMaterialGetColor(material);
-        alphas[i] = color->alpha;
-        color->alpha = std::min(color->alpha, (uint8)alpha);
+        RwRGBA* color        = RpMaterialGetColor(material);
+        alphas[i]            = color->alpha;
+        color->alpha         = std::min(color->alpha, (uint8)alpha);
     }
+
     AtomicDefaultRenderCallBack(atomic);
+
     for (int32 i = 0; i < numMaterials; i++) {
         RpMaterial* material = RpGeometryGetMaterial(geometry, i);
-        RwRGBA* color = RpMaterialGetColor(material);
-        color->alpha = alphas[i];
+        RwRGBA* color        = RpMaterialGetColor(material);
+        color->alpha         = alphas[i];
     }
-    geometry->flags = geometryFlags;
+    RpGeometrySetFlags(geometry, geometryFlags);
 }
 
+// 0x733E90
 void CVisibilityPlugins::RenderAlphaAtomics() {
     RenderOrderedList(m_alphaList);
 }
 
+// 0x732660
 RpAtomic* CVisibilityPlugins::RenderAtomicWithAlphaCB(RpAtomic* atomic, void* data) {
     if (RpAtomicGetFlags(atomic) & rpATOMICRENDER)
         RenderAlphaAtomic(atomic, *reinterpret_cast<int32*>(data));
     return atomic;
 }
 
+// 0x733EC0
 void CVisibilityPlugins::RenderBoatAlphaAtomics() {
     RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
     RenderOrderedList(m_alphaBoatAtomicList);
@@ -473,7 +531,7 @@ void CVisibilityPlugins::RenderBoatAlphaAtomics() {
 void CVisibilityPlugins::RenderEntity(CEntity* entity, float distance) {
     if (!entity->m_pRwObject)
         return;
-    
+
     CBaseModelInfo* mi = CModelInfo::GetModelInfo(entity->m_nModelIndex);
     if (mi->bDontWriteZBuffer)
         RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(FALSE));
@@ -489,39 +547,51 @@ void CVisibilityPlugins::RenderEntity(CEntity* entity, float distance) {
         RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(0));
         int32 alpha = CalculateFadingAtomicAlpha(mi, entity, distance);
         entity->m_bImBeingRendered = true;
-        if (!entity->m_bBackfaceCulled)
+        if (!entity->m_bBackfaceCulled) {
             RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
+        }
         bool bLightingSetup = entity->SetupLighting();
-        if (RwObjectGetType(entity->m_pRwObject) == rpATOMIC)
+        if (RwObjectGetType(entity->m_pRwObject) == rpATOMIC) {
             RenderFadingAtomic(mi, entity->m_pRwAtomic, alpha);
-        else
+        } else {
             RenderFadingClump(mi, entity->m_pRwClump, alpha);
+        }
         entity->RemoveLighting(bLightingSetup);
         entity->m_bImBeingRendered = false;
         if (!entity->m_bBackfaceCulled)
             RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLBACK));
     }
-    
+
     if (mi->bDontWriteZBuffer)
         RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(TRUE));
 }
 
+// 0x732610
 void CVisibilityPlugins::RenderFadingAtomic(CBaseModelInfo* modelInfo, RpAtomic* atomic, int32 alpha) {
-    if (modelInfo->bAdditiveRender)
+    if (modelInfo->bAdditiveRender) {
         RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDONE));
+    }
+
     RenderAlphaAtomic(atomic, alpha);
-    if (modelInfo->bAdditiveRender)
+
+    if (modelInfo->bAdditiveRender) {
         RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCALPHA));
+    }
 }
 
+// 0x732680
 void CVisibilityPlugins::RenderFadingClump(CBaseModelInfo* modelInfo, RpClump* clump, int32 alpha) {
-    if (modelInfo->bAdditiveRender)
+    if (modelInfo->bAdditiveRender) {
         RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDONE));
+    }
+
     RpClumpForAllAtomics(clump, RenderAtomicWithAlphaCB, &alpha);
-    if (modelInfo->bAdditiveRender)
+    if (modelInfo->bAdditiveRender) {
         RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCALPHA));
+    }
 }
 
+// 0x733630
 RpAtomic* CVisibilityPlugins::RenderFadingClumpCB(RpAtomic* atomic) {
     if (GetClumpAlpha(RpAtomicGetClump(atomic)) == 255)
         AtomicDefaultRenderCallBack(atomic);
@@ -530,43 +600,46 @@ RpAtomic* CVisibilityPlugins::RenderFadingClumpCB(RpAtomic* atomic) {
     return atomic;
 }
 
+// 0x733F10
 void CVisibilityPlugins::RenderFadingEntities() {
     RenderOrderedList(m_alphaEntityList);
     RenderBoatAlphaAtomics();
 }
 
+// 0x7337D0
 void CVisibilityPlugins::RenderFadingUnderwaterEntities() {
     RenderOrderedList(m_alphaUnderwaterEntityList);
 }
 
+// 0x7340B0
 RpAtomic* CVisibilityPlugins::RenderHeliRotorAlphaCB(RpAtomic* atomic) {
     if (gVehicleDistanceFromCamera >= ms_bigVehicleLod0Dist)
         return atomic;
-    
+
     RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
     RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
-    RwV3d distance;
-    RwV3dSub(&distance, &atomicMatrix->pos, ms_pCameraPosn);
-    const float dotProduct = RwV3dDotProduct(&clumpMatrix->at, &distance);
+    CVector distance = atomicMatrix->pos - *ms_pCameraPosn;
+    const float dotProduct = DotProduct(clumpMatrix->at, &distance);
     AlphaObjectInfo objectInfo{};
     objectInfo.m_atomic = atomic;
     objectInfo.m_pCallback = DefaultAtomicRenderCallback;
     objectInfo.m_distance = dotProduct * MAX_FADING_DISTANCE + gVehicleDistanceFromCamera;
-    if (!m_alphaList.InsertSorted(objectInfo))
+    if (!m_alphaList.InsertSorted(objectInfo)) {
         AtomicDefaultRenderCallBack(atomic);
+    }
     return atomic;
 }
 
+// 0x734170
 RpAtomic* CVisibilityPlugins::RenderHeliTailRotorAlphaCB(RpAtomic* atomic) {
     if (gVehicleDistanceFromCamera >= ms_vehicleLod0Dist)
         return atomic;
-    
+
     RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
     RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
-    RwV3d distance;
-    RwV3dSub(&distance, &atomicMatrix->pos, ms_pCameraPosn);
-    const float dotProduct1 = RwV3dDotProduct(&clumpMatrix->right, &distance);
-    const float dotProduct2 = RwV3dDotProduct(&clumpMatrix->up, &distance);
+    CVector distance = atomicMatrix->pos - *ms_pCameraPosn;
+    const float dotProduct1 = DotProduct(clumpMatrix->right, &distance);
+    const float dotProduct2 = DotProduct(clumpMatrix->up, &distance);
     AlphaObjectInfo info{};
     info.m_atomic = atomic;
     info.m_pCallback = DefaultAtomicRenderCallback;
@@ -577,17 +650,18 @@ RpAtomic* CVisibilityPlugins::RenderHeliTailRotorAlphaCB(RpAtomic* atomic) {
 }
 
 // Unused
+// 0x7323E0
 RpAtomic* CVisibilityPlugins::RenderObjNormalAtomic(RpAtomic* atomic) {
     RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
-    RwV3d distance;
-    RwV3dSub(&distance, &atomicMatrix->pos, ms_pCameraPosn);
+    CVector distance = atomicMatrix->pos - *ms_pCameraPosn;
     const float length = RwV3dLength(&distance);
-    if (RwV3dDotProduct(&atomicMatrix->up, &distance) < length * -0.3f && length > 8.0f)
+    if (DotProduct(atomicMatrix->up, &distance) < length * -0.3f && length > 8.0f)
         return atomic;
     AtomicDefaultRenderCallBack(atomic);
     return atomic;
 }
 
+// 0x7337A0
 void CVisibilityPlugins::RenderOrderedList(CLinkList<CVisibilityPlugins::AlphaObjectInfo>& alphaObjectInfoList) {
     auto link = alphaObjectInfoList.usedListTail.prev;
     for (; link != &alphaObjectInfoList.usedListHead; link = link->prev) {
@@ -596,10 +670,12 @@ void CVisibilityPlugins::RenderOrderedList(CLinkList<CVisibilityPlugins::AlphaOb
     }
 }
 
+// 0x7335B0
 RpAtomic* CVisibilityPlugins::RenderPedCB(RpAtomic* atomic) {
     const float distanceSquared = GetDistanceSquaredFromCamera(RpAtomicGetFrame(atomic));
     if (distanceSquared >= ms_pedLodDist)
         return atomic;
+
     int32 alpha = GetClumpAlpha(RpAtomicGetClump(atomic));
     if (alpha == 255) {
         AtomicDefaultRenderCallBack(atomic);
@@ -609,12 +685,14 @@ RpAtomic* CVisibilityPlugins::RenderPedCB(RpAtomic* atomic) {
     return atomic;
 }
 
+// 0x732850
 RpMaterial* CVisibilityPlugins::SetTextureCB(RpMaterial* material, void* texture)
 {
     RpMaterialSetTexture(material, reinterpret_cast<RwTexture*>(texture));
     return material;
 }
 
+// 0x732870
 RpAtomic* CVisibilityPlugins::RenderPlayerCB(RpAtomic* atomic) {
     RwTexture* skinTexture = CWorld::Players[0].m_pSkinTexture;
     if (skinTexture)
@@ -623,7 +701,10 @@ RpAtomic* CVisibilityPlugins::RenderPlayerCB(RpAtomic* atomic) {
     return atomic;
 }
 
+// 0x733800
 void CVisibilityPlugins::RenderReallyDrawLastObjects() {
+    ZoneScoped;
+
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
@@ -632,12 +713,15 @@ void CVisibilityPlugins::RenderReallyDrawLastObjects() {
     RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
     RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATECULLMODE,          RWRSTATE(rwCULLMODECULLNONE));
+
     SetAmbientColours();
     DeActivateDirectional();
     RenderOrderedList(m_alphaReallyDrawLastList);
+
     RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
 }
 
+// 0x734240
 RpAtomic* CVisibilityPlugins::RenderTrainHiDetailAlphaCB(RpAtomic* atomic) {
     if (gVehicleDistanceFromCamera >= ms_bigVehicleLod0Dist)
         return atomic;
@@ -646,6 +730,7 @@ RpAtomic* CVisibilityPlugins::RenderTrainHiDetailAlphaCB(RpAtomic* atomic) {
         SetAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
     else
         ClearAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
+
     RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
     uint16 atomicFlags = GetAtomicId(atomic);
     RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
@@ -671,6 +756,7 @@ RpAtomic* CVisibilityPlugins::RenderTrainHiDetailAlphaCB(RpAtomic* atomic) {
     return atomic;
 }
 
+// 0x733330
 RpAtomic* CVisibilityPlugins::RenderTrainHiDetailCB(RpAtomic* atomic) {
     if (gVehicleDistanceFromCamera >= ms_bigVehicleLod0Dist)
         return atomic;
@@ -679,6 +765,7 @@ RpAtomic* CVisibilityPlugins::RenderTrainHiDetailCB(RpAtomic* atomic) {
         SetAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
     else
         ClearAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
+
     uint16 atomicFlags = GetAtomicId(atomic);
     if (gVehicleDistanceFromCamera > ms_cullCompsDist && !(atomicFlags & ATOMIC_RENDER_ALWAYS)) {
         if (gVehicleAngleToCamera < 0.2f) {
@@ -694,6 +781,7 @@ RpAtomic* CVisibilityPlugins::RenderTrainHiDetailCB(RpAtomic* atomic) {
 
 }
 
+// 0x733F80
 RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailAlphaCB(RpAtomic* atomic) {
     if (gVehicleDistanceFromCamera >= ms_vehicleLod0Dist)
         return atomic;
@@ -702,6 +790,7 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailAlphaCB(RpAtomic* atomic) {
         SetAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
     else
         ClearAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
+
     uint16 atomicFlags = GetAtomicId(atomic);
     RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
     RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
@@ -727,6 +816,7 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailAlphaCB(RpAtomic* atomic) {
     return atomic;
 }
 
+// 0x734370
 RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailAlphaCB_BigVehicle(RpAtomic* atomic) {
     if (gVehicleDistanceFromCamera >= ms_bigVehicleLod0Dist)
         return atomic;
@@ -735,6 +825,7 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailAlphaCB_BigVehicle(RpAtomic* 
         SetAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
     else
         ClearAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
+
     uint16 atomicFlags = GetAtomicId(atomic);
     RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
     RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
@@ -760,6 +851,7 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailAlphaCB_BigVehicle(RpAtomic* 
     return atomic;
 }
 
+// 0x7344A0
 RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailAlphaCB_Boat(RpAtomic* atomic) {
     if (gVehicleDistanceFromCamera >= ms_vehicleLod0Dist)
         return atomic;
@@ -768,6 +860,7 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailAlphaCB_Boat(RpAtomic* atomic
         SetAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
     else
         ClearAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
+
     uint16 atomicFlags = GetAtomicId(atomic);
     if (atomicFlags & ATOMIC_HAS_ALPHA) {
         AlphaObjectInfo info{};
@@ -781,6 +874,7 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailAlphaCB_Boat(RpAtomic* atomic
     return atomic;
 }
 
+// 0x733240
 RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailCB(RpAtomic* atomic) {
     if (gVehicleDistanceFromCamera >= ms_vehicleLod0Dist)
         return atomic;
@@ -789,6 +883,7 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailCB(RpAtomic* atomic) {
         SetAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
     else
         ClearAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
+
     uint16 atomicFlags = GetAtomicId(atomic);
     if (gVehicleDistanceFromCamera > ms_cullCompsDist && !(atomicFlags & ATOMIC_RENDER_ALWAYS)) {
         if (gVehicleAngleToCamera < 0.2f) {
@@ -804,13 +899,16 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailCB(RpAtomic* atomic) {
     return atomic;
 }
 
+// 0x733420
 RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailCB_BigVehicle(RpAtomic* atomic) {
     if (gVehicleDistanceFromCamera >= ms_bigVehicleLod0Dist)
         return atomic;
+
     if (gVehicleDistanceFromCamera >= ms_vehicleLod0RenderMultiPassDist)
         SetAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
     else
         ClearAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
+
     uint16 atomicFlags = GetAtomicId(atomic);
     if (gVehicleDistanceFromCamera > ms_cullBigCompsDist && !(atomicFlags & ATOMIC_RENDER_ALWAYS)) {
         if (gVehicleAngleToCamera < 0.2f) {
@@ -826,18 +924,22 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailCB_BigVehicle(RpAtomic* atomi
     return atomic;
 }
 
+// 0x733550
 RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailCB_Boat(RpAtomic* atomic) {
     if (gVehicleDistanceFromCamera >= ms_vehicleLod0Dist)
         return atomic;
+
     if (gVehicleDistanceFromCamera >= ms_vehicleLod0RenderMultiPassDist)
         SetAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
     else
         ClearAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
+
     AtomicDefaultRenderCallBack(atomic);
 
     return atomic;
 }
 
+// 0x7334F0
 RpAtomic* CVisibilityPlugins::RenderVehicleLoDetailCB_Boat(RpAtomic* atomic) {
     if (gVehicleDistanceFromCamera < ms_vehicleLod0Dist)
         return atomic;
@@ -851,6 +953,7 @@ RpAtomic* CVisibilityPlugins::RenderVehicleLoDetailCB_Boat(RpAtomic* atomic) {
     return atomic;
 }
 
+// 0x7331E0
 RpAtomic* CVisibilityPlugins::RenderVehicleReallyLowDetailCB(RpAtomic* atomic) {
     if (gVehicleDistanceFromCamera < ms_vehicleLod0Dist)
         return atomic;
@@ -864,6 +967,7 @@ RpAtomic* CVisibilityPlugins::RenderVehicleReallyLowDetailCB(RpAtomic* atomic) {
     return atomic;
 }
 
+// 0x732820
 RpAtomic* CVisibilityPlugins::RenderVehicleReallyLowDetailCB_BigVehicle(RpAtomic* atomic) {
     if (gVehicleDistanceFromCamera >= ms_bigVehicleLod0Dist)
         AtomicDefaultRenderCallBack(atomic);
@@ -871,6 +975,7 @@ RpAtomic* CVisibilityPlugins::RenderVehicleReallyLowDetailCB_BigVehicle(RpAtomic
     return atomic;
 }
 
+// 0x733670
 RpAtomic* CVisibilityPlugins::RenderWeaponCB(RpAtomic* atomic) {
     RpClump* clump = RpAtomicGetClump(atomic);
     CClumpModelInfo* modelInfo = GetClumpModelInfo(clump);
@@ -881,7 +986,10 @@ RpAtomic* CVisibilityPlugins::RenderWeaponCB(RpAtomic* atomic) {
     return atomic;
 }
 
+// 0x732F30
 void CVisibilityPlugins::RenderWeaponPedsForPC() {
+    ZoneScoped;
+
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATEFOGENABLE,            RWRSTATE(TRUE));
@@ -895,15 +1003,18 @@ void CVisibilityPlugins::RenderWeaponPedsForPC() {
             ped->SetupLighting();
             const CWeapon& activeWeapon = ped->GetActiveWeapon();
             RpHAnimHierarchy* pRpAnimHierarchy = GetAnimHierarchyFromSkinClump(ped->m_pRwClump);
-            const int32 boneID = activeWeapon.m_nType != WEAPON_PARACHUTE ? BONE_R_HAND : BONE_SPINE1;
+            const int32 boneID = activeWeapon.m_Type != WEAPON_PARACHUTE ? BONE_R_HAND : BONE_SPINE1;
             int32 animIDIndex = RpHAnimIDGetIndex(pRpAnimHierarchy, boneID);
             RwMatrix* pRightHandMatrix = &RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy)[animIDIndex];
-            if (boneID == BONE_NORMAL)
+            { // todo: NOTSA
+            if (boneID == BONE_NORMAL) {
                 pRightHandMatrix = ped->GetModellingMatrix();
+            }
+            }
             RwFrame* weaponFrame = RpClumpGetFrame(ped->m_pWeaponObject);
             RwMatrix* weaponRwMatrix = RwFrameGetMatrix(weaponFrame);
             memcpy(weaponRwMatrix, pRightHandMatrix, sizeof(RwMatrixTag));
-            if (activeWeapon.m_nType == WEAPON_PARACHUTE) {
+            if (activeWeapon.m_Type == WEAPON_PARACHUTE) {
                 static RwV3d rightWeaponTranslate = { 0.1f, -0.15f, 0.0f };
                 RwMatrixTranslate(weaponRwMatrix, &rightWeaponTranslate, rwCOMBINEPRECONCAT);
                 RwMatrixRotate(weaponRwMatrix, &CPedIK::YaxisIK, 90.0f, rwCOMBINEPRECONCAT);
@@ -912,7 +1023,7 @@ void CVisibilityPlugins::RenderWeaponPedsForPC() {
             RwFrameUpdateObjects(weaponFrame);
             RpClumpRender(ped->m_pWeaponObject);
             eWeaponSkill weaponSkill = ped->GetWeaponSkill();
-            if (CWeaponInfo::GetWeaponInfo(activeWeapon.m_nType, weaponSkill)->flags.bTwinPistol) {
+            if (CWeaponInfo::GetWeaponInfo(activeWeapon.m_Type, weaponSkill)->flags.bTwinPistol) {
                 int32 animIDIndex = RpHAnimIDGetIndex(pRpAnimHierarchy, BONE_L_HAND);
                 RwMatrix* pLeftHandMatrix = &RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy)[animIDIndex];
                 memcpy(weaponRwMatrix, pLeftHandMatrix, sizeof(RwMatrixTag));
@@ -928,36 +1039,49 @@ void CVisibilityPlugins::RenderWeaponPedsForPC() {
     }
 }
 
-RpAtomic* CVisibilityPlugins::SetAtomicFlagCB(RpAtomic* atomic, void* data) {
-    uint16 flag = *reinterpret_cast<uint16*>(&data);
-    ATOMICPLG(atomic, m_flags) |= flag;
-    return atomic;
-}
-
+// 0x7322B0
 void CVisibilityPlugins::SetAtomicFlag(RpAtomic* atomic, uint16 flag) {
     ATOMICPLG(atomic, m_flags) |= flag;
 }
 
+// 0x7322D0
+void CVisibilityPlugins::SetAtomicFlag(RpAtomic* atomic, int32 flag) {
+    ATOMICPLG(atomic, m_flags) |= flag; // how does this work??? m_flags is `uint16` ffs
+}
+
+RpAtomic* CVisibilityPlugins::SetAtomicFlagCB(RpAtomic* atomic, void* data) {
+    uint16 flag = *reinterpret_cast<uint16*>(&data);
+    SetAtomicFlag(atomic, flag);
+    return atomic;
+}
+
+// 0x732307
 void CVisibilityPlugins::SetClumpForAllAtomicsFlag(RpClump* clump, uint16 flag) {
     RpClumpForAllAtomics(clump, SetAtomicFlagCB, (void*)flag);
 }
 
+// 0x732230
 void CVisibilityPlugins::SetAtomicId(void* atomic, int16 id) {
     ATOMICPLG(atomic, m_modelId) = id;
 }
 
+// 0x7328A0
 void CVisibilityPlugins::SetAtomicRenderCallback(RpAtomic* atomic, RpAtomicCallBackRender renderCB) {
-    if (!renderCB)
+    if (!renderCB) {
         renderCB = AtomicDefaultRenderCallBack;
+    }
     atomic->renderCallBack = renderCB;
-    if (!renderCB)
+    if (!renderCB) {
         atomic->renderCallBack = AtomicDefaultRenderCallBack;
+    }
 }
 
-void CVisibilityPlugins::SetClumpAlpha(RpClump* clump, int32 dwAlpha) {
-    CLUMPPLG(clump, m_alpha) = dwAlpha;
+// 0x732B00
+void CVisibilityPlugins::SetClumpAlpha(RpClump* clump, int32 alpha) {
+    CLUMPPLG(clump, m_alpha) = alpha;
 }
 
+// 0x733750
 void CVisibilityPlugins::SetClumpModelInfo(RpClump* clump, CClumpModelInfo* clumpModelInfo) {
     FRAMEPLG(RpClumpGetFrame(clump), m_modelInfo) = clumpModelInfo;
     if (clumpModelInfo->GetModelType() != MODEL_INFO_VEHICLE)
@@ -970,33 +1094,43 @@ void CVisibilityPlugins::SetClumpModelInfo(RpClump* clump, CClumpModelInfo* clum
         CLUMPPLG(clump, m_visibilityCallBack) = VehicleVisibilityCB;
 }
 
+// 0x732A00
 void CVisibilityPlugins::SetFrameHierarchyId(RwFrame* frame, int32 id) {
     FRAMEPLG(frame, m_hierarchyId) = id;
 }
 
+// 0x7328C0
 void CVisibilityPlugins::SetRenderWareCamera(RwCamera* camera) {
     ms_pCamera = camera;
-    ms_pCameraPosn = static_cast<CVector*>(RwMatrixGetPos(RwFrameGetMatrix(RwCameraGetFrame(camera))));
+    ms_pCameraPosn = RwMatrixGetPos(RwFrameGetMatrix(RwCameraGetFrame(camera)));
+
     ms_cullCompsDist = std::powf(TheCamera.m_fLODDistMultiplier * 20.0f, 2.0f);
     ms_cullBigCompsDist = std::powf(TheCamera.m_fLODDistMultiplier * 50.0f, 2.0f);
+
     ms_vehicleLod0RenderMultiPassDist = std::powf(TheCamera.m_fGenerationDistMultiplier * 45.0f, 2.0f);
     ms_vehicleLod0RenderMultiPassDist += ms_vehicleLod0RenderMultiPassDist;
+
     ms_vehicleLod0Dist = std::powf(TheCamera.m_fGenerationDistMultiplier * 70.0f, 2.0f);
     ms_vehicleLod0Dist += ms_vehicleLod0Dist;
+
     float vehicleLodDistance = std::powf(TheCamera.m_fGenerationDistMultiplier * 150.0f, 2.0f);
     vehicleLodDistance += vehicleLodDistance;
     ms_vehicleLod1Dist = vehicleLodDistance;
     ms_bigVehicleLod0Dist = vehicleLodDistance;
+
     ms_pedLodDist = std::powf(TheCamera.m_fLODDistMultiplier * 60.0f, 2.0f);
     ms_pedLodDist += ms_pedLodDist;
+
     ms_pedFadeDist = std::powf(TheCamera.m_fLODDistMultiplier * 70.0f, 2.0f);
     ms_pedFadeDist += ms_pedFadeDist;
 }
 
+// 0x732380
 void CVisibilityPlugins::SetUserValue(RpAtomic* atomic, uint16 value) {
     ATOMICPLG(atomic, m_flags) = value;
 }
 
+// 0x733160
 void CVisibilityPlugins::SetupVehicleVariables(RpClump* clump) {
     if (RwObjectGetType(clump) != rpCLUMP)
         return;
@@ -1011,6 +1145,7 @@ void CVisibilityPlugins::SetupVehicleVariables(RpClump* clump) {
     gVehicleAngleToCamera = atan2(ms_pCameraPosn->z - RwMatrixGetPos(RwFrameGetMatrix(frame))->z, distance2.Magnitude());
 }
 
+// 0x7336F0
 bool CVisibilityPlugins::VehicleVisibilityCB(RpClump* clump) {
     const float distanceSquared = GetDistanceSquaredFromCamera(RpClumpGetFrame(clump));
     if (distanceSquared <= ms_vehicleLod1Dist)
@@ -1019,6 +1154,11 @@ bool CVisibilityPlugins::VehicleVisibilityCB(RpClump* clump) {
     return false;
 }
 
+// 0x732AB0
 bool CVisibilityPlugins::VehicleVisibilityCB_BigVehicle(RpClump* clump) {
     return FrustumSphereCB(clump);
+}
+
+void weaponPedsForPc_Insert(CPed* ped) {
+    plugin::Call<0x5E46D0>(ped);
 }

@@ -17,7 +17,7 @@ public:
     int32      field_3C;
     CTaskTimer field_40;
     CTaskTimer field_4C;
-    int32      m_moveState; // see eMoveState
+    eMoveState m_moveState;
     int8       m_flag1 : 1;
     int8       m_flag2 : 1;
     int8       m_flag3 : 1;
@@ -28,12 +28,12 @@ public:
     static constexpr auto Type = TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING;
 
     CTaskComplexAvoidOtherPedWhileWandering(CPed* ped, const CVector& targetPoint, int32 moveState);
-    ~CTaskComplexAvoidOtherPedWhileWandering();
+    ~CTaskComplexAvoidOtherPedWhileWandering() override;
 
-    CTask* Clone() override;
+    CTask* Clone() const override;
     CTask* ControlSubTask(CPed* ped) override;
-    eTaskType GetTaskType() override { return Type; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() const override { return Type; }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
 

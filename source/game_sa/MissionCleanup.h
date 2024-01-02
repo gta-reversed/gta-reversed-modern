@@ -6,7 +6,7 @@
 */
 #pragma once
 
-constexpr int32 NUM_MISSION_CLEANUP_OBJECTS = 75;
+constexpr auto NUM_MISSION_CLEANUP_OBJECTS = 75;
 
 enum MissionCleanUpEntityType : uint8 {
     MISSION_CLEANUP_ENTITY_TYPE_EMPTY          = 0, // free slot
@@ -26,17 +26,20 @@ enum MissionCleanUpEntityType : uint8 {
 };
 
 struct tMissionCleanupEntity {
-    char  type;
-    char  _pad[3];
+    int8  type;
     int32 handle;
+
+    tMissionCleanupEntity() { // 0x468DC0
+        type   = 0;
+        handle = 0;
+    }
 };
 VALIDATE_SIZE(tMissionCleanupEntity, 0x8);
 
 class CMissionCleanup {
 public:
-    tMissionCleanupEntity m_Objects[75];
-    char                  m_Count;
-    char                  _pad[3];
+    std::array<tMissionCleanupEntity, NUM_MISSION_CLEANUP_OBJECTS> m_Objects;
+    int8 m_Count;
 
 public:
     // Default constructor
@@ -59,6 +62,16 @@ public:
 
     // Checks if collision has loaded for mission objects
     void CheckIfCollisionHasLoadedForMissionObjects();
+
+
+    // QoL (NOTSA) - TODO: Use `PooledType` + some traits shit to get the `MissionCleanUpEntityType` of `T`
+    void AddEntityToList(CObject& obj);
+    void AddEntityToList(CPed& ped);
+    void AddEntityToList(CVehicle& veh);
+
+    void RemoveEntityFromList(CObject& obj);
+    void RemoveEntityFromList(CPed& ped);
+    void RemoveEntityFromList(CVehicle& veh);
 };
 
 VALIDATE_SIZE(CMissionCleanup, 0x25C);

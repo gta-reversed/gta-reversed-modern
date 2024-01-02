@@ -6,33 +6,115 @@ float& CMonsterTruck::DUMPER_COL_ANGLEMULT = *(float*)0x8D33A8;
 float& fWheelExtensionRate = *(float*)0x8D33AC;
 
 void CMonsterTruck::InjectHooks() {
-    RH_ScopedClass(CMonsterTruck);
+    RH_ScopedVirtualClass(CMonsterTruck, 0x8717d8, 71);
     RH_ScopedCategory("Vehicle");
 
     RH_ScopedInstall(Constructor, 0x6C8D60);
-    // RH_ScopedInstall(ProcessEntityCollision, 0x6C8AE0);
-    // RH_ScopedInstall(ProcessSuspension, 0x6C83A0);
-    // RH_ScopedInstall(ProcessControlCollisionCheck, 0x6C8330);
-    // RH_ScopedInstall(ProcessControl, 0x6C8250);
-    // RH_ScopedInstall(SetupSuspensionLines, 0x6C7FB0);
-    RH_ScopedInstall(PreRender, 0x6C7DE0);
-    // RH_ScopedInstall(ExtendSuspension, 0x6C7D80);
-    // RH_ScopedInstall(ResetSuspension, 0x6C7D40);
-    RH_ScopedInstall(BurstTyre_Reversed, 0x6C7D30);
-    RH_ScopedInstall(SetUpWheelColModel_Reversed, 0x6C7D20);
+
+    RH_ScopedInstall(ExtendSuspension, 0x6C7D80, { .reversed = false });
+
+    RH_ScopedVMTInstall(ProcessEntityCollision, 0x6C8AE0);
+    RH_ScopedVMTInstall(ProcessSuspension, 0x6C83A0, { .reversed = false });
+    RH_ScopedVMTInstall(ProcessControlCollisionCheck, 0x6C8330, { .reversed = false });
+    RH_ScopedVMTInstall(ProcessControl, 0x6C8250, { .reversed = false });
+    RH_ScopedVMTInstall(SetupSuspensionLines, 0x6C7FB0, { .reversed = false });
+    RH_ScopedVMTInstall(PreRender, 0x6C7DE0);
+    RH_ScopedVMTInstall(ResetSuspension, 0x6C7D40, { .reversed = false });
+    RH_ScopedVMTInstall(BurstTyre, 0x6C7D30);
+    RH_ScopedVMTInstall(SetUpWheelColModel, 0x6C7D20);
 }
 
 // 0x6C8D60
 CMonsterTruck::CMonsterTruck(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelIndex, createdBy, false) {
     std::ranges::fill(field_988, 1.0f);
-    SetupSuspensionLines();
-    npcFlags.bSoftSuspension = true;
+    CMonsterTruck::SetupSuspensionLines();
+    autoFlags.bIsMonsterTruck = true;
     m_nVehicleSubType = VEHICLE_TYPE_MTRUCK;
 }
 
 // 0x6C8AE0
 int32 CMonsterTruck::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) {
-    return plugin::CallMethodAndReturn<int32, 0x6C8AE0, CMonsterTruck*, CEntity*, CColPoint*>(this, entity, colPoint);
+    if (m_nStatus != STATUS_SIMPLE) {
+        vehicleFlags.bVehicleColProcessed = true; // OK
+    }
+
+    const auto tcm = GetColModel();
+
+    if (physicalFlags.bSkipLineCol || physicalFlags.bProcessingShift || entity->IsPed()) {
+        tcm->GetData()->m_nNumLines = 0; // hmm..... (Later reset back to 4)
+    }
+
+    auto wheelColPtsTouchDists{ m_wheelPosition };
+    const auto numColPts = CCollision::ProcessColModels(
+        GetMatrix(), *tcm,
+        entity->GetMatrix(), *entity->GetColModel(),
+        *(std::array<CColPoint, 32>*)(colPoint), // trust me bro
+        m_wheelColPoint.data(),
+        wheelColPtsTouchDists.data(),
+        false
+    );
+
+    size_t numProcessedLines{};
+    if (tcm->GetData()->m_nNumLines) {
+        for (auto i = 0; i < MAX_CARWHEELS; i++) {
+            const auto  thisWheelTouchDistNow = wheelColPtsTouchDists[i];
+            const auto& thisWheelColPtNow = m_wheelColPoint[i];
+
+            if (thisWheelTouchDistNow <= m_wheelPosition[i]) {
+                continue;
+            }
+
+            if (!(m_bUsesCollision || !numColPts)) { // TODO: Why is this in the loop body?
+                continue;
+            }
+
+            numProcessedLines++;
+
+            m_fWheelsSuspensionCompression[i] = 0.f;
+            m_wheelPosition[i] = thisWheelTouchDistNow;
+
+            m_anCollisionLighting[i] = thisWheelColPtNow.m_nLightingB;
+            m_nContactSurface = thisWheelColPtNow.m_nSurfaceTypeB;
+
+            // Same as in CAutomobile::ProcessEntityCollision
+            switch (entity->GetType()) {
+            case ENTITY_TYPE_VEHICLE:
+            case ENTITY_TYPE_OBJECT: {
+                CEntity::ChangeEntityReference(m_apWheelCollisionEntity[i], entity->AsPhysical());
+
+                m_vWheelCollisionPos[i] = thisWheelColPtNow.m_vecPoint - entity->GetPosition();
+                if (entity->IsVehicle()) {
+                    m_anCollisionLighting[i] = entity->AsVehicle()->m_anCollisionLighting[i];
+                }
+                break;
+            }
+            case ENTITY_TYPE_BUILDING: {
+                m_pEntityWeAreOn = entity;
+                m_bTunnel = entity->m_bTunnel;
+                m_bTunnelTransition = entity->m_bTunnelTransition;
+                break;
+            }
+            }
+        }
+    } else {
+        tcm->GetData()->m_nNumLines = MAX_CARWHEELS; // TODO: Magic (Each wheel has 1 suspension line right now, but hardcoding like this isnt good)
+    }
+
+    if (numColPts > 0 || numProcessedLines > 0) {
+        AddCollisionRecord(entity);
+        if (!entity->IsBuilding()) {
+            entity->AsPhysical()->AddCollisionRecord(this);
+        }
+        if (numColPts > 0) {
+            if (   entity->IsBuilding()
+                || (entity->IsObject() && entity->AsPhysical()->physicalFlags.bDisableCollisionForce)
+            ) {
+                m_bHasHitWall = true;
+            }
+        }
+    }
+
+    return numColPts;
 }
 
 // 0x6C83A0
@@ -67,16 +149,14 @@ void CMonsterTruck::PreRender() {
     CMatrix mat;
     CVector pos;
 
-    mi->GetWheelPosn(CARWHEEL_FRONT_LEFT, pos, false);
-    SetTransmissionRotation(m_aCarNodes[MONSTER_TRANSMISSION_F], m_wheelPosition[CARWHEEL_FRONT_LEFT], m_wheelPosition[CARWHEEL_FRONT_RIGHT], pos, true);
+    mi->GetWheelPosn(CAR_WHEEL_FRONT_LEFT, pos, false);
+    SetTransmissionRotation(m_aCarNodes[MONSTER_TRANSMISSION_F], m_wheelPosition[CAR_WHEEL_FRONT_LEFT], m_wheelPosition[CAR_WHEEL_FRONT_RIGHT], pos, true);
 
-    mi->GetWheelPosn(CARWHEEL_REAR_LEFT, pos, false);
-    SetTransmissionRotation(m_aCarNodes[MONSTER_TRANSMISSION_R], m_wheelPosition[CARWHEEL_REAR_LEFT], m_wheelPosition[CARWHEEL_REAR_RIGHT], pos, false);
+    mi->GetWheelPosn(CAR_WHEEL_REAR_LEFT, pos, false);
+    SetTransmissionRotation(m_aCarNodes[MONSTER_TRANSMISSION_R], m_wheelPosition[CAR_WHEEL_REAR_LEFT], m_wheelPosition[CAR_WHEEL_REAR_RIGHT], pos, false);
 
-    if (m_nModelIndex == MODEL_DUMPER) {
-        if (auto node = m_aCarNodes[MONSTER_MISC_A]) {
-            SetComponentRotation(node, AXIS_X, (float)m_wMiscComponentAngle * DUMPER_COL_ANGLEMULT, true);
-        }
+    if (m_nModelIndex == MODEL_DUMPER && m_aCarNodes[MONSTER_MISC_A]) {
+        SetComponentRotation(m_aCarNodes[MONSTER_MISC_A], AXIS_X, (float)m_wMiscComponentAngle * DUMPER_COL_ANGLEMULT, true);
     }
 }
 
@@ -87,13 +167,9 @@ void CMonsterTruck::ExtendSuspension() {
 
 // 0x6C7D40
 void CMonsterTruck::ResetSuspension() {
-    plugin::CallMethod<0x6C7D40, CMonsterTruck*>(this);
-    return;
-
+    return plugin::CallMethod<0x6C7D40, CMonsterTruck*>(this);
     CAutomobile::ResetSuspension();
-    for (auto& suspension : m_wheelPosition) {
-        suspension = 1.0f;
-    }
+    std::ranges::fill(m_wheelPosition, 1.0f);
 }
 
 // 0x6C7D30

@@ -3,7 +3,7 @@
 #include "EventEditableResponse.h"
 #include "Vector.h"
 
-class CEventSoundQuiet : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventSoundQuiet : public CEventEditableResponse {
 public:
     CEntity* m_entity;
     float    m_fLocalSoundLevel;
@@ -12,7 +12,7 @@ public:
 
 public:
     CEventSoundQuiet(CEntity* entity, float fLocalSoundLevel, uint32 startTime, const CVector& position);
-    ~CEventSoundQuiet();
+    ~CEventSoundQuiet() override;
 
     eEventType GetEventType() const override { return EVENT_SOUND_QUIET; }
     int32 GetEventPriority() const override { return 8; }

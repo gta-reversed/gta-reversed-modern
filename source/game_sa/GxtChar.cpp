@@ -6,6 +6,7 @@
 
 // 0x718600
 void AsciiToGxtChar(const char* src, GxtChar* dst) {
+    assert(src && dst);
     for (int32 i = 0; src[i]; ++i) {
         dst[i] = src[i];
         dst[i + 1] = 0;
@@ -13,13 +14,16 @@ void AsciiToGxtChar(const char* src, GxtChar* dst) {
 }
 
 // 0x69F7E0
-const char* GxtCharToAscii(GxtChar* src, uint8 start) {
+const char* GxtCharToAscii(const GxtChar* src, uint8 start) {
     static char buf[256] = { 0 };
 
-    GxtChar* str = src;
-    if (start) {
-        str = &src[start];
-    }
+    const GxtChar* str = [&] {
+        if (start) {
+            return &src[start];
+        } else {
+            return src;
+        }
+    }();
 
     int32 i = 0;
     while (i < (ARRAY_SIZE(buf) - 1) && (str && str[i])) {
@@ -42,13 +46,13 @@ const char* GxtCharToAscii(GxtChar* src, uint8 start) {
         else if (symbol >= 0xA9 && symbol <= 0xCC)
             symbol += 0x50;
         else if (symbol == 0xCD)
-            symbol = 0xD1;
+            symbol = static_cast<GxtChar>(0xD1);
         else if (symbol == 0xCE)
-            symbol = 0xF1;
+            symbol = static_cast<GxtChar>(0xF1);
         else if (symbol == 0xCF)
-            symbol = 0xBF;
+            symbol = static_cast<GxtChar>(0xBF);
         else if (symbol >= 0xD0)
-            symbol = 0x23; // '#'
+            symbol = static_cast<GxtChar>(0x23); // '#'
 
         buf[i] = symbol;
 
@@ -59,7 +63,7 @@ const char* GxtCharToAscii(GxtChar* src, uint8 start) {
     return buf;
 }
 
-GxtChar* GxtCharStrcat(GxtChar* dst, GxtChar* src) {
+GxtChar* GxtCharStrcat(GxtChar* dst, const GxtChar* src) {
     GxtChar* target = dst;
     if (*dst) {
         while (target[0])
@@ -99,4 +103,10 @@ void TextCopy(GxtChar* dst, const GxtChar* src) {
         ++dst;
     }
     *dst = '\0';
+}
+
+// 0x718660
+GxtChar* GxtCharStrcpy(GxtChar* dst, const GxtChar* src) {
+    TextCopy(dst, src);
+    return dst;
 }

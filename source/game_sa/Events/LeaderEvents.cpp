@@ -16,7 +16,7 @@ void CEventLeaderEnteredCarAsDriver::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x48E1C0);
-    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B0EF0);
+    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B0EF0);
 }
 
 void CEventLeaderExitedCarAsDriver::InjectHooks()
@@ -25,7 +25,7 @@ void CEventLeaderExitedCarAsDriver::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B8300);
-    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B0F80);
+    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B0F80);
 }
 
 void CEventLeaderQuitEnteringCarAsDriver::InjectHooks()
@@ -34,7 +34,7 @@ void CEventLeaderQuitEnteringCarAsDriver::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x63A110);
-    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B1010);
+    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B1010);
 }
 
 void CEventAreaCodes::InjectHooks()
@@ -43,8 +43,8 @@ void CEventAreaCodes::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B2190);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B2270);
-    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4B2350);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B2270);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4B2350);
 }
 
 void CEventLeaderEntryExit::InjectHooks()
@@ -58,14 +58,12 @@ void CEventLeaderEntryExit::InjectHooks()
 CEventLeaderEnteredCarAsDriver::CEventLeaderEnteredCarAsDriver(CVehicle* vehicle)
 {
     m_vehicle = vehicle;
-    if (vehicle)
-        vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeRegisterRef(m_vehicle);
 }
 
 CEventLeaderEnteredCarAsDriver::~CEventLeaderEnteredCarAsDriver()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeCleanUpRef(m_vehicle);
 }
 
 CEventLeaderEnteredCarAsDriver* CEventLeaderEnteredCarAsDriver::Constructor(CVehicle* vehicle)
@@ -111,20 +109,13 @@ bool CEventLeaderExitedCarAsDriver::AffectsPedGroup(CPedGroup* pedGroup)
     return CEventLeaderExitedCarAsDriver::AffectsPedGroup_Reversed(pedGroup);
 }
 
-bool CEventLeaderExitedCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
-{
-    for (int32 i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
-        CPedGroupMembership& memberShip = pedGroup->GetMembership();
-        CPed* member = memberShip.GetMember(i);
-        if (!member)
-            continue;
-
-        if (member->m_pVehicle && member->bInVehicle && member->m_pVehicle == memberShip.GetLeader()->m_pVehicle)
+bool CEventLeaderExitedCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pg) {
+    const auto leader = pg->GetMembership().GetLeader();
+    for (auto& m : pg->GetMembership().GetFollowers()) {
+        if (m.m_pVehicle && m.bInVehicle && m.m_pVehicle == leader->m_pVehicle) {
             return true;
-
-        if (member->GetIntelligence()->FindTaskByType(TASK_COMPLEX_ENTER_CAR_AS_PASSENGER)
-            || member->GetIntelligence()->FindTaskByType(TASK_COMPLEX_ENTER_CAR_AS_PASSENGER_WAIT))
-        {
+        }
+        if (m.GetTaskManager().HasAnyOf<TASK_COMPLEX_ENTER_CAR_AS_PASSENGER, TASK_COMPLEX_ENTER_CAR_AS_PASSENGER_WAIT>(false)) {
             return true;
         }
     }
@@ -143,25 +134,20 @@ bool CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup(CPedGroup* pedGroup)
     return CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup_Reversed(pedGroup);
 }
 
-bool CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
-{
-    auto oldEventGroupEvent = pedGroup->GetIntelligence().m_oldEventGroupEvent;
-    if (oldEventGroupEvent) 
-        return oldEventGroupEvent->m_event->GetEventType() == EVENT_LEADER_ENTERED_CAR_AS_DRIVER;
-    return false;
+bool CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGroup) {
+    const auto oe = pedGroup->GetIntelligence().GetOldEvent();
+    return oe && oe->GetEvent().GetEventType() == EVENT_LEADER_ENTERED_CAR_AS_DRIVER;
 }
 
 CEventAreaCodes::CEventAreaCodes(CPed* ped)
 {
     m_ped = ped;
-    if (ped)
-        ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventAreaCodes::~CEventAreaCodes()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 CEventAreaCodes* CEventAreaCodes::Constructor(CPed* ped)
@@ -192,7 +178,7 @@ bool CEventAreaCodes::AffectsPed_Reversed(CPed* ped)
         targetPed = killPedOnFoot->m_target;
         if (targetPed != m_ped) {
             if (const auto arrestPed = ped->GetTaskManager().Find<CTaskComplexArrestPed>()) {
-                targetPed = arrestPed->m_pedToArrest;
+                targetPed = arrestPed->m_PedToArrest;
             }
         }
     }
@@ -219,7 +205,7 @@ bool CEventAreaCodes::TakesPriorityOver_Reversed(const CEvent& refEvent)
 {
     if (CEventHandler::IsTemporaryEvent(refEvent))
         return true;
-    return CEvent::TakesPriorityOver(refEvent); 
+    return CEvent::TakesPriorityOver(refEvent);
 }
 
 CEventLeaderEntryExit* CEventLeaderEntryExit::Constructor(CPed* ped)

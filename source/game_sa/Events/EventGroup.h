@@ -20,12 +20,12 @@ public:
 
 public:
     static void InjectHooks();
+    CEventGroup* Constructor(CPed* ped);
 
     explicit CEventGroup(CPed* ped);
     virtual ~CEventGroup();
-    CEventGroup* Constructor(CPed* ped);
-public:
-    CEvent * Add(CEvent* event, bool bValid = false);
+
+    CEvent* Add(CEvent* event, bool bValid = false);
     bool HasScriptCommandOfTaskType(eTaskType taskId);
     bool HasEventOfType(CEvent* event);
     bool HasEvent(CEvent* event);
@@ -36,6 +36,17 @@ public:
     void Reorganise();
     void Flush(bool bAvoidFlushingTaskComplexBeInGroup);
     CEvent* GetEventOfType(eEventType type) const noexcept;
+
+    // NOTSA
+
+    auto GetEvents()       { return std::span{ m_events, (size_t)m_count }; }
+    auto GetEvents() const { return std::span{ m_events, (size_t)m_count }; }
+
+    //! Helper so events can be directly passed in without having to put them into a variable
+    template<std::derived_from<CEvent> T>
+    CEvent* Add(T event, bool valid = false) {
+        return Add(&event, valid);
+    }
 };
 
 VALIDATE_SIZE(CEventGroup, 0x4C);

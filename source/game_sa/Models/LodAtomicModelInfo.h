@@ -2,10 +2,10 @@
 
 #include "AtomicModelInfo.h"
 
-class CLodAtomicModelInfo : public CAtomicModelInfo {
+class NOTSA_EXPORT_VTABLE CLodAtomicModelInfo : public CAtomicModelInfo {
 public:
-    int16 field_20;
-    int16 field_22;
+    int16 m_numChildren;
+    int16 m_numChildrenRendered;
 
 public:
     CLodAtomicModelInfo();

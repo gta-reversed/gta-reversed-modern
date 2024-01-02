@@ -12,8 +12,8 @@
 #include "PedClothesDesc.h"
 
 int32& CClothes::ms_clothesImageId = *(int32*)0xBC12F8;
-int32& CClothes::ms_numRuleTags = *(int32*)0xBC12FC;
-int32 (&CClothes::ms_clothesRules)[600] = *(int32(*)[600])0xBC1300;
+uint32& CClothes::ms_numRuleTags = *(uint32*)0xBC12FC;
+uint32 (&CClothes::ms_clothesRules)[600] = *(uint32(*)[600])0xBC1300;
 
 CPedClothesDesc& PlayerClothes = *(CPedClothesDesc*)0xBC1C78;
 
@@ -22,16 +22,14 @@ void CClothes::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x5A80D0);
-    // RH_ScopedInstall(LoadClothesFile, 0x5A7B30);
+    RH_ScopedInstall(LoadClothesFile, 0x5A7B30);
     RH_ScopedInstall(ConstructPedModel, 0x5A81E0);
     RH_ScopedInstall(RequestMotionGroupAnims, 0x5A8120);
     RH_ScopedInstall(RebuildPlayerIfNeeded, 0x5A8390);
     RH_ScopedInstall(RebuildPlayer, 0x5A82C0);
     RH_ScopedInstall(RebuildCutscenePlayer, 0x5A8270);
-    /* crashes, incompatible registers?
     RH_ScopedInstall(GetTextureDependency, 0x5A7EA0);
     RH_ScopedInstall(GetDependentTexture, 0x5A7F30);
-    */
     RH_ScopedInstall(GetPlayerMotionGroupToLoad, 0x5A7FB0);
     RH_ScopedInstall(GetDefaultPlayerMotionGroup, 0x5A81B0);
 }
@@ -67,7 +65,93 @@ int32 GetClothesModelFromName(const char* name) {
 
 // 0x5A7B30
 void CClothes::LoadClothesFile() {
-    plugin::Call<0x5A7B30>();
+    bool isRuleStarted = false;
+    auto* file = CFileMgr::OpenFile("DATA\\CLOTHES.DAT", "r");
+
+    for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
+        if (line[0] == '\0' || line[0] == '#') {
+            continue;
+        }
+        if (!isRuleStarted) {
+            isRuleStarted = !strcmp("rule", line);
+            continue;
+        }
+        if (!strcmp("end", line)) {
+            isRuleStarted = false;
+            continue;
+        }
+
+        char* nextToken{};
+        char* strTag = strtok_s(line, " \t,", &nextToken);
+        if (strTag == nullptr) {
+            continue;
+        }
+
+        enum class eClothRule : uint8_t {
+            TAG_CUTS,
+            TAG_SETC,
+            TAG_TEX,
+            TAG_HIDE,
+            TAG_END_IGNORE,
+            TAG_IGNORE,
+            TAG_END_EXCLUSIVE,
+            TAG_EXCLUSIVE
+        };
+        const eClothRule ruleTag = [&](){
+            constexpr struct {const char* name; eClothRule rule;} map[]{
+                {"cuts", eClothRule::TAG_CUTS},
+                {"setc", eClothRule::TAG_SETC},
+                {"tex", eClothRule::TAG_TEX},
+                {"hide", eClothRule::TAG_HIDE},
+                {"endignore", eClothRule::TAG_END_IGNORE},
+                {"ignore", eClothRule::TAG_IGNORE},
+                {"endexclusive", eClothRule::TAG_END_EXCLUSIVE},
+                {"exclusive", eClothRule::TAG_EXCLUSIVE}
+            };
+            for (const auto& [name, rule] : map) {
+                if (!strcmp(strTag, name)) {
+                    return rule;
+                }
+            }
+            NOTSA_UNREACHABLE("Invalid rule tag: {}", strTag);
+        }();
+        AddRule(static_cast<uint32>(ruleTag));
+
+        const auto GetNextArg = [&nextToken]{
+            return strtok_s(NULL, " \t,", &nextToken);
+        };
+        switch (ruleTag) {
+        case eClothRule::TAG_CUTS:
+        case eClothRule::TAG_TEX: {
+            for (auto i = 0u; i < 2u; i++) {
+                AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
+            }
+            break;
+        }
+        case eClothRule::TAG_SETC: {
+            AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
+            AddRule(GetClothesModelFromName(GetNextArg()));
+            for (auto i = 0u; i < 2u; i++) {
+                const auto rule = GetNextArg();
+                AddRule(!strcmp("-", rule) ? 0 : CKeyGen::GetUppercaseKey(rule));
+            }
+            break;
+        }
+        case eClothRule::TAG_HIDE: {
+            AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
+            AddRule(GetClothesModelFromName(GetNextArg()));
+            break;
+        }
+        case eClothRule::TAG_END_IGNORE:
+        case eClothRule::TAG_IGNORE:
+        case eClothRule::TAG_END_EXCLUSIVE:
+        case eClothRule::TAG_EXCLUSIVE: 
+            AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
+            break;
+        }
+    }
+
+    CFileMgr::CloseFile(file);
 }
 
 // 0x5A81E0
@@ -83,7 +167,7 @@ void CClothes::ConstructPedModel(uint32 modelId, CPedClothesDesc& newClothes, co
         modelInfo->DeleteRwObject();
         modelInfo->SetClump(skinnedClump);
         modelInfo->RemoveTexDictionaryRef();
-        CStreaming::LoadAllRequestedModels(1);
+        CStreaming::LoadAllRequestedModels(true);
     }
 
     CTimer::Resume();
@@ -111,8 +195,8 @@ void CClothes::RequestMotionGroupAnims() {
 
 // 0x5A8390
 void CClothes::RebuildPlayerIfNeeded(CPlayerPed* player) {
-    const auto fat = player->m_pPlayerData->m_pPedClothesDesc->m_fFatStat;
-    const auto muscle = player->m_pPlayerData->m_pPedClothesDesc->m_fMuscleStat;
+    const auto& fat = player->m_pPlayerData->m_pPedClothesDesc->m_fFatStat;
+    const auto& muscle = player->m_pPlayerData->m_pPedClothesDesc->m_fMuscleStat;
 
     if (CStats::GetStatValue(STAT_FAT) != fat || CStats::GetStatValue(STAT_MUSCLE) != muscle) {
         RebuildPlayer(player, 0);
@@ -124,7 +208,7 @@ void CClothes::RebuildPlayer(CPlayerPed* player, bool bIgnoreFatAndMuscle) {
     auto assoc = RpAnimBlendClumpExtractAssociations(player->m_pRwClump);
     auto task = player->m_pIntelligence->m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_IK);
     if (task)
-        task->MakeAbortable(player, ABORT_PRIORITY_IMMEDIATE, 0);
+        task->MakeAbortable(player, ABORT_PRIORITY_IMMEDIATE, nullptr);
 
     player->DeleteRwObject();
     CWorld::Remove(player);
@@ -150,70 +234,32 @@ void CClothes::RebuildCutscenePlayer(CPlayerPed* player, int32 modelId) {
 // 0x5A7EA0
 eClothesModelPart CClothes::GetTextureDependency(eClothesTexturePart texturePart) {
     switch (texturePart) {
-    case CLOTHES_TEXTURE_TORSO:
-        return CLOTHES_MODEL_TORSO;
-
-    case CLOTHES_TEXTURE_HEAD:
-        return CLOTHES_MODEL_HEAD;
-
-    case CLOTHES_TEXTURE_LEGS:
-        return CLOTHES_MODEL_LEGS;
-
-    case CLOTHES_TEXTURE_SHOES:
-        return CLOTHES_MODEL_SHOES;
-
-    case CLOTHES_TEXTURE_NECKLACE:
-        return CLOTHES_MODEL_NECKLACE;
-
-    case CLOTHES_TEXTURE_BRACELET:
-        return CLOTHES_MODEL_BRACELET;
-
-    case CLOTHES_TEXTURE_GLASSES:
-        return CLOTHES_MODEL_GLASSES;
-
-    case CLOTHES_TEXTURE_HATS:
-        return CLOTHES_MODEL_HATS;
-
-    case CLOTHES_TEXTURE_SPECIAL:
-        return CLOTHES_MODEL_SPECIAL;
-
-    default:
-        return CLOTHES_MODEL_UNAVAILABLE;
+    case CLOTHES_TEXTURE_TORSO:    return CLOTHES_MODEL_TORSO;
+    case CLOTHES_TEXTURE_HEAD:     return CLOTHES_MODEL_HEAD;
+    case CLOTHES_TEXTURE_LEGS:     return CLOTHES_MODEL_LEGS;
+    case CLOTHES_TEXTURE_SHOES:    return CLOTHES_MODEL_SHOES;
+    case CLOTHES_TEXTURE_NECKLACE: return CLOTHES_MODEL_NECKLACE;
+    case CLOTHES_TEXTURE_BRACELET: return CLOTHES_MODEL_BRACELET;
+    case CLOTHES_TEXTURE_GLASSES:  return CLOTHES_MODEL_GLASSES;
+    case CLOTHES_TEXTURE_HATS:     return CLOTHES_MODEL_HATS;
+    case CLOTHES_TEXTURE_SPECIAL:  return CLOTHES_MODEL_SPECIAL;
+    default:                       return CLOTHES_MODEL_UNAVAILABLE;
     }
 }
 
 // 0x5A7F30
 eClothesTexturePart CClothes::GetDependentTexture(eClothesModelPart modelPart) {
     switch (modelPart) {
-    case CLOTHES_MODEL_TORSO:
-        return CLOTHES_TEXTURE_TORSO;
-
-    case CLOTHES_MODEL_HEAD:
-        return CLOTHES_TEXTURE_HEAD;
-
-    case CLOTHES_MODEL_LEGS:
-        return CLOTHES_TEXTURE_LEGS;
-
-    case CLOTHES_MODEL_SHOES:
-        return CLOTHES_TEXTURE_SHOES;
-
-    case CLOTHES_MODEL_NECKLACE:
-        return CLOTHES_TEXTURE_NECKLACE;
-
-    case CLOTHES_MODEL_BRACELET:
-        return CLOTHES_TEXTURE_BRACELET;
-
-    case CLOTHES_MODEL_GLASSES:
-        return CLOTHES_TEXTURE_GLASSES;
-
-    case CLOTHES_MODEL_HATS:
-        return CLOTHES_TEXTURE_HATS;
-
-    case CLOTHES_MODEL_SPECIAL:
-        return CLOTHES_TEXTURE_SPECIAL;
-
-    default:
-        return CLOTHES_TEXTURE_UNAVAILABLE;
+    case CLOTHES_MODEL_TORSO:    return CLOTHES_TEXTURE_TORSO;
+    case CLOTHES_MODEL_HEAD:     return CLOTHES_TEXTURE_HEAD;
+    case CLOTHES_MODEL_LEGS:     return CLOTHES_TEXTURE_LEGS;
+    case CLOTHES_MODEL_SHOES:    return CLOTHES_TEXTURE_SHOES;
+    case CLOTHES_MODEL_NECKLACE: return CLOTHES_TEXTURE_NECKLACE;
+    case CLOTHES_MODEL_BRACELET: return CLOTHES_TEXTURE_BRACELET;
+    case CLOTHES_MODEL_GLASSES:  return CLOTHES_TEXTURE_GLASSES;
+    case CLOTHES_MODEL_HATS:     return CLOTHES_TEXTURE_HATS;
+    case CLOTHES_MODEL_SPECIAL:  return CLOTHES_TEXTURE_SPECIAL;
+    default:                     return CLOTHES_TEXTURE_UNAVAILABLE;
     }
 }
 

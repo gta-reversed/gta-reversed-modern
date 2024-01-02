@@ -45,6 +45,7 @@ class CLodTimeModelInfo;
 class CPedModelInfo;
 class CTimeModelInfo;
 class CVehicleModelInfo;
+class CWeaponModelInfo;
 struct RwObject;
 
 // originally an abstract class
@@ -74,10 +75,11 @@ public:
             uint8 bIsBackfaceCulled : 1;
             uint8 bIsLod : 1;
 
+            // 1st byte
             union {
                 struct { // Atomic flags
                     uint8 bIsRoad : 1;
-                    uint8 : 1;
+                    uint8 bAtomicFlag0x200: 1;
                     uint8 bDontCollideWithFlyer : 1;
                     uint8 nSpecialType : 4;
                     uint8 bWetRoadReflection : 1;
@@ -133,7 +135,7 @@ public:
     void AddRef();
     void RemoveRef();
     // initPairedModel defines if we need to set col model for time model
-    void SetColModel(CColModel* colModel, bool bIsLodModel);
+    void SetColModel(CColModel* colModel, bool bIsLodModel = false);
     void Init2dEffects();
     void DeleteCollisionModel();
     // index is a number of effect (max number is (m_n2dfxCount - 1))
@@ -143,6 +145,7 @@ public:
     // Those further ones are completely inlined in final version, not present at all in android version;
     CVehicleModelInfo* AsVehicleModelInfoPtr() { return reinterpret_cast<CVehicleModelInfo*>(this); }
     CPedModelInfo*     AsPedModelInfoPtr()     { return reinterpret_cast<CPedModelInfo*>(this); }
+    CWeaponModelInfo*  AsWeaponModelInfoPtr()  { return reinterpret_cast<CWeaponModelInfo*>(this); }
 
     [[nodiscard]] CColModel* GetColModel() const { return m_pColModel; }
 

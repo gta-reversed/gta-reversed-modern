@@ -3,17 +3,20 @@
 #include "TaskComplexEnterCarAsDriver.h"
 
 // 0x6402F0
-CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(CVehicle* targetVehicle) : CTaskComplexEnterCar(targetVehicle, true, false, false, false) {
-    // empty
+CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(CVehicle* targetVehicle) :
+    CTaskComplexEnterCar(targetVehicle, true, false, false, false)
+{
 }
 
-// 0x643780
-CTask* CTaskComplexEnterCarAsDriver::Clone() {
-    return CTaskComplexEnterCarAsDriver::Clone_Reversed();
+CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(CVehicle* targetVehicle, eMoveState moveState) : // NOTSA
+    CTaskComplexEnterCarAsDriver{ targetVehicle }
+{
+    m_MoveState = moveState;
 }
 
-CTask* CTaskComplexEnterCarAsDriver::Clone_Reversed() {
-    auto clonedTask = new CTaskComplexEnterCarAsDriver(m_pTargetVehicle);
-    clonedTask->m_nMoveState = m_nMoveState;
-    return clonedTask;
+// For 0x643780
+CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(const CTaskComplexEnterCarAsDriver& o) :
+    CTaskComplexEnterCarAsDriver{ m_Car }
+{
+    m_MoveState = o.m_MoveState;
 }

@@ -12,8 +12,8 @@ void CEventPedCollisionWithPed::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AC990);
-    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4ACAD0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4ACB10);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4ACAD0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4ACB10);
 }
 
 void CEventPedCollisionWithPlayer::InjectHooks()
@@ -38,7 +38,7 @@ void CEventObjectCollision::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4ACCF0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4ACE30);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4ACE30);
 }
 
 void CEventBuildingCollision::InjectHooks()
@@ -47,28 +47,26 @@ void CEventBuildingCollision::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4ACF00);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AD070);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AD070);
     RH_ScopedInstall(IsHeadOnCollision, 0x4AD1E0);
     RH_ScopedInstall(CanTreatBuildingAsObject, 0x4B3120);
 }
 
 CEventPedCollisionWithPed::CEventPedCollisionWithPed(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState, int16 victimMoveState)
 {
-    m_pieceType = pieceType;
-    m_damageIntensity = damageIntensity;
-    m_victim = victim;
+    m_pieceType               = pieceType;
+    m_damageIntensity         = damageIntensity;
+    m_victim                  = victim;
     m_collisionImpactVelocity = *collisionImpactVelocity;
-    m_collisionPos = *collisionPos;
-    m_movestate = moveState;
-    m_victimMoveState = victimMoveState;
-    if (victim)
-        victim->RegisterReference(reinterpret_cast<CEntity**>(&m_victim));
+    m_collisionPos            = *collisionPos;
+    m_movestate               = moveState;
+    m_victimMoveState         = victimMoveState;
+    CEntity::SafeRegisterRef(m_victim);
 }
 
 CEventPedCollisionWithPed::~CEventPedCollisionWithPed()
 {
-    if (m_victim)
-        m_victim->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_victim));
+    CEntity::SafeCleanUpRef(m_victim);
 }
 
 CEventPedCollisionWithPed* CEventPedCollisionWithPed::Constructor(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState, int16 victimMoveState)
@@ -96,13 +94,12 @@ bool CEventPedCollisionWithPed::TakesPriorityOver_Reversed(const CEvent& refEven
     return CEvent::TakesPriorityOver(refEvent);
 }
 
-bool CEventPedCollisionWithPed::AffectsPed_Reversed(CPed* ped)
-{
-    if (!ped->IsAlive() || ped->m_pAttachedTo || ped->bInVehicle || ped->GetIntelligence()->IsThreatenedBy(*m_victim)) {
+bool CEventPedCollisionWithPed::AffectsPed_Reversed(CPed* ped) {
+    if (!ped->IsAlive() || ped->m_pAttachedTo || ped->bInVehicle) {
         return false;
     }
 
-    if (!m_victim || m_victim->bInVehicle || m_victim->GetIntelligence()->m_AnotherStaticCounter > 30) {
+    if (!m_victim || m_victim->bInVehicle || ped->GetIntelligence()->IsThreatenedBy(*m_victim) || m_victim->GetIntelligence()->m_AnotherStaticCounter > 30) {
         return false;
     }
 
@@ -173,16 +170,14 @@ CEventObjectCollision::CEventObjectCollision(int16 pieceType, float damageIntens
     m_moveState = moveState;
     m_damageIntensity = damageIntensity;
     m_object = object;
-    m_collisionImpactVelocity = *collisionImpactVelocity;
-    m_collisionPos = *collisionPos;
-    if (m_object)
-        m_object->RegisterReference(reinterpret_cast<CEntity**>(&m_object));
+    m_impactNormal = *collisionImpactVelocity;
+    m_impactPos = *collisionPos;
+    CEntity::SafeRegisterRef(m_object);
 }
 
 CEventObjectCollision::~CEventObjectCollision()
 {
-    if (m_object)
-        m_object->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_object));
+    CEntity::SafeCleanUpRef(m_object);
 }
 
 CEventObjectCollision* CEventObjectCollision::Constructor(int16 pieceType, float damageIntensity, CObject* object, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState)
@@ -214,16 +209,14 @@ CEventBuildingCollision::CEventBuildingCollision(int16 pieceType, float damageIn
     m_moveState = moveState;
     m_damageIntensity = damageIntensity;
     m_building = building;
-    m_collisionImpactVelocity = *collisionImpactVelocity;
-    m_collisionPos = *collisionPos;
-    if (building)
-        m_building->RegisterReference(reinterpret_cast<CEntity**>(&m_building));
+    m_impactNormal = *collisionImpactVelocity;
+    m_impactPos = *collisionPos;
+    CEntity::SafeRegisterRef(m_building);
 }
 
 CEventBuildingCollision::~CEventBuildingCollision()
 {
-    if (m_building)
-        m_building->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_building));
+    CEntity::SafeCleanUpRef(m_building);
 }
 
 CEventBuildingCollision* CEventBuildingCollision::Constructor(int16 pieceType, float damageIntensity, CBuilding* building, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState)
@@ -243,10 +236,10 @@ bool CEventBuildingCollision::AffectsPed_Reversed(CPed* ped)
     if (!ped->IsPlayer()
         && ped->IsAlive()
         && m_moveState != PEDMOVE_STILL
-        && (m_collisionImpactVelocity.z <= 0.707f || m_building->m_bIsTempBuilding)
+        && (m_impactNormal.z <= 0.707f || m_building->m_bIsTempBuilding)
         && !ped->m_pAttachedTo)
     {
-        CVector direction(m_collisionImpactVelocity.x, m_collisionImpactVelocity.y, 0.0f);
+        CVector direction(m_impactNormal.x, m_impactNormal.y, 0.0f);
         direction.Normalise();
         float dotProduct = DotProduct(direction, ped->GetForward());
         if (dotProduct <= -0.422f) {
@@ -267,7 +260,7 @@ bool CEventBuildingCollision::AffectsPed_Reversed(CPed* ped)
 // 0x4AD1E0
 bool CEventBuildingCollision::IsHeadOnCollision(CPed* ped)
 {
-    CVector velocity = m_collisionImpactVelocity;
+    CVector velocity = m_impactNormal;
     velocity.z = 0.0f;
     velocity.Normalise();
     return -DotProduct(velocity, ped->GetForward()) > 0.866f;

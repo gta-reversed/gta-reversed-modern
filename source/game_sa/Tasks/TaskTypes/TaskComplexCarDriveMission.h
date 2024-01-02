@@ -1,42 +1,55 @@
 #pragma once
 
 #include "TaskComplexCarDrive.h"
-#include "Enums/eCarMission.h"
-#include "Enums/eCarDrivingStyle.h"
+#include "eCarMission.h"
+#include "eCarDrivingStyle.h"
 
 class CVehicle;
 
 class CTaskComplexCarDriveMission : public CTaskComplexCarDrive {
 public:
-    CVehicle* m_targetVehicle = {};   // 0x24
-    uint32    m_carMission = {};      // 0x28 - eCarMission (Sadly we can't use it as the type because it's underlaying type isn't uint32) (TODO)
+    CVehicle*   m_pTargetVehicle;
+    eCarMission m_nCarMission;
 
 public:
     static constexpr auto Type = TASK_COMPLEX_CAR_DRIVE_MISSION;
 
-    static void InjectHooks();
+    CTaskComplexCarDriveMission(CVehicle* vehicle, CEntity* targetVehicle, eCarMission carDriveMission, eCarDrivingStyle carDrivingStyle, float fSpeed);
+    ~CTaskComplexCarDriveMission() override;
 
-    CTaskComplexCarDriveMission(CVehicle* pVehicle, CVehicle* pTargetVehicle, eCarMission carDriveMission, eCarDrivingStyle carDrivingStyle, float fSpeed);
-    CTaskComplexCarDriveMission(const CTaskComplexCarDriveMission&); // NOTSA: `Clone()` helper
-    ~CTaskComplexCarDriveMission() override = default;
-
-    CTask* Clone() override { return new CTaskComplexCarDriveMission{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() const override { return new CTaskComplexCarDriveMission(m_Veh, m_pTargetVehicle, m_nCarMission, (eCarDrivingStyle)m_CarDrivingStyle, m_CruiseSpeed); }
+    eTaskType GetTaskType() const override { return Type; }
     void SetUpCar() override;
 
-private: // Wrappers for hooks
-    CTaskComplexCarDriveMission* Constructor(CVehicle * pVehicle, CVehicle* pTargetVehicle, eCarMission carDriveMission, eCarDrivingStyle carDrivingStyle, float fSpeed) {
-        this->CTaskComplexCarDriveMission::CTaskComplexCarDriveMission(pVehicle, pTargetVehicle, carDriveMission, carDrivingStyle, fSpeed);
-        return this;
-    }
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
 
-    CTaskComplexCarDriveMission* Destructor() {
-        this->CTaskComplexCarDriveMission::~CTaskComplexCarDriveMission();
-        return this;
-    }
+    CTaskComplexCarDriveMission* Constructor(CVehicle* vehicle, CEntity* targetVehicle, eCarMission carDriveMission, eCarDrivingStyle carDrivingStyle, float fSpeed) { this->CTaskComplexCarDriveMission::CTaskComplexCarDriveMission(vehicle, targetVehicle, carDriveMission, carDrivingStyle, fSpeed); return this; }
+    CTaskComplexCarDriveMission* Destructor() { this->CTaskComplexCarDriveMission::~CTaskComplexCarDriveMission(); return this; }
 
     CTask* Clone_Reversed() { return CTaskComplexCarDriveMission::Clone(); }
     eTaskType GetTaskType_Reversed() { return CTaskComplexCarDriveMission::GetTaskType(); }
     void SetUpCar_Reversed() { return CTaskComplexCarDriveMission::SetUpCar(); }
 };
 VALIDATE_SIZE(CTaskComplexCarDriveMission, 0x2C);
+
+class CTaskComplexCarDriveMissionFleeScene : public CTaskComplexCarDriveMission {
+public:
+    explicit CTaskComplexCarDriveMissionFleeScene(CVehicle* vehicle) : CTaskComplexCarDriveMission(vehicle, nullptr, MISSION_CRUISE, DRIVING_STYLE_AVOID_CARS, 40.0f) { }; // 0x4B8920
+    ~CTaskComplexCarDriveMissionFleeScene() override = default; // 0x4B89F0
+
+    static constexpr auto Type = TASK_COMPLEX_CAR_DRIVE_MISSION_FLEE_SCENE;
+    eTaskType GetTaskType() const override { return Type; } // 0x4B89C0
+    CTask* Clone() const override { return new CTaskComplexCarDriveMissionFleeScene(m_Veh); } // 0x4B8950
+};
+
+class CTaskComplexCarDriveMissionKillPed : public CTaskComplexCarDriveMission {
+public:
+    CTaskComplexCarDriveMissionKillPed(CVehicle* vehicle, CEntity* targetVehicle) : CTaskComplexCarDriveMission(vehicle, targetVehicle, MISSION_36, DRIVING_STYLE_PLOUGH_THROUGH, 40.0f) { } // 0x4B8A00
+    ~CTaskComplexCarDriveMissionKillPed() override = default; // 0x4B8AD0
+
+    static constexpr auto Type = TASK_COMPLEX_CAR_DRIVE_MISSION_KILL_PED;
+    eTaskType GetTaskType() const override { return Type; } // 0x4B8AA0
+    CTask* Clone() const override { return new CTaskComplexCarDriveMissionKillPed(m_Veh, m_pTargetVehicle); } // 0x4B8A30
+};

@@ -16,8 +16,14 @@ class CAutomobile;
 class CHeli;
 class CPlane;
 
+constexpr auto GAME_SPEED_TO_METERS_PER_SECOND = 50.0f;
+constexpr auto METERS_PER_SECOND_TO_GAME_SPEED = 1.0f / GAME_SPEED_TO_METERS_PER_SECOND;
+constexpr auto GAME_SPEED_TO_CAR_AI_SPEED = 60.0f;
+constexpr auto TIME_COPS_WAIT_TO_EXIT_AFTER_STOPPING = 2500;
+
 class CCarCtrl {
 public:
+    static inline bool& bCarIsBeingCreated = *(bool*)0x9690CC;
     static uint32& NumLawEnforcerCars;
     static uint32& NumParkedCars;
     static uint32& NumAmbulancesOnDuty;
@@ -48,7 +54,7 @@ public:
     static int32 ChooseCarModelToLoad(int32 arg1);
     static int32 ChooseModel(int32* arg1);
     static int32 ChoosePoliceCarModel(uint32 arg0);
-    static int32 ChooseGangCarModel(int32 loadedCarGroupId);
+    static eModelID ChooseGangCarModel(eGangID loadedCarGroupId);
     static void ClearInterestingVehicleList();
     static void ClitargetOrientationToLink(CVehicle* vehicle, CCarPathLinkAddress arg2, int8 arg3, float* arg4, float arg5, float arg6);
     static CVehicle* CreateCarForScript(int32 modelId, CVector posn, bool doMissionCleanup);

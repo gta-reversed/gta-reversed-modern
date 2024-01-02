@@ -11,37 +11,22 @@
 class CPed;
 class GangInfo;
 
-enum eGangID {
-    GANG_BALLAS = 0,
-    GANG_GROVE = 1,
-    GANG_VAGOS = 2,
-    GANG_RIFA = 3,
-    GANG_DANANGBOYS = 4,
-    GANG_MAFIA = 5,
-    GANG_TRIAD = 6,
-    GANG_AZTECAS = 7,
-    GANG_UNUSED1 = 8, //!< RUSSIAN_MAFIA
-    GANG_UNUSED2 = 9  //!< BIKERS
-};
-
 class CGangs {
 public:
-    static bool (&GangAttackWithCops)[16]; // static bool GangAttackWithCops[16]
-    static CGangInfo (&Gang)[10];          // static CGangInfo Gang[10]
+    inline static std::array<bool, TOTAL_GANGS>& GangAttackWithCops = *reinterpret_cast<std::array<bool, 10>*>(0xC091D9);
+    inline static std::array<CGangInfo, TOTAL_GANGS>& Gang = *reinterpret_cast<std::array<CGangInfo, 10>*>(0xC091F0);
 
 public:
     static void InjectHooks();
 
     static void Initialise();
 
-    static int32 ChooseGangPedModel(int16 gangID);
-    //! unused
-    static bool GetWillAttackPlayerWithCops(ePedType gangID);
     static bool Load();
     static bool Save();
-    //! unused
-    static void SetGangPedModelOverride(int16 gangID, int8 PedModelOverride);
-    static void SetGangWeapons(int16 gangID, int32 weapID1, int32 weapID2, int32 weapID3);
-    //! unused
-    static void SetWillAttackPlayerWithCops(ePedType gangID, bool bAttackPlayerWithCops);
+    static void SetGangWeapons(int16 gangId, eWeaponType weapId1, eWeaponType weapId2, eWeaponType weapId3);
+    static eModelID ChooseGangPedModel(eGangID gangId);
+
+    static bool GetWillAttackPlayerWithCops(ePedType pedType);
+    static void SetWillAttackPlayerWithCops(ePedType pedType, bool bAttackPlayerWithCops);
+    static void SetGangPedModelOverride(int16 gangId, int8 PedModelOverride);
 };

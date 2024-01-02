@@ -46,15 +46,15 @@ public:
 
     union {
         struct {
-            uint16 unk1 : 1; // eCamMode::MODE_1STPERSON leftover?
-            uint16 unk2 : 1; // unused
+            uint16 bCamera : 1;
+            uint16 unk2 : 1;
             uint16 bPlayerAwaitsInGarage : 1;
             uint16 bPlayerOnInteriorTransition : 1;
-            uint16 unk3 : 1; // unused
+            uint16 unk3 : 1;                        // 0x10 unused
             uint16 bPlayerSafe : 1;
-            uint16 bPlayerTalksOnPhone : 1; // bPlayerSafeForPhoneCall?
+            uint16 bPlayerTalksOnPhone : 1;         // bPlayerSafeForPhoneCall?
             uint16 bPlayerSafeForCutscene : 1;
-            uint16 bPlayerSkipsToDestination : 1; // bPlayerSafeForDestination?
+            uint16 bPlayerSkipsToDestination : 1;   // bPlayerSafeForDestination?
         };
         uint16 DisablePlayerControls;
     };
@@ -106,7 +106,7 @@ public:
     void Update(int32 pad);
     static void UpdatePads();
     void UpdateMouse();
-    static void ProcessPad(bool numPad);
+    static void ProcessPad(int numPad);
     void ProcessPCSpecificStuff();
     CControllerState& ReconcileTwoControllersInput(CControllerState& out, const CControllerState& controllerA, const CControllerState& controllerB);
 
@@ -118,7 +118,8 @@ public:
     void StartShake(int16 time, uint8 frequency, uint32 arg2);
     void StartShake_Distance(int16 time, uint8 frequency, CVector pos);
     void StartShake_Train(const CVector2D& point);
-    void StopShaking(int16 arg0);
+    static void StopPadsShaking();
+    void StopShaking(int16 pad);
 
     [[nodiscard]] int16 GetCarGunLeftRight() const;
     [[nodiscard]] int16 GetCarGunUpDown() const;
@@ -211,6 +212,10 @@ public:
     [[nodiscard]] bool IsLeftCtrlJustDown() const noexcept                  { return NewKeyState.lctrl && OldKeyState.lctrl; }                                               //
     [[nodiscard]] bool IsRightCtrlJustDown() const noexcept                 { return NewKeyState.rctrl && OldKeyState.rctrl; }                                               //
     [[nodiscard]] bool IsCtrlPressed() const noexcept                       { return IsLeftCtrlJustDown() || IsRightCtrlJustDown(); }                                        //
+    [[nodiscard]] static bool IsUpPressed() noexcept                        { return KEY_IS_PRESSED(up); }                                                                   //
+    [[nodiscard]] static bool IsDownPressed() noexcept                      { return KEY_IS_PRESSED(down); }                                                                 //
+    [[nodiscard]] static bool IsLeftPressed() noexcept                      { return KEY_IS_PRESSED(left); }                                                                 //
+    [[nodiscard]] static bool IsRightPressed() noexcept                     { return KEY_IS_PRESSED(right); }                                                                //
     static bool IsPadEnterJustPressed() noexcept                            { return KEY_IS_PRESSED(enter); }                                                                //
     static bool IsReturnJustPressed() noexcept                              { return KEY_IS_PRESSED(extenter); }                                                             //
     static bool IsEnterJustPressed() noexcept                               { return IsPadEnterJustPressed() || IsReturnJustPressed(); }                                     // 0x4D5980
@@ -218,6 +223,7 @@ public:
 
     static bool IsMenuKeyJustPressed() noexcept                             { return KEY_IS_PRESSED(lmenu); }                                                                // 0x744D50
     static bool IsTabJustPressed() noexcept                                 { return KEY_IS_PRESSED(tab); }                                                                  // 0x744D90
+    static bool IsEscJustPressed() noexcept                                 { return KEY_IS_PRESSED(esc); }                                                                  // 0x572DB0
 
     bool IsRadioTrackSkipPressed() { return BUTTON_IS_PRESSED(m_bRadioTrackSkip); } // 0x4E7F20
     static bool f0x57C360() { return NewKeyState.back && !OldKeyState.back; }       // 0x57C360
@@ -274,18 +280,14 @@ public:
     [[nodiscard]] int16 GetRightStickY() const noexcept                     { return BUTTON_IS_DOWN(RightStickY); }
 
     bool IsSteeringInAnyDirection() { return GetSteeringLeftRight() || GetSteeringUpDown(); }
-    bool f0x45AF90() {
-        NewState.LeftStickX = NewMouseControllerState.X;
-        NewState.RightStickX = NewMouseControllerState.Y;
-    }
 
     // PAD END
 
     // MOUSE
-    static bool f0x57C3C0() noexcept               { return !NewMouseControllerState.lmb && OldMouseControllerState.lmb;}           // 0x57C3C0
+    static bool f0x57C3C0() noexcept               { return !NewMouseControllerState.lmb && OldMouseControllerState.lmb; }          // 0x57C3C0
     static bool IsMouseLButtonPressed() noexcept   { return MOUSE_IS_PRESSED(lmb); }                                                // 0x4D5A00
-    static bool IsMouseRButtonJustDown() noexcept  { return !NewMouseControllerState.rmb && OldMouseControllerState.rmb;}           // 0x572E70
-    static bool IsMouseMPressed() noexcept         { return MOUSE_IS_PRESSED(mmb); }                                                // 0x57C3E0
+    static bool IsMouseRButtonPressed() noexcept   { return MOUSE_IS_PRESSED(rmb); }                                                // 0x572E70
+    static bool IsMouseMButtonPressed() noexcept   { return MOUSE_IS_PRESSED(mmb); }                                                // 0x57C3E0
     static bool IsMouseWheelUpPressed() noexcept   { return MOUSE_IS_PRESSED(wheelUp); }                                            // 0x57C400
     static bool IsMouseWheelDownPressed() noexcept { return MOUSE_IS_PRESSED(wheelDown); }                                          // 0x57C420
     static bool IsMouseBmx1Pressed() noexcept      { return MOUSE_IS_PRESSED(bmx1); }                                               // 0x57C440
@@ -300,23 +302,30 @@ public:
     bool sub_541150() const noexcept;
     static bool sub_540A40();
     static bool sub_540A10();
-    static bool sub_5409E0();
-    static bool sub_5409B0();
-    static bool sub_540980();
-    static bool sub_540950();
+    static bool GetAnaloguePadLeft();
+    static bool GetAnaloguePadUp();
+    static bool GetAnaloguePadRight();
+    static bool GetAnaloguePadDown();
     bool sub_540530() const noexcept;
     bool sub_5404F0() const noexcept { return Mode != 1 ? 0 : IsDPadDownPressed(); } // 0x5404F0
     bool IsPhaseEqual11() const noexcept { return Phase == 11; } // 0x53FB60
 
-    static bool SetCurrentPad(int8 pad) { padNumber = pad; } // 0x53ED70
-    static bool f0x53ED80(int8 a1) { *(char*)0xB73401 = a1; } // see .cpp
-    bool f0x541290() { } // weapon related
+    static void SetCurrentPad(int8 pad) { padNumber = pad; } // 0x53ED70
 
     // 0x541A60
     static bool UpdatePadsTillStable() { return true; }
+    bool ArePlayerControlsDisabled() { return DisablePlayerControls != 0; }
+    bool DebugMenuJustPressed();
 };
 
 VALIDATE_SIZE(CPad, 0x134);
+
+// return pressed key, in order of CKeyboardState
+int GetCurrentKeyPressed(RsKeyCodes& keys);
+
+// todo: move these fucks out
+IDirectInputDevice8* DIReleaseMouse();
+void InitialiseMouse(bool exclusive);
 
 /*
 Android has 99 funcs
@@ -333,7 +342,6 @@ EditString(char *,int)
 FixPadsAfterSave(void)
 GetAbortClimb(void)
 GetAutoClimb(void)
-GetEscapeJustDown(void)
 GetExitTargeting(void)
 GetLeftAnalogue(CVector2D *)
 GetNitroFired(void)
@@ -345,7 +353,6 @@ LookAroundLeftRight(void)
 LookAroundUpDown(void)
 ProcessStoppie(void)
 ProcessWheelie(float)
-StopPadsShaking(void)
 SwimJumpJustDown(void)
 UpdatePadsTillStable(void)
 UseBomb(void)

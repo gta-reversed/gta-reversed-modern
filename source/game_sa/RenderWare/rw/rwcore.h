@@ -2743,6 +2743,7 @@ RxPipeline* RxLockedPipeReplaceNode(RxLockedPipe* pipeline, RxPipelineNode* node
 RxPipeline* RxLockedPipeDeleteNode(RxLockedPipe* pipeline, RxPipelineNode* node); // 0x807040
 RxPipeline* RxLockedPipeSetEntryPoint(RxLockedPipe* pipeline, RxNodeInput in); // 0x807070
 RxPipelineNode* RxLockedPipeGetEntryPoint(RxLockedPipe* pipeline); // 0x8070D0
+RxPipeline* RxLockedPipeAddFragment(RxLockedPipe* pipeline, RwUInt32 firstIndex, RxNodeDefinition* nodeDef0, RwUInt32 nodeUnk = 0); // 0x806BE0
 RxPipeline* RxLockedPipeAddPath(RxLockedPipe* pipeline, RxNodeOutput out, RxNodeInput in); // 0x807100
 RxPipeline* RxLockedPipeDeletePath(RxLockedPipe* pipeline, RxNodeOutput out, RxNodeInput in); // 0x807170
 RxPipeline* RxPipelineInsertDebugNode(RxPipeline* pipeline, RxPipelineNode* before, RxPipelineNode* after, RxNodeDefinition* debugNode); // 0x8071B0
@@ -2845,7 +2846,7 @@ RwRaster* RwD3D9RasterStreamReadDDS(RwStream* stream); // 0x81F360
 RwTexture* RwD3D9DDSTextureRead(const RwChar* name, const RwChar* maskname); // 0x820A10
 RwBool RwD3D9RasterIsCompressed(const RwRaster* raster); // 0x820C90
 RwBool RwD3D9DeviceSupportsDXTTexture(); // 0x7F9C30
-void* RwD3D9GetCurrentD3DDevice(); // 0x7F9D50
+IDirect3DDevice9* RwD3D9GetCurrentD3DDevice(); // 0x7F9D50
 RwUInt32 RwD3D9EngineGetMaxMultiSamplingLevels(); // 0x7F84E0
 void RwD3D9EngineSetMultiSamplingLevels(RwUInt32 numLevels); // 0x7F84F0
 void RwD3D9EngineSetRefreshRate(RwUInt32 refreshRate); // 0x7F8580

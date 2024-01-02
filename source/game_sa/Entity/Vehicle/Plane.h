@@ -63,27 +63,28 @@ public:
     int32        field_9DC;
     int32        field_9E0;
     int32        field_9E4;
-    FxSystem_c*  m_apJettrusParticles[4];
+    std::array<FxSystem_c*, 4> m_apJettrusParticles;
     FxSystem_c*  m_pSmokeParticle;
     uint32       m_nSmokeTimer;
     bool         m_bSmokeEjectorEnabled;
+
+    static constexpr auto Type = VEHICLE_TYPE_PLANE;
 
 public:
     static int32& GenPlane_ModelIndex;
     static uint32& GenPlane_Status;
     static uint32& GenPlane_LastTimeGenerated;
 
-    static bool& GenPlane_Active;               // true
-    static float& ANDROM_COL_ANGLE_MULT;        // 0.00015
-    static float& HARRIER_NOZZLE_ROTATE_LIMIT;  // 5000.0
-    static float& HARRIER_NOZZLE_SWITCH_LIMIT;  // 3000.0
-    static float& PLANE_MIN_PROP_SPEED;         // 0.05
-    static float& PLANE_STD_PROP_SPEED;         // 0.18
-    static float& PLANE_MAX_PROP_SPEED;         // 0.34
-    static float& PLANE_ROC_PROP_SPEED;         // 0.01
+    static bool& GenPlane_Active;
+    static float& ANDROM_COL_ANGLE_MULT;
+    static uint16& HARRIER_NOZZLE_ROTATE_LIMIT;
+    static uint16& HARRIER_NOZZLE_SWITCH_LIMIT;
+    static float& PLANE_MIN_PROP_SPEED;
+    static float& PLANE_STD_PROP_SPEED;
+    static float& PLANE_MAX_PROP_SPEED;
+    static float& PLANE_ROC_PROP_SPEED;
 
 public:
-    CPlane(plugin::dummy_func_t) : CAutomobile(plugin::dummy) { /* todo: remove NOTSA */ }
     CPlane(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CPlane() override;
 
@@ -94,7 +95,7 @@ public:
     void ProcessFlyingCarStuff() override;
     void PreRender() override;
     void Render() override;
-    void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override;
+    void BlowUpCar(CEntity* damager, bool bHideExplosion) override;
     void Fix() override;
     void OpenDoor(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) override;
     void SetupDamageAfterLoad() override;
@@ -127,7 +128,7 @@ private:
     void ProcessFlyingCarStuff_Reversed() { CPlane::ProcessFlyingCarStuff(); };
     void PreRender_Reversed() { CPlane::PreRender(); };
     void Render_Reversed() { CPlane::Render(); };
-    void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) { CPlane::BlowUpCar(damager, bHideExplosion); };
+    void BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion) { CPlane::BlowUpCar(damager, bHideExplosion); };
     void Fix_Reversed() { CPlane::Fix(); };
     void OpenDoor_Reversed(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) { CPlane::OpenDoor(ped, componentId, door, doorOpenRatio, playSound); };
     void SetupDamageAfterLoad_Reversed() { CPlane::SetupDamageAfterLoad(); };

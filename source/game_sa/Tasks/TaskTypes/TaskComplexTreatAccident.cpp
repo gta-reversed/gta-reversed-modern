@@ -14,10 +14,10 @@ void CTaskComplexTreatAccident::InjectHooks()
     RH_ScopedInstall(Constructor, 0x658AB0);
     RH_ScopedInstall(CreateSubTask, 0x659E90);
     RH_ScopedInstall(ComputeHeading, 0x658AF0);
-    RH_ScopedInstall(Clone_Reversed, 0x659A90);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x65A8F0);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x65A830);
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x658B90);
+    RH_ScopedVirtualInstall(Clone, 0x659A90);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x65A8F0);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x65A830);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x658B90);
 }
 
 // 0x658AB0
@@ -52,8 +52,7 @@ CTask* CTaskComplexTreatAccident::ControlSubTask(CPed* ped)
 }
 
 // 0x659A90
-CTask* CTaskComplexTreatAccident::Clone()
-{
+CTask* CTaskComplexTreatAccident::Clone() const {
     return Clone_Reversed();
 }
 
@@ -70,7 +69,7 @@ CTask* CTaskComplexTreatAccident::CreateNextSubTask_Reversed(CPed* ped)
 
         if (targetPed && !targetPed->bFadeOut)
         {
-            targetPed->m_nDeathTime = CTimer::GetTimeInMS();
+            targetPed->m_nDeathTimeMS = CTimer::GetTimeInMS();
             auto newSubTask = CreateSubTask(TASK_SIMPLE_GIVE_CPR, ped);
             ped->m_fCurrentRotation = ComputeHeading(ped);
             ped->m_fAimingRotation = ped->m_fCurrentRotation;
@@ -89,7 +88,7 @@ CTask* CTaskComplexTreatAccident::CreateFirstSubTask_Reversed(CPed* ped)
 
     if (targetPed && !targetPed->bFadeOut)
     {
-        targetPed->m_nDeathTime = CTimer::GetTimeInMS();
+        targetPed->m_nDeathTimeMS = CTimer::GetTimeInMS();
         ped->Say(232, 0, 1.0F, false, false, false);
         g_ikChainMan.LookAt("TaskTreatAccident", ped, targetPed, 5000, BONE_HEAD, nullptr, true, 0.25F, 500, 3, false);
         return CreateSubTask(TASK_SIMPLE_ACHIEVE_HEADING, ped);
@@ -103,8 +102,7 @@ CTask* CTaskComplexTreatAccident::ControlSubTask_Reversed(CPed* ped)
     return m_pSubTask;
 }
 
-CTask* CTaskComplexTreatAccident::Clone_Reversed()
-{
+CTask* CTaskComplexTreatAccident::Clone_Reversed() const {
     return new CTaskComplexTreatAccident(m_pAccident);
 }
 

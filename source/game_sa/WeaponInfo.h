@@ -48,8 +48,8 @@ public:
             uint32 bOnlyFreeAim : 1;
             uint32 bMoveAim : 1;  // can move when aiming
             uint32 bMoveFire : 1; // can move when firing
-            uint32  : 1;        
-            uint32  : 1;        
+            uint32  : 1;
+            uint32  : 1;
 
             uint32 bThrow : 1;
             uint32 bHeavy : 1; // can't run fast with this weapon
@@ -108,22 +108,25 @@ public:
     static eWeaponFire FindWeaponFireType(const char *name);
     static eStats GetSkillStatIndex(eWeaponType weaponType);
 
-    auto GetCrouchReloadAnimationID() -> AnimationId;
-    auto GetTargetHeadRange() -> float;
-    auto GetWeaponReloadTime() -> uint32;
+    auto GetCrouchReloadAnimationID() const -> AnimationId;
+    auto GetTargetHeadRange() const -> float;
+    auto GetWeaponReloadTime() const -> uint32;
 
-    // NOTSA
-
-    // Check if weapon has skill stats
     static bool WeaponHasSkillStats(eWeaponType type);
-
-    // Get weapon info index for this type and with this skill
     static uint32 GetWeaponInfoIndex(eWeaponType weaponType, eWeaponSkill skill);
-
     // Return both model IDs as an array
-    auto GetModels() const { return std::to_array({ m_nModelId1, m_nModelId2 }); }
-};
+    [[nodiscard]] auto GetModels() const { return std::to_array({ m_nModelId1, m_nModelId2 }); }
 
+    //! NOTSA: Load models of this weapon (Blocks thread until loaded)
+    void StreamModelsForWeapon(eStreamingFlags streamingFlags);
+
+    //! NOTSA: GetWeaponInfo for specific ped.
+    static auto GetWeaponInfo(CPed* ped) {
+        return GetWeaponInfo(ped->GetActiveWeapon().m_Type, ped->GetWeaponSkill());
+    }
+
+    const auto& GetAimingOffset() const { return g_GunAimingOffsets[m_nAimOffsetIndex]; }
+};
 VALIDATE_SIZE(CWeaponInfo, 0x70);
 
 // list of weapon infos. Count: MAX_WEAPON_INFOS (80)

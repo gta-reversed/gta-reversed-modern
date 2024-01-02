@@ -6,14 +6,14 @@ void CRoadBlocks::InjectHooks() {
     RH_ScopedClass(CRoadBlocks);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Init, 0x461100);
-    // RH_ScopedInstall(ClearScriptRoadBlocks, 0x460EC0);
-    // RH_ScopedInstall(ClearSpaceForRoadBlockObject, 0x461020);
-    // RH_ScopedInstall(CreateRoadBlockBetween2Points, 0x4619C0);
-    // RH_ScopedInstall(GenerateRoadBlockCopsForCar, 0x461170);
-    // RH_ScopedInstall(GenerateRoadBlocks, 0x4629E0);
-    // RH_ScopedInstall(GetRoadBlockNodeInfo, 0x460EE0);
-    // RH_ScopedInstall(RegisterScriptRoadBlock, 0x460DF0);
+    RH_ScopedInstall(Init, 0x461100, { .reversed = false });
+    RH_ScopedInstall(ClearScriptRoadBlocks, 0x460EC0, { .reversed = false });
+    RH_ScopedInstall(ClearSpaceForRoadBlockObject, 0x461020, { .reversed = false });
+    RH_ScopedInstall(CreateRoadBlockBetween2Points, 0x4619C0, { .reversed = false });
+    RH_ScopedInstall(GenerateRoadBlockCopsForCar, 0x461170, { .reversed = false });
+    RH_ScopedInstall(GenerateRoadBlocks, 0x4629E0, { .reversed = false });
+    RH_ScopedInstall(GetRoadBlockNodeInfo, 0x460EE0, { .reversed = false });
+    RH_ScopedInstall(RegisterScriptRoadBlock, 0x460DF0, { .reversed = false });
 }
 
 // 0x461100
@@ -43,6 +43,8 @@ void CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* vehicle, int32 pedsPosit
 
 // 0x4629E0
 void CRoadBlocks::GenerateRoadBlocks() {
+    ZoneScoped;
+
     plugin::Call<0x4629E0>();
 }
 

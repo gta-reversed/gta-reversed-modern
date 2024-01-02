@@ -35,8 +35,7 @@ CTaskSimpleJetPack::CTaskSimpleJetPack(const CVector* pVecTargetPos, float fCrui
     m_fLegSwingSideSpeed = 0.0f;
     m_fLegTwistSpeed = 0.0f;
 
-    if (entity)
-        entity->RegisterReference(&m_pTargetEnt);
+    CEntity::SafeRegisterRef(m_pTargetEnt);
 
     if (pVecTargetPos)
         m_vecTargetPos = *pVecTargetPos;
@@ -66,11 +65,11 @@ bool CTaskSimpleJetPack::MakeAbortable_Reversed(CPed* ped, eAbortPriority priori
 }
 
 // 0x67C690
-CTask* CTaskSimpleJetPack::Clone() {
+CTask* CTaskSimpleJetPack::Clone() const {
     return Clone_Reversed();
 }
-CTask* CTaskSimpleJetPack::Clone_Reversed() {
-    return plugin::CallMethodAndReturn<CTask*, 0x67C690, CTaskSimpleJetPack*>(this);
+CTask* CTaskSimpleJetPack::Clone_Reversed() const {
+    return plugin::CallMethodAndReturn<CTask*, 0x67C690, const CTaskSimpleJetPack*>(this);
 }
 
 // 0x6801F0
@@ -79,7 +78,7 @@ bool CTaskSimpleJetPack::ProcessPed(CPed* ped) {
 }
 
 // 0x67F6A0
-void CTaskSimpleJetPack::Process(CPed* ped) {
+void CTaskSimpleJetPack::RenderJetPack(CPed* ped) {
     plugin::CallMethod<0x67F6A0, CTaskSimpleJetPack*>(this, ped);
 }
 

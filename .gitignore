@@ -4,6 +4,7 @@
 *~
 .*.swp
 /CMakeLists.txt.user
+/cmake-build-debug
 
 # ELF files
 *.o
@@ -49,3 +50,6 @@ perf.data*
 # macOS
 .DS_Store
 *.ini
+
+# Code Analyzers
+/.PVS-Studio

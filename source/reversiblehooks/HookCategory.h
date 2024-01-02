@@ -31,7 +31,10 @@ public:
 
     // Accessors
     auto OverallState()         const { return m_overallState; }
-                                
+
+    bool Disabled()             const { return m_allCatsDisabled && m_itemsDisabled; }
+    bool ItemsDisabled()        const { return m_itemsDisabled; }
+
     auto ItemsState()           const { return m_itemsState; }
                                 
     auto SubcategoriesState()   const { return m_subcatsState; }
@@ -52,7 +55,7 @@ public:
     bool Open()                 const { return m_isOpen; }
     void Open(bool open)              { m_isOpen = open; }
 
-    // Adds one item to this category and deals with possible state change
+    //! Add one item to this category (Deal with possible state change)
     void AddItem(Item item) {
         assert(!FindItem(item->Name())); // Make sure there are no duplicate names :D
 
@@ -61,46 +64,54 @@ public:
             rng::upper_bound(m_items, item->Name(), {}, [](auto&& v) { return v->Name(); }),
             std::move(item)
         );
+
         OnOneItemStateChange(emplacedItem); // Deal with possible state change introduced by item
     }
 
-    // Enable/disable all items at once (subcategories' items included)
+    //! Enable/disable all items at once (subcategories' items included)
     void SetAllItemsEnabled(bool enabled) {
-        SetAllItemsEnabled_Internal(enabled);
+        SetAllItemsState_Internal(enabled);
     }
 
-    // Enable/disable all items at once (subcategories' items excluded)
-    void SetOurItemsEnabled(bool enabled) {
-        for (auto& v : m_items) {
-            v->State(enabled);
+    //! Toggle state of all items (subcategories' items included)
+    void ToggleAllItemsState() {
+        if (OverallState() == HooksState::MIXED) {
+            SetAllItemsState_Internal(m_triStateToggle);
+            m_triStateToggle = !m_triStateToggle;
+        } else {
+            const auto newState = OverallState() != HooksState::ALL; // ALL => NONE; NONE => ALL
+            SetAllItemsState_Internal(newState);
+            m_triStateToggle = !newState;
         }
+    }
 
-        m_itemsState = enabled ? HooksState::ALL : HooksState::NONE;
+    // Enable/disable all _our_ items at once (subcategories' items _excluded_)
+    void SetOurItemsState(bool enabled) {
+        SetOurItemsState_Internal(enabled);
         ReCalculateOverallStateAndMaybeNotify();
     }
 
     // Set one item's state - Calling `item->SetState` isn't advised as the category's state won't be updated.
     void SetItemEnabled(Item& item, bool enabled) {
-        if (enabled != item->Hooked()) {
-            item->State(enabled);
+        if (item->State(enabled)) { // State changed?
             OnOneItemStateChange(item);
         }
     }
 
-    // Find item by name (function name)
+    //! Find item by name (function name)
     Item FindItem(std::string_view name) {
         const auto it = rng::find_if(m_items, [&](const auto& c) { return c->Name() == name; });
         return it == m_items.end() ? nullptr : *it;
     }
 
-    // Find subcategory by name - Only checks for top-level children
+    //! Find subcategory by name (Only checks for direct sub categories [No recursion])
     HookCategory* FindSubcategory(std::string_view name) {
         const auto it = rng::find_if(m_subCategories, [&](const auto& c) { return c.Name() == name; });
         return it == m_subCategories.end() ? nullptr : &*it;
     }
 
-    // Find subcategory by name - Only checks for top-level children
-    // If none found a sub-category will be created with the given name.
+    //! Find subcategory by name - Only checks for top-level children
+    //! If none found a sub-category will be created with the given name.
     auto& FindOrCreateSubcategory(std::string_view name) {
         if (auto* cat = FindSubcategory(name))
             return *cat; // Return found
@@ -109,9 +120,9 @@ public:
         return m_subCategories.emplace_back(std::string{ name }, this);
     }
 
-    // Iterates over all items, including those in all subcategories
-    // NOTE: Make sure the function doesn't add/remove items/subcategories!
-    //       (Underlaying storages are vectors, which don't like being modifies while they're being iterated over)
+    //! Iterates over all items, including those in all subcategories
+    //! NOTE: Make sure the function doesn't add/remove items/subcategories!
+    //!       (Underlaying storages are vectors, which don't like being modifies while they're being iterated over)
     template<typename Fn>
     void ForEachItem(Fn&& fn) {
         for (auto& item : m_items) {
@@ -122,8 +133,21 @@ public:
         }
     }
 
-    // Called when `InjectHooksMain` has finished - That is, all hooks have been injected.
-    // From this point on no items/categories should be added/removed.
+    /*!
+    * @brief Iterate over all sub-categories recursively
+    *
+    * @param fn A functor taking a `HookCategory&` as it's first argument
+    */
+    template<typename Fn>
+    void ForEachCategory(Fn&& fn) {
+        std::invoke(fn, *this);
+        for (auto& cat : m_subCategories) {
+            cat.ForEachCategory(fn);
+        }
+    }
+
+    //! Called when `InjectHooksMain` has finished - That is, all hooks have been injected.
+    //! From this point on no items/categories should be added/removed.
     void OnInjectionEnd() {
         // Re-sort all categories (uses operator<=> defined below)
         m_subCategories.sort();
@@ -132,30 +156,112 @@ public:
         for (auto&& cat : m_subCategories) {
             cat.OnInjectionEnd();
         }
+
+        // Call this only after the above (Because by then all sub-categories have their disabled state calculated properly)
+        CalculateIsDisabled();
     }
 
 private:
-    // Set all our and subcategories' items to the specified state.
-    // `dontNotify` - Useful to avoid unnecessary parent notifications (Only the level 1 caller should notify it's parents)
-    void SetAllItemsEnabled_Internal(bool enabled, bool notifyParent = true) {
-        for (auto& item : m_items) {
-            item->State(enabled);
-        }
+    /*!
+    * @brief Calculates and caches disabled state
+    * @returns If all items (including those of sub-category's) is disabled
+    */
+    void CalculateIsDisabled() {
+        // Update subcategories first
+        rng::for_each(m_subCategories, &HookCategory::CalculateIsDisabled);
 
-        for (auto& cat : m_subCategories) {
-            cat.SetAllItemsEnabled_Internal(enabled, false); // No need to notify parents as we'll do that ourselves
-        }
-
-        const auto state = enabled ? HooksState::ALL : HooksState::NONE;
-        m_itemsState = state;
-        m_subcatsState = state;
-        ReCalculateOverallStateAndMaybeNotify(notifyParent); // It's enough if only we notify our parent
+        // Now update ourselves
+        m_allCatsDisabled = rng::all_of(m_subCategories, [](HookCategory& cat) {  return cat.Disabled(); });
+        m_itemsDisabled   = rng::all_of(m_items, [](const Item& item)  { return item->Locked(); });
     }
 
-    // Recalculates overall state, and if changed, notifies parent.
-    // Returns true if state changed
+    /*!
+    * @brief Change state of all entities
+    * 
+    * @param entities         The entities whos state is to be changed
+    * @param currState        Current overall state
+    * @param DoSetEntityState Function to change the state of one entity, should return whenever the (entity's) state has changed to the expected value.
+    * @param GetEntityState   Function to get the state of an entity.
+    * 
+    * @return The new overall state
+    */
+    template<rng::input_range R>
+    HooksState SetEntitiesState(R&& entities, HooksState currState, bool newState, auto&& DoSetEntityState, auto&& GetEntityState) {
+        // Important early out to prevent ever returning `HooksState::ALL` with no entries
+        if (rng::empty(entities)) {
+            return HooksState::NONE;
+        }
+
+        const auto nchangedToState = (size_t)(rng::count_if(entities, DoSetEntityState));
+        if (nchangedToState == rng::size(entities)) { // All changed to requested state
+            return newState
+                ? HooksState::ALL
+                : HooksState::NONE;
+        } else { // Not all has changed, recalculate state manually
+            return CalculateEntitesOverallState(std::forward<R>(entities), GetEntityState);
+        }
+    }
+
+    /*!
+    * @brief Set all our and sub-categories' items to the specified state.
+    *
+    * @param newState The new state of all items
+    * @param notifyParent If the parent should be notified, this should be true only for the top-level call
+    * 
+    * @return If the overall state has changed of the category
+    */
+    bool SetAllItemsState_Internal(bool newState, bool notifyParent = true) {
+        SetOurItemsState_Internal(newState);
+        SetAllCategoriesState_Internal(newState);
+        return ReCalculateOverallStateAndMaybeNotify(notifyParent); // It's enough if only we notify our parent
+    }
+
+    /*!
+    * @brief Set state of all items at once. NOTE: `ReCalculateOverallStateAndMaybeNotify` has to be called after.
+    * @param enabled New state of items
+    */
+    void SetOurItemsState_Internal(bool enabled) {
+        m_itemsState = SetEntitiesState(m_items, m_itemsState, enabled,
+            [
+                enabled,
+                expectedState = enabled ? HooksState::ALL : HooksState::NONE
+            ](Item& item) {
+                (void)item->State(enabled);
+                return item->Hooked() == enabled;
+            },
+            &GetItemHookState
+        );
+    }
+
+    /*!
+    * @brief Set state of all sub-categories at once. NOTE: `ReCalculateOverallStateAndMaybeNotify` has to be called after.
+    * 
+    * @param enabled New state of the sub-categories
+    */
+    void SetAllCategoriesState_Internal(bool enabled) {
+        m_subcatsState = SetEntitiesState(m_subCategories, m_subcatsState, enabled,
+            [
+                enabled,
+                expectedState = enabled ? HooksState::ALL : HooksState::NONE
+            ](HookCategory& cat) {
+                (void)cat.SetAllItemsState_Internal(enabled, false);
+                return cat.OverallState() == expectedState;
+            },
+            &HookCategory::OverallState
+        );
+    }
+
+    /*!
+    * @brief Recalculates overall state, and if changed, notifies parent.
+    *
+    * @param notifyParent If the parent should be notified of the state change
+    * 
+    * @return If the overall state has changed
+    */
     bool ReCalculateOverallStateAndMaybeNotify(bool notifyParent = true) {
-        const auto Calculate = [this] {
+        const auto prev = m_overallState;
+
+        m_overallState = [this] {
             if (m_items.empty()) {
                 return m_subcatsState;
             }
@@ -168,11 +274,8 @@ private:
                 return m_subcatsState; // Both equal, we can return either - Either both NONE or ALL
             }
 
-            return HooksState::SOME; // They differ 
-        };
-
-        const auto prev = m_overallState;
-        m_overallState = Calculate();
+            return HooksState::MIXED; // They differ 
+        }();
 
         const bool changed = prev != m_overallState;
 
@@ -184,53 +287,62 @@ private:
 
         return changed;
     }
+    
+    template<rng::input_range R, typename Fn>
+    static HooksState CalculateEntitesOverallState(R&& entities, Fn&& GetEntityState) {
+        size_t ninactive{}, nactive{}, ntotal{};
 
+        for (auto&& e : entities) {
+            switch (std::invoke(GetEntityState, e)) {
+            case HooksState::NONE:
+                ninactive++;
+                break;
+            case HooksState::ALL:
+                nactive++;
+                break;
+            }
+            ntotal++;
+        }
+
+        if (ninactive == ntotal || ntotal == 0) {
+            return HooksState::NONE;
+        } else if (nactive == ntotal) {
+            return HooksState::ALL;
+        } else {
+            return HooksState::MIXED;
+        }
+    }
+
+    /*!
+    * @brief Helper function to recaulcate new state of entities when one item's state changes
+    *
+    * @param entities The entitites to process (Items or Categories)
+    * @param currOverallState Current overall state of the entities
+    * @param entityState The changed entity's state
+    * @param isActivePred The function used to check if an entity is hooked (active) or not (should return true/false respectively)
+    */
     // Helper function to recaulcate new state of collection when one item's state changes
     template<rng::input_range R, typename Fn>
-    static HooksState CalculateCollectionOverallStateOnEntryChange(R&& collection, HooksState currentCollectiveState, HooksState itemState, Fn&& isHookedPredicate) {
-        assert(!collection.empty()); // Logically impossible for the collection to be empty (It has to contain at least the entry whose state just changed)
-
-        if (itemState == currentCollectiveState) {
-            return currentCollectiveState; // No changes
-
+    static HooksState CalculateEntitiesOverallStateOnEntryChange(R&& entities, HooksState entitiesOverallState, HooksState entityState, Fn&& GetEntityState) {
+        if (entityState == entitiesOverallState) {
+            return entitiesOverallState; // No changes
         }
 
-        // The collection consists of this entry alone,
-        // so overall state is decided by it alone
-        if (collection.size() == 1) {
-            return itemState;
+        if (entitiesOverallState != HooksState::MIXED) { // All entities have the same state
+            return HooksState::MIXED; // This entity has changed so the state must be mixed now
         }
 
-        // Multiple entries at this point
-        switch (currentCollectiveState) {
-        case HooksState::ALL:
-        case HooksState::NONE: {
-            return HooksState::SOME; // At this point the state of the collection and item differ
-        }
-        case HooksState::SOME: { // Has to calculate it all again - TODO: Check if this is slow - If so, it can be optimized further
-            const auto hookedCount = rng::count_if(collection, isHookedPredicate);
-            if (hookedCount == 0) {
-                return HooksState::NONE;
-            } else if (hookedCount == collection.size()) {
-                return HooksState::ALL;
-            } else {
-                return HooksState::SOME;
-            }
-        }
-        }
-
-        assert(0);
-        return HooksState::SOME; // Theoritically unreachable - Had to put it here to avoid compiler warnings :D
+        return CalculateEntitesOverallState(std::forward<R>(entities), std::forward<Fn>(GetEntityState));
     }
 
     // Called when a sub-category's overall state changes
     // (Will propagate to parent if it affected this category's overall state)
     void OnSubcategoryStateChanged(HookCategory& cat) {
-        m_subcatsState = CalculateCollectionOverallStateOnEntryChange(
+        m_subcatsState = CalculateEntitiesOverallStateOnEntryChange(
             m_subCategories,
             m_subcatsState,
             cat.OverallState(),
-            [](const auto& v) { return v.OverallState() == HooksState::ALL; }
+            [](const HookCategory& c) { return c.OverallState(); }
         );
         ReCalculateOverallStateAndMaybeNotify();
     }
@@ -239,13 +351,19 @@ private:
     // Also not called if item is modified from the outside
     // (Currently only called by `AddItem` and `SetItemEnabled`, but not from `SetAllItemsEnabled`)
     void OnOneItemStateChange(const Item& item) {
-        m_itemsState = CalculateCollectionOverallStateOnEntryChange(
+        m_itemsState = CalculateEntitiesOverallStateOnEntryChange(
             m_items,
             m_itemsState,
-            item->Hooked() ? HooksState::ALL : HooksState::NONE,
-            [](const auto& v) { return v->Hooked(); }
+            GetItemHookState(item),
+            GetItemHookState
         );
         ReCalculateOverallStateAndMaybeNotify();
+    }
+
+    static HooksState GetItemHookState(const Item& i) {
+        return i->Hooked()
+            ? HooksState::ALL
+            : HooksState::NONE;
     }
 
     // Main ordering criteria is the no. of top-level sub categories
@@ -258,12 +376,15 @@ private:
     }
 public:
     // Stuff required for the Hooks tool
-    HooksState                m_itemsState{ HooksState::ALL };            // Collective state of all items (Can be ignored if `m_items.empty()` (In this case it's always NONE))
-    HooksState                m_subcatsState{ HooksState::ALL };          // Collective state of all subcategories (Can be ignored if `m_subCategories.empty()` (In this case it's always NONE))
-    HooksState                m_overallState{ HooksState::ALL };          // Overall state - Combination of the above 2 - Calculated by `ReCalculateOverallStateAndMaybeNotify`
-    bool                      m_isVisible{true};                          // Updated each time the search box is updated. Indicates whenever we should be visible in the GUI.
-    bool                      m_isOpen{};                                 // Is our tree currently open
-    bool                      m_anyItemsVisible{};                        // Used when searching 
+    HooksState                m_itemsState{ HooksState::ALL };   // Collective state of all items (Can be ignored if `m_items.empty()` (In this case it's always NONE))
+    HooksState                m_subcatsState{ HooksState::ALL }; // Collective state of all subcategories (Can be ignored if `m_subCategories.empty()` (In this case it's always NONE))
+    HooksState                m_overallState{ HooksState::ALL }; // Overall state - Combination of the above 2 - Calculated by `ReCalculateOverallStateAndMaybeNotify`
+    bool                      m_isVisible{true};                 // Updated each time the search box is updated. Indicates whenever we should be visible in the GUI.
+    bool                      m_isOpen{};                        // Is our tree currently open
+    bool                      m_triStateToggle{};                // Used by the UI when m_overallState is mixed to decide what the next state should be
+    bool                      m_anyItemsVisible{true};           // Used when searching
+    bool                      m_allCatsDisabled{true};           // Are all owned sub-categories disabled
+    bool                      m_itemsDisabled{true};             // Are all owned items disabled
 private:
 
     HookCategory*             m_parent{};        // Category we belong to - In case of `RootHookCategory` this is always `nullptr`.

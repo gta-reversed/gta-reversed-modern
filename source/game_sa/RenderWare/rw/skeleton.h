@@ -64,78 +64,87 @@ enum RsEventStatus
 };
 typedef enum RsEventStatus RsEventStatus;
 
-enum RsEvent
-{
-#ifdef RWSPLASH
-    rsDISPLAYSPLASH,
-#endif
-    rsCAMERASIZE,
-    rsCOMMANDLINE,
-    rsFILELOAD,
-    rsINITDEBUG,
-    rsINPUTDEVICEATTACH,
-    rsLEFTBUTTONDOWN,
-    rsLEFTBUTTONUP,
-    rsMOUSEMOVE,
-    rsMOUSEWHEELMOVE,
-    rsPLUGINATTACH,
-    rsREGISTERIMAGELOADER,
-    rsRIGHTBUTTONDOWN,
-    rsRIGHTBUTTONUP,
-    rsRWINITIALIZE,
-    rsRWTERMINATE,
-    rsSELECTDEVICE,
-    rsINITIALIZE,
-    rsTERMINATE,
-    rsIDLE,
-    rsKEYDOWN,
-    rsKEYUP,
-    rsQUITAPP,
-    rsPADBUTTONDOWN,
-    rsPADBUTTONUP,
-    rsPADANALOGUELEFT,
-    rsPADANALOGUELEFTRESET,
-    rsPADANALOGUERIGHT,
-    rsPADANALOGUERIGHTRESET,
-    rsPREINITCOMMANDLINE,
-    rsACTIVATE,
-    rsSETMEMORYFUNCS
+enum RsEvent {
+    rsCAMERASIZE            =  0,
+    rsCOMMANDLINE           =  1,
+    rsFILELOAD              =  2,
+    rsINITDEBUG             =  3,
+    rsINPUTDEVICEATTACH     =  4,
+    rsLEFTBUTTONDOWN        =  5,
+    rsLEFTBUTTONUP          =  6,
+    rsMOUSEMOVE             =  7,
+    rsMOUSEWHEELMOVE        =  8,
+    rsPLUGINATTACH          =  9,
+    rsREGISTERIMAGELOADER   = 10,
+
+    rsRIGHTBUTTONDOWN       = 11,
+    rsRIGHTBUTTONUP         = 12,
+    rsMIDDLEBUTTONDOWN      = 13,
+    rsMIDDLEBUTTONUP        = 14,
+    rsMOUSEWHEELMOVEDUP     = 15,
+    rsMOUSEWHEELMOVEDDOWN   = 16,
+    rsFIRST_XBUTTONUP       = 17,
+    rsSECOND_XBUTTONUP      = 18,
+    rsFIRST_XBUTTONDOWN     = 19,
+    rsSECOND_XBUTTONDOWN    = 20,
+
+    rsRWINITIALIZE          = 21,
+    rsRWTERMINATE           = 22,
+    rsSELECTDEVICE          = 23,
+    rsINITIALIZE            = 24,
+    rsTERMINATE             = 25,
+    rsIDLE                  = 26,
+    rsFRONTENDIDLE          = 27,
+    rsKEYDOWN               = 28,
+    rsKEYUP                 = 29,
+    rsQUITAPP               = 30,
+
+    rsPADBUTTONDOWN         = 31,
+    rsPADBUTTONUP           = 32,
+    rsPADANALOGUELEFT       = 33,
+    rsPADANALOGUELEFTRESET  = 34,
+    rsPADANALOGUERIGHT      = 35,
+    rsPADANALOGUERIGHTRESET = 36,
+    rsPREINITCOMMANDLINE    = 37,
+    rsACTIVATE              = 38,
+    rsSETMEMORYFUNCS        = 39,
 };
 typedef enum RsEvent RsEvent;
 
-typedef RsEventStatus (*RsInputEventHandler)(RsEvent event, void *param);
+typedef RsEventStatus (*RsInputEventHandler)(RsEvent event, void* param);
 
 typedef struct RsInputDevice RsInputDevice;
-struct RsInputDevice
-{
+struct RsInputDevice {
     RsInputDeviceType inputDeviceType;
     RwBool used;
     RsInputEventHandler inputEventHandler;
 };
 
-struct psGlobalType
-{
+/**
+ * platform-specific global data
+ */
+struct psGlobalType {
     HWND      window;
     HINSTANCE instance;
     RwBool    fullScreen;
     RwV2d     lastMousePos;
-    int       field_14;
-    void*     diInterface;
-    void*     diMouse;
-    void*     diDevice1;
-    void*     diDevice2;
+    uint32    lastRenderTime;
+
+    LPDIRECTINPUT8 diInterface;
+    LPDIRECTINPUTDEVICE8 diMouse;
+    LPDIRECTINPUTDEVICE8 diDevice1;
+    LPDIRECTINPUTDEVICE8 diDevice2;
 };
 
 typedef struct RsGlobalType RsGlobalType;
-struct RsGlobalType
-{
-    const RwChar *appName;
+struct RsGlobalType {
+    const RwChar* appName;
     RwInt32 maximumWidth;
     RwInt32 maximumHeight;
     RwInt32 frameLimit;
-    RwBool  quit;
+    RwBool quit;
 
-    psGlobalType   *ps; /* platform specific data */
+    psGlobalType* ps; /* platform specific data */
 
     RsInputDevice keyboard;
     RsInputDevice mouse;
@@ -154,67 +163,79 @@ struct RsMouseStatus
 #endif /* defined(macintosh) */
 };
 
-enum RsKeyCodes
-{
-    rsESC       = 128,
+enum RsKeyCodes : int32 {
+    rsESC            = 1000,
 
-    rsF1        = 129,
-    rsF2        = 130,
-    rsF3        = 131,
-    rsF4        = 132,
-    rsF5        = 133,
-    rsF6        = 134,
-    rsF7        = 135,
-    rsF8        = 136,
-    rsF9        = 137,
-    rsF10       = 138,
-    rsF11       = 139,
-    rsF12       = 140,
+    rsF1             = 1001,
+    rsF2             = 1002,
+    rsF3             = 1003,
+    rsF4             = 1004,
+    rsF5             = 1005,
+    rsF6             = 1006,
+    rsF7             = 1007,
+    rsF8             = 1008,
+    rsF9             = 1009,
+    rsF10            = 1010,
+    rsF11            = 1011,
+    rsF12            = 1012,
 
-    rsINS       = 141,
-    rsDEL       = 142,
-    rsHOME      = 143,
-    rsEND       = 144,
-    rsPGUP      = 145,
-    rsPGDN      = 146,
+    rsINS            = 1013,
+    rsDEL            = 1014,
+    rsHOME           = 1015,
+    rsEND            = 1016,
+    rsPGUP           = 1017,
+    rsPGDN           = 1018,
 
-    rsUP        = 147,
-    rsDOWN      = 148,
-    rsLEFT      = 149,
-    rsRIGHT     = 150,
+    rsUP             = 1019,
+    rsDOWN           = 1020,
+    rsLEFT           = 1021,
+    rsRIGHT          = 1022,
 
-    rsPADINS    = 151,
-    rsPADDEL    = 152,
-    rsPADHOME   = 153,
-    rsPADEND    = 154,
-    rsPADPGUP   = 155,
-    rsPADPGDN   = 156,
+    rsDIVIDE         = 1023,
+    rsTIMES          = 1024,
+    rsPLUS           = 1025,
+    rsMINUS          = 1026,
+    rsPADDEL         = 1027,
+    rsPADEND         = 1028,
+    rsPADDOWN        = 1029,
+    rsPADPGDN        = 1030,
+    rsPADLEFT        = 1031,
+    rsPAD5           = 1032,
+    rsNUMLOCK        = 1033,
+    rsPADRIGHT       = 1034,
+    rsPADHOME        = 1035,
+    rsPADUP          = 1036,
+    rsPADPGUP        = 1037,
+    rsPADINS         = 1038,
+    rsPADENTER       = 1039,
 
-    rsPADUP     = 157,
-    rsPADDOWN   = 158,
-    rsPADLEFT   = 159,
-    rsPADRIGHT  = 160,
+    rsSCROLL         = 1040,
+    rsPAUSE          = 1041,
 
-    rsNUMLOCK   = 161,
-    rsDIVIDE    = 162,
-    rsTIMES     = 163,
-    rsMINUS     = 164,
-    rsPLUS      = 165,
-    rsPADENTER  = 166,
-    rsPAD5      = 167,
+    rsBACKSP         = 1042,
+    rsTAB            = 1043,
+    rsCAPSLK         = 1044,
+    rsENTER          = 1045,
+    rsLSHIFT         = 1046,
+    rsRSHIFT         = 1047,
+    rsSHIFT          = 1048,
+    rsLCTRL          = 1049,
+    rsRCTRL          = 1050,
+    rsLALT           = 1051,
+    rsRALT           = 1052,
+    rsLWIN           = 1053,
+    rsRWIN           = 1054,
+    rsAPPS           = 1055,
 
-    rsBACKSP    = 168,
-    rsTAB       = 169,
-    rsCAPSLK    = 170,
-    rsENTER     = 171,
-    rsLSHIFT    = 172,
-    rsRSHIFT    = 173,
-    rsLCTRL     = 174,
-    rsRCTRL     = 175,
-    rsLALT      = 176,
-    rsRALT      = 177,
+    rsNULL           = 1056,
 
-    rsNULL       = 255
+    rsMOUSE_LEFT_BUTTON       = 1,
+    rsMOUSE_MIDDLE_BUTTON     = 2,
+    rsMOUSE_RIGHT_BUTTON      = 3,
+    rsMOUSE_WHEEL_UP_BUTTON   = 4,
+    rsMOUSE_WHEEL_DOWN_BUTTON = 5,
+    rsMOUSE_X1_BUTTON         = 6,
+    rsMOUSE_X2_BUTTON         = 7,
 };
 typedef enum RsKeyCodes RsKeyCodes;
 

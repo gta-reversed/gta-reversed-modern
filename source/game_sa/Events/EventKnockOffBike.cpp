@@ -11,11 +11,10 @@ void CEventKnockOffBike::InjectHooks()
     RH_ScopedClass(CEventKnockOffBike);
     RH_ScopedCategory("Events");
 
-    using namespace ReversibleHooks;
     RH_ScopedOverloadedInstall(Constructor, "first", 0x4AFCF0, CEventKnockOffBike*(CEventKnockOffBike::*)(CVehicle*, CVector*, CVector*, float, float, uint8, uint8, int32, CPed*, bool, bool));
     RH_ScopedOverloadedInstall(Constructor, "second", 0x4AFC70, CEventKnockOffBike*(CEventKnockOffBike::*)());
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AFEE0);
-    RH_ScopedInstall(ReportCriminalEvent_Reversed, 0x4B4E80);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AFEE0);
+    RH_ScopedVirtualInstall(ReportCriminalEvent, 0x4B4E80);
     RH_ScopedInstall(From, 0x4AFDD0);
     RH_ScopedInstall(SetPedOutCar, 0x4AFF60);
     RH_ScopedInstall(CalcForcesAndAnims, 0x4B0020);
@@ -36,10 +35,8 @@ CEventKnockOffBike::CEventKnockOffBike(CVehicle* vehicle, CVector* moveSpeed, CV
     m_knockOffType = knockOffType;
     m_exitDoor = 0;
     m_vehicle = vehicle;
-    if (m_vehicle)
-        m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_vehicle);
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventKnockOffBike::CEventKnockOffBike()
@@ -58,10 +55,8 @@ CEventKnockOffBike::CEventKnockOffBike()
 
 CEventKnockOffBike::~CEventKnockOffBike()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_vehicle);
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 CEventKnockOffBike* CEventKnockOffBike::Constructor(CVehicle* vehicle, CVector* moveSpeed, CVector* collisionImpactVelocity, float damageIntensity, float a6, uint8 knockOffType, uint8 knockOffDirection, int32 time, CPed* ped, bool isVictimDriver, bool forceKnockOff)
@@ -91,7 +86,7 @@ void CEventKnockOffBike::ReportCriminalEvent(CPed* ped)
 bool CEventKnockOffBike::AffectsPed_Reversed(CPed* ped)
 {
     if (ped->IsAlive()) {
-        if (m_vehicle && m_vehicle->m_nStatus == STATUS_TRAILER)
+        if (m_vehicle && m_vehicle->m_nStatus == STATUS_GHOST)
             return false;
         if (ped->CantBeKnockedOffBike && !ped->bHasBeenRendered && !m_forceKnockOff)
             return false;
@@ -134,10 +129,8 @@ void CEventKnockOffBike::From(const CEventKnockOffBike& right)
     m_isVictimDriver = right.m_isVictimDriver;
     m_forceKnockOff = right.m_forceKnockOff;
     m_exitDoor = right.m_exitDoor;
-    if (m_vehicle)
-        m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_vehicle);
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 // 0x4AFF60
@@ -154,7 +147,7 @@ void CEventKnockOffBike::SetPedOutCar(CPed* ped)
         m_exitDoor = TARGET_DOOR_REAR_LEFT;
     else if (m_vehicle->m_apPassengers[2] == ped)
         m_exitDoor = TARGET_DOOR_REAR_RIGHT;
-    CTaskSimpleCarSetPedOut taskCarSetPedOut(m_vehicle, m_exitDoor, true);
+    CTaskSimpleCarSetPedOut taskCarSetPedOut(m_vehicle, (eTargetDoor)m_exitDoor, true);
     taskCarSetPedOut.m_bKnockedOffBike = true;
     taskCarSetPedOut.m_bSwitchOffEngine = false;
     taskCarSetPedOut.ProcessPed(ped);
@@ -167,7 +160,7 @@ int32 CEventKnockOffBike::CalcForcesAndAnims(CPed* ped)
     uint8 numContactWheels = 0;
     float massRatio = ped->m_fMass / m_vehicle->m_fMass;
     if (m_vehicle->IsBike())
-        numContactWheels = m_vehicle->AsBike()->m_nNumContactWheels;
+        numContactWheels = m_vehicle->AsBike()->m_nNoOfContactWheels;
     else if (m_vehicle->IsAutomobile())
         numContactWheels = m_vehicle->AsAutomobile()->m_nNumContactWheels;
 
@@ -217,7 +210,10 @@ int32 CEventKnockOffBike::CalcForcesAndAnims(CPed* ped)
             ped->ApplyMoveForce(force);
             return ANIM_ID_KO_SPIN_L;
         }
+        default:
+            NOTSA_UNREACHABLE();
         }
+        break;
     case KNOCK_OFF_TYPE_SKIDBACKFRONT:
     {
         ped->m_vecMoveSpeed = m_moveSpeed;
@@ -295,25 +291,31 @@ bool CEventKnockOffBike::SetPedSafePosition(CPed* ped)
 {
     if (m_vehicle->IsBike()) {
         CBike* bike = m_vehicle->AsBike();
-        bike->m_rideAnimData.m_fAnimLean = 0.0f;
+        bike->m_RideAnimData.m_fAnimLean = 0.0f;
         bike->m_bLeanMatrixCalculated = false;
         ped->SetPedPositionInCar();
     }
+
     if (m_vehicle->GetUp().z >= 0.0f)
         ped->m_fAimingRotation = m_vehicle->GetHeading();
     else
         ped->m_fAimingRotation = CGeneral::LimitRadianAngle(m_vehicle->GetHeading() + PI);
+
     ped->m_fCurrentRotation = ped->m_fAimingRotation;
     ped->SetHeading(ped->m_fAimingRotation);
+
     if (m_vehicle->IsBike() && !m_isVictimDriver) {
         float forwardDistance = (1.0f - fabs(DotProduct(m_vehicle->GetForward(), ped->GetForward()))) * 0.8f;
         CVector distance = ped->GetPosition() - (forwardDistance * ped->GetForward());
         ped->SetPosn(distance);
     }
+
     bool isSafe = true;
     bool findClosestNode = false;
-    if (ped->m_fHealth <= 0.0f || m_ped)
+    if (ped->m_fHealth <= 0.0f || m_ped) {
         findClosestNode = true;
+    }
+
     CWorld::pIgnoreEntity = m_vehicle;
     ped->m_pEntityIgnoredCollision = m_vehicle;
     CVector savedPedPos = ped->GetPosition();
@@ -353,16 +355,14 @@ bool CEventKnockOffBike::SetPedSafePosition(CPed* ped)
             }
         }
     }
+
     if (knockPedOffBike) {
         ped->bKnockedOffBike = true;
-        if (ped->m_standingOnEntity) {
-            ped->m_standingOnEntity->CleanUpOldReference(reinterpret_cast<CEntity**>(&ped->m_standingOnEntity));
-            ped->m_standingOnEntity = nullptr;
-        }
+        CEntity::ClearReference(ped->m_standingOnEntity);
         ped->bWasStanding = false;
         ped->bIsStanding = false;
     }
+
     CWorld::pIgnoreEntity = nullptr;
     return isSafe;
 }
-

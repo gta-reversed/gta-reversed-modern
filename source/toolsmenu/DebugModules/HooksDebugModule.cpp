@@ -3,6 +3,9 @@
 #include <reversiblehooks/RootHookCategory.h>
 #include "HooksDebugModule.h"
 #include "Utility.h"
+#include <reversiblehooks/ReversibleHook/Base.h>
+#include <reversiblehooks/ReversibleHook/Simple.h>
+#include <reversiblehooks/ReversibleHook/Virtual.h>
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -10,6 +13,7 @@
 #include <string>
 #include <ranges>
 #include <optional>
+#include <format>
 
 namespace RH = ReversibleHooks;
 namespace rng = std::ranges;
@@ -28,10 +32,10 @@ namespace HookFilter {
     //static inline const std::regex INPUT_VALID_REGEX{
     //    R"r(\/?(?:\w+\/)*\w+(?:\:{2}\w*|\:))r", // We're using in r-string here to avoid the need of escaping all `\`
     //    std::regex::optimize | std::regex::icase
-    //}; 
+    //};
 
     // Used as char buffer for the ImGUI input
-    std::string m_input{};          
+    std::string m_input{};
 
     // Are the string checks case sensitive?
     // It is used, but there's no GUI to change it for now. It is case-insensitive by defult (false).
@@ -48,7 +52,7 @@ namespace HookFilter {
     // Filter of hook name
     // If `nullopt` means there was no `::` (HOOKNAME_SEP) in the user input
     // othewise if there was, it contains whatever was after it (Which might be nothing - So it's empty)
-    std::optional<std::string_view> m_hookFilter{}; 
+    std::optional<std::string_view> m_hookFilter{};
 
     // Clears both filters
     // Making all items visible again is done by `DoFilter`
@@ -125,8 +129,9 @@ namespace HookFilter {
             return std::make_pair(anyVisible, anyOpen);
         };
 
-        // If `doFilter` argument is `false` all items are set visible, and either true (if we have hooks) or false (if `cat.Items().empty()`) is returned.
-        // otherwise items are filtered and true if returned if at least 1 item is visible.
+        // If `doFilter` argument is `false` all items are set visible,
+        // and either true (if we have hooks) or false (if `cat.Items().empty()`) is returned.
+        // Otherwise items are filtered and true if returned if at least 1 item is visible.
         const auto ProcessItems = [&](bool allowFilter) {
             if (allowFilter && IsHookFilterActive()) {
                 cat.m_anyItemsVisible = false;
@@ -140,7 +145,7 @@ namespace HookFilter {
                 } else {
                     cat.m_anyItemsVisible = true;
                     for (auto& i : cat.Items()) {
-                        i->m_isVisible = true; 
+                        i->m_isVisible = true;
                     }
                 }
             }
@@ -155,7 +160,7 @@ namespace HookFilter {
                 const auto ProcessFilter = [&]() -> bool {
                     if (depth == 0) { // Special case - Root namespace depth, no need to check any tokens
                         assert(m_namespaceTokens.front().empty()); // This codepath should be unreachable unless first token is empty
-                        return true; 
+                        return true;
                     } else if (depth < m_namespaceTokens.size()) {
                         if (   hasSubCategories                      // Unless we're last category to match we must have more sub-categories so all tokens can match
                             || depth == m_namespaceTokens.size() - 1 // Last token to match, so there will be no more, thus it's fine if there are no more subcategories.
@@ -224,12 +229,12 @@ namespace HookFilter {
                     return true;
                 };
 
-                const auto byFilterVisible = ProcessFilter();
-                const auto itemsVisible = ProcessItems(true); // Filter items
+                const auto byFilterVisible           = ProcessFilter();
+                const auto itemsVisible              = ProcessItems(true); // Filter items
                 const auto [anySCVisible, anySCOpen] = ProcessSubCategories();
 
-                const bool open    = anySCOpen || anySCVisible || hasSubCategories && (byFilterVisible) || IsHookFilterPresent() && itemsVisible;
-                const bool visible = byFilterVisible && itemsVisible || anySCVisible;
+                const bool open    = anySCOpen || anySCVisible || (hasSubCategories && byFilterVisible) || (IsHookFilterPresent() && itemsVisible);
+                const bool visible = (byFilterVisible && itemsVisible) || anySCVisible;
 
                 cat.Visible(visible);
                 cat.Open(open);
@@ -239,20 +244,19 @@ namespace HookFilter {
 ;       } else {
             // Filter by hook names
             // Category is visible if it:
-            // - It has visible hooks (After filtering) 
+            // - It has visible hooks (After filtering)
             // - Or it has visible sub-categories
 
             const auto itemsVisible = ProcessItems(true); // Filter items
-            const auto [anySCVisible, anySCOpen] = ProcessSubCategories(); 
+            const auto [anySubCatVisible, anySubCatOpen] = ProcessSubCategories();
 
-            const auto open = itemsVisible || anySCOpen;
-
-            const bool visible = open || anySCVisible;
+            const auto open    = itemsVisible || anySubCatOpen;
+            const bool visible = open || anySubCatVisible;
 
             cat.Visible(visible);
             cat.Open(open);
 
-            return {visible, open};
+            return { visible, open };
         }
     }
 
@@ -261,7 +265,7 @@ namespace HookFilter {
             DoFilter_Internal(cat);
         } else {
             MakeAllVisibleAndOpen(cat, true, false); // Make all visible, but closed
-        }        
+        }
     }
 
     void OnInputUpdate() {
@@ -273,7 +277,7 @@ namespace HookFilter {
             return; // No filters
         }
 
-        {   
+        {
             const auto sepPos = inputsv.rfind(HOOKNAME_SEP);
 
             // First half contains the namespace filter tokens
@@ -308,7 +312,7 @@ namespace HookFilter {
         }
     }
 
-    void ProcessImGui() {
+    void Render() {
         PushItemWidth(GetWindowContentRegionMax().x - 10.f);
         if (InputText(" ", &m_input)) {
             OnInputUpdate();
@@ -318,8 +322,8 @@ namespace HookFilter {
             SetTooltip(
                 "`::function`         - Filters only functions \n"
                 "`cpy`                - Filter namespace - Will only show namespace with name containing \"cphy\"\n"
-                "`player/ped`         - Should only show Ped/CPlayerPed\n"
-                "`player/ped::busted` - Should only show `Ped/CPlayerPed` with the `busted` function visible only\n"
+                "`ped/player`         - Should only show Ped/CPlayerPed\n"
+                "`ped/player::busted` - Should only show `Ped/CPlayerPed` with the `busted` function visible only\n"
                 "`/entity`            - Should only show the top level `Entity` namespace in Root\n"
                 "For more tips see gta-reversed-modern/discussions/190\n"
             );
@@ -328,115 +332,214 @@ namespace HookFilter {
     }
 };
 
-void RenderCategory(RH::HookCategory& cat) {
+template<typename T> 
+struct IDScope_Helper {
+    IDScope_Helper(T id) { PushID(id); }
+    ~IDScope_Helper() { PopID(); }
+};
+
+struct DisabledScope_Helper {
+    DisabledScope_Helper(bool disabled) { BeginDisabled(disabled); }
+    ~DisabledScope_Helper() { EndDisabled(); }
+};
+
+// https://stackoverflow.com/a/17624752
+#define CONCAT(a, b) CONCAT_INNER(a, b)
+#define CONCAT_INNER(a, b) a ## b
+#define UNIQUE_VAR_NAME(base) CONCAT(base, __COUNTER__)
+#define IDScope(id) IDScope_Helper UNIQUE_VAR_NAME(__helper){id}
+#define DisabledScope(disabled) DisabledScope_Helper UNIQUE_VAR_NAME(__helper){disabled}
+
+bool HooksDebugModule::HandleSlideSetterForItem(bool& inOutState) {
+    if (m_SlideSetter.Mode == SlideSetterMode::NONE || !IsItemHovered()) {
+        return false;
+    }
+    if (m_SlideSetter.Mode == SlideSetterMode::SETTER) {
+        m_SlideSetter.Mode = inOutState
+            ? SlideSetterMode::TURN_ON
+            : SlideSetterMode::TURN_OFF;
+    }
+    inOutState = [&]{
+        switch (m_SlideSetter.Mode) {
+        case SlideSetterMode::TURN_ON:  return true;
+        case SlideSetterMode::TURN_OFF: return false;
+        case SlideSetterMode::TOGGLE:   return !inOutState;
+        default: NOTSA_UNREACHABLE();
+        }
+    }();
+    return true;
+}
+
+void HooksDebugModule::RenderCategoryItems(RH::HookCategory& cat) {
+    for (auto& item : cat.Items()) {
+        if (!item->m_isVisible) {
+            continue;
+        }
+
+        // Use hook's address as unique ID - Hooks aren't dynamically created, so this should really be unique
+        IDScope(item.get());
+
+        // Draw hook symbol (`S` or `V`)
+        {
+            PushStyleVar(ImGuiStyleVar_Alpha, GetStyle().Alpha * 0.5f);
+            AlignTextToFramePadding();
+            Text(item->Symbol());
+            PopStyleVar();
+        }
+
+        // State checkbox
+        {
+            IDScope("state");
+            DisabledScope(item->Locked());
+
+            bool hooked{ item->Hooked() };
+
+            if (SameLine(); Checkbox(item->Name().c_str(), &hooked) && !item->Locked()) {
+                cat.SetItemEnabled(item, hooked);
+            }
+            if (!item->Locked() && HandleSlideSetterForItem(hooked)) {
+                cat.SetItemEnabled(item, hooked);
+            }
+        }
+
+        if (!IsItemHovered()) {
+            continue;
+        }
+
+        const auto ProcessToolTip = [](const auto& i) {
+            const auto DrawToolTip = [](void* gta, void* our, bool locked) {
+                const auto AddrToClipboard = [](void* addr) {
+                    SetClipboardText(std::format("{}", addr).c_str());
+                };
+
+                std::string tooltipText = std::format("SA: {} / Our: {}", gta, our);
+                if (locked) {
+                    tooltipText += "\n(locked)";
+                }
+                SetTooltip(tooltipText.c_str());
+
+                if (IsItemClicked(ImGuiMouseButton_Right)) {
+                    AddrToClipboard(gta);
+                } else if (IsItemClicked(ImGuiMouseButton_Middle)) {
+                    AddrToClipboard(our);
+                }
+            };
+            DrawToolTip(i->GetHookGTAAddress(), i->GetHookOurAddress(), i->Locked());
+        };
+
+        switch (item->Type()) {
+        case RH::ReversibleHook::Base::HookType::Simple: {
+            ProcessToolTip(std::static_pointer_cast<RH::ReversibleHook::Simple>(item));
+            break;
+        }
+        case RH::ReversibleHook::Base::HookType::Virtual: {
+            ProcessToolTip(std::static_pointer_cast<RH::ReversibleHook::Virtual>(item));
+            break;
+        }
+        }
+    }
+}
+
+void HooksDebugModule::RenderCategory(RH::HookCategory& cat) {
     if (!cat.Visible()) {
         return;
     }
 
+    // We copy ImGui style here to alter it for indication.
+    const auto styleRestore = ImGui::GetStyle();
+    auto& style = ImGui::GetStyle();
+
     // NOTE: Won't work properly if `cat::m_items`s type is changed from `std::list`
     // Using this instead of the name as it's faster than encoding a string (And we care about performance, since this is mostly run in debug mode)
-    PushID(&cat);
+    IDScope(&cat);
 
     const auto& name = cat.Name();
 
-    const auto TreeNodeWithCheckbox = [](auto label, ImTristate triState, bool& cbStateOut, bool& cbClicked, bool& open) {
-        // TODO/NOTE: The Tree's label is a workaround for when the label is shorter than the visual checkbox (otherwise the checkbox can't be clicked)
-        open = TreeNodeEx("##         ", ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth);
-
+    // TODO: Replace with `TreeNodeWithTriStateCheckBox`
+    //! returns tuple<bool open, bool cbStateChanged, bool cbState>
+    const auto TreeNodeWithCheckbox = [](auto label, ImTristate triState, bool disabled) {
+        // TODO/NOTE: The Tree's label is a workaround for when the label is shorter than the visual checkbox (otherwise the checkbox can't be clic
+        const auto open = TreeNodeEx("##         ", ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth);
+        
         SameLine();
 
-        // Checkbox + it's label will be the tree name
-        cbClicked = CheckboxTristate(label, triState, cbStateOut);
-    };
+        // Tree is never disabled, otherwise it couldn't be opened
+        DisabledScope(disabled);
 
-    bool isCategoryOpen{};
+        // Checkbox + it's label will be the tree name
+        bool cbState{};
+        const auto stateChanged = CheckboxTristate(label, triState, cbState);
+
+        return std::make_tuple(open, stateChanged, cbState);
+    };
 
     // Disable all hooks in category at once
     {
         SetNextItemOpen(cat.Open());
 
-        bool cbClicked{};
-        bool cbState{};
-        TreeNodeWithCheckbox(cat.Name().c_str(), cat.OverallState(), cbState, cbClicked, isCategoryOpen);
-        if (cbClicked) {
-            cat.SetAllItemsEnabled(cbState);
+        const auto [open, stateChanged, cbState] = TreeNodeWithCheckbox(cat.Name().c_str(), cat.OverallState(), cat.Disabled());
+        if (stateChanged) {
+            cat.ToggleAllItemsState();
         }
-
-        cat.Open(isCategoryOpen);
+        if (bool state = cbState; HandleSlideSetterForItem(state)) {
+            cat.SetAllItemsEnabled(state);
+        }
+        cat.Open(open);
     }
 
+    if (!cat.Open()) {
+        return;
+    }
+
+    //
     // Draw hooks, and subcategories
-    if (isCategoryOpen) {
-        // Draw hooks (if any)
-        if (!cat.Items().empty() && cat.m_anyItemsVisible) {
-            const auto DrawItems = [&] {
-                for (auto& item : cat.Items()) {
-                    if (!item->m_isVisible) {
-                        continue;
-                    }
+    //
 
-                    PushID(item.get()); // Use hook's address as unique ID - Hooks aren't dynamically created, so this should really be unique
+    // Draw hooks (items) (if any)
+    if (!cat.Items().empty() && cat.m_anyItemsVisible) {
+        if (cat.SubCategories().empty()) { // If there are no subcategories we can draw all items directly
+            RenderCategoryItems(cat);
+        } else { // Otherwise use a tree node + checkbox
+            const auto [open, stateChanged, cbState] = TreeNodeWithCheckbox("Hooks", cat.ItemsState(), cat.ItemsDisabled());
 
-                    // Draw hook symbol (`S` or `V`)
-                    {
-                        PushStyleVar(ImGuiStyleVar_Alpha, GetStyle().Alpha * 0.5f);
-                        AlignTextToFramePadding();
-                        Text(item->Symbol());
-                        PopStyleVar();
-                    }
+            if (stateChanged) {
+                //cat.SetOurItemsState(cbState);
+                cat.ToggleAllItemsState();
+            }
 
-                    // State checkbox
-                    {
-                        PushID("state");
-                        bool hooked{ item->Hooked() };
-                        if (SameLine(); Checkbox(item->Name().c_str(), &hooked)) {
-                            cat.SetItemEnabled(item, hooked);
-                        }
-                        PopID(); // State checkbox
-                    }
-
-                    PopID(); // This hook
-                }
-            };
-
-            if (cat.SubCategories().empty()) { // If there are no subcategories we can draw all items directly
-                DrawItems();
-            } else { // Otherwise use a tree node + checkbox
-                bool hooksNodeOpen{};
-                bool cbState{};
-                bool cbClicked{};
-                TreeNodeWithCheckbox("Hooks", cat.ItemsState(), cbState, cbClicked, hooksNodeOpen);
-                if (cbClicked) {
-                    cat.SetOurItemsEnabled(cbState);
-                }
-                if (hooksNodeOpen) {
-                    DrawItems();
-                    TreePop();
-                }
+            if (open) {
+                RenderCategoryItems(cat);
+                TreePop();
             }
         }
-
-        // Draw subcategories
-        for (auto& v : cat.SubCategories()) {
-            RenderCategory(v);
-        }
-
-        TreePop();
     }
 
-    PopID();
-}
-
-namespace HooksDebugModule {
-void ProcessImGui() {
-    HookFilter::ProcessImGui();
-
-    if (BeginChild("##hookstool")) {
-        RenderCategory(RH::GetRootCategory());
-        EndChild();
+    // Draw subcategories
+    for (auto& v : cat.SubCategories()) {
+        RenderCategory(v);
     }
+
+    TreePop();
 }
 
-void ProcessRender() {
+void HooksDebugModule::RenderWindow() {
+    const notsa::ui::ScopedWindow window{ "ReversibleHooks (TM) (R)", {500.f, 700.f}, m_IsOpen };
+    if (!m_IsOpen) {
+        return;
+    }
+    m_SlideSetter.Mode = IsMouseDown(ImGuiMouseButton_Middle)
+        ? SlideSetterMode::TOGGLE
+        : IsMouseDown(ImGuiMouseButton_Right)
+            ? m_SlideSetter.Mode == SlideSetterMode::TURN_OFF || m_SlideSetter.Mode == SlideSetterMode::TURN_ON
+                ? m_SlideSetter.Mode // Technically in setter mode already
+                : SlideSetterMode::SETTER
+            : SlideSetterMode::NONE;
+    HookFilter::Render();
+    RenderCategory(RH::GetRootCategory());
 }
-};
+
+void HooksDebugModule::RenderMenuEntry() {
+    notsa::ui::DoNestedMenuIL({ "Settings" }, [&] {
+        ImGui::MenuItem("Hooks", nullptr, &m_IsOpen);
+    });
+}

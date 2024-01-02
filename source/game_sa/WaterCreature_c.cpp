@@ -87,10 +87,7 @@ void WaterCreature_c::Exit()
     g_waterCreatureMan.m_createdList.RemoveItem(this);
     g_waterCreatureMan.m_freeList.AddItem(this);
     CWorld::Remove(m_pObject);
-
-    if (m_pObject)
-        delete m_pObject;
-
+    delete m_pObject;
     m_pObject = nullptr;
     --CObject::nNoTempObjects;
 }
@@ -234,7 +231,7 @@ void WaterCreature_c::Update(float fTimeStep)
     {
         auto& vecJellyPos = m_pObject->GetPosition();
         float fWaterLevel;
-        if (CWaterLevel::GetWaterLevel(vecJellyPos.x, vecJellyPos.y, vecJellyPos.z, &fWaterLevel, true, nullptr))
+        if (CWaterLevel::GetWaterLevel(vecJellyPos.x, vecJellyPos.y, vecJellyPos.z, fWaterLevel, true, nullptr))
             m_pObject->SetPosn(CVector(vecJellyPos.x, vecJellyPos.y, fWaterLevel - 0.2F));
     }
 

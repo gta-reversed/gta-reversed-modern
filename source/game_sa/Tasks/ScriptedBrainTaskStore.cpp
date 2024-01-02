@@ -25,7 +25,7 @@ void CScriptedBrainTaskStore::InjectHooks()
 // 0x62EC40
 CScriptedBrainTaskEntry::CScriptedBrainTaskEntry()
 {
-    m_ped = nullptr;
+    m_ped  = nullptr;
     m_task = nullptr;
 }
 
@@ -41,36 +41,37 @@ CTask* CScriptedBrainTaskStore::SetTask(CPed* ped, CTask* task)
     int32 freeEntryIndex = -1;
     for (int32 i = 0; i < TOTAL_SCRIPTED_BRAIN_TASK_ENTRIES; i++) {
         CScriptedBrainTaskEntry& entry = ms_entries[i];
+
         if (!entry.m_ped && freeEntryIndex == -1)
             freeEntryIndex = i;
+
         if (entry.m_ped == ped) {
-            if (entry.m_task)
-                delete entry.m_task;
+            delete entry.m_task;
             entry.m_task = task;
             return task;
         }
     }
+
     if (freeEntryIndex == -1) {
-        if (task)
-            delete task;
+        delete task;
         return nullptr;
     }
+
     CScriptedBrainTaskEntry& entry = ms_entries[freeEntryIndex];
+
     entry.m_ped = ped;
     ped->RegisterReference(reinterpret_cast<CEntity**>(&entry.m_ped));
-    if (entry.m_task)
-        delete entry.m_task;
+
+    delete entry.m_task;
     entry.m_task = task;
+
     return task;
 }
 
 // 0x6357C0
-CTask* CScriptedBrainTaskStore::GetTask(CPed* ped)
-{
-    for (int32 i = 0; i < TOTAL_SCRIPTED_BRAIN_TASK_ENTRIES; i++) {
-        CScriptedBrainTaskEntry& entry = ms_entries[i];
-        if (entry.m_ped == ped)
-            return entry.m_task;
+CTask* CScriptedBrainTaskStore::GetTask(CPed* ped) {
+    if (const auto brain = GetOf(ped)) {
+        return brain->m_task;
     }
     return nullptr;
 }
@@ -78,33 +79,32 @@ CTask* CScriptedBrainTaskStore::GetTask(CPed* ped)
 // 0x635850
 void CScriptedBrainTaskStore::Clear(CPed* ped)
 {
-    for (int32 i = 0; i < TOTAL_SCRIPTED_BRAIN_TASK_ENTRIES; i++) {
-        CScriptedBrainTaskEntry& entry = ms_entries[i];
-        if (entry.m_ped == ped) {
-            if (entry.m_task)
-                delete entry.m_task;
-            entry.m_task = nullptr;
-            if (entry.m_ped)
-                entry.m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&entry.m_ped));
-            entry.m_ped = nullptr;
-            return;
-        }
+    for (auto& entry : ms_entries) {
+        if (entry.m_ped != ped)
+            continue;
+
+        delete entry.m_task;
+        entry.m_task = nullptr;
+        CEntity::ClearReference(entry.m_ped);
+        return;
     }
 }
 
 // 0x6357F0
 void CScriptedBrainTaskStore::Clear(CTask* task)
 {
-    for (int32 i = 0; i < TOTAL_SCRIPTED_BRAIN_TASK_ENTRIES; i++) {
-        CScriptedBrainTaskEntry& entry = ms_entries[i];
-        if (entry.m_task == task) {
-            if (entry.m_task)
-                delete entry.m_task;
-            entry.m_task = nullptr;
-            if (entry.m_ped)
-                entry.m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&entry.m_ped));
-            entry.m_ped = nullptr;
-            return;
-        }
+    for (auto& entry : ms_entries) {
+        if (entry.m_task != task)
+            continue;
+
+        delete entry.m_task;
+        entry.m_task = nullptr;
+        CEntity::ClearReference(entry.m_ped);
+        return;
     }
+}
+
+auto CScriptedBrainTaskStore::GetOf(CPed* ped) -> CScriptedBrainTaskEntry* {
+    const auto it = rng::find_if(ms_entries, [ped](CScriptedBrainTaskEntry& entry) { return entry.m_ped == ped; });
+    return it != rng::end(ms_entries) ? &*it : nullptr;
 }

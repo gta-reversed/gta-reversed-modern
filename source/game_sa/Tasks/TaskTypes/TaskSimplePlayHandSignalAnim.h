@@ -1,9 +1,9 @@
 #pragma once
 
 #include "TaskSimpleAnim.h"
-#include "HandObject.h"
+class CHandObject;
 
-class CTaskSimplePlayHandSignalAnim : public CTaskSimpleAnim {
+class NOTSA_EXPORT_VTABLE CTaskSimplePlayHandSignalAnim : public CTaskSimpleAnim {
 public:
     AnimationId  m_nAnimationBlockIndex;
     float        m_fBlendFactor;
@@ -15,23 +15,16 @@ public:
     static constexpr auto Type = TASK_SIMPLE_HANDSIGNAL_ANIM;
 
     CTaskSimplePlayHandSignalAnim(AnimationId animationId, float fBlendFactor, bool bFatHands, bool bHoldLastFrame);
-    ~CTaskSimplePlayHandSignalAnim();
+    ~CTaskSimplePlayHandSignalAnim() override;
 
-    CTask* Clone() override;
-    eTaskType GetTaskType() override;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() const override { return Type; } // 0x61AEA0;
+    CTask* Clone() const override { return new CTaskSimplePlayHandSignalAnim(m_nAnimationBlockIndex, m_fBlendFactor, m_bUseFatHands, m_bHoldLastFrame); }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override { return CTaskSimpleAnim::MakeAbortable(ped, priority, event); }
     bool ProcessPed(CPed* ped) override;
 
     void StartAnim(CPed* ped);
 
-private:
-    friend void InjectHooksMain();
     static void InjectHooks();
-
-    CTask* Clone_Reversed();
-    eTaskType GetId_Reversed();
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool ProcessPed_Reversed(CPed* ped);
 };
-
 VALIDATE_SIZE(CTaskSimplePlayHandSignalAnim, 0x24);

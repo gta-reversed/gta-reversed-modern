@@ -23,7 +23,7 @@ COctTree::~COctTree() {
 }
 
 // 0x5A7410
-void* COctTree::operator new(unsigned size) {
+void* COctTree::operator new(size_t size) {
     return ms_octTreePool.New();
 }
 
@@ -34,10 +34,11 @@ void COctTree::operator delete(void* data) {
 
 // 0x5A7460
 void COctTree::InitPool(void* data, int32 dataSize) {
+    const int32 size = sizeof(COctTree) + 1;
     ms_octTreePool.Init(
-        dataSize / sizeof(COctTree) + 1,
+        dataSize / size,
         data,
-        (char*)data + sizeof(COctTree) * (dataSize / sizeof(COctTree)) + 1
+        (uint8*)data + sizeof(COctTree) * (dataSize / size)
     );
     ms_octTreePool.m_bIsLocked = true;
 }
@@ -48,50 +49,49 @@ void COctTree::ShutdownPool() {
 }
 
 // 0x5A75B0
-bool COctTree::InsertTree(uint8 colorRed, uint8 colorGreen, uint8 colorBlue) {
-    const auto poolIndex = ((colorRed << ms_level >> 5) & 4) + ((colorGreen << ms_level >> 6) & 2) + ((colorBlue << ms_level >> 7) & 1); // todo:
-    ms_level++;
+bool COctTree::InsertTree(uint8 red, uint8 green, uint8 blue) {
+    const auto poolIndex = ( // todo: magic
+        ((red   << ms_level >> 5) & 4) +
+        ((green << ms_level >> 6) & 2) +
+        ((blue  << ms_level >> 7) & 1)
+    );
+    ++ms_level;
 
-    m_nRedComponent   += colorRed;
-    m_nGreenComponent += colorGreen;
-    m_nBlueComponent  += colorBlue;
+    m_nRedComponent   += red;
+    m_nGreenComponent += green;
+    m_nBlueComponent  += blue;
     m_nLevel++;
 
     if (ms_level == std::size(m_aChildrens) || m_bLastStep) {
         ms_level = 0;
         m_bLastStep = true;
-
         RemoveChildren();
-
         return m_nLevel == 1;
     }
 
-    COctTree* treeElement = nullptr;
+    COctTree* treeElement{};
     if (m_aChildrens[poolIndex] >= 0) {
-        if (!ms_octTreePool.IsFreeSlotAtIndex(poolIndex))
-            treeElement = ms_octTreePool.GetAt(poolIndex);
+        treeElement = ms_octTreePool.GetAt(poolIndex);
     } else {
         treeElement = ms_octTreePool.New();
-
         if (!treeElement) {
             ms_bFailed = true;
             return false;
         }
-
-        m_aChildrens[poolIndex] = ms_octTreePool.GetIndex(treeElement);
+        m_aChildrens[poolIndex] = (int16)ms_octTreePool.GetIndex(treeElement);
     }
 
+// todo (Izzotop): review fix_bugs
 #ifdef FIX_BUGS
     if (!treeElement)
         return false;
 #endif
 
-    bool bTreeInserted = treeElement->InsertTree(colorRed, colorGreen, colorBlue);
+    bool bTreeInserted = treeElement->InsertTree(red, green, blue);
 
     if (ms_bFailed && treeElement->m_nLevel < 2) {
         delete treeElement;
         m_aChildrens[poolIndex] = -1;
-
         return false;
     }
 
@@ -99,41 +99,39 @@ bool COctTree::InsertTree(uint8 colorRed, uint8 colorGreen, uint8 colorBlue) {
 }
 
 // 0x5A70F0
-void COctTree::FillPalette(uint8* colors) {
+void COctTree::FillPalette(uint8* data) {
     if (m_bLastStep) {
-        colors[ms_level + 0] = m_nRedComponent   / m_nLevel;
-        colors[ms_level + 1] = m_nGreenComponent / m_nLevel;
-        colors[ms_level + 2] = m_nBlueComponent  / m_nLevel;
-        colors[ms_level + 3] = 128;
-
+        auto* colors = *reinterpret_cast<RwRGBA**>(data);
+        colors[ms_level].red   = m_nRedComponent   / m_nLevel;
+        colors[ms_level].green = m_nGreenComponent / m_nLevel;
+        colors[ms_level].blue  = m_nBlueComponent  / m_nLevel;
+        colors[ms_level].alpha = 128;
         m_nLevel = ms_level++;
-    } else {
-        for (auto i = std::size(m_aChildrens) - 1; i; --i) {
-            const auto poolIndex = m_aChildrens[i];
+        return;
+    }
 
-            if (poolIndex < 0)
-                continue;
-
-            if (!ms_octTreePool.IsFreeSlotAtIndex(poolIndex))
-                ms_octTreePool.GetAt(poolIndex)->FillPalette(colors);
+    for (auto& children : m_aChildrens) {
+        if (auto elem = ms_octTreePool.GetAt(children)) {
+            elem->FillPalette(data);
         }
     }
 }
 
 // 0x5A71E0
-uint32 COctTree::FindNearestColour(uint8 colorRed, uint8 colorGreen, uint8 colorBlue) {
-    if (m_bLastStep)
+uint32 COctTree::FindNearestColour(uint8 red, uint8 green, uint8 blue) {
+    if (m_bLastStep) {
         return m_nLevel;
+    }
 
     COctTree* treeElement = this;
     do {
-        uint32 treeIndex = treeElement->m_aChildrens[(colorBlue >> 7) + ((colorGreen >> 6) & 2) + ((colorRed >> 5) & 4)]; // todo:
-        if (!ms_octTreePool.IsFreeSlotAtIndex(treeIndex))
-            treeElement = ms_octTreePool.GetAt(treeIndex);
-
-        colorRed *= 2;
-        colorGreen *= 2;
-        colorBlue *= 2;
+        auto child = ((red >> 5) & 4) + ((green >> 6) & 2) + (blue >> 7); // todo: magic
+        auto treeIndex = treeElement->m_aChildrens[child];
+        treeElement = ms_octTreePool.GetAt(treeIndex);
+        // useless permutation
+        red   *= 2;
+        green *= 2;
+        blue  *= 2;
     } while (!treeElement->m_bLastStep);
 
     return treeElement->m_nLevel;
@@ -142,32 +140,31 @@ uint32 COctTree::FindNearestColour(uint8 colorRed, uint8 colorGreen, uint8 color
 // 0x5A6DE0
 uint32 COctTree::NoOfChildren() {
     uint32 numOfChildren = 0;
-    for (auto& m_aChildren : m_aChildrens)
-        if (m_aChildren >= 0)
+    for (auto& m_aChildren : m_aChildrens) {
+        if (m_aChildren >= 0) {
             numOfChildren++;
-
+        }
+    }
     return numOfChildren;
 }
 
 // 0x5A7040
 void COctTree::ReduceTree() {
-    if (m_bLastStep)
+    if (m_bLastStep) {
         return;
+    }
 
     ms_level++;
 
     uint32 currentLevel = 0;
     uint32 totalLevels = 0;
     static uint32 lastLevel;
-    for (auto i = std::size(m_aChildrens) - 1; i; --i) {
-        if (m_aChildrens[i] < 0)
+    for (auto& children : m_aChildrens) {
+        if (children < 0) {
             continue;
-
+        }
         currentLevel++;
-
-        if (!ms_octTreePool.IsFreeSlotAtIndex(m_aChildrens[i])) {
-            COctTree* tree = ms_octTreePool.GetAt(m_aChildrens[i]);
-
+        if (COctTree* tree = ms_octTreePool.GetAt(children)) {
             tree->ReduceTree();
             totalLevels += tree->m_nLevel;
         }
@@ -183,21 +180,13 @@ void COctTree::ReduceTree() {
 
 // 0x5A74F0
 void COctTree::RemoveChildren() {
-    for (uint32 i = std::size(m_aChildrens) - 1; i; --i) {
-        auto& poolIndex = m_aChildrens[i];
-
-        if (poolIndex < 0)
+    for (auto& children : m_aChildrens) {
+        if (children < 0) {
             continue;
-
-        if (ms_octTreePool.IsFreeSlotAtIndex(poolIndex))
-            continue;
-
-        COctTree* elem = ms_octTreePool.GetAt(poolIndex);
-        if (!elem)
-            continue;
-
+        }
+        COctTree* elem = ms_octTreePool.GetAt(children);
         delete elem;
-        poolIndex = -1;
+        children = -1;
     }
 }
 
@@ -207,16 +196,5 @@ void COctTree::empty() {
     m_nRedComponent = 0;
     m_nGreenComponent = 0;
     m_nBlueComponent = 0;
-
-    for (uint32 i = std::size(m_aChildrens) - 1; i; --i) {
-        auto& poolIndex = m_aChildrens[i];
-
-        if (poolIndex < 0)
-            continue;
-
-        if (!ms_octTreePool.IsFreeSlotAtIndex(poolIndex) && ms_octTreePool.GetAt(poolIndex))
-            delete ms_octTreePool.GetAt(poolIndex);
-
-        poolIndex = -1;
-    }
+    RemoveChildren();
 }

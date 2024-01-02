@@ -7,8 +7,10 @@
 #pragma once
 
 #include "TaskSimple.h"
-#include "AnimBlendAssociation.h"
-#include "Entity.h"
+class CAnimBlendAssociation;
+class CEntity;
+class CPed;
+class CPlayerPed;
 
 enum eFightAttackType : int8 {
     FIGHT_ATTACK_HIT_1 = 0,
@@ -20,7 +22,7 @@ enum eFightAttackType : int8 {
 
 class CMeleeInfo {
 public:
-    int32  m_dwAnimGroup;
+    AssocGroupId m_nAnimGroup;
     float  m_fRanges;
     float  m_fHit[5];
     float  m_fChain[5];
@@ -29,51 +31,43 @@ public:
     int32  ABlockHit;
     int32  ABlockChain;
     uint8  m_nHitLevel;
-    char   _pad0[3];
-    int32  damage;
+    int32  m_nDamage;
     int32  field_58;
-    int32  hit[5];
-    int32  altHit[5];
+    int32  m_Hit[5];
+    int32  m_AltHit[5];
     uint16 m_wFlags;
-    char   _pad1[2];
 };
-
 VALIDATE_SIZE(CMeleeInfo, 0x88);
 
-class CPed;
-class CPlayerPed;
-
-class CTaskSimpleFight : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleFight : public CTaskSimple {
 public:
     bool                   m_bIsFinished;
     bool                   m_bIsInControl;
     bool                   m_bAnimsReferenced;
-    char                   _pad;
-    uint32                 m_nRequiredAnimGroup;
+    AssocGroupId           m_nRequiredAnimGroup;
     uint16                 m_nIdlePeriod;
     uint16                 m_nIdleCounter;
-    char                   m_nContinueStrike;
-    char                   m_nChainCounter;
-    char                   _pad2[2];
+    int8                   m_nContinueStrike;
+    int8                   m_nChainCounter;
     CEntity*               m_pTargetEntity;
     CAnimBlendAssociation* m_pAnim;
     CAnimBlendAssociation* m_pIdleAnim;
-    uint8                  m_nComboSet;
+    int8                   m_nComboSet;
     eFightAttackType       m_nCurrentMove;
     uint8                  m_nNextCommand;
     uint8                  m_nLastCommand;
 
-    static CMeleeInfo* m_aComboData; // m_aComboData[12];
+    static inline CMeleeInfo (&m_aComboData)[12] = *(CMeleeInfo(*)[12])0xC170D0;
 
 public:
-    static constexpr auto Type = TASK_SIMPLE_FIGHT_CTRL;
+    static constexpr auto Type = eTaskType::TASK_SIMPLE_FIGHT;
 
     CTaskSimpleFight(CEntity* entity, int32 nCommand, uint32 nIdlePeriod = 10000);
     ~CTaskSimpleFight() override;
 
-    CTask* Clone() override;
-    eTaskType GetTaskType() override { return TASK_SIMPLE_FIGHT_CTRL; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override { return new CTaskSimpleFight(m_pTargetEntity, m_nLastCommand, m_nIdlePeriod); } // 0x622E40
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
 
     static void LoadMeleeData();
@@ -113,7 +107,7 @@ private:
     CTaskSimpleFight* Constructor(CEntity* entity, int32 nCommand, uint32 nIdlePeriod);
     CTaskSimpleFight* Destructor();
 
-    CTask* Clone_Reversed();
+    CTask*  Clone_Reversed() const;
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool ProcessPed_Reversed(CPed* ped);
 };

@@ -6,12 +6,11 @@
 */
 #pragma once
 
-
 #include "TaskSimple.h"
 #include "TaskTimer.h"
 #include "Vector.h"
-#include "AnimBlendAssociation.h"
-#include "Entity.h"
+class CAnimBlendAssociation;
+class CEntity;
 
 class CTaskSimpleInAir : public CTaskSimple {
 public:
@@ -42,10 +41,10 @@ public:
     CTaskSimpleInAir(bool bUsingJumpGlide, bool bUsingFallGlide, bool bUsingClimbJump);
     ~CTaskSimpleInAir() override;
 
-    CTask* Clone() override { return new CTaskSimpleInAir(m_bUsingJumpGlide, m_bUsingFallGlide, m_bUsingClimbJump); }
-    eTaskType GetTaskType() override { return TASK_SIMPLE_IN_AIR; }
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override { return new CTaskSimpleInAir(m_bUsingJumpGlide, m_bUsingFallGlide, m_bUsingClimbJump); }
     bool ProcessPed(CPed* ped) override;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
 
     bool ProcessPed_Reversed(CPed* ped);
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
@@ -55,5 +54,4 @@ public:
     static void InjectHooks();
     CTaskSimpleInAir* Constructor(bool bUsingJumpGlide, bool bUsingFallGlide, bool bUsingClimbJump);
 };
-
 VALIDATE_SIZE(CTaskSimpleInAir, 0x3C);

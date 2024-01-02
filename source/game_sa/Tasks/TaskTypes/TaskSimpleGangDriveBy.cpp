@@ -25,10 +25,9 @@ CTaskSimpleGangDriveBy::CTaskSimpleGangDriveBy(CEntity* target, const CVector* t
     m_nLOSBlocked = true;
     m_pAnimAssoc = nullptr;
     m_nRequiredAnimID = ANIM_ID_NO_ANIMATION_SET;
-    m_nRequiredAnimGroup = 0;
+    m_nRequiredAnimGroup = ANIM_GROUP_DEFAULT;
     m_pWeaponInfo = nullptr;
-    if (m_pTargetEntity)
-        m_pTargetEntity->RegisterReference(&m_pTargetEntity);
+    CEntity::SafeRegisterRef(m_pTargetEntity);
     if (targetPos)
         m_vecCoords = *targetPos;
 }
@@ -37,15 +36,15 @@ CTaskSimpleGangDriveBy::~CTaskSimpleGangDriveBy()
 {
     if (m_bAnimsReferenced)
         CAnimManager::RemoveAnimBlockRef(CAnimManager::GetAnimationBlockIndex(m_nRequiredAnimGroup));
+
     if (m_pAnimAssoc)
         m_pAnimAssoc->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
-    if (m_pTargetEntity)
-        m_pTargetEntity->CleanUpOldReference(&m_pTargetEntity);
+
+    CEntity::SafeCleanUpRef(m_pTargetEntity);
 }
 
-CTask* CTaskSimpleGangDriveBy::Clone()
-{
-    return plugin::CallMethodAndReturn<CTask*, 0x6236D0, CTask*>(this);
+CTask* CTaskSimpleGangDriveBy::Clone() const {
+    return plugin::CallMethodAndReturn<CTask*, 0x6236D0, const CTask*>(this);
 }
 
 bool CTaskSimpleGangDriveBy::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)

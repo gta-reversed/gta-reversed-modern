@@ -6,7 +6,7 @@
 */
 #pragma once
 
-enum eSurfaceType {
+enum eSurfaceType : uint8 {
     SURFACE_DEFAULT = 0,
     SURFACE_TARMAC = 1,
     SURFACE_TARMAC_FUCKED = 2,
@@ -187,5 +187,6 @@ enum eSurfaceType {
     SURFACE_GORE = 177,
     SURFACE_RAILTRACK = 178,
 
-    TOTAL_NUM_SURFACE_TYPES
+    TOTAL_NUM_SURFACE_TYPES,
+    NUM_FUCKING_SURFACES = 194
 };

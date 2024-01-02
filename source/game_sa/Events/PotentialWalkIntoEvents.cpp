@@ -15,7 +15,7 @@ void CEventPotentialWalkIntoVehicle::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AE320);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AE420);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AE420);
 }
 
 void CEventPotentialWalkIntoObject::InjectHooks()
@@ -24,7 +24,7 @@ void CEventPotentialWalkIntoObject::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AE5D0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B4950);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B4950);
 }
 
 void CEventPotentialWalkIntoFire::InjectHooks()
@@ -33,7 +33,7 @@ void CEventPotentialWalkIntoFire::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B1E20);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B6890);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B6890);
 }
 
 void CEventPotentialWalkIntoPed::InjectHooks()
@@ -42,39 +42,32 @@ void CEventPotentialWalkIntoPed::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AE6E0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AE800);
-    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4AE950);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AE800);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4AE950);
 }
 
-CEventPotentialWalkIntoVehicle::CEventPotentialWalkIntoVehicle(CVehicle* vehicle, int32 moveState)
-{
+CEventPotentialWalkIntoVehicle::CEventPotentialWalkIntoVehicle(CVehicle* vehicle, int32 moveState) {
     m_vehicle = vehicle;
     m_moveState = moveState;
-    if (vehicle)
-        vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeRegisterRef(m_vehicle);
 }
 
 // 0x4AE3C0
-CEventPotentialWalkIntoVehicle::~CEventPotentialWalkIntoVehicle()
-{
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
+CEventPotentialWalkIntoVehicle::~CEventPotentialWalkIntoVehicle() {
+    CEntity::SafeCleanUpRef(m_vehicle);
 }
 
-CEventPotentialWalkIntoVehicle* CEventPotentialWalkIntoVehicle::Constructor(CVehicle* vehicle, int32 moveState)
-{
+CEventPotentialWalkIntoVehicle* CEventPotentialWalkIntoVehicle::Constructor(CVehicle* vehicle, int32 moveState) {
     this->CEventPotentialWalkIntoVehicle::CEventPotentialWalkIntoVehicle(vehicle, moveState);
     return this;
 }
 
 // 0x4AE420
-bool CEventPotentialWalkIntoVehicle::AffectsPed(CPed* ped)
-{
+bool CEventPotentialWalkIntoVehicle::AffectsPed(CPed* ped) {
     return CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(ped);
 }
 
-bool CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(CPed* ped)
-{
+bool CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(CPed* ped) {
     auto taskEnterCarAsDriver = ped->GetTaskManager().Find<CTaskComplexEnterCarAsDriver>();
     auto goToTask = reinterpret_cast<CTaskSimpleGoTo*>(ped->GetTaskManager().GetSimplestActiveTask());
     if (ped->IsPlayer() && !taskEnterCarAsDriver && !CTask::IsGoToTask(goToTask))
@@ -102,7 +95,7 @@ bool CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(CPed* ped)
             isGoToPointTask = true;
         }
         if (taskEnterCarAsDriver) {
-            if (m_vehicle == taskEnterCarAsDriver->m_pTargetVehicle && m_vehicle->IsSubPlane())
+            if (m_vehicle == taskEnterCarAsDriver->GetTargetCar() && m_vehicle->IsSubPlane())
                 return false;
 
             targetPos = taskEnterCarAsDriver->GetTargetPos();
@@ -121,44 +114,37 @@ bool CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(CPed* ped)
     return false;
 }
 
-CEventPotentialWalkIntoObject::CEventPotentialWalkIntoObject(CObject* object, int32 moveState)
-{
+CEventPotentialWalkIntoObject::CEventPotentialWalkIntoObject(CObject* object, int32 moveState) {
     m_object = object;
     m_moveState = moveState;
-    if (object)
-        object->RegisterReference(reinterpret_cast<CEntity**>(&m_object));
+    CEntity::SafeRegisterRef(m_object);
 }
 
-CEventPotentialWalkIntoObject::~CEventPotentialWalkIntoObject()
-{
-    if (m_object)
-        m_object->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_object));
+CEventPotentialWalkIntoObject::~CEventPotentialWalkIntoObject() {
+    CEntity::SafeCleanUpRef(m_object);
 }
 
-CEventPotentialWalkIntoObject* CEventPotentialWalkIntoObject::Constructor(CObject* object, int32 moveState)
-{
+CEventPotentialWalkIntoObject* CEventPotentialWalkIntoObject::Constructor(CObject* object, int32 moveState) {
     this->CEventPotentialWalkIntoObject::CEventPotentialWalkIntoObject(object, moveState);
     return this;
 }
 
 // 0x4B4950
-bool CEventPotentialWalkIntoObject::AffectsPed(CPed* ped)
-{
+bool CEventPotentialWalkIntoObject::AffectsPed(CPed* ped) {
     return CEventPotentialWalkIntoObject::AffectsPed_Reversed(ped);
 }
 
-bool CEventPotentialWalkIntoObject::AffectsPed_Reversed(CPed* ped)
-{
+bool CEventPotentialWalkIntoObject::AffectsPed_Reversed(CPed* ped) {
     if (ped->IsPlayer() || !ped->IsAlive() || !m_object)
         return false;
 
     if (m_moveState != PEDMOVE_STILL
         && !ped->m_pAttachedTo
         && m_object->m_pAttachedTo != ped
-        && !m_object->physicalFlags.bDisableMoveForce)
-    {
-        CColModel* colModel = CModelInfo::GetModelInfo(m_object->m_nModelIndex)->GetColModel();
-        CVector length = colModel->m_boundBox.m_vecMax - colModel->m_boundBox.m_vecMin;
+        && !m_object->physicalFlags.bDisableMoveForce
+    ) {
+        CColModel* colModel = m_object->GetModelInfo()->GetColModel();
+        CVector length = colModel->GetBoundingBox().GetSize();
         if (length.x >= 0.01f && length.y >= 0.01f && length.z >= 0.01f) {
             CTask* activeTask = ped->GetTaskManager().GetActiveTask();
             if (!activeTask)
@@ -178,15 +164,13 @@ bool CEventPotentialWalkIntoObject::AffectsPed_Reversed(CPed* ped)
 }
 
 // 0x4B1E20
-CEventPotentialWalkIntoFire::CEventPotentialWalkIntoFire(const CVector& firePos, float fireSize, int32 moveState)
-{
+CEventPotentialWalkIntoFire::CEventPotentialWalkIntoFire(const CVector& firePos, float fireSize, int32 moveState) {
     m_firePos = firePos;
     m_fireSize = fireSize;
     m_moveState = moveState;
     if (fireSize < 1.0f) {
         m_radius = 0.7f + 0.35f;
-    }
-    else {
+    } else {
         if (fireSize >= 2.0f)
             m_radius = 1.5f;
         else
@@ -196,25 +180,22 @@ CEventPotentialWalkIntoFire::CEventPotentialWalkIntoFire(const CVector& firePos,
     }
 }
 
-CEventPotentialWalkIntoFire* CEventPotentialWalkIntoFire::Constructor(const CVector& firePos, float fireSize, int32 moveState)
-{
+CEventPotentialWalkIntoFire* CEventPotentialWalkIntoFire::Constructor(const CVector& firePos, float fireSize, int32 moveState) {
     this->CEventPotentialWalkIntoFire::CEventPotentialWalkIntoFire(firePos, fireSize, moveState);
     return this;
 }
 
 // 0x4B6890
-bool CEventPotentialWalkIntoFire::AffectsPed(CPed* ped)
-{
+bool CEventPotentialWalkIntoFire::AffectsPed(CPed* ped) {
     return CEventPotentialWalkIntoFire::AffectsPed_Reversed(ped);
 }
 
-bool CEventPotentialWalkIntoFire::AffectsPed_Reversed(CPed* ped)
-{
+bool CEventPotentialWalkIntoFire::AffectsPed_Reversed(CPed* ped) {
     if (ped->IsAlive() && m_moveState != PEDMOVE_STILL) {
         auto goToTask = static_cast<CTaskSimpleGoTo*>(ped->GetTaskManager().GetSimplestActiveTask());
         if (goToTask && CTask::IsGoToTask(goToTask)) {
             CColSphere colSphere;
-            colSphere.Set(m_radius, m_firePos, 0, 0, 255u);
+            colSphere.Set(m_radius, m_firePos, SURFACE_DEFAULT, 0, tColLighting(0xFF));
             CVector intersectPoint2;
             CVector intersectPoint1;
             return colSphere.IntersectEdge(ped->GetPosition(), goToTask->m_vecTargetPoint, intersectPoint1, intersectPoint2);
@@ -223,40 +204,33 @@ bool CEventPotentialWalkIntoFire::AffectsPed_Reversed(CPed* ped)
     return false;
 }
 
-CEventPotentialWalkIntoPed::CEventPotentialWalkIntoPed(CPed* ped, const CVector& targetPoint, int32 moveState)
-{
+CEventPotentialWalkIntoPed::CEventPotentialWalkIntoPed(CPed* ped, const CVector& targetPoint, int32 moveState) {
     m_targetPoint = targetPoint;
     m_ped = ped;
     m_moveState = moveState;
     ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
 }
 
-CEventPotentialWalkIntoPed::~CEventPotentialWalkIntoPed()
-{
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+CEventPotentialWalkIntoPed::~CEventPotentialWalkIntoPed() {
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
-CEventPotentialWalkIntoPed* CEventPotentialWalkIntoPed::Constructor(CPed* ped, const CVector& targetPoint, int32 moveState)
-{
+CEventPotentialWalkIntoPed* CEventPotentialWalkIntoPed::Constructor(CPed* ped, const CVector& targetPoint, int32 moveState) {
     this->CEventPotentialWalkIntoPed::CEventPotentialWalkIntoPed(ped, targetPoint, moveState);
     return this;
 }
 
 // 0x4AE800
-bool CEventPotentialWalkIntoPed::AffectsPed(CPed* ped)
-{
+bool CEventPotentialWalkIntoPed::AffectsPed(CPed* ped) {
     return CEventPotentialWalkIntoPed::AffectsPed_Reversed(ped);
 }
 
 // 0x4AE950
-bool CEventPotentialWalkIntoPed::TakesPriorityOver(const CEvent& refEvent)
-{
+bool CEventPotentialWalkIntoPed::TakesPriorityOver(const CEvent& refEvent) {
     return CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed(refEvent);
 }
 
-bool CEventPotentialWalkIntoPed::AffectsPed_Reversed(CPed* ped)
-{
+bool CEventPotentialWalkIntoPed::AffectsPed_Reversed(CPed* ped) {
     if (!ped->IsAlive() || !m_ped || m_moveState == PEDMOVE_STILL) {
         return false;
     }
@@ -286,7 +260,6 @@ bool CEventPotentialWalkIntoPed::AffectsPed_Reversed(CPed* ped)
     return false;
 }
 
-bool CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed(const CEvent& refEvent)
-{
+bool CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed(const CEvent& refEvent) {
     return CEventHandler::IsTemporaryEvent(refEvent) ? true : CEvent::TakesPriorityOver(refEvent);
 }

@@ -10,9 +10,37 @@
 #include "TxdDef.h"
 #include "Pool.h"
 
+struct _TxdParent {
+    RwTexDictionary* parent;
+};
+
+/**
+ * Txd Store plugin unique rwID
+ */
+#define rwID_TXDPARENTPLUGIN  MAKECHUNKID(rwVENDORID_DEVELOPER, 0xF5)
+
+static inline int32& ms_txdPluginOffset = *reinterpret_cast<int32*>(0xC88018);
+
 typedef CPool<TxdDef> CTxdPool;
 
 class CTxdStore {
+public:
+    struct ScopedTXDSlot {
+        ScopedTXDSlot(int32 id) {
+            assert(id >= 0);
+            CTxdStore::PushCurrentTxd();
+            CTxdStore::SetCurrentTxd(static_cast<uint32>(id));
+        }
+
+        ScopedTXDSlot(const char* txd) :
+            ScopedTXDSlot{ CTxdStore::FindTxdSlot(txd) }
+        {
+        }
+
+        ~ScopedTXDSlot() {
+            CTxdStore::PopCurrentTxd();
+        }
+    };
 public:
     static CTxdPool*&        ms_pTxdPool;
     static RwTexDictionary*& ms_pStoredTxd;
@@ -24,6 +52,7 @@ public:
 public:
     static void InjectHooks();
 
+    static bool PluginAttach();
     static void Initialise();
     static void Shutdown();
     static void GameShutdown();
@@ -60,6 +89,16 @@ public:
 
     static RwTexture* TxdStoreFindCB(const char* name);
     static RwTexture* TxdStoreLoadCB(const char* name, const char* mask);
+
+    static auto FindOrAddTxdSlot(const char* name) {
+        auto slot = CTxdStore::FindTxdSlot(name);
+        if (slot == -1) slot = CTxdStore::AddTxdSlot(name);
+        return slot;
+    }
+    static void SafeRemoveTxdSlot(const char* name) {
+        auto slot = CTxdStore::FindTxdSlot(name);
+        if (slot != -1) CTxdStore::RemoveTxdSlot(slot);
+    }
 };
 
 RwTexture* RemoveIfRefCountIsGreaterThanOne(RwTexture* texture, void* data);

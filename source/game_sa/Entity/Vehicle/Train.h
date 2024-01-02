@@ -65,9 +65,9 @@ public:
         } trainFlags;
         uint16 m_nTrainFlags;
     };
-    int32    m_nTimeWhenStoppedAtStation;
-    char     m_nTrackId;
-    int32    m_nTimeWhenCreated;
+    uint32   m_nTimeWhenStoppedAtStation;
+    int8     m_nTrackId;
+    uint32   m_nTimeWhenCreated;
     int16    field_5C8;                    // initialized with 0, not referenced
     uint8    m_nPassengersGenerationState; // see eTrainPassengersGenerationState
     uint8    m_nNumPassengersToLeave : 4;  // 0 to 4
@@ -84,33 +84,37 @@ public:
     static uint32& GenTrain_GenerationNode;
     static uint32& GenTrain_Status;
     static bool& bDisableRandomTrains;
-    static CVector (&aStationCoors)[6];
+    static CVector aStationCoors[6];
+
+    static constexpr auto Type = VEHICLE_TYPE_TRAIN;
 
 public:
     CTrain(int32 modelIndex, eVehicleCreatedBy createdBy);
 
     void ProcessControl() override;
+    void SetupModelNodes();
 
     bool FindMaximumSpeedToStopAtStations(float* speed);
     uint32 FindNumCarriagesPulled();
     void OpenTrainDoor(float state);
     void AddPassenger(CPed* ped);
     void RemovePassenger(CPed* ped);
-    bool FindSideStationIsOn(); 
-    bool IsInTunnel();
+    [[nodiscard]] bool FindSideStationIsOn() const;
+    [[nodiscard]] bool IsInTunnel() const;
     void RemoveRandomPassenger();
     void FindPositionOnTrackFromCoors();
     void AddNearbyPedAsRandomPassenger();
 
-    static void ReadAndInterpretTrackFile(char* filename, CTrainNode** nodes, int32* lineCount, float* totalDist, int32 skipStations);
+    static void InitTrains();
+    static void ReadAndInterpretTrackFile(const char* filename, CTrainNode** nodes, int32* lineCount, float* totalDist, int32 skipStations);
     static void Shutdown();
-    static void UpdateTrains(); // dummy function
-    static void FindCoorsFromPositionOnTrack(float railDistance, int32 trackId, CVector* outCoors); // dummy function
+    static void UpdateTrains();
+    static void FindCoorsFromPositionOnTrack(float railDistance, int32 trackId, CVector* outCoors);
     static void DisableRandomTrains(bool disable);
     static void RemoveOneMissionTrain(CTrain* train);
     static void ReleaseOneMissionTrain(CTrain* train);
     static void SetTrainSpeed(CTrain* train, float speed);
-    static void SetTrainCruiseSpeed(CTrain* arg0, float cruiseSpeed);
+    static void SetTrainCruiseSpeed(CTrain* train, float speed);
     static CTrain* FindCaboose(CTrain* train);
     static CTrain* FindEngine(CTrain* train);
     static CTrain* FindCarriage(CTrain* train, uint8 carriage);
@@ -123,7 +127,6 @@ public:
     static void SetNewTrainPosition(CTrain* train, CVector posn);
     static bool IsNextStationAllowed(CTrain* train);
     static void SkipToNextAllowedStation(CTrain* train);
-    static void InitTrains();
     static void CreateMissionTrain(CVector posn, bool clockwiseDirection, uint32 trainType, CTrain**outFirstCarriage, CTrain**outLastCarriage, int32 nodeIndex, int32 trackId, bool isMissionTrain);
     static void DoTrainGenerationAndRemoval();
 
@@ -131,12 +134,13 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
+    CTrain* Constructor(int32 modelIndex, eVehicleCreatedBy createdBy) { this->CTrain::CTrain(modelIndex, createdBy); return this; }
     void ProcessControl_Reversed() { CTrain::ProcessControl(); }
 };
-
 VALIDATE_SIZE(CTrain, 0x6AC);
+VALIDATE_OFFSET(CTrain, m_nTrainFlags, 0x5B8);
 
-void ProcessTrainAnnouncements(); // dummy function
+void ProcessTrainAnnouncements();
 void PlayAnnouncement(uint8 arg0, uint8 arg1);
 void TrainHitStuff(CPtrList& ptrList, CEntity* entity);
-void MarkSurroundingEntitiesForCollisionWithTrain(CVector arg0, float arg1, CEntity* arg2, bool bOnlyVehicles);
+void MarkSurroundingEntitiesForCollisionWithTrain(CVector pos, float radius, CEntity* entity, bool bOnlyVehicles);

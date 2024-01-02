@@ -5,34 +5,30 @@
 
 class CPed;
 
-class CEventGroupEvent : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventGroupEvent : public CEvent {
 public:
     CPed*   m_ped;
     CEvent* m_event;
 
 public:
     CEventGroupEvent(CPed* ped, CEvent* event);
-    ~CEventGroupEvent();
+    ~CEventGroupEvent() override;
 
     eEventType GetEventType() const override { return EVENT_GROUP_EVENT; }
     int32 GetEventPriority() const override { return 41; }
     int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override;
     bool AffectsPed(CPed* ped) override { return false; }
-    bool AffectsPedGroup(CPedGroup* pedGroup) override { return pedGroup->m_groupMembership.IsMember(m_ped); }
+    bool AffectsPedGroup(CPedGroup* pedGroup) override { return pedGroup->GetMembership().IsMember(m_ped); }
     float GetLocalSoundLevel() override { return 100.0f; }
 
     CEvent* Clone_Reversed();
     bool BaseEventTakesPriorityOverBaseEvent(const CEventGroupEvent& other);
 
+    auto& GetEvent() const { return *m_event; }
+
 private:
     bool IsPriorityEvent() const;
-
-private:
-    friend void InjectHooksMain();
-    static void InjectHooks();
-
-    CEventGroupEvent* Constructor(CPed* ped, CEvent* event);
 };
 
 VALIDATE_SIZE(CEventGroupEvent, 0x14);

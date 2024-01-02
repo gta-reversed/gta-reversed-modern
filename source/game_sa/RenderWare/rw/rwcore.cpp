@@ -186,6 +186,10 @@ RxPipeline* RxLockedPipeSetEntryPoint(RxLockedPipe* pipeline, RxNodeInput in) {
     return ((RxPipeline*(__cdecl *)(RxLockedPipe*, RxNodeInput))0x807070)(pipeline, in);
 }
 
+RxPipeline* RxLockedPipeAddFragment(RxLockedPipe* pipeline, RwUInt32 firstIndex, RxNodeDefinition* nodeDef0, RwUInt32 nodeUnk) {
+    return plugin::CallAndReturn<RxPipeline*, 0x806BE0, RxLockedPipe*, RwUInt32, RxNodeDefinition*, RwUInt32>(pipeline, firstIndex, nodeDef0, nodeUnk);
+}
+
 RxPipelineNode* RxLockedPipeGetEntryPoint(RxLockedPipe* pipeline) {
     return ((RxPipelineNode*(__cdecl *)(RxLockedPipe*))0x8070D0)(pipeline);
 }
@@ -290,6 +294,7 @@ RwRaster* RwRasterShowRaster(RwRaster* raster, void* dev, RwUInt32 flags) {
     return ((RwRaster*(__cdecl *)(RwRaster*, void*, RwUInt32))0x7FB1A0)(raster, dev, flags);
 }
 
+//! NOTE: This function is responsible for calculating the `stride` in the `raster`
 RwUInt8* RwRasterLock(RwRaster* raster, RwUInt8 level, RwInt32 lockMode) {
     return ((RwUInt8*(__cdecl *)(RwRaster*, RwUInt8, RwInt32))0x7FB2D0)(raster, level, lockMode);
 }
@@ -594,8 +599,8 @@ RwBool RwD3D9DeviceSupportsDXTTexture() {
     return ((RwBool(__cdecl *)(void))0x7F9C30)();
 }
 
-void* RwD3D9GetCurrentD3DDevice() {
-    return ((void*(__cdecl *)(void))0x7F9D50)();
+IDirect3DDevice9* RwD3D9GetCurrentD3DDevice() {
+    return ((IDirect3DDevice9*(__cdecl *)(void))0x7F9D50)();
 }
 
 RwUInt32 RwD3D9EngineGetMaxMultiSamplingLevels() {
@@ -903,6 +908,7 @@ RwFrame* RwFrameCreate() {
 }
 
 RwBool RwFrameDestroy(RwFrame* frame) {
+    assert(frame);
     return ((RwBool(__cdecl *)(RwFrame*))0x7F05A0)(frame);
 }
 
@@ -1051,10 +1057,14 @@ RwBool RwBBoxContainsPoint(const RwBBox* boundBox, const RwV3d* vertex) {
 }
 
 RwCamera* RwCameraBeginUpdate(RwCamera* camera) {
+    ZoneScoped;
+
     return ((RwCamera*(__cdecl *)(RwCamera*))0x7EE190)(camera);
 }
 
 RwCamera* RwCameraEndUpdate(RwCamera* camera) {
+    ZoneScoped;
+
     return ((RwCamera*(__cdecl *)(RwCamera*))0x7EE180)(camera);
 }
 

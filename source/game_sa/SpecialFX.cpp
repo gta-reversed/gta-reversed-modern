@@ -1,5 +1,6 @@
 #include "StdInc.h"
-
+#include "MotionBlurStreaks.h"
+#include "Checkpoints.h"
 #include "SpecialFX.h"
 
 extern RwTexture*& gpFinishFlagTex;
@@ -15,12 +16,12 @@ void CSpecialFX::InjectHooks() {
     RH_ScopedClass(CSpecialFX);
     RH_ScopedCategoryGlobal();
 
-//    RH_ScopedInstall(Init, 0x7268F0);
-//    RH_ScopedInstall(Update, 0x726AA0);
+    RH_ScopedInstall(Init, 0x7268F0, { .reversed = false });
+    RH_ScopedInstall(Update, 0x726AA0, { .reversed = false });
     RH_ScopedInstall(Shutdown, 0x723390);
-//    RH_ScopedInstall(AddWeaponStreak, 0x0);
-//    RH_ScopedInstall(Render, 0x726AD0);
-//    RH_ScopedInstall(Render2DFXs, 0x721660);
+    //RH_ScopedInstall(AddWeaponStreak, 0x0, { .reversed = false });
+    RH_ScopedInstall(Render, 0x726AD0);
+    RH_ScopedInstall(Render2DFXs, 0x721660, { .reversed = false });
     RH_ScopedInstall(ReplayStarted, 0x721D30);
 }
 
@@ -31,6 +32,8 @@ void CSpecialFX::Init() {
 
 // 0x726AA0
 void CSpecialFX::Update() {
+    ZoneScoped;
+
     plugin::Call<0x726AA0>();
 }
 
@@ -41,16 +44,7 @@ void CSpecialFX::Shutdown() {
         RwTextureDestroy(gpFinishFlagTex);
         gpFinishFlagTex = nullptr;
     }
-    if (CMirrors::pBuffer) {
-        RwRasterDestroy(CMirrors::pBuffer);
-        CMirrors::pBuffer = nullptr;
-    }
-    if (CMirrors::pZBuffer) {
-        RwRasterDestroy(CMirrors::pZBuffer);
-        CMirrors::pZBuffer = nullptr;
-    }
-    CMirrors::TypeOfMirror = 0;
-    CMirrors::MirrorFlags = 0;
+    CMirrors::ShutDown();
 }
 
 // unused function
@@ -61,13 +55,14 @@ void CSpecialFX::AddWeaponStreak(eWeaponType weaponType) {
 
 // 0x726AD0
 void CSpecialFX::Render() {
-    plugin::Call<0x726AD0>();
-//    CMotionBlurStreaks::Render();
-//    CBulletTraces::Render();
-//    CBrightLights::Render();
-//    CShinyTexts::Render();
-//    C3dMarkers::Render();
-//    CCheckpoints::Render();
+    ZoneScoped;
+
+    CMotionBlurStreaks::Render();
+    CBulletTraces::Render();
+    CBrightLights::Render();
+    CShinyTexts::Render();
+    C3dMarkers::Render();
+    CCheckpoints::Render();
 }
 
 // 0x721660
@@ -77,8 +72,8 @@ void CSpecialFX::Render2DFXs() {
 
 // 0x721D30
 void CSpecialFX::ReplayStarted() {
-    if (CSpecialFX::bSnapShotActive) {
-        CSpecialFX::bSnapShotActive = false;
+    if (bSnapShotActive) {
+        bSnapShotActive = false;
         CTimer::ResetTimeScale();
     }
 }

@@ -124,8 +124,9 @@ void WaterCreatureManager_c::TryToExitGroup(WaterCreature_c* pCreature)
         apCreatures[i]->m_bShouldBeDeleted = true;
 }
 
-void WaterCreatureManager_c::Update(float fTimestep)
-{
+void WaterCreatureManager_c::Update(float fTimestep) {
+    ZoneScoped;
+
     if (FindPlayerPed(0)->m_pPlayerData->m_nWaterCoverPerc > 50)
     {
         const auto nCurTime = CTimer::GetTimeInMS();

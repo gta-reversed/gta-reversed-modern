@@ -1,31 +1,30 @@
 #pragma once
 
 #include "TaskComplexWander.h"
+#include "TaskComplexGoToPointAndStandStill.h"
 #include "TaskTimer.h"
+#include "eMoveState.h"
 
-class CTaskComplexMoveGoToPointAndStandStill;
 class CPed;
 
-class CTaskComplexWanderCop : public CTaskComplexWander {
+class NOTSA_EXPORT_VTABLE CTaskComplexWanderCop : public CTaskComplexWander {
 public:
-    CTaskComplexMoveGoToPointAndStandStill* m_pTaskComplexMoveGoToPointAndStandStill;
-    CTaskTimer m_nScanForStuffTimer;
-    uint32     m_nTimePassedSinceLastLookedForCriminals;
-    uint32     m_nTimePassedSinceLastLookedForCarAlarmsAndStolenCopCars;
-    CPed*      m_pLastCriminalPedLookedFor;
-    CTaskTimer m_nSubTaskCreatedTimer;
+    CTaskComplexGoToPointAndStandStill* m_pGoToPointAndStandStillTask;
+    CTaskTimer                          m_nScanForStuffTimer;
+    uint32                              m_nTimePassedSinceLastLookedForCriminals;
+    uint32                              m_nTimePassedSinceLastLookedForCarAlarmsAndStolenCopCars;
+    CPed*                               m_pLastCriminalPedLookedFor;
+    CTaskTimer                          m_nSubTaskCreatedTimer;
 
 public:
-    static constexpr auto Type = WANDER_TYPE_COP;
+    CTaskComplexWanderCop(eMoveState moveState, uint8 dir);
+    ~CTaskComplexWanderCop() override;
 
-    CTaskComplexWanderCop(int32 moveState, uint8 dir);
-    ~CTaskComplexWanderCop();
-
-    CTask* Clone() override;
+    eWanderType GetWanderType() override { return WANDER_TYPE_COP; } // 0x460D50
+    CTask* Clone() const override { return new CTaskComplexWanderCop(m_nMoveState, m_nDir); } // 0x460CE0
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
-    int32 GetWanderType() override;
     void ScanForStuff(CPed* ped) override;
 
     void LookForCarAlarms(CPed* ped);
@@ -37,13 +36,12 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskComplexWanderCop* Constructor(int32 moveState, uint8 dir);
+    CTaskComplexWanderCop* Constructor(eMoveState moveState, uint8 dir);
 
-    CTask* Clone_Reversed();
+    CTask*  Clone_Reversed() const;
     CTask* CreateNextSubTask_Reversed(CPed* ped);
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
     CTask* ControlSubTask_Reversed(CPed* ped);
-    int32 GetWanderType_Reversed() { return WANDER_TYPE_COP; };
     void ScanForStuff_Reversed(CPed* ped);
 };
 

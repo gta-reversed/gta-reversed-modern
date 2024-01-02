@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "OnscreenTimerEntry.h"
+#include "TheScripts.h"
 
 void COnscreenTimerEntry::Init() {
     m_nVarId = 0;
@@ -18,7 +19,7 @@ void COnscreenTimerEntry::Process() {
         return;
 
     auto& timerPtr  = *CTheScripts::GetPointerToScriptVariable(m_nVarId);
-    auto  deltaTime = CTimer::GetTimeStepInMS();
+    auto deltaTime = (uint32)CTimer::GetTimeStepInMS();
 
     switch (m_nTimerDirection) {
     case eTimerDirection::INCREASE:
@@ -30,7 +31,7 @@ void COnscreenTimerEntry::Process() {
         if (timerPtr >= 0) {
             uint32 seconds = timerPtr / 1000;
             if (seconds < m_nClockBeepCountdownSecs && !TheCamera.m_bWideScreenOn) {
-                AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_TIMER_COUNT, 0.0f, 1.0f);
+                AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_TIMER_COUNT);
             }
         } else {
             timerPtr = 0;
@@ -42,7 +43,7 @@ void COnscreenTimerEntry::Process() {
     }
 /*
 #ifndef NDEBUG
-    printf("[COnscreenTimerEntry::Process] timerPtr: %d\n", timerPtr);
+    DEV_LOG("[COnscreenTimerEntry::Process] timerPtr: {}", timerPtr);
 #endif
 */
 }
@@ -50,7 +51,7 @@ void COnscreenTimerEntry::Process() {
 // 0x44CA40
 void COnscreenTimerEntry::ProcessForDisplayClock() {
     auto time = *CTheScripts::GetPointerToScriptVariable(m_nVarId);
-    sprintf(
+    sprintf_s(
         m_szDisplayedText,
         "%02d:%02d",
         time / 1000 / 60 % 100,

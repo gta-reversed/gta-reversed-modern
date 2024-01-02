@@ -182,7 +182,7 @@ void CAETwinLoopSoundEntity::InjectHooks() {
 
     RH_ScopedInstall(Initialise, 0x4F28A0);
     RH_ScopedInstall(UpdateTwinLoopSound, 0x4F29A0);
-    RH_ScopedInstall(UpdateParameters_Reversed, 0x4F2E90);
+    RH_ScopedVirtualInstall(UpdateParameters, 0x4F2E90);
     RH_ScopedInstall(SwapSounds, 0x4F2C10);
     RH_ScopedInstall(StopSoundAndForget, 0x4F2960);
     RH_ScopedInstall(PlayTwinLoopSound, 0x4F2CB0);

@@ -17,17 +17,17 @@ struct tPedColNodeInfo {
     float   m_fRadius;
 };
 
-class CPedModelInfo : public CClumpModelInfo {
+class NOTSA_EXPORT_VTABLE CPedModelInfo : public CClumpModelInfo {
 public:
     AssocGroupId m_nAnimType;
     ePedType     m_nPedType;
     ePedStats    m_nStatType;
-    uint16       m_nCarsCanDriveMask;
+    uint16       m_nCarsCanDriveMask; //< Bitset of vehicle classes ped can drive. To check if it can drive a given class check if the bit is set (eg.: & (1 << eVehicleClass))
     uint16       m_nPedFlags;
     CColModel*   m_pHitColModel;
     eRadioID     m_nRadio1;
     eRadioID     m_nRadio2;
-    uint8        m_nRace;
+    uint8        m_nRace; // See `ePedRace` - TODO: Maybe we can change this? Check if `ePedRace` can be made 1 byte.
     int16        m_nPedAudioType;
     int16        m_nVoiceMin; // Also called voice1
     int16        m_nVoiceMax; // Also called voice2
@@ -59,6 +59,10 @@ public:
     CColModel* AnimatePedColModelSkinned(RpClump* clump);
     CColModel* AnimatePedColModelSkinnedWorld(RpClump* clump);
     void IncrementVoice();
+    auto GetRace() const { return (ePedRace)m_nRace; }
+    auto GetPedType() const { return (ePedType)(m_nPedType); }
+    auto GetPedStatType() const { return (ePedStats)(m_nStatType); }
+    auto CanPedDriveVehicleClass(eVehicleClass cls) const { return (m_nCarsCanDriveMask & (1 << (size_t)cls)) != 0; }
 };
 
 VALIDATE_SIZE(CPedModelInfo, 0x44);

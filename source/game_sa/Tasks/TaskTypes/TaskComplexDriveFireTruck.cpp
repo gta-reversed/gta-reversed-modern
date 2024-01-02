@@ -13,10 +13,10 @@ void CTaskComplexDriveFireTruck::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x659310);
     RH_ScopedInstall(CreateSubTask, 0x65A240);
-    RH_ScopedInstall(Clone_Reversed, 0x659BC0);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x65B140);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x65B090);
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x65B1E0);
+    RH_ScopedVirtualInstall(Clone, 0x659BC0);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x65B140);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x65B090);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x65B1E0);
 }
 
 CTaskComplexDriveFireTruck* CTaskComplexDriveFireTruck::Constructor(CVehicle* vehicle, CPed* partnerFireman, bool bIsDriver) {
@@ -31,24 +31,18 @@ CTaskComplexDriveFireTruck::CTaskComplexDriveFireTruck(CVehicle* vehicle, CPed* 
     m_bIsDriver       = bIsDriver;
     m_pFire           = nullptr;
 
-    if (m_pVehicle)
-        m_pVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pVehicle));
-
-    if (m_pPartnerFireman)
-        m_pPartnerFireman->RegisterReference(reinterpret_cast<CEntity**>(&m_pPartnerFireman));
+    CEntity::SafeRegisterRef(m_pVehicle);
+    CEntity::SafeRegisterRef(m_pPartnerFireman);
 }
 
 // 0x6593A0
 CTaskComplexDriveFireTruck::~CTaskComplexDriveFireTruck() {
-    if (m_pVehicle)
-        m_pVehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pVehicle));
-
-    if (m_pPartnerFireman)
-        m_pPartnerFireman->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pPartnerFireman));
+    CEntity::SafeCleanUpRef(m_pVehicle);
+    CEntity::SafeCleanUpRef(m_pPartnerFireman);
 }
 
 // 0x659BC0
-CTask* CTaskComplexDriveFireTruck::Clone() {
+CTask* CTaskComplexDriveFireTruck::Clone() const {
     return Clone_Reversed();
 }
 
@@ -67,7 +61,7 @@ CTask* CTaskComplexDriveFireTruck::ControlSubTask(CPed* ped) {
     return ControlSubTask_Reversed(ped);
 }
 
-CTask* CTaskComplexDriveFireTruck::Clone_Reversed() {
+CTask* CTaskComplexDriveFireTruck::Clone_Reversed() const {
     return new CTaskComplexDriveFireTruck(m_pVehicle, m_pPartnerFireman, m_bIsDriver);
 }
 
@@ -115,7 +109,7 @@ CTask* CTaskComplexDriveFireTruck::ControlSubTask_Reversed(CPed* ped) {
 
             if (newFire != m_pFire) {
                 m_pFire = newFire;
-                reinterpret_cast<CTaskComplexDriveToPoint*>(m_pSubTask)->point = m_pFire->m_vecPosition;
+                reinterpret_cast<CTaskComplexDriveToPoint*>(m_pSubTask)->m_Point = m_pFire->m_vecPosition;
             }
         }
     }
@@ -132,9 +126,9 @@ CTask* CTaskComplexDriveFireTruck::ControlSubTask_Reversed(CPed* ped) {
 CTask* CTaskComplexDriveFireTruck::CreateSubTask(eTaskType taskType, CPed* ped) {
     switch (taskType) {
     case TASK_COMPLEX_CAR_DRIVE_WANDER:
-        return new CTaskComplexCarDriveWander(m_pVehicle, 0, 10.0F);
+        return new CTaskComplexCarDriveWander(m_pVehicle, DRIVING_STYLE_STOP_FOR_CARS, 10.0F);
     case TASK_COMPLEX_CAR_DRIVE_TO_POINT:
-        return new CTaskComplexDriveToPoint(m_pVehicle, m_pFire->m_vecPosition, 30.0F, 0, -1, 25.0F, 2);
+        return new CTaskComplexDriveToPoint(m_pVehicle, m_pFire->m_vecPosition, 30.0F, 0, MODEL_INVALID, 25.0F, DRIVING_STYLE_AVOID_CARS);
     case TASK_COMPLEX_USE_WATER_CANNON:
         return new CTaskComplexUseWaterCannon(m_pFire);
     case TASK_SIMPLE_CAR_DRIVE:

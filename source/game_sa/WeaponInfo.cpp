@@ -8,8 +8,6 @@
 
 #include "WeaponInfo.h"
 
-namespace rng = std::ranges;
-
 void CWeaponInfo::InjectHooks() {
     RH_ScopedClass(CWeaponInfo);
     RH_ScopedCategoryGlobal();
@@ -18,7 +16,7 @@ void CWeaponInfo::InjectHooks() {
     RH_ScopedInstall(LoadWeaponData, 0x5BE670);
     RH_ScopedInstall(Initialise, 0x5BF750);
     RH_ScopedInstall(Shutdown, 0x743C50);
-    RH_ScopedInstall(GetWeaponInfo, 0x743C60);
+    RH_ScopedOverloadedInstall(GetWeaponInfo, "original", 0x743C60, CWeaponInfo*(*)(eWeaponType, eWeaponSkill));
     RH_ScopedInstall(GetSkillStatIndex, 0x743CD0);
     RH_ScopedInstall(FindWeaponType, 0x743D10);
     RH_ScopedInstall(GetCrouchReloadAnimationID, 0x685700);
@@ -93,61 +91,67 @@ eWeaponFire CWeaponInfo::FindWeaponFireType(const char* name) {
     return WEAPON_FIRE_INSTANT_HIT;
 }
 
+// Check if weapon has skill stats
+// NOTSA
 bool CWeaponInfo::WeaponHasSkillStats(eWeaponType type) {
     return type >= WEAPON_PISTOL && type <= WEAPON_TEC9;
 }
 
+// Get weapon info index for this type and with this skill
+// NOTSA
 uint32 CWeaponInfo::GetWeaponInfoIndex(eWeaponType weaponType, eWeaponSkill skill) {
     const auto numWeaponsWithSkill = (WEAPON_TEC9 - WEAPON_PISTOL) + 1;
     switch (skill) {
-    case eWeaponSkill::POOR:
-        return (uint32)weaponType + 25u + 0 * numWeaponsWithSkill;
-    case eWeaponSkill::STD:
-        return (uint32)weaponType;
-    case eWeaponSkill::PRO:
-        return (uint32)weaponType + 25u + 1 * numWeaponsWithSkill;
-    case eWeaponSkill::COP:
-        return (uint32)weaponType + 25u + 2 * numWeaponsWithSkill;
+    case eWeaponSkill::POOR: return (uint32)weaponType + 25u + 0 * numWeaponsWithSkill;
+    case eWeaponSkill::STD:  return (uint32)weaponType;
+    case eWeaponSkill::PRO:  return (uint32)weaponType + 25u + 1 * numWeaponsWithSkill;
+    case eWeaponSkill::COP:  return (uint32)weaponType + 25u + 2 * numWeaponsWithSkill;
+    default:                 NOTSA_UNREACHABLE("Invalid weapon skill");
     }
-    assert(0); // Something went wrong
-    return WEAPON_LAST_WEAPON;
 }
 
+// NOTSA
+void CWeaponInfo::StreamModelsForWeapon(eStreamingFlags streamingFlags) {
+    for (auto modelId : GetModels()) {
+        if (modelId != MODEL_INVALID) {
+            CStreaming::RequestModel(modelId, streamingFlags | STREAMING_PRIORITY_REQUEST);
+        }
+    }
+    CStreaming::LoadAllRequestedModels(true);
+}
+
+// NOTSA
 auto GetBaseComboByName(const char* name) {
-    static constexpr std::pair<std::string_view, eWeaponType> mapping[]{
-        { "UNARMED",     WEAPON_KNIFE    },
-        { "BBALLBAT",    WEAPON_KATANA   },
-        { "KNIFE",       WEAPON_CHAINSAW },
-        { "GOLFCLUB",    WEAPON_DILDO1   },
-        { "SWORD",       WEAPON_DILDO2   },
-        { "CHAINSAW",    WEAPON_VIBE1    },
-        { "DILDO",       WEAPON_VIBE2    },
-        { "FLOWERS",     WEAPON_FLOWERS  },
+    static constexpr std::pair<std::string_view, eMeleeCombo> mapping[]{
+        { "UNARMED",     MELEE_COMBO_UNARMED_1 },
+        { "BBALLBAT",    MELEE_COMBO_BBALLBAT  },
+        { "KNIFE",       MELEE_COMBO_KNIFE     },
+        { "GOLFCLUB",    MELEE_COMBO_GOLFCLUB  },
+        { "SWORD",       MELEE_COMBO_SWORD     },
+        { "CHAINSAW",    MELEE_COMBO_CHAINSAW  },
+        { "DILDO",       MELEE_COMBO_DILDO     },
+        { "FLOWERS",     MELEE_COMBO_FLOWERS   },
     };
     if (const auto it = rng::find(mapping, name, [](const auto& e) { return e.first; }); it != std::end(mapping))
         return it->second;
 
-    return eWeaponType::WEAPON_KNIFE;
+    return eMeleeCombo::MELEE_COMBO_UNARMED_1;
 }
 
 // 0x5BE670
 void CWeaponInfo::LoadWeaponData() {
-    auto f = CFileMgr::OpenFile("DATA\\WEAPON.DAT", "rb"); // I wonder why they open it in binary mode
-    for (auto l = CFileLoader::LoadLine(f); l; l = CFileLoader::LoadLine(f)) {
-        if (std::string_view{ l }.find("ENDWEAPONDATA") != std::string_view::npos) // Not quite the way they did it, but it's fine.
+    auto f = CFileMgr::OpenFile("DATA\\WEAPON.DAT", "rb");
+    for (auto line = CFileLoader::LoadLine(f); line; line = CFileLoader::LoadLine(f)) {
+        if (std::string_view{line}.find("ENDWEAPONDATA") != std::string_view::npos) // Not quite the way they did it, but it's fine.
             break;
 
-        // Read beginning of line here (that is, from the first char up to the first string)
-        // This is quite a hacky solution, they should've just skipped to the first non-ws character manually
-        char unused[32]{};
-
-        switch ((uint8)l[0]) { // Gotta cast it because of `case 163`
+        switch ((uint8)line[0]) { // Gotta cast it because of `case 163`
         case '$': { // Gun data
             char weaponName[32]{};
             char fireTypeName[32]{};
             float targetRange{}, weaponRange{};
             int32 modelId1{}, modelId2{};
-            uint32 slot{};
+            int32 slot{};
             char animGrpName[32]{};
             uint32 ammo{};
             uint32 dmg{};
@@ -166,15 +170,14 @@ void CWeaponInfo::LoadWeaponData() {
             float speed{}, radius{};
             float lifespan{}, spread{};
 
-            (void)sscanf(l,
-                "%s %s %s %f %f %d %d %d %s %d %d %f %f %f %d %d %f %f %d %d %d %d %d %d %d %x %f %f %f %f",
-                unused,
-                weaponName,
-                fireTypeName,
+            VERIFY(sscanf_s(line,
+                "%*s %s %s %f %f %d %d %d %s %d %d %f %f %f %d %d %f %f %d %d %d %d %d %d %d %x %f %f %f %f",
+                SCANF_S_STR(weaponName),
+                SCANF_S_STR(fireTypeName),
                 &targetRange, &weaponRange,
                 &modelId1, &modelId2,
                 &slot,
-                animGrpName,
+                SCANF_S_STR(animGrpName),
                 &ammo,
                 &dmg,
                 &offset.x, &offset.y, &offset.z,
@@ -186,11 +189,11 @@ void CWeaponInfo::LoadWeaponData() {
                 &animLoopInfo[1].start, &animLoopInfo[1].end, &animLoopInfo[1].fire,
                 &breakoutTime,
                 &flags,
-                &speed,
-                &radius,
-                &lifespan,
-                &spread
-            );
+                &speed,    // optional
+                &radius,   // optional
+                &lifespan, // optional
+                &spread    // optional
+            ) >= 25);
 
             const auto weaponType = FindWeaponType(weaponName);
             const auto skillLevel = WeaponHasSkillStats(weaponType) ? (eWeaponSkill)skill : eWeaponSkill::STD;
@@ -229,7 +232,7 @@ void CWeaponInfo::LoadWeaponData() {
 
 
             if (!std::string_view{ animGrpName }.starts_with("null")) {
-                wi.m_eAnimGroup = CAnimManager::GetAnimationGroupId(animGrpName);
+                wi.m_eAnimGroup = CAnimManager::GetAnimationGroupIdByName(animGrpName);
             }
 
             if (wi.m_eAnimGroup >= ANIM_GROUP_PYTHON && wi.m_eAnimGroup <= ANIM_GROUP_SPRAYCAN) {
@@ -238,7 +241,7 @@ void CWeaponInfo::LoadWeaponData() {
 
             if (skillLevel == eWeaponSkill::STD && weaponType != eWeaponType::WEAPON_DETONATOR) {
                 if (modelId1 > 0) {
-                    static_cast<CWeaponModelInfo*>(CModelInfo::GetModelInfo(modelId1))->m_weaponInfo = weaponType;
+                    CModelInfo::GetModelInfo(modelId1)->AsWeaponModelInfoPtr()->m_weaponInfo = weaponType;
                 }
             }
             break;
@@ -250,9 +253,9 @@ void CWeaponInfo::LoadWeaponData() {
             uint32 RLoadA{}, RLoadB{};
             uint32 crouchRLoadA{}, crouchRLoadB{};
 
-            (void)sscanf(l, "%s %s %f %f %f %f %d %d %d %d", unused, stealthAnimGrp, &aimX, &aimZ, &duckX, &duckZ, &RLoadA, &RLoadB, &crouchRLoadA, &crouchRLoadB);
+            VERIFY(sscanf_s(line, "%*s %s %f %f %f %f %d %d %d %d", SCANF_S_STR(stealthAnimGrp), &aimX, &aimZ, &duckX, &duckZ, &RLoadA, &RLoadB, &crouchRLoadA, &crouchRLoadB) == 9);
 
-            g_GunAimingOffsets[CAnimManager::GetAnimationGroupId(stealthAnimGrp) - ANIM_GROUP_PYTHON] = {
+            g_GunAimingOffsets[CAnimManager::GetAnimationGroupIdByName(stealthAnimGrp) - ANIM_GROUP_PYTHON] = {
                 .AimX = aimX,
                 .AimZ = aimZ,
 
@@ -279,24 +282,23 @@ void CWeaponInfo::LoadWeaponData() {
             uint32 flags{};
             char stealthAnimGrpName[32]{};
 
-            (void)sscanf(
-                l,
-                "%s %s %s %f %f %d %d %d %s %d %x %s",
-                unused,
-                weaponName,
-                fireTypeName,
+            VERIFY(sscanf_s(line,
+                "%*s %s %s %f %f %d %d %d %s %d %x %s",
+                SCANF_S_STR(weaponName),
+                SCANF_S_STR(fireTypeName),
                 &targetRange,
                 &weaponRange,
                 &modelId1,
                 &modelId2,
                 &slot,
-                baseComboName,
+                SCANF_S_STR(baseComboName),
                 &numCombos,
                 &flags,
-                stealthAnimGrpName
-            );
+                SCANF_S_STR(stealthAnimGrpName)
+            ) == 11);
 
-            auto& wi = aWeaponInfo[(uint32)FindWeaponType(weaponName)];
+            auto wType = FindWeaponType(weaponName);
+            auto& wi = aWeaponInfo[(uint32)wType];
             wi.m_nWeaponFire = FindWeaponFireType(fireTypeName);
             wi.m_fTargetRange = targetRange;
             wi.m_fWeaponRange = weaponRange;
@@ -305,6 +307,13 @@ void CWeaponInfo::LoadWeaponData() {
             wi.m_nSlot = slot;
             wi.m_nBaseCombo = GetBaseComboByName(baseComboName);
             wi.m_nNumCombos = (uint8)numCombos;
+            wi.m_nFlags = flags;
+
+            if (!std::string_view{stealthAnimGrpName}.starts_with("null"))
+                wi.m_eAnimGroup = CAnimManager::GetAnimationGroupIdByName(stealthAnimGrpName);
+
+            if (modelId1 > 0)
+                CModelInfo::GetModelInfo(modelId1)->AsWeaponModelInfoPtr()->m_weaponInfo = wType;
 
             break;
         }
@@ -401,17 +410,17 @@ eWeaponType CWeaponInfo::FindWeaponType(const char* type) {
 }
 
 // 0x685700
-AnimationId CWeaponInfo::GetCrouchReloadAnimationID() {
+AnimationId CWeaponInfo::GetCrouchReloadAnimationID() const {
     return flags.bCrouchFire && flags.bReload ? ANIM_ID_CROUCHRELOAD : ANIM_ID_WALK;
 }
 
 // 0x743D50
-float CWeaponInfo::GetTargetHeadRange() {
+float CWeaponInfo::GetTargetHeadRange() const {
     return (float)((uint32)m_nSkillLevel + 2) * m_fWeaponRange / 25.f;
 }
 
 // 0x743D70
-uint32 CWeaponInfo::GetWeaponReloadTime() {
+uint32 CWeaponInfo::GetWeaponReloadTime() const {
     if (flags.bReload)
         return flags.bTwinPistol ? 2000u : 1000u;
 

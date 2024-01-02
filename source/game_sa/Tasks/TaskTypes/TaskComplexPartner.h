@@ -26,21 +26,19 @@ public:
     bool          m_makePedAlwaysFacePartner;
     char          m_animBlockName[16];
     bool          m_requiredAnimsStreamedIn;
-    char          _pad;
 
 public:
     static constexpr auto Type = TASK_COMPLEX_PARTNER;
 
     CTaskComplexPartner(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, bool makePedAlwaysFacePartner, int8 updateDirectionCount, CVector point);
-    ~CTaskComplexPartner();
+    ~CTaskComplexPartner() override;
 
-    eTaskType GetTaskType() override { return TASK_COMPLEX_PARTNER; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask*       CreateNextSubTask(CPed* ped) override;
     CTask*       CreateFirstSubTask(CPed* ped) override;
     CTask*       ControlSubTask(CPed* ped) override;
     virtual void StreamRequiredAnims();
     virtual void RemoveStreamedAnims();
-
 
 private:
     friend void InjectHooksMain();

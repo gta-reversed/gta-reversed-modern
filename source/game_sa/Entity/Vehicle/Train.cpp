@@ -17,26 +17,65 @@ uint8& CTrain::GenTrain_Direction = *(uint8*)0xC38004;
 uint32& CTrain::GenTrain_GenerationNode = *(uint32*)0xC38008;
 uint32& CTrain::GenTrain_Status = *(uint32*)0xC3800C;
 bool& CTrain::bDisableRandomTrains = *(bool*)0xC38010;
-CVector (&CTrain::aStationCoors)[6] = *(CVector(*)[6])0x8D48F8; /*{ // 0x8D48F8
+CVector CTrain::aStationCoors[6] = { // 0x8D48F8
     CVector{ 1741.0f, -1954.0f, 15.0f },
     CVector{ 1297.0f, -1898.0f, 3.0f  },
     CVector{ -1945.0f, 128.0f,  29.0f },
     CVector{ 1434.0f,  2632.0f, 13.0f },
     CVector{ 2783.0f,  1758.0f, 12.0f },
     CVector{ 2865.0f,  1281.0f, 12.0  }
-};*/
+};
 
-uint32 (&NumTrackNodes)[4] = *(uint32(*)[4])0xC38014;
+CTrainNode* (&pTrackNodes)[4] = *(CTrainNode*(*)[4])0xC38024;
+int32 (&NumTrackNodes)[4] = *(int32(*)[4])0xC38014;
 float (&arrTotalTrackLength)[4] = *(float (*)[4])0xC37FEC;
-CTrainNode* (&trackNodes)[4] = *(CTrainNode*(*)[4])0xC38024;
 float (&StationDist)[6] = *(float (*)[6])0xC38034;
 
-void CTrain::InjectHooks()
-{
+void CTrain::InjectHooks() {
     RH_ScopedClass(CTrain);
     RH_ScopedCategory("Vehicle");
 
-    RH_ScopedInstall(ProcessControl_Reversed, 0x6F86A0);
+    RH_ScopedInstall(Constructor, 0x6F6030, { .reversed = false });
+    RH_ScopedInstall(InitTrains, 0x6F7440, { .reversed = false });
+    RH_ScopedInstall(ReadAndInterpretTrackFile, 0x6F55D0, { .reversed = false });
+    RH_ScopedInstall(Shutdown, 0x6F58D0);
+    RH_ScopedInstall(UpdateTrains, 0x6F5900);
+    RH_ScopedInstall(FindCoorsFromPositionOnTrack, 0x6F59E0, { .reversed = false });
+    RH_ScopedInstall(FindMaximumSpeedToStopAtStations, 0x6F5BA0, { .reversed = false });
+    RH_ScopedInstall(FindNumCarriagesPulled, 0x6F5CD0);
+    RH_ScopedInstall(OpenTrainDoor, 0x6F5D80);
+    RH_ScopedInstall(AddPassenger, 0x6F5D90);
+    RH_ScopedInstall(RemovePassenger, 0x6F5DA0);
+    RH_ScopedInstall(DisableRandomTrains, 0x6F5DB0);
+    RH_ScopedInstall(RemoveOneMissionTrain, 0x6F5DC0);
+    RH_ScopedInstall(ReleaseOneMissionTrain, 0x6F5DF0);
+    RH_ScopedInstall(SetTrainSpeed, 0x6F5E20);
+    RH_ScopedInstall(SetTrainCruiseSpeed, 0x6F5E50);
+    RH_ScopedInstall(FindCaboose, 0x6F5E70, { .reversed = false });
+    RH_ScopedInstall(FindEngine, 0x6F5E90, { .reversed = false });
+    RH_ScopedInstall(FindCarriage, 0x6F5EB0, { .reversed = false });
+    RH_ScopedInstall(FindSideStationIsOn, 0x6F5EF0);
+    RH_ScopedInstall(FindNextStationPositionInDirection, 0x6F5F00, { .reversed = false });
+    RH_ScopedInstall(IsInTunnel, 0x6F6320);
+    RH_ScopedInstall(RemoveRandomPassenger, 0x6F6850, { .reversed = false });
+    RH_ScopedInstall(RemoveMissionTrains, 0x6F6A20);
+    RH_ScopedInstall(RemoveAllTrains, 0x6F6AA0, { .reversed = false });
+    RH_ScopedInstall(ReleaseMissionTrains, 0x6F6B60);
+    RH_ScopedInstall(FindClosestTrackNode, 0x6F6BD0, { .reversed = false });
+    RH_ScopedInstall(FindPositionOnTrackFromCoors, 0x6F6CC0, { .reversed = false });
+    RH_ScopedInstall(FindNearestTrain, 0x6F7090, { .reversed = false });
+    RH_ScopedInstall(SetNewTrainPosition, 0x6F7140);
+    RH_ScopedInstall(IsNextStationAllowed, 0x6F7260, { .reversed = false });
+    RH_ScopedInstall(SkipToNextAllowedStation, 0x6F72F0, { .reversed = false });
+    RH_ScopedInstall(CreateMissionTrain, 0x6F7550, { .reversed = false });
+    RH_ScopedInstall(DoTrainGenerationAndRemoval, 0x6F7900, { .reversed = false });
+    RH_ScopedInstall(AddNearbyPedAsRandomPassenger, 0x6F8170, { .reversed = false });
+    RH_ScopedVirtualInstall(ProcessControl, 0x6F86A0);
+
+    RH_ScopedGlobalInstall(ProcessTrainAnnouncements, 0x6F5910);
+    RH_ScopedGlobalInstall(PlayAnnouncement, 0x6F5920);
+    RH_ScopedGlobalInstall(MarkSurroundingEntitiesForCollisionWithTrain, 0x6F6640);
+    RH_ScopedGlobalInstall(TrainHitStuff, 0x6F5CF0, { .reversed = false });
 }
 
 // 0x6F6030
@@ -44,20 +83,17 @@ CTrain::CTrain(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(created
     plugin::CallMethod<0x6F6030, CTrain*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
     return;
 
-    const auto mi = CModelInfo::GetModelInfo(modelIndex)->AsVehicleModelInfoPtr();
-
-    memset(&m_aDoors, 0, sizeof(m_aDoors));
     m_nVehicleSubType = VEHICLE_TYPE_TRAIN;
     m_nVehicleType = VEHICLE_TYPE_TRAIN;
-    // m_pHandlingData = &handling.mod_HandlingManager.vehicleHandling[mi->m_nHandlingId];
-    // m_nHandlingFlags = m_pHandlingData->m_handlingFlags;
+
+    const auto mi = CModelInfo::GetModelInfo(modelIndex)->AsVehicleModelInfoPtr();
+    m_pHandlingData = gHandlingDataMgr.GetVehiclePointer(mi->m_nHandlingId);
+    m_nHandlingFlagsIntValue = m_pHandlingData->m_nHandlingFlags;
+
     CVehicle::SetModelIndex(modelIndex);
+    SetupModelNodes();
 
-    // todo: add as NOTSA add SetupModelNodes
-    std::ranges::fill(m_aTrainNodes, nullptr);
-    CClumpModelInfo::FillFrameArray(m_pRwClump, m_aTrainNodes);
-    //
-
+    std::memset(&m_aDoors, 0, sizeof(m_aDoors));
     m_aDoors[2].m_nDirn = 20;
     m_aDoors[2].m_nAxis = 2;
     if (m_nModelIndex == MODEL_STREAKC) {
@@ -66,24 +102,28 @@ CTrain::CTrain(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(created
         m_aDoors[3].m_fOpenAngle = 1.25f;
         m_aDoors[3].m_fClosedAngle = 0.25f;
     } else {
-        m_aDoors[2].m_fOpenAngle = -1.2566371;
+        m_aDoors[2].m_fOpenAngle = TWO_PI / -5.0f;
         m_aDoors[2].m_fClosedAngle = 0.0f;
-        m_aDoors[3].m_fOpenAngle = 1.2566371;
+        m_aDoors[3].m_fOpenAngle = TWO_PI / +5.0f;
         m_aDoors[3].m_fClosedAngle = 0.0f;
     }
     m_aDoors[3].m_nAxis = 2;
     m_aDoors[3].m_nDirn = 20;
 
-    // m_nTrainFlags = m_nTrainFlags & (CLOCKWISE_DIRECTION | IS_LAST_CARRIAGE | IS_FRONT_CARRIAGE) | TF_80 | TF_1;
-    // m_nTrainFlags = m_nTrainFlags & 0xF8 | 2;
+    { // todo:
+    trainFlags.bClockwiseDirection = true;
+    trainFlags.bIsLastCarriage = true;
+    trainFlags.bIsFrontCarriage = true;
+    trainFlags.bStopsAtStations = true;
+    }
 
     m_nPassengersGenerationState = 0;
-    // m_nPassengerFlags = m_nPassengerFlags & 0xF0 | rand() & 3;
-    // m_nPassengerFlags = m_nPassengerFlags & 0xF | (16 * ((rand() & 3) + 1));
+    m_nNumPassengersToEnter = CGeneral::GetRandomNumber() & 3; // ?
+    m_nNumPassengersToLeave = (CGeneral::GetRandomNumber() & 3) + 1;
     m_pTemporaryPassenger = nullptr;
     m_nMaxPassengers = 5;
-    m_nPhysicalFlags = m_nPhysicalFlags | 0x20000; // b18;
-    m_nFlags = m_nFlags | 1;                       // uses collision
+    physicalFlags.bDisableSimpleCollision = true;
+    m_bUsesCollision = true;
     m_nTimeWhenCreated = CTimer::GetTimeInMS();
     field_5C8 = 0;
     m_nTrackId = 0;
@@ -93,47 +133,83 @@ CTrain::CTrain(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(created
     mi->ChooseVehicleColour(m_nPrimaryColor, m_nSecondaryColor, m_nTertiaryColor, m_nQuaternaryColor, 1);
     m_fMass = m_pHandlingData->m_fMass;
     m_fTurnMass = m_pHandlingData->m_fTurnMass;
-    m_vecCentreOfMass = (CVector)m_pHandlingData->m_vecCentreOfMass;
+    m_vecCentreOfMass = m_pHandlingData->m_vecCentreOfMass;
     m_fElasticity = 0.05f;
     m_fBuoyancyConstant = m_pHandlingData->m_fBuoyancyConstant;
-    if (m_pHandlingData->m_fDragMult <= 0.01f)
-        m_fAirResistance = m_pHandlingData->m_fDragMult;
-    else
-        m_fAirResistance = m_pHandlingData->m_fDragMult / 1000.0f * 0.5f; // pattern: see CPlane::SetGearDown
+    m_fAirResistance = GetDefaultAirResistance();
 
-    m_nPhysicalFlags = m_nPhysicalFlags & 0xFFFFFFF3 | 4; // bDisableCollisionForce
-    m_nFlags = m_nFlags | 0x80000000;                     // m_bTunnelTransition
+    physicalFlags.bAddMovingCollisionSpeed = true;
+    m_bTunnelTransition = true;
     m_pPrevCarriage = nullptr;
     m_pNextCarriage = nullptr;
-    // m_nType = (m_nType & 7) | 0x30;
+    m_nStatus = STATUS_TRAIN_MOVING;
     m_autoPilot.m_speed = 0.0f;
     m_autoPilot.m_nCruiseSpeed = 0;
     m_vehicleAudio.Initialise(this);
 }
 
+void CTrain::SetupModelNodes() {
+    std::ranges::fill(m_aTrainNodes, nullptr);
+    CClumpModelInfo::FillFrameArray(m_pRwClump, m_aTrainNodes);
+}
+
+// 0x6F7440
+void CTrain::InitTrains() {
+    ZoneScoped;
+
+    return plugin::Call<0x6F7440>();
+
+    bDisableRandomTrains = false;
+    GenTrain_Status = 0;
+
+    constexpr const char* filenames[] {
+        "data\\paths\\tracks.dat",
+        "data\\paths\\tracks3.dat",
+        "data\\paths\\tracks2.dat",
+        "data\\paths\\tracks4.dat",
+    };
+    for (auto i = 0u; i < std::size(pTrackNodes); ++i) {
+        if (!pTrackNodes[i]) {
+            CTrain::ReadAndInterpretTrackFile(filenames[i], pTrackNodes, NumTrackNodes, arrTotalTrackLength, i);
+        }
+    }
+
+    for (auto i = 0u; i < std::size(aStationCoors); ++i) {
+        int32 trackId;
+        CTrain::FindClosestTrackNode(aStationCoors[i], &trackId);
+        auto distance = (float)pTrackNodes[trackId]->m_nDistanceFromStart;
+        StationDist[i] = distance / 3.0f;
+    }
+}
+
 // 0x6F55D0
-void CTrain::ReadAndInterpretTrackFile(char* filename, CTrainNode** nodes, int32* lineCount, float* totalDist, int32 skipStations) {
-    ((void(__cdecl*)(char*, CTrainNode * *, int32*, float*, int32))0x6F55D0)(filename, nodes, lineCount, totalDist, skipStations);
+void CTrain::ReadAndInterpretTrackFile(const char* filename, CTrainNode** nodes, int32* lineCount, float* totalDist, int32 skipStations) {
+    ((void(__cdecl*)(const char*, CTrainNode **, int32*, float*, int32))0x6F55D0)(filename, nodes, lineCount, totalDist, skipStations);
 }
 
 // 0x6F58D0
 void CTrain::Shutdown() {
-    ((void(__cdecl*)())0x6F58D0)();
+    for (auto node : pTrackNodes) {
+        delete node;
+        node = nullptr;
+    }
 }
 
 // 0x6F5900
 void CTrain::UpdateTrains() {
-    ((void(__cdecl*)())0x6F5900)();
+    ZoneScoped;
+
+    // NOP
 }
 
 // 0x6F5910
 void ProcessTrainAnnouncements() {
-    ((void(__cdecl*)())0x6F5910)();
+    // NOP
 }
 
 // 0x6F5920
 void PlayAnnouncement(uint8 arg0, uint8 arg1) {
-    ((void(__cdecl*)(uint8, uint8))0x6F5920)(arg0, arg1);
+    // NOP
 }
 
 // 0x6F59E0
@@ -148,12 +224,12 @@ bool CTrain::FindMaximumSpeedToStopAtStations(float* speed) {
 
 // 0x6F5CD0
 uint32 CTrain::FindNumCarriagesPulled() {
-    return ((uint32(__thiscall*)(CTrain*))0x6F5CD0)(this);
-}
-
-// 0x6F5CF0
-void TrainHitStuff(CPtrList& ptrList, CEntity* entity) {
-    ((void(__cdecl*)(CPtrList&, CEntity*))0x6F5CF0)(ptrList, entity);
+    uint32 num;
+    CTrain* carriage = m_pNextCarriage;
+    for (num = 0; carriage; ++num) {
+        carriage = carriage->m_pNextCarriage;
+    }
+    return num;
 }
 
 // 0x6F5D80
@@ -178,22 +254,37 @@ void CTrain::DisableRandomTrains(bool disable) {
 
 // 0x6F5DC0
 void CTrain::RemoveOneMissionTrain(CTrain* train) {
-    ((void(__cdecl*)(CTrain*))0x6F5DC0)(train);
+    if (!train)
+        return;
+
+    CTrain* next;
+    CTrain* _train = train;
+    do {
+        next = _train->m_pNextCarriage;
+        CWorld::Remove(_train);
+        delete _train;
+        _train = next;
+    } while (next);
 }
 
 // 0x6F5DF0
 void CTrain::ReleaseOneMissionTrain(CTrain* train) {
-    ((void(__cdecl*)(CTrain*))0x6F5DF0)(train);
+    for (auto* head = train; head; head = head->m_pNextCarriage) {
+        head->trainFlags.bMissionTrain = false;
+    }
 }
 
 // 0x6F5E20
 void CTrain::SetTrainSpeed(CTrain* train, float speed) {
-    ((void(__cdecl*)(CTrain*, float))0x6F5E20)(train, speed);
+    train->m_fTrainSpeed = speed / 50.0f;
+    if (!train->trainFlags.bClockwiseDirection) {
+        train->m_fTrainSpeed = -train->m_fTrainSpeed;
+    }
 }
 
 // 0x6F5E50
-void CTrain::SetTrainCruiseSpeed(CTrain* arg0, float cruiseSpeed) {
-    ((void(__cdecl*)(CTrain*, float))0x6F5E50)(arg0, cruiseSpeed);
+void CTrain::SetTrainCruiseSpeed(CTrain* train, float speed) {
+    train->m_autoPilot.m_nCruiseSpeed = (uint8)speed;
 }
 
 // 0x6F5E70
@@ -212,8 +303,8 @@ CTrain* CTrain::FindCarriage(CTrain* train, uint8 carriage) {
 }
 
 // 0x6F5EF0
-bool CTrain::FindSideStationIsOn() {
-    return ((bool(__thiscall*)(CTrain*))0x6F5EF0)(this);
+bool CTrain::FindSideStationIsOn() const {
+    return trainFlags.bClockwiseDirection; // ?
 }
 
 // 0x6F5F00
@@ -222,13 +313,37 @@ void CTrain::FindNextStationPositionInDirection(bool clockwiseDirection, float d
 }
 
 // 0x6F6320
-bool CTrain::IsInTunnel() {
-    return ((bool(__thiscall*)(CTrain*))0x6F6320)(this);
+bool CTrain::IsInTunnel() const {
+    const auto& pos = GetPosition();
+    CColPoint colPoint{};
+    CEntity* colEntity{};
+    return CWorld::ProcessVerticalLine(pos, pos.z + 100.0f, colPoint, colEntity, true);
 }
 
 // 0x6F6640
-void MarkSurroundingEntitiesForCollisionWithTrain(CVector arg0, float arg1, CEntity* arg2, bool bOnlyVehicles) {
-    ((void(__cdecl*)(CVector, float, CEntity*, bool))0x6F6640)(arg0, arg1, arg2, bOnlyVehicles);
+void MarkSurroundingEntitiesForCollisionWithTrain(CVector pos, float radius, CEntity* entity, bool bOnlyVehicles) {
+    int32 startSectorX = std::max(CWorld::GetSectorX(pos.x - radius), 0);
+    int32 startSectorY = std::max(CWorld::GetSectorY(pos.y - radius), 0);
+    int32 endSectorX   = std::min(CWorld::GetSectorX(pos.x + radius), MAX_SECTORS_X - 1);
+    int32 endSectorY   = std::min(CWorld::GetSectorY(pos.y + radius), MAX_SECTORS_Y - 1);
+
+    CWorld::IncrementCurrentScanCode();
+
+    for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+        for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+            CRepeatSector* repeatSector = GetRepeatSector(sectorX, sectorY);
+            TrainHitStuff(repeatSector->GetList(REPEATSECTOR_VEHICLES), entity);
+            if (!bOnlyVehicles) {
+                TrainHitStuff(repeatSector->GetList(REPEATSECTOR_PEDS), entity);
+                TrainHitStuff(repeatSector->GetList(REPEATSECTOR_OBJECTS), entity);
+            }
+        }
+    }
+}
+
+// 0x6F5CF0
+void TrainHitStuff(CPtrList& ptrList, CEntity* entity) {
+    ((void(__cdecl*)(CPtrList&, CEntity*))0x6F5CF0)(ptrList, entity);
 }
 
 // 0x6F6850
@@ -238,7 +353,20 @@ void CTrain::RemoveRandomPassenger() {
 
 // 0x6F6A20
 void CTrain::RemoveMissionTrains() {
-    ((void(__cdecl*)())0x6F6A20)();
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        auto vehicle = GetVehiclePool()->GetAt(i);
+        if (!vehicle) {
+            continue;
+        }
+
+        if (vehicle->IsTrain() &&
+            vehicle != FindPlayerVehicle() &&
+            vehicle->AsTrain()->trainFlags.bMissionTrain
+        ) {
+            CWorld::Remove(vehicle);
+            delete vehicle;
+        }
+    }
 }
 
 // 0x6F6AA0
@@ -248,7 +376,16 @@ void CTrain::RemoveAllTrains() {
 
 // 0x6F6B60
 void CTrain::ReleaseMissionTrains() {
-    ((void(__cdecl*)())0x6F6B60)();
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        auto vehicle = GetVehiclePool()->GetAt(i);
+        if (!vehicle) {
+            continue;
+        }
+
+        if (vehicle->IsTrain() && vehicle != FindPlayerVehicle()) {
+            vehicle->AsTrain()->trainFlags.bMissionTrain = false;
+        }
+    }
 }
 
 // 0x6F6BD0
@@ -268,7 +405,8 @@ CTrain* CTrain::FindNearestTrain(CVector posn, bool mustBeMainTrain) {
 
 // 0x6F7140
 void CTrain::SetNewTrainPosition(CTrain* train, CVector posn) {
-    ((void(__cdecl*)(CTrain*, CVector))0x6F7140)(train, posn);
+    train->SetPosn(posn);
+    train->FindPositionOnTrackFromCoors();
 }
 
 // 0x6F7260
@@ -281,14 +419,9 @@ void CTrain::SkipToNextAllowedStation(CTrain* train) {
     ((void(__cdecl*)(CTrain*))0x6F72F0)(train);
 }
 
-// 0x6F7440
-void CTrain::InitTrains() {
-    ((void(__cdecl*)())0x6F7440)();
-}
-
 // 0x6F7550
 void CTrain::CreateMissionTrain(CVector posn, bool clockwiseDirection, uint32 trainType, CTrain** outFirstCarriage, CTrain** outLastCarriage, int32 nodeIndex, int32 trackId, bool isMissionTrain) {
-    ((void(__cdecl*)(CVector, bool, uint32, CTrain * *, CTrain * *, int32, int32, bool))0x6F7550)(posn, clockwiseDirection, trainType, outFirstCarriage, outLastCarriage, nodeIndex, trackId, isMissionTrain);
+    ((void(__cdecl*)(CVector, bool, uint32, CTrain**, CTrain**, int32, int32, bool))0x6F7550)(posn, clockwiseDirection, trainType, outFirstCarriage, outLastCarriage, nodeIndex, trackId, isMissionTrain);
 }
 
 // 0x6F7900
@@ -302,170 +435,120 @@ void CTrain::AddNearbyPedAsRandomPassenger() {
 }
 
 // 0x6F86A0
-void CTrain::ProcessControl()
-{
+void CTrain::ProcessControl() {
     vehicleFlags.bWarnedPeds = 0;
     m_vehicleAudio.Service();
-    if (gbModelViewer)
-    {
+    if (gbModelViewer) {
         return;
     }
 
     CVector vecOldTrainPosition = GetPosition();
     float fOldTrainHeading = GetHeading();
 
-    float fTotalTrackLength = arrTotalTrackLength[m_nTrackId];
-    CTrainNode* trainNodes = trackNodes[m_nTrackId];
-    int32 numTrackNodes = NumTrackNodes[m_nTrackId];
+    const float& fTotalTrackLength = arrTotalTrackLength[m_nTrackId];
+    CTrainNode* trainNodes = pTrackNodes[m_nTrackId];
+    auto numTrackNodes = NumTrackNodes[m_nTrackId];
 
-    if (trainFlags.bNotOnARailRoad == 0)
-    {
-        if (!trainFlags.bIsFrontCarriage)
-        {
-            CTrain* pPrevCarriage = m_pPrevCarriage;
-            if (pPrevCarriage)
-            {
-                m_fTrainSpeed = pPrevCarriage->m_fTrainSpeed;
-                m_fCurrentRailDistance = pPrevCarriage->m_fCurrentRailDistance + m_fLength;
-            }
-            else
-            {
-                m_fTrainSpeed *= pow(0.9900000095367432f, CTimer::GetTimeStep());
+    if (trainFlags.bNotOnARailRoad == 0) {
+        if (!trainFlags.bIsFrontCarriage) {
+            if (m_pPrevCarriage) {
+                m_fTrainSpeed = m_pPrevCarriage->m_fTrainSpeed;
+                m_fCurrentRailDistance = m_pPrevCarriage->m_fCurrentRailDistance + m_fLength;
+            } else {
+                m_fTrainSpeed *= std::pow(0.9900000095367432f, CTimer::GetTimeStep());
                 m_fCurrentRailDistance += m_fTrainSpeed * CTimer::GetTimeStep();
             }
 
-            if (trainFlags.b01 && trainFlags.bStoppedAtStation
-                && m_nModelIndex == MODEL_STREAKC
-                && !trainFlags.bMissionTrain)
-            {
+            if (trainFlags.b01 && trainFlags.bStoppedAtStation && m_nModelIndex == MODEL_STREAKC && !trainFlags.bMissionTrain) {
                 CPlayerPed* localPlayer = FindPlayerPed();
-                if (m_nPassengersGenerationState == TRAIN_PASSENGERS_QUERY_NUM_PASSENGERS_TO_LEAVE)
-                {
-                    if (localPlayer->m_pVehicle == this)
-                    {
+                if (m_nPassengersGenerationState == TRAIN_PASSENGERS_QUERY_NUM_PASSENGERS_TO_LEAVE) {
+                    if (localPlayer->m_pVehicle == this) {
                         m_nNumPassengersToLeave = 0;
-                    }
-                    else
-                    {
-                        m_nNumPassengersToLeave = (rand() & 3) + 1; // rand(1, 4)
+                    } else {
+                        m_nNumPassengersToLeave = (CGeneral::GetRandomNumber() & 3) + 1; // [1, 4]
                     }
                     m_nPassengersGenerationState = TRAIN_PASSENGERS_TELL_PASSENGERS_TO_LEAVE;
                 }
 
-                if (m_nPassengersGenerationState == TRAIN_PASSENGERS_TELL_PASSENGERS_TO_LEAVE)
-                {
+                if (m_nPassengersGenerationState == TRAIN_PASSENGERS_TELL_PASSENGERS_TO_LEAVE) {
                     RemoveRandomPassenger();
-                    if (m_nNumPassengersToLeave == 0)
-                    {
+                    if (m_nNumPassengersToLeave == 0) {
                         m_nPassengersGenerationState = TRAIN_PASSENGERS_QUERY_NUM_PASSENGERS_TO_ENTER;
                     }
                 }
 
-                if (m_nPassengersGenerationState == TRAIN_PASSENGERS_QUERY_NUM_PASSENGERS_TO_ENTER)
-                {
-                    if (localPlayer->m_pVehicle == this)
-                    {
+                if (m_nPassengersGenerationState == TRAIN_PASSENGERS_QUERY_NUM_PASSENGERS_TO_ENTER) {
+                    if (localPlayer->m_pVehicle == this) {
                         m_nNumPassengersToEnter = 0;
-                    }
-                    else
-                    {
-                        m_nNumPassengersToEnter = rand() % 4 + 1; // rand(1, 4)
+                    } else {
+                        m_nNumPassengersToEnter = CGeneral::GetRandomNumber() % 4 + 1; // rand(1, 4)
                     }
                     m_nPassengersGenerationState = TRAIN_PASSENGERS_TELL_PASSENGERS_TO_ENTER;
                 }
 
-                if (m_nPassengersGenerationState == TRAIN_PASSENGERS_TELL_PASSENGERS_TO_ENTER)
-                {
-                    if (trainFlags.bPassengersCanEnterAndLeave)
-                    {
+                if (m_nPassengersGenerationState == TRAIN_PASSENGERS_TELL_PASSENGERS_TO_ENTER) {
+                    if (trainFlags.bPassengersCanEnterAndLeave) {
                         AddNearbyPedAsRandomPassenger();
-                        if (m_nNumPassengersToLeave == m_nNumPassengersToEnter)
-                        {
+                        if (m_nNumPassengersToLeave == m_nNumPassengersToEnter) {
                             m_nPassengersGenerationState = TRAIN_PASSENGERS_GENERATION_FINISHED;
                         }
                     }
                 }
             }
-        }
-        else
-        {
-            CPad* pad = CPad::GetPad(0);
-            if (m_pDriver && m_pDriver->IsPlayer())
-            {
+        } else {
+            CPad* pad = CPad::GetPad();
+            if (m_pDriver && m_pDriver->IsPlayer()) {
                 pad = m_pDriver->AsPlayer()->GetPadFromPlayer();
             }
 
             uint32 numCarriagesPulled = FindNumCarriagesPulled();
-            if (!trainFlags.bClockwiseDirection)
-            {
+            if (!trainFlags.bClockwiseDirection) {
                 m_fTrainSpeed = -m_fTrainSpeed;
             }
 
-            ///*
-            if (m_nStatus)
-            {
+            if (m_nStatus) {
                 bool bIsStreakModel = trainFlags.bIsStreakModel;
                 auto fStopAtStationSpeed = static_cast<float>(m_autoPilot.m_nCruiseSpeed);
 
-                uint32 timeInMilliSeconds = CTimer::GetTimeInMS();
                 uint32 timeAtStation = CTimer::GetTimeInMS() - m_nTimeWhenStoppedAtStation;
-                if (timeAtStation >= (bIsStreakModel ? 20000u : 10000u))
-                {
-                    if (timeAtStation >= (bIsStreakModel ? 28000u : 18000u))
-                    {
-                        if (timeAtStation >= (bIsStreakModel ? 32000u : 22000u))
-                        {
-                            if (trainFlags.bStopsAtStations)
-                            {
+                if (timeAtStation >= (bIsStreakModel ? 20'000u : 10'000u)) {
+                    if (timeAtStation >= (bIsStreakModel ? 28'000u : 18'000u)) {
+                        if (timeAtStation >= (bIsStreakModel ? 32'000u : 22'000u)) {
+                            if (trainFlags.bStopsAtStations) {
                                 float maxTrainSpeed = 0.0f;
-                                if (FindMaximumSpeedToStopAtStations(&maxTrainSpeed))
-                                {
+                                if (FindMaximumSpeedToStopAtStations(&maxTrainSpeed)) {
                                     fStopAtStationSpeed = 0.0f;
-                                    m_nTimeWhenStoppedAtStation = timeInMilliSeconds;
-                                }
-                                else
-                                {
-                                    if (fStopAtStationSpeed >= maxTrainSpeed)
-                                    {
+                                    m_nTimeWhenStoppedAtStation = CTimer::GetTimeInMS();
+                                } else {
+                                    if (fStopAtStationSpeed >= maxTrainSpeed) {
                                         fStopAtStationSpeed = maxTrainSpeed;
                                     }
                                 }
                             }
-                        }
-                        else if (trainFlags.bStoppedAtStation)
-                        {
+                        } else if (trainFlags.bStoppedAtStation) {
                             CTrain* trainCarriage = this;
-                            do
-                            {
+                            do {
                                 trainFlags.bStoppedAtStation = false;
                                 trainCarriage->m_nPassengersGenerationState = TRAIN_PASSENGERS_GENERATION_FINISHED;
                                 trainCarriage = trainCarriage->m_pNextCarriage;
                             } while (trainCarriage);
                         }
-                    }
-                    else
-                    {
+                    } else {
                         fStopAtStationSpeed = 0.0f;
-                        if (trainFlags.bStoppedAtStation)
-                        {
+                        if (trainFlags.bStoppedAtStation) {
                             CTrain* trainCarriage = this;
-                            do
-                            {
+                            do {
                                 trainFlags.bPassengersCanEnterAndLeave = false;
                                 trainCarriage->m_nPassengersGenerationState = TRAIN_PASSENGERS_GENERATION_FINISHED;
                                 trainCarriage = trainCarriage->m_pNextCarriage;
                             } while (trainCarriage);
                         }
                     }
-                }
-                else
-                {
+                } else {
                     fStopAtStationSpeed = 0.0f;
-                    if (!trainFlags.bStoppedAtStation)
-                    {
+                    if (!trainFlags.bStoppedAtStation) {
                         CTrain* trainCarriage = this;
-                        do
-                        {
+                        do {
                             trainFlags.bStoppedAtStation = true;
                             trainFlags.bPassengersCanEnterAndLeave = true;
                             trainCarriage->m_nPassengersGenerationState = TRAIN_PASSENGERS_QUERY_NUM_PASSENGERS_TO_LEAVE;
@@ -474,150 +557,112 @@ void CTrain::ProcessControl()
                     }
                 }
 
-                fStopAtStationSpeed = fStopAtStationSpeed * 0.02f - m_fTrainSpeed;
-                if (fStopAtStationSpeed > 0.0f)
-                {
+                fStopAtStationSpeed = fStopAtStationSpeed / 50.0f - m_fTrainSpeed;
+                if (fStopAtStationSpeed > 0.0f) {
                     m_fTrainGas = fStopAtStationSpeed * 30.0f;
-                    if (m_fTrainGas >= 1.0f)
-                    {
+                    if (m_fTrainGas >= 1.0f) {
                         m_fTrainGas = 1.0f;
                     }
 
                     m_fTrainGas *= 255.0f;
                     m_fTrainBrake = 0.0f;
-                }
-                else
-                {
+                } else {
                     float fTrainSpeed = fStopAtStationSpeed * -30.0f;
                     m_fTrainGas = 0.0f;
-                    if (fTrainSpeed >= 1.0f)
-                    {
+                    if (fTrainSpeed >= 1.0f) {
                         fTrainSpeed = 1.0f;
                     }
                     m_fTrainBrake = fTrainSpeed * 255.0f;
                 }
-            }
-            else
-            {
+            } else {
                 float fTrainSpeed = m_fTrainSpeed;
-                if (fTrainSpeed < 0.0f)
-                {
+                if (fTrainSpeed < 0.0f) {
                     fTrainSpeed = -fTrainSpeed;
                 }
 
-                if (fTrainSpeed < 0.001f)
-                {
+                if (fTrainSpeed < 0.001f) {
                     m_fTrainBrake = 0.0f;
                     m_fTrainGas = static_cast<float>(pad->GetAccelerate() - pad->GetBrake());
-                }
-                else
-                {
-                    if (m_fTrainSpeed > 0.0f)
-                    {
+                } else {
+                    if (m_fTrainSpeed > 0.0f) {
                         m_fTrainBrake = static_cast<float>(pad->GetBrake());
                         m_fTrainGas = static_cast<float>(pad->GetAccelerate());
-                    }
-                    else
-                    {
+                    } else {
                         m_fTrainGas = static_cast<float>(-pad->GetBrake());
                         m_fTrainBrake = static_cast<float>(pad->GetAccelerate());
                     }
                 }
             }
 
-            if (trainFlags.bForceSlowDown)
-            {
-                CVector vecPoint = GetPosition();
-                CVector vecDistance;
-                if (CGameLogic::CalcDistanceToForbiddenTrainCrossing(vecPoint, m_vecMoveSpeed, true, &vecDistance) < 230.0f)
-                {
-                    if (DotProduct(GetForwardVector(), vecDistance) <= 0.0f)
-                    {
+            if (trainFlags.bForceSlowDown) {
+                const CVector& vecPoint = GetPosition();
+                CVector vecDistance{};
+                if (CGameLogic::CalcDistanceToForbiddenTrainCrossing(vecPoint, m_vecMoveSpeed, true, vecDistance) < 230.0f) {
+                    if (DotProduct(GetForwardVector(), vecDistance) <= 0.0f) {
                         m_fTrainGas = std::max(0.0f, m_fTrainGas);
-                    }
-                    else
-                    {
+                    } else {
                         m_fTrainGas = std::min(0.0f, m_fTrainGas);
                     }
 
-                    if (CGameLogic::CalcDistanceToForbiddenTrainCrossing(vecPoint, m_vecMoveSpeed, false, &vecDistance) < 230.0f)
-                    {
+                    if (CGameLogic::CalcDistanceToForbiddenTrainCrossing(vecPoint, m_vecMoveSpeed, false, vecDistance) < 230.0f) {
                         m_fTrainBrake = 512.0f;
-
                     }
                 }
             }
 
             numCarriagesPulled += 3;
 
-            m_fTrainSpeed += m_fTrainGas * 0.00390625f * CTimer::GetTimeStep() * 0.002f / numCarriagesPulled;
+            m_fTrainSpeed += m_fTrainGas / 256.0f * CTimer::GetTimeStep() * 0.002f / float(numCarriagesPulled);
 
-            if (m_fTrainBrake != 0.0f)
-            {
+            if (m_fTrainBrake != 0.0f) {
                 float fTrainSpeed = m_fTrainSpeed;
-                if (m_fTrainSpeed < 0.0f)
-                {
+                if (m_fTrainSpeed < 0.0f) {
                     fTrainSpeed = -fTrainSpeed;
                 }
-                float fBreak = m_fTrainBrake * 0.00390625f * CTimer::GetTimeStep() * 0.006f / numCarriagesPulled;
-                if (fTrainSpeed >= fBreak)
-                {
-                    if (m_fTrainSpeed < 0.0f)
-                    {
+                float fBreak = m_fTrainBrake / 256.0f * CTimer::GetTimeStep() * 0.006f / float(numCarriagesPulled);
+                if (fTrainSpeed >= fBreak) {
+                    if (m_fTrainSpeed < 0.0f) {
                         m_fTrainSpeed += fBreak;
-                    }
-                    else
-                    {
+                    } else {
                         m_fTrainSpeed -= fBreak;
                     }
-                }
-                else
-                {
+                } else {
                     m_fTrainSpeed = 0.0f;
                 }
             }
 
             m_fTrainSpeed *= pow(0.999750018119812f, CTimer::GetTimeStep());
-            if (!trainFlags.bClockwiseDirection)
-            {
+            if (!trainFlags.bClockwiseDirection) {
                 m_fTrainSpeed = -m_fTrainSpeed;
             }
 
             m_fCurrentRailDistance += CTimer::GetTimeStep() * m_fTrainSpeed;
 
-            if (m_nStatus == STATUS_PLAYER)
-            {
+            if (m_nStatus == STATUS_PLAYER) {
 
                 float fTheTrainSpeed = m_fTrainSpeed;
-                if (fTheTrainSpeed < 0.0f)
-                {
+                if (fTheTrainSpeed < 0.0f) {
                     fTheTrainSpeed = -fTheTrainSpeed;
                 }
-                if (fTheTrainSpeed > 1.0 * 0.94999999)
-                {
-                    CPad::GetPad(0)->StartShake(300, 0x46u, 0);
-                    CVector vecVehiclePosition = GetPosition();
-                    TheCamera.CamShake(0.1f, vecVehiclePosition.x, vecVehiclePosition.y, vecVehiclePosition.z);
+                if (fTheTrainSpeed > 1.0f * 0.95f) {
+                    CPad::GetPad()->StartShake(300, 70, 0);
+                    TheCamera.CamShake(0.1f, GetPosition());
                 }
 
                 fTheTrainSpeed = m_fTrainSpeed;
-                if (fTheTrainSpeed < 0.0f)
-                {
+                if (fTheTrainSpeed < 0.0f) {
                     fTheTrainSpeed = -fTheTrainSpeed;
                 }
 
-                if (fTheTrainSpeed > 1.0f)
-                {
+                if (fTheTrainSpeed > 1.0f) {
                     int32 nNodeIndex = m_nNodeIndex;
                     int32 previousNodeIndex = nNodeIndex - 1;
-                    if (previousNodeIndex < 0)
-                    {
+                    if (previousNodeIndex < 0) {
                         previousNodeIndex = numTrackNodes;
                     }
 
                     int32 previousNodeIndex2 = previousNodeIndex - 1;
-                    if (previousNodeIndex2 < 0)
-                    {
+                    if (previousNodeIndex2 < 0) {
                         previousNodeIndex2 = numTrackNodes;
                     }
 
@@ -630,23 +675,16 @@ void CTrain::ProcessControl()
                     vecDifference1.Normalise();
                     vecDifference2.Normalise();
 
-                    if (vecDifference1.x * vecDifference2.x +
-                        vecDifference1.y * vecDifference2.y +
-                        vecDifference1.z * vecDifference2.z < 0.99599999f)
-                    {
+                    if (DotProduct(vecDifference1, vecDifference2) < 0.996f) {
                         CTrain* carriage = this;
                         bool bIsInTunnel = false;
-                        while (!bIsInTunnel)
-                        {
+                        while (!bIsInTunnel) {
                             bIsInTunnel = carriage->IsInTunnel();
                             carriage = carriage->m_pNextCarriage;
-                            if (!carriage)
-                            {
-                                if (!bIsInTunnel)
-                                {
+                            if (!carriage) {
+                                if (!bIsInTunnel) {
                                     CTrain* theTrainCarriage = this;
-                                    do
-                                    {
+                                    do {
                                         trainFlags.bNotOnARailRoad = true;
                                         theTrainCarriage->physicalFlags.bDisableCollisionForce = false;
                                         theTrainCarriage->physicalFlags.bDisableSimpleCollision = false;
@@ -664,160 +702,122 @@ void CTrain::ProcessControl()
             }
         }
 
-        if (m_fCurrentRailDistance < 0.0f)
-        {
-            do
-            {
+        if (m_fCurrentRailDistance < 0.0f) {
+            do {
                 m_fCurrentRailDistance += fTotalTrackLength;
             } while (m_fCurrentRailDistance < 0.0f);
         }
 
-        if (m_fCurrentRailDistance >= fTotalTrackLength)
-        {
-            do
-            {
+        if (m_fCurrentRailDistance >= fTotalTrackLength) {
+            do {
                 m_fCurrentRailDistance -= fTotalTrackLength;
             } while (m_fCurrentRailDistance >= fTotalTrackLength);
         }
 
         float fNextNodeTrackLength = 0.0f;
         int32 nextNodeIndex = m_nNodeIndex + 1;
-        if (nextNodeIndex < numTrackNodes)
-        {
+        if (nextNodeIndex < numTrackNodes) {
             CTrainNode* nextTrainNode = &trainNodes[nextNodeIndex];
-            fNextNodeTrackLength = nextTrainNode->m_nDistanceFromStart / 3.0f;
-        }
-        else
-        {
+            fNextNodeTrackLength = nextTrainNode->GetDistanceFromStart();
+        } else {
             fNextNodeTrackLength = fTotalTrackLength;
             nextNodeIndex = 0;
         }
 
         CTrainNode* theTrainNode = &trainNodes[m_nNodeIndex];
-        float fCurrentNodeTrackLength = theTrainNode->m_nDistanceFromStart / 3.0f;
-        while (m_fCurrentRailDistance < fCurrentNodeTrackLength || fNextNodeTrackLength < m_fCurrentRailDistance)
-        {
+        float fCurrentNodeTrackLength = theTrainNode->GetDistanceFromStart();
+        while (m_fCurrentRailDistance < fCurrentNodeTrackLength || fNextNodeTrackLength < m_fCurrentRailDistance) {
             int32 newNodeIndex = m_nNodeIndex - 1; // previous node
-            if (fCurrentNodeTrackLength <= m_fCurrentRailDistance)
-            {
+            if (fCurrentNodeTrackLength <= m_fCurrentRailDistance) {
                 newNodeIndex = m_nNodeIndex + 1; // next node
             }
             m_nNodeIndex = newNodeIndex % numTrackNodes;
             m_vehicleAudio.AddAudioEvent(AE_TRAIN_CLACK, 0.0f);
 
             theTrainNode = &trainNodes[m_nNodeIndex];
-            fCurrentNodeTrackLength = theTrainNode->m_nDistanceFromStart / 3.0f;
+            fCurrentNodeTrackLength = theTrainNode->GetDistanceFromStart();
 
             nextNodeIndex = m_nNodeIndex + 1;
-            if (nextNodeIndex < numTrackNodes)
-            {
+            if (nextNodeIndex < numTrackNodes) {
                 CTrainNode* nextTrainNode = &trainNodes[nextNodeIndex];
-                fNextNodeTrackLength = nextTrainNode->m_nDistanceFromStart / 3.0f;
-            }
-            else
-            {
+                fNextNodeTrackLength = nextTrainNode->GetDistanceFromStart();
+            } else {
                 fNextNodeTrackLength = fTotalTrackLength;
                 nextNodeIndex = 0;
             }
         }
 
         CTrainNode* nextTrainNode = &trainNodes[nextNodeIndex];
-        fNextNodeTrackLength = nextTrainNode->m_nDistanceFromStart / 3.0f;
+        fNextNodeTrackLength = nextTrainNode->GetDistanceFromStart();
 
         float fTrackNodeDifference = fNextNodeTrackLength - fCurrentNodeTrackLength;
-        if (fTrackNodeDifference < 0.0f)
-        {
+        if (fTrackNodeDifference < 0.0f) {
             fTrackNodeDifference += fTotalTrackLength;
         }
 
         float fTheDistance = (m_fCurrentRailDistance - fCurrentNodeTrackLength) / fTrackNodeDifference;
-        CVector vecPosition1;
-        vecPosition1.x = theTrainNode->x * 0.125f * (1.0f - fTheDistance) + nextTrainNode->x * 0.125f * fTheDistance;
-        vecPosition1.y = theTrainNode->y * 0.125f * (1.0f - fTheDistance) + nextTrainNode->y * 0.125f * fTheDistance;
-        vecPosition1.z = theTrainNode->z * 0.125f * (1.0f - fTheDistance) + nextTrainNode->z * 0.125f * fTheDistance;
-
+        CVector vecPosition1 = theTrainNode->GetPosn() * (1.0f - fTheDistance) + nextTrainNode->GetPosn() * fTheDistance;
 
         CColModel* vehicleColModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
-        CBoundingBox* pBoundingBox = &vehicleColModel->GetBoundingBox();
-        float fTotalCurrentRailDistance = pBoundingBox->m_vecMax.y - pBoundingBox->m_vecMin.y + m_fCurrentRailDistance;
-        if (fTotalCurrentRailDistance > fTotalTrackLength)
-        {
+        const CBoundingBox& bbox = vehicleColModel->GetBoundingBox();
+        float fTotalCurrentRailDistance = bbox.GetLength() + m_fCurrentRailDistance;
+        if (fTotalCurrentRailDistance > fTotalTrackLength) {
             fTotalCurrentRailDistance -= fTotalTrackLength;
         }
 
         nextNodeIndex = m_nNodeIndex + 1;
-        if (nextNodeIndex < numTrackNodes)
-        {
-            CTrainNode* nextTrainNode = &trainNodes[nextNodeIndex];
-            fNextNodeTrackLength = nextTrainNode->m_nDistanceFromStart / 3.0f;
-        }
-        else
-        {
+        if (nextNodeIndex < numTrackNodes) {
+            fNextNodeTrackLength = trainNodes[nextNodeIndex].GetDistanceFromStart();
+        } else {
             fNextNodeTrackLength = fTotalTrackLength;
             nextNodeIndex = 0;
         }
 
         int32 trainNodeIndex = m_nNodeIndex;
-        while (fTotalCurrentRailDistance < fCurrentNodeTrackLength || fTotalCurrentRailDistance > fNextNodeTrackLength)
-        {
+        while (fTotalCurrentRailDistance < fCurrentNodeTrackLength || fTotalCurrentRailDistance > fNextNodeTrackLength) {
             trainNodeIndex = (trainNodeIndex + 1) % numTrackNodes;
 
             theTrainNode = &trainNodes[trainNodeIndex];
-            fCurrentNodeTrackLength = theTrainNode->m_nDistanceFromStart / 3.0f;
+            fCurrentNodeTrackLength = theTrainNode->GetDistanceFromStart();
 
             nextNodeIndex = trainNodeIndex + 1;
-            if (nextNodeIndex < numTrackNodes)
-            {
-                CTrainNode* nextTrainNode = &trainNodes[nextNodeIndex];
-                fNextNodeTrackLength = nextTrainNode->m_nDistanceFromStart / 3.0f;
-            }
-            else
-            {
+            if (nextNodeIndex < numTrackNodes) {
+                fNextNodeTrackLength = trainNodes[nextNodeIndex].GetDistanceFromStart();
+            } else {
                 fNextNodeTrackLength = fTotalTrackLength;
                 nextNodeIndex = 0;
             }
         }
 
-        nextTrainNode = &trainNodes[nextNodeIndex];
-        fNextNodeTrackLength = nextTrainNode->m_nDistanceFromStart / 3.0f;
+        fNextNodeTrackLength = trainNodes[nextNodeIndex].GetDistanceFromStart();
 
         fTrackNodeDifference = fNextNodeTrackLength - fCurrentNodeTrackLength;
-        if (fTrackNodeDifference < 0.0f)
-        {
+        if (fTrackNodeDifference < 0.0f) {
             fTrackNodeDifference += fTotalTrackLength;
         }
 
         fTheDistance = (fTotalCurrentRailDistance - fCurrentNodeTrackLength) / fTrackNodeDifference;
-        CVector vecPosition2;
-        vecPosition2.x = theTrainNode->x * 0.125f * (1.0f - fTheDistance) + nextTrainNode->x * 0.125f * fTheDistance;
-        vecPosition2.y = theTrainNode->y * 0.125f * (1.0f - fTheDistance) + nextTrainNode->y * 0.125f * fTheDistance;
-        vecPosition2.z = theTrainNode->z * 0.125f * (1.0f - fTheDistance) + nextTrainNode->z * 0.125f * fTheDistance;
+        CVector vecPosition2 = theTrainNode->GetPosn() * (1.0f - fTheDistance) + trainNodes[nextNodeIndex].GetPosn() * fTheDistance;
 
         {
             CVector& vecVehiclePosition = GetPosition();
-            vecVehiclePosition = (vecPosition1 + vecPosition2) * 0.5f;
-            vecVehiclePosition.z += m_pHandlingData->m_fSuspensionLowerLimit - pBoundingBox->m_vecMin.z;
+            vecVehiclePosition = (vecPosition1 + vecPosition2) / 2.0f;
+            vecVehiclePosition.z += m_pHandlingData->m_fSuspensionLowerLimit - bbox.m_vecMin.z;
         }
 
         GetForward() = vecPosition2 - vecPosition1;
         GetForward().Normalise();
-        if (!trainFlags.bClockwiseDirection)
-        {
+        if (!trainFlags.bClockwiseDirection) {
             GetForward() *= -1.0f;
         }
 
         CVector vecTemp(0.0f, 0.0f, 1.0f);
-
         CrossProduct(&GetRight(), &GetForward(), &vecTemp);
         GetRight().Normalise();
-
         CrossProduct(&GetUp(), &GetRight(), &GetForward());
 
-        uint8 trainNodeLighting = theTrainNode->GetLightingFromCollision();
-        uint8 trainNextNodeLighting = nextTrainNode->GetLightingFromCollision();
-
-        auto fTrainNodeLighting = static_cast<float>(ScaleLighting(trainNodeLighting, 0.5f));
-        auto fTrainNextNodeLighting = static_cast<float>(ScaleLighting(trainNextNodeLighting, 0.5f));
+        auto fTrainNodeLighting     = theTrainNode->GetLightingFromCollision().GetCurrentLighting();
+        auto fTrainNextNodeLighting = trainNodes[nextNodeIndex].GetLightingFromCollision().GetCurrentLighting();
 
         fTrainNodeLighting += (fTrainNextNodeLighting - fTrainNodeLighting) * fTheDistance;
         m_fContactSurfaceBrightness = fTrainNodeLighting;
@@ -825,22 +825,17 @@ void CTrain::ProcessControl()
 
         float fNewTrainHeading = GetHeading();
         float fHeading = fNewTrainHeading - fOldTrainHeading;
-        if (fHeading <= PI)
-        {
-            if (fHeading < -PI)
-            {
+        if (fHeading <= PI) {
+            if (fHeading < -PI) {
                 fHeading += TWO_PI;
             }
-        }
-        else
-        {
+        } else {
             fHeading -= TWO_PI;
         }
 
         m_vecTurnSpeed = CVector(0.0f, 0.0f, fHeading / CTimer::GetTimeStep());
 
-        if (trainFlags.bNotOnARailRoad)
-        {
+        if (trainFlags.bNotOnARailRoad) {
             m_vecMoveSpeed *= -1.0f;
             m_vecTurnSpeed *= -1.0f;
 
@@ -850,80 +845,14 @@ void CTrain::ProcessControl()
             m_vecTurnSpeed *= -1.0f;
 
             CPhysical::ProcessControl();
-        }
-        else
-        {
-            float fVehicleMoveSpeedX = m_vecMoveSpeed.x;
-            if (fVehicleMoveSpeedX <= -2.0f)
-            {
-                fVehicleMoveSpeedX = -2.0f;
-            }
+        } else {
+            m_vecMoveSpeed.x = std::clamp(m_vecMoveSpeed.x, -2.0f, 2.0f);
+            m_vecMoveSpeed.y = std::clamp(m_vecMoveSpeed.y, -2.0f, 2.0f);
+            m_vecMoveSpeed.z = std::clamp(m_vecMoveSpeed.z, -2.0f, 2.0f);
 
-            if (fVehicleMoveSpeedX >= 2.0f)
-            {
-                fVehicleMoveSpeedX = 2.0f;
-            }
-            m_vecMoveSpeed.x = fVehicleMoveSpeedX;
-
-            float fVehicleMoveSpeedY = m_vecMoveSpeed.y;
-            if (fVehicleMoveSpeedY <= -2.0f)
-            {
-                fVehicleMoveSpeedY = -2.0f;
-            }
-
-            if (fVehicleMoveSpeedY >= 2.0f)
-            {
-                fVehicleMoveSpeedY = 2.0f;
-            }
-            m_vecMoveSpeed.y = fVehicleMoveSpeedY;
-
-            float fVehicleMoveSpeedZ = m_vecMoveSpeed.z;
-            if (fVehicleMoveSpeedZ <= -2.0f)
-            {
-                fVehicleMoveSpeedZ = -2.0f;
-            }
-
-            if (fVehicleMoveSpeedZ >= 2.0f)
-            {
-                fVehicleMoveSpeedZ = 2.0f;
-            }
-            m_vecMoveSpeed.z = fVehicleMoveSpeedZ;
-
-            float fVehicleTurnSpeedX = m_vecTurnSpeed.x;
-            if (fVehicleTurnSpeedX <= -0.1f)
-            {
-                fVehicleTurnSpeedX = -0.1f;
-            }
-
-            if (fVehicleTurnSpeedX >= 0.1f)
-            {
-                fVehicleTurnSpeedX = 0.1f;
-            }
-            m_vecTurnSpeed.x = fVehicleTurnSpeedX;
-
-            float fVehicleTurnSpeedY = m_vecTurnSpeed.y;
-            if (fVehicleTurnSpeedY <= -0.1f)
-            {
-                fVehicleTurnSpeedY = -0.1f;
-            }
-
-            if (fVehicleTurnSpeedY >= 0.1f)
-            {
-                fVehicleTurnSpeedY = 0.1f;
-            }
-            m_vecTurnSpeed.y = fVehicleTurnSpeedY;
-
-            float fVehicleTurnSpeedZ = m_vecTurnSpeed.z;
-            if (fVehicleTurnSpeedZ <= -0.1f)
-            {
-                fVehicleTurnSpeedZ = -0.1f;
-            }
-
-            if (fVehicleTurnSpeedZ >= 0.1f)
-            {
-                fVehicleTurnSpeedZ = 0.1f;
-            }
-            m_vecTurnSpeed.z = fVehicleTurnSpeedZ;
+            m_vecTurnSpeed.x = std::clamp(m_vecTurnSpeed.x, -0.1f, 0.1f);
+            m_vecTurnSpeed.y = std::clamp(m_vecTurnSpeed.y, -0.1f, 0.1f);
+            m_vecTurnSpeed.z = std::clamp(m_vecTurnSpeed.z, -0.1f, 0.1f);
         }
 
         UpdateRW();
@@ -934,92 +863,72 @@ void CTrain::ProcessControl()
         m_bWasPostponed = false;
         m_bIsInSafePosition = true;
 
-        m_fMovingSpeed = (vecOldTrainPosition - GetPosition()).Magnitude();
+        m_fMovingSpeed = DistanceBetweenPoints(GetPosition(), vecOldTrainPosition);
 
-        if (trainFlags.bIsFrontCarriage || trainFlags.bIsLastCarriage)
-        {
-            CVector vecPoint = pBoundingBox->m_vecMax.y * GetForward();
+        if (trainFlags.bIsFrontCarriage || trainFlags.bIsLastCarriage) {
+            CVector vecPoint = bbox.m_vecMax.y * GetForward();
             vecPoint += GetPosition();
             vecPoint += CTimer::GetTimeStep() * m_vecMoveSpeed;
 
             MarkSurroundingEntitiesForCollisionWithTrain(vecPoint, 3.0f, this, false);
         }
 
-        if (!vehicleFlags.bWarnedPeds)
-        {
+        if (!vehicleFlags.bWarnedPeds) {
             CCarCtrl::ScanForPedDanger(this);
         }
         return;
-    }
-    else
-    {
-        if (!m_bIsStuck)
-        {
+    } else {
+        if (!m_bIsStuck) {
             float fMaxForce = 0.003f;
-            float fMaxTorque = 0.00090000004f;
+            float fMaxTorque = 0.0009f;
             float fMaxMovingSpeed = 0.005f;
 
-            if (m_nStatus != STATUS_PLAYER)
-            {
+            if (m_nStatus != STATUS_PLAYER) {
                 fMaxForce = 0.006f;
                 fMaxTorque = 0.0015f;
                 fMaxMovingSpeed = 0.015f;
             }
 
-            float fMaxForceTimeStep = (fMaxForce * CTimer::GetTimeStep()) * (fMaxForce * CTimer::GetTimeStep());
+            float fMaxForceTimeStep  = (fMaxForce  * CTimer::GetTimeStep()) * (fMaxForce * CTimer::GetTimeStep());
             float fMaxTorqueTimeStep = (fMaxTorque * CTimer::GetTimeStep()) * (fMaxTorque * CTimer::GetTimeStep());
 
-            m_vecForce = (m_vecForce + m_vecMoveSpeed) * 0.5f;
-            m_vecTorque = (m_vecTorque + m_vecTurnSpeed) * 0.5f;
+            m_vecForce  = (m_vecForce  + m_vecMoveSpeed) / 2.0f;
+            m_vecTorque = (m_vecTorque + m_vecTurnSpeed) / 2.0f;
 
-            if (m_vecForce.SquaredMagnitude() > fMaxForceTimeStep
-                || m_vecTorque.SquaredMagnitude() > fMaxTorqueTimeStep
-                || m_fMovingSpeed >= fMaxMovingSpeed
-                || m_fDamageIntensity > 0.0f
-                && m_pDamageEntity != nullptr
-                && (m_pDamageEntity->IsPed())
-                )
-            {
+            if (m_vecForce.SquaredMagnitude() > fMaxForceTimeStep ||
+                m_vecTorque.SquaredMagnitude() > fMaxTorqueTimeStep ||
+                m_fMovingSpeed >= fMaxMovingSpeed ||
+                m_fDamageIntensity > 0.0f && m_pDamageEntity != nullptr && m_pDamageEntity->IsPed()
+            ) {
                 m_nFakePhysics = 0;
-            }
-            else
-            {
-
+            } else {
                 m_nFakePhysics += 1;
-                if (m_nFakePhysics > 10)
-                {
+                if (m_nFakePhysics > 10 /*&& !plugin::Call<0x424100>()*/) {
+                    // if (m_nFakePhysics > 10) { // OG redundant check
+                        m_nFakePhysics = 10;
+                    // }
 
-                    //if (!dummy_424100()) dummy_424100 returns 0, nothing else
-                    {
-                        if (m_nFakePhysics > 10)
-                        {
-                            m_nFakePhysics = 10;
-                        }
-
-                        m_vecMoveSpeed = CVector();
-                        m_vecTurnSpeed = CVector();
-                        SkipPhysics();
-                        return;
-                    }
+                    ResetMoveSpeed();
+                    ResetTurnSpeed();
+                    SkipPhysics();
+                    return;
                 }
             }
         }
 
         CPhysical::ProcessControl();
 
-        CVector vecMoveForce, vecTurnForce;
-        if (mod_Buoyancy.ProcessBuoyancy(this, m_fBuoyancyConstant, &vecMoveForce, &vecTurnForce))
-        {
+        CVector vecMoveForce{}, vecTurnForce{};
+        if (mod_Buoyancy.ProcessBuoyancy(this, m_fBuoyancyConstant, &vecMoveForce, &vecTurnForce)) {
             physicalFlags.bTouchingWater = true;
 
             float fTimeStep = 0.01f;
-            if (CTimer::GetTimeStep() >= 0.01f)
-            {
+            if (CTimer::GetTimeStep() >= 0.01f) {
                 fTimeStep = CTimer::GetTimeStep();
             }
 
             float fSpeedFactor = 1.0f - vecOldTrainPosition.z / (fTimeStep * m_fMass * 0.008f) * 0.05f;
-            fSpeedFactor = pow(fSpeedFactor, CTimer::GetTimeStep());
+            fSpeedFactor = std::pow(fSpeedFactor, CTimer::GetTimeStep());
 
             m_vecMoveSpeed *= fSpeedFactor;
             m_vecTurnSpeed *= fSpeedFactor;

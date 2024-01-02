@@ -1,17 +1,22 @@
-// dllmain.cpp : Defines the entry point for the DLL application.
-#include "StdInc.h"
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+
+#include "StdInc.h"
 #include "config.h"
 
-void InjectHooksMain();
+#include "extensions/CommandLine.h"
+#include "extensions/Configuration.hpp"
+
+void InjectHooksMain(HMODULE hThisDLL);
 
 void DisplayConsole()
 {
-    if (AllocConsole())
-    {
-        freopen("CONIN$", "r", stdin);
-        freopen("CONOUT$", "w", stdout);
-        freopen("CONOUT$", "w", stderr);
+    if (AllocConsole()) {
+        FILESTREAM fs{};
+        VERIFY(freopen_s(&fs, "CONIN$",  "r", stdin)  == NOERROR);
+        VERIFY(freopen_s(&fs, "CONOUT$", "w", stdout) == NOERROR);
+        VERIFY(freopen_s(&fs, "CONOUT$", "w", stderr) == NOERROR);
     }
 }
 
@@ -22,32 +27,17 @@ void WaitForDebugger() {
     }
 }
 
-namespace CommandLineArguments {
+static constexpr auto DEFAULT_INI_FILENAME = "gta-reversed.ini";
 
-std::vector<std::wstring> Get() {
-    std::vector<std::wstring> out;
-    int numArgs{0};
-    LPWSTR* szArgs = CommandLineToArgvW(GetCommandLineW(), &numArgs);
-    out.reserve(numArgs);
-    if (szArgs) {
-        for (int i = 0; i < numArgs; i++) {
-            out.emplace_back(szArgs[i]);
-        }
-    }
-    LocalFree(szArgs);
-    return out;
-}
+#include "extensions/Configs/FastLoader.hpp"
 
-void Process() {
-    using namespace std::literals;
-    const auto args = Get();
-    for (const auto& arg : args) {
-        if (arg == L"--debug") {
-            WaitForDebugger();
-        }
-    }
-}
+void LoadConfigurations() {
+    // Firstly load the INI into the memory.
+    g_ConfigurationMgr.Load(DEFAULT_INI_FILENAME);
 
+    // Then load all specific configurations.
+    g_FastLoaderConfig.Load();
+    // ...
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
@@ -56,18 +46,22 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
     {
     case DLL_PROCESS_ATTACH:
     {
-        RwCamera * pRwCamera = *(RwCamera**)0xC1703C;
-
         // Fail if RenderWare has already been started
-        if (pRwCamera)
+        if (*(RwCamera**)0xC1703C)
         {
             MessageBox(NULL, "gta_reversed failed to load (RenderWare has already been started)", "Error", MB_ICONERROR | MB_OK);
             return FALSE;
         }
 
         DisplayConsole();
-        CommandLineArguments::Process();
-        InjectHooksMain();
+        CommandLine::Load(__argc, __argv);
+
+        if (CommandLine::waitForDebugger)
+            WaitForDebugger();
+
+        LoadConfigurations();
+
+        InjectHooksMain(hModule);
         break;
     }
     case DLL_THREAD_ATTACH:
@@ -79,4 +73,3 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
     }
     return TRUE;
 }
-

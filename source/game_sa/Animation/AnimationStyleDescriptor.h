@@ -1,19 +1,19 @@
-/*
-    Plugin-SDK file
-    Authors: GTA Community. See more here
-    https://github.com/DK22Pac/plugin-sdk
-    Do not delete this comment block. Respect others' work!
-*/
 #pragma once
 
-class CAnimationStyleDescriptor {
-public:
-    char  groupName[16];
-    char  blockName[16];
-    int32 field_20;
-    int32 animsCount;
-    void* animNames;
-    void* animDesc;
+struct AnimDescriptor {
+    int32 animId{};
+    int32 flags{};
 };
 
-VALIDATE_SIZE(CAnimationStyleDescriptor, 0x30);
+struct AnimAssocDefinition {
+    constexpr static size_t ANIM_NAME_BUF_SZ = 24;
+    
+    char   groupName[16]{};
+    char   blockName[16]{};
+    int32  modelIndex{};
+    int32  animsCount{};
+
+    const char**    animNames{}; //< Pointers to heap allocated char arrays (size 24 each) - The array of pointers itself is heap allocated as well - Size == animsCount
+    AnimDescriptor* animDesc{};
+};
+VALIDATE_SIZE(AnimAssocDefinition, 0x30);

@@ -13,19 +13,18 @@ CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering
     m_ped       = ped;
     field_1C    = targetPoint;
     field_28    = targetPoint;
-    m_moveState = moveState;
+    m_moveState = static_cast<eMoveState>(moveState); // todo: change signature
     m_flag1     = false;
     m_flag2     = false;
     m_flag3     = false;
     m_flag4     = false;
 
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
+// 0x66A1D0
 CTaskComplexAvoidOtherPedWhileWandering::~CTaskComplexAvoidOtherPedWhileWandering() {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 CTaskComplexAvoidOtherPedWhileWandering* CTaskComplexAvoidOtherPedWhileWandering::Constructor(CPed* ped, const CVector& targetPoint, int32 moveState) {
@@ -33,8 +32,8 @@ CTaskComplexAvoidOtherPedWhileWandering* CTaskComplexAvoidOtherPedWhileWandering
     return this;
 }
 
-CTask* CTaskComplexAvoidOtherPedWhileWandering::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x66D050, CTaskComplexAvoidOtherPedWhileWandering*>(this);
+CTask* CTaskComplexAvoidOtherPedWhileWandering::Clone() const {
+    return plugin::CallMethodAndReturn<CTask*, 0x66D050, const CTaskComplexAvoidOtherPedWhileWandering*>(this);
 }
 
 CTask* CTaskComplexAvoidOtherPedWhileWandering::ControlSubTask(CPed* ped) {

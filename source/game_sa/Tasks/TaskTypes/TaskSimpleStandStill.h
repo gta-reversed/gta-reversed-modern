@@ -6,38 +6,35 @@
 */
 #pragma once
 
-
 #include "TaskSimple.h"
 #include "TaskTimer.h"
 
-class CTaskSimpleStandStill : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleStandStill : public CTaskSimple {
 public:
-    int32 m_nTime;
+    int32      m_nTime;
     CTaskTimer m_timer;
-    bool m_bLooped;
-    bool m_bUseAnimIdleStance;
-private:
-    char _pad[2];
-public:
-    float m_fBlendData;
+    bool       m_bLooped;
+    bool       m_bUseAnimIdleStance;
+    float      m_fBlendData;
 
+public:
     static constexpr auto Type = TASK_SIMPLE_STAND_STILL;
 
-    static void InjectHooks();
+    CTaskSimpleStandStill(int32 nTime = 0, bool Looped = false, bool bUseAnimIdleStance = false, float fBlendData = 8.0f);
+    ~CTaskSimpleStandStill() override = default;
 
-    CTaskSimpleStandStill(int32 nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData);
-    ~CTaskSimpleStandStill();
-private:
-	CTaskSimpleStandStill* Constructor(int32 nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData);
 public:
-    CTask* Clone()  override;
-    eTaskType GetTaskType() override { return TASK_SIMPLE_STAND_STILL; };
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override { return new CTaskSimpleStandStill(m_nTime, m_bLooped, m_bUseAnimIdleStance, m_fBlendData); } // 0x635CF0
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
 
-    CTask* Clone_Reversed();
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CTaskSimpleStandStill* Constructor(int32 nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData) { this->CTaskSimpleStandStill::CTaskSimpleStandStill(nTime, Looped, bUseAnimIdleStance, fBlendData); return this; }
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool ProcessPed_Reversed(CPed* ped);
 };
-
 VALIDATE_SIZE(CTaskSimpleStandStill, 0x20);

@@ -6,20 +6,18 @@ void CStuckCarCheck::InjectHooks() {
     RH_ScopedClass(CStuckCarCheck);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Init, 0x4639E0);
-    // RH_ScopedInstall(AddCarToCheck, 0x465970);
-    // RH_ScopedInstall(AttemptToWarpVehicle, 0x463A60);
-    // RH_ScopedInstall(ClearStuckFlagForCar, 0x463C40);
-    // RH_ScopedInstall(HasCarBeenStuckForAWhile, 0x463C00);
-    // RH_ScopedInstall(IsCarInStuckCarArray, 0x463C70);
-    // RH_ScopedInstall(Process, 0x465680);
-    // RH_ScopedInstall(RemoveCarFromCheck, 0x463B80);
+    RH_ScopedInstall(Init, 0x4639E0);
+    RH_ScopedInstall(AddCarToCheck, 0x465970, { .reversed = false });
+    RH_ScopedInstall(AttemptToWarpVehicle, 0x463A60, { .reversed = false });
+    RH_ScopedInstall(ClearStuckFlagForCar, 0x463C40);
+    RH_ScopedInstall(HasCarBeenStuckForAWhile, 0x463C00, { .reversed = false });
+    RH_ScopedInstall(IsCarInStuckCarArray, 0x463C70, { .reversed = false });
+    RH_ScopedInstall(Process, 0x465680, { .reversed = false });
+    RH_ScopedInstall(RemoveCarFromCheck, 0x463B80, { .reversed = false });
 }
 
 // 0x4639E0
 void CStuckCarCheck::Init() {
-    return plugin::Call<0x4639E0, CStuckCarCheck*>(this);
-
     for (auto& car : m_aStuckCars) {
         ResetArrayElement(car);
     }
@@ -37,12 +35,10 @@ bool CStuckCarCheck::AttemptToWarpVehicle(CVehicle* vehicle, CVector* origin, fl
 
 // 0x463C40
 void CStuckCarCheck::ClearStuckFlagForCar(int32 carHandle) {
-    return plugin::Call<0x463C40, CStuckCarCheck*, int32>(this, carHandle);
-
     for (auto& car : m_aStuckCars) {
         if (car.m_nCarHandle == carHandle) {
             car.m_bCarStuck = false;
-            return;
+            return; // NOTSA optimization
         }
     }
 }
@@ -73,10 +69,11 @@ bool CStuckCarCheck::IsCarInStuckCarArray(int32 carHandle) {
 
 // 0x465680
 void CStuckCarCheck::Process() {
+    ZoneScoped;
+
     plugin::CallMethod<0x465680, CStuckCarCheck*>(this);
 }
 
-// See CStuckCarCheck::ResetArrayElement
 // 0x463B80
 void CStuckCarCheck::RemoveCarFromCheck(int32 carHandle) {
     return plugin::CallMethod<0x463B80, CStuckCarCheck*, int32>(this, carHandle);
@@ -88,18 +85,22 @@ void CStuckCarCheck::RemoveCarFromCheck(int32 carHandle) {
     }
 }
 
-// Used in Init and RemoveCarFromCheck
-// Not presented on PC because inlined. See Android PDB (v1.0 0x2B3534)
-void CStuckCarCheck::ResetArrayElement(StuckCar& car) {
+// 0x463970 | refactored
+void CStuckCarCheck::ResetArrayElement(uint16 carHandle) {
+    ResetArrayElement(m_aStuckCars[carHandle]);
+}
+
+// NOTSA
+void CStuckCarCheck::ResetArrayElement(tStuckCar& car) {
+    car.m_vCarPos    = CVector(-5000.0f, -5000.0f, -5000.0f);
     car.m_nCarHandle = -1;
-    car.m_vCarPos = CVector(-5000.0f, -5000.0f, -5000.0f);
     car.m_nStartTime = -1;
-    car.m_fDistance = 0.0f;
+    car.m_fDistance  = 0.0f;
     car.m_nStuckTime = 0;
-    car.m_bCarStuck = false;
-    car.field_1D = false;
-    car.m_bStuck = false;
-    car.m_bFlipped = false;
-    car.m_bbWarp = false;
-    car.m_pathID = false;
+    car.m_bCarStuck  = false;
+    car.field_1D     = 0;
+    car.m_bStuck     = false;
+    car.m_bFlipped   = false;
+    car.m_bbWarp     = false;
+    car.m_nPathId     = 0;
 }

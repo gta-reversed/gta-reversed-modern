@@ -3,13 +3,13 @@
 #include "EventEditableResponse.h"
 #include "Vector.h"
 
-class CEventAcquaintancePed : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventAcquaintancePed : public CEventEditableResponse {
 public:
     CPed* m_ped;
 
 public:
-    CEventAcquaintancePed(CPed* ped);
-    ~CEventAcquaintancePed();
+    explicit CEventAcquaintancePed(CPed* ped, eTaskType taskType = TASK_NONE/*notsa arg*/);
+    ~CEventAcquaintancePed() override;
 
     int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
@@ -18,7 +18,7 @@ public:
     bool TakesPriorityOver(const CEvent& refEvent) override;
     bool CanBeInterruptedBySameEvent() override { return true; }
 
-private:
+public:
     friend void InjectHooksMain();
     static void InjectHooks();
 
@@ -29,86 +29,85 @@ private:
     bool TakesPriorityOver_Reversed(const CEvent& refEvent);
 };
 
-class CEventAcquaintancePedHate : public CEventAcquaintancePed {
+class NOTSA_EXPORT_VTABLE CEventAcquaintancePedHate : public CEventAcquaintancePed {
 public:
-    CEventAcquaintancePedHate(CPed* ped) : CEventAcquaintancePed (ped) {}
-    ~CEventAcquaintancePedHate() {}
+    using CEventAcquaintancePed::CEventAcquaintancePed;
 
     eEventType GetEventType() const override { return EVENT_ACQUAINTANCE_PED_HATE; }
     int32 GetEventPriority() const override { return 26; }
     CEventEditableResponse* CloneEditable() override { return new CEventAcquaintancePedHate(m_ped); }
 
-private:
+public:
     friend class CEventAcquaintancePed;
     static void InjectHooks();
 
-    CEventAcquaintancePedHate* Constructor(CPed* ped);
+    CEventAcquaintancePedHate* Constructor2(CPed* ped);
 };
 
-class CEventAcquaintancePedRespect : public CEventAcquaintancePed {
+class NOTSA_EXPORT_VTABLE CEventAcquaintancePedRespect : public CEventAcquaintancePed {
 public:
-    CEventAcquaintancePedRespect(CPed* ped) : CEventAcquaintancePed(ped) {}
-    ~CEventAcquaintancePedRespect() {}
+    using CEventAcquaintancePed::CEventAcquaintancePed;
 
     eEventType GetEventType() const override { return EVENT_ACQUAINTANCE_PED_RESPECT; }
     int32 GetEventPriority() const override { return 23; }
     CEventEditableResponse* CloneEditable() override { return new CEventAcquaintancePedRespect(m_ped); }
 };
 
-class CEventAcquaintancePedLike : public CEventAcquaintancePed {
+class NOTSA_EXPORT_VTABLE CEventAcquaintancePedLike : public CEventAcquaintancePed {
 public:
-    CEventAcquaintancePedLike(CPed* ped) : CEventAcquaintancePed(ped) {}
-    ~CEventAcquaintancePedLike() {}
+    using CEventAcquaintancePed::CEventAcquaintancePed;
 
     eEventType GetEventType() const override { return EVENT_ACQUAINTANCE_PED_LIKE; }
     int32 GetEventPriority() const override { return 22; }
     CEventEditableResponse* CloneEditable() override { return new CEventAcquaintancePedLike(m_ped); }
 };
 
-class CEventAcquaintancePedDislike : public CEventAcquaintancePed {
+class NOTSA_EXPORT_VTABLE CEventAcquaintancePedDislike : public CEventAcquaintancePed {
 public:
-    CEventAcquaintancePedDislike(CPed* ped) : CEventAcquaintancePed(ped) {}
-    ~CEventAcquaintancePedDislike() {}
+    using CEventAcquaintancePed::CEventAcquaintancePed;
 
     eEventType GetEventType() const override { return EVENT_ACQUAINTANCE_PED_DISLIKE; }
     int32 GetEventPriority() const override { return 24; }
     CEventEditableResponse* CloneEditable() override { return new CEventAcquaintancePedDislike(m_ped); }
 };
 
-class CEventAcquaintancePedHateBadlyLit : public CEventAcquaintancePed {
+class NOTSA_EXPORT_VTABLE CEventAcquaintancePedHateBadlyLit : public CEventAcquaintancePed {
 public:
     uint32 m_startTimeInMs;
     CVector m_point;
 
-    static void InjectHooks();
-
-    CEventAcquaintancePedHateBadlyLit(CPed* ped, int32 startTimeInMs, const CVector& point);
-    ~CEventAcquaintancePedHateBadlyLit() {}
-private:
-    CEventAcquaintancePedHateBadlyLit* Constructor(CPed* ped, int32 startTimeInMs, const CVector& point);
 public:
+    CEventAcquaintancePedHateBadlyLit(CPed* ped, int32 startTimeInMs, const CVector& point);
+    ~CEventAcquaintancePedHateBadlyLit() override = default;
+
     eEventType GetEventType() const override { return EVENT_ACQUAINTANCE_PED_HATE_BADLY_LIT; }
     int32 GetEventPriority() const override { return 25; }
     bool AffectsPed(CPed* ped) override;
     bool CanBeInterruptedBySameEvent() override { return true; }
     CEventEditableResponse* CloneEditable() override { return new CEventAcquaintancePedHateBadlyLit(m_ped, m_startTimeInMs, m_point); }
-private:
-    bool AffectsPed_Reversed(CPed* ped);
-};
 
-class CEventSeenCop : public CEventAcquaintancePed {
 public:
+    friend void InjectHooksMain();
     static void InjectHooks();
 
-    CEventSeenCop(CPed* cop) : CEventAcquaintancePed(cop) {}
-    ~CEventSeenCop() {}
-private:
-    CEventSeenCop* Constructor(CPed* cop);
+    CEventAcquaintancePedHateBadlyLit* Constructor(CPed* ped, int32 startTimeInMs, const CVector& point);
+    bool AffectsPed_Reversed1(CPed* ped);
+};
+
+class NOTSA_EXPORT_VTABLE CEventSeenCop : public CEventAcquaintancePed {
 public:
+    using CEventAcquaintancePed::CEventAcquaintancePed;
+
     eEventType GetEventType() const override { return EVENT_SEEN_COP; }
     int32 GetEventPriority() const override { return 21; }
     bool AffectsPed(CPed* ped) override { return CEventAcquaintancePed::AffectsPed(ped); }
     CEventSeenCop* CloneEditable() override { return new CEventSeenCop(m_ped); }
+
+public:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CEventSeenCop* Constructor1(CPed* cop);
 };
 
 VALIDATE_SIZE(CEventSeenCop, 0x18);

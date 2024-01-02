@@ -3213,6 +3213,34 @@ typedef RwMatrixTag RwMatrix;
  */
 #endif /* (!defined(DOXYGEN)) */
 
+#define rwMatrixSetFlags(m, flagsbit)     ((m)->flags = (flagsbit))
+#define rwMatrixGetFlags(m)               ((m)->flags)
+#define rwMatrixTestFlags(m, flagsbit)    ((m)->flags & (RwInt32)(flagsbit))
+
+#if (!defined(RwMatrixCopyMacro))
+#define RwMatrixCopyMacro(_target, _source)             \
+    ( *(_target) = *(_source) )
+#endif /* (!defined(RwMatrixCopyMacro)) */
+
+#if (!defined(RwMatrixSetIdentityMacro))
+#define RwMatrixSetIdentityMacro(m)                                     \
+MACRO_START                                                             \
+{                                                                       \
+    (m)->right.x = (m)->up.y    = (m)->at.z    = (RwReal)((1.0));       \
+    (m)->right.y = (m)->right.z = (m)->up.x    = (RwReal)((0.0));       \
+    (m)->up.z    = (m)->at.x    = (m)->at.y    = (RwReal)((0.0));       \
+    (m)->pos.x   = (m)->pos.y   = (m)->pos.z   = (RwReal)((0.0));       \
+    rwMatrixSetFlags((m),                                               \
+                     rwMatrixGetFlags(m) |                              \
+                     (rwMATRIXINTERNALIDENTITY |                        \
+                      rwMATRIXTYPEORTHONORMAL));                        \
+}                                                                       \
+MACRO_STOP
+#endif /* (!defined(RwMatrixSetIdentityMacro)) */
+
+#define RwMatrixCopy(dst, src)   RwMatrixCopyMacro(dst, src)
+#define RwMatrixSetIdentity(m)   RwMatrixSetIdentityMacro(m)
+
 typedef void (RWASMCALL * rwMatrixMultFn) (RwMatrix * dstMat,
                                            const RwMatrix * matA,
                                            const RwMatrix * matB);
@@ -5301,7 +5329,7 @@ RwSubSystemInfo* RwEngineGetSubSystemInfo(RwSubSystemInfo* subSystemInfo, RwInt3
 RwInt32 RwEngineGetCurrentSubSystem(); // 0x7F2C60
 RwBool RwEngineSetSubSystem(RwInt32 subSystemIndex); // 0x7F2C90
 RwInt32 RwEngineGetNumVideoModes(); // 0x7F2CC0
-RwVideoMode* RwEngineGetVideoModeInfo(RwVideoMode* modeinfo, RwInt32 modeIndex); // 0x7F2CF0
+RwVideoMode RwEngineGetVideoModeInfo(RwInt32 modeIndex); // 0x7F2CF0
 RwInt32 RwEngineGetCurrentVideoMode(); // 0x7F2D20
 RwBool RwEngineSetVideoMode(RwInt32 modeIndex); // 0x7F2D50
 RwInt32 RwEngineGetTextureMemorySize(); // 0x7F2D80

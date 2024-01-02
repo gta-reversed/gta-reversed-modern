@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "StuntJumpManager.h"
+#include "Hud.h"
 
 static constexpr uint16 STUNT_JUMP_COUNT = 256;
 
@@ -19,6 +20,8 @@ void CStuntJumpManager::InjectHooks() {
 
 // 0x49CA50
 void CStuntJumpManager::Init() {
+    ZoneScoped;
+
     mp_poolStuntJumps = new CStuntJumpsPool(STUNT_JUMP_COUNT, "Stunt Jumps");
     m_bActive = true;
 }
@@ -84,7 +87,9 @@ void CStuntJumpManager::AddOne(const CBoundingBox& start, const CBoundingBox& en
 
 // 0x49C490
 void CStuntJumpManager::Update() {
-    if (!mp_poolStuntJumps || CReplay::Mode == REPLAY_MODE_1)
+    ZoneScoped;
+
+    if (!mp_poolStuntJumps || CReplay::Mode == MODE_PLAYBACK)
         return;
 
     CPlayerPed* playerPed = FindPlayerPed();
@@ -127,7 +132,7 @@ void CStuntJumpManager::Update() {
                 CTimer::SetTimeScale(0.3f);
                 CVector rotation{0.0f, 0.0f, 0.0f};
                 TheCamera.SetCamPositionForFixedMode(&mp_Active->camera, &rotation);
-                TheCamera.TakeControl(playerVehicle, MODE_FIXED, SWITCHTYPE_JUMPCUT, 1);
+                TheCamera.TakeControl(playerVehicle, MODE_FIXED, eSwitchType::JUMPCUT, 1);
             }
         }
         break;
@@ -167,20 +172,20 @@ void CStuntJumpManager::Update() {
             time = m_iTimer;
         }
 
-        m_iTimer = CTimer::GetTimeStepInMS() + time;
+        m_iTimer = (uint32)CTimer::GetTimeStepInMS() + time;
         if (m_iTimer > 1000 && time <= 1000) {
             auto vehicle = FindPlayerVehicle();
             if (vehicle) {
                 CPed* randomPassenger = vehicle->PickRandomPassenger();
                 if (randomPassenger)
-                    randomPassenger->Say(37, 0, 1.0f, 0, 0, 0);
+                    randomPassenger->Say(37);
             }
         }
 
         break;
     }
     case eJumpState::END_POINT_INTERSECTED: {
-        m_iTimer += CTimer::GetTimeStepInMS();
+        m_iTimer += (uint32)CTimer::GetTimeStepInMS();
         if (m_iTimer < 300)
             return;
 
@@ -201,19 +206,19 @@ void CStuntJumpManager::Update() {
         int32 reward = m_iNumCompleted == m_iNumJumps ? 10000 : mp_Active->reward;
         playerInfo->m_nMoney += reward;
 
-        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PART_MISSION_COMPLETE, 0.0f, 1.0f);
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PART_MISSION_COMPLETE);
 
-        char* bonusMessage = TheText.Get("USJ"); // UNIQUE STUNT BONUS!
+        auto bonusMessage = TheText.Get("USJ"); // UNIQUE STUNT BONUS!
         if (bonusMessage)
             CMessages::AddBigMessageQ(bonusMessage, 5000, STYLE_MIDDLE_SMALLER_HIGHER);
 
         if (m_iNumCompleted == m_iNumJumps) {
-            char* stuntsCompleteMessage = TheText.Get("USJ_ALL"); // ALL UNIQUE STUNTS COMPLETED!
+            auto stuntsCompleteMessage = TheText.Get("USJ_ALL"); // ALL UNIQUE STUNTS COMPLETED!
             if (stuntsCompleteMessage)
                 CHud::SetHelpMessage(stuntsCompleteMessage, false, false, false);
         }
 
-        char* rewardMessage = TheText.Get("REWARD");
+        auto rewardMessage = TheText.Get("REWARD");
         if (rewardMessage)
             CMessages::AddBigMessageWithNumber(rewardMessage, 6000, STYLE_WHITE_MIDDLE_SMALLER, reward, -1, -1, -1, -1, -1);
 
@@ -249,11 +254,10 @@ void ResetAllJumps() {
 void StuntJumpTestCode() {
     CPad* pad = CPad::GetPad(0);
     if (pad->IsStandardKeyJustDown('1')) {
-        printf("ResetAllJumps");
+        DEV_LOG("ResetAllJumps");
         ResetAllJumps();
     }
     if (pad->IsStandardKeyJustDown('2')) {
-        printf("");
         auto player = FindPlayerPed();
         if (player) {
             CVector posn{-2053.93848f, 236.598221f, 35.5952835f};

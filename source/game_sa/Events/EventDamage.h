@@ -7,8 +7,9 @@
 #include "Event.h"
 
 enum ePedPieceTypes;
+class CPedDamageResponseCalculator;
 
-class CEventDamage : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventDamage : public CEventEditableResponse {
 public:
     CEntity*       m_pSourceEntity;
     uint32         m_nStartTime;
@@ -34,9 +35,11 @@ public:
     CPedDamageResponse m_damageResponse;
 
 public:
+    static constexpr auto Type = eEventType::EVENT_DAMAGE;
+
     CEventDamage(const CEventDamage& event);
     CEventDamage(CEntity* source, uint32 startTime, eWeaponType weaponType, ePedPieceTypes pieceHit, uint8 direction, bool a7, bool bPedInVehicle);
-    ~CEventDamage();
+    ~CEventDamage() override;
 
     eEventType GetEventType() const override;
     int32 GetEventPriority() const override;
@@ -57,6 +60,10 @@ public:
     void ComputeBodyPartToRemove(int32& boneFrameId);
     void ComputeDeathAnim(CPed* ped, bool bMakeActiveTaskAbortable);
     void ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable);
+    void ComputeAnim(CPed* ped, bool bMakeActiveTaskAbortable = true);
+
+    //! Either computes the damage, or sets it as computed (Without computing it) - Very common logic in the code
+    void ComputeDamageResponseIfAffectsPed(CPed* ped, CPedDamageResponseCalculator calculator, bool bSpeak);
 
 private:
     friend void InjectHooksMain();

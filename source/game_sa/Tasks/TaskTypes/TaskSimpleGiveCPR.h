@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TaskSimple.h"
-#include "Accident.h"
+class CAccident;
 
 class CTaskSimpleGiveCPR : public CTaskSimple {
 public:
@@ -19,17 +19,16 @@ public:
 public:
     static constexpr auto Type = TASK_SIMPLE_GIVE_CPR;
 
-    CTaskSimpleGiveCPR(CAccident* pAccident);
+    explicit CTaskSimpleGiveCPR(CAccident* accident);
     ~CTaskSimpleGiveCPR() override;
 
-    eTaskType GetTaskType() override { return TASK_SIMPLE_GIVE_CPR; }
-
-    CTask* Clone() override;
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override;
     bool ProcessPed(CPed* ped) override;
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
 
     void ReviveDeadPed(CPed* ped);
-    static void FinishGiveCPRAnimCB(CAnimBlendAssociation* anim, void* priv);
+    static void FinishGiveCPRAnimCB(CAnimBlendAssociation* anim, void* ptask);
 
 private:
     friend void InjectHooksMain();
@@ -37,9 +36,8 @@ private:
 
     CTaskSimpleGiveCPR* Constructor(CAccident* pAccident);
 
-    CTask* Clone_Reversed();
+    CTask*  Clone_Reversed() const;
     bool ProcessPed_Reversed(CPed* ped);
     bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event);
 };
-
 VALIDATE_SIZE(CTaskSimpleGiveCPR, 0x18);

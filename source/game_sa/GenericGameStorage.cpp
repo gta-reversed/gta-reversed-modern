@@ -11,6 +11,8 @@
 #include "EntryExitManager.h"
 #include "Rope.h"
 #include "Ropes.h"
+#include "TheScripts.h"
+#include "Garages.h"
 
 constexpr uint32 SIZE_OF_ONE_GAME_IN_BYTES = 202748;
 
@@ -24,24 +26,24 @@ void CGenericGameStorage::InjectHooks() {
     // until we reverse everything.
 
     RH_ScopedInstall(ReportError, 0x5D08C0);
-    RH_ScopedInstall(DoGameSpecificStuffBeforeSave, 0x618F50, true);
-    RH_ScopedInstall(DoGameSpecificStuffAfterSucessLoad, 0x618E90, true);
-    RH_ScopedInstall(InitRadioStationPositionList, 0x618E70, true);
-    RH_ScopedGlobalInstall(GetSavedGameDateAndTime, 0x618D00, true);
-    RH_ScopedInstall(GenericLoad, 0x5D17B0, true);
-    RH_ScopedInstall(GenericSave, 0x5D13E0, true);
-    RH_ScopedInstall(CheckSlotDataValid, 0x5D1380, true);
-    RH_ScopedInstall(LoadDataFromWorkBuffer, 0x5D1300, true);
-    RH_ScopedInstall(SaveDataToWorkBuffer, 0x5D1270, true);
-    RH_ScopedInstall(LoadWorkBuffer, 0x5D10B0, true);
-    RH_ScopedInstall(SaveWorkBuffer, 0x5D0F80, true);
-    RH_ScopedInstall(GetCurrentVersionNumber, 0x5D0F50, true);
-    RH_ScopedInstall(MakeValidSaveName, 0x5D0E90, true);
-    RH_ScopedInstall(CloseFile, 0x5D0E30, true);
-    RH_ScopedInstall(OpenFileForWriting, 0x5D0DD0, true);
-    RH_ScopedInstall(OpenFileForReading, 0x5D0D20, true);
-    RH_ScopedInstall(CheckDataNotCorrupt, 0x5D1170, true);
-    RH_ScopedInstall(RestoreForStartLoad, 0x619000, true);
+    RH_ScopedInstall(DoGameSpecificStuffBeforeSave, 0x618F50, { .reversed = false });
+    RH_ScopedInstall(DoGameSpecificStuffAfterSucessLoad, 0x618E90, { .reversed = false });
+    RH_ScopedInstall(InitRadioStationPositionList, 0x618E70, { .reversed = false });
+    RH_ScopedGlobalInstall(GetSavedGameDateAndTime, 0x618D00, { .reversed = false });
+    RH_ScopedInstall(GenericLoad, 0x5D17B0, { .reversed = false });
+    RH_ScopedInstall(GenericSave, 0x5D13E0, { .reversed = false });
+    RH_ScopedInstall(CheckSlotDataValid, 0x5D1380, { .reversed = false });
+    //RH_ScopedInstall(LoadDataFromWorkBuffer, 0x5D1300, { .reversed = false });
+    //RH_ScopedInstall(SaveDataToWorkBuffer, 0x5D1270, { .reversed = false });
+    RH_ScopedInstall(LoadWorkBuffer, 0x5D10B0, { .reversed = false });
+    RH_ScopedInstall(SaveWorkBuffer, 0x5D0F80, { .reversed = false });
+    RH_ScopedInstall(GetCurrentVersionNumber, 0x5D0F50, { .reversed = false });
+    RH_ScopedInstall(MakeValidSaveName, 0x5D0E90, { .reversed = false });
+    RH_ScopedInstall(CloseFile, 0x5D0E30, { .reversed = false });
+    RH_ScopedInstall(OpenFileForWriting, 0x5D0DD0, { .reversed = false });
+    RH_ScopedInstall(OpenFileForReading, 0x5D0D20, { .reversed = false });
+    RH_ScopedInstall(CheckDataNotCorrupt, 0x5D1170, { .reversed = false });
+    RH_ScopedInstall(RestoreForStartLoad, 0x619000, { .reversed = false });
 }
 
 // 0x5D08C0
@@ -462,7 +464,7 @@ bool CGenericGameStorage::CheckSlotDataValid(int32 slot) {
     assert(slot < MAX_SAVEGAME_SLOTS);
 
     char fileName[MAX_PATH]{};
-    C_PcSave::GenerateGameFilename(slot, fileName);
+    s_PcSaveHelper.GenerateGameFilename(slot, fileName);
 
     if (CheckDataNotCorrupt(slot, fileName)) {
         CStreaming::DeleteAllRwObjects();
@@ -485,12 +487,12 @@ bool CGenericGameStorage::LoadDataFromWorkBuffer(void* data, int32 size) {
 
     auto pos = ms_WorkBufferPos;
 
-    if (size + pos > ms_WorkBufferSize) {
+    if (static_cast<uint32>(size + pos) > ms_WorkBufferSize) {
         const auto maxSize = BUFFER_SIZE - pos;
         if (LoadDataFromWorkBuffer(data, maxSize)) {
             if (LoadWorkBuffer()) {
                 pos = ms_WorkBufferPos;
-                data = (byte*)data + maxSize;
+                data = (uint8*)data + maxSize;
                 size -= maxSize;
             }
         }
@@ -533,7 +535,7 @@ int32 CGenericGameStorage::SaveDataToWorkBuffer(void* data, int32 size) {
 
     memcpy(&ms_WorkBuffer[ms_WorkBufferPos], data, size);
     ms_WorkBufferPos += size;
-    
+
     return true;
 }
 
@@ -548,7 +550,7 @@ bool CGenericGameStorage::LoadWorkBuffer() {
         if (ms_FileSize == ms_FilePos) {
             return false;
         } else {
-            if (toReadSize != ((toReadSize + 3) & 0xFFFFFFFC)) { // Not sure, I think it's a check if the read size is 4 byte aligned? 
+            if (toReadSize != ((toReadSize + 3) & 0xFFFFFFFC)) { // Not sure, I think it's a check if the read size is 4 byte aligned?
                 return false;
             }
         }
@@ -616,7 +618,7 @@ bool CGenericGameStorage::SaveWorkBuffer(bool bIncludeChecksum) {
 // 0x5D0F50
 uint32 CGenericGameStorage::GetCurrentVersionNumber() {
     char buffer[40]{};
-    sprintf(buffer, "%s%s", "Apr 28 2005", "10:28:55");
+    sprintf_s(buffer, "%s%s", "Apr 28 2005", "10:28:55");
     return CKeyGen::GetKey(buffer);
 }
 
@@ -636,7 +638,7 @@ void CGenericGameStorage::MakeValidSaveName(int32 slot) {
             *it = ' ';
     }
 
-    strcpy_s(ms_SaveFileName, path); 
+    strcpy_s(ms_SaveFileName, path);
 }
 
 // 0x5D0E30
@@ -669,13 +671,13 @@ bool CGenericGameStorage::OpenFileForReading(const char* fileName, int32 slot) {
 
     if (fileName) {
         strcpy_s(ms_LoadFileName, fileName);
-        C_PcSave::GenerateGameFilename(slot, ms_LoadFileNameWithPath);
+        s_PcSaveHelper.GenerateGameFilename(slot, ms_LoadFileNameWithPath);
     }
 
     ms_FileHandle = CFileMgr::OpenFile(ms_LoadFileName, "rb");
 
     if (ms_FileHandle) {
-        ms_FileSize = CFileMgr::GetFileLength(ms_FileHandle); // todo: rename to CFileMgr::GetTotalSize
+        ms_FileSize = CFileMgr::GetTotalSize(ms_FileHandle);
         ms_FilePos = 0;
         ms_WorkBufferSize = BUFFER_SIZE;
         ms_WorkBufferPos = BUFFER_SIZE;

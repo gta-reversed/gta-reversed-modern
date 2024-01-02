@@ -58,9 +58,7 @@ struct tFrameVisibilityPlugin {
 VALIDATE_SIZE(tFrameVisibilityPlugin, 0x4);
 
 // TODO: Probably belongs inside `CVisibilityPlugins`
-static void weaponPedsForPc_Insert(CPed* ped) {
-    plugin::Call<0x5E46D0>(ped);
-}
+void weaponPedsForPc_Insert(CPed* ped);
 
 class CVisibilityPlugins {
 public:
@@ -120,6 +118,7 @@ public:
     static void* AtomicDestructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
     static int32 CalculateFadingAtomicAlpha(CBaseModelInfo* modelInfo, CEntity* entity, float distance);
     static void ClearAtomicFlag(RpAtomic* atomic, uint16 flag);
+    static void ClearAtomicFlag(RpAtomic* atomic, int32 flag);
     static RpAtomic* ClearAtomicFlagCB(RpAtomic* atomic, void* data);
     static void ClearClumpForAllAtomicsFlag(RpClump* clump, uint16 flag);
     static void* ClumpConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
@@ -135,7 +134,7 @@ public:
     static int32 GetClumpAlpha(RpClump* clump);
     static CClumpModelInfo* GetClumpModelInfo(RpClump* clump);
     static float GetDistanceSquaredFromCamera(RwFrame* frame);
-    static float GetDistanceSquaredFromCamera(CVector* pPos);
+    static float GetDistanceSquaredFromCamera(const CVector* pos);
     static float GetDotProductWithCameraVector(RwMatrix* atomicMatrix, RwMatrix* clumpMatrix, uint16 flags);
     static int32 GetFrameHierarchyId(RwFrame* frame);
     static int16 GetModelInfoIndex(RpAtomic* atomic);
@@ -175,10 +174,11 @@ public:
     static void RenderWeaponPedsForPC();
     static RpAtomic* SetAtomicFlagCB(RpAtomic* atomic, void* data);
     static void SetAtomicFlag(RpAtomic* atomic, uint16 flag);
+    static void SetAtomicFlag(RpAtomic* atomic, int32 flag);
     static void SetClumpForAllAtomicsFlag(RpClump* clump, uint16 flag);
     static void SetAtomicId(void* atomic, int16 id);
     static void SetAtomicRenderCallback(RpAtomic* atomic, RpAtomicCallBackRender renderCB);
-    static void SetClumpAlpha(RpClump* clump, int32 dwAlpha);
+    static void SetClumpAlpha(RpClump* clump, int32 alpha);
     static void SetClumpModelInfo(RpClump* clump, CClumpModelInfo* pClumpModelInfo);
     static void SetFrameHierarchyId(RwFrame* frame, int32 id);
     static void SetRenderWareCamera(RwCamera* pRwCamera);

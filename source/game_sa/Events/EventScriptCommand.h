@@ -4,17 +4,19 @@
 
 class CTask;
 
-class CEventScriptCommand : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventScriptCommand : public CEvent {
 public:
     int32  m_primaryTaskIndex;
     CTask* m_task;
     bool   m_affectsDeadPeds;
 
 public:
-    CEventScriptCommand(int32 primaryTaskIndex, CTask* task, bool affectsDeadPeds);
-    ~CEventScriptCommand();
+    static constexpr auto Type = eEventType::EVENT_SCRIPT_COMMAND;
 
-    eEventType GetEventType() const override { return EVENT_SCRIPT_COMMAND; }
+    CEventScriptCommand(int32 primaryTaskIndex, CTask* task, bool affectsDeadPeds = false);
+    ~CEventScriptCommand() override;
+
+    eEventType GetEventType() const override { return Type; }
     int32 GetEventPriority() const override;
     int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override;

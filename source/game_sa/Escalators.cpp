@@ -44,7 +44,7 @@ void CEscalators::AddOne(const CVector& vecStart, const CVector& vecBottom, cons
 
 // 0x718580
 void CEscalators::Update() {
-    if (CReplay::Mode != REPLAY_MODE_1) {
+    if (CReplay::Mode != MODE_PLAYBACK) {
         for (CEscalator& escalator : aEscalators) {
             if (escalator.m_bExist)
                 escalator.Update();

@@ -27,7 +27,6 @@ public:
     float            m_fMoveSpeed;
     uint8            m_nChosenWeapon;
     uint8            m_nCarDangerCounter;
-    char             _pad0[2];
     uint32           m_nStandStillTimer;
     uint32           m_nHitAnimDelayTimer;
     float            m_fAttackButtonCounter;
@@ -81,13 +80,11 @@ public:
     bool      m_bPlayerSprintDisabled;
     bool      m_bDontAllowWeaponChange;
     bool      m_bForceInteriorLighting;
-    char      _pad1;
     uint16    m_nPadDownPressedInMilliseconds;
     uint16    m_nPadUpPressedInMilliseconds;
     uint8     m_nWetness;
     bool      m_bPlayersGangActive;
     uint8     m_nWaterCoverPerc;
-    char      _pad2;
     float     m_fWaterHeight;
     uint32    m_nFireHSMissilePressedTime;
     CEntity*  m_LastHSMissileTarget;

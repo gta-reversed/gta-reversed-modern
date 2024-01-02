@@ -2,8 +2,7 @@
 
 #include "EventGlobalGroup.h"
 
-void CEventGlobalGroup::InjectHooks()
-{
+void CEventGlobalGroup::InjectHooks() {
     RH_ScopedClass(CEventGlobalGroup);
     RH_ScopedCategory("Events");
 
@@ -13,16 +12,13 @@ void CEventGlobalGroup::InjectHooks()
 }
 
 // 0x4AB900
-float CEventGlobalGroup::GetSoundLevel(CEntity* entity, CVector& position)
-{
+float CEventGlobalGroup::GetSoundLevel(CEntity* entity, CVector& position) {
     float soundLevel = 0.0f;
-    if (m_count > 0) {
-        for (int32 i = 0; i < m_count; i++) {
-            CEvent* event = m_events[i];
-            if (event->GetSourceEntity() == entity || !entity) {
-                float eventSoundLevel = event->GetSoundLevel(entity, position);
-                if (eventSoundLevel > 0.0f) 
-                    soundLevel += CEvent::CalcSoundLevelIncrement(soundLevel, eventSoundLevel);
+    for (auto& event : GetEvents()) {
+        if (event->GetSourceEntity() == entity || !entity) {
+            float eventSoundLevel = event->GetSoundLevel(entity, position);
+            if (eventSoundLevel > 0.0f) {
+                soundLevel += CEvent::CalcSoundLevelIncrement(soundLevel, eventSoundLevel);
             }
         }
     }
@@ -30,29 +26,19 @@ float CEventGlobalGroup::GetSoundLevel(CEntity* entity, CVector& position)
 }
 
 // 0x4AB9C0
-void CEventGlobalGroup::AddEventsToPed(CPed* ped)
-{
-    if (m_count > 0) {
-        CEventGroup& pedEventGroup = ped->GetEventGroup();
-        for (int32 i = 0; i < m_count; i++) {
-            CEvent* event = m_events[i];
-            CEvent* clonedEvent = event->Clone();
-            pedEventGroup.Add(clonedEvent, false);
-            delete clonedEvent;
-        }
+void CEventGlobalGroup::AddEventsToPed(CPed* ped) {
+    for (auto& event : GetEvents()) {
+        CEvent* clonedEvent = event->Clone();
+        ped->GetEventGroup().Add(clonedEvent, false);
+        delete clonedEvent;
     }
 }
 
 // 0x4AB8A0
-void CEventGlobalGroup::AddEventsToGroup(CPedGroup* pedGroup)
-{
-    if (m_count > 0) {
-        CPedGroupIntelligence& groupIntelligence = pedGroup->GetIntelligence();
-        for (int32 i = 0; i < m_count; i++) {
-            CEvent* event = m_events[i];
-            CEvent* clonedEvent = event->Clone();
-            groupIntelligence.AddEvent(clonedEvent);
-            delete clonedEvent;
-        }
+void CEventGlobalGroup::AddEventsToGroup(CPedGroup* pedGroup) {
+    for (auto& event : GetEvents()) {
+        CEvent* clonedEvent = event->Clone();
+        pedGroup->GetIntelligence().AddEvent(clonedEvent);
+        delete clonedEvent;
     }
 }

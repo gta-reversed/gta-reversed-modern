@@ -7,21 +7,25 @@
 #pragma once
 
 #include "Vector.h"
+#include "ColSurface.h"
 
-class CColDisk {
+class CColDisk : public CColSphere {
 public:
-    CVector m_vecStart;
-    float   m_fStartRadius;
-    uint8   m_nMaterial;
-    uint8   m_nPiece;
-    uint8   m_nLighting;
-    char    _pad13;
+    CVector     m_vThickness{};
+    float       m_fThickness{};
 
 public:
-    CVector m_vecEnd;
-    float   m_fEndRadius;
-
-    void Set(float startRadius, const CVector& start, const CVector& end, float endRadius, uint8 material, uint8 pieceType, uint8 lighting);
+    // 0x40FD50
+    /*
+    void Set(float startRadius, const CVector& start, const CVector& end, float endRadius, eSurfaceType material, uint8 pieceType, tColLighting lighting) {
+        m_fStartRadius = startRadius;
+        m_vecStart = start;
+        m_vecEnd = end;
+        m_fEndRadius = endRadius;
+        m_Surface.m_nMaterial = material;
+        m_Surface.m_nPiece = pieceType;
+        m_Surface.ligthing = lighting;
+    }
+    */
 };
-
 VALIDATE_SIZE(CColDisk, 0x24);

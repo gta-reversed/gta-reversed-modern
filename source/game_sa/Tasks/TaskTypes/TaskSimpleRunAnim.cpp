@@ -10,8 +10,8 @@ void CTaskSimpleRunAnim::InjectHooks()
     RH_ScopedInstall(Constructor2, 0x61A900);
     RH_ScopedInstall(StartAnim, 0x61A950);
     //VTABLE
-    RH_ScopedInstall(Clone_Reversed, 0x61B6D0);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x61BAC0);
+    RH_ScopedVirtualInstall(Clone, 0x61B6D0);
+    RH_ScopedVirtualInstall(ProcessPed, 0x61BAC0);
 }
 
 CTaskSimpleRunAnim* CTaskSimpleRunAnim::Constructor(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, bool bHoldLastFrame)
@@ -45,8 +45,7 @@ CTaskSimpleRunAnim::CTaskSimpleRunAnim(AssocGroupId animGroup, AnimationId animI
 }
 
 // 0x61B6D0
-CTask* CTaskSimpleRunAnim::Clone()
-{
+CTask* CTaskSimpleRunAnim::Clone() const {
     return Clone_Reversed();
 }
 
@@ -56,8 +55,7 @@ bool CTaskSimpleRunAnim::ProcessPed(CPed* ped)
     return ProcessPed_Reversed(ped);
 }
 
-CTask* CTaskSimpleRunAnim::Clone_Reversed()
-{
+CTask* CTaskSimpleRunAnim::Clone_Reversed() const {
     return new CTaskSimpleRunAnim(m_nAnimGroup, m_nAnimId, m_fBlendDelta, m_bHoldLastFrame);
 }
 

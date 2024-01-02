@@ -163,20 +163,11 @@ void CSimpleVariablesSaveStructure::Extract(uint32& versionId) const {
     FrontEndMenuManager.m_nTargetBlipIndex = m_nTargetBlipIndex;
     CPlayerPed::bHasDisplayedPlayerQuitEnterCarHelpText = m_bHasDisplayedPlayerQuitEnterCarHelpText;
 
-    static constexpr void (*pTaxiNitroCheat)() = nullptr;
-    static constexpr void (*pProstitutesPayYouCheat)() = nullptr;
-
     CCheat::m_bHasPlayerCheated = m_bHasPlayerCheated;
     if (m_bAllTaxisNitro) {
-        if (pTaxiNitroCheat)
-            pTaxiNitroCheat();
-        else
-            CCheat::Toggle(CHEAT_ALL_TAXIS_NITRO);
+        CCheat::ApplyCheat(CHEAT_ALL_TAXIS_NITRO);
     }
     if (m_bProstitutesPayYou) {
-        if (pProstitutesPayYouCheat)
-            pProstitutesPayYouCheat();
-        else
-            CCheat::Toggle(CHEAT_PROSTITUTES_PAY_YOU);
+        CCheat::ApplyCheat(CHEAT_PROSTITUTES_PAY_YOU);
     }
 }

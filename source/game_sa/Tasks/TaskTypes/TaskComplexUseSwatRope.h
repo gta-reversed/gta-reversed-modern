@@ -8,19 +8,18 @@ public:
     uint32 m_nRopeId;
     float  m_fCoorAlongRope;
     uint8  m_bIsOnHeli;
-    uint8  _pad_15[3];
     CHeli* m_pHeli;
 
 public:
     static constexpr auto Type = TASK_COMPLEX_USE_SWAT_ROPE;
 
     CTaskComplexUseSwatRope(uint32 ropeId, CHeli* heli);
-    CTaskComplexUseSwatRope(uint32 ropeId);
+    explicit CTaskComplexUseSwatRope(uint32 ropeId);
     ~CTaskComplexUseSwatRope() override;
 
-    CTask* Clone() override;
-    eTaskType GetTaskType() override { return TASK_COMPLEX_USE_SWAT_ROPE; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    CTask* Clone() const override;
+    eTaskType GetTaskType() const override { return Type; }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
@@ -35,7 +34,7 @@ private:
 
     CTaskComplexUseSwatRope* Constructor(uint32 ropeId, CHeli* heli);
 
-    CTask* Clone_Reversed();
+    CTask*  Clone_Reversed() const;
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     CTask* CreateNextSubTask_Reversed(CPed* ped);
     CTask* CreateFirstSubTask_Reversed(CPed* ped);

@@ -1,14 +1,13 @@
 #pragma once
 
 #include "TaskComplexWander.h"
+#include "eMoveState.h"
 
 class CTaskComplexWanderMedic : public CTaskComplexWander {
 public:
-    static constexpr auto Type = TASK_COMPLEX_WANDER_MEDIC;
+    CTaskComplexWanderMedic(eMoveState MoveState, uint8 Dir, bool bWanderSensibly = true);
 
-    CTaskComplexWanderMedic* Constructor(int32 MoveState, uint8 Dir, bool bWanderSensibly);
-    CTaskComplexWanderMedic(int32 MoveState, uint8 Dir, bool bWanderSensibly);
-    int32 GetWanderType() override { return TASK_COMPLEX_WANDER_MEDIC; }
-    void ScanForStuff(CPed* ped) override {}
-    CTask* Clone() override;
+    eWanderType GetWanderType() override { return WANDER_TYPE_MEDIC; } // 0x658810
+    CTask* Clone() const override { return new CTaskComplexWanderMedic(m_nMoveState, m_nDir, m_bWanderSensibly); } // 0x6587A0
+    void ScanForStuff(CPed* ped) override {} // 0x658820
 };

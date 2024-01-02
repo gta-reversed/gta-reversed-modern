@@ -7,15 +7,15 @@ void CLodAtomicModelInfo::InjectHooks()
     RH_ScopedClass(CLodAtomicModelInfo);
     RH_ScopedCategory("Models");
 
-    RH_ScopedInstall(AsLodAtomicModelInfoPtr_Reversed, 0x4C5610);
-    RH_ScopedInstall(GetModelType_Reversed, 0x4C5600);
-    RH_ScopedInstall(Init_Reversed, 0x4C54D0);
+    RH_ScopedVirtualInstall(AsLodAtomicModelInfoPtr, 0x4C5610);
+    RH_ScopedVirtualInstall(GetModelType, 0x4C5600);
+    RH_ScopedVirtualInstall(Init, 0x4C54D0);
 }
 
 CLodAtomicModelInfo::CLodAtomicModelInfo() : CAtomicModelInfo()
 {
-    field_20 = 0;
-    field_22 = 0;
+    m_numChildren = 0;
+    m_numChildrenRendered = 0;
 }
 
 CLodAtomicModelInfo* CLodAtomicModelInfo::AsLodAtomicModelInfoPtr()

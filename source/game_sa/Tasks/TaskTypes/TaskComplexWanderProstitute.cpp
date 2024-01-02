@@ -2,8 +2,14 @@
 
 #include "TaskComplexWanderProstitute.h"
 
-CTaskComplexWanderProstitute* CTaskComplexWanderProstitute::Constructor(int32 MoveState, uint8 Dir, bool bWanderSensibly)
+// 0x672690
+CTaskComplexWanderProstitute::CTaskComplexWanderProstitute(eMoveState MoveState, uint8 Dir, bool bWanderSensibly) :
+    CTaskComplexWanderStandard(MoveState, Dir, bWanderSensibly),
+    m_nStartTimeInMs{ 0 }
 {
-    return plugin::CallMethodAndReturn<CTaskComplexWanderProstitute*, 0x672690, CTaskComplexWanderProstitute*, int32, uint8, bool>
-        (this, MoveState, Dir, bWanderSensibly);
+}
+
+// 0x672700
+void CTaskComplexWanderProstitute::ScanForStuff(CPed* ped) {
+    plugin::CallMethod<0x672700, CTaskComplexWanderProstitute*, CPed*>(this, ped);
 }

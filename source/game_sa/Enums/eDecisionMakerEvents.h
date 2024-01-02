@@ -6,7 +6,8 @@
 */
 #pragma once
 
-enum eDecisionMakerEvents {
+enum eDecisionMakerEvents : int32 {
+    DM_EVENT_UNDEFINED = -1,
     DM_EVENT_DRAGGED_OUT_CAR = 0,
     DM_EVENT_KNOCK_OFF_BIKE,
     DM_EVENT_DAMAGE,

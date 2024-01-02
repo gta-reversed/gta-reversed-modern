@@ -46,8 +46,8 @@ void RtQuatConvertToMatrix(const RtQuat* const qpQuat, RwMatrix* const mpMatrix)
     mpMatrix->flags = rwMATRIXTYPEORTHONORMAL & ~rwMATRIXINTERNALIDENTITY;
 }
 
-RwBool RtQuatConvertFromMatrix(RtQuat * const qpQuat, const RwMatrix * const mpMatrix) {
-    return ((RwBool(__cdecl *)(RtQuat * const, const RwMatrix * const))0x7EB5C0)(qpQuat, mpMatrix);
+RwBool RtQuatConvertFromMatrix(RtQuat* qpQuat, const RwMatrix* const mpMatrix) {
+    return ((RwBool(__cdecl*)(RtQuat*, const RwMatrix* const))0x7EB5C0)(qpQuat, mpMatrix);
 }
 
 RtQuat* RtQuatRotate(RtQuat* quat, const RwV3d* axis, RwReal angle, RwOpCombineType combineOp) {

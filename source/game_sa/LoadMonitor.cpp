@@ -6,12 +6,12 @@ void CLoadMonitor::InjectHooks() {
     RH_ScopedClass(CLoadMonitor);
     RH_ScopedCategoryGlobal();
 
-//    RH_ScopedInstall(Constructor, 0x53CFA0);
-//    RH_ScopedInstall(Destructor, 0x856430);
-//    RH_ScopedInstall(BeginFrame, 0x53D030);
-//    RH_ScopedInstall(EndFrame, 0x53D0B0);
-//    RH_ScopedInstall(StartTimer, 0x53D050);
-//    RH_ScopedInstall(EndTimer, 0x53D070);
+RH_ScopedInstall(Constructor, 0x53CFA0, { .reversed = false });
+RH_ScopedInstall(Destructor, 0x856430, { .reversed = false });
+RH_ScopedInstall(BeginFrame, 0x53D030, { .reversed = false });
+RH_ScopedInstall(EndFrame, 0x53D0B0, { .reversed = false });
+RH_ScopedInstall(StartTimer, 0x53D050, { .reversed = false });
+RH_ScopedInstall(EndTimer, 0x53D070, { .reversed = false });
 }
 
 // 0x53CFA0
@@ -22,11 +22,6 @@ CLoadMonitor::CLoadMonitor() {
 CLoadMonitor* CLoadMonitor::Constructor() {
     this->CLoadMonitor::CLoadMonitor();
     return this;
-}
-
-// 0x856430
-CLoadMonitor::~CLoadMonitor() {
-    // NOP
 }
 
 CLoadMonitor* CLoadMonitor::Destructor() {

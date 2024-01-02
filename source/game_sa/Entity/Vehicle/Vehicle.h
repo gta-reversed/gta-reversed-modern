@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <optional>
+
 #include "Physical.h"
 #include "AEVehicleAudioEntity.h"
 #include "tHandlingData.h"
@@ -18,8 +20,10 @@
 #include "PtrList.h"
 #include "RideAnimData.h"
 #include "DamageManager.h"
-#include "FxSystem_c.h"
+#include "FxSystem.h"
 #include "Fire.h"
+
+#include <Enums/eControllerType.h>
 
 /*  Thanks to MTA team for https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CVehicleSA.cpp */
 
@@ -27,13 +31,15 @@ class CWeapon;
 class CPed;
 class CPlane;
 class CHeli;
+class CPedGroup;
+class CVehicleAnimGroup;
 
 enum eCarWeapon : uint8 {
-    CAR_WEAPON_NOT_USED,
-    CAR_WEAPON_HEAVY_GUN,
-    CAR_WEAPON_FREEFALL_BOMB,
-    CAR_WEAPON_LOCK_ON_ROCKET,
-    CAR_WEAPON_DOUBLE_ROCKET
+    CAR_WEAPON_NOT_USED       = 0,
+    CAR_WEAPON_HEAVY_GUN      = 1,
+    CAR_WEAPON_FREEFALL_BOMB  = 2,
+    CAR_WEAPON_LOCK_ON_ROCKET = 3,
+    CAR_WEAPON_DOUBLE_ROCKET  = 4,
 };
 
 enum eCarLock : uint32 {
@@ -56,7 +62,7 @@ enum eVehicleAppearance {
     VEHICLE_APPEARANCE_PLANE = 5,
 };
 
-enum eVehicleLightsFlags {
+enum eVehicleLightsFlags : uint32 {
     VEHICLE_LIGHTS_TWIN = 1,
     VEHICLE_LIGHTS_IGNORE_DAMAGE = 4,
     VEHICLE_LIGHTS_DISABLE_FRONT = 16,
@@ -104,6 +110,7 @@ enum eCarPiece {
     CAR_PIECE_WHEEL_RR,
     CAR_PIECE_WINDSCREEN = 19,
 };
+constexpr inline eCarPiece eCarPiece_WheelPieces[]{ CAR_PIECE_WHEEL_LF, CAR_PIECE_WHEEL_RF, CAR_PIECE_WHEEL_RL, CAR_PIECE_WHEEL_RR };
 
 enum eRotationAxis : int32 {
     AXIS_X = 0,
@@ -115,18 +122,20 @@ typedef int32 eOrdnanceType;
 typedef int32 eBikeWheelSpecial;
 
 enum eFlightModel : int32 {
+    FLIGHT_MODEL_UNK = 0,
     FLIGHT_MODEL_BARON = 1,
     FLIGHT_MODEL_RC = 2,
     FLIGHT_MODEL_PLANE = 3, // also used for cars
+    FLIGHT_MODEL_UNK2 = 4,
     FLIGHT_MODEL_BOAT = 5,
     FLIGHT_MODEL_HELI = 6, // also used for hydra
 };
 
 enum tWheelState : int32 {
-    WHEEL_STATE_NORMAL,	  // standing still or rolling normally
+    WHEEL_STATE_NORMAL,   // standing still or rolling normally
     WHEEL_STATE_SPINNING, // rotating but not moving
     WHEEL_STATE_SKIDDING,
-    WHEEL_STATE_FIXED,	  // not rotating
+    WHEEL_STATE_FIXED,    // not rotating
 };
 
 enum class eVehicleCollisionComponent : uint16
@@ -167,12 +176,21 @@ struct tHydraulicData {
 
 VALIDATE_SIZE(tHydraulicData, 0x28);
 
-class CVehicle : public CPhysical {
+class NOTSA_EXPORT_VTABLE CVehicle : public CPhysical {
+public:
+    static constexpr auto NUM_VEHICLE_UPGRADES = 15u;
+
+public:
+    enum class eComedyControlState : uint8 {
+        INACTIVE,
+        STEER_RIGHT,
+        STEER_LEFT
+    };
 public:
     CAEVehicleAudioEntity m_vehicleAudio;
     tHandlingData*        m_pHandlingData;
     tFlyingHandlingData*  m_pFlyingHandlingData;
-    union {
+    union { // TODO: The struct in `tHandlingData` is exactly the same thing, so use that here too! (Requires renaming fields in `tHandlingData`)
         eVehicleHandlingFlags m_nHandlingFlagsIntValue;
         struct {
             uint32 b1gBoost : 1;
@@ -183,6 +201,7 @@ public:
             uint32 bSteerRearwheels : 1;
             uint32 bHbRearwheelSteer : 1;
             uint32 bAltSteerOpt : 1;
+
             uint32 bWheelFNarrow2 : 1;
             uint32 bWheelFNarrow : 1;
             uint32 bWheelFWide : 1;
@@ -191,10 +210,11 @@ public:
             uint32 bWheelRNarrow : 1;
             uint32 bWheelRWide : 1;
             uint32 bWheelRWide2 : 1;
+
             uint32 bHydraulicGeom : 1;
-            uint32 bHydraulicInst : 1;
+            uint32 bHydraulicInst : 1; // ..alled (bHydraulicInstalled)
             uint32 bHydraulicNone : 1;
-            uint32 bNosInst : 1;
+            uint32 bNosInst : 1; // ...alled (bNosInstalled)
             uint32 bOffroadAbility : 1;
             uint32 bOffroadAbility2 : 1;
             uint32 bHalogenLights : 1;
@@ -223,17 +243,17 @@ public:
 
             uint32 bIsVan : 1;                       // Is this vehicle a van (doors at back of vehicle)
             uint32 bIsBus : 1;                       // Is this vehicle a bus
-            uint32 bIsBig : 1;                       // Is this vehicle a bus
+            uint32 bIsBig : 1;                       // Is this vehicle big
             uint32 bLowVehicle : 1;                  // Need this for sporty type cars to use low getting-in/out anims
             uint32 bComedyControls : 1;              // Will make the car hard to control (hopefully in a funny way)
             uint32 bWarnedPeds : 1;                  // Has scan and warn peds of danger been processed?
-            uint32 bCraneMessageDone : 1;            // A crane message has been printed for this car allready
+            uint32 bCraneMessageDone : 1;            // A crane message has been printed for this car already
             uint32 bTakeLessDamage : 1;              // This vehicle is stronger (takes about 1/4 of damage)
 
             uint32 bIsDamaged : 1;                   // This vehicle has been damaged and is displaying all its components
             uint32 bHasBeenOwnedByPlayer : 1;        // To work out whether stealing it is a crime
             uint32 bFadeOut : 1;                     // Fade vehicle out
-            uint32 bIsBeingCarJacked : 1;            // Fade vehicle out
+            uint32 bIsBeingCarJacked : 1;            //
             uint32 bCreateRoadBlockPeds : 1;         // If this vehicle gets close enough we will create peds (coppers or gang members) round it
             uint32 bCanBeDamaged : 1;                // Set to FALSE during cut scenes to avoid explosions
             uint32 bOccupantsHaveBeenGenerated : 1;  // Is true if the occupants have already been generated. (Shouldn't happen again)
@@ -259,7 +279,7 @@ public:
 
             uint32 bAlwaysSkidMarks : 1;             // This vehicle leaves skidmarks regardless of the wheels' states.
             uint32 bEngineBroken : 1;                // Engine doesn't work. Player can get in but the vehicle won't drive
-            uint32 bVehicleCanBeTargetted : 1;       // The ped driving this vehicle can be targetted, (for Torenos plane mission)
+            uint32 bVehicleCanBeTargetted : 1;       // The ped driving this vehicle can be targeted, (for Torenos plane mission)
             uint32 bPartOfAttackWave : 1;            // This car is used in an attack during a gang war
             uint32 bWinchCanPickMeUp : 1;            // This car cannot be picked up by any ropes.
             uint32 bImpounded : 1;                   // Has this vehicle been in a police impounding garage
@@ -272,7 +292,7 @@ public:
             uint32 bMadDriver : 1;                   // This vehicle is driving like a lunatic
             uint32 bUpgradedStereo : 1;              // This vehicle has an upgraded stereo
             uint32 bConsideredByPlayer : 1;          // This vehicle is considered by the player to enter
-            uint32 bPetrolTankIsWeakPoint : 1;       // If false shootong the petrol tank will NOT Blow up the car
+            uint32 bPetrolTankIsWeakPoint : 1;       // If false shooting the petrol tank will NOT Blow up the car
             uint32 bDisableParticles : 1;            // Disable particles from this car. Used in garage.
 
             uint32 bHasBeenResprayed : 1;            // Has been resprayed in a respray garage. Reset after it has been checked.
@@ -287,13 +307,13 @@ public:
     uint8             m_nSecondaryColor;
     uint8             m_nTertiaryColor;
     uint8             m_nQuaternaryColor;
-    char              m_anExtras[2];
-    int16             m_anUpgrades[15];
+    uint8             m_anExtras[2];
+    std::array<int16, NUM_VEHICLE_UPGRADES> m_anUpgrades;
     float             m_fWheelScale;
-    int16             m_nAlarmState;
+    uint16            m_nAlarmState;
     int16             m_nForcedRandomRouteSeed; // if this is non-zero the random wander gets deterministic
     CPed*             m_pDriver;
-    CPed*             m_apPassengers[8];
+    CPed*             m_apPassengers[8]{};
     uint8             m_nNumPassengers;
     uint8             m_nNumGettingIn;
     uint8             m_nGettingInFlags;
@@ -318,9 +338,9 @@ public:
                                                       // 4 = Timed Bomb has been activated
                                                       // 5 = On ignition has been activated
     uint8            m_nOverrideLights : 2;           // uses enum NO_CAR_LIGHT_OVERRIDE, FORCE_CAR_LIGHTS_OFF, FORCE_CAR_LIGHTS_ON
-    uint8            m_nWinchType : 2;                // Does this vehicle use a winch?
-    uint8            m_nGunsCycleIndex : 2;           // Cycle through alternate gun hardpoints on planes/helis
-    uint8            m_nOrdnanceCycleIndex : 2;       // Cycle through alternate ordnance hardpoints on planes/helis
+    uint8            m_ropeType : 2;                  // See `eRopeType` (also called `m_nWinchType`)
+    uint8            m_nGunsCycleIndex : 2;           // Cycle through alternate gun hard-points on planes/helis
+    uint8            m_nOrdnanceCycleIndex : 2;       // Cycle through alternate ordnance hard-points on planes/helis
     uint8            m_nUsedForCover;                 // Has n number of cops hiding/attempting to hid behind it
     uint8            m_nAmmoInClip;                   // Used to make the guns on boat do a reload (20 by default).
     uint8            m_nPacMansCollected;             // initialised, but not used?
@@ -357,9 +377,9 @@ public:
     char            field_512;             // initialised, but not used?
     eCarWeapon      m_nVehicleWeaponInUse;
     uint32          m_nHornCounter;
-    char            field_518;       // random id related to siren
+    int8            m_nRandomIdRelatedToSiren;
     char            m_nCarHornTimer; // car horn related
-    char            m_comedyControlState;
+    eComedyControlState m_comedyControlState;
     char            m_nHasslePosId;
     CStoredCollPoly m_FrontCollPoly;          // poly which is under front part of car
     CStoredCollPoly m_RearCollPoly;           // poly which is under rear part of car
@@ -377,7 +397,7 @@ public:
         } m_renderLights;
     };
     RwTexture*   m_pCustomCarPlate;
-    float        m_fRawSteerAngle;
+    float        m_fRawSteerAngle; // AKA m_fSteeringLeftRight
     eVehicleType m_nVehicleType;    // Theory by forkerer:
     eVehicleType m_nVehicleSubType; // Hack to have stuff be 2 classes at once, like vortex which can act like a car and a boat
     int16        m_nPreviousRemapTxd;
@@ -395,20 +415,24 @@ public:
     static bool &bDisableRemoteDetonationOnContact;
     static bool &m_bEnableMouseSteering;
     static bool &m_bEnableMouseFlying;
-    static int32 &m_nLastControlInput;
-    static CColModel* (&m_aSpecialColVehicle)[4];
+    static inline auto& m_nLastControlInput = *(eControllerType*)0xC1CC04;
+    static inline auto& m_aSpecialColVehicle = StaticRef<std::array<CVehicle*, 4>, 0xC1CC08>();
+    static inline auto& m_aSpecialColModel = StaticRef<std::array<CColModel, 4>, 0xC1CC78>();
     static bool &ms_forceVehicleLightsOff;
     static bool &s_bPlaneGunsEjectShellCasings;
-    static CColModel (&m_aSpecialColModel)[4];
     static inline tHydraulicData(&m_aSpecialHydraulicData)[4] = *(tHydraulicData(*)[4])0xC1CB60;
 
+    static constexpr auto Type = VEHICLE_TYPE_IGNORE;
+
 public:
-    CVehicle(plugin::dummy_func_t) : CPhysical() { /* todo: remove NOTSA */ }
     CVehicle(eVehicleCreatedBy createdBy);
     ~CVehicle() override;
 
     static void* operator new(unsigned size);
     static void operator delete(void* data);
+
+    static void* operator new(unsigned size, int32 poolRef);
+    static void operator delete(void* data, int32 poolRef);
 
     void SetModelIndex(uint32 index) override;
     void DeleteRwObject() override;
@@ -428,27 +452,32 @@ public:
     virtual bool IsComponentPresent(int32 componentId) { return false; }
     virtual void OpenDoor(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) { /* Do nothing */ }
     virtual void ProcessOpenDoor(CPed* ped, uint32 doorComponentId, uint32 animGroup, uint32 animId, float fTime);
+
+    //!!!!!!!!!!!!!!!!!!!
+    // PAY CLOSE ATTENTION TO WHICH VERSION OF THE FUNCTIONS DOWN BELOW YOU'RE CALLING!
+    //!!!!!!!!!!!!!!!!!!!
+    virtual float GetDooorAngleOpenRatioU32(uint32 door) { return 0.0F; }
     virtual float GetDooorAngleOpenRatio(eDoors door) { return 0.0F; }
-    virtual float GetDooorAngleOpenRatio(uint32 door) { return 0.0F; }
+    virtual bool IsDoorReadyU32(uint32 door) { return false; }
     virtual bool IsDoorReady(eDoors door) { return false; }
-    virtual bool IsDoorReady(uint32 door) { return false; }
+    virtual bool IsDoorFullyOpenU32(uint32 door) { return false; }
     virtual bool IsDoorFullyOpen(eDoors door) { return false; }
-    virtual bool IsDoorFullyOpen(uint32 door) { return false; }
+    virtual bool IsDoorClosedU32(uint32 door){ return false; }
     virtual bool IsDoorClosed(eDoors door){ return false; }
-    virtual bool IsDoorClosed(uint32 door){ return false; }
+    virtual bool IsDoorMissingU32(uint32 door){ return false; }
     virtual bool IsDoorMissing(eDoors door) { return false; }
-    virtual bool IsDoorMissing(uint32 door){ return false; }
+
     // check if car has roof as extra
     virtual bool IsOpenTopCar(){ return false; }
     // remove ref to this entity
     virtual void RemoveRefsToVehicle(CEntity* entity) { /* Do nothing */ }
-    virtual void BlowUpCar(CEntity* damager, uint8 bHideExplosion) { /* Do nothing */ }
+    virtual void BlowUpCar(CEntity* damager, bool bHideExplosion) { /* Do nothing */ }
     virtual void BlowUpCarCutSceneNoExtras(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound) { /* Do nothing */ }
     virtual bool SetUpWheelColModel(CColModel* wheelCol) { return false; }
     // returns false if it's not possible to burst vehicle's tyre or it is already damaged. bPhysicalEffect=true applies random moving force to vehicle
     virtual bool BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect) { return false; }
-    virtual bool IsRoomForPedToLeaveCar(uint32 arg0, CVector* arg1) { return false; }
-    virtual void ProcessDrivingAnims(CPed* driver, uint8 bBlend);
+    virtual bool IsRoomForPedToLeaveCar(uint32 doorId, CVector* arg1) { return false; }
+    virtual void ProcessDrivingAnims(CPed* driver, bool bBlend);
     // get special ride anim data for bile or quad
     virtual CRideAnimData* GetRideAnimData() { return nullptr; }
     virtual void SetupSuspensionLines() { /* Do nothing */ }
@@ -460,33 +489,31 @@ public:
     virtual void PlayCarHorn() { /* Do nothing */ }
     virtual int32 GetNumContactWheels() { return 4; }
     virtual void VehicleDamage(float damageIntensity, eVehicleCollisionComponent collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { /* Do nothing */ }
-    virtual bool CanPedStepOutCar(bool bIgnoreSpeedUpright);
+    virtual bool CanPedStepOutCar(bool bIgnoreSpeedUpright = false) const;
     virtual bool CanPedJumpOutCar(CPed* ped);
-    virtual bool GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
-    virtual bool GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
+    virtual bool GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
+    virtual bool GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
     virtual bool SetTowLink(CVehicle* tractor, bool setMyPosToTowBar) { return false; }
     virtual bool BreakTowLink() { return false; }
     virtual float FindWheelWidth(bool bRear) { return 0.25F; }
     virtual bool Save();
     virtual bool Load();
 
-    // -1 if no remap index
     int32 GetRemapIndex();
     void SetRemapTexDictionary(int32 txdId);
-    // index for m_awRemapTxds[] array
     void SetRemap(int32 remapIndex);
     void SetCollisionLighting(tColLighting lighting);
     void UpdateLightingFromStoredPolys();
     void CalculateLightingFromCollision();
     void ResetAfterRender();
-    eVehicleAppearance GetVehicleAppearance();
-    // returns false if vehicle model has no car plate material
+    [[nodiscard]] eVehicleAppearance GetVehicleAppearance() const;
     bool CustomCarPlate_TextureCreate(CVehicleModelInfo* model);
     void CustomCarPlate_TextureDestroy();
     bool CanBeDeleted();
     float ProcessWheelRotation(tWheelState wheelState, const CVector& arg1, const CVector& arg2, float arg3);
-    bool CanVehicleBeDamaged(CEntity* damager, eWeaponType weapon, uint8& arg2);
+    bool CanVehicleBeDamaged(CEntity* damager, eWeaponType weapon, bool& bDamagedDueToFireOrExplosionOrBullet);
     void ProcessDelayedExplosion();
+    void ApplyTurnForceToOccupantOnEntry(CPed* passenger);
     bool AddPassenger(CPed* passenger);
     bool AddPassenger(CPed* passenger, uint8 seatNumber);
     void RemovePassenger(CPed* passenger);
@@ -494,22 +521,22 @@ public:
     void RemoveDriver(bool arg0);
     CPed* SetUpDriver(int32 pedType, bool arg1, bool arg2);
     CPed* SetupPassenger(int32 seatNumber, int32 pedType, bool arg2, bool arg3);
-    bool IsPassenger(CPed* ped);
-    bool IsPassenger(int32 modelIndex);
-    bool IsDriver(CPed* ped);
-    bool IsDriver(int32 modelIndex);
+    bool IsPassenger(CPed* ped) const;
+    [[nodiscard]] bool IsPassenger(int32 modelIndex) const;
+    bool IsPedOfModelInside(eModelID model) const; // NOTSA
+    bool IsDriver(CPed* ped) const;
+    [[nodiscard]] bool IsDriver(int32 modelIndex) const;
     void KillPedsInVehicle();
-    // return this->m_pCoords->matrix.GetUp().z <= -0.9;
-    bool IsUpsideDown();
-    // return this->m_pCoords->matrix.GetRight().z >= 0.8 || this->m_pCoords->matrix.GetRight().z <= -0.8;
-    bool IsOnItsSide();
-    bool CanPedOpenLocks(CPed* ped);
-    bool CanDoorsBeDamaged();
+    bool IsUpsideDown() const;
+    bool IsOnItsSide() const;
+    bool CanPedOpenLocks(const CPed* ped) const;
+    [[nodiscard]] bool CanDoorsBeDamaged() const;
     bool CanPedEnterCar();
     void ProcessCarAlarm();
+    void DestroyVehicleAndDriverAndPassengers(CVehicle* vehicle);
     bool IsVehicleNormal();
     void ChangeLawEnforcerState(bool bIsEnforcer);
-    bool IsLawEnforcementVehicle();
+    bool IsLawEnforcementVehicle() const;
     static bool ShufflePassengersToMakeSpace();
     void ExtinguishCarFire();
     void ActivateBomb();
@@ -536,19 +563,19 @@ public:
     void RemoveUpgrade(int32 upgradeId);
     // return upgrade model id or -1 if not present
     int32 GetUpgrade(int32 upgradeId);
-    RpAtomic* CreateReplacementAtomic(CBaseModelInfo* model, RwFrame* component, int32 arg2, bool bDamaged, bool bIsWheel);
+    RpAtomic* CreateReplacementAtomic(CBaseModelInfo* model, RwFrame* component, int16 arg2, bool bDamaged, bool bIsWheel);
     void AddReplacementUpgrade(int32 modelIndex, int32 nodeId);
     void RemoveReplacementUpgrade(int32 nodeId);
     // return upgrade model id or -1 if not present
-    void GetReplacementUpgrade(int32 nodeId);
+    int32 GetReplacementUpgrade(int32 nodeId);
     void RemoveAllUpgrades();
-    int32 GetSpareHasslePosId();
+    [[nodiscard]] int32 GetSpareHasslePosId() const;
     void SetHasslePosId(int32 hasslePos, bool enable);
     void InitWinch(int32 arg0);
     void UpdateWinch();
     void RemoveWinch();
     void ReleasePickedUpEntityWithWinch();
-    void PickUpEntityWithWinch(CEntity* arg0);
+    void PickUpEntityWithWinch(CEntity* entity);
     CEntity* QueryPickedUpEntityWithWinch();
     float GetRopeHeightForHeli();
     void SetRopeHeightForHeli(float height);
@@ -560,39 +587,37 @@ public:
     float GetFiringRateMultiplier();
     uint32 GetPlaneGunsRateOfFire();
     CVector GetPlaneGunsPosition(int32 gunId);
-    uint32 GetPlaneOrdnanceRateOfFire(eOrdnanceType ordnanceType);
-    CVector GetPlaneOrdnancePosition(eOrdnanceType ordnanceType);
-    void SelectPlaneWeapon(bool bChange, eOrdnanceType ordnanceType);
+    uint32 GetPlaneOrdnanceRateOfFire(eOrdnanceType type);
+    CVector GetPlaneOrdnancePosition(eOrdnanceType type);
+    void SelectPlaneWeapon(bool bChange, eOrdnanceType type);
     void DoPlaneGunFireFX(CWeapon* weapon, CVector& particlePos, CVector& gunshellPos, int32 particleIndex);
     void FirePlaneGuns();
-    void FireUnguidedMissile(eOrdnanceType ordnanceType, bool bCheckTime);
-    bool CanBeDriven();
+    void FireUnguidedMissile(eOrdnanceType type, bool bCheckTime);
+    bool CanBeDriven() const;
     void ReactToVehicleDamage(CPed* ped);
     bool GetVehicleLightsStatus();
     bool CanPedLeanOut(CPed* ped);
-    void SetVehicleCreatedBy(int32 createdBy);
+    void SetVehicleCreatedBy(eVehicleCreatedBy createdBy);
     void SetupRender();
-    void ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& wheelContactSpeed, CVector& wheelContactPoint,
-        int32 wheelsOnGround, float thrust, float brake, float adhesion, int8 wheelId, float* wheelSpeed, tWheelState* wheelState, uint16 wheelStatus);
-    void ProcessBikeWheel(CVector& arg0, CVector& arg1, CVector& arg2, CVector& arg3, int32 arg4, float arg5, float arg6, float arg7, float arg8, char arg9, float* arg10, tWheelState* arg11, eBikeWheelSpecial arg12, uint16 arg13);
-    // return nearest wheel?
-    int32 FindTyreNearestPoint(float x, float y);
+    void ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& wheelContactSpeed, CVector& wheelContactPoint, int32 wheelsOnGround, float thrust, float brake,
+                      float adhesion, int8 wheelId, float* wheelSpeed, tWheelState* wheelState, uint16 wheelStatus);
+    void ProcessBikeWheel(CVector& wheelFwd, CVector& wheelRight, CVector& wheelContactSpeed, CVector& wheelContactPoint, int32 wheelsOnGround, float thrust, float brake,
+                          float adhesion, float destabTraction, int8 wheelId, float* wheelSpeed, tWheelState* wheelState, eBikeWheelSpecial special, uint16 wheelStatus);
+    int32 FindTyreNearestPoint(CVector2D point);
     void InflictDamage(CEntity* damager, eWeaponType weapon, float intensity, CVector coords);
     void KillPedsGettingInVehicle();
     bool UsesSiren();
-    bool IsSphereTouchingVehicle(float x, float y, float z, float radius);
+    bool IsSphereTouchingVehicle(CVector posn, float radius);
     void FlyingControl(eFlightModel flightModel, float leftRightSkid, float steeringUpDown, float steeringLeftRight, float accelerationBreakStatus);
-    // always return false?
-    void BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatrix& matrix, int16 arg3, float arg4);
-    void SetComponentRotation(RwFrame* component, eRotationAxis axis, float angle, bool bResetPosition); // rotation axis: eRotationAxis
-    void SetTransmissionRotation(RwFrame* component, float arg1, float arg2, CVector posn, bool isFront);
+    bool BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatrix& matrix, int16 rotorType, float damageMult);
+    void SetComponentRotation(RwFrame* component, eRotationAxis axis, float angle, bool bResetPosition);
+    void SetTransmissionRotation(RwFrame* component, float angleL, float angleR, CVector wheelPos, bool isFront);
     void ProcessBoatControl(tBoatHandlingData* boatHandling, float* fWaterResistance, bool bCollidedWithWorld, bool bPostCollision);
     void DoBoatSplashes(float fWaterDamping);
     void DoSunGlare();
     void AddWaterSplashParticles();
     void AddExhaustParticles();
-    // always return false?
-    bool AddSingleWheelParticles(tWheelState arg0, uint32 arg1, float arg2, float arg3, CColPoint* arg4, CVector* arg5, float arg6, int32 arg7, uint32 surfaceType, bool* bloodState, uint32 arg10);
+    bool AddSingleWheelParticles(tWheelState wheelState, uint32 arg1, float arg2, float arg3, CColPoint* arg4, CVector* arg5, float arg6, int32 arg7, uint32 surfaceType, bool* bloodState, uint32 arg10);
     bool GetSpecialColModel();
     void RemoveVehicleUpgrade(int32 upgradeModelIndex);
     void AddUpgrade(int32 modelIndex, int32 upgradeIndex);
@@ -602,16 +627,17 @@ public:
     void FireHeatSeakingMissile(CEntity* targetEntity, eOrdnanceType ordnanceType, bool arg2);
     void PossiblyDropFreeFallBombForPlayer(eOrdnanceType ordnanceType, bool arg1);
     void ProcessSirenAndHorn(bool arg0);
-    bool DoHeadLightEffect(int32 dummyId, CMatrix& vehicleMatrix, uint8 lightId, uint8 lightState);
-    void DoHeadLightBeam(int32 dummyId, CMatrix& matrix, bool arg2);
+
+    bool DoHeadLightEffect(eVehicleDummy dummyId, CMatrix& vehicleMatrix, uint8 lightId, uint8 lightState);
+    void DoHeadLightBeam(eVehicleDummy dummyId, CMatrix& matrix, bool arg2);
     void DoHeadLightReflectionSingle(CMatrix& matrix, uint8 lightId);
     void DoHeadLightReflectionTwin(CMatrix& matrix);
     void DoHeadLightReflection(CMatrix& matrix, uint32 flags, uint8 left, uint8 right);
     bool DoTailLightEffect(int32 lightId, CMatrix& matrix, uint8 arg2, uint8 arg3, uint32 arg4, uint8 arg5);
-    // see eVehicleLightsFlags
-    void DoVehicleLights(CMatrix& matrix, uint32 flags);
+    void DoVehicleLights(CMatrix& matrix, eVehicleLightsFlags flags);
+
     void FillVehicleWithPeds(bool bSetClothesToAfro);
-    void DoBladeCollision(CVector arg0, CMatrix& matrix, int16 arg2, float arg3, float arg4);
+    void DoBladeCollision(CVector pos, CMatrix& matrix, int16 rotorType, float radius, float damageMult);
     void AddVehicleUpgrade(int32 modelId);
     void SetupUpgradesAfterLoad();
     void GetPlaneWeaponFiringStatus(bool& status, eOrdnanceType& ordnanceType);
@@ -622,10 +648,12 @@ public:
 
     bool AreAnyOfPassengersFollowerOfGroup(const CPedGroup& group);
 
+    auto GetPassengerIndex(const CPed* ped) const -> std::optional<size_t>;
+
     static void Shutdown();
     static void SetComponentAtomicAlpha(RpAtomic* atomic, int32 alpha);
 
-public:
+public: // NOTSA functions
     // m_nVehicleType start
     [[nodiscard]] bool IsVehicleTypeValid()     const { return m_nVehicleType != VEHICLE_TYPE_IGNORE; }
     [[nodiscard]] bool IsAutomobile()           const { return m_nVehicleType == VEHICLE_TYPE_AUTOMOBILE; }
@@ -656,31 +684,61 @@ public:
     [[nodiscard]] bool IsSubTrailer()          const { return m_nVehicleSubType == VEHICLE_TYPE_TRAILER; }
 
     [[nodiscard]] bool IsSubRoadVehicle()      const { return !IsSubHeli() && !IsSubPlane() && !IsSubTrain(); }
+    [[nodiscard]] bool IsSubFlyingVehicle()    const { return IsSubHeli() && IsSubPlane(); }
     // m_nVehicleSubType end
 
     [[nodiscard]] bool IsTransportVehicle()    const { return m_nModelIndex == MODEL_TAXI    || m_nModelIndex == MODEL_CABBIE; }
     [[nodiscard]] bool IsAmphibiousHeli()      const { return m_nModelIndex == MODEL_SEASPAR || m_nModelIndex == MODEL_LEVIATHN; }
     [[nodiscard]] bool IsConstructionVehicle() const { return m_nModelIndex == MODEL_DUMPER  || m_nModelIndex == MODEL_DOZER || m_nModelIndex == MODEL_FORKLIFT; }
 
-    eVehicleCreatedBy GetCreatedBy()      { return m_nCreatedBy; }
-    bool IsCreatedBy(eVehicleCreatedBy v) { return v == m_nCreatedBy; }
-    bool IsMissionVehicle() const { return m_nCreatedBy == MISSION_VEHICLE; }
+    [[nodiscard]] bool IsRealBike() const { return m_pHandlingData->m_bIsBike;  }
+    [[nodiscard]] bool IsRealHeli() const { return m_pHandlingData->m_bIsHeli;  }
+    [[nodiscard]] bool IsRealPlane()const { return m_pHandlingData->m_bIsPlane; }
+    [[nodiscard]] bool IsRealBoat() const { return m_pHandlingData->m_bIsBoat;  }
+
+    [[nodiscard]] eVehicleCreatedBy GetCreatedBy() const      { return m_nCreatedBy; }
+    [[nodiscard]] bool IsCreatedBy(eVehicleCreatedBy v) const { return v == m_nCreatedBy; }
+    [[nodiscard]] bool IsMissionVehicle() const { return m_nCreatedBy == MISSION_VEHICLE; }
 
     bool CanUpdateHornCounter() { return m_nAlarmState == 0 || m_nAlarmState == -1 || m_nStatus == STATUS_WRECKED; }
 
     CPlane* AsPlane() { return reinterpret_cast<CPlane*>(this); }
     CHeli*  AsHeli()  { return reinterpret_cast<CHeli*>(this); }
 
-public:
-    // NOTSA functions
+    CVehicleModelInfo* GetVehicleModelInfo() const;
 
-    CVehicleModelInfo* GetVehicleModelInfo();
+    CVector GetDummyPositionObjSpace(eVehicleDummy dummy) const; // NOTSA
+    CVector GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace = true); // NOTSA
 
-    // if bWorldSpace is true, returns the position in world-space
-    // otherwise in model-space
-    CVector GetDummyPosition(eVehicleDummies dummy, bool bWorldSpace = true);
-    int32 GetRopeIndex();
-    bool HasDriver() const { return !!m_pDriver; }
+    /// get position of driver seat dummy (Object Space)
+    CVector GetDriverSeatDummyPositionOS() const; // NOTSA
+
+    /// get position of driver seat dummy (World Space)
+    CVector GetDriverSeatDummyPositionWS(); // NOTSA
+
+    [[nodiscard]] auto GetRopeID() const { return (uint32)&m_nFlags + 1; } // yep, flags + 1
+    [[nodiscard]] CVehicleAnimGroup& GetAnimGroup() const;
+    [[nodiscard]] AssocGroupId GetAnimGroupId() const;
+
+    auto GetPassengers() const { return std::span{ m_apPassengers, m_nMaxPassengers }; }
+    auto GetMaxPassengerSeats() { return std::span{ m_apPassengers, m_nMaxPassengers }; } // NOTE: Added this because I plan to refactor `GetPassengers()`
+
+    [[nodiscard]] float GetDefaultAirResistance() const {
+        if (m_pHandlingData->m_fDragMult <= 0.01f) {
+            return m_pHandlingData->m_fDragMult;
+        } else {
+            return m_pHandlingData->m_fDragMult / 1000.0f / 2.0f;
+        }
+    }
+
+    /// Is there a driver who is also a ped
+    bool IsDriverAPlayer() const;
+
+    /// Is the vehicle totally flipped (Should probably be moved to `CPlaceable`)
+    [[nodiscard]] bool IsTotallyUpsideDown() const { return GetUp().z < 0.f; }
+
+    /// Is there enough space for at least one more passenger
+    [[nodiscard]] bool HasSpaceForAPassenger() const { return m_nMaxPassengers > m_nNumPassengers + 1; }
 
 private:
     friend void InjectHooksMain();
@@ -700,17 +758,18 @@ private:
     bool SetupLighting_Reversed();
     void RemoveLighting_Reversed(bool bRemove);
     void ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint32 animGroup, uint32 animId, float fTime);
-    void ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend);
+    void ProcessDrivingAnims_Reversed(CPed* driver, bool blend);
     float GetHeightAboveRoad_Reversed();
-    bool CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright);
+    bool CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright) const;
     bool CanPedJumpOutCar_Reversed(CPed* ped);
-    bool GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
-    bool GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
+    bool GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
+    bool GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
     bool Save_Reversed();
     bool Load_Reversed();
 };
 VALIDATE_SIZE(CVehicle, 0x5A0);
 
+bool IsValidModForVehicle(uint32 modelId, CVehicle* vehicle);
 bool IsVehiclePointerValid(CVehicle* vehicle);
 RpAtomic* RemoveUpgradeCB(RpAtomic* atomic, void* data);
 RpAtomic* FindUpgradeCB(RpAtomic* atomic, void* data);
@@ -723,9 +782,7 @@ RpMaterial* SetCompAlphaCB(RpMaterial* material, void* data);
 RwObject* SetVehicleAtomicVisibilityCB(RwObject* object, void* data);
 RwFrame* SetVehicleAtomicVisibilityCB(RwFrame* component, void* data);
 void DestroyVehicleAndDriverAndPassengers(CVehicle* vehicle);
-
-extern char *&HandlingFilename;
-extern char(*VehicleNames)[14]; // char VehicleNames[100][14]; sorting is based on handling id
+void SetVehicleAtomicVisibility(RpAtomic* atomic, int16 state);
 
 /* Missing funcs | from Android
 
@@ -737,3 +794,5 @@ void CVehicle::GetGasTankPosition();
 void CVehicle::SetTappedGasTankVehicle(CEntity* entity);
 bool CVehicle::GetHasDualExhausts() { return (m_pHandlingData->m_nModelFlags >> 13) & 1; // m_bNoExhaust }
 */
+static constexpr uint16 TOWTRUCK_HOIST_DOWN_LIMIT = 20'000; // 0x8D313C
+static constexpr uint16 TOWTRUCK_HOIST_UP_LIMIT   = 10'000; // 0x8D3140

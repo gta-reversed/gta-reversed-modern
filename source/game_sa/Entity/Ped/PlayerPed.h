@@ -15,13 +15,18 @@
 class CEventDamage;
 class CPlayerInfo;
 
-class CPlayerPed : public CPed {
+class NOTSA_EXPORT_VTABLE CPlayerPed : public CPed {
 public:
     CPed* m_p3rdPersonMouseTarget;
     int32 field_7A0;
 
     // did we display "JCK_HLP" message
     static bool& bHasDisplayedPlayerQuitEnterCarHelpText;
+
+    // Android
+    static bool bDebugPlayerInvincible;
+    static bool bDebugTargeting;
+    static bool bDebugTapToTarget;
 
 public:
     static void InjectHooks();
@@ -31,10 +36,11 @@ public:
     bool Load_Reversed();
     bool Save_Reversed();
 
+    void ProcessControl() override;
     bool Load() override;
     bool Save() override;
 
-    CPad* GetPadFromPlayer();
+    CPad* GetPadFromPlayer() const;
     bool CanPlayerStartMission();
     bool IsHidden();
     void ReApplyMoveAnims();
@@ -64,7 +70,7 @@ public:
     void MakePlayerGroupDisappear();
     void MakePlayerGroupReappear();
     void ResetSprintEnergy();
-    bool HandleSprintEnergy(bool arg0, float arg1);
+    bool HandleSprintEnergy(bool sprint, float adrenalineConsumedPerTimeStep);
     float ControlButtonSprint(eSprintType sprintType);
     float GetButtonSprintResults(eSprintType sprintType);
     void ResetPlayerBreath();
@@ -104,8 +110,7 @@ public:
     static void SetupPlayerPed(int playerId);
 
     // NOTSA
-    CPedGroup& GetGroup() const noexcept { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
-    CPedGroupMembership& GetGroupMembership() const noexcept { return GetGroup().GetMembership(); }
+    CPedGroup& GetPlayerGroup() const noexcept { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
 };
 
 VALIDATE_SIZE(CPlayerPed, 0x7A4);

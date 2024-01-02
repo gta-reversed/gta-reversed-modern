@@ -8,21 +8,20 @@ void CEventVehicleDied::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B0D10);
-    RH_ScopedInstall(Clone_Reversed, 0x4B76D0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B0E00);
+    RH_ScopedVirtualInstall(Clone, 0x4B76D0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B0E00);
 }
 
 CEventVehicleDied::CEventVehicleDied (CVehicle* vehicle)
 {
     m_vehicle = vehicle;
     m_IsOccupantLeavingCar = false;
-    m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle)); // todo: possible nullptr
 }
 
 CEventVehicleDied::~CEventVehicleDied ()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeCleanUpRef(m_vehicle);
 }
 
 // 0x4B0D10

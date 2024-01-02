@@ -10,17 +10,18 @@ struct RwRGBA;
 
 class CRGBA {
 public:
-    uint8 r;
-    uint8 g;
-    uint8 b;
-    uint8 a;
+    uint8 r{}, g{}, b{}, a{};
 
-    CRGBA(uint8 red, uint8 green, uint8 blue);
-    CRGBA(uint8 red, uint8 green, uint8 blue, uint8 alpha);
-    CRGBA(const CRGBA& rhs);
-    CRGBA(uint32 intValue);
-    CRGBA(const RwRGBA& rhs);
-    CRGBA();
+public:
+    CRGBA() = default;
+    CRGBA(const CRGBA& rhs) = default;
+
+    CRGBA(uint8 red, uint8 green, uint8 blue) { Set(red, green, blue); }
+    CRGBA(uint8 red, uint8 green, uint8 blue, uint8 alpha){ Set(red, green, blue, alpha); }
+    CRGBA(uint32 intValue) { Set(intValue); }
+    CRGBA(const RwRGBA& rhs) { Set(rhs); }
+    CRGBA(const CRGBA& rhs, uint8 alpha) { Set(rhs, alpha); };
+    explicit CRGBA(RwRGBAReal rgba);
 
     void Set(uint8 red, uint8 green, uint8 blue);
     void Set(uint8 red, uint8 green, uint8 blue, uint8 alpha);
@@ -59,5 +60,9 @@ public:
 
     CRGBA& operator*=(float mult) {
         *this = *this * mult;
+        return *this;
     }
+
+    operator RwRGBAReal() { return { (RwReal)r / 255.f, (RwReal)g / 255.f, (RwReal)b / 255.f, (RwReal)a / 255.f }; }
+    operator RwRGBA()     { return { r, g, b, a }; }
 };

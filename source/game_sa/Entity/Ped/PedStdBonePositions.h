@@ -3,13 +3,13 @@
 // DO NOT ADD ANY HEADER INCLUDES HERE!
 
 // Dump @ 0x8D13A8
-// To big to be in a middle of a function.
+// Too big to be in a middle of a function.
 
-// Presumeably default bone positions in object space.
+// Presumably default bone positions in object space.
 // And yes, R* typo: Posisions :D
 
-constexpr const auto& GetPedBoneStdPosition(uint32 bone) { // ePedBone
-    constexpr CVector aStdBonePosisions[BONE_NUM]{ 
+static const auto& GetPedBoneStdPosition(uint32 bone) { // ePedBone
+    static constexpr CVector aStdBonePosisions[BONE_NUM]{
         { 0.0f, 0.0f, 0.0f },
         { 0.0f, 0.0f, 0.0f },
         { 0.0f, 0.0f, 0.0f },

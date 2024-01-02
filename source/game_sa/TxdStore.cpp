@@ -14,8 +14,6 @@ int32& CTxdStore::ms_lastSlotFound = *reinterpret_cast<int32*>(0xC88014);
 
 int16 (&CTxdStore::defaultTxds)[4] = *reinterpret_cast<int16 (*)[4]>(0xC88004);
 
-int32& TexDictionaryLinkPluginOffset = *reinterpret_cast<int32*>(0xC88018);
-
 // variables list is not finished. Need to make CPools before.
 
 void CTxdStore::InjectHooks() {
@@ -119,9 +117,11 @@ bool CTxdStore::LoadTxd(int32 index, RwStream* stream) {
 // load txd from file
 // 0x7320B0
 bool CTxdStore::LoadTxd(int32 index, const char* filename) {
+    ZoneScoped;
+
     char data[260];
     RwStream* stream;
-    sprintf(data, "%s", filename);
+    sprintf_s(data, "%s", filename);
     do {
         stream = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, data);
     } while (!stream);
@@ -285,14 +285,6 @@ void CTxdStore::RemoveRefWithoutDelete(int32 index) {
 int32 CTxdStore::GetNumRefs(int32 index) {
     TxdDef* txd = ms_pTxdPool->GetAt(index);
     return txd ? txd->m_wRefsCount : 0;
-}
-
-RwTexDictionary* CTxdStore::GetTxdParent(RwTexDictionary* txd) {
-    return *RWPLUGINOFFSET(RwTexDictionary*, txd, TexDictionaryLinkPluginOffset);
-}
-
-void CTxdStore::SetTxdParent(RwTexDictionary* txd, RwTexDictionary* parent) {
-    *RWPLUGINOFFSET(RwTexDictionary*, txd, TexDictionaryLinkPluginOffset) = parent;
 }
 
 // 0x731D50

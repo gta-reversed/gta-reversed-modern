@@ -12,28 +12,26 @@ void CEventVehicleCollision::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AC840);
-    RH_ScopedInstall(Clone_Reversed, 0x4B6BC0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B2EE0);
+    RH_ScopedVirtualInstall(Clone, 0x4B6BC0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B2EE0);
 }
 
 CEventVehicleCollision::CEventVehicleCollision(int16 pieceType, float damageIntensity, CVehicle* vehicle, const CVector& collisionImpactVelocity, const CVector& collisionPosition, int8 moveState, int16 evadeType)
 {
-    m_pieceType = pieceType;
-    m_evadeType = evadeType;
-    m_fDamageIntensity = damageIntensity;
-    m_vehicle = vehicle;
-    m_collisionImpactVelocity = collisionImpactVelocity;
-    m_collisionPosition = collisionPosition;
-    m_moveState = moveState;
-    field_31 = 0;
-    if (vehicle)
-        vehicle->RegisterReference(reinterpret_cast<CEntity**>(m_vehicle));
+    m_pieceType               = pieceType;
+    m_evadeType               = evadeType;
+    m_fDamageIntensity        = damageIntensity;
+    m_vehicle                 = vehicle;
+    m_impactNormal = collisionImpactVelocity;
+    m_impactPos       = collisionPosition;
+    m_moveState               = moveState;
+    field_31                  = 0;
+    CEntity::SafeRegisterRef(m_vehicle);
 }
 
 CEventVehicleCollision::~CEventVehicleCollision()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(m_vehicle));
+    CEntity::SafeCleanUpRef(m_vehicle);
 }
 
 // 0x4AC840
@@ -57,7 +55,7 @@ bool CEventVehicleCollision::AffectsPed(CPed* ped)
 
 CEvent* CEventVehicleCollision::Clone_Reversed()
 {
-    return new CEventVehicleCollision(m_pieceType, m_fDamageIntensity, m_vehicle, m_collisionImpactVelocity, m_collisionPosition, m_moveState, VEHICLE_EVADE_NONE);
+    return new CEventVehicleCollision(m_pieceType, m_fDamageIntensity, m_vehicle, m_impactNormal, m_impactPos, m_moveState, VEHICLE_EVADE_NONE);
 }
 
 bool CEventVehicleCollision::AffectsPed_Reversed(CPed* ped)
@@ -73,7 +71,7 @@ bool CEventVehicleCollision::AffectsPed_Reversed(CPed* ped)
 
     if (ped->bInVehicle
         || m_vehicle->IsBoat()
-        || -DotProduct(m_collisionImpactVelocity, ped->GetForward()) < 0.35f)
+        || -DotProduct(m_impactNormal, ped->GetForward()) < 0.35f)
     {
         return false;
     }
@@ -88,7 +86,7 @@ bool CEventVehicleCollision::AffectsPed_Reversed(CPed* ped)
 
             CVector boundingBoxPlanes[4];
             float planes_D[4];
-            CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanes(ped->GetPosition().z, *m_vehicle, boundingBoxPlanes, planes_D);
+            CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanes(ped->GetPosition().z, *m_vehicle, &boundingBoxPlanes, planes_D);
             int32 targetPointInPlanes = 0, pedInPlanes = 0;
             for (int32 i = 0; i < 4; i++) {
                 CVector& plane = boundingBoxPlanes[i];

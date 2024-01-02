@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include "MenuManager_Internal.h"
+
 #include "RGBA.h"
 #include "Sprite2d.h"
 #include "Vector2D.h"
@@ -13,293 +15,178 @@
 
 class CRect;
 
-// Menu entries action to perform
-enum eMenuActions {   // There's many actions @0x57702E and @0x57CD88
-    MENU_ACTION_NA = 0,
-    MENU_ACTION_TEXT = 1,      // Some static text at the top of the page (works only on first entry)
-    MENU_ACTION_BACK = 2,      // Back to previous menu
-    MENU_ACTION_YES = 3,       // Used as YES in menus (also as NO, weird?)
-    MENU_ACTION_NO = 4,        // Used as NO in menus  (also as YES, weird?)
-    MENU_ACTION_SWITCH = 5,    // Switch to target menu
-    MENU_ACTION_SKIP = 20,     // Skip this entry (unselectable)
-    MENU_ACTION_BACK_PC = 55,  // Same as BACK without a extra checking (?)
+enum eHelperText : int32 {
+    HELPER_NONE,
+    FET_APP = 1, // CLICK LMB / RETURN - APPLY NEW SETTING
+    FET_HRD = 2, // DEFAULT SETTINGS RESTORED
+    FET_RSO = 3, // ORIGINAL SETTING RESTORED
+    FEA_SCF = 4, // FAILED TO SCAN USER TRACKS
+    FEA_SCS = 5, // USER TRACKS SCANNED SUCCESSFULLY
+    FEA_STS = 6, // STATS SAVED TO 'STATS.HTML'
 };
 
-// Type of menu entries
-enum eMenuEntryType {
-    MENU_ENTRY_SAVE_1 = 1,
-    MENU_ENTRY_SAVE_2,
-    MENU_ENTRY_SAVE_3,
-    MENU_ENTRY_SAVE_4,
-    MENU_ENTRY_SAVE_5,
-    MENU_ENTRY_SAVE_6,
-    MENU_ENTRY_SAVE_7,
-    MENU_ENTRY_SAVE_8,
-    MENU_ENTRY_MISSIONPACK,
-    MENU_ENTRY_JOYMOUSE,
-    MENU_ENTRY_BUTTON,
-    MENU_ENTRY_OPTION,
+enum eRadarMode : int32 {
+    MAPS_AND_BLIPS,
+    BLIPS_ONLY,
+    OFF
 };
 
-enum eMenuPage {
-    MENUPAGE_STATS = 0,
-    MENUPAGE_START_GAME = 1, // New Game, Load Game, Delete Game
-    MENUPAGE_BRIEF = 2,
-    MENUPAGE_AUDIO_SETTINGS = 3,
-    MENUPAGE_DISPLAY_SETTINGS = 4,
-    MENUPAGE_MAP = 5,
-    MENUPAGE_NEW_GAME_ASK = 6, // Are you sure you want to start a new game? All current game progress will be lost. Proceed?
-    MENUPAGE_SELECT_GAME = 7, // Please select which new game you wish to start:
-    MENUPAGE_MISSIONPACK_LOADING_ASK = 8, // // Are you sure you want to load a San Andreas Mission Pack? All current game progress will be lost. Proceed?
-    MENUPAGE_LOAD_GAME = 9, // Select save file to load:
-    MENUPAGE_DELETE_GAME = 10, // Select save file to delete:
-    MENUPAGE_LOAD_GAME_ASK = 11, // All unsaved progress in your current game will be lost. Proceed with loading?
-    MENUPAGE_DELETE_GAME_ASK = 12, // Are you sure you wish to delete this save file?
-    MENUPAGE_LOAD_FIRST_SAVE = 13,
-    MENUPAGE_DELETE_FINISHED = 14,
-    MENUPAGE_DELETE_SUCCESSFUL = 15, // // Delete Successful. Select OK to continue.
-    MENUPAGE_GAME_SAVE = 16, // Select file you wish to save to:
-    MENUPAGE_SAVE_WRITE_ASK = 17, // Are you sure you wish to save?
-    MENUPAGE_SAVE_DONE_1 = 18,
-    MENUPAGE_SAVE_DONE_2 = 19, // Save Successful. Select OK to continue.
-    MENUPAGE_GAME_SAVED = 20, // OK
-    MENUPAGE_GAME_LOADED = 21, // OK
-    MENUPAGE_GAME_WARNING_DONT_SAVE = 22, // Warning! One or more cheats have been activated. This may affect your save game. It is recommended that you do not save this game.
-    MENUPAGE_ASK_DISPLAY_DEFAULT_SETS = 23, // Are you sure you want to reset your current settings to default?
-    MENUPAGE_ASK_AUDIO_DEFAULT_SETS = 24, // Are you sure you want to reset your current settings to default?
-    MENUPAGE_ASK_CONTROLLER_DEFAULT_SETS = 25, // Are you sure you want to reset your current settings to default?
-    MENUPAGE_USER_TRACKS_OPTIONS = 26,
-    MENUPAGE_DISPLAY_ADVANCED = 27, // DRAW DISTANCE, ...
-    MENUPAGE_LANGUAGE = 28, // English, ...
-    MENUPAGE_SAVE_GAME_DONE = 29, // O.K
-    MENUPAGE_SAVE_GAME_FAILED = 30, // Save Unsuccessful., O.K.
-    MENUPAGE_SAVE_WRITE_FAILED = 31, // Save Unsuccessful.
-    MENUPAGE_SAVE_FAILED_FILE_ERROR = 32, // Load Unsuccessful. File Corrupted, Please delete.
-    MENUPAGE_OPTIONS = 33, // Controller Setup, Audio Setup ...
-    MENUPAGE_MAIN_MENU = 34, // Start Game, Options, Quit Game
-    MENUPAGE_QUIT_GAME_ASK = 35, // Are you sure you want to quit? All progress since the last save game will be lost. Proceed?
-    MENUPAGE_CONTROLLER_SETUP = 36, // CONFIGURATION, Redefine Controls ...
-    MENUPAGE_REDEFINE_CONTROLS = 37, // Foot Controls, Vehicle Controls
-    MENUPAGE_CONTROLS_VEHICLE_ONFOOT = 38,
-    MENUPAGE_MOUSE_SETTINGS = 39,
-    MENUPAGE_JOYPAD_SETTINGS = 40,
-    MENUPAGE_PAUSE_MENU = 41, // Resume, START NEW GAME ...
-    MENUPAGE_QUIT_GAME_2 = 42,
-    MENUPAGE_EMPTY = 43
+struct MPack {
+    uint8 m_Id;
+    char  m_Name[260];
 };
 
-enum eMenuTexture {
-    MENUTEX_RADIO_TEXTURES_BEGIN,
-    MENUTEX_ARROW = MENUTEX_RADIO_TEXTURES_BEGIN,
-    MENUTEX_RADIO_PLAYBACK,
-    MENUTEX_RADIO_KROSE,
-    MENUTEX_RADIO_KDST,
-    MENUTEX_RADIO_BOUNCE,
-    MENUTEX_RADIO_SFUR,
-    MENUTEX_RADIO_RLS,
-    MENUTEX_RADIO_RADIOX,
-    MENUTEX_RADIO_CSR,
-    MENUTEX_RADIO_KJAH,
-    MENUTEX_RADIO_MASTERSOUND,
-    MENUTEX_RADIO_WCTR,
-    MENUTEX_RADIO_TPLAYER,
-    MENUTEX_RADIO_TEXTURES_END,
-
-    MENUTEX_BACKGROUND_TEXTURES_BEGIN = MENUTEX_RADIO_TEXTURES_END,
-    MENUTEX_BACK2 = MENUTEX_BACKGROUND_TEXTURES_BEGIN,
-    MENUTEX_BACK3,
-    MENUTEX_BACK4,
-    MENUTEX_BACK5,
-    MENUTEX_BACK6,
-    MENUTEX_BACK7,
-    MENUTEX_BACK8,
-    MENUTEX_MAP,
-    MENUTEX_BACKGROUND_TEXTURES_END,
-
-    MENUTEX_BACK8_TEXTURES_BEGIN = MENUTEX_BACKGROUND_TEXTURES_END,
-    MENUTEX_BACK8_TOP = MENUTEX_BACK8_TEXTURES_BEGIN,
-    MENUTEX_BACK8_RIGHT,
-    MENUTEX_BACK8_TEXTURES_END,
-
-    MENUTEX_MOUSE_TEXTURES_BEGIN = MENUTEX_BACK8_TEXTURES_END,
-    MENUTEX_MOUSE = MENUTEX_MOUSE_TEXTURES_BEGIN,
-    MENUTEX_CROSSHAIR,
-    MENUTEX_MOUSE_TEXTURES_END,
-
-    MENUTEX_TEXTURE_COUNT = MENUTEX_MOUSE_TEXTURES_END
-};
-
-struct CMenuPageButton {
-    uint8 m_nActionType; // Unknown if signed or signed, but it does only '==' comparisions, so it's safe to use unsigned (moar numbers)
-    char  m_szName[8];
-    char  m_nType;
-    char  m_nTargetMenu;
-
-private:
-    char _padB;
-
-public:
-    int16 m_nPosnX;
-    int16 m_nPosnY;
-    char  m_nAlign;
-};
-
-VALIDATE_SIZE(CMenuPageButton, 0x12);
-
-struct CMenuPage {
-    char m_szTitleName[8];
-    char m_nPrevMenu;
-    char m_nStartingButton;
-    CMenuPageButton m_aButtons[12];
-};
-
-VALIDATE_SIZE(CMenuPage, 0xE2);
+constexpr auto FRONTEND_MAP_RANGE_MIN = 300.0f;
+constexpr auto FRONTEND_MAP_RANGE_MAX = 1100.0f;
 
 class CMenuManager {
+    enum {
+        MPACK_COUNT  = 25,
+        SPRITE_COUNT = 25,
+    };
+
 public:
-    char      field_0;
-    char      field_1[3];
+    static constexpr uint32 SETTINGS_FILE_VERSION = 6u;
+
+    int8      m_nStatsScrollDirection;
     float     m_fStatsScrollSpeed;
-    char      field_8;
+    uint8     m_nSelectedRow; // CMenuSystem
     char      field_9[23];
     bool      m_PrefsUseVibration;
     bool      m_bHudOn;
-    char      field_22[2];
-    int32     m_nRadarMode;
+    char      field_22[2]; // pad
+    eRadarMode m_nRadarMode;
     char      field_28[4];
     int32     m_nTargetBlipIndex; // blip script handle
-    char      field_30;
+    uint8     m_nSysMenu; // CMenuSystem
     char      field_31;
     bool      m_bDontDrawFrontEnd;
     bool      m_bActivateMenuNextFrame;
     bool      m_bMenuAccessWidescreen;
     char      field_35;
     char      field_36[2];
-    int32     field_38;
-    int32     m_nBrightness;
+    RsKeyCodes field_38;
+    int32     m_PrefsBrightness;
     float     m_fDrawDistance;
+
     bool      m_bShowSubtitles;
-    char      field_45[4];
-    char      field_49;
+    union {
+        struct {
+            bool m_ShowLocationsBlips;
+            bool m_ShowContactsBlips;
+            bool m_ShowMissionBlips;
+            bool m_ShowOtherBlips;
+            bool m_ShowGangAreaBlips;
+        };
+        bool m_abPrefsMapBlips[5];
+    };
     bool      m_bMapLegend;
     bool      m_bWidescreenOn;
-    bool      m_bFrameLimiterOn;
+    bool      m_bPrefsFrameLimiter;
     bool      m_bRadioAutoSelect;
     char      field_4E;
-    char      m_nSfxVolume;
-    char      m_nRadioVolume;
+    int8      m_nSfxVolume;
+    int8      m_nRadioVolume;
     bool      m_bRadioEq;
-    char      m_nRadioStation;
+
+    eRadioID  m_nRadioStation;
     char      field_53;
-    int32     m_nSelectedMenuItem;
-    char      field_58;
-    char      drawRadarOrMap;
-    char      field_5A;
-    char      m_bAllStreamingStuffLoaded;
+    int32     m_nCurrentScreenItem;
+    bool      m_bQuitGameNoDVD; // CMenuManager::WaitForUserCD 0x57C5E0
+
+    bool      m_bDrawingMap;
+    bool      m_bStreamingDisabled;
+    bool      m_bAllStreamingStuffLoaded;
+
     bool      m_bMenuActive;
-    char      doGameReload;
-    char      field_5E;
-    char      isSaveDone;
+    bool      m_bStartGameLoading;
+    int8      m_nGameState;
+    char      m_bIsSaveDone;
     bool      m_bLoadingData;
-    char      field_61[3];
     float     m_fMapZoom;
-    float     m_fMapBaseX;
-    float     m_fMapBaseY;
-    CVector2D m_vMousePos;
-    char      field_78;
-    char      field_79[3];
-    int32     titleLanguage;
-    int32     textLanguage;
-    eLanguage m_nLanguage;
-    char      m_nPreviousLanguage;
-    char      field_86[2];
-    int32     field_88;
-    bool      m_bLanguageChanged;
-    char      field_8D[3];
-    int32     field_90;
-    int32     field_94;
+    CVector2D m_vMapOrigin;
+    CVector2D m_vMousePos;  // Red marker position (world coordinates)
+    bool      m_bMapLoaded;
+
+    int32     m_nTitleLanguage; // Value is PRIMARYLANGID(GetSystemDefaultLCID())
+    int32     m_nTextLanguage; // TODO: Change to `eLanguage`
+    eLanguage m_nPrefsLanguage;
+    eLanguage m_nPreviousLanguage;
+    int32     m_nLanguageF0x88;
+    bool      field_8C;
+    int32     field_90;      // controller related
+    int32     field_94;      // unused
     char*     m_pJPegBuffer; //!< +0x98  \see JPegCompress file
     char      field_9C[16];
-    int32     field_AC;
-    char      m_nRadioMode;
-    char      invertPadX1;
-    char      invertPadY1;
-    char      invertPadX2;
-    char      invertPadY2;
-    char      swapPadAxis1;
-    char      swapPadAxis2;
+    int32     m_nUserTrackIndex;
+    int8      m_nRadioMode;
+
+    bool      m_bInvertPadX1;
+    bool      m_bInvertPadY1;
+    bool      m_bInvertPadX2;
+    bool      m_bInvertPadY2;
+    bool      m_bSwapPadAxis1;
+    bool      m_bSwapPadAxis2;
+
     char      field_B7;
-    bool      m_bDrawMouse;
-    char      field_B9[3];
-    int32     m_nMousePosLeft;
-    int32     m_nMousePosTop;
-    bool      m_bMipMapping;
+    bool      m_bDrawMouse; // m_bMouseMoved
+    int32     m_nMousePosX;
+    int32     m_nMousePosY;
+    bool      m_bPrefsMipMapping;
     bool      m_bTracksAutoScan;
-    int16     field_C6;
-    int32     m_nAppliedAntiAliasingLevel;
-    int32     m_nAntiAliasingLevel;
-    char      m_nController;
-    char      field_D1[3];
-    int32     m_nAppliedResolution;
-    int32     m_nResolution;
-    int32     field_DC;
-    int32     mousePosLeftA;
-    int32     mousePosTopA;
+    int32     m_nPrefsAntialiasing;
+    int32     m_nDisplayAntialiasing;
+    int8      m_nController;
+    int32     m_nPrefsVideoMode;
+    int32     m_nDisplayVideoMode;
+    int32     m_nCurrentRwSubsystem; // initialized | not used
+
+    int32     m_nMousePosWinX; // xPos = GET_X_LPARAM(lParam); 0x748323
+    int32     m_nMousePosWinY; // yPos = GET_Y_LPARAM(lParam);
+
     bool      m_bSavePhotos;
     bool      m_bMainMenuSwitch;
-    char      m_nPlayerNumber;
-    char      field_EB;
+    int8      m_nPlayerNumber;
+    bool      m_bLanguageChanged; // useless?
     int32     field_EC;
-    int32     field_F0;
-    char      field_F4;
-    char      field_F5[3];
-    // union{
-    //	struct{
-    CSprite2d m_aFrontEndSprites[25];
-    //	};
-    //	struct{
-    //		CSprite2d m_apRadioSprites[13];
-    //		CSprite2d m_apBackgroundTextures[8];
-    //		CSprite2d m_apAdditionalBackgroundTextures[2];
-    //		CSprite2d m_apMouseTextures[2];
-    //	};
-    //};
+    RsKeyCodes* m_pPressedKey; // any pressed key, in order of CKeyboardState; rsNULL means no key pressed
+    bool      field_F4; // m_bPreInitialised
+
+    union {
+        struct {
+            CSprite2d m_apRadioSprites[13];
+            CSprite2d m_apBackgroundTextures[8];
+            CSprite2d m_apAdditionalBackgroundTextures[2];
+            CSprite2d m_apMouseTextures[2];
+        };
+        CSprite2d m_aFrontEndSprites[25];
+    };
+
     bool  m_bTexturesLoaded;
-    uint8 m_nCurrentMenuPage;
-    char  field_15E;
+    eMenuScreen m_nCurrentScreen;
+    eMenuScreen m_nPrevScreen; // Used only in SwitchToNewScreen
     uint8 m_bSelectedSaveGame;
-    char  field_160;
-    char  field_161;
-    char  m_szMpackName[8];
-    char  field_16A[6486];
-    int32 field_1AC0;
-    int32 field_1AC4;
-    int32 field_1AC8;
-    int32 field_1ACC;
-    int32 field_1AD0;
-    int32 field_1AD4;
-    int32 field_1AD8;
-    int16 field_1ADC;
-    bool  m_bChangeVideoMode;
-    char  field_1ADF;
-    int32 field_1AE0;
-    int32 field_1AE4;
+    uint8 m_nMissionPackGameId;
+    MPack m_MissionPacks[25];
+    bool  m_bDoVideoModeUpdate;
+    RsKeyCodes m_nPressedMouseButton; // used in redefine controls
+    int32 m_nJustDownJoyButton; // used in redefine controls; set via CControllerConfigManager::GetJoyButtonJustDown
     char  field_1AE8;
-    char  field_1AE9;
-    char  field_1AEA;
+    bool  m_bRadioAvailable;
+    uint8 m_nControllerError;
     bool  m_bScanningUserTracks;
-    int32 field_1AEC;
+    int32 m_nHelperTextFadingAlpha;
     char  field_1AF0;
     char  field_1AF1;
     char  field_1AF2;
     char  field_1AF3;
     int32 field_1AF4;
-    int32 field_1AF8;
-    int32 field_1AFC;
+    int32 field_1AF8; // m_nOldMousePosX
+    int32 field_1AFC; // m_nOldMousePosY ?
     int32 field_1B00;
     int32 field_1B04;
-    char  field_1B08;
-    char  field_1B09;
+    char  m_bJustOpenedControlRedefWindow;
+    char  field_1B09; // controller
     char  field_1B0A;
     char  field_1B0B;
     int32 field_1B0C;
@@ -311,49 +198,57 @@ public:
     char  field_1B15;
     char  field_1B16;
     char  field_1B17;
-    int32 EventToDo;
-    int32 field_1B1C;
-    uint8 m_nTexturesRound;
-    uint8 m_nNumberOfMenuOptions;
-    int16 field_1B22;
-    int32 field_1B24;
-    char  field_1B28;
-    char  field_1B29;
-    int16 field_1B2A;
-    int32 field_1B2C;
-    int32 field_1B30;
-    int16 field_1B34;
-    int16 field_1B36;
-    int32 field_1B38;
-    char  field_1B3C;
-    char  field_1B3D;
-    char  field_1B3E;
-    char  field_1B3F;
-    int32 field_1B40;
-    char  field_1B44;
-    char  field_1B45;
-    int16 field_1B46;
-    int32 field_1B48;
-    int32 field_1B4C;
-    char  m_nBackgroundSprite;
+    eHelperText m_nHelperText;
+    int32  field_1B1C;
+    bool   m_bTexturesRound;
+    uint8  m_nNumberOfMenuOptions;
+    int16  field_1B22;
+    int32  field_1B24;
+    char   field_1B28;
+    char   field_1B29;
+    int16  field_1B2A;
+    int32  field_1B2C;
+    uint32 m_nBriefsArrowBlinkTimeMs;
+    int16  field_1B34; // CPad::DisablePlayerControls
+    int16  field_1B36;
+    int32  field_1B38;
+    char   field_1B3C;
+    char   field_1B3D;
+    char   field_1B3E; // mpack related
+    char   field_1B3F;
+    uint32 m_nUserTrackScanningTimeMs;
+    char   field_1B44;
+    char   field_1B45;
+    int16  field_1B46;
+    uint32 field_1B48;
+
+    union {
+        struct {
+            uint32 field_1B4C_b1 : 1;
+            uint32 bScanningUserTracks : 1;
+        };
+        int32 field_1B4C;
+    };
+
+    int8  m_nBackgroundSprite;
     char  field_1B51;
     int16 field_1B52;
     int32 field_1B54;
-    int32 field_1B58;
+    uint32 m_nTimeHelperTextUpdated;
     char  field_1B5C;
     char  field_1B5D;
     int16 field_1B5E;
     int32 field_1B60;
     int32 field_1B64;
-    int32 field_1B68;
-    int32 field_1B6C;
+    int32 m_nTimeSlideLeftMove;
+    int32 m_nTimeSlideRightMove;
     int32 field_1B70;
     int32 field_1B74;
 
     static int32& nLastMenuPage;
 
-    static bool& bInvertMouseX;
-    static bool& bInvertMouseY;
+    static inline bool& bInvertMouseX = *(bool*)0xBA6744;
+    static inline bool& bInvertMouseY = *(bool*)0xBA6745;
 
 public:
     static void InjectHooks();
@@ -361,30 +256,109 @@ public:
     CMenuManager();
     ~CMenuManager();
 
-    void CheckForMenuClosing();
-    void ProcessFileActions();
-    void ProcessStreaming(char bImmediately);
-    void UserInput();
-    void Process();
-    void DrawWindow(const CRect& coords, const char* pKey, uint8 nColour, CRGBA backColor, bool Unused, bool bBackground);
-    char SwitchToNewScreen(char page);
-    void SaveSettings();
-    char InitialiseChangedLanguageSettings(char a2);
-    void ScrollRadioStations(char numStations);
-    void ProcessMissionPackNewGame();
-    int32 DoSettingsBeforeStartingAGame();
-    char SetDefaultPreferences(eMenuPage page);
-    char PrintMap();
-    char PrintStats();
-    char PrintBriefs();
-    char DrawControllerSetupScreen();
-    bool CheckMissionPackValidMenu();
-    static double StretchX(float x);
-    static double StretchY(float y);
-    void MessageScreen(const char* pKey, bool bRenderBig, bool bWithinFrame);
+    void Initialise();
+
+    void LoadAllTextures();
+    void SwapTexturesRound(bool slot);
     void UnloadTextures();
+
+    void InitialiseChangedLanguageSettings(bool reinitControls);
+    bool HasLanguageChanged();
+
+    void DoSettingsBeforeStartingAGame();
+    float StretchX(float x);
+    float StretchY(float y);
+    void SwitchToNewScreen(eMenuScreen screen);
+    void ScrollRadioStations(int8 numStations);
+    void SetFrontEndRenderStates();
+    void SetDefaultPreferences(eMenuScreen screen);
+    uint32 GetNumberOfMenuOptions();
+
+    void JumpToGenericMessageScreen(eMenuScreen screen, const char* titleKey, const char* textKey);
+
+    void DrawFrontEnd();
+    void DrawBuildInfo();
+    void DrawBackground();
+    void DrawStandardMenus(uint8);
+    void DrawWindow(const CRect& coords, const char* key, uint8 color, CRGBA backColor, bool unused, bool background);
+    void DrawWindowedText(float x, float y, float wrap, const char* str1, const char* str2, eFontAlignment alignment);
+    void DrawQuitGameScreen();
+    void DrawControllerScreenExtraText(int32);
+    void DrawControllerBound(uint16, bool);
+    void DrawControllerSetupScreen();
+#ifdef USE_GALLERY
+    void DrawGallery();
+    void DrawGallerySaveMenu();
+#endif
+
+    void CentreMousePointer();
+
+    void LoadSettings();
+    void SaveSettings();
+    void SaveStatsToFile();
+    void SaveLoadFileError_SetUpErrorScreen();
+
+    void CheckSliderMovement(int8 value);
+    [[nodiscard]] bool CheckFrontEndUpInput() const;
+    [[nodiscard]] bool CheckFrontEndDownInput() const;
+    [[nodiscard]] bool CheckFrontEndLeftInput() const;
+    [[nodiscard]] bool CheckFrontEndRightInput() const;
+    void CheckForMenuClosing();
+    [[nodiscard]] bool CheckHover(int32 left, int32 right, int32 top, int32 bottom) const;
+    bool CheckMissionPackValidMenu();
+    bool CheckCodesForControls(RsInputDeviceType type);
+
+    int32 DisplaySlider(float x, float y, float h1, float h2, float length, float value, int32 spacing);
+
+    void DisplayHelperText(const char* key);
+    void SetHelperText(eHelperText messageId);
+    void ResetHelperText();
+    void NoDiskInDriveMessage();
+
+    void MessageScreen(const char* key, bool blackBackground, bool cameraUpdateStarted);
+    void SmallMessageScreen(const char* key);
+
+    void CalculateMapLimits(float& bottom, float& top, float& left, float& right);
+
+    void PlaceRedMarker();
+    void RadarZoomIn();
+
+    void PrintMap();
+    void PrintStats();
+    void PrintBriefs();
+    void PrintRadioStationList();
+
+    void UserInput();
+    void AdditionalOptionInput(bool* upPressed, bool* downPressed);
+    bool CheckRedefineControlInput();
+    void RedefineScreenUserInput(bool* accept, bool* cancel);
+
+    void Process();
+    void ProcessStreaming(bool streamAll);
+    void ProcessFileActions();
+    void ProcessUserInput(bool downPressed, bool upPressed, bool acceptPressed, bool cancelPressed, int8 pressedLR);
+    void ProcessMenuOptions(int8 pressedLR, bool& cancelPressed, bool acceptPressed);
+    bool ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed);
+    void ProcessMissionPackNewGame();
+
+    // NOTSA
+    const char* GetMovieFileName() const {
+        switch (m_nTitleLanguage) {
+        case 12:
+        case 7:
+            return "movies\\GTAtitlesGER.mpg";
+        }
+        return "movies\\GTAtitles.mpg";
+    }
+
+    //! Simulate that we came into the menu and clicked to load game
+    //! @param newGame If we should start a new game
+    //! @param slot    Slot of the save-game to load (Ignored if `newGame`)
+    void SimulateGameLoad(bool newGame, uint32 slot);
+private:
+    static void SetBrightness(float brightness, bool arg2);
 };
 
 VALIDATE_SIZE(CMenuManager, 0x1B78);
 
-extern CMenuManager &FrontEndMenuManager;
+extern CMenuManager& FrontEndMenuManager;

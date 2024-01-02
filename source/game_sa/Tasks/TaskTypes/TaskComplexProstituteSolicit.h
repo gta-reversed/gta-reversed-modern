@@ -15,33 +15,41 @@ public:
     CVector m_vecVehiclePosn;
     int32   m_nLastSavedTime;
     int32   m_nNextTimeToCheckForSecludedPlace; // when we will scan nearby peds again
-    int32   m_nLastPaymentTime; // when CJ will pay $2 again
-    int16   m_nVehicleMovementTimer; // wait some time and push vehicle again
+    int32   m_nLastPaymentTime;                 // when CJ will pay $2 again
+    int16   m_nVehicleMovementTimer;            // wait some time and push vehicle again
     int16   m_nCurrentTimer;
-    struct {
-        uint16 bSearchingForSecludedPlace : 1;
-        uint16 bSexProcessStarted : 1;
-        uint16 bTaskCanBeFinished : 1;
-        uint16 bPedsCanPotentiallySeeThis : 1;
-        uint16 bPedsCanSeeThis : 1;
-        uint16 bCopsCanSeeThis : 1;
-        uint16 b07 : 1;
-        uint16 b08 : 1;
-        uint16 bMoveCameraDown : 1;
-        uint16 b10 : 1;
-        uint16 bPlayerHasAcceptedSexProposition : 1;
-        uint16 bVehicleShifted : 1;
-        uint16 bSecludedPlaceMessageShown : 1;
-    } m_nFlags;
+
+    uint16 bSearchingForSecludedPlace : 1;
+    uint16 bSexProcessStarted : 1;
+    uint16 bTaskCanBeFinished : 1;
+    uint16 bPedsCanPotentiallySeeThis : 1;
+    uint16 bPedsCanSeeThis : 1;
+    uint16 bCopsCanSeeThis : 1;
+    uint16 b07 : 1;
+    uint16 b08 : 1;
+
+    uint16 bMoveCameraDown : 1;
+    uint16 b10 : 1;
+    uint16 bPlayerHasAcceptedSexProposition : 1;
+    uint16 bVehicleShifted : 1;
+    uint16 bSecludedPlaceMessageShown : 1;
 
 public:
     static constexpr auto Type = TASK_COMPLEX_PROSTITUTE_SOLICIT;
 
-    CTaskComplexProstituteSolicit(CPed* client);
+    explicit CTaskComplexProstituteSolicit(CPed* client);
+    ~CTaskComplexProstituteSolicit() override;
 
-    CTask* CreateSubTask(int32 taskId, CPed* prostitute);
+    eTaskType GetTaskType() const override { return Type; } // 0x661AE0
+    CTask* Clone() const override { return new CTaskComplexProstituteSolicit(m_pClient); } // 0x6622F0
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
+    CTask* CreateFirstSubTask(CPed* ped) override;
+    CTask* CreateNextSubTask(CPed* ped) override;
+    CTask* ControlSubTask(CPed* ped) override;
+
+    CTask* CreateSubTask(eTaskType taskType, CPed* prostitute);
     static void GetRidOfPlayerProstitute();
-    static bool IsTaskValid(CPed* prostitute, CPed* client);
+    static bool IsTaskValid(CPed* prostitute, CPed* ped);
 };
 
 VALIDATE_SIZE(CTaskComplexProstituteSolicit, 0x30);

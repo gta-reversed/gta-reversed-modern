@@ -12,7 +12,7 @@ struct UpsideDownCar {
     int32  m_nHandle;
     uint32 m_nTime;
 
-    UpsideDownCar() {
+    UpsideDownCar() { // 0x468DE0
         Clear();
     };
 
@@ -25,14 +25,14 @@ struct UpsideDownCar {
 class CUpsideDownCarCheck {
 public:
     static constexpr auto UPSIDE_DOWN_CAR_MIN_TIME{ 2000u };
-    UpsideDownCar m_aUpsideDownCars[6];
+    std::array<UpsideDownCar, 6> m_aUpsideDownCars;
 
 public:
     static void InjectHooks();
 
     void Init();
     bool IsCarUpsideDown(int32 carHandle);
-    bool IsCarUpsideDown(CVehicle* vehicle);
+    bool IsCarUpsideDown(const CVehicle* vehicle);
     bool AreAnyCarsUpsideDown();
     void UpdateTimers();
     void AddCarToCheck(int32 car);

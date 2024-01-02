@@ -58,7 +58,12 @@ void CClock::Initialise(uint32 millisecondsPerGameMinute) {
  * @addr  0x52CF10
  */
 void CClock::Update() {
-    if (ms_nMillisecondsPerGameMinute < (CTimer::GetTimeInMS() - ms_nLastClockTick) || CCheat::IsActive(CHEAT_FASTER_CLOCK)) {
+    ZoneScoped;
+
+    if (gbFreezeTime) { // NOTSA
+        ms_nLastClockTick = CTimer::GetTimeInMS();
+    }
+    else if (ms_nMillisecondsPerGameMinute < (CTimer::GetTimeInMS() - ms_nLastClockTick) || CCheat::IsActive(CHEAT_FASTER_CLOCK)) {
         if (!CCheat::IsActive(CHEAT_ALWAYS_MIDNIGHT) && !CCheat::IsActive(CHEAT_STOP_GAME_CLOCK_ORANGE_SKY)) {
             // next minute
             ms_nGameClockMinutes++;

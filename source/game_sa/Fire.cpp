@@ -54,14 +54,14 @@ void CFire::ExtinguishWithWater(float fWaterStrength) {
         CGeneral::GetRandomNumberInRange(-1.28f, 1.28f),
         CGeneral::GetRandomNumberInRange(-0.64f, 0.64f)
         /* Original code:
-        (float)((rand() % 256) - 128) / 100.0f,
-        (float)((rand() % 256) - 128) / 100.0f,
-        (float)((rand() % 256) - 128) / 200.0f
+        (float)((CGeneral::GetRandomNumber() % 256) - 128) / 100.0f,
+        (float)((CGeneral::GetRandomNumber() % 256) - 128) / 100.0f,
+        (float)((CGeneral::GetRandomNumber() % 256) - 128) / 200.0f
         */
     };
     FxPrtMult_c prtMult{ 1.0f, 1.0f, 1.0f, 0.6f, 0.75f, 0.0f, 0.4f };
     const auto AddParticle = [&](CVector velocity) {
-        g_fx.m_pPrtSmokeII3expand->AddParticle(&particlePos, &velocity, 0.0f, &prtMult, -1.0f, 1.2f, 0.6f, false);
+        g_fx.m_SmokeII3expand->AddParticle(&particlePos, &velocity, 0.0f, &prtMult, -1.0f, 1.2f, 0.6f, false);
     };
     /* The two particles only differ in velocity */
     AddParticle({ 0.0f, 0.0f, 0.8f });
@@ -180,21 +180,17 @@ void CFire::Start(CVector pos, float fStrength, CEntity* target, uint8 nGens) {
 }
 
 void CFire::SetTarget(CEntity* target) {
-    if (m_pEntityTarget)
-        m_pEntityTarget->CleanUpOldReference(&m_pEntityTarget); /* Assume old target's m_pFire is not pointing to `*this` */
+    CEntity::SafeCleanUpRef(m_pEntityTarget); /* Assume old target's m_pFire is not pointing to `*this` */
 
     m_pEntityTarget = target; /* assign, even if its null, to clear it */
-    if (target)
-        m_pEntityTarget->RegisterReference(&m_pEntityTarget); /* Assume caller set target->m_pFire */
+    CEntity::SafeRegisterRef(m_pEntityTarget); /* Assume caller set target->m_pFire */
 }
 
 void CFire::SetCreator(CEntity* creator) {
-    if (m_pEntityCreator)
-        m_pEntityCreator->CleanUpOldReference(&m_pEntityCreator);
+    CEntity::SafeCleanUpRef(m_pEntityCreator);
 
     m_pEntityCreator = creator; /* assign, even if its null, to clear it */
-    if (creator)
-        creator->RegisterReference(&m_pEntityCreator);
+    CEntity::SafeRegisterRef(m_pEntityCreator);
 }
 
 void CFire::DestroyFx() {
@@ -244,8 +240,7 @@ void CFire::Extinguish() {
             break;
         }
         }
-        m_pEntityTarget->CleanUpOldReference(&m_pEntityTarget);
-        m_pEntityTarget = nullptr;
+        CEntity::ClearReference(m_pEntityTarget);
     }
 }
 
@@ -300,7 +295,7 @@ void CFire::ProcessFire() {
             }
 
             if (targetVehicle->IsAutomobile()) {
-                m_vecPosition = targetVehicle->GetDummyPosition(eVehicleDummies::DUMMY_LIGHT_FRONT_MAIN) + CVector{0.0f, 0.0f, 0.15f};
+                m_vecPosition = targetVehicle->GetDummyPosition(eVehicleDummy::DUMMY_LIGHT_FRONT_MAIN) + CVector{0.0f, 0.0f, 0.15f};
             }
             break;
         }
@@ -327,46 +322,46 @@ void CFire::ProcessFire() {
         }
     }
 
-    if (rand() % 32 == 0) {
+    if (CGeneral::GetRandomNumber() % 32 == 0) {
         for (auto i = GetVehiclePool()->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
             CVehicle* vehicle = GetVehiclePool()->GetAt(i);
             if (!vehicle)
                 continue;
 
-            if (DistanceBetweenPoints(vehicle->GetPosition(), m_vecPosition) >= 2.0f)
+            if (DistanceBetweenPoints(m_vecPosition, vehicle->GetPosition()) >= 2.0f)
                 continue;
 
             if (vehicle->IsSubBMX()) {
                 player->DoStuffToGoOnFire();
                 gFireManager.StartFire(player, m_pEntityCreator, 0.8f, true, 7000, 100);
-                vehicle->BurstTyre(vehicle->FindTyreNearestPoint(m_vecPosition.x, m_vecPosition.y) + 13, false); // TODO: What's this 13?
+                vehicle->BurstTyre(vehicle->FindTyreNearestPoint(m_vecPosition) + 13, false); // TODO: What's this 13?
             } else {
                 gFireManager.StartFire(vehicle, m_pEntityCreator, 0.8f, true, 7000, 100);
             }
         }
     }
 
-    if (rand() % 4 == 0) {
+    if (CGeneral::GetRandomNumber() % 4 == 0) {
         for (auto i = GetObjectPool()->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
             CObject* obj = GetObjectPool()->GetAt(i);
             if (!obj)
                 continue;
 
-            if (DistanceBetweenPoints(obj->GetPosition(), m_vecPosition) >= 3.0f)
+            if (DistanceBetweenPoints(m_vecPosition, obj->GetPosition()) >= 3.0f)
                 continue;
 
             obj->ObjectFireDamage(CTimer::GetTimeStep() * 8.0f, m_pEntityCreator);
         }
     }
 
-    if (m_nNumGenerationsAllowed > 0 && rand() % 128 == 0) {
+    if (m_nNumGenerationsAllowed > 0 && CGeneral::GetRandomNumber() % 128 == 0) {
         if (gFireManager.GetNumOfFires() < 25) {
             const CVector dir{ CGeneral::GetRandomNumberInRange(-1.0f, 1.0f), CGeneral::GetRandomNumberInRange(-1.0f, 1.0f), 0.0f };
             CCreepingFire::TryToStartFireAtCoors(m_vecPosition + dir * CGeneral::GetRandomNumberInRange(2.0f, 3.0f), m_nNumGenerationsAllowed, false, IsScript(), 10.0f);
         }
     }
 
-    if (m_fStrength <= 2.0f && m_nNumGenerationsAllowed && rand() % 16 == 0) {
+    if (m_fStrength <= 2.0f && m_nNumGenerationsAllowed && CGeneral::GetRandomNumber() % 16 == 0) {
         CFire& nearby = gFireManager.GetRandomFire();
         if (&nearby != this && nearby.active && !nearby.createdByScript && nearby.m_fStrength <= 1.0f) {
             if (DistanceBetweenPoints(nearby.m_vecPosition, m_vecPosition) < 3.5f) {
@@ -383,11 +378,11 @@ void CFire::ProcessFire() {
     if (m_pFxSystem) {
         float unused;
         const float fFractPart = std::modf(m_fStrength, &unused); // R* way: m_fStrength - (float)(int)m_fStrength
-        m_pFxSystem->SetConstTime(true, std::min(CTimer::GetTimeInMS() / 3500.0f, fFractPart));
+        m_pFxSystem->SetConstTime(true, std::min((float)CTimer::GetTimeInMS() / 3500.0f, fFractPart));
     }
 
     if (createdByScript || (HasTimeToBurn() && IsNotInRemovalDistance())) {
-        const float fColorRG = (float)(rand() % 128) / 512.0f; // todo: GetRandomNumberInRange
+        const float fColorRG = (float)(CGeneral::GetRandomNumber() % 128) / 512.0f; // todo: GetRandomNumberInRange
         CPointLights::AddLight(ePointLightType::PLTYPE_POINTLIGHT, m_vecPosition, CVector{}, 8.0f, fColorRG, fColorRG, 0.0f, 0, false, nullptr);
     } else {
         if (m_fStrength <= 1.0f) {

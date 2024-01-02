@@ -16,22 +16,22 @@ public:
 public:
     static constexpr auto Type = TASK_COMPLEX_FOLLOW_PED_FOOTSTEPS;
 
-    CTaskComplexFollowPedFootsteps(CPed* ped);
-    ~CTaskComplexFollowPedFootsteps();
+    explicit CTaskComplexFollowPedFootsteps(CPed* ped);
+    ~CTaskComplexFollowPedFootsteps() override;
 
-    CTask* Clone() override { return new CTaskComplexFollowPedFootsteps(m_targetPed); }
-    eTaskType GetTaskType() override { return TASK_COMPLEX_FOLLOW_PED_FOOTSTEPS; }
-    bool           MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
-    CTask*         CreateNextSubTask(CPed* ped) override;
-    CTask*         CreateFirstSubTask(CPed* ped) override;
-    CTask*         ControlSubTask(CPed* ped) override;
+    CTask* Clone() const override {
+        return new CTaskComplexFollowPedFootsteps(m_targetPed);
+    }
+    eTaskType GetTaskType() const override { return Type; }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
+    CTask* CreateNextSubTask(CPed* ped) override;
+    CTask* CreateFirstSubTask(CPed* ped) override;
+    CTask* ControlSubTask(CPed* ped) override;
     virtual CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
-
     CTaskComplexFollowPedFootsteps* Constructor(CPed* ped);
 };
-
 VALIDATE_SIZE(CTaskComplexFollowPedFootsteps, 0x20);

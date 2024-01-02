@@ -1,25 +1,20 @@
 #pragma once
+
 #include "TaskSimple.h"
 
-class CTaskSimpleSetStayInSamePlace : public CTaskSimple
-{
+class NOTSA_EXPORT_VTABLE CTaskSimpleSetStayInSamePlace : public CTaskSimple {
 public:
-    uint8 m_bStayInSamePlace;
-    uint8 _pad_9[3];
-private:
-    CTaskSimpleSetStayInSamePlace* Constructor(bool bStayInSamePlace);
+    bool m_bStayInSamePlace;
+
 public:
-    CTaskSimpleSetStayInSamePlace(bool bStayInSamePlace);
-    ~CTaskSimpleSetStayInSamePlace() override {}
+    static constexpr auto Type = TASK_SIMPLE_SET_STAY_IN_SAME_PLACE;
 
-    static void InjectHooks();
+    explicit CTaskSimpleSetStayInSamePlace(bool bStayInSamePlace);
+    ~CTaskSimpleSetStayInSamePlace() override = default;
 
-    CTask* Clone() override { return new CTaskSimpleSetStayInSamePlace(m_bStayInSamePlace); }
-    eTaskType GetTaskType() override { return TASK_SIMPLE_SET_STAY_IN_SAME_PLACE; }
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override { return new CTaskSimpleSetStayInSamePlace(m_bStayInSamePlace); }
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override { return true; }
     bool ProcessPed(CPed* ped) override;
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; }
-
-    bool ProcessPed_Reversed(CPed* ped);
 };
-
 VALIDATE_SIZE(CTaskSimpleSetStayInSamePlace, 0xC);
