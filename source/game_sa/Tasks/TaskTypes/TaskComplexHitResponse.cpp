@@ -21,7 +21,7 @@ void CTaskComplexHitResponse::InjectHooks() {
 }
 
 // 0x631D70
-CTaskComplexHitResponse::CTaskComplexHitResponse(eHitSide hs) :
+CTaskComplexHitResponse::CTaskComplexHitResponse(eDirection hs) :
     m_HitSide{ hs }
 {
 }
@@ -34,10 +34,10 @@ CTaskComplexHitResponse::CTaskComplexHitResponse(const CTaskComplexHitResponse& 
 // 0x638040
 CTask* CTaskComplexHitResponse::CreateFirstSubTask(CPed* ped) {
     switch (m_HitSide) {
-    case eHitSide::FRONT: return new CTaskSimpleHitFromFront{};
-    case eHitSide::LEFT:  return new CTaskSimpleHitFromLeft{};
-    case eHitSide::BACK:  return new CTaskSimpleHitFromBack{};
-    case eHitSide::RIGHT: return new CTaskSimpleHitFromRight{};
-    default:              NOTSA_UNREACHABLE();
+    case eDirection::FORWARD:  return new CTaskSimpleHitFromFront{};
+    case eDirection::LEFT:     return new CTaskSimpleHitFromLeft{};
+    case eDirection::BACKWARD: return new CTaskSimpleHitFromBack{};
+    case eDirection::RIGHT:    return new CTaskSimpleHitFromRight{};
+    default:                   NOTSA_UNREACHABLE();
     }
 }

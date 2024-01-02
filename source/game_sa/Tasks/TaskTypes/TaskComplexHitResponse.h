@@ -1,27 +1,22 @@
 #pragma once
 
 #include "TaskComplex.h"
+#include "Enums/eDirection.h"
+#include <extensions/WEnum.hpp>
 
 class CTaskComplexHitResponse;
 class CPed;
 
-enum class eHitSide : int32 {
-    FRONT,
-    LEFT,
-    BACK,
-    RIGHT
-};
-
 class NOTSA_EXPORT_VTABLE CTaskComplexHitResponse final : public CTaskComplex {
 public:
-    eHitSide m_HitSide = {};
+    notsa::WEnumS32<eDirection> m_HitSide{};
 
 public:
     static constexpr auto Type = eTaskType::TASK_COMPLEX_HIT_RESPONSE;
 
     static void InjectHooks();
 
-    CTaskComplexHitResponse(eHitSide hs);
+    CTaskComplexHitResponse(eDirection hs);
     CTaskComplexHitResponse(const CTaskComplexHitResponse&);
     ~CTaskComplexHitResponse() override = default;
 
@@ -33,7 +28,7 @@ public:
 
 private: // Wrappers for hooks
     // 0x631D70
-    CTaskComplexHitResponse* Constructor(eHitSide hs) {
+    CTaskComplexHitResponse* Constructor(eDirection hs) {
         this->CTaskComplexHitResponse::CTaskComplexHitResponse(hs);
         return this;
     }
