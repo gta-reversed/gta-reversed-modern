@@ -95,7 +95,7 @@ bool CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(CPed* ped) {
             isGoToPointTask = true;
         }
         if (taskEnterCarAsDriver) {
-            if (m_vehicle == taskEnterCarAsDriver->m_car && m_vehicle->IsSubPlane())
+            if (m_vehicle == taskEnterCarAsDriver->GetTargetCar() && m_vehicle->IsSubPlane())
                 return false;
 
             targetPos = taskEnterCarAsDriver->GetTargetPos();

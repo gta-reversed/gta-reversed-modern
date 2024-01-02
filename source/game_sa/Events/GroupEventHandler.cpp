@@ -282,7 +282,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderExitedCar(const CEventE
         }
         CVehicle* mveh{};
         if (const auto t = m.GetTaskManager().Find<CTaskComplexEnterCarAsPassengerWait>(false); !t || !(mveh = t->GetTarget())) {
-            if (const auto t = m.GetTaskManager().Find<CTaskComplexEnterCarAsPassenger>(false); !t || !(mveh = t->GetTarget())) {
+            if (const auto t = m.GetTaskManager().Find<CTaskComplexEnterCarAsPassenger>(false); !t || !(mveh = t->GetTargetCar())) {
                 continue;
             }
         }

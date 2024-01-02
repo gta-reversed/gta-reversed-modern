@@ -115,7 +115,7 @@ CPedIntelligence::CPedIntelligence(CPed* ped) :
     m_fSeeingRange                        = 15.0f;
     m_nDmNumPedsToScan                    = 3;
     m_fDmRadius                           = 15.0f;
-    field_CC                              = 30.0f;
+    m_FollowNodeThresholdDist             = 30.0f;
     field_D0                              = -1;
     m_nEventId                            = 0;
     m_nEventPriority                      = 0;
@@ -664,11 +664,11 @@ bool CPedIntelligence::Respects(CPed* ped) const {
 // 0x601CC0
 bool CPedIntelligence::IsInACarOrEnteringOne() {
     if (const auto task = m_TaskMgr.Find<CTaskComplexEnterCarAsDriver>()) {
-        return !!task->GetTarget();
+        return !!task->GetTargetCar();
     }
 
     if (const auto task = m_TaskMgr.Find<CTaskComplexEnterCarAsPassenger>()) {
-        return !!task->GetTarget();
+        return !!task->GetTargetCar();
     }
 
     if (const auto task = m_TaskMgr.Find<CTaskSimpleCarDrive>()) {
@@ -1040,7 +1040,7 @@ void CPedIntelligence::operator delete(void* object) {
 CVehicle* CPedIntelligence::GetEnteringVehicle() {
     for (const auto taskt : { TASK_COMPLEX_ENTER_CAR_AS_DRIVER, TASK_COMPLEX_ENTER_CAR_AS_PASSENGER }) {
         if (const auto task = FindTaskByType(taskt)) {
-            return static_cast<CTaskComplexEnterCar*>(task)->GetTarget();
+            return static_cast<CTaskComplexEnterCar*>(task)->GetTargetCar();
         }
     }
     return nullptr;
