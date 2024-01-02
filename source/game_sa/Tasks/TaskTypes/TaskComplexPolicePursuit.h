@@ -27,7 +27,7 @@ public:
 
     bool SetPursuit(CPed* ped);
     bool PersistPursuit(CCopPed* pursuer);
-    void CreateSubTask(int32 taskType, CPed* ped);
+    CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 
     CTask*    Clone() const override { return new CTaskComplexPolicePursuit{ *this }; }
     eTaskType GetTaskType() const override { return Type; }

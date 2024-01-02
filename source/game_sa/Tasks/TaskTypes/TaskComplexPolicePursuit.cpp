@@ -1,5 +1,10 @@
 #include "StdInc.h"
 #include "TaskComplexPolicePursuit.h"
+#include "TaskComplexArrestPed.h"
+#include "TaskComplexSeekEntity.h"
+#include "SeekEntity/PosCalculators/EntitySeekPosCalculatorStandard.h"
+#include "TaskSimpleStandStill.h"
+#include "TaskSimpleScratchHead.h"
 
 void CTaskComplexPolicePursuit::InjectHooks() {
     RH_ScopedVirtualClass(CTaskComplexPolicePursuit, 0x8709d4, 11);
@@ -12,7 +17,7 @@ void CTaskComplexPolicePursuit::InjectHooks() {
     RH_ScopedInstall(ClearPursuit, 0x68BD90);
     RH_ScopedInstall(SetPursuit, 0x68BBD0);
     RH_ScopedInstall(PersistPursuit, 0x68BDC0);
-    RH_ScopedInstall(CreateSubTask, 0x68D910, { .reversed = false });
+    RH_ScopedInstall(CreateSubTask, 0x68D910);
     RH_ScopedVMTInstall(Clone, 0x68CDD0, { .reversed = false });
     RH_ScopedVMTInstall(GetTaskType, 0x68BAA0, { .reversed = false });
     RH_ScopedVMTInstall(MakeAbortable, 0x68BAB0, { .reversed = false });
@@ -128,8 +133,28 @@ bool CTaskComplexPolicePursuit::PersistPursuit(CCopPed* pursuer) {
 }
 
 // 0x68D910
-void CTaskComplexPolicePursuit::CreateSubTask(int32 taskType, CPed* ped) {
-    return plugin::CallMethodAndReturn<void, 0x68D910, CTaskComplexPolicePursuit*, int32, CPed*>(this, taskType, ped);
+CTask* CTaskComplexPolicePursuit::CreateSubTask(eTaskType taskType, CPed* ped) {
+    switch (taskType) {
+    case TASK_COMPLEX_ARREST_PED:
+        return new CTaskComplexArrestPed{m_Persecuted};
+    case TASK_COMPLEX_SEEK_ENTITY:
+        return new CTaskComplexSeekEntity<CEntitySeekPosCalculatorStandard>{
+            ped->m_pVehicle,
+            50'000,
+            1'000,
+            ped->m_pVehicle->GetColModel()->GetBoundRadius() + 1.f,
+            2.f,
+            2.f,
+            true,
+            true
+        };
+    case TASK_SIMPLE_STAND_STILL:
+        return new CTaskSimpleStandStill{};
+    case TASK_SIMPLE_SCRATCH_HEAD:
+        return new CTaskSimpleScratchHead{};
+    default:
+        NOTSA_UNREACHABLE("Invalid TaskType({})", taskType);
+    }
 }
 
 // 0x68BAC0
