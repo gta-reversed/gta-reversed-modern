@@ -65,6 +65,7 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(RemoveThisPed, 0x486240);
 
     RH_ScopedInstall(ReadObjectNamesFromScript, 0x486720);
+    RH_ScopedInstall(UpdateObjectIndices, 0x486780);
 }
 
 // 0x468D50
@@ -227,15 +228,14 @@ void CTheScripts::InitialiseSpecialAnimGroup(uint16 index) {
 
 // 0x486720
 void CTheScripts::ReadObjectNamesFromScript() {
-    //plugin::Call<0x486720>();
-    const auto scriptInfoOffset = notsa::ReadAs<uint32_t>(&ScriptSpace[3]);
+    const auto scriptInfoOffset = notsa::ReadAs<uint32>(&ScriptSpace[3]);
 
     // TODO: Make a helper structure
-    NumberOfUsedObjects = notsa::ReadAs<uint16_t>(&ScriptSpace[scriptInfoOffset + 8]);
+    NumberOfUsedObjects = notsa::ReadAs<uint16>(&ScriptSpace[scriptInfoOffset + 8]);
     const auto* objNames = reinterpret_cast<char*>(&ScriptSpace[scriptInfoOffset + 12]);
 
     for (auto& obj : UsedObjectArray) {
-        obj.nModelIndex = 0;
+        obj.nModelIndex = 0; // To be updated via UpdateObjectIndices.
         std::memcpy(obj.szModelName, objNames, sizeof(obj.szModelName));
 
         objNames += sizeof(obj.szModelName);
@@ -244,7 +244,11 @@ void CTheScripts::ReadObjectNamesFromScript() {
 
 // 0x486780
 void CTheScripts::UpdateObjectIndices() {
-    plugin::Call<0x486780>();
+    // NOTE: We drop the first because first entry has an empty name in vanilla,
+    // so we ignore it?
+    for (auto& obj : UsedObjectArray | std::views::drop(1)) {
+        CModelInfo::GetModelInfo(obj.szModelName, &obj.nModelIndex);
+    }
 }
 
 // 0x4867C0
