@@ -419,7 +419,7 @@ bool CTaskSimpleDuck::ProcessPed(CPed* ped) {
                 if (weaponCruchAnim->m_fBlendAmount > 0 && weaponCruchAnim->m_fBlendDelta >= 0.f) {
                     if (weaponCruchAnim->m_nFlags & ANIMATION_PARTIAL) {
                         weaponCruchAnim->m_fBlendDelta = -4.f;
-                    } else {*
+                    } else {
                         CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_IDLE, 4.f);
                     }
                 }
