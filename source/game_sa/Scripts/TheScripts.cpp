@@ -8,8 +8,10 @@
 #include "Checkpoint.h"
 #include "Checkpoints.h"
 #include "LoadingScreen.h"
-// #include "Scripted2dEffects.h"
+#include "Scripted2dEffects.h"
 #include "Shadows.h"
+
+static inline bool gAllowScriptedFixedCameraCollision = false;
 
 void CTheScripts::InjectHooks() {
     // Has to have these, because there seems to be something going on with the variable init order
@@ -20,7 +22,7 @@ void CTheScripts::InjectHooks() {
     RH_ScopedClass(CTheScripts);
     RH_ScopedCategory("Scripts");
 
-    RH_ScopedInstall(Init, 0x468D50, { .reversed = false });
+    RH_ScopedInstall(Init, 0x468D50, { .reversed = true });
     RH_ScopedOverloadedInstall(StartNewScript, "", 0x464C20, CRunningScript* (*)(uint8*));
     // RH_ScopedOverloadedInstall(StartNewScript, "index", 0x464C90, CRunningScript* (*)(uint8*, uint16));
     RH_ScopedInstall(StartTestScript, 0x464D40);
@@ -36,7 +38,142 @@ void CTheScripts::InjectHooks() {
 
 // 0x468D50
 void CTheScripts::Init() {
-    plugin::Call<0x468D50>();
+    rng::fill(ScriptSpace, 0u);
+    rng::fill(LocalVariablesForCurrentMission, tScriptParam{});
+
+    CRunningScript* nextScript = nullptr;
+    for (auto& script : ScriptsArray) {
+        script.Init();
+        script.m_pPrev = nullptr;
+        script.m_pNext = nextScript;
+
+        if (nextScript) {
+            nextScript->m_pPrev = &script;
+        }
+        nextScript = &script;
+    }
+    pActiveScripts = nullptr;
+    pIdleScripts   = nextScript;
+
+    MissionCleanUp.Init();
+    UpsideDownCars.Init();
+    StuckCars.Init();
+    ScriptsForBrains.Init();
+    ScriptResourceManager.Initialise();
+    rng::fill(EntitiesWaitingForScriptBrain, tScriptBrainWaitEntity{});
+
+    if (CGame::bMissionPackGame) {
+        while (FrontEndMenuManager.CheckMissionPackValidMenu()) {
+            CFileMgr::SetDirMyDocuments();
+            //notsa::format_to_sz(gString, "MPACK//MPACK{:d}//SCR.SCM", CGame::bMissionPackGame);
+            const auto scr = std::format("MPACK//MPACK{:d}//SCR.SCM", CGame::bMissionPackGame);
+
+            if (const auto file = CFileMgr::OpenFile(scr.c_str(), "rb")) {
+                const auto read = CFileMgr::Read(file, ScriptSpace.data(), MAIN_SCRIPT_SIZE);
+                CFileMgr::CloseFile(file);
+
+                if (read >= 1) {
+                    break;
+                }
+            }
+        }
+    } else {
+        CFileMgr::SetDir("data\\script");
+
+        const auto file = CFileMgr::OpenFile("main.scm", "rb");
+        VERIFY(CFileMgr::Read(file, ScriptSpace.data(), MAIN_SCRIPT_SIZE) >= 1);
+        CFileMgr::CloseFile(file);
+    }
+    CFileMgr::SetDir("");
+
+    StoreVehicleIndex     = -1;
+    StoreVehicleWasRandom = true;
+    OnAMissionFlag        = false;
+    LastMissionPassedTime = -1;
+    LastRandomPedId       = -1;
+
+    rng::fill(UsedObjectArray, tUsedObject{});
+    ReadObjectNamesFromScript();
+    UpdateObjectIndices();
+    rng::fill(MultiScriptArray, 0u);
+    NumberOfUsedObjects                        = 0;
+    bAlreadyRunningAMissionScript              = 0;
+    bUsingAMultiScriptFile                     = 1;
+    MainScriptSize                             = 0;
+    LargestMissionScriptSize                   = 0;
+    NumberOfMissionScripts                     = 0;
+    NumberOfExclusiveMissionScripts            = 0;
+    LargestNumberOfMissionScriptLocalVariables = 0;
+
+    ReadMultiScriptFileOffsetsFromScript();
+    if (!CGame::bMissionPackGame) {
+        StreamedScripts.ReadStreamedScriptData();
+    }
+
+    ForceRandomCarModel                    = -1;
+    FailCurrentMission                     = 0;
+    ScriptPickupCycleIndex                 = 0;
+    bMiniGameInProgress                    = false;
+    bDisplayNonMiniGameHelpMessages        = true;
+    bPlayerHasMetDebbieHarry               = false;
+    RiotIntensity                          = 0;
+    bPlayerIsOffTheMap                     = false;
+    RadarZoomValue                         = 0;
+    RadarShowBlipOnAllLevels               = false;
+    HideAllFrontEndMapBlips                = false;
+    bDisplayHud                            = true;
+    fCameraHeadingWhenPlayerIsAttached     = 0.0f;
+    fCameraHeadingStepWhenPlayerIsAttached = 0.0f;
+    bEnableCraneRaise                      = true;
+    bEnableCraneLower                      = true;
+    bEnableCraneRelease                    = true;
+    bDrawCrossHair                         = eCrossHairType::NONE;
+    gAllowScriptedFixedCameraCollision     = false;
+    bAddNextMessageToPreviousBriefs        = true;
+    bScriptHasFadedOut                     = false;
+    bDrawOddJobTitleBeforeFade             = true;
+    bDrawSubtitlesBeforeFade               = true;
+
+    rng::fill(ScriptSphereArray, tScriptSphere{});
+    rng::fill(IntroTextLines, tScriptText{});
+
+    NumberOfIntroTextLinesThisFrame = 0;
+    UseTextCommands                 = false;
+    bUseMessageFormatting           = false;
+    MessageCentre                   = 0;
+    MessageWidth                    = 0;
+
+    rng::fill(IntroRectangles, tScriptRectangle{});
+    NumberOfIntroRectanglesThisFrame = 0;
+
+    rng::for_each(ScriptSprites, &CSprite2d::Delete);
+
+    if (const auto slot = CTxdStore::FindTxdSlot("script"); slot != -1) {
+        if (const auto* txd = CTxdStore::ms_pTxdPool->GetAt(slot); txd) {
+            CTxdStore::RemoveTxd(slot);
+        }
+    }
+
+    rng::fill(BuildingSwapArray, tBuildingSwap{});
+    rng::fill(InvisibilitySettingArray, nullptr);
+    ClearAllSuppressedCarModels();
+    ClearAllVehicleModelsBlockedByScript();
+    InitialiseAllConnectLodObjects();
+    InitialiseSpecialAnimGroupsAttachedToCharModels();
+    rng::fill(ScriptEffectSystemArray, tScriptEffectSystem{});
+    rng::fill(ScriptSearchLightArray, tScriptSearchlight{});
+    NumberOfScriptSearchLights = 0;
+    rng::fill(ScriptCheckpointArray, tScriptCheckpoint{});
+    NumberOfScriptCheckpoints = 0;
+    rng::fill(ScriptSequenceTaskArray, tScriptSequence{});
+
+    CScripted2dEffects::Init();
+    CTaskSequences::Init();
+    CPedGroups::Init();
+    CInformFriendsEventQueue::Init();
+    CInformGroupEventQueue::Init();
+    CDecisionMakerTypes::GetInstance();
+
 }
 
 // 0x470960

@@ -84,7 +84,7 @@ union tScriptParam {
     uint16 u16Param;
     int16  i16Param;
 
-    uint32 uParam;
+    uint32 uParam{0u};
     int32  iParam;
 
     float  fParam;
