@@ -54,6 +54,13 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(GetNewUniqueScriptThingIndex, 0x483720, {.reversed = false});
     RH_ScopedInstall(GetScriptIndexFromPointer, 0x464D20);
     RH_ScopedInstall(GetUniqueScriptThingIndex, 0x4810C0);
+
+    RH_ScopedInstall(RemoveFromWaitingForScriptBrainArray, 0x46ABC0);
+    RH_ScopedInstall(RemoveScriptCheckpoint, 0x4936C0);
+    RH_ScopedInstall(RemoveScriptEffectSystem, 0x492FD0);
+    RH_ScopedInstall(RemoveScriptSearchLight, 0x493160);
+    RH_ScopedInstall(RemoveScriptSphere, 0x483BA0);
+    RH_ScopedInstall(RemoveScriptTextureDictionary, 0x465A40);
 }
 
 // 0x468D50
@@ -166,13 +173,7 @@ void CTheScripts::Init() {
     rng::fill(IntroRectangles, tScriptRectangle{});
     NumberOfIntroRectanglesThisFrame = 0;
 
-    rng::for_each(ScriptSprites, &CSprite2d::Delete);
-
-    if (const auto slot = CTxdStore::FindTxdSlot("script"); slot != -1) {
-        if (const auto* txd = CTxdStore::ms_pTxdPool->GetAt(slot); txd) {
-            CTxdStore::RemoveTxd(slot);
-        }
-    }
+    RemoveScriptTextureDictionary();
 
     rng::fill(BuildingSwapArray, tBuildingSwap{});
     rng::fill(InvisibilitySettingArray, nullptr);
@@ -402,39 +403,92 @@ void CTheScripts::ReinitialiseSwitchStatementData() {
 // unused
 // 0x?
 void CTheScripts::RemoveFromVehicleModelsBlockedByScript(int32 modelIndex) {
-    for (auto& script : VehicleModelsBlockedByScript) {
-        // ?
+    for (auto& model : VehicleModelsBlockedByScript) {
+        if (model == modelIndex) {
+            model = MODEL_INVALID;
+        }
     }
 }
 
 // 0x46ABC0
 void CTheScripts::RemoveFromWaitingForScriptBrainArray(CEntity* entity, int16 modelIndex) {
-    plugin::Call<0x46ABC0, CEntity*, int16>(entity, modelIndex);
+    for (auto& bwe : EntitiesWaitingForScriptBrain) {
+        if (bwe.m_pEntity != entity || bwe.m_nSpecialModelIndex != modelIndex) {
+            continue;
+        }
+
+        CEntity::ClearReference(bwe.m_pEntity);
+        bwe.m_nSpecialModelIndex = MODEL_INVALID;
+    }
 }
 
 // 0x4936C0
 void CTheScripts::RemoveScriptCheckpoint(int32 scriptIndex) {
-    plugin::Call<0x4936C0, int32>(scriptIndex);
+    const auto i = GetActualScriptThingIndex(scriptIndex, eScriptThingType::SCRIPT_THING_CHECKPOINT);
+    if (i == -1) {
+        return;
+    }
+
+    auto& scp = ScriptCheckpointArray[i];
+    if (const auto* cp = scp.m_Checkpoint) {
+        CCheckpoints::DeleteCP(cp->m_nIdentifier, cp->m_nType);
+    }
+    scp.m_bUsed = false;
+    scp.m_nId = 0;
+
+    --NumberOfScriptCheckpoints;
 }
 
 // 0x492FD0
 void CTheScripts::RemoveScriptEffectSystem(int32 scriptIndex) {
-    plugin::Call<0x492FD0, int32>(scriptIndex);
+    const auto i = GetActualScriptThingIndex(scriptIndex, eScriptThingType::SCRIPT_THING_EFFECT_SYSTEM);
+    if (i == -1) {
+        return;
+    }
+
+    auto& sef = ScriptEffectSystemArray[i];
+    sef.m_bUsed = false;
+    sef.m_pFxSystem = nullptr;
 }
 
 // 0x493160
 void CTheScripts::RemoveScriptSearchLight(int32 scriptIndex) {
-    plugin::Call<0x493160, int32>(scriptIndex);
+    const auto i = GetActualScriptThingIndex(scriptIndex, eScriptThingType::SCRIPT_THING_SEARCH_LIGHT);
+    if (i == -1) {
+        return;
+    }
+
+    auto& ssl = ScriptSearchLightArray[i];
+    CEntity::ClearReference(ssl.m_FollowingEntity);
+    CEntity::ClearReference(ssl.m_AttachedEntity);
+    CEntity::ClearReference(ssl.m_Tower);
+    CEntity::ClearReference(ssl.m_Housing);
+    CEntity::ClearReference(ssl.m_Bulb);
+    ssl = tScriptSearchlight{};
+
+    --NumberOfScriptSearchLights;
 }
 
 // 0x483BA0
 void CTheScripts::RemoveScriptSphere(int32 scriptIndex) {
-    plugin::Call<0x483BA0>();
+    const auto i = GetActualScriptThingIndex(scriptIndex, eScriptThingType::SCRIPT_THING_SPHERE);
+    if (i == -1) {
+        return;
+    }
+
+    auto& ss = ScriptSphereArray[i];
+    ss.m_bUsed = false;
+    ss.m_nId   = 0;
 }
 
 // 0x465A40
 void CTheScripts::RemoveScriptTextureDictionary() {
-    plugin::Call<0x465A40>();
+    rng::for_each(ScriptSprites, &CSprite2d::Delete);
+    if (const auto slot = CTxdStore::FindTxdSlot("script"); slot != -1) {
+        if (const auto* txd = CTxdStore::ms_pTxdPool->GetAt(slot); txd) {
+            CTxdStore::RemoveTxd(slot);
+        }
+    }
 }
 
 // 0x486240
