@@ -68,6 +68,8 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(UpdateObjectIndices, 0x486780);
 
     RH_ScopedInstall(DrawScriptSpheres, 0x4810E0);
+
+    RH_ScopedInstall(UndoEntityInvisibilitySettings, 0x4812D0)
 }
 
 // 0x468D50
@@ -818,18 +820,26 @@ void CTheScripts::ProcessWaitingForScriptBrainArray() {
 
 // 0x4812D0
 void CTheScripts::UndoEntityInvisibilitySettings() {
-    plugin::Call<0x4812D0>();
+    for (auto& is : InvisibilitySettingArray) {
+        if (!is) {
+            continue;
+        }
+
+        is->m_bIsVisible = true;
+        is->m_bUsesCollision = true;
+
+        is = nullptr; // Remove from the array.
+    }
 }
 
 // 0x4646D0
 void CTheScripts::PrintListSizes() {
-    int active = 0;
-    int idle = 0;
+    auto active{ 0u }, idle{ 0u };
 
-    for (CRunningScript* script = pActiveScripts; script; script = script->m_pNext) active++;
-    for (CRunningScript* script = pIdleScripts; script; script = script->m_pNext) idle++;
+    for (const auto* s = pActiveScripts; s; s = s->m_pNext) active++;
+    for (const auto* s = pIdleScripts; s; s = s->m_pNext) idle++;
 
-    DEV_LOG("Scripts Active: {}, Idle: {}", active, idle);
+    NOTSA_LOG_DEBUG("Scripts Active: {}, Idle: {}", active, idle);
 }
 
 uint32 DbgLineColour = 0x0000FFFF; // r = 0, g = 0, b = 255, a = 255
