@@ -61,6 +61,7 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(RemoveScriptSearchLight, 0x493160);
     RH_ScopedInstall(RemoveScriptSphere, 0x483BA0);
     RH_ScopedInstall(RemoveScriptTextureDictionary, 0x465A40);
+    RH_ScopedInstall(RemoveThisPed, 0x486240);
 }
 
 // 0x468D50
@@ -493,7 +494,35 @@ void CTheScripts::RemoveScriptTextureDictionary() {
 
 // 0x486240
 void CTheScripts::RemoveThisPed(CPed* ped) {
-    plugin::Call<0x486240, CPed*>( ped);
+    // plugin::Call<0x486240, CPed*>( ped);
+    if (!ped) {
+        return;
+    }
+
+    if (auto* veh = ped->GetVehicleIfInOne()) {
+        if (veh->IsDriver(ped)) {
+            veh->RemoveDriver(false);
+
+            if (veh->m_nDoorLock == eCarLock::CARLOCK_COP_CAR) {
+                veh->m_nDoorLock = eCarLock::CARLOCK_UNLOCKED;
+            }
+
+            if (ped->IsCop() && veh->IsLawEnforcementVehicle()) {
+                veh->ChangeLawEnforcerState(false);
+            }
+        } else {
+            veh->RemovePassenger(ped);
+        }
+    }
+
+    const auto isMissionChar = ped->m_nCreatedBy == ePedCreatedBy::PED_MISSION;
+
+    CWorld::RemoveReferencesToDeletedObject(ped);
+    delete ped;
+
+    if (isMissionChar) {
+        --CPopulation::ms_nTotalMissionPeds;
+    }
 }
 
 // 0x464C20
