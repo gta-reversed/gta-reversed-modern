@@ -34,6 +34,11 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(Process, 0x46A000);
 
     RH_ScopedInstall(ProcessAllSearchLights, 0x4939F0);
+
+    RH_ScopedInstall(InitialiseAllConnectLodObjects, 0x470960);
+    RH_ScopedInstall(InitialiseConnectLodObjects, 0x470940);
+    RH_ScopedInstall(InitialiseSpecialAnimGroupsAttachedToCharModels, 0x474730);
+    RH_ScopedInstall(InitialiseSpecialAnimGroup, 0x474710);
 }
 
 // 0x468D50
