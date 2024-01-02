@@ -416,75 +416,37 @@ int32 CTheScripts::GetActualScriptThingIndex(int32 index, eScriptThingType type)
 // TODO: TEST REFACTOR!
 int32 CTheScripts::GetNewUniqueScriptThingIndex(int32 index, eScriptThingType type) {
     //return plugin::CallAndReturn<uint32, 0x483720, int32, char>(index, type);
+    const auto NewUniqueId = [index](int16& id) -> int32 {
+        if (id == -1 || id == -2) {
+            id = 1;
+        } else {
+            id++;
+        }
 
-    const auto MakeUniqueIndex = [](uint16 lo, uint16 hi) {
-        return lo | (uint32)(hi << 16);
-    };
-
-    // TODO better name
-    const auto IsIdWeird = [](int16 id) {
-        return id == -1 || id == -2;
+        return (uint32)id << 16 | index;
     };
 
     switch (type) {
-    case eScriptThingType::SCRIPT_THING_SPHERE: {
-        auto& uniqueId = ScriptSphereArray[index].m_nUniqueId;
-        uniqueId = IsIdWeird(uniqueId) ? 1 : uniqueId + 1;
-
-        return MakeUniqueIndex(index, uniqueId);
-    }
-    case eScriptThingType::SCRIPT_THING_EFFECT_SYSTEM: {
-        auto& id = ScriptEffectSystemArray[index].m_nId;
-        id = IsIdWeird(id) ? 1 : id + 1;
-
-        return MakeUniqueIndex(index, id);
-    }
-    case eScriptThingType::SCRIPT_THING_SEARCH_LIGHT: {
-        auto& id = ScriptSearchLightArray[index].m_nId;
-        id       = IsIdWeird(id) ? 1 : id + 1;
-
-        return MakeUniqueIndex(index, id);
-    }
-    case eScriptThingType::SCRIPT_THING_CHECKPOINT: {
-        auto& id = ScriptCheckpointArray[index].m_nId;
-        id       = IsIdWeird(id) ? 1 : id + 1;
-
-        return MakeUniqueIndex(index, id);
-    }
-    case eScriptThingType::SCRIPT_THING_SEQUENCE_TASK: {
-        auto& id = ScriptSequenceTaskArray[index].m_nId;
-        id       = IsIdWeird(id) ? 1 : id + 1;
-
+    case eScriptThingType::SCRIPT_THING_SPHERE:
+        return NewUniqueId(ScriptSphereArray[index].m_nUniqueId);
+    case eScriptThingType::SCRIPT_THING_EFFECT_SYSTEM:
+        return NewUniqueId(ScriptEffectSystemArray[index].m_nId);
+    case eScriptThingType::SCRIPT_THING_SEARCH_LIGHT:
+        return NewUniqueId(ScriptSearchLightArray[index].m_nId);
+    case eScriptThingType::SCRIPT_THING_CHECKPOINT:
+        return NewUniqueId(ScriptCheckpointArray[index].m_nId);
+    case eScriptThingType::SCRIPT_THING_SEQUENCE_TASK:
         ScriptSequenceTaskArray[index].m_bUsed = true;
-        return MakeUniqueIndex(index, id);
-    }
-    case eScriptThingType::SCRIPT_THING_FIRE: {
-        auto& id = gFireManager.m_aFires[index].m_nScriptReferenceIndex;
-        id       = IsIdWeird(id) ? 1 : id + 1;
-
-        return MakeUniqueIndex(index, id);
-    }
-    case eScriptThingType::SCRIPT_THING_2D_EFFECT: {
-        auto& id = CScripted2dEffects::ScriptReferenceIndex[index];
-        id       = IsIdWeird(id) ? 1 : id + 1;
-
-        return MakeUniqueIndex(index, id);
-    }
-    case eScriptThingType::SCRIPT_THING_DECISION_MAKER: {
-        CDecisionMakerTypes::GetInstance();
-
-        auto& id = CDecisionMakerTypes::ScriptReferenceIndex[index];
-        id       = IsIdWeird(id) ? 1 : id + 1;
-
-        CDecisionMakerTypes::GetInstance(); // ? TODO check if we really need these
-        return MakeUniqueIndex(index, id);
-    }
-    case eScriptThingType::SCRIPT_THING_PED_GROUP: {
-        auto& id = CPedGroups::ScriptReferenceIndex[index];
-        id       = IsIdWeird(id) ? 1 : id + 1;
-
-        return MakeUniqueIndex(index, id);
-    }
+        return NewUniqueId(ScriptSequenceTaskArray[index].m_nId);
+    case eScriptThingType::SCRIPT_THING_FIRE:
+        return NewUniqueId(gFireManager.m_aFires[index].m_nScriptReferenceIndex);
+    case eScriptThingType::SCRIPT_THING_2D_EFFECT:
+        return NewUniqueId(*(int16*)CScripted2dEffects::ScriptReferenceIndex[index]);
+    case eScriptThingType::SCRIPT_THING_DECISION_MAKER:
+        CDecisionMakerTypes::GetInstance(); // ? TODO check if we really need this
+        return NewUniqueId(*(int16*)CDecisionMakerTypes::ScriptReferenceIndex[index]);
+    case eScriptThingType::SCRIPT_THING_PED_GROUP:
+        return NewUniqueId(*(int16*)CPedGroups::ScriptReferenceIndex[index]);
     default:
         break;
     }
