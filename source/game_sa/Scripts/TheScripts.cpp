@@ -373,7 +373,7 @@ bool CTheScripts::HasVehicleModelBeenBlockedByScript(eModelID carModelId) {
 void CTheScripts::StartTestScript() {
     ZoneScoped;
 
-    StartNewScript(MainSCMBlock);
+    StartNewScript(MainSCMBlock.data());
 }
 
 // 0x46A000
