@@ -19,7 +19,7 @@ enum eDuckControlType : uint8
     DUCK_SCRIPT_CONTROLLED,
 };
 
-class CTaskSimpleDuck : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleDuck : public CTaskSimple {
 public:
     uint32                 m_StartTime{};
     uint16                 m_LengthOfDuck{};
@@ -58,6 +58,7 @@ public:
     eTaskType GetTaskType() const override { return Type; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority = eAbortPriority::ABORT_PRIORITY_URGENT, CEvent const* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
+    void SetPedIsDucking(CPed* ped, bool value);
 
 private: // Wrappers for hooks
 
