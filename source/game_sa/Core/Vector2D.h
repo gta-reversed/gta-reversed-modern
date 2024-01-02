@@ -115,9 +115,6 @@ public:
         return std::atan2(-x, y);
     }
 
-
-    bool IsZero() const { return x == 0.f && y == 0.f; }
-
     auto GetComponents() const {
         return std::span{ reinterpret_cast<const float*>(this), 2 };
     }

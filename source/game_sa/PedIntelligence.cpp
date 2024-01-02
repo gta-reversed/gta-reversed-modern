@@ -369,7 +369,7 @@ bool CPedIntelligence::GetUsingParachute() {
 // 0x601230
 void CPedIntelligence::SetTaskDuckSecondary(uint16 nLengthOfDuck) {
     if (const auto duck = GetTaskDuck()) {
-        if (duck->m_nDuckControlType == DUCK_SCRIPT_CONTROLLED) {
+        if (duck->m_DuckControlType == DUCK_SCRIPT_CONTROLLED) {
             return;
         }
     }
