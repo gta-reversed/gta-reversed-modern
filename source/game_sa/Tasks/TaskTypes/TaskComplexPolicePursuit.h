@@ -25,8 +25,8 @@ public:
     static void SetWeapon(CPed* ped);
     static void __stdcall ClearPursuit(CCopPed* pursuer);
 
-    int8 SetPursuit(CPed* ped);
-    int8 PersistPursuit(CPed* ped);
+    bool SetPursuit(CPed* ped);
+    bool PersistPursuit(CCopPed* pursuer);
     void CreateSubTask(int32 taskType, CPed* ped);
 
     CTask*    Clone() const override { return new CTaskComplexPolicePursuit{ *this }; }

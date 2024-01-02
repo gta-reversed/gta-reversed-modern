@@ -11,7 +11,7 @@ void CTaskComplexPolicePursuit::InjectHooks() {
     RH_ScopedInstall(SetWeapon, 0x68BAD0);
     RH_ScopedInstall(ClearPursuit, 0x68BD90);
     RH_ScopedInstall(SetPursuit, 0x68BBD0);
-    RH_ScopedInstall(PersistPursuit, 0x68BDC0, { .reversed = false });
+    RH_ScopedInstall(PersistPursuit, 0x68BDC0);
     RH_ScopedInstall(CreateSubTask, 0x68D910, { .reversed = false });
     RH_ScopedVMTInstall(Clone, 0x68CDD0, { .reversed = false });
     RH_ScopedVMTInstall(GetTaskType, 0x68BAA0, { .reversed = false });
@@ -80,7 +80,7 @@ void __stdcall CTaskComplexPolicePursuit::ClearPursuit(CCopPed* pursuer) {
 }
 
 // 0x68BBD0
-int8 CTaskComplexPolicePursuit::SetPursuit(CPed* ped) {
+bool CTaskComplexPolicePursuit::SetPursuit(CPed* ped) {
     // Find closest player
     float minDistSq = FLT_MAX;
     CPlayerPed* closestPlayer{};
@@ -103,8 +103,28 @@ int8 CTaskComplexPolicePursuit::SetPursuit(CPed* ped) {
 }
 
 // 0x68BDC0
-int8 CTaskComplexPolicePursuit::PersistPursuit(CPed* ped) {
-    return plugin::CallMethodAndReturn<int8, 0x68BDC0, CTaskComplexPolicePursuit*, CPed*>(this, ped);
+bool CTaskComplexPolicePursuit::PersistPursuit(CCopPed* pursuer) {
+    const auto wanted = FindPlayerWanted();
+
+    if (pursuer->m_fHealth < 0.f) { // 0x68BDD0
+        ClearPursuit(pursuer);
+    } else if (CCullZones::NoPolice() && !m_bRoadBlockCop) { // 0x68BDF1
+        if (pursuer->bHitSomethingLastFrame) {
+            m_bPlayerInCullZone = m_bRoadBlockCop = true;
+            ClearPursuit(pursuer);
+        }
+    } else if (!CCullZones::NoPolice() && m_bPlayerInCullZone) { // 0x68BE16
+        m_bPlayerInCullZone = m_bRoadBlockCop = false;
+        ClearPursuit(pursuer);
+    } else if (wanted->GetWantedLevel() == 0) { // 0x68BE43
+        if (m_bRoadBlockCop && !m_bPlayerInCullZone) {
+            m_bPlayerInCullZone = m_bRoadBlockCop = false;
+            ClearPursuit(pursuer);
+        }
+    }
+
+    wanted->RemoveExcessPursuitCops(); // 0x68BE5D
+    return wanted->IsInPursuit(pursuer);
 }
 
 // 0x68D910
