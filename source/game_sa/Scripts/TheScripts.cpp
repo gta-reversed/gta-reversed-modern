@@ -39,6 +39,21 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(InitialiseConnectLodObjects, 0x470940);
     RH_ScopedInstall(InitialiseSpecialAnimGroupsAttachedToCharModels, 0x474730);
     RH_ScopedInstall(InitialiseSpecialAnimGroup, 0x474710);
+
+    RH_ScopedInstall(AddToSwitchJumpTable, 0x470390);
+    RH_ScopedInstall(AddToVehicleModelsBlockedByScript, 0x46B200, {.reversed = false});
+
+    RH_ScopedInstall(CleanUpThisObject, 0x4866C0);
+    RH_ScopedInstall(CleanUpThisPed, 0x486300, {.reversed = false});
+    RH_ScopedInstall(CleanUpThisVehicle, 0x486670, {.reversed = false});
+    RH_ScopedInstall(ClearAllVehicleModelsBlockedByScript, 0x46A840);
+    RH_ScopedInstall(ClearAllSuppressedCarModels, 0x46A7C0);
+    RH_ScopedInstall(ClearSpaceForMissionEntity, 0x486B00, {.reversed = false});
+
+    RH_ScopedInstall(GetActualScriptThingIndex, 0x4839A0, {.reversed = false});
+    RH_ScopedInstall(GetNewUniqueScriptThingIndex, 0x483720, {.reversed = false});
+    RH_ScopedInstall(GetScriptIndexFromPointer, 0x464D20);
+    RH_ScopedInstall(GetUniqueScriptThingIndex, 0x4810C0);
 }
 
 // 0x468D50
@@ -290,7 +305,7 @@ void CTheScripts::AddToSwitchJumpTable(int32 switchValue, int32 switchLabelLocal
 
 // 0x46B200, unused | inlined?
 void CTheScripts::AddToVehicleModelsBlockedByScript(int32 modelIndex) {
-
+    NOTSA_UNREACHABLE();
 }
 
 // 0x46AB60
