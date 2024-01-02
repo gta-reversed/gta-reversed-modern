@@ -296,4 +296,9 @@ void format_to_sz(char* out, std::string_view fmt, Args&&... args) {
     *std::vformat_to(out, fmt, std::make_format_args(args...)) = '\0';
 }
 
+//! Reads a pointer as specified type.
+template<typename T> requires std::is_trivially_constructible_v<T>
+T ReadAs(void* ptr) {
+    return *static_cast<T*>(ptr);
+}
 };
