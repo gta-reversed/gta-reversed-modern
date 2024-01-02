@@ -307,6 +307,8 @@ enum {
     MAX_NUM_SUPPRESSED_VEHICLE_MODELS           = 40,
 };
 
+static constexpr uint32 SCRIPT_VAR_TIMERA = 32, SCRIPT_VAR_TIMERB = 33;
+
 static constexpr uint32 MISSION_SCRIPT_SIZE = 69000;
 class CTheScripts {
 public:
@@ -411,7 +413,7 @@ public:
     static inline bool& UseTextCommands = *reinterpret_cast<bool*>(0xA44B67);
     static inline int32& LastRandomPedId = *reinterpret_cast<int32*>(0xA476A4);
     static inline uint32& LastMissionPassedTime = *reinterpret_cast<uint32*>(0xA476A8);
-    static inline int32& OnAMissionFlag = *reinterpret_cast<int32*>(0xA476AC);
+    static inline int32& OnAMissionFlag = *reinterpret_cast<int32*>(0xA476AC); // Refers to the offset of OM flag in script space.
     static inline CStreamedScripts& StreamedScripts = *reinterpret_cast<CStreamedScripts*>(0xA47B60);
     static inline CScriptResourceManager& ScriptResourceManager = *reinterpret_cast<CScriptResourceManager*>(0xA485A8);
     static inline CUpsideDownCarCheck& UpsideDownCars = *reinterpret_cast<CUpsideDownCarCheck*>(0xA4892C);
@@ -443,7 +445,7 @@ public:
     static void   AddToListOfConnectedLodObjects(CObject* obj1, CObject* obj2);
     static void   AddToListOfSpecialAnimGroupsAttachedToCharModels(int32 modelId, Const char* ifpName);
     static void   AddToSwitchJumpTable(int32 switchValue, int32 switchLabelLocalAddress);
-    static void   AddToVehicleModelsBlockedByScript(int32 modelIndex);
+    static void   AddToVehicleModelsBlockedByScript(eModelID modelIndex);
     static void   AddToWaitingForScriptBrainArray(CEntity* entity, int16 arg2);
 
     static void AttachSearchlightToSearchlightObject(int32 searchLightId, CObject* tower, CObject* housing, CObject* bulb, float offsetX, float offsetY, float offsetZ);
@@ -466,7 +468,7 @@ public:
     static bool IsPedStopped(CPed* ped);
     static bool IsPlayerOnAMission();
     static bool IsPointWithinSearchLight(CVector* pointPosn, int32 index);
-    static bool IsVehicleStopped(CVehicle* vehicle);
+    static bool IsVehicleStopped(CVehicle* veh);
 
     static bool Load();
     static bool Save();

@@ -42,7 +42,7 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(InitialiseSpecialAnimGroup, 0x474710);
 
     RH_ScopedInstall(AddToSwitchJumpTable, 0x470390);
-    RH_ScopedInstall(AddToVehicleModelsBlockedByScript, 0x46B200, {.reversed = false});
+    RH_ScopedInstall(AddToVehicleModelsBlockedByScript, 0x46B200);
 
     RH_ScopedInstall(CleanUpThisObject, 0x4866C0);
     RH_ScopedInstall(CleanUpThisPed, 0x486300, {.reversed = false});
@@ -50,6 +50,7 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(ClearAllVehicleModelsBlockedByScript, 0x46A840);
     RH_ScopedInstall(ClearAllSuppressedCarModels, 0x46A7C0);
     RH_ScopedInstall(ClearSpaceForMissionEntity, 0x486B00, {.reversed = false});
+    RH_ScopedInstall(WipeLocalVariableMemoryForMissionScript, 0x464BB0);
 
     RH_ScopedInstall(GetActualScriptThingIndex, 0x4839A0, {.reversed = false});
     RH_ScopedInstall(GetNewUniqueScriptThingIndex, 0x483720, {.reversed = false});
@@ -69,7 +70,10 @@ void CTheScripts::InjectHooks() {
 
     RH_ScopedInstall(DrawScriptSpheres, 0x4810E0);
 
-    RH_ScopedInstall(UndoEntityInvisibilitySettings, 0x4812D0)
+    RH_ScopedInstall(UndoEntityInvisibilitySettings, 0x4812D0);
+
+    RH_ScopedInstall(IsPlayerOnAMission, 0x464D50);
+    RH_ScopedInstall(IsVehicleStopped, 0x4861F0);
 }
 
 // 0x468D50
@@ -329,8 +333,18 @@ void CTheScripts::AddToSwitchJumpTable(int32 switchValue, int32 switchLabelLocal
 }
 
 // 0x46B200, unused | inlined?
-void CTheScripts::AddToVehicleModelsBlockedByScript(int32 modelIndex) {
-    NOTSA_UNREACHABLE();
+void CTheScripts::AddToVehicleModelsBlockedByScript(eModelID modelIndex) {
+    if (notsa::contains(VehicleModelsBlockedByScript, modelIndex)) {
+        return;
+    }
+
+    auto free = rng::find(VehicleModelsBlockedByScript, MODEL_INVALID);
+    if (free == VehicleModelsBlockedByScript.end()) {
+        // In vanilla, game chooses the last index to be filled, probably unwanted.
+        NOTSA_UNREACHABLE();
+    }
+
+    *free = modelIndex;
 }
 
 // 0x46AB60
@@ -630,12 +644,12 @@ bool CTheScripts::IsPedStopped(CPed* ped) {
 
 // 0x464D50
 bool CTheScripts::IsPlayerOnAMission() {
-    return plugin::CallAndReturn<bool, 0x464D50>();
+    return OnAMissionFlag && notsa::ReadAs<uint32_t>(&ScriptSpace[OnAMissionFlag]) == 1;
 }
 
 // 0x4861F0
-bool CTheScripts::IsVehicleStopped(CVehicle* vehicle) {
-    return plugin::CallAndReturn<bool, 0x4861F0, CVehicle*>(vehicle);
+bool CTheScripts::IsVehicleStopped(CVehicle* veh) {
+    return std::max(CTimer::GetTimeStep(), CTimer::ms_fOldTimeStep) / 100.0f >= veh->m_fMovingSpeed;
 }
 
 // 0x5D4FD0
@@ -650,7 +664,7 @@ bool CTheScripts::Save() {
 
 // 0x464BB0
 void CTheScripts::WipeLocalVariableMemoryForMissionScript() {
-    memset(&LocalVariablesForCurrentMission, 0, sizeof(LocalVariablesForCurrentMission));
+    rng::fill(LocalVariablesForCurrentMission, tScriptParam{});
 }
 
 // 0x46A810
@@ -683,27 +697,27 @@ void CTheScripts::Process() {
     UpsideDownCars.UpdateTimers();
     StuckCars.Process();
     MissionCleanUp.CheckIfCollisionHasLoadedForMissionObjects();
-    CTheScripts::DrawScriptSpheres();
-    CTheScripts::ProcessAllSearchLights();
-    CTheScripts::ProcessWaitingForScriptBrainArray();
+    DrawScriptSpheres();
+    ProcessAllSearchLights();
+    ProcessWaitingForScriptBrainArray();
 
-    if (CTheScripts::FailCurrentMission) {
-        --CTheScripts::FailCurrentMission;
+    if (FailCurrentMission) {
+        --FailCurrentMission;
     }
 
-    if (CTheScripts::UseTextCommands) {
+    if (UseTextCommands) {
         rng::fill(IntroTextLines, tScriptText{});
         NumberOfIntroTextLinesThisFrame = 0;
 
         rng::fill(IntroRectangles, tScriptRectangle{});
         NumberOfIntroRectanglesThisFrame = 0;
 
-        CTheScripts::UseTextCommands = false;
+        UseTextCommands = false;
     }
 
     const auto timeStepMS = (int32)CTimer::GetTimeStepInMS();
-    LocalVariablesForCurrentMission[32].iParam += timeStepMS;
-    LocalVariablesForCurrentMission[33].iParam += timeStepMS;
+    LocalVariablesForCurrentMission[SCRIPT_VAR_TIMERA].iParam += timeStepMS;
+    LocalVariablesForCurrentMission[SCRIPT_VAR_TIMERB].iParam += timeStepMS;
 
     CLoadingScreen::NewChunkLoaded();
 
