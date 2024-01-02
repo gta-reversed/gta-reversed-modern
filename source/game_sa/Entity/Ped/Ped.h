@@ -117,7 +117,7 @@ public:
         bool bCanPointGunAtTarget : 1 = false;   // can ped point gun at target
         bool bIsTalking : 1 = false;             // is ped talking(see Chat())
 
-        bool bInVehicle : 1 = false;             // is in a vehicle
+        bool bInVehicle : 1 = false;             // Is in a vehicle - `m_pVehicle` might still be set regardless. Problems (crashes) arise if `bInVehicle && !m_pVehicle`, so the caller should always check.
         bool bIsInTheAir : 1 = false;            // is in the air
         bool bIsLanding : 1 = false;             // is landing after being in the air
         bool bHitSomethingLastFrame : 1 = false; // has been in a collision last frame
@@ -281,7 +281,7 @@ public:
     CVector             field_578;
     CEntity*            m_pContactEntity;
     float               field_588;
-    CVehicle*           m_pVehicle;
+    CVehicle*           m_pVehicle;         // Ped's vehicle - Only phyisically in it if `bInVehicle` is `true`.
     CVehicle*           m_VehDeadInFrontOf; // Set if `bDeadPedInFrontOfCar` 
     int32               field_594;
     ePedType            m_nPedType;

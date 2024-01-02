@@ -22,7 +22,7 @@ public:
     CTaskComplexPolicePursuit(const CTaskComplexPolicePursuit&);
     ~CTaskComplexPolicePursuit() override;
 
-    static void SetWeapon(CPed* ped);
+    static void __stdcall SetWeapon(CPed* ped);
     static void __stdcall ClearPursuit(CCopPed* pursuer);
 
     bool SetPursuit(CPed* ped);
@@ -34,6 +34,9 @@ public:
     CTask*    CreateNextSubTask(CPed* ped) override { return nullptr; }
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;
+
+private:
+    eTaskType GetNextSubTaskType(CCopPed* ped);
 
 private: // Wrappers for hooks
     // 0x68BA70

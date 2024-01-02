@@ -18,12 +18,12 @@ void CTaskComplexPolicePursuit::InjectHooks() {
     RH_ScopedInstall(SetPursuit, 0x68BBD0);
     RH_ScopedInstall(PersistPursuit, 0x68BDC0);
     RH_ScopedInstall(CreateSubTask, 0x68D910);
-    RH_ScopedVMTInstall(Clone, 0x68CDD0, { .reversed = false });
-    RH_ScopedVMTInstall(GetTaskType, 0x68BAA0, { .reversed = false });
-    RH_ScopedVMTInstall(MakeAbortable, 0x68BAB0, { .reversed = false });
+    RH_ScopedVMTInstall(Clone, 0x68CDD0);
+    RH_ScopedVMTInstall(GetTaskType, 0x68BAA0);
+    RH_ScopedVMTInstall(MakeAbortable, 0x68BAB0);
     RH_ScopedVMTInstall(CreateNextSubTask, 0x68BAC0);
     RH_ScopedVMTInstall(CreateFirstSubTask, 0x6908E0);
-    RH_ScopedVMTInstall(ControlSubTask, 0x690920, { .reversed = false });
+    RH_ScopedVMTInstall(ControlSubTask, 0x690920);
 }
 
 // 0x68CDD0
@@ -45,7 +45,7 @@ CTaskComplexPolicePursuit::~CTaskComplexPolicePursuit() {
 
 //! @addr 0x68BAD0
 //! Make sure cop has a weapon on them
-void CTaskComplexPolicePursuit::SetWeapon(CPed* ped) { // `ped` is the pursuer
+void __stdcall CTaskComplexPolicePursuit::SetWeapon(CPed* ped) { // `ped` is the pursuer
     const auto wantedLevel = FindPlayerWanted()->GetWantedLevel();
 
     // At level 0 we dont do anything (I don't think this is possible anyways)
@@ -91,6 +91,9 @@ bool CTaskComplexPolicePursuit::SetPursuit(CPed* ped) {
     CPlayerPed* closestPlayer{};
     for (const auto& v : CWorld::Players) {
         const auto plyr = v.m_pPed;
+        if (!plyr) {
+            continue;
+        }
         const auto distSq = (plyr->GetPosition() - ped->GetPosition()).SquaredMagnitude();
         if (distSq >= minDistSq) {
             continue;
@@ -170,5 +173,55 @@ CTask* CTaskComplexPolicePursuit::CreateFirstSubTask(CPed* ped) {
 
 // 0x690920
 CTask* CTaskComplexPolicePursuit::ControlSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x690920, CTaskComplexPolicePursuit*, CPed*>(this, ped);
+    const auto nextSubTaskType = GetNextSubTaskType(ped->AsCop());
+
+    if (m_pSubTask->GetTaskType() == TASK_COMPLEX_ARREST_PED || nextSubTaskType == TASK_COMPLEX_ARREST_PED) { // 0x690A3D
+        SetWeapon(ped);
+    }
+
+    if (nextSubTaskType == TASK_NONE || !m_pSubTask->MakeAbortable(ped)) { // 0x690A56
+        return m_pSubTask;
+    }
+
+    if (nextSubTaskType == TASK_COMPLEX_ENTER_CAR_AS_DRIVER) { // 0x690A6C - Inverted
+        ped->GetEventGroup().Add(CEventVehicleToSteal{ped->m_pVehicle});
+        return new CTaskSimpleScratchHead{};
+    }
+
+    return CreateSubTask(nextSubTaskType, ped);
+}
+
+// Code @ 0x690956 (not a function originally)
+eTaskType CTaskComplexPolicePursuit::GetNextSubTaskType(CCopPed* pursuer) { // ped is the pursuer
+    const auto plyrWanted = FindPlayerWanted();
+
+    if (PersistPursuit(pursuer)) { // 0x0x690956
+        return TASK_NONE;
+    }
+
+    if (m_bRoadBlockCop && (!pursuer->bStayInSamePlace || pursuer->GetActiveWeapon().GetType() != WEAPON_PISTOL)) { // 0x690991 (Inverted)
+        pursuer->SetCurrentWeapon(WEAPON_PISTOL);
+        pursuer->bStayInSamePlace = true;
+        return TASK_COMPLEX_ARREST_PED;
+    }
+
+    if (m_pSubTask->GetTaskType() == TASK_COMPLEX_ARREST_PED) { // 0x6909BB
+        if (pursuer->bInVehicle) {
+            return TASK_FINISHED;
+        }
+
+        if (!pursuer->m_pVehicle) {
+            return TASK_SIMPLE_STAND_STILL;
+        }
+
+        if (plyrWanted->GetWantedLevel() == 0) { // 0x6909D7
+            return TASK_COMPLEX_ENTER_CAR_AS_DRIVER;
+        }
+
+        if ((pursuer->m_pVehicle->GetPosition() - pursuer->GetPosition()).SquaredMagnitude() <= sq(5.f)) {
+            return TASK_COMPLEX_SEEK_ENTITY;
+        }
+    }
+
+    return TASK_NONE;
 }
