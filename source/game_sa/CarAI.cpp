@@ -92,7 +92,7 @@ void CCarAI::AddPoliceCarOccupants(CVehicle* vehicle, bool arg2) {
                 CTaskSimpleCarSetPedOut{ vehicle, TARGET_DOOR_DRIVER, true }.ProcessPed(driver);
                 driver->AttachPedToEntity(vehicle, CVector(0.0, 0.0, 0.0), 0, (float)6.2831855, WEAPON_PISTOL);
                 // ??which flag it sets?
-                // driver->m_nPedFlags |= 0x200000u;
+                driver->bStayInSamePlace = true;
 
                 // ??there is no CTaskComplexKillPedFromBoat
                 // driver->GetTaskManager().SetTask(new CTaskComplexKillPedFromBoat{ FindPlayerPed() }, TASK_PRIMARY_PRIMARY);
