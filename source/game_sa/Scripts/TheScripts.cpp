@@ -416,11 +416,11 @@ int32 CTheScripts::GetActualScriptThingIndex(int32 index, eScriptThingType type)
 // TODO: TEST REFACTOR!
 int32 CTheScripts::GetNewUniqueScriptThingIndex(int32 index, eScriptThingType type) {
     //return plugin::CallAndReturn<uint32, 0x483720, int32, char>(index, type);
-    const auto NewUniqueId = [index](int16& id) -> int32 {
+    const auto NewUniqueId = [index](auto& id) -> int32 {
         if (id == -1 || id == -2) {
             id = 1;
         } else {
-            id++;
+            ++id;
         }
 
         return (uint32)id << 16 | index;
@@ -441,12 +441,12 @@ int32 CTheScripts::GetNewUniqueScriptThingIndex(int32 index, eScriptThingType ty
     case eScriptThingType::SCRIPT_THING_FIRE:
         return NewUniqueId(gFireManager.m_aFires[index].m_nScriptReferenceIndex);
     case eScriptThingType::SCRIPT_THING_2D_EFFECT:
-        return NewUniqueId(*(int16*)CScripted2dEffects::ScriptReferenceIndex[index]);
+        return NewUniqueId(CScripted2dEffects::ScriptReferenceIndex[index]);
     case eScriptThingType::SCRIPT_THING_DECISION_MAKER:
         CDecisionMakerTypes::GetInstance(); // ? TODO check if we really need this
-        return NewUniqueId(*(int16*)CDecisionMakerTypes::ScriptReferenceIndex[index]);
+        return NewUniqueId(CDecisionMakerTypes::ScriptReferenceIndex[index]);
     case eScriptThingType::SCRIPT_THING_PED_GROUP:
-        return NewUniqueId(*(int16*)CPedGroups::ScriptReferenceIndex[index]);
+        return NewUniqueId(CPedGroups::ScriptReferenceIndex[index]);
     default:
         break;
     }
