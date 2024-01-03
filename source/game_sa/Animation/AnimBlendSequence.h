@@ -56,18 +56,18 @@ public:
         }
     }
 
-    KeyFrame* GetUKeyFrame(size_t n) const { // `U` = Uncompressed
+    KeyFrameTrans* GetUKeyFrame(size_t n) const { // `U` = Uncompressed
         assert(n < m_FramesNum);
-        return m_bHasTranslation ?
+        return static_cast<KeyFrameTrans*>(m_bHasTranslation ? // Lie a little by always casting to `KeyFrameTrans*` to make our lifes easier
             &((KeyFrameTrans*)m_Frames)[n] :
-            &((KeyFrame*)m_Frames)[n];
+            &((KeyFrame*)m_Frames)[n]);
     }
 
-    KeyFrameCompressed* GetCKeyFrame(size_t n) const { // `C` = Compressed
+    KeyFrameTransCompressed* GetCKeyFrame(size_t n) const { // `C` = Compressed
         assert(n < m_FramesNum);
-        return m_bHasTranslation ?
+        return static_cast<KeyFrameTransCompressed*>(m_bHasTranslation ? // Lie a little by always casting to `KeyFrameTransCompressed*` to make our lifes easier
             &((KeyFrameTransCompressed*)m_Frames)[n] :
-            &((KeyFrameCompressed*)m_Frames)[n];
+            &((KeyFrameCompressed*)m_Frames)[n]);
     }
 
     KeyFrameTrans* GetUncompressedFrame(int32 frame) const; // Same as `GetUKeyFrame`

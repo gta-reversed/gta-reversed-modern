@@ -198,7 +198,7 @@ T stepto(const T& from, const T& to, float step) {
 
 template<typename T>
 T lerp(const T& from, const T& to, float t) {
-    // Same as from + (to - from) * t
+    // Same as `from + (to - from) * t` (Or `from + t * (to - from)`
     return static_cast<T>(to * t + from * (1.f - t));
 }
 
