@@ -115,7 +115,7 @@ void CAnimManager::Shutdown() {
 }
 
 CAnimBlock* CAnimManager::GetAnimationBlock(AssocGroupId animGroup) {
-    return ms_aAnimAssocGroups[animGroup].m_pAnimBlock;
+    return ms_aAnimAssocGroups[animGroup].m_AnimBlock;
 }
 
 // 0x4D3940
@@ -301,7 +301,7 @@ void CAnimManager::CreateAnimAssocGroups() {
     for (auto&& [i, group] : notsa::enumerate(GetAssocGroups())) {
         const auto def   = &ms_aAnimAssocDefinitions[i];
         const auto block = GetAnimationBlock(def->blockName);
-        if (block == nullptr || !block->bLoaded || group.m_pAssociations) {
+        if (block == nullptr || !block->bLoaded || group.m_Associations) {
             continue;
         }
 
@@ -311,10 +311,10 @@ void CAnimManager::CreateAnimAssocGroups() {
             RpAnimBlendClumpInit(clump);
         }
 
-        group.m_nGroupID = i;
-        group.m_nIdOffset = def->animDesc->animId;
+        group.m_GroupID = i;
+        group.m_IdOffset = def->animDesc->animId;
         group.CreateAssociations(def->blockName, clump, const_cast<char**>(def->animNames), def->animsCount); // todo: remove const_cast
-        for (auto j = 0u; j < group.m_nNumAnimations; j++) {
+        for (auto j = 0u; j < group.m_NumAnimsx; j++) {
             group.GetAnimation(def->animDesc[j].animId)->m_nFlags |= def->animDesc[j].flags;
         }
 
@@ -356,7 +356,7 @@ void CAnimManager::RemoveAnimBlock(int32 index) {
     const auto ab = &GetAnimBlocks()[index];
 
     for (auto& g : GetAssocGroups()) {
-        if (g.m_pAnimBlock == ab) {
+        if (g.m_AnimBlock == ab) {
             g.DestroyAssociations();
         }
     }

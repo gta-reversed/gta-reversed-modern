@@ -14,14 +14,11 @@ class CAnimBlendStaticAssociation;
 
 class CAnimBlendAssocGroup {
 public:
-    CAnimBlock*                  m_pAnimBlock;
-    CAnimBlendStaticAssociation* m_pAssociations;
-    uint32                       m_nNumAnimations;
-    int32                        m_nIdOffset;
-    int32                        m_nGroupID;
+    static void InjectHooks();
 
-public:
     CAnimBlendAssocGroup();
+    ~CAnimBlendAssocGroup();
+
     CAnimBlendAssociation*       CopyAnimation(const char* AnimName);
     CAnimBlendAssociation*       CopyAnimation(uint32 ID);
     void                         CreateAssociations(const char* szBlockName);
@@ -32,7 +29,25 @@ public:
     CAnimBlendStaticAssociation* GetAnimation(uint32 ID);
     uint32                       GetAnimationId(const char* AnimName);
     void                         InitEmptyAssociations(RpClump* clump);
-    ~CAnimBlendAssocGroup();
-};
 
+private: // Wrappers for hooks
+    // 0x4CDE70
+    CAnimBlendAssocGroup* Constructor() {
+        this->CAnimBlendAssocGroup::CAnimBlendAssocGroup();
+        return this;
+    }
+
+    // 0x4CE1D0
+    CAnimBlendAssocGroup* Destructor() {
+        this->CAnimBlendAssocGroup::~CAnimBlendAssocGroup();
+        return this;
+    }
+
+private:
+    CAnimBlock*                  m_AnimBlock{};
+    CAnimBlendStaticAssociation* m_Associations{};
+    uint32                       m_NumAnimsx{};
+    int32                        m_IdOffset{};
+    int32                        m_GroupID{-1};
+};
 VALIDATE_SIZE(CAnimBlendAssocGroup, 0x14);

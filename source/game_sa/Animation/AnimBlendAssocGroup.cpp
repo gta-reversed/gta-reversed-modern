@@ -8,9 +8,27 @@
 
 #include "AnimBlendAssocGroup.h"
 
-// 0x4CDE70
-CAnimBlendAssocGroup::CAnimBlendAssocGroup() {
-    plugin::CallMethod<0x4CDE70, CAnimBlendAssocGroup*>(this);
+void CAnimBlendAssocGroup::InjectHooks() {
+    RH_ScopedClass(CAnimBlendAssocGroup);
+    RH_ScopedCategory("Animation");
+
+    RH_ScopedInstall(Constructor, 0x4CDE70);
+    RH_ScopedInstall(Destructor, 0x4CE1D0);
+
+    //RH_ScopedInstall(GetNumAnimations, 0x45B050, { .reversed = false });
+    //RH_ScopedInstall(GetAnimBlock, 0x45B060, { .reversed = false });
+    RH_ScopedInstall(InitEmptyAssociations, 0x4CDFB0, { .reversed = false });
+    RH_ScopedInstall(DestroyAssociations, 0x4CDFF0, { .reversed = false });
+    RH_ScopedOverloadedInstall(GetAnimation, "Name", 0x4CE040, CAnimBlendStaticAssociation *(CAnimBlendAssocGroup::*)(const char*), { .reversed = false });
+    RH_ScopedOverloadedInstall(GetAnimation, "BlockID", 0x4CE090, CAnimBlendStaticAssociation *(CAnimBlendAssocGroup::*)(uint32), { .reversed = false });
+    RH_ScopedOverloadedInstall(CopyAnimation, "Name", 0x4CE0B0, CAnimBlendAssociation *(CAnimBlendAssocGroup::*)(const char*), { .reversed = false });
+    RH_ScopedOverloadedInstall(CopyAnimation, "BlockID", 0x4CE130, CAnimBlendAssociation *(CAnimBlendAssocGroup::*)(uint32), { .reversed = false });
+    RH_ScopedInstall(GetAnimationId, 0x4CE1B0, { .reversed = false });
+    //RH_ScopedOverloadedInstall(CreateAssociations, "", 0x4CE220, CAnimBlock *(CAnimBlendAssocGroup::*)(const char*), { .reversed = false });
+    //RH_ScopedOverloadedInstall(CreateAssociations, "", 0x4CE3B0, CAnimBlock *(CAnimBlendAssocGroup::*)(const char*, const char*, const char*, int32), { .reversed = false });
+    //RH_ScopedOverloadedInstall(CreateAssociations, "", 0x4CE5C0, CAnimBlock *(CAnimBlendAssocGroup::*)(const char*, RpClump*), { .reversed = false });
+    //RH_ScopedOverloadedInstall(CreateAssociations, "", 0x4CE6E0, int32 *(CAnimBlendAssocGroup::*)(charconst*, RpClump*, char**, int32), { .reversed = false });
+    //RH_ScopedInstall(IsCreated, 0x4D37A0, { .reversed = false });
 }
 
 // 0x4CE0B0

@@ -198,7 +198,7 @@ void CReplay::RetrievePedAnimation(CPed* ped, const CStoredAnimationState& state
 
     CAnimBlendAssociation* anim = nullptr;
     if (auto first = state[0]; first.m_nAnimId > 3u) {
-        auto animBlock = CAnimManager::ms_aAnimAssocGroups[first.m_nGroupId1].m_pAnimBlock;
+        auto animBlock = CAnimManager::ms_aAnimAssocGroups[first.m_nGroupId1].m_AnimBlock;
         if (animBlock && animBlock->bLoaded) {
             anim = CAnimManager::BlendAnimation(ped->m_pRwClump, (AssocGroupId)first.m_nGroupId1, (AnimationId)first.m_nAnimId, 100.0f);
         } else {
@@ -213,7 +213,7 @@ void CReplay::RetrievePedAnimation(CPed* ped, const CStoredAnimationState& state
     anim->m_nCallbackType = ANIM_BLEND_CALLBACK_NONE;
 
     anim = nullptr;
-    if (auto second = state[1]; second.m_nGroupId1 && second.m_nAnimId && CAnimManager::ms_aAnimAssocGroups[second.m_nGroupId2].m_nNumAnimations > 0) {
+    if (auto second = state[1]; second.m_nGroupId1 && second.m_nAnimId && CAnimManager::ms_aAnimAssocGroups[second.m_nGroupId2].m_NumAnimsx > 0) {
         if (second.m_nAnimId > 3u) {
             anim = CAnimManager::BlendAnimation(ped->m_pRwClump, (AssocGroupId)second.m_nGroupId2, (AnimationId)second.m_nAnimId, 100.0f);
         } else {
@@ -231,7 +231,7 @@ void CReplay::RetrievePedAnimation(CPed* ped, const CStoredAnimationState& state
     RpAnimBlendClumpRemoveAssociations(ped->m_pRwClump, ANIMATION_PARTIAL);
     if (auto third = state[2]; third.m_nGroupId1 && third.m_nAnimId) {
         if (/*third.m_nGroupId1 >= 0 &&*/ third.m_nAnimId != 3u) {
-            if (auto animBlock = CAnimManager::ms_aAnimAssocGroups[third.m_nGroupId2].m_pAnimBlock; animBlock && animBlock->bLoaded) {
+            if (auto animBlock = CAnimManager::ms_aAnimAssocGroups[third.m_nGroupId2].m_AnimBlock; animBlock && animBlock->bLoaded) {
                 anim = CAnimManager::BlendAnimation(ped->m_pRwClump, (AssocGroupId)third.m_nGroupId2, (AnimationId)third.m_nAnimId, 1000.0f);
 
                 anim->SetCurrentTime(third.m_nTime / ANIM_TIME_COMPRESS_VALUE);
