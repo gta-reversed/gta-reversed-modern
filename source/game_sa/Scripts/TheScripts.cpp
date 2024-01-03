@@ -137,8 +137,8 @@ void CTheScripts::Init() {
     UpdateObjectIndices();
     rng::fill(MultiScriptArray, 0u);
     NumberOfUsedObjects                        = 0;
-    bAlreadyRunningAMissionScript              = 0;
-    bUsingAMultiScriptFile                     = 1;
+    bAlreadyRunningAMissionScript              = false;
+    bUsingAMultiScriptFile                     = true;
     MainScriptSize                             = 0;
     LargestMissionScriptSize                   = 0;
     NumberOfMissionScripts                     = 0;
@@ -341,7 +341,10 @@ void CTheScripts::AddToVehicleModelsBlockedByScript(eModelID modelIndex) {
     auto free = rng::find(VehicleModelsBlockedByScript, MODEL_INVALID);
     if (free == VehicleModelsBlockedByScript.end()) {
         // In vanilla, game chooses the last index to be filled, probably unwanted.
-        NOTSA_UNREACHABLE();
+        //
+        // If this asserts then it's reachable. Remove the assert and uncomment the line below:
+        // --free;
+        assert(false);
     }
 
     *free = modelIndex;

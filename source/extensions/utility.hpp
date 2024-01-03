@@ -291,8 +291,8 @@ inline constexpr bool is_standard_integer = std::is_integral_v<T> && !is_any_of_
 //! Null terminated `std::format_to`. Use inplace of sprintf.
 //! NOTE: Note a complete replacement for std::format_to,
 //! e.g. it doesn't use output iterators. i don't care.
-template<class... Args>
-void format_to_sz(char* out, std::string_view fmt, Args&&... args) {
+template<size_t N, class... Args>
+void format_to_sz(char(&out)[N], std::string_view fmt, Args&&... args) {
     *std::vformat_to(out, fmt, std::make_format_args(args...)) = '\0';
 }
 
