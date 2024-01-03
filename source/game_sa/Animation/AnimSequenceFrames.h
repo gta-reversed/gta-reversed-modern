@@ -2,6 +2,9 @@
 
 #include "Quaternion.h"
 
+#include "FixedVector.hpp"
+#include "FixedQuat.hpp"
+
 
 union Quat16 { // 4096
     struct {
@@ -40,53 +43,39 @@ struct KeyFrameTrans : KeyFrame {
 };
 
 struct KeyFrameCompressed {
-    int16 rot[4];    // 4096
-    int16 deltaTime; // 60
+    FixedQuat<int16, 4096.f> Rot;
+    FixedFloat<int16, 60.f>  DeltaTime;
 
-    void GetRotation(CQuaternion* quat) {
-        float scale = 1.0f / 4096.0f;
-        quat->x = float(rot[0]) * scale;
-        quat->y = float(rot[1]) * scale;
-        quat->z = float(rot[2]) * scale;
-        quat->w = float(rot[3]) * scale;
+    void GetRotation(CQuaternion* quat) const {
+        *quat = Rot;
     }
 
     void SetRotation(const CQuaternion& quat) {
-        rot[0] = int16(quat.x * 4096.0f);
-        rot[1] = int16(quat.y * 4096.0f);
-        rot[2] = int16(quat.z * 4096.0f);
-        rot[3] = int16(quat.w * 4096.0f);
+        Rot = quat;
     }
 
     [[nodiscard]] float GetDeltaTime() const {
-        return (float)deltaTime / 60.0f;
+        return DeltaTime;
     }
 
-    void SetTime(float time) {
-        deltaTime = int16(time * 60.0f + 0.5f);
+    void SetTime(float compressedTime) {
+        DeltaTime.Set(compressedTime, true); // NOTE/TODO: I don't really think rounding upwards matters that much, but thats how the code was
     }
 };
 
 struct KeyFrameTransCompressed : KeyFrameCompressed {
-    int16 trans[3]; // 1024 - TODO: FixedVector
+    FixedVector<int16, 1024.f> Trans;
 
-    void GetTranslation(CVector* vec) {
-        float scale = 1.0f / 1024.0f;
-        vec->x = float(trans[0]) * scale;
-        vec->y = float(trans[1]) * scale;
-        vec->z = float(trans[2]) * scale;
+    void GetTranslation(CVector* vec) const {
+        *vec = Trans;
     }
 
-    CVector GetTranslation() {
-        CVector out;
-        GetTranslation(&out);
-        return out;
+    CVector GetTranslation() const {
+        return Trans;
     }
 
     void SetTranslation(const CVector& vec) {
-        trans[0] = int16(vec.x * 1024.0f);
-        trans[1] = int16(vec.y * 1024.0f);
-        trans[2] = int16(vec.z * 1024.0f);
+        Trans = vec;
     }
 };
 

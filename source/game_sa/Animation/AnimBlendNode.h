@@ -34,8 +34,11 @@ public:
 
     bool FindKeyFrame(float time);
 
-    void GetCurrentTranslation(CVector& trans, float weight);
-    void GetCurrentTranslationCompressed(CVector& trans, float weight);
+    //! @addr 0x4CFC50
+    void GetCurrentTranslation(CVector& trans, float weight) { I_GetCurrentTranslation<false>(trans, weight); }
+
+    //! @addr 0x4CFE60
+    void GetCurrentTranslationCompressed(CVector& trans, float weight) { I_GetCurrentTranslation<true>(trans, weight); }
 
     void GetEndTranslation(CVector& trans, float weight);
     void GetEndTranslationCompressed(CVector& trans, float weight);
@@ -50,6 +53,28 @@ public:
     bool UpdateCompressed(CVector& trans, CQuaternion& rot, float weight);
 
     bool UpdateTime();
+
+private: // Generic implementations
+    template<bool IsCompressed>
+    NOTSA_FORCEINLINE void I_GetCurrentTranslation(CVector& trans, float weight) {
+        trans = CVector{0.0f, 0.0f, 0.0f};
+
+        const auto blend = m_BlendAssoc->GetBlendAmount(weight);
+        if (blend <= 0.0f) {
+            return;
+        }
+
+        const auto kfA = m_BlendSeq->GetKeyFrame<IsCompressed>(m_KeyFrameA),
+                   kfB = m_BlendSeq->GetKeyFrame<IsCompressed>(m_KeyFrameB);
+
+        const auto t = (kfA->DeltaTime - m_RemainingTime) / kfA->DeltaTime;
+
+        if (m_BlendSeq->m_bHasTranslation) {
+            trans = kfB->Trans + t * (kfA->Trans - kfB->Trans);
+            trans *= blend;
+        }
+    }
+
 };
 
 VALIDATE_SIZE(CAnimBlendNode, 0x18);

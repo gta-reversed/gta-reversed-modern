@@ -8,8 +8,8 @@ void CAnimBlendNode::InjectHooks() {
 
     RH_ScopedInstall(Init, 0x4CFB70);
     RH_ScopedInstall(NextKeyFrameNoCalc, 0x4CFB90);
-    RH_ScopedInstall(GetCurrentTranslation, 0x4CFC50, { .reversed = false });
-    RH_ScopedInstall(GetCurrentTranslationCompressed, 0x4CFE60, { .reversed = false });
+    RH_ScopedInstall(GetCurrentTranslation, 0x4CFC50);
+    RH_ScopedInstall(GetCurrentTranslationCompressed, 0x4CFE60);
     RH_ScopedInstall(GetEndTranslation, 0x4CFD90, { .reversed = false });
     RH_ScopedInstall(GetEndTranslationCompressed, 0x4D0000, { .reversed = false });
     RH_ScopedInstall(CalcTheta, 0x4D00E0);
@@ -109,16 +109,6 @@ void CAnimBlendNode::CalcDeltasCompressed() {
         kfB->SetRotation(rotB);
     }
     CalcTheta(DotProduct(rotA, rotB));
-}
-
-// 0x4CFC50
-void CAnimBlendNode::GetCurrentTranslation(CVector& trans, float weight) {
-    assert(0);
-}
-
-// 0x4CFE60
-void CAnimBlendNode::GetCurrentTranslationCompressed(CVector& trans, float weight) {
-    assert(0);
 }
 
 // 0x4CFD90

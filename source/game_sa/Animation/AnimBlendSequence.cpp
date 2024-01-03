@@ -45,6 +45,7 @@ void CAnimBlendSequence::CompressKeyframes(uint8* frameData) {
     }
 
     void* frames = (frameData ? frameData : CMemoryMgr::Malloc(GetDataSize(true)));
+
     if (m_bHasTranslation) {
         auto* kftc = (KeyFrameTransCompressed*)frames;
         auto* kf = (KeyFrameTrans*)m_Frames;
@@ -88,7 +89,7 @@ size_t CAnimBlendSequence::GetDataSize(bool compressed) const {
 }
 
 // 0x4D1190
-void CAnimBlendSequence::RemoveQuaternionFlips() {
+void CAnimBlendSequence::RemoveQuaternionFlips() const {
     if (m_FramesNum < 2) {
         return;
     }

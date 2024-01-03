@@ -39,12 +39,22 @@ public:
     [[nodiscard]] size_t GetDataSize(bool compressed) const;
     bool MoveMemory();
     void Print();
-    void RemoveQuaternionFlips();
+    void RemoveQuaternionFlips() const;
     void RemoveUncompressedData(uint8* frameData);
     void SetBoneTag(int32 boneId);
     void SetName(const char* string);
     void SetNumFrames(int32 count, bool root, bool compressed, CAnimBlendSequence* frameData); // root -> isTranslated?
     void Uncompress(uint8* frameData);
+
+    // Used to implement copy-paste functions
+    template<bool AsCompressed>
+    auto GetKeyFrame(size_t n) const {
+        if constexpr (AsCompressed) {
+            return GetCKeyFrame(n);
+        } else {
+            return GetUKeyFrame(n);
+        }
+    }
 
     KeyFrame* GetUKeyFrame(size_t n) const { // `U` = Uncompressed
         assert(n < m_FramesNum);
@@ -60,8 +70,8 @@ public:
             &((KeyFrameCompressed*)m_Frames)[n];
     }
 
-    KeyFrameTrans* GetUncompressedFrame(int32 frame) const;
-    KeyFrameTransCompressed* GetCompressedFrame(int32 frame) const;
+    KeyFrameTrans* GetUncompressedFrame(int32 frame) const; // Same as `GetUKeyFrame`
+    KeyFrameTransCompressed* GetCompressedFrame(int32 frame) const; // Same as `GetCKeyFrame`
 
     CAnimBlendSequence* Constructor() { this->CAnimBlendSequence::CAnimBlendSequence(); return this; }
     CAnimBlendSequence* Destructor() { this->CAnimBlendSequence::~CAnimBlendSequence(); return this; }
