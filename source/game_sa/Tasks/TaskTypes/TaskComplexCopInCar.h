@@ -23,7 +23,7 @@ public:
 public:
     static constexpr auto Type = TASK_COMPLEX_COP_IN_CAR;
 
-    CTaskComplexCopInCar(CVehicle* vehicle, CPed* cop1, CPed* cop2, bool bSuspectDeadOrLost);
+    CTaskComplexCopInCar(CVehicle* vehicle, CPed* partnerCop, CPed* suspect, bool bSuspectDeadOrLost);
     ~CTaskComplexCopInCar() override;
 
     CTask* CreateSubTask(eTaskType taskType, CPed* copPed);

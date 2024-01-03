@@ -8,22 +8,32 @@
 
 #include "CarAI.h"
 #include "CarCtrl.h"
+#include "CullZones.h"
+#include "TaskComplexCopInCar.h"
+#include "TaskComplexDriveFireTruck.h"
 #include "TaskComplexMedicTreatInjuredPed.h"
+#include "TaskComplexKillPedFromBoat.h"
 #include "TaskSimpleCarDrive.h"
+#include "TaskSimpleCarSetPedOut.h"
+#include "Timer.h"
+
+#include "eWeaponType.h"
+
+
 
 void CCarAI::InjectHooks() {
     RH_ScopedClass(CCarAI);
     RH_ScopedCategory("AI");
 
     RH_ScopedInstall(AddAmbulanceOccupants, 0x41C4A0, { .reversed = true });
-    RH_ScopedInstall(AddFiretruckOccupants, 0x41C600, { .reversed = false });
-    RH_ScopedInstall(AddPoliceCarOccupants, 0x41C070, { .reversed = false });
-    RH_ScopedInstall(BackToCruisingIfNoWantedLevel, 0x41BFA0, { .reversed = false });
-    RH_ScopedInstall(CarHasReasonToStop, 0x41C050, { .reversed = false });
-    RH_ScopedInstall(EntitiesGoHeadOn, 0x41CD00, { .reversed = false });
+    RH_ScopedInstall(AddFiretruckOccupants, 0x41C600, { .reversed = true });
+    RH_ScopedInstall(AddPoliceCarOccupants, 0x41C070, { .reversed = true });
+    RH_ScopedInstall(BackToCruisingIfNoWantedLevel, 0x41BFA0, { .reversed = true });
+    RH_ScopedInstall(CarHasReasonToStop, 0x41C050, { .reversed = true });
+    RH_ScopedInstall(EntitiesGoHeadOn, 0x41CD00, { .reversed = true });
     RH_ScopedInstall(FindPoliceBikeMissionForWantedLevel, 0x41CA40);
     RH_ScopedInstall(FindPoliceBoatMissionForWantedLevel, 0x41CA50);
-    RH_ScopedInstall(FindPoliceCarMissionForWantedLevel, 0x41C9D0, { .reversed = false });
+    RH_ScopedInstall(FindPoliceCarMissionForWantedLevel, 0x41C9D0, { .reversed = true });
     RH_ScopedInstall(FindPoliceCarSpeedForWantedLevel, 0x41CAA0);
     RH_ScopedInstall(FindSwitchDistanceClose, 0x41BF50, { .reversed = false });
     RH_ScopedInstall(FindSwitchDistanceFar, 0x41BF70, { .reversed = false });
@@ -55,27 +65,113 @@ void CCarAI::AddAmbulanceOccupants(CVehicle* vehicle) {
 
 // 0x41C600
 void CCarAI::AddFiretruckOccupants(CVehicle* vehicle) {
-    plugin::Call<0x41C600, CVehicle*>(vehicle);
+    CPed* driver = vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
+    CPed* passenger = vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
+
+    driver->GetTaskManager().SetTask(new CTaskSimpleCarDrive{ vehicle }, TASK_PRIMARY_DEFAULT);
+    driver->GetTaskManager().SetTask(new CTaskComplexDriveFireTruck{ vehicle, passenger, true }, TASK_PRIMARY_PRIMARY);
+    passenger->GetTaskManager().SetTask(new CTaskSimpleCarDrive{ vehicle }, TASK_PRIMARY_DEFAULT);
+    passenger->GetTaskManager().SetTask(new CTaskComplexDriveFireTruck{ vehicle, driver, false }, TASK_PRIMARY_PRIMARY);
 }
 
 // 0x41C070
 void CCarAI::AddPoliceCarOccupants(CVehicle* vehicle, bool arg2) {
-    plugin::Call<0x41C070, CVehicle*, bool>(vehicle, arg2);
+    if (!vehicle->vehicleFlags.bOccupantsHaveBeenGenerated) {
+        vehicle->vehicleFlags.bOccupantsHaveBeenGenerated = 1;
+        switch (vehicle->m_nModelIndex) {
+        case MODEL_ENFORCER:
+        case MODEL_FBIRANCH:
+            vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
+            vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
+            vehicle->SetupPassenger(1, PED_TYPE_NONE, false, false);
+            vehicle->SetupPassenger(2, PED_TYPE_NONE, false, false);
+            return;
+        case MODEL_PREDATOR:
+            if (FindPlayerPed()->GetWantedLevel() > 1) {
+                CPed* driver = vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
+                CTaskSimpleCarSetPedOut{ vehicle, TARGET_DOOR_DRIVER, true }.ProcessPed(driver);
+                driver->AttachPedToEntity(vehicle, CVector(0.0, 0.0, 0.0), 0, (float)6.2831855, WEAPON_PISTOL);
+                // ??which flag it sets?
+                // driver->m_nPedFlags |= 0x200000u;
+
+                // ??there is no CTaskComplexKillPedFromBoat
+                // driver->GetTaskManager().SetTask(new CTaskComplexKillPedFromBoat{ FindPlayerPed() }, TASK_PRIMARY_PRIMARY);
+            }
+            vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
+        case MODEL_RHINO:
+        case MODEL_COPBIKE:
+            vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
+            return;
+        case MODEL_BARRACKS:
+        case MODEL_COPCARLA:
+        case MODEL_COPCARSF:
+        case MODEL_COPCARVG:
+        case MODEL_COPCARRU:
+            CPed*  driver      = vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
+            uint32 wantedLevel = FindPlayerPed()->GetWantedLevel();
+            if (wantedLevel > 1) {
+                CPed* passenger = vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
+                if (wantedLevel > 2) {
+                    CPed* selectedPed;
+                    if (CGeneral::GetRandomNumberInRange(0.0, 1.0) < 0.25) {
+                        selectedPed = driver;
+                    }
+                    if (CGeneral::GetRandomNumberInRange(0.0, 1.0) < 0.25) {
+                        selectedPed = passenger;
+                    }
+                    selectedPed->GiveDelayedWeapon(WEAPON_SHOTGUN, 1'000);
+                }
+                driver->GetIntelligence()->ClearTasks(true, true);
+                driver->GetTaskManager().SetTask(new CTaskComplexCopInCar{ vehicle, passenger, FindPlayerPed(), true }, TASK_PRIMARY_PRIMARY, true);
+                passenger->GetIntelligence()->ClearTasks(true, true);
+                driver->GetTaskManager().SetTask(new CTaskComplexCopInCar{ vehicle, driver, FindPlayerPed(), true }, TASK_PRIMARY_PRIMARY, false);
+                return;
+            }
+
+            if (arg2 || CGeneral::GetRandomNumberInRange(0, 100) < 50) {
+                vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
+            }
+        }
+    }
 }
 
 // 0x41BFA0
 void CCarAI::BackToCruisingIfNoWantedLevel(CVehicle* vehicle) {
-    plugin::Call<0x41BFA0, CVehicle*>(vehicle);
+    if (vehicle->vehicleFlags.bIsLawEnforcer) {
+        CWanted* wanted = FindPlayerWanted(-1);
+        if (!wanted->m_nWantedLevel || wanted->BackOff() || CCullZones::NoPolice()) {
+            CCarCtrl::JoinCarWithRoadSystem(vehicle);
+            uint32 bSirenOrAlarm = vehicle->vehicleFlags.bSirenOrAlarm;
+            vehicle->m_autoPilot.m_nCarMission = MISSION_CRUISE;
+            vehicle->m_autoPilot.m_nCarDrivingStyle = DRIVING_STYLE_STOP_FOR_CARS;
+            vehicle->vehicleFlags.bSirenOrAlarm = bSirenOrAlarm;
+            if (CCullZones::NoPolice()) {
+                vehicle->m_autoPilot.m_nCarMission = MISSION_NONE;
+            }
+        }
+    }
 }
 
 // 0x41C050
 void CCarAI::CarHasReasonToStop(CVehicle* vehicle) {
-    plugin::Call<0x41C050, CVehicle*>(vehicle);
+    vehicle->m_autoPilot.m_nTimeToStartMission = CTimer::m_snTimeInMilliseconds;
 }
 
 // 0x41CD00
-void CCarAI::EntitiesGoHeadOn(CEntity* entity1, CEntity* entity2) {
-    plugin::Call<0x41CD00, CEntity*, CEntity*>(entity1, entity2);
+// ?? it returns something
+bool CCarAI::EntitiesGoHeadOn(CEntity* entity1, CEntity* entity2) {
+    CVector position1 = entity1->m_matrix ? entity1->m_matrix->GetPosition() : entity1->m_placement.m_vPosn;
+    CVector position2 = entity2->m_matrix ? entity2->m_matrix->GetPosition() : entity2->m_placement.m_vPosn;
+    CVector positionDiff = position1 - position2;
+    positionDiff.Normalise();
+
+    CVector forward1 = entity1->m_matrix ? entity1->m_matrix->GetForward() : CVector(-sin(entity1->m_placement.m_fHeading), cos(entity1->m_placement.m_fHeading), 0.0);
+    if (forward1.Dot(positionDiff) > -0.80000001) {
+        return false;
+    }
+
+    CVector forward2 = entity2->m_matrix ? entity2->m_matrix->GetForward() : CVector(-sin(entity2->m_placement.m_fHeading), cos(entity2->m_placement.m_fHeading), 0.0);
+    return forward2.Dot(positionDiff) >= 0.80000001;
 }
 
 // 0x41CA40
@@ -95,7 +191,19 @@ eCarMission CCarAI::FindPoliceBoatMissionForWantedLevel() {
 // rtype eCarMission ?
 // 0x41C9D0
 int8 CCarAI::FindPoliceCarMissionForWantedLevel() {
-    return plugin::CallAndReturn<int8, 0x41C9D0>();
+    double probability = CGeneral::GetRandomNumberInRange(0.0, 1.0);
+    switch (FindPlayerWanted()->m_nWantedLevel) {
+    case 2:
+        return probability < 0.75 ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_RAMPLAYER_FARAWAY;
+    case 3:
+        return probability < 0.50 ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_RAMPLAYER_FARAWAY;
+    case 4:
+    case 5:
+    case 6:
+        return probability < 0.25 ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_RAMPLAYER_FARAWAY;
+    default:
+        return MISSION_BLOCKPLAYER_FARAWAY;
+    }
 }
 
 // 0x41CAA0

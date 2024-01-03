@@ -18,7 +18,7 @@ public:
 
     static void BackToCruisingIfNoWantedLevel(CVehicle* vehicle);
     static void CarHasReasonToStop(CVehicle* vehicle);
-    static void EntitiesGoHeadOn(CEntity* entity1, CEntity* entity2);
+    static bool EntitiesGoHeadOn(CEntity* entity1, CEntity* entity2);
 
     static eCarMission FindPoliceBikeMissionForWantedLevel();
     static eCarMission FindPoliceBoatMissionForWantedLevel();

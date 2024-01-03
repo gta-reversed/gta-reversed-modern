@@ -28,9 +28,9 @@ void CTaskComplexCopInCar::InjectHooks() {
 }
 
 // 0x68C7F0
-CTaskComplexCopInCar::CTaskComplexCopInCar(CVehicle* vehicle, CPed* cop, CPed* suspect, bool bSuspectDeadOrLost) : CTaskComplex(),
+CTaskComplexCopInCar::CTaskComplexCopInCar(CVehicle* vehicle, CPed* partnerCop, CPed* suspect, bool bSuspectDeadOrLost) : CTaskComplex(),
     m_Vehicle{ vehicle },
-    m_Cop{ cop },
+    m_Cop{ partnerCop },
     m_Suspect{ suspect },
     m_bSuspectDeadOrLost{ bSuspectDeadOrLost }
 {
