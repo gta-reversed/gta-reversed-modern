@@ -2,9 +2,8 @@
 
 #include "Quaternion.h"
 
-#include "FixedVector.hpp"
-#include "FixedQuat.hpp"
-
+#include <extensions/FixedVector.hpp>
+#include <extensions/FixedQuat.hpp>
 
 union Quat16 { // 4096
     struct {
