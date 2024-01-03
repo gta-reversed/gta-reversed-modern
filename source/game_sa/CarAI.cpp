@@ -16,11 +16,7 @@
 #include "TaskSimpleCarDrive.h"
 #include "TaskSimpleCarSetPedOut.h"
 #include "Timer.h"
-
 #include "eWeaponType.h"
-
-
-
 void CCarAI::InjectHooks() {
     RH_ScopedClass(CCarAI);
     RH_ScopedCategory("AI");
