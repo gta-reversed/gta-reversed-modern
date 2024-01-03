@@ -189,11 +189,22 @@ struct tScriptAttachedAnimGroup {
     }
 };
 
+enum class eScriptSearchLightState : uint8 {
+    STATE_0,
+    STATE_1,
+    STATE_2,
+    STATE_3,
+    STATE_4,
+};
+
 struct tScriptSearchlight {
     bool     m_bUsed{true};
-    char     m_field_1{}; // unk flag; m_bNotScriptedLight ?
+    bool     m_bClipIfColliding{};
     bool     m_bEnableShadow{};
-    uint8    m_nFlags{};
+    union {
+        eScriptSearchLightState m_nCurrentState : 7;
+        bool  bIsUsed : 1; // ?
+    } /* m_Flags */;
     int16    m_nId{1};
     CVector  m_Origin{};
     CVector  m_Target{};

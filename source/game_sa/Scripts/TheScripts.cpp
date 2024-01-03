@@ -785,14 +785,13 @@ void CTheScripts::Process() {
 void CTheScripts::ProcessAllSearchLights() {
     ZoneScoped;
 
-    //return plugin::Call<0x4939F0>();
     for (auto& light : ScriptSearchLightArray) {
-        if (!light.IsActive() || !(light.m_nFlags & 0b1000'0000)) {
+        if (!light.IsActive() || !light.bIsUsed) {
             continue;
         }
 
-        switch (light.m_nFlags & 0b111'1111) {
-        case 1: {
+        switch (light.m_nCurrentState) {
+        case eScriptSearchLightState::STATE_1: {
             const auto d = light.m_PathCoord1 - light.m_Target;
             if (d.SquaredMagnitude() > sq(light.m_fPathSpeed)) {
                 light.m_Target *= d.Normalized();
@@ -800,21 +799,21 @@ void CTheScripts::ProcessAllSearchLights() {
             }
 
             light.m_Target = light.m_PathCoord1;
-            light.m_nFlags = 0b1000'0010;
+            light.m_nCurrentState = eScriptSearchLightState::STATE_2;
             break;
         }
-        case 2: {
+        case eScriptSearchLightState::STATE_2: {
             const auto d = light.m_PathCoord2 - light.m_Target;
             if (d.SquaredMagnitude() > sq(light.m_fPathSpeed)) {
                 light.m_Target *= d.Normalized();
                 break;
             }
 
-            light.m_Target = light.m_PathCoord2;
-            light.m_nFlags = 0b1000'0001;
+            light.m_Target        = light.m_PathCoord2;
+            light.m_nCurrentState = eScriptSearchLightState::STATE_1;
             break;
         }
-        case 3: {
+        case eScriptSearchLightState::STATE_3: {
             const auto d = light.m_FollowingEntity->GetPosition() - light.m_Target;
             if (d.SquaredMagnitude() > sq(light.m_fPathSpeed)) {
                 light.m_Target *= d.Normalized();
@@ -825,17 +824,17 @@ void CTheScripts::ProcessAllSearchLights() {
             /* flag is not altered */
             break;
         }
-        case 4: {
+        case eScriptSearchLightState::STATE_4: {
             auto d = light.m_PathCoord1 - light.m_FollowingEntity->GetPosition();
             if (d.SquaredMagnitude() > sq(light.m_fPathSpeed)) {
                 light.m_Target *= d.Normalized();
                 break;
             }
 
-            light.m_Target     = light.m_PathCoord1;
-            light.m_fPathSpeed = 0.0f;
-            light.m_PathCoord1 = CVector{};
-            light.m_nFlags     = 0b1000'0000;
+            light.m_Target        = light.m_PathCoord1;
+            light.m_fPathSpeed    = 0.0f;
+            light.m_PathCoord1    = CVector{};
+            light.m_nCurrentState = eScriptSearchLightState::STATE_0;
             break;
         }
         default:
