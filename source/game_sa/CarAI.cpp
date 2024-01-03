@@ -138,7 +138,7 @@ void CCarAI::AddPoliceCarOccupants(CVehicle* vehicle, bool arg2) {
 // 0x41BFA0
 void CCarAI::BackToCruisingIfNoWantedLevel(CVehicle* vehicle) {
     if (vehicle->vehicleFlags.bIsLawEnforcer) {
-        CWanted* wanted = FindPlayerWanted(-1);
+        CWanted* wanted = FindPlayerWanted();
         if (!wanted->m_nWantedLevel || wanted->BackOff() || CCullZones::NoPolice()) {
             CCarCtrl::JoinCarWithRoadSystem(vehicle);
             uint32 bSirenOrAlarm = vehicle->vehicleFlags.bSirenOrAlarm;
