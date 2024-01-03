@@ -166,7 +166,7 @@ bool CCarAI::EntitiesGoHeadOn(CEntity* entity1, CEntity* entity2) {
     positionDiff.Normalise();
 
     CVector forward1 = entity1->m_matrix ? entity1->m_matrix->GetForward() : CVector(-sin(entity1->m_placement.m_fHeading), cos(entity1->m_placement.m_fHeading), 0.0);
-    if (forward1.Dot(positionDiff) > -0.80000001) {
+    if (forward1.Dot(positionDiff) > -0.8f) {
         return false;
     }
 
