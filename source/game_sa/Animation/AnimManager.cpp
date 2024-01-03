@@ -690,10 +690,10 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
                         kf->SetTime(fbuf[10]); // absolute time here
                     } else {
                         KeyFrameTrans* kf = (KeyFrameTrans*)seq->GetUncompressedFrame(l);
-                        kf->rotation = rot;
-                        kf->translation = trans;
+                        kf->Rot = rot;
+                        kf->Trans = trans;
                         // scaling ignored
-                        kf->deltaTime = fbuf[10]; // absolute time here
+                        kf->DeltaTime = fbuf[10]; // absolute time here
                     }
                 } else if (hasTranslation) {
                     RwStreamRead(stream, buf, 0x20);
@@ -708,9 +708,9 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
                         kf->SetTime(fbuf[7]); // absolute time here
                     } else {
                         KeyFrameTrans* kf = (KeyFrameTrans*)seq->GetUncompressedFrame(l);
-                        kf->rotation = rot;
-                        kf->translation = trans;
-                        kf->deltaTime = fbuf[7]; // absolute time here
+                        kf->Rot = rot;
+                        kf->Trans = trans;
+                        kf->DeltaTime = fbuf[7]; // absolute time here
                     }
                 } else {
                     RwStreamRead(stream, buf, 0x14);
@@ -723,8 +723,8 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
                         kf->SetTime(fbuf[4]); // absolute time here
                     } else {
                         KeyFrame* kf = (KeyFrame*)seq->GetUncompressedFrame(l);
-                        kf->rotation = rot;
-                        kf->deltaTime = fbuf[4]; // absolute time here
+                        kf->Rot = rot;
+                        kf->DeltaTime = fbuf[4]; // absolute time here
                     }
                 }
             }
@@ -836,11 +836,11 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* stream, bool compress, bo
                 }
 
                 seq->SetNumFrames(sdata.frames_count, bIsRoot, bIsCompressed, st);
-                RwStreamRead(stream, seq->m_pFrames, data_size);
+                RwStreamRead(stream, seq->m_Frames, data_size);
                 if (isANP3) {
                     // st += data_size; //(void *)((uint32)st + data_size);
                     st = (CAnimBlendSequence*)((size_t)st + data_size);
-                    seq->m_usingExternalMemory = true;
+                    seq->m_bUsingExternalMemory = true;
                     // seq->usFlags |= EXTERNAL_KEYFRAMES_MEM;
                 }
             }

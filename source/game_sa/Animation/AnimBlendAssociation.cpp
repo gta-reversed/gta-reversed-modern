@@ -112,7 +112,7 @@ void CAnimBlendAssociation::Init(RpClump* clump, CAnimBlendHierarchy* animHierar
         } else {
             frame = RpAnimBlendClumpFindFrameFromHashKey(clump, sequence.m_hash);
         }
-        if (frame && sequence.m_nFrameCount > 0) {
+        if (frame && sequence.m_FramesNum > 0) {
             m_BlendNodes[frame - animClumpData->m_Frames].m_BlendSeq = &sequence;
         }
     }

@@ -31,12 +31,12 @@ union Vec16 { // 1024
  * */
 
 struct KeyFrame {
-    CQuaternion rotation;
-    float deltaTime; // relative to previous key frame
+    CQuaternion Rot;
+    float       DeltaTime; //< Relative to previous key frame
 };
 
 struct KeyFrameTrans : KeyFrame {
-    CVector translation;
+    CVector Trans;
 };
 
 struct KeyFrameCompressed {
@@ -68,7 +68,7 @@ struct KeyFrameCompressed {
 };
 
 struct KeyFrameTransCompressed : KeyFrameCompressed {
-    int16 trans[3]; // 1024
+    int16 trans[3]; // 1024 - TODO: FixedVector
 
     void GetTranslation(CVector* vec) {
         float scale = 1.0f / 1024.0f;

@@ -20,14 +20,14 @@ public:
         struct {
             uint16 m_bHasRotation : 1;
             uint16 m_bHasTranslation : 1;     // Root key frames have translation values (quaternion).
-            uint16 m_isCompressed : 1;        // Compressed key frames.
-            uint16 m_usingExternalMemory : 1; // When this flag is NOT set, you have to loop through all key frames in m_pFrames and free them separately.
+            uint16 m_bIsCompressed : 1;        // Compressed key frames.
+            uint16 m_bUsingExternalMemory : 1; // When this flag is NOT set, you have to loop through all key frames in m_pFrames and free them separately.
             uint16 m_hasBoneIdSet : 1;
         };
         uint16 m_nFlags;
     };
-    uint16 m_nFrameCount;
-    void*  m_pFrames;
+    uint16 m_FramesNum;
+    void*  m_Frames;
 
 public:
     static void InjectHooks();
@@ -46,10 +46,18 @@ public:
     void SetNumFrames(int32 count, bool root, bool compressed, CAnimBlendSequence* frameData); // root -> isTranslated?
     void Uncompress(uint8* frameData);
 
-    KeyFrame* GetKeyFrame(size_t n) const {
+    KeyFrame* GetUKeyFrame(size_t n) const { // `U` = Uncompressed
+        assert(n < m_FramesNum);
         return m_bHasTranslation ?
-            &((KeyFrameTrans*)m_pFrames)[n] :
-            &((KeyFrame*)m_pFrames)[n];
+            &((KeyFrameTrans*)m_Frames)[n] :
+            &((KeyFrame*)m_Frames)[n];
+    }
+
+    KeyFrameCompressed* GetCKeyFrame(size_t n) const { // `C` = Compressed
+        assert(n < m_FramesNum);
+        return m_bHasTranslation ?
+            &((KeyFrameTransCompressed*)m_Frames)[n] :
+            &((KeyFrameCompressed*)m_Frames)[n];
     }
 
     KeyFrameTrans* GetUncompressedFrame(int32 frame) const;

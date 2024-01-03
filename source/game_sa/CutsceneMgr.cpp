@@ -916,7 +916,7 @@ void CCutsceneMgr::SetupCutsceneToStart() {
                 // Get anim translation and offset the object's position by it
                 const auto animTrans = anim->m_BlendHier->m_bIsCompressed
                     ? anim->m_BlendHier->m_pSequences->GetCompressedFrame(1)->GetTranslation()
-                    : anim->m_BlendHier->m_pSequences->GetUncompressedFrame(1)->translation;
+                    : anim->m_BlendHier->m_pSequences->GetUncompressedFrame(1)->Trans;
                 SetObjPos(ms_cutsceneOffset + animTrans);
 
                 // Start the anim

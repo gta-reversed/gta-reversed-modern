@@ -199,9 +199,9 @@ CVector CVehicleAnimGroup::ComputeAnimDoorOffsets(eVehAnimDoorOffset doorId) {
     auto* animAssoc = CAnimManager::GetAnimAssociation(groupId, animId);
     auto* sequences = animAssoc->m_pHierarchy->m_pSequences;
     CAnimManager::UncompressAnimation(animAssoc->m_pHierarchy);
-    if (sequences->m_nFrameCount > 0) {
-        auto* frame = sequences->GetUncompressedFrame(sequences->m_nFrameCount - 1);
-        GetDoorOffset(doorId) = frame->translation;
+    if (sequences->m_FramesNum > 0) {
+        auto* frame = sequences->GetUncompressedFrame(sequences->m_FramesNum - 1);
+        GetDoorOffset(doorId) = frame->Trans;
     }
 
     return GetDoorOffset(doorId);

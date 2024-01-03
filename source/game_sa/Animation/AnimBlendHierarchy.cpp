@@ -50,8 +50,8 @@ void CAnimBlendHierarchy::Shutdown() {
 // 0x4CF8E0
 void CAnimBlendHierarchy::RemoveAnimSequences() {
     void* oldFrameData = nullptr;
-    if (m_pSequences && m_pSequences->m_usingExternalMemory) {
-        oldFrameData = m_pSequences->m_pFrames;
+    if (m_pSequences && m_pSequences->m_bUsingExternalMemory) {
+        oldFrameData = m_pSequences->m_Frames;
     }
     CAnimManager::RemoveFromUncompressedCache(this);
     delete[] m_pSequences;
@@ -96,14 +96,14 @@ void CAnimBlendHierarchy::SetName(const char* name) {
 void CAnimBlendHierarchy::CalcTotalTime() {
     m_fTotalTime = 0.0f;
     for (auto& sequence : GetSequences()) {
-        if (sequence.m_nFrameCount == 0) { // FIX_BUGS by Mitchell Tobass
+        if (sequence.m_FramesNum == 0) { // FIX_BUGS by Mitchell Tobass
             continue;
         }
-        m_fTotalTime = std::max(m_fTotalTime, sequence.GetUncompressedFrame(sequence.m_nFrameCount - 1)->deltaTime);
-        for (auto j = sequence.m_nFrameCount - 1; j >= 1; j--) {
+        m_fTotalTime = std::max(m_fTotalTime, sequence.GetUncompressedFrame(sequence.m_FramesNum - 1)->DeltaTime);
+        for (auto j = sequence.m_FramesNum - 1; j >= 1; j--) {
             KeyFrame* kf1 = sequence.GetUncompressedFrame(j);
             KeyFrame* kf2 = sequence.GetUncompressedFrame(j - 1);
-            kf1->deltaTime -= kf2->deltaTime;
+            kf1->DeltaTime -= kf2->DeltaTime;
         }
     }
 }
@@ -112,11 +112,11 @@ void CAnimBlendHierarchy::CalcTotalTime() {
 void CAnimBlendHierarchy::CalcTotalTimeCompressed() {
     m_fTotalTime = 0.0f;
     for (auto& sequence : GetSequences()) {
-        if (sequence.m_nFrameCount == 0) { // FIX_BUGS by Mitchell Tobass
+        if (sequence.m_FramesNum == 0) { // FIX_BUGS by Mitchell Tobass
             continue;
         }
-        m_fTotalTime = std::max(m_fTotalTime, sequence.GetCompressedFrame(sequence.m_nFrameCount - 1)->GetDeltaTime());
-        for (auto j = sequence.m_nFrameCount - 1; j >= 1; j--) {
+        m_fTotalTime = std::max(m_fTotalTime, sequence.GetCompressedFrame(sequence.m_FramesNum - 1)->GetDeltaTime());
+        for (auto j = sequence.m_FramesNum - 1; j >= 1; j--) {
             KeyFrameCompressed* kf1 = sequence.GetCompressedFrame(j);
             KeyFrameCompressed* kf2 = sequence.GetCompressedFrame(j - 1);
             kf1->deltaTime -= kf2->deltaTime;
@@ -133,8 +133,8 @@ void CAnimBlendHierarchy::RemoveQuaternionFlips() {
 
 // 0x4CF560
 void* CAnimBlendHierarchy::GetSequenceBlock() {
-    if (m_pSequences->m_usingExternalMemory) {
-        return m_pSequences->m_pFrames;
+    if (m_pSequences->m_bUsingExternalMemory) {
+        return m_pSequences->m_Frames;
     } else {
         return nullptr;
     }

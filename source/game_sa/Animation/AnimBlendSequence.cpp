@@ -25,54 +25,55 @@ void CAnimBlendSequence::InjectHooks() {
 // 0x4D0C10
 CAnimBlendSequence::CAnimBlendSequence() {
     m_nFlags = 0;
-    m_nFrameCount = 0;
-    m_pFrames = nullptr;
+    m_FramesNum = 0;
+    m_Frames = nullptr;
     m_boneId = BONE_UNKNOWN;
 }
 
 // 0x4D0C30
 CAnimBlendSequence::~CAnimBlendSequence() {
     // If we allocated memory, clean it
-    if (!m_usingExternalMemory && m_pFrames) {
-        CMemoryMgr::Free(m_pFrames);
+    if (!m_bUsingExternalMemory && m_Frames) {
+        CMemoryMgr::Free(m_Frames);
     }
 }
 
 // 0x4D0F40
 void CAnimBlendSequence::CompressKeyframes(uint8* frameData) {
-    if (m_nFrameCount == 0) {
+    if (m_FramesNum == 0) {
         return;
     }
 
     void* frames = (frameData ? frameData : CMemoryMgr::Malloc(GetDataSize(true)));
     if (m_bHasTranslation) {
         auto* kftc = (KeyFrameTransCompressed*)frames;
-        auto* kf = (KeyFrameTrans*)m_pFrames;
-        for (auto i = 0; i < m_nFrameCount; i++, kf++, kftc++) {
-            kftc->SetRotation(kf->rotation);
-            kftc->SetTime(kf->deltaTime);
-            kftc->SetTranslation(kf->translation);
+        auto* kf = (KeyFrameTrans*)m_Frames;
+        for (auto i = 0; i < m_FramesNum; i++, kf++, kftc++) {
+            kftc->SetRotation(kf->Rot);
+            kftc->SetTime(kf->DeltaTime);
+            kftc->SetTranslation(kf->Trans);
         }
     } else {
         auto* kfc = (KeyFrameCompressed*)frames;
-        auto* kf = (KeyFrame*)m_pFrames;
-        for (auto i = 0; i < m_nFrameCount; i++, kf++, kfc++) {
-            kfc->SetRotation(kf->rotation);
-            kfc->SetTime(kf->deltaTime);
+        auto* kf = (KeyFrame*)m_Frames;
+        for (auto i = 0; i < m_FramesNum; i++, kf++, kfc++) {
+            kfc->SetRotation(kf->Rot);
+            kfc->SetTime(kf->DeltaTime);
         }
     }
 
-    if (!m_usingExternalMemory) {
-        CMemoryMgr::Free(m_pFrames);
+    if (!m_bUsingExternalMemory) {
+        CMemoryMgr::Free(m_Frames);
     }
-    m_pFrames = frames;
-    m_usingExternalMemory = frameData != nullptr;
-    m_isCompressed = true;
+
+    m_Frames = frames;
+    m_bUsingExternalMemory = frameData != nullptr;
+    m_bIsCompressed = true;
 }
 
 // 0x4D12A0
 void CAnimBlendSequence::RemoveUncompressedData(uint8* frameData) {
-    if (m_nFrameCount) {
+    if (m_FramesNum) {
         CompressKeyframes(frameData);
     }
 }
@@ -80,26 +81,26 @@ void CAnimBlendSequence::RemoveUncompressedData(uint8* frameData) {
 // 0x4D0C90
 size_t CAnimBlendSequence::GetDataSize(bool compressed) const {
     if (compressed) {
-        return m_nFrameCount * (m_bHasTranslation ? sizeof(KeyFrameTransCompressed) : sizeof(KeyFrameCompressed));
+        return m_FramesNum * (m_bHasTranslation ? sizeof(KeyFrameTransCompressed) : sizeof(KeyFrameCompressed));
     } else {
-        return m_nFrameCount * (m_bHasTranslation ? sizeof(KeyFrameTrans) : sizeof(KeyFrame));
+        return m_FramesNum * (m_bHasTranslation ? sizeof(KeyFrameTrans) : sizeof(KeyFrame));
     }
 }
 
 // 0x4D1190
 void CAnimBlendSequence::RemoveQuaternionFlips() {
-    if (m_nFrameCount < 2) {
+    if (m_FramesNum < 2) {
         return;
     }
 
     KeyFrame* frame = GetUncompressedFrame(0);
-    CQuaternion last = frame->rotation;
-    for (auto i = 1; i < m_nFrameCount; i++) {
+    CQuaternion last = frame->Rot;
+    for (auto i = 1; i < m_FramesNum; i++) {
         frame = GetUncompressedFrame(i);
-        if (DotProduct(last, frame->rotation) < 0.0f) {
-            frame->rotation = -frame->rotation;
+        if (DotProduct(last, frame->Rot) < 0.0f) {
+            frame->Rot = -frame->Rot;
         }
-        last = frame->rotation;
+        last = frame->Rot;
     }
 }
 
@@ -119,58 +120,58 @@ void CAnimBlendSequence::SetBoneTag(int32 boneId) {
 // 0x4D0CD0
 void CAnimBlendSequence::SetNumFrames(int32 count, bool bHasTranslation, bool compressed, CAnimBlendSequence* frameData) {
     m_bHasTranslation = bHasTranslation;
-    m_nFrameCount = (uint16)count;
-    m_pFrames = frameData ? frameData : CMemoryMgr::Malloc(GetDataSize(compressed));
-    m_usingExternalMemory = frameData != nullptr; // NOTSA
+    m_FramesNum = (uint16)count;
+    m_Frames = frameData ? frameData : CMemoryMgr::Malloc(GetDataSize(compressed));
+    m_bUsingExternalMemory = frameData != nullptr; // NOTSA
     m_bHasRotation = true;
-    m_isCompressed = compressed; // condition has been removed
+    m_bIsCompressed = compressed; // condition has been removed
 }
 
 // 0x4D0D40
 void CAnimBlendSequence::Uncompress(uint8* frameData) {
-    if (m_nFrameCount == 0) {
+    if (m_FramesNum == 0) {
         return;
     }
 
     void* frames = (frameData ? frameData : CMemoryMgr::Malloc(GetDataSize(false)));
     if (m_bHasTranslation) {
-        auto* kftc = (KeyFrameTransCompressed*)m_pFrames;
+        auto* kftc = (KeyFrameTransCompressed*)m_Frames;
         auto* kf = (KeyFrameTrans*)frames;
-        for (auto i = 0; i < m_nFrameCount; i++, kf++, kftc++) {
-            kftc->GetRotation(&kf->rotation);
-            kf->deltaTime = kftc->GetDeltaTime();
-            kftc->GetTranslation(&kf->translation);
+        for (auto i = 0; i < m_FramesNum; i++, kf++, kftc++) {
+            kftc->GetRotation(&kf->Rot);
+            kf->DeltaTime = kftc->GetDeltaTime();
+            kftc->GetTranslation(&kf->Trans);
         }
     } else {
-        auto* kfc = (KeyFrameCompressed*)m_pFrames;
+        auto* kfc = (KeyFrameCompressed*)m_Frames;
         auto* kf = (KeyFrame*)frames;
-        for (auto i = 0; i < m_nFrameCount; i++, kf++, kfc++) {
-            kfc->GetRotation(&kf->rotation);
-            kf->deltaTime = kfc->GetDeltaTime();
+        for (auto i = 0; i < m_FramesNum; i++, kf++, kfc++) {
+            kfc->GetRotation(&kf->Rot);
+            kf->DeltaTime = kfc->GetDeltaTime();
         }
     }
 
-    if (!m_usingExternalMemory) {
-        CMemoryMgr::Free(m_pFrames);
+    if (!m_bUsingExternalMemory) {
+        CMemoryMgr::Free(m_Frames);
     }
-    m_pFrames = frames;
-    m_usingExternalMemory = frameData != nullptr;
-    m_isCompressed = false;
+    m_Frames = frames;
+    m_bUsingExternalMemory = frameData != nullptr;
+    m_bIsCompressed = false;
 }
 
 // 0x4D1150
 bool CAnimBlendSequence::MoveMemory() {
-    if (m_usingExternalMemory)
+    if (m_bUsingExternalMemory)
         return false;
 
-    if (!m_pFrames)
+    if (!m_Frames)
         return false;
 
-    auto frames = (CAnimBlendSequence*)CMemoryMgr::MoveMemory(m_pFrames);
-    if (frames == m_pFrames)
+    auto frames = (CAnimBlendSequence*)CMemoryMgr::MoveMemory(m_Frames);
+    if (frames == m_Frames)
         return false;
 
-    m_pFrames = frames;
+    m_Frames = frames;
     return true;
 }
 
@@ -185,10 +186,10 @@ void CAnimBlendSequence::Print() {
 // 0x4CF1F0
 KeyFrameTrans* CAnimBlendSequence::GetUncompressedFrame(int32 frame) const {
     if (m_bHasTranslation) {
-        return &static_cast<KeyFrameTrans*>(m_pFrames)[frame];
+        return &static_cast<KeyFrameTrans*>(m_Frames)[frame];
     }
 
-    auto* data = static_cast<KeyFrame*>(m_pFrames);
+    auto* data = static_cast<KeyFrame*>(m_Frames);
     return reinterpret_cast<KeyFrameTrans*>(&data[frame]);
 }
 
@@ -196,9 +197,9 @@ KeyFrameTrans* CAnimBlendSequence::GetUncompressedFrame(int32 frame) const {
 // 0x4CF220
 KeyFrameTransCompressed* CAnimBlendSequence::GetCompressedFrame(int32 frame) const {
     if (m_bHasTranslation) {
-        return &static_cast<KeyFrameTransCompressed*>(m_pFrames)[frame];
+        return &static_cast<KeyFrameTransCompressed*>(m_Frames)[frame];
     }
 
-    auto* data = static_cast<KeyFrameCompressed*>(m_pFrames);
+    auto* data = static_cast<KeyFrameCompressed*>(m_Frames);
     return reinterpret_cast<KeyFrameTransCompressed*>(&data[frame]);
 }
