@@ -16,11 +16,7 @@
 #include "TaskSimpleCarDrive.h"
 #include "TaskSimpleCarSetPedOut.h"
 #include "Timer.h"
-
 #include "eWeaponType.h"
-
-
-
 void CCarAI::InjectHooks() {
     RH_ScopedClass(CCarAI);
     RH_ScopedCategory("AI");
@@ -92,7 +88,7 @@ void CCarAI::AddPoliceCarOccupants(CVehicle* vehicle, bool arg2) {
                 CTaskSimpleCarSetPedOut{ vehicle, TARGET_DOOR_DRIVER, true }.ProcessPed(driver);
                 driver->AttachPedToEntity(vehicle, CVector(0.0, 0.0, 0.0), 0, (float)6.2831855, WEAPON_PISTOL);
                 // ??which flag it sets?
-                // driver->m_nPedFlags |= 0x200000u;
+                driver->bStayInSamePlace = true;
 
                 // ??there is no CTaskComplexKillPedFromBoat
                 // driver->GetTaskManager().SetTask(new CTaskComplexKillPedFromBoat{ FindPlayerPed() }, TASK_PRIMARY_PRIMARY);
@@ -138,7 +134,7 @@ void CCarAI::AddPoliceCarOccupants(CVehicle* vehicle, bool arg2) {
 // 0x41BFA0
 void CCarAI::BackToCruisingIfNoWantedLevel(CVehicle* vehicle) {
     if (vehicle->vehicleFlags.bIsLawEnforcer) {
-        CWanted* wanted = FindPlayerWanted(-1);
+        CWanted* wanted = FindPlayerWanted();
         if (!wanted->m_nWantedLevel || wanted->BackOff() || CCullZones::NoPolice()) {
             CCarCtrl::JoinCarWithRoadSystem(vehicle);
             uint32 bSirenOrAlarm = vehicle->vehicleFlags.bSirenOrAlarm;
@@ -166,7 +162,7 @@ bool CCarAI::EntitiesGoHeadOn(CEntity* entity1, CEntity* entity2) {
     positionDiff.Normalise();
 
     CVector forward1 = entity1->m_matrix ? entity1->m_matrix->GetForward() : CVector(-sin(entity1->m_placement.m_fHeading), cos(entity1->m_placement.m_fHeading), 0.0);
-    if (forward1.Dot(positionDiff) > -0.80000001) {
+    if (forward1.Dot(positionDiff) > -0.8f) {
         return false;
     }
 
