@@ -22,7 +22,7 @@ public:
 
     static eCarMission FindPoliceBikeMissionForWantedLevel();
     static eCarMission FindPoliceBoatMissionForWantedLevel();
-    static int8 FindPoliceCarMissionForWantedLevel();
+    static eCarMission FindPoliceCarMissionForWantedLevel();
     static int32 FindPoliceCarSpeedForWantedLevel(CVehicle* vehicle);
     static float FindSwitchDistanceClose(CVehicle* vehicle);
     static float FindSwitchDistanceFar(CVehicle* vehicle);

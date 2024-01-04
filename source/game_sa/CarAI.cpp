@@ -17,6 +17,7 @@
 #include "TaskSimpleCarSetPedOut.h"
 #include "Timer.h"
 #include "eWeaponType.h"
+
 void CCarAI::InjectHooks() {
     RH_ScopedClass(CCarAI);
     RH_ScopedCategory("AI");
@@ -87,11 +88,8 @@ void CCarAI::AddPoliceCarOccupants(CVehicle* vehicle, bool arg2) {
                 CPed* driver = vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
                 CTaskSimpleCarSetPedOut{ vehicle, TARGET_DOOR_DRIVER, true }.ProcessPed(driver);
                 driver->AttachPedToEntity(vehicle, CVector(0.0, 0.0, 0.0), 0, (float)6.2831855, WEAPON_PISTOL);
-                // ??which flag it sets?
                 driver->bStayInSamePlace = true;
-
-                // ??there is no CTaskComplexKillPedFromBoat
-                // driver->GetTaskManager().SetTask(new CTaskComplexKillPedFromBoat{ FindPlayerPed() }, TASK_PRIMARY_PRIMARY);
+                driver->GetTaskManager().SetTask(new CTaskComplexKillPedFromBoat{ FindPlayerPed() }, TASK_PRIMARY_PRIMARY);
             }
             vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
         case MODEL_RHINO:
@@ -109,13 +107,15 @@ void CCarAI::AddPoliceCarOccupants(CVehicle* vehicle, bool arg2) {
                 CPed* passenger = vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
                 if (wantedLevel > 2) {
                     CPed* selectedPed;
-                    if (RandomBool(25.0f)) {
+                    if (CGeneral::RandomBool(25.0f)) {
                         selectedPed = driver;
                     }
-                    if (CGeneral::GetRandomNumberInRange(0.0, 1.0) < 0.25) {
+                    if (CGeneral::RandomBool(25.0f)) {
                         selectedPed = passenger;
                     }
-                    selectedPed->GiveDelayedWeapon(WEAPON_SHOTGUN, 1'000);
+                    if (selectedPed) {
+                        selectedPed->GiveDelayedWeapon(WEAPON_SHOTGUN, 1000);
+                    }
                 }
                 driver->GetIntelligence()->ClearTasks(true, true);
                 driver->GetTaskManager().SetTask(new CTaskComplexCopInCar{ vehicle, passenger, FindPlayerPed(), true }, TASK_PRIMARY_PRIMARY, true);
@@ -124,7 +124,7 @@ void CCarAI::AddPoliceCarOccupants(CVehicle* vehicle, bool arg2) {
                 return;
             }
 
-            if (arg2 || CGeneral::GetRandomNumberInRange(0, 100) < 50) {
+            if (arg2 || CGeneral::RandomBool(50.0f)) {
                 vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
             }
         }
@@ -137,10 +137,8 @@ void CCarAI::BackToCruisingIfNoWantedLevel(CVehicle* vehicle) {
         CWanted* wanted = FindPlayerWanted();
         if (!wanted->m_nWantedLevel || wanted->BackOff() || CCullZones::NoPolice()) {
             CCarCtrl::JoinCarWithRoadSystem(vehicle);
-            uint32 bSirenOrAlarm = vehicle->vehicleFlags.bSirenOrAlarm;
             vehicle->m_autoPilot.m_nCarMission = MISSION_CRUISE;
             vehicle->m_autoPilot.m_nCarDrivingStyle = DRIVING_STYLE_STOP_FOR_CARS;
-            vehicle->vehicleFlags.bSirenOrAlarm = bSirenOrAlarm;
             if (CCullZones::NoPolice()) {
                 vehicle->m_autoPilot.m_nCarMission = MISSION_NONE;
             }
@@ -154,20 +152,19 @@ void CCarAI::CarHasReasonToStop(CVehicle* vehicle) {
 }
 
 // 0x41CD00
-// ?? it returns something
 bool CCarAI::EntitiesGoHeadOn(CEntity* entity1, CEntity* entity2) {
     CVector position1 = entity1->m_matrix ? entity1->m_matrix->GetPosition() : entity1->m_placement.m_vPosn;
     CVector position2 = entity2->m_matrix ? entity2->m_matrix->GetPosition() : entity2->m_placement.m_vPosn;
     CVector positionDiff = position1 - position2;
     positionDiff.Normalise();
 
-    CVector forward1 = entity1->m_matrix ? entity1->m_matrix->GetForward() : CVector(-sin(entity1->m_placement.m_fHeading), cos(entity1->m_placement.m_fHeading), 0.0);
+    const CVector& forward1 = entity1->GetForwardVector();
     if (forward1.Dot(positionDiff) > -0.8f) {
         return false;
     }
 
-    CVector forward2 = entity2->m_matrix ? entity2->m_matrix->GetForward() : CVector(-sin(entity2->m_placement.m_fHeading), cos(entity2->m_placement.m_fHeading), 0.0);
-    return forward2.Dot(positionDiff) >= 0.80000001;
+    const CVector& forward2 = entity2->GetForwardVector();
+    return forward2.Dot(positionDiff) >= 0.8f;
 }
 
 // 0x41CA40
@@ -184,19 +181,18 @@ eCarMission CCarAI::FindPoliceBoatMissionForWantedLevel() {
         return FindPlayerVehicle() ? MISSION_ATTACKPLAYER : MISSION_BOAT_CIRCLING_PLAYER;
 }
 
-// rtype eCarMission ?
 // 0x41C9D0
-int8 CCarAI::FindPoliceCarMissionForWantedLevel() {
+eCarMission CCarAI::FindPoliceCarMissionForWantedLevel() {
     double probability = CGeneral::GetRandomNumberInRange(0.0, 1.0);
     switch (FindPlayerWanted()->m_nWantedLevel) {
     case 2:
-        return probability < 0.75 ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_RAMPLAYER_FARAWAY;
+        return CGeneral::RandomBool(75.0f) ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_RAMPLAYER_FARAWAY;
     case 3:
-        return probability < 0.50 ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_RAMPLAYER_FARAWAY;
+        return CGeneral::RandomBool(50.0f) ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_RAMPLAYER_FARAWAY;
     case 4:
     case 5:
     case 6:
-        return probability < 0.25 ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_RAMPLAYER_FARAWAY;
+        return CGeneral::RandomBool(25.0f) ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_RAMPLAYER_FARAWAY;
     default:
         return MISSION_BLOCKPLAYER_FARAWAY;
     }

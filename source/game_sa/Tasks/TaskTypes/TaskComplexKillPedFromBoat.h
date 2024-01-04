@@ -1,22 +1,36 @@
-/*
-    Plugin-SDK file
-    Authors: GTA Community. See more here
-    https://github.com/DK22Pac/plugin-sdk
-    Do not delete this comment block. Respect others' work!
-*/
 #pragma once
 
 #include "TaskComplex.h"
-#include "Ped.h"
+
+class CPed;
+class CTaskComplexKillPedFromBoat;
 
 class NOTSA_EXPORT_VTABLE CTaskComplexKillPedFromBoat : public CTaskComplex {
 public:
-    static constexpr auto Type = TASK_KILL_PED_FROM_BOAT;
-
-    CPed* m_pPed;
-
+    CPed* m_Ped{};
 public:
-    CTaskComplexKillPedFromBoat(CPed* ped);
-};
+    static void InjectHooks();
 
-VALIDATE_SIZE(CTaskComplexKillPedFromBoat, 0x10);
+    static constexpr auto Type = eTaskType::TASK_KILL_PED_FROM_BOAT;
+
+    CTaskComplexKillPedFromBoat(CPed * ped);
+    ~CTaskComplexKillPedFromBoat();
+
+    virtual CTask* Clone();
+    virtual eTaskType GetTaskType() { return Type; }
+    virtual CTask* CreateNextSubTask(CPed* ped);
+    virtual CTask* CreateFirstSubTask(CPed* ped);
+    virtual CTask* ControlSubTask(CPed* ped);
+ 
+private: // Wrappers for hooks
+    // 0x6227C0
+    CTaskComplexKillPedFromBoat* Constructor(CPed* ped) {
+        this->CTaskComplexKillPedFromBoat::CTaskComplexKillPedFromBoat(ped);
+        return this;
+    }
+    // 0x622830
+    CTaskComplexKillPedFromBoat* Destructor() {
+        this->CTaskComplexKillPedFromBoat::~CTaskComplexKillPedFromBoat();
+        return this;
+    }
+};
