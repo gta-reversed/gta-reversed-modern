@@ -519,7 +519,7 @@ void CCarCtrl::JoinCarWithRoadAccordingToMission(CVehicle* vehicle) {
     case MISSION_GOTO_ESCORTPOINT_1:
     case MISSION_GOTO_ESCORTPOINT_2:
     case MISSION_GOTO_ESCORTPOINT_3:
-    case MISSION_34:
+    case MISSION_FOLLOW_CAR:
     case MISSION_35:
     case MISSION_36:
     case MISSION_37:

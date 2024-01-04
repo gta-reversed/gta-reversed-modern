@@ -44,8 +44,8 @@ void CCarAI::InjectHooks() {
     RH_ScopedInstall(MellowOutChaseSpeed, 0x41D3D0, { .reversed = false });
     RH_ScopedInstall(MellowOutChaseSpeedBoat, 0x41CB70);
     RH_ScopedInstall(TellCarToBlockOtherCar, 0x41C900, { .reversed = false });
-    RH_ScopedInstall(TellCarToFollowOtherCar, 0x41C960, { .reversed = false });
-    RH_ScopedInstall(TellCarToRamOtherCar, 0x41C8A0, { .reversed = false });
+    RH_ScopedInstall(TellCarToFollowOtherCar, 0x41C960);
+    RH_ScopedInstall(TellCarToRamOtherCar, 0x41C8A0);
     RH_ScopedInstall(TellOccupantsToLeaveCar, 0x41C760);
     RH_ScopedInstall(UpdateCarAI, 0x41DA30, { .reversed = false });
 }
@@ -302,12 +302,23 @@ void CCarAI::TellCarToBlockOtherCar(CVehicle* vehicle1, CVehicle* vehicle2) {
 
 // 0x41C960
 void CCarAI::TellCarToFollowOtherCar(CVehicle* vehicle1, CVehicle* vehicle2, float radius) {
-    plugin::Call<0x41C960, CVehicle*, CVehicle*, float>(vehicle1, vehicle2, radius);
+    vehicle1->m_autoPilot.m_pTargetCar = vehicle2;
+    CEntity::SafeRegisterRef(vehicle1->m_autoPilot.m_pTargetCar);
+    CCarCtrl::JoinCarWithRoadSystem(vehicle1);
+    vehicle1->m_autoPilot.m_nCarMission = MISSION_FOLLOW_CAR;
+    vehicle1->vehicleFlags.bEngineOn    = !vehicle1->vehicleFlags.bEngineBroken;
+
+    if (vehicle1->m_autoPilot.m_nCruiseSpeed <= 6) {
+        vehicle1->m_autoPilot.m_nCruiseSpeed = 6;
+    }
+
+    vehicle1->m_autoPilot.m_ucCarFollowDist = radius;
 }
 
 // unused
 // 0x41C8A0
 void CCarAI::TellCarToRamOtherCar(CVehicle* vehicle1, CVehicle* vehicle2) {
+    /*
     vehicle1->m_autoPilot.m_pTargetCar = vehicle2;
     CEntity::SafeRegisterRef(vehicle1->m_autoPilot.m_pTargetCar);
     CCarCtrl::JoinCarWithRoadSystem(vehicle1);
@@ -317,6 +328,8 @@ void CCarAI::TellCarToRamOtherCar(CVehicle* vehicle1, CVehicle* vehicle2) {
     if (vehicle1->m_autoPilot.m_nCruiseSpeed <= 6) {
         vehicle1->m_autoPilot.m_nCruiseSpeed = 6;
     }
+    */
+    NOTSA_UNREACHABLE("Unused");
 }
 
 // 0x41C760
