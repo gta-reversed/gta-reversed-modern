@@ -109,7 +109,7 @@ void CCarAI::AddPoliceCarOccupants(CVehicle* vehicle, bool arg2) {
                 CPed* passenger = vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
                 if (wantedLevel > 2) {
                     CPed* selectedPed;
-                    if (CGeneral::GetRandomNumberInRange(0.0, 1.0) < 0.25) {
+                    if (RandomBool(25.0f)) {
                         selectedPed = driver;
                     }
                     if (CGeneral::GetRandomNumberInRange(0.0, 1.0) < 0.25) {
