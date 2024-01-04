@@ -14,7 +14,7 @@ public:
     static constexpr auto Type = eTaskType::TASK_KILL_PED_FROM_BOAT;
 
     CTaskComplexKillPedFromBoat(CPed * ped);
-    ~CTaskComplexKillPedFromBoat();
+    ~CTaskComplexKillPedFromBoat() override;
 
     virtual CTask* Clone() const override;
     virtual eTaskType GetTaskType() const override { return Type; }

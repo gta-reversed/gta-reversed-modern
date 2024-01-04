@@ -17,12 +17,13 @@ void CTaskComplexKillPedFromBoat::InjectHooks() {
 
 // 0x6227C0
 CTaskComplexKillPedFromBoat::CTaskComplexKillPedFromBoat(CPed* ped) {
-    assert(false && "Constructor not reversed"); // TODO: Reverse constructor}
+    m_Ped = ped;
+    CEntity::SafeRegisterRef(m_Ped);
 }
 
 // 0x622830
 CTaskComplexKillPedFromBoat::~CTaskComplexKillPedFromBoat() {
-    assert(false && "Destructor not reversed"); // TODO: Reverse destructor}
+    CEntity::SafeCleanUpRef(m_Ped);
 }
 
 // 0x6238A0
