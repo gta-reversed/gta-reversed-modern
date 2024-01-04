@@ -305,9 +305,18 @@ void CCarAI::TellCarToFollowOtherCar(CVehicle* vehicle1, CVehicle* vehicle2, flo
     plugin::Call<0x41C960, CVehicle*, CVehicle*, float>(vehicle1, vehicle2, radius);
 }
 
+// unused
 // 0x41C8A0
 void CCarAI::TellCarToRamOtherCar(CVehicle* vehicle1, CVehicle* vehicle2) {
-    plugin::Call<0x41C8A0, CVehicle*, CVehicle*>(vehicle1, vehicle2);
+    vehicle1->m_autoPilot.m_pTargetCar = vehicle2;
+    CEntity::SafeRegisterRef(vehicle1->m_autoPilot.m_pTargetCar);
+    CCarCtrl::JoinCarWithRoadSystem(vehicle1);
+    vehicle1->m_autoPilot.m_nCarMission = MISSION_RAMCAR_FARAWAY;
+    vehicle1->vehicleFlags.bEngineOn    = !vehicle1->vehicleFlags.bEngineBroken;
+
+    if (vehicle1->m_autoPilot.m_nCruiseSpeed <= 6) {
+        vehicle1->m_autoPilot.m_nCruiseSpeed = 6;
+    }
 }
 
 // 0x41C760
