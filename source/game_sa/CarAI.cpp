@@ -46,7 +46,7 @@ void CCarAI::InjectHooks() {
     RH_ScopedInstall(TellCarToBlockOtherCar, 0x41C900, { .reversed = false });
     RH_ScopedInstall(TellCarToFollowOtherCar, 0x41C960, { .reversed = false });
     RH_ScopedInstall(TellCarToRamOtherCar, 0x41C8A0, { .reversed = false });
-    RH_ScopedInstall(TellOccupantsToLeaveCar, 0x41C760, { .reversed = false });
+    RH_ScopedInstall(TellOccupantsToLeaveCar, 0x41C760, { .reversed = true });
     RH_ScopedInstall(UpdateCarAI, 0x41DA30, { .reversed = false });
 }
 
@@ -316,24 +316,24 @@ void CCarAI::TellCarToRamOtherCar(CVehicle* vehicle1, CVehicle* vehicle2) {
 
 // 0x41C760
 void CCarAI::TellOccupantsToLeaveCar(CVehicle* vehicle) {
-    if (vehicle->m_pDriver) {
+    auto tellToLeaveCar = [vehicle](CPed* ped) {
+        if (!ped) {
+            return;
+        }
+
         CTaskComplexCopInCar* task = vehicle->m_pDriver->GetTaskManager().Find<CTaskComplexCopInCar>(false);
         if (task) {
             task->m_flag0x2 = 1;
         } else {
             vehicle->m_pDriver->GetTaskManager().SetTask(new CTaskComplexLeaveCar{ vehicle, TARGET_DOOR_FRONT_LEFT, 0, true, false }, TASK_PRIMARY_PRIMARY, false);
         }
-    }
+    };
+
+    tellToLeaveCar(vehicle->m_pDriver);
 
     if (vehicle->m_nMaxPassengers) {
-        for (auto passenger : vehicle->GetPassengers()) {
-            CTaskComplexCopInCar* task = passenger->GetTaskManager().Find<CTaskComplexCopInCar>(false);
-            if (task) {
-                task->m_flag0x2 = 1;
-            } else {
-                passenger->GetTaskManager().SetTask(new CTaskComplexLeaveCar{ vehicle, TARGET_DOOR_FRONT_LEFT, 0, true, false }, TASK_PRIMARY_PRIMARY, false);
-                // rand();
-            }
+        for (CPed* passenger : vehicle->GetPassengers()) {
+            tellToLeaveCar(passenger);
         }
     }
 }
