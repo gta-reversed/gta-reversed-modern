@@ -16,11 +16,11 @@ public:
     CTaskComplexKillPedFromBoat(CPed * ped);
     ~CTaskComplexKillPedFromBoat() override;
 
-    virtual CTask* Clone() const override;
-    virtual eTaskType GetTaskType() const override { return Type; }
-    virtual CTask* CreateNextSubTask(CPed* ped);
-    virtual CTask* CreateFirstSubTask(CPed* ped);
-    virtual CTask* ControlSubTask(CPed* ped);
+    CTask* Clone() const override;
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* CreateNextSubTask(CPed* ped) override;
+    CTask* CreateFirstSubTask(CPed* ped) override;
+    CTask* ControlSubTask(CPed* ped) override;
  
 private: // Wrappers for hooks
     // 0x6227C0
