@@ -295,9 +295,21 @@ void CCarAI::MellowOutChaseSpeedBoat(CVehicle* vehicle) {
     }
 }
 
+// unused
 // 0x41C900
 void CCarAI::TellCarToBlockOtherCar(CVehicle* vehicle1, CVehicle* vehicle2) {
-    plugin::Call<0x41C900, CVehicle*, CVehicle*>(vehicle1, vehicle2);
+    /*
+    vehicle1->m_autoPilot.m_pTargetCar = vehicle2;
+    CEntity::SafeRegisterRef(vehicle1->m_autoPilot.m_pTargetCar);
+    CCarCtrl::JoinCarWithRoadSystem(vehicle1);
+    vehicle1->m_autoPilot.m_nCarMission = MISSION_BLOCKCAR_FARAWAY;
+    vehicle1->vehicleFlags.bEngineOn    = !vehicle1->vehicleFlags.bEngineBroken;
+
+    if (vehicle1->m_autoPilot.m_nCruiseSpeed <= 6) {
+        vehicle1->m_autoPilot.m_nCruiseSpeed = 6;
+    }
+    */
+    NOTSA_UNREACHABLE("Unused");
 }
 
 // 0x41C960
