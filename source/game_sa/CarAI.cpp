@@ -74,60 +74,62 @@ void CCarAI::AddFiretruckOccupants(CVehicle* vehicle) {
 
 // 0x41C070
 void CCarAI::AddPoliceCarOccupants(CVehicle* vehicle, bool arg2) {
-    if (!vehicle->vehicleFlags.bOccupantsHaveBeenGenerated) {
-        vehicle->vehicleFlags.bOccupantsHaveBeenGenerated = 1;
-        switch (vehicle->m_nModelIndex) {
-        case MODEL_ENFORCER:
-        case MODEL_FBIRANCH:
-            vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
-            vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
-            vehicle->SetupPassenger(1, PED_TYPE_NONE, false, false);
-            vehicle->SetupPassenger(2, PED_TYPE_NONE, false, false);
-            return;
-        case MODEL_PREDATOR:
-            if (FindPlayerPed()->GetWantedLevel() > 1) {
-                CPed* driver = vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
-                CTaskSimpleCarSetPedOut{ vehicle, TARGET_DOOR_DRIVER, true }.ProcessPed(driver);
-                driver->AttachPedToEntity(vehicle, CVector(0.0, 0.0, 0.0), 0, (float)6.2831855, WEAPON_PISTOL);
-                driver->bStayInSamePlace = true;
-                driver->GetTaskManager().SetTask(new CTaskComplexKillPedFromBoat{ FindPlayerPed() }, TASK_PRIMARY_PRIMARY);
-            }
-            vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
-        case MODEL_RHINO:
-        case MODEL_COPBIKE:
-            vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
-            return;
-        case MODEL_BARRACKS:
-        case MODEL_COPCARLA:
-        case MODEL_COPCARSF:
-        case MODEL_COPCARVG:
-        case MODEL_COPCARRU:
-            CPed*  driver      = vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
-            uint32 wantedLevel = FindPlayerPed()->GetWantedLevel();
-            if (wantedLevel > 1) {
-                CPed* passenger = vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
-                if (wantedLevel > 2) {
-                    CPed* selectedPed;
-                    if (CGeneral::RandomBool(25.0f)) {
-                        selectedPed = driver;
-                    }
-                    if (CGeneral::RandomBool(25.0f)) {
-                        selectedPed = passenger;
-                    }
-                    if (selectedPed) {
-                        selectedPed->GiveDelayedWeapon(WEAPON_SHOTGUN, 1000);
-                    }
-                }
-                driver->GetIntelligence()->ClearTasks(true, true);
-                driver->GetTaskManager().SetTask(new CTaskComplexCopInCar{ vehicle, passenger, FindPlayerPed(), true }, TASK_PRIMARY_PRIMARY, true);
-                passenger->GetIntelligence()->ClearTasks(true, true);
-                driver->GetTaskManager().SetTask(new CTaskComplexCopInCar{ vehicle, driver, FindPlayerPed(), true }, TASK_PRIMARY_PRIMARY, false);
-                return;
-            }
+    if (vehicle->vehicleFlags.bOccupantsHaveBeenGenerated) {
+        return;
+    }
 
-            if (arg2 || CGeneral::RandomBool(50.0f)) {
-                vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
+    vehicle->vehicleFlags.bOccupantsHaveBeenGenerated = 1;
+    switch (vehicle->m_nModelIndex) {
+    case MODEL_ENFORCER:
+    case MODEL_FBIRANCH:
+        vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
+        vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
+        vehicle->SetupPassenger(1, PED_TYPE_NONE, false, false);
+        vehicle->SetupPassenger(2, PED_TYPE_NONE, false, false);
+        return;
+    case MODEL_PREDATOR:
+        if (FindPlayerPed()->GetWantedLevel() > 1) {
+            CPed* driver = vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
+            CTaskSimpleCarSetPedOut{ vehicle, TARGET_DOOR_DRIVER, true }.ProcessPed(driver);
+            driver->AttachPedToEntity(vehicle, CVector(0.0, 0.0, 0.0), 0, (float)6.2831855, WEAPON_PISTOL);
+            driver->bStayInSamePlace = true;
+            driver->GetTaskManager().SetTask(new CTaskComplexKillPedFromBoat{ FindPlayerPed() }, TASK_PRIMARY_PRIMARY);
+        }
+        vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
+    case MODEL_RHINO:
+    case MODEL_COPBIKE:
+        vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
+        return;
+    case MODEL_BARRACKS:
+    case MODEL_COPCARLA:
+    case MODEL_COPCARSF:
+    case MODEL_COPCARVG:
+    case MODEL_COPCARRU:
+        CPed*  driver      = vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
+        uint32 wantedLevel = FindPlayerPed()->GetWantedLevel();
+        if (wantedLevel > 1) {
+            CPed* passenger = vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
+            if (wantedLevel > 2) {
+                CPed* selectedPed;
+                if (CGeneral::RandomBool(25.0f)) {
+                    selectedPed = driver;
+                }
+                if (CGeneral::RandomBool(25.0f)) {
+                    selectedPed = passenger;
+                }
+                if (selectedPed) {
+                    selectedPed->GiveDelayedWeapon(WEAPON_SHOTGUN, 1000);
+                }
             }
+            driver->GetIntelligence()->ClearTasks(true, true);
+            driver->GetTaskManager().SetTask(new CTaskComplexCopInCar{ vehicle, passenger, FindPlayerPed(), true }, TASK_PRIMARY_PRIMARY, true);
+            passenger->GetIntelligence()->ClearTasks(true, true);
+            driver->GetTaskManager().SetTask(new CTaskComplexCopInCar{ vehicle, driver, FindPlayerPed(), true }, TASK_PRIMARY_PRIMARY, false);
+            return;
+        }
+
+        if (arg2 || CGeneral::RandomBool(50.0f)) {
+            vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
         }
     }
 }
