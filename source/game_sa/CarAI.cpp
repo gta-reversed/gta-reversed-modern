@@ -13,6 +13,7 @@
 #include "TaskComplexDriveFireTruck.h"
 #include "TaskComplexMedicTreatInjuredPed.h"
 #include "TaskComplexKillPedFromBoat.h"
+#include "TaskComplexLeaveCar.h"
 #include "TaskSimpleCarDrive.h"
 #include "TaskSimpleCarSetPedOut.h"
 #include "Timer.h"
@@ -315,7 +316,26 @@ void CCarAI::TellCarToRamOtherCar(CVehicle* vehicle1, CVehicle* vehicle2) {
 
 // 0x41C760
 void CCarAI::TellOccupantsToLeaveCar(CVehicle* vehicle) {
-    plugin::Call<0x41C760, CVehicle*>(vehicle);
+    if (vehicle->m_pDriver) {
+        CTaskComplexCopInCar* task = vehicle->m_pDriver->GetTaskManager().Find<CTaskComplexCopInCar>(false);
+        if (task) {
+            task->m_flag0x2 = 1;
+        } else {
+            vehicle->m_pDriver->GetTaskManager().SetTask(new CTaskComplexLeaveCar{ vehicle, TARGET_DOOR_FRONT_LEFT, 0, true, false }, TASK_PRIMARY_PRIMARY, false);
+        }
+    }
+
+    if (vehicle->m_nMaxPassengers) {
+        for (auto passenger : vehicle->GetPassengers()) {
+            CTaskComplexCopInCar* task = passenger->GetTaskManager().Find<CTaskComplexCopInCar>(false);
+            if (task) {
+                task->m_flag0x2 = 1;
+            } else {
+                passenger->GetTaskManager().SetTask(new CTaskComplexLeaveCar{ vehicle, TARGET_DOOR_FRONT_LEFT, 0, true, false }, TASK_PRIMARY_PRIMARY, false);
+                // rand();
+            }
+        }
+    }
 }
 
 // 0x41DA30
