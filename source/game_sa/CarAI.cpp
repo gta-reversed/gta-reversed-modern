@@ -161,11 +161,7 @@ void CCarAI::CarHasReasonToStop(CVehicle* vehicle) {
 // 0x41CD00
 bool CCarAI::EntitiesGoHeadOn(CEntity* entity1, CEntity* entity2) {
     CVector positionDiff = (entity1->GetPosition() - entity2->GetPosition()).Normalized();
-    if (entity1->GetForwardVector().Dot(positionDiff) > -0.8f) {
-        return false;
-    }
-
-    return entity2->GetForwardVector().Dot(positionDiff) >= 0.8f;
+    return entity1->GetForwardVector().Dot(positionDiff) <= -0.8f && entity2->GetForwardVector().Dot(positionDiff) >= 0.8f;
 }
 
 // 0x41CA40
