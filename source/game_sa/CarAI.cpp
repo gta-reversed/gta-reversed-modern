@@ -320,7 +320,7 @@ void CCarAI::TellCarToRamOtherCar(CVehicle* vehicle1, CVehicle* vehicle2) {
 
 // 0x41C760
 void CCarAI::TellOccupantsToLeaveCar(CVehicle* vehicle) {
-    auto tellToLeaveCar = [vehicle](CPed* ped) {
+    auto TellToLeaveCar = [vehicle](CPed* ped) {
         if (!ped) {
             return;
         }
@@ -333,11 +333,11 @@ void CCarAI::TellOccupantsToLeaveCar(CVehicle* vehicle) {
         }
     };
 
-    tellToLeaveCar(vehicle->m_pDriver);
+    TellToLeaveCar(vehicle->m_pDriver);
 
     if (vehicle->m_nMaxPassengers) {
         for (CPed* passenger : vehicle->GetPassengers()) {
-            tellToLeaveCar(passenger);
+            TellToLeaveCar(passenger);
         }
     }
 }
