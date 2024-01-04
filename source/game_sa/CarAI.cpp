@@ -141,13 +141,15 @@ void CCarAI::BackToCruisingIfNoWantedLevel(CVehicle* vehicle) {
     }
 
     CWanted* wanted = FindPlayerWanted();
-    if (!wanted->m_nWantedLevel || wanted->BackOff() || CCullZones::NoPolice()) {
-        CCarCtrl::JoinCarWithRoadSystem(vehicle);
-        vehicle->m_autoPilot.m_nCarMission = MISSION_CRUISE;
-        vehicle->m_autoPilot.m_nCarDrivingStyle = DRIVING_STYLE_STOP_FOR_CARS;
-        if (CCullZones::NoPolice()) {
-            vehicle->m_autoPilot.m_nCarMission = MISSION_NONE;
-        }
+    if (wanted->m_nWantedLevel > 0 && !wanted->BackOff() && !CCullZones::NoPolice()) {
+        return;
+    }
+
+    CCarCtrl::JoinCarWithRoadSystem(vehicle);
+    vehicle->m_autoPilot.m_nCarMission = MISSION_CRUISE;
+    vehicle->m_autoPilot.m_nCarDrivingStyle = DRIVING_STYLE_STOP_FOR_CARS;
+    if (CCullZones::NoPolice()) {
+        vehicle->m_autoPilot.m_nCarMission = MISSION_NONE;
     }
 }
 
@@ -158,18 +160,12 @@ void CCarAI::CarHasReasonToStop(CVehicle* vehicle) {
 
 // 0x41CD00
 bool CCarAI::EntitiesGoHeadOn(CEntity* entity1, CEntity* entity2) {
-    CVector position1 = entity1->m_matrix ? entity1->m_matrix->GetPosition() : entity1->m_placement.m_vPosn;
-    CVector position2 = entity2->m_matrix ? entity2->m_matrix->GetPosition() : entity2->m_placement.m_vPosn;
-    CVector positionDiff = position1 - position2;
-    positionDiff.Normalise();
-
-    const CVector& forward1 = entity1->GetForwardVector();
-    if (forward1.Dot(positionDiff) > -0.8f) {
+    CVector positionDiff = (entity1->GetPosition() - entity2->GetPosition()).Normalized();
+    if (entity1->GetForwardVector().Dot(positionDiff) > -0.8f) {
         return false;
     }
 
-    const CVector& forward2 = entity2->GetForwardVector();
-    return forward2.Dot(positionDiff) >= 0.8f;
+    return entity2->GetForwardVector().Dot(positionDiff) >= 0.8f;
 }
 
 // 0x41CA40
@@ -334,12 +330,7 @@ void CCarAI::TellOccupantsToLeaveCar(CVehicle* vehicle) {
     };
 
     TellToLeaveCar(vehicle->m_pDriver);
-
-    if (vehicle->m_nMaxPassengers) {
-        for (CPed* passenger : vehicle->GetPassengers()) {
-            TellToLeaveCar(passenger);
-        }
-    }
+    rng::for_each(vehicle->GetPassengers(), TellToLeaveCar);
 }
 
 // 0x41DA30
