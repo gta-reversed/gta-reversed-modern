@@ -26,8 +26,8 @@ CTaskComplexKillPedFromBoat::~CTaskComplexKillPedFromBoat() {
 }
 
 // 0x6238A0
-CTask* CTaskComplexKillPedFromBoat::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x6238A0, CTaskComplexKillPedFromBoat*>(this);
+CTask* CTaskComplexKillPedFromBoat::Clone() const {
+    return plugin::CallMethodAndReturn<CTask*, 0x6238A0, const CTaskComplexKillPedFromBoat*>(this);
 }
 
 // 0x622890

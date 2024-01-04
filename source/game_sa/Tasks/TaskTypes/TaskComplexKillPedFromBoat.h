@@ -16,8 +16,8 @@ public:
     CTaskComplexKillPedFromBoat(CPed * ped);
     ~CTaskComplexKillPedFromBoat();
 
-    virtual CTask* Clone();
-    virtual eTaskType GetTaskType() { return Type; }
+    virtual CTask* Clone() const override;
+    virtual eTaskType GetTaskType() const override { return Type; }
     virtual CTask* CreateNextSubTask(CPed* ped);
     virtual CTask* CreateFirstSubTask(CPed* ped);
     virtual CTask* ControlSubTask(CPed* ped);
