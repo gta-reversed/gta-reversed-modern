@@ -23,15 +23,15 @@ void CCarAI::InjectHooks() {
     RH_ScopedClass(CCarAI);
     RH_ScopedCategory("AI");
 
-    RH_ScopedInstall(AddAmbulanceOccupants, 0x41C4A0, { .reversed = true });
-    RH_ScopedInstall(AddFiretruckOccupants, 0x41C600, { .reversed = true });
-    RH_ScopedInstall(AddPoliceCarOccupants, 0x41C070, { .reversed = true });
-    RH_ScopedInstall(BackToCruisingIfNoWantedLevel, 0x41BFA0, { .reversed = true });
-    RH_ScopedInstall(CarHasReasonToStop, 0x41C050, { .reversed = true });
-    RH_ScopedInstall(EntitiesGoHeadOn, 0x41CD00, { .reversed = true });
+    RH_ScopedInstall(AddAmbulanceOccupants, 0x41C4A0);
+    RH_ScopedInstall(AddFiretruckOccupants, 0x41C600);
+    RH_ScopedInstall(AddPoliceCarOccupants, 0x41C070);
+    RH_ScopedInstall(BackToCruisingIfNoWantedLevel, 0x41BFA0);
+    RH_ScopedInstall(CarHasReasonToStop, 0x41C050);
+    RH_ScopedInstall(EntitiesGoHeadOn, 0x41CD00);
     RH_ScopedInstall(FindPoliceBikeMissionForWantedLevel, 0x41CA40);
     RH_ScopedInstall(FindPoliceBoatMissionForWantedLevel, 0x41CA50);
-    RH_ScopedInstall(FindPoliceCarMissionForWantedLevel, 0x41C9D0, { .reversed = true });
+    RH_ScopedInstall(FindPoliceCarMissionForWantedLevel, 0x41C9D0);
     RH_ScopedInstall(FindPoliceCarSpeedForWantedLevel, 0x41CAA0);
     RH_ScopedInstall(FindSwitchDistanceClose, 0x41BF50, { .reversed = false });
     RH_ScopedInstall(FindSwitchDistanceFar, 0x41BF70, { .reversed = false });
@@ -46,7 +46,7 @@ void CCarAI::InjectHooks() {
     RH_ScopedInstall(TellCarToBlockOtherCar, 0x41C900, { .reversed = false });
     RH_ScopedInstall(TellCarToFollowOtherCar, 0x41C960, { .reversed = false });
     RH_ScopedInstall(TellCarToRamOtherCar, 0x41C8A0, { .reversed = false });
-    RH_ScopedInstall(TellOccupantsToLeaveCar, 0x41C760, { .reversed = true });
+    RH_ScopedInstall(TellOccupantsToLeaveCar, 0x41C760);
     RH_ScopedInstall(UpdateCarAI, 0x41DA30, { .reversed = false });
 }
 
