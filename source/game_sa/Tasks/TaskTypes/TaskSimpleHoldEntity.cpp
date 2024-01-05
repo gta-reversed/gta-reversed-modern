@@ -394,7 +394,7 @@ void CTaskSimpleHoldEntity::StartAnim(CPed* ped) {
                 animBlock = CAnimManager::GetAnimationBlock(CAnimManager::GetAnimBlockName(m_nAnimGroupId));
             }
             const auto blockIndex = CAnimManager::GetAnimationBlockIndex(animBlock);
-            if (!animBlock->bLoaded) {
+            if (!animBlock->IsLoaded) {
                 CStreaming::RequestModel(IFPToModelId(blockIndex), STREAMING_KEEP_IN_MEMORY);
                 return;
             }

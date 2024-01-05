@@ -1482,7 +1482,7 @@ void CPed::StopPlayingHandSignal() {
 * @returns Get walk speed in units/s based on the ped's anim group's WALK anim.
 */
 float CPed::GetWalkAnimSpeed() {
-    auto hier = CAnimManager::GetAnimAssociation(m_nAnimGroup, ANIM_ID_WALK)->m_pHierarchy;
+    auto hier = CAnimManager::GetAnimAssociation(m_nAnimGroup, ANIM_ID_WALK)->m_BlendHier;
 
     CAnimManager::UncompressAnimation(hier);
     auto& firstSequence = hier->m_pSequences[ANIM_ID_WALK];

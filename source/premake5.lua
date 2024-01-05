@@ -49,7 +49,9 @@ project "gta_reversed"
         "TRACY_ON_DEMAND",
         "TRACY_CALLSTACK",
 
-        "SPDLOG_USE_STD_FORMAT"
+        "SPDLOG_USE_STD_FORMAT",
+
+        "NOTSA_SKINNED_PEDS"
     }
 
     links { 

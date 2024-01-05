@@ -8,21 +8,22 @@
 
 #include "AnimSequenceFrames.h"
 
-// The sequence of key frames of one animated node
+//! The sequence of key-frames of one animated node (bone)
 class CAnimBlendSequence {
 public:
-    // thanks to jte for some info
+    //! The bone/frame this sequence is associated with
+    //! Thanks to jte for some info
     union {
-        ePedBones m_boneId; // IF m_hasBoneIdSet == TRUE
-        uint32    m_hash;   // IF m_hasBoneIdSet == FALSE
+        ePedBones m_BoneID;         // IF m_bUsingBones == TRUE
+        uint32    m_FrameHashKey;   // IF m_bUsingBones == FALSE
     };
     union {
         struct {
             uint16 m_bHasRotation : 1;
-            uint16 m_bHasTranslation : 1;     // Root key frames have translation values (quaternion).
+            uint16 m_bHasTranslation : 1;      // Root key frames have translation values (quaternion).
             uint16 m_bIsCompressed : 1;        // Compressed key frames.
             uint16 m_bUsingExternalMemory : 1; // When this flag is NOT set, you have to loop through all key frames in m_pFrames and free them separately.
-            uint16 m_hasBoneIdSet : 1;
+            uint16 m_bUsingBones : 1;          // If `true` this sequence is for animating bones, otherwise frames.
         };
         uint16 m_nFlags;
     };

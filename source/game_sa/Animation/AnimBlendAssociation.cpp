@@ -31,7 +31,7 @@ void CAnimBlendAssociation::InjectHooks() {
 
 // 0x4CE9B0
 CAnimBlendAssociation::CAnimBlendAssociation() {
-    m_nAnimGroup = -1;
+    m_AnimGroupId = ANIM_GROUP_NONE;
     m_BlendNodes = nullptr;
     m_BlendHier = nullptr;
     m_BlendAmount = 1.0f;
@@ -39,7 +39,7 @@ CAnimBlendAssociation::CAnimBlendAssociation() {
     m_CurrentTime = 0.0f;
     m_Speed = 1.0f;
     m_TimeStep = 0.0f;
-    m_AnimId = -1;
+    m_AnimId = ANIM_ID_UNDEFINED;
     m_Flags = 0;
     m_nCallbackType = ANIM_BLEND_CALLBACK_NONE;
     // NOTSA
@@ -107,10 +107,10 @@ void CAnimBlendAssociation::Init(RpClump* clump, CAnimBlendHierarchy* animHierar
     m_BlendHier = animHierarchy;
     for (auto& sequence : m_BlendHier->GetSequences()) {
         AnimBlendFrameData* frame = nullptr;
-        if (sequence.m_hasBoneIdSet) {
-            frame = RpAnimBlendClumpFindBone(clump, sequence.m_boneId);
+        if (sequence.m_bUsingBones) {
+            frame = RpAnimBlendClumpFindBone(clump, sequence.m_BoneID);
         } else {
-            frame = RpAnimBlendClumpFindFrameFromHashKey(clump, sequence.m_hash);
+            frame = RpAnimBlendClumpFindFrameFromHashKey(clump, sequence.m_FrameHashKey);
         }
         if (frame && sequence.m_FramesNum > 0) {
             m_BlendNodes[frame - animClumpData->m_Frames].m_BlendSeq = &sequence;
@@ -124,7 +124,7 @@ void CAnimBlendAssociation::Init(CAnimBlendAssociation& assoc) {
     m_NumBlendNodes = assoc.m_NumBlendNodes;
     m_Flags         = assoc.m_Flags;
     m_AnimId        = assoc.m_AnimId;
-    m_nAnimGroup     = assoc.m_nAnimGroup;
+    m_AnimGroupId     = assoc.m_AnimGroupId;
     AllocateAnimBlendNodeArray(m_NumBlendNodes);
     for (auto i = 0; i < m_NumBlendNodes; i++) {
         m_BlendNodes[i] = assoc.m_BlendNodes[i];
@@ -134,14 +134,14 @@ void CAnimBlendAssociation::Init(CAnimBlendAssociation& assoc) {
 
 // 0x4CEEC0
 void CAnimBlendAssociation::Init(CAnimBlendStaticAssociation& assoc) {
-    m_BlendHier     = assoc.m_pHierarchy;
-    m_NumBlendNodes = assoc.m_nNumBlendNodes;
-    m_Flags         = assoc.m_nFlags;
-    m_AnimId        = assoc.m_nAnimId;
-    m_nAnimGroup     = assoc.m_nAnimGroup;
+    m_BlendHier     = assoc.m_BlendHier;
+    m_NumBlendNodes = assoc.m_NumBlendNodes;
+    m_Flags         = assoc.m_Flags;
+    m_AnimId        = assoc.m_AnimId;
+    m_AnimGroupId    = assoc.m_AnimGroupId;
     AllocateAnimBlendNodeArray(m_NumBlendNodes);
     for (auto i = 0; i < m_NumBlendNodes; i++) {
-        m_BlendNodes[i].m_BlendSeq = assoc.m_pSequenceArray[i];
+        m_BlendNodes[i].m_BlendSeq = assoc.m_BlendSeqs[i];
         m_BlendNodes[i].m_BlendAssoc = this;
     }
 }

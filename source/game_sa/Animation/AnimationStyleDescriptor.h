@@ -1,8 +1,8 @@
 #pragma once
 
 struct AnimDescriptor {
-    int32 animId{};
-    int32 flags{};
+    AnimationId animId{};
+    int32       flags{};
 };
 
 struct AnimAssocDefinition {

@@ -244,7 +244,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
             AssocGroupId animGroupID = weaponInfo->m_eAnimGroup;
             if (targetEntity && pad->GetTarget() && playerData->m_fMoveBlendRatio < 1.9f && player->m_nMoveState != PEDMOVE_SPRINT &&
                 !taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK) && animGroupID != ANIM_GROUP_DEFAULT && CAnimManager::GetAnimationBlock(animGroupID) &&
-                CAnimManager::GetAnimationBlock(animGroupID)->bLoaded && intelligence->TestForStealthKill(targetEntity, false)) {
+                CAnimManager::GetAnimationBlock(animGroupID)->IsLoaded && intelligence->TestForStealthKill(targetEntity, false)) {
                 if (player->bIsDucking) {
                     CTaskSimpleDuck* duckTask = intelligence->GetTaskDuck(true);
                     if (duckTask && duckTask->IsTaskInUseByOtherTasks()) {
@@ -700,7 +700,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
     CAnimBlock* animBlock = &CAnimManager::ms_aAnimBlocks[m_nAnimationBlockIndex];
     uint32 touchTimeDelta = pad->GetTouchedTimeDelta();
     if (touchTimeDelta <= 10000) {
-        if (animBlock->bLoaded) {
+        if (animBlock->IsLoaded) {
             CStreaming::SetModelIsDeletable(IFPToModelId(m_nAnimationBlockIndex));
             CAnimBlendAssociation* animAssoc = nullptr;
             for (animAssoc = RpAnimBlendClumpGetFirstAssociation(player->m_pRwClump); animAssoc; animAssoc = RpAnimBlendGetNextAssociation(animAssoc)) {
@@ -714,7 +714,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
     }
 
     CStreaming::RequestModel(IFPToModelId(m_nAnimationBlockIndex), STREAMING_GAME_REQUIRED);
-    if (!animBlock->bLoaded)
+    if (!animBlock->IsLoaded)
         return;
 
     const auto PlayRandomIdleAnim = [&]() {
@@ -752,8 +752,8 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
             animHierarchyIndex = animHierarchyIndex / 6 + ((animHierarchyIndex >> 31) >> 2);
             animHierarchyIndex = animHierarchyIndex + (animHierarchyIndex >> 31);
 
-            uint32 animBlockFirstAnimIndex = static_cast<uint32>(animBlock->startAnimation);
-            if (animHierarchyIndex >= animBlockFirstAnimIndex && animHierarchyIndex < animBlockFirstAnimIndex + animBlock->animationCount) {
+            uint32 animBlockFirstAnimIndex = static_cast<uint32>(animBlock->FirstAnimId);
+            if (animHierarchyIndex >= animBlockFirstAnimIndex && animHierarchyIndex < animBlockFirstAnimIndex + animBlock->NumAnims) {
                 break;
             }
             animAssoc1 = RpAnimBlendGetNextAssociation(animAssoc1);
@@ -981,7 +981,7 @@ int32 CTaskSimplePlayerOnFoot::PlayerControlZelda(CPlayerPed* player, bool bAvoi
                 CAnimBlendAssocGroup* animGroup = &CAnimManager::ms_aAnimAssocGroups[player->m_nAnimGroup];
 
                 if (player->m_pPlayerData->m_bPlayerSprintDisabled || g_surfaceInfos.CantSprintOn(player->m_nContactSurface) ||
-                    (animHierarchy = animGroup->GetAnimation(ANIM_ID_RUN)->m_pHierarchy, animHierarchy == animGroup->GetAnimation(ANIM_ID_SPRINT)->m_pHierarchy)) {
+                    (animHierarchy = animGroup->GetAnimation(ANIM_ID_RUN)->m_BlendHier, animHierarchy == animGroup->GetAnimation(ANIM_ID_SPRINT)->m_BlendHier)) {
                     if (pad->GetSprint()) {
                         player->m_nMoveState = PEDMOVE_RUN;
                     }

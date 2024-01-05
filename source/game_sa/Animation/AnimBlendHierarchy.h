@@ -8,6 +8,12 @@
 
 #include "AnimBlendSequence.h"
 
+/*!
+* @brief The animation object. It contains `CAnimBlendSequence`'s each of which are the animation for one bone (node).
+* 
+* The sequence/frames data is copied from it to `CAnimBlendAssociation` when a clump requests an animation.
+* It is never destroyed and stays in memory unless `CStreaming` forces the IFP to unload to create space in memory.
+*/
 class CAnimBlendHierarchy {
 public:
     uint32              m_hashKey;
@@ -47,6 +53,7 @@ public:
     void Print();
 
     auto GetSequences() const { return std::span{ m_pSequences, (size_t)m_nSeqCount }; }
+    auto GetHashKey() const { return m_hashKey; }
 
 private: // Function implementations
     template<bool Compressed>

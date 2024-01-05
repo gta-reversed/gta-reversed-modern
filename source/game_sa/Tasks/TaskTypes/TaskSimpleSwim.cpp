@@ -261,7 +261,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* ped) {
         }
 
         const auto blockIndex = CAnimManager::GetAnimationBlockIndex(animBlock);
-        if (animBlock->bLoaded) {
+        if (animBlock->IsLoaded) {
             CAnimManager::AddAnimBlockRef(blockIndex);
             m_bAnimBlockRefAdded = true;
         } else {

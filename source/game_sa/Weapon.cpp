@@ -1652,7 +1652,7 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
         case WEAPON_MINIGUN: { // 0x7424FE
             if (   firedByPed
                 && firedByPed->m_nPedType == PED_TYPE_PLAYER1
-                && notsa::contains({ MODE_M16_1STPERSON, MODE_HELICANNON_1STPERSON }, TheCamera.m_PlayerWeaponMode.m_nMode)
+                && notsa::contains({ MODE_M16_1STPERSON, MODE_HELICANNON_1STPERSON }, (eCamMode)TheCamera.m_PlayerWeaponMode.m_nMode)
             ) {
                 return { FireM16_1stPerson(firedByPed), true };
             }

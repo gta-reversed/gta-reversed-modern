@@ -27,7 +27,7 @@ CAnimBlendSequence::CAnimBlendSequence() {
     m_nFlags = 0;
     m_FramesNum = 0;
     m_Frames = nullptr;
-    m_boneId = BONE_UNKNOWN;
+    m_BoneID = BONE_UNKNOWN;
 }
 
 // 0x4D0C30
@@ -107,14 +107,14 @@ void CAnimBlendSequence::RemoveQuaternionFlips() const {
 
 // 0x4D0C50
 void CAnimBlendSequence::SetName(const char* name) {
-    m_hash = CKeyGen::GetUppercaseKey(name);
+    m_FrameHashKey = CKeyGen::GetUppercaseKey(name);
 }
 
 // 0x4D0C70
 void CAnimBlendSequence::SetBoneTag(int32 boneId) {
     if (boneId != BONE_UNKNOWN) {
-        m_hasBoneIdSet = true;
-        m_boneId = static_cast<ePedBones>(boneId);
+        m_bUsingBones = true;
+        m_BoneID = static_cast<ePedBones>(boneId);
     }
 }
 

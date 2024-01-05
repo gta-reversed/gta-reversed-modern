@@ -9,6 +9,7 @@
 
 #include "Quaternion.h"
 
+//! Animation of a single node (bone)
 class CAnimBlendNode {
 public:
     static void InjectHooks();

@@ -866,8 +866,8 @@ void CCutsceneMgr::SetCutsceneAnim(const char* animName, CObject* object) {
         return;
     }
 
-    if (theAnim->m_pHierarchy->m_bIsCompressed) {
-        theAnim->m_pHierarchy->m_bKeepCompressed = true;
+    if (theAnim->m_BlendHier->m_bIsCompressed) {
+        theAnim->m_BlendHier->m_bKeepCompressed = true;
     }
 
     CStreaming::ImGonnaUseStreamingMemory();
@@ -887,7 +887,7 @@ void CCutsceneMgr::SetCutsceneAnim(const char* animName, CObject* object) {
 
 // 0x5B0420
 void CCutsceneMgr::SetCutsceneAnimToLoop(const char* animName) {
-    ms_cutsceneAssociations.GetAnimation(animName)->m_nFlags |= ANIMATION_LOOPED;
+    ms_cutsceneAssociations.GetAnimation(animName)->m_Flags |= ANIMATION_LOOPED;
 }
 
 // 0x5B0440

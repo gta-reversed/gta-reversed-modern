@@ -576,8 +576,8 @@ void CCarEnterExit::SetAnimOffsetForEnterOrExitVehicle() {
 
     {
         const auto anim = CAnimManager::GetAnimAssociation(ANIM_GROUP_DEFAULT, ANIM_ID_GETUP_0);
-        CAnimManager::UncompressAnimation(anim->m_pHierarchy);
-        const auto& seq = anim->m_pHierarchy->GetSequences()[0];
+        CAnimManager::UncompressAnimation(anim->m_BlendHier);
+        const auto& seq = anim->m_BlendHier->GetSequences()[0];
         ms_vecPedGetUpAnimOffset = seq.m_FramesNum ? seq.GetUncompressedFrame(0)->Trans : CVector{};
     }
 
@@ -593,8 +593,8 @@ void CCarEnterExit::SetAnimOffsetForEnterOrExitVehicle() {
         // Calculate translation delta between first and last sequence frames
         *out = [grpId, animId] {
             const auto anim = CAnimManager::GetAnimAssociation(grpId, animId);
-            CAnimManager::UncompressAnimation(anim->m_pHierarchy);
-            const auto& seq = anim->m_pHierarchy->GetSequences()[0];
+            CAnimManager::UncompressAnimation(anim->m_BlendHier);
+            const auto& seq = anim->m_BlendHier->GetSequences()[0];
             if (seq.m_FramesNum > 0) {
                 return seq.GetUncompressedFrame(seq.m_FramesNum - 1)->Trans - seq.GetUncompressedFrame(0)->Trans;
             }

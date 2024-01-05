@@ -52,6 +52,7 @@ public:
     static AssocGroupId GetFirstAssocGroup(const char* name);
     static CAnimBlendHierarchy* GetAnimation(uint32 hash, const CAnimBlock* animBlock);
     static CAnimBlendHierarchy* GetAnimation(const char* animName, const CAnimBlock* animBlock);
+    static CAnimBlendHierarchy& GetAnimation(AnimationId id);
     static const char* GetAnimGroupName(AssocGroupId groupId);
     static const char* GetAnimBlockName(AssocGroupId groupId);
     static AssocGroupId GetAnimationGroupIdByName(notsa::ci_string_view name);
@@ -90,3 +91,9 @@ private:
     static void LoadAnimFile_ANPK(RwStream* stream, bool compress, const char (*uncompressedAnims)[32]);
     static void LoadAnimFile_ANP23(RwStream* stream, bool compress, bool isANP3);
 };
+
+// 0x4C4DC0
+inline bool IsClumpSkinned(RpClump *clump) {
+    const auto a = GetFirstAtomic(clump);
+    return a && RpSkinGeometryGetSkin(RpAtomicGetGeometry(a));
+}

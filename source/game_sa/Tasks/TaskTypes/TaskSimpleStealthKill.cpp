@@ -101,7 +101,7 @@ bool CTaskSimpleStealthKill::MakeAbortable(class CPed* ped, eAbortPriority prior
 // 0x6296D0
 void CTaskSimpleStealthKill::ManageAnim(CPed* ped) {
     CAnimBlock* pAnimBlock = CAnimManager::ms_aAnimAssocGroups[m_animGrpId].m_AnimBlock;
-    if (!pAnimBlock || !pAnimBlock->bLoaded) {
+    if (!pAnimBlock || !pAnimBlock->IsLoaded) {
         m_spentWaitingMs += (uint32)CTimer::GetTimeStepInMS();
         if (m_spentWaitingMs > 10000) {
             m_bIsAborting = true;
@@ -153,6 +153,6 @@ void CTaskSimpleStealthKill::ManageAnim(CPed* ped) {
 // 0x622790
 void CTaskSimpleStealthKill::FinishAnimStealthKillCB(CAnimBlendAssociation* pAnimAssoc, void* data) {
     const auto self = static_cast<CTaskSimpleStealthKill*>(data);
-    self->m_bIsAborting = notsa::contains({ ANIM_ID_KILL_KNIFE_PLAYER, ANIM_ID_KILL_KNIFE_PED_DIE }, pAnimAssoc->m_AnimId);
+    self->m_bIsAborting = notsa::contains<AnimationId>({ ANIM_ID_KILL_KNIFE_PLAYER, ANIM_ID_KILL_KNIFE_PED_DIE }, pAnimAssoc->m_AnimId);
     self->m_anim        = nullptr;
 }
