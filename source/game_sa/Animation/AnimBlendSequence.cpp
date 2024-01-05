@@ -45,20 +45,19 @@ void CAnimBlendSequence::CompressKeyframes(uint8* frameData) {
     }
 
     void* frames = (frameData ? frameData : CMemoryMgr::Malloc(GetDataSize(true)));
-
     if (m_bHasTranslation) {
         auto* kftc = (KeyFrameTransCompressed*)frames;
         auto* kf = (KeyFrameTrans*)m_Frames;
         for (auto i = 0; i < m_FramesNum; i++, kf++, kftc++) {
-            kftc->SetRotation(kf->Rot);
+            kftc->Rot = kf->Rot;
             kftc->SetTime(kf->DeltaTime);
-            kftc->SetTranslation(kf->Trans);
+            kftc->Trans = kf->Trans;
         }
     } else {
         auto* kfc = (KeyFrameCompressed*)frames;
         auto* kf = (KeyFrame*)m_Frames;
         for (auto i = 0; i < m_FramesNum; i++, kf++, kfc++) {
-            kfc->SetRotation(kf->Rot);
+            kfc->Rot = kf->Rot;
             kfc->SetTime(kf->DeltaTime);
         }
     }
@@ -136,19 +135,19 @@ void CAnimBlendSequence::Uncompress(uint8* frameData) {
 
     void* frames = (frameData ? frameData : CMemoryMgr::Malloc(GetDataSize(false)));
     if (m_bHasTranslation) {
-        auto* kftc = (KeyFrameTransCompressed*)m_Frames;
+        auto* kfc = (KeyFrameTransCompressed*)m_Frames; // kfc = Kentucky Fried Chkicken
         auto* kf = (KeyFrameTrans*)frames;
-        for (auto i = 0; i < m_FramesNum; i++, kf++, kftc++) {
-            kftc->GetRotation(&kf->Rot);
-            kf->DeltaTime = kftc->GetDeltaTime();
-            kftc->GetTranslation(&kf->Trans);
+        for (auto i = 0u; i < m_FramesNum; i++, kf++, kfc++) {
+            kf->Rot = kfc->Rot;
+            kf->DeltaTime = kfc->DeltaTime;
+            kf->Trans = kfc->Trans;
         }
     } else {
         auto* kfc = (KeyFrameCompressed*)m_Frames;
         auto* kf = (KeyFrame*)frames;
-        for (auto i = 0; i < m_FramesNum; i++, kf++, kfc++) {
-            kfc->GetRotation(&kf->Rot);
-            kf->DeltaTime = kfc->GetDeltaTime();
+        for (auto i = 0u; i < m_FramesNum; i++, kf++, kfc++) {
+            kf->Rot = kfc->Rot;
+            kf->DeltaTime = kfc->DeltaTime;
         }
     }
 

@@ -72,8 +72,8 @@ bool CAnimBlendNode::FindKeyFrame(float time) {
 }
 
 // 0x4D00E0
-void CAnimBlendNode::CalcTheta(float angle) {
-    m_Theta       = std::acos(std::min(angle, 1.0f));
+void CAnimBlendNode::CalcTheta(float angleCos) {
+    m_Theta       = std::acos(std::min(angleCos, 1.0f));
     m_InvSinTheta = m_Theta == 0.0f
         ? 0.0f
         : 1.0f / std::sin(m_Theta);
@@ -100,15 +100,13 @@ void CAnimBlendNode::CalcDeltasCompressed() {
     KeyFrameCompressed* kfA = m_BlendSeq->GetCompressedFrame(m_KeyFrameA);
     KeyFrameCompressed* kfB = m_BlendSeq->GetCompressedFrame(m_KeyFrameB);
 
-    CQuaternion rotA, rotB;
-    kfA->GetRotation(&rotA);
-    kfB->GetRotation(&rotB);
-    float cos = DotProduct(rotA, rotB);
-    if (cos < 0.0f) {
-        rotB = -rotB;
-        kfB->SetRotation(rotB);
+    CQuaternion rotA = kfA->Rot, rotB = kfB->Rot;
+    const auto angleCos = DotProduct(rotA, rotB);
+    if (angleCos < 0.0f) {
+        rotB     = -rotB;
+        kfB->Rot = rotB;
     }
-    CalcTheta(DotProduct(rotA, rotB));
+    CalcTheta(angleCos);
 }
 
 // 0x4CFB90 - Unused
@@ -129,7 +127,7 @@ bool CAnimBlendNode::SetupKeyFrameCompressed() {
         m_KeyFrameA     = 0;
         m_RemainingTime = 0.0f;
     } else { // More than a frame
-        m_RemainingTime = m_BlendSeq->GetCompressedFrame(m_KeyFrameA)->GetDeltaTime();
+        m_RemainingTime = m_BlendSeq->GetCompressedFrame(m_KeyFrameA)->DeltaTime;
     }
 
     CalcDeltasCompressed();

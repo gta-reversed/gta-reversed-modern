@@ -683,8 +683,8 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
 
                     if (isCompressed) {
                         KeyFrameTransCompressed* kf = (KeyFrameTransCompressed*)seq->GetCompressedFrame(l);
-                        kf->SetRotation(rot);
-                        kf->SetTranslation(trans);
+                        kf->Rot = rot;
+                        kf->Trans = trans;
                         // scaling ignored
                         kf->SetTime(fbuf[10]); // absolute time here
                     } else {
@@ -702,8 +702,8 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
 
                     if (isCompressed) {
                         KeyFrameTransCompressed* kf = (KeyFrameTransCompressed*)seq->GetCompressedFrame(l);
-                        kf->SetRotation(rot);
-                        kf->SetTranslation(trans);
+                        kf->Rot = rot;
+                        kf->Trans = trans;
                         kf->SetTime(fbuf[7]); // absolute time here
                     } else {
                         KeyFrameTrans* kf = (KeyFrameTrans*)seq->GetUncompressedFrame(l);
@@ -718,7 +718,7 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
 
                     if (isCompressed) {
                         KeyFrameCompressed* kf = (KeyFrameCompressed*)seq->GetCompressedFrame(l);
-                        kf->SetRotation(rot);
+                        kf->Rot = rot;
                         kf->SetTime(fbuf[4]); // absolute time here
                     } else {
                         KeyFrame* kf = (KeyFrame*)seq->GetUncompressedFrame(l);
