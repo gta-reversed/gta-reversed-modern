@@ -263,7 +263,73 @@ void CCarAI::MakeWayForCarWithSiren(CVehicle* vehicle) {
 
 // 0x41D3D0
 void CCarAI::MellowOutChaseSpeed(CVehicle* vehicle) {
-    plugin::Call<0x41D3D0, CVehicle*>(vehicle);
+    float distance = (vehicle->GetPosition() - FindPlayerCoors()).Magnitude();
+    bool  isPlayerSlowEnough = FindPlayerPed()->m_vecMoveSpeed.Magnitude() < 0.07f;
+    if (FindPlayerVehicle()) {
+        if (FindPlayerWanted()->m_nWantedLevel == 1) {
+            if (distance < 10.0f) {
+                vehicle->m_autoPilot.m_nCruiseSpeed = 15;
+                return;
+            }
+
+            if (distance < 20.0f) {
+                vehicle->m_autoPilot.m_nCruiseSpeed = 22;
+                return;
+            }
+
+            vehicle->m_autoPilot.m_nCruiseSpeed = 25;
+            return;
+        } else if (FindPlayerWanted()->m_nWantedLevel == 2) {
+            if (distance < 10.0f) {
+                vehicle->m_autoPilot.m_nCruiseSpeed = 27;
+                return;
+            }
+
+            if (distance < 20.0f) {
+                vehicle->m_autoPilot.m_nCruiseSpeed = 30;
+                return;
+            }
+
+            vehicle->m_autoPilot.m_nCruiseSpeed = 34;
+            return;
+        }
+    } else {
+        if (FindPlayerWanted()->m_nWantedLevel == 1) {
+            if (distance < 20.0f) {
+                vehicle->m_autoPilot.m_nCruiseSpeed = 5;
+                return;
+            }
+
+            if (distance >= 20.0f && distance < 40.0f) {
+                vehicle->m_autoPilot.m_nCruiseSpeed = 13;
+                if (isPlayerSlowEnough && distance <= 30.0f && vehicle->m_autoPilot.m_nCruiseSpeed >= 10) {
+                    vehicle->m_autoPilot.m_nCruiseSpeed = 10;
+                }
+                return;
+            }
+
+            vehicle->m_autoPilot.m_nCruiseSpeed = 25;
+            return;
+        } else if (FindPlayerWanted()->m_nWantedLevel == 2) {
+            if (distance < 20.0f) {
+                vehicle->m_autoPilot.m_nCruiseSpeed = 5;
+                return;
+            }
+
+            if (distance >= 20.0f && distance < 40.0f) {
+                vehicle->m_autoPilot.m_nCruiseSpeed = 18;
+                if (isPlayerSlowEnough && distance <= 30.0f && vehicle->m_autoPilot.m_nCruiseSpeed >= 10) {
+                    vehicle->m_autoPilot.m_nCruiseSpeed = 10;
+                }
+                return;
+            }
+
+            vehicle->m_autoPilot.m_nCruiseSpeed = 34;
+            return;
+        } else if (isPlayerSlowEnough && distance <= 30.0f && vehicle->m_autoPilot.m_nCruiseSpeed >= 10) {
+                vehicle->m_autoPilot.m_nCruiseSpeed = 10;
+        }
+    }
 }
 
 // 0x41CB70
@@ -305,9 +371,7 @@ void CCarAI::TellCarToBlockOtherCar(CVehicle* vehicle1, CVehicle* vehicle2) {
     vehicle1->m_autoPilot.m_nCarMission = MISSION_BLOCKCAR_FARAWAY;
     vehicle1->vehicleFlags.bEngineOn    = !vehicle1->vehicleFlags.bEngineBroken;
 
-    if (vehicle1->m_autoPilot.m_nCruiseSpeed <= 6) {
-        vehicle1->m_autoPilot.m_nCruiseSpeed = 6;
-    }
+    vehicle1->m_autoPilot.m_nCruiseSpeed = std::max(vehicle1->m_autoPilot.m_nCruiseSpeed, (uint8)6);
     */
     NOTSA_UNREACHABLE("Unused");
 }
@@ -320,10 +384,7 @@ void CCarAI::TellCarToFollowOtherCar(CVehicle* vehicle1, CVehicle* vehicle2, flo
     vehicle1->m_autoPilot.m_nCarMission = MISSION_FOLLOW_CAR;
     vehicle1->vehicleFlags.bEngineOn    = !vehicle1->vehicleFlags.bEngineBroken;
 
-    if (vehicle1->m_autoPilot.m_nCruiseSpeed <= 6) {
-        vehicle1->m_autoPilot.m_nCruiseSpeed = 6;
-    }
-
+    vehicle1->m_autoPilot.m_nCruiseSpeed = std::max(vehicle1->m_autoPilot.m_nCruiseSpeed, (uint8)6);
     vehicle1->m_autoPilot.m_ucCarFollowDist = radius;
 }
 
@@ -337,9 +398,7 @@ void CCarAI::TellCarToRamOtherCar(CVehicle* vehicle1, CVehicle* vehicle2) {
     vehicle1->m_autoPilot.m_nCarMission = MISSION_RAMCAR_FARAWAY;
     vehicle1->vehicleFlags.bEngineOn    = !vehicle1->vehicleFlags.bEngineBroken;
 
-    if (vehicle1->m_autoPilot.m_nCruiseSpeed <= 6) {
-        vehicle1->m_autoPilot.m_nCruiseSpeed = 6;
-    }
+    vehicle1->m_autoPilot.m_nCruiseSpeed = std::max(vehicle1->m_autoPilot.m_nCruiseSpeed, (uint8)6);
     */
     NOTSA_UNREACHABLE("Unused");
 }
