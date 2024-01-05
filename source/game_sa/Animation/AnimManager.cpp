@@ -682,13 +682,13 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
                     CVector trans(fbuf[4], fbuf[5], fbuf[6]);
 
                     if (isCompressed) {
-                        KeyFrameTransCompressed* kf = (KeyFrameTransCompressed*)seq->GetCompressedFrame(l);
+                        KeyFrameTransCompressed* kf = (KeyFrameTransCompressed*)seq->GetCKeyFrame(l);
                         kf->Rot = rot;
                         kf->Trans = trans;
                         // scaling ignored
                         kf->SetTime(fbuf[10]); // absolute time here
                     } else {
-                        KeyFrameTrans* kf = (KeyFrameTrans*)seq->GetUncompressedFrame(l);
+                        KeyFrameTrans* kf = (KeyFrameTrans*)seq->GetUKeyFrame(l);
                         kf->Rot = rot;
                         kf->Trans = trans;
                         // scaling ignored
@@ -701,12 +701,12 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
                     CVector trans(fbuf[4], fbuf[5], fbuf[6]);
 
                     if (isCompressed) {
-                        KeyFrameTransCompressed* kf = (KeyFrameTransCompressed*)seq->GetCompressedFrame(l);
+                        KeyFrameTransCompressed* kf = (KeyFrameTransCompressed*)seq->GetCKeyFrame(l);
                         kf->Rot = rot;
                         kf->Trans = trans;
                         kf->SetTime(fbuf[7]); // absolute time here
                     } else {
-                        KeyFrameTrans* kf = (KeyFrameTrans*)seq->GetUncompressedFrame(l);
+                        KeyFrameTrans* kf = (KeyFrameTrans*)seq->GetUKeyFrame(l);
                         kf->Rot = rot;
                         kf->Trans = trans;
                         kf->DeltaTime = fbuf[7]; // absolute time here
@@ -717,11 +717,11 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
                     rot.Conjugate();
 
                     if (isCompressed) {
-                        KeyFrameCompressed* kf = (KeyFrameCompressed*)seq->GetCompressedFrame(l);
+                        KeyFrameCompressed* kf = (KeyFrameCompressed*)seq->GetCKeyFrame(l);
                         kf->Rot = rot;
                         kf->SetTime(fbuf[4]); // absolute time here
                     } else {
-                        KeyFrame* kf = (KeyFrame*)seq->GetUncompressedFrame(l);
+                        KeyFrame* kf = (KeyFrame*)seq->GetUKeyFrame(l);
                         kf->Rot = rot;
                         kf->DeltaTime = fbuf[4]; // absolute time here
                     }

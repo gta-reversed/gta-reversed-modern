@@ -18,8 +18,8 @@ void CAnimBlendSequence::InjectHooks() {
     RH_ScopedInstall(Print, 0x4D1180);
     RH_ScopedInstall(RemoveQuaternionFlips, 0x4D1190);
     RH_ScopedInstall(RemoveUncompressedData, 0x4D12A0);
-    RH_ScopedInstall(GetUncompressedFrame, 0x4CF1F0);
-    RH_ScopedInstall(GetCompressedFrame, 0x4CF220);
+    RH_ScopedInstall(GetUKeyFrame, 0x4CF1F0);
+    RH_ScopedInstall(GetCKeyFrame, 0x4CF220);
 }
 
 // 0x4D0C10
@@ -93,10 +93,10 @@ void CAnimBlendSequence::RemoveQuaternionFlips() const {
         return;
     }
 
-    KeyFrame* frame = GetUncompressedFrame(0);
+    KeyFrame* frame = GetUKeyFrame(0);
     CQuaternion last = frame->Rot;
     for (auto i = 1; i < m_FramesNum; i++) {
-        frame = GetUncompressedFrame(i);
+        frame = GetUKeyFrame(i);
         if (DotProduct(last, frame->Rot) < 0.0f) {
             frame->Rot = -frame->Rot;
         }
@@ -180,26 +180,4 @@ void CAnimBlendSequence::Print() {
 #ifndef FINAL
 
 #endif
-}
-
-// Can return child frame casted as root frame, the translation shouldn't be accessed then
-// 0x4CF1F0
-KeyFrameTrans* CAnimBlendSequence::GetUncompressedFrame(int32 frame) const {
-    if (m_bHasTranslation) {
-        return &static_cast<KeyFrameTrans*>(m_Frames)[frame];
-    }
-
-    auto* data = static_cast<KeyFrame*>(m_Frames);
-    return reinterpret_cast<KeyFrameTrans*>(&data[frame]);
-}
-
-// Can return child frame casted as root frame, the translation shouldn't be accessed then
-// 0x4CF220
-KeyFrameTransCompressed* CAnimBlendSequence::GetCompressedFrame(int32 frame) const {
-    if (m_bHasTranslation) {
-        return &static_cast<KeyFrameTransCompressed*>(m_Frames)[frame];
-    }
-
-    auto* data = static_cast<KeyFrameCompressed*>(m_Frames);
-    return reinterpret_cast<KeyFrameTransCompressed*>(&data[frame]);
 }

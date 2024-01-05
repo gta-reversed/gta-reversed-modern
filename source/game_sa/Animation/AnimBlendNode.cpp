@@ -85,8 +85,8 @@ void CAnimBlendNode::CalcDeltas() {
         return;
     }
 
-    KeyFrame* kfA = m_BlendSeq->GetUncompressedFrame(m_KeyFrameA);
-    KeyFrame* kfB = m_BlendSeq->GetUncompressedFrame(m_KeyFrameB);
+    KeyFrame* kfA = m_BlendSeq->GetUKeyFrame(m_KeyFrameA);
+    KeyFrame* kfB = m_BlendSeq->GetUKeyFrame(m_KeyFrameB);
 
     CalcTheta(DotProduct(kfA->Rot, kfB->Rot));
 }
@@ -97,8 +97,8 @@ void CAnimBlendNode::CalcDeltasCompressed() {
         return;
     }
 
-    KeyFrameCompressed* kfA = m_BlendSeq->GetCompressedFrame(m_KeyFrameA);
-    KeyFrameCompressed* kfB = m_BlendSeq->GetCompressedFrame(m_KeyFrameB);
+    KeyFrameCompressed* kfA = m_BlendSeq->GetCKeyFrame(m_KeyFrameA);
+    KeyFrameCompressed* kfB = m_BlendSeq->GetCKeyFrame(m_KeyFrameB);
 
     CQuaternion rotA = kfA->Rot, rotB = kfB->Rot;
     const auto angleCos = DotProduct(rotA, rotB);
@@ -127,7 +127,7 @@ bool CAnimBlendNode::SetupKeyFrameCompressed() {
         m_KeyFrameA     = 0;
         m_RemainingTime = 0.0f;
     } else { // More than a frame
-        m_RemainingTime = m_BlendSeq->GetCompressedFrame(m_KeyFrameA)->DeltaTime;
+        m_RemainingTime = m_BlendSeq->GetCKeyFrame(m_KeyFrameA)->DeltaTime;
     }
 
     CalcDeltasCompressed();

@@ -1494,12 +1494,12 @@ float CPed::GetWalkAnimSpeed() {
     // NOTE: This is quite garbage, based on at least 5 assumptions, more of a hack than a solution from R*'s side.
     //       It won't work correctly if first frame is not a root frame, nor if the animation happens on any other axis than Y, etc..
 
-    const auto lastFrame = firstSequence.GetUncompressedFrame(firstSequence.m_FramesNum - 1);
+    const auto lastFrame = firstSequence.GetUKeyFrame(firstSequence.m_FramesNum - 1);
     const auto lastFrameY = firstSequence.m_bHasTranslation
                                 ? lastFrame->Trans.y
                                 : ((KeyFrame*)lastFrame)->Rot.imag.y;
 
-    return (lastFrameY - firstSequence.GetUncompressedFrame(0)->Trans.y) / hier->m_fTotalTime;
+    return (lastFrameY - firstSequence.GetUKeyFrame(0)->Trans.y) / hier->m_fTotalTime;
 }
 
 /*!

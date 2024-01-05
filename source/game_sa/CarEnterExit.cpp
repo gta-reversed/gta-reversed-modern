@@ -578,7 +578,7 @@ void CCarEnterExit::SetAnimOffsetForEnterOrExitVehicle() {
         const auto anim = CAnimManager::GetAnimAssociation(ANIM_GROUP_DEFAULT, ANIM_ID_GETUP_0);
         CAnimManager::UncompressAnimation(anim->m_BlendHier);
         const auto& seq = anim->m_BlendHier->GetSequences()[0];
-        ms_vecPedGetUpAnimOffset = seq.m_FramesNum ? seq.GetUncompressedFrame(0)->Trans : CVector{};
+        ms_vecPedGetUpAnimOffset = seq.m_FramesNum ? seq.GetUKeyFrame(0)->Trans : CVector{};
     }
 
     ms_vecPedQuickDraggedOutCarAnimOffset = CVector{ -1.841797f, -0.3261719f, -0.01269531f };
@@ -596,7 +596,7 @@ void CCarEnterExit::SetAnimOffsetForEnterOrExitVehicle() {
             CAnimManager::UncompressAnimation(anim->m_BlendHier);
             const auto& seq = anim->m_BlendHier->GetSequences()[0];
             if (seq.m_FramesNum > 0) {
-                return seq.GetUncompressedFrame(seq.m_FramesNum - 1)->Trans - seq.GetUncompressedFrame(0)->Trans;
+                return seq.GetUKeyFrame(seq.m_FramesNum - 1)->Trans - seq.GetUKeyFrame(0)->Trans;
             }
             return CVector{};
         }();
