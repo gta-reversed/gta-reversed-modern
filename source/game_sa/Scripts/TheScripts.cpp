@@ -44,6 +44,7 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(AddToSwitchJumpTable, 0x470390);
     RH_ScopedInstall(AddToVehicleModelsBlockedByScript, 0x46B200);
     RH_ScopedInstall(AddScriptCheckpoint, 0x4935A0);
+    RH_ScopedInstall(AddScriptEffectSystem, 0x492F90);
 
     RH_ScopedInstall(CleanUpThisObject, 0x4866C0);
     RH_ScopedInstall(CleanUpThisPed, 0x486300, {.reversed = false});
@@ -314,7 +315,17 @@ uint32 CTheScripts::AddScriptCheckpoint(CVector at, CVector pointTo, float radiu
 
 // 0x492F90
 uint32 CTheScripts::AddScriptEffectSystem(FxSystem_c* system) {
-    return plugin::CallAndReturn<uint32, 0x492F90, FxSystem_c*>(system);
+    const auto fx = rng::find_if(ScriptEffectSystemArray, [](auto& fx) {
+        return !fx.IsActive();
+    });
+    if (fx == ScriptEffectSystemArray.end()) {
+        // In vanilla game goes OOB access.
+        NOTSA_UNREACHABLE();
+    }
+
+    fx->m_bUsed = true;
+    fx->m_pFxSystem = system;
+    return GetNewUniqueScriptThingIndex(std::distance(ScriptEffectSystemArray.begin(), fx), SCRIPT_THING_EFFECT_SYSTEM);
 }
 
 // signature changed (CVector)
