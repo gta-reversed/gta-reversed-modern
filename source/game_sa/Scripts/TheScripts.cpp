@@ -273,7 +273,7 @@ void CTheScripts::ReadMultiScriptFileOffsetsFromScript() {
 uint32 CTheScripts::AddScriptCheckpoint(CVector at, CVector pointTo, float radius, int32 type) {
     const auto cp = rng::find_if(ScriptCheckpointArray, [](auto& cp) { return !cp.IsActive(); });
     if (cp == ScriptCheckpointArray.end()) {
-        // In vanilla game goes OOB access.
+        // In vanilla game does OOB access.
         NOTSA_UNREACHABLE();
     }
 
@@ -319,7 +319,7 @@ uint32 CTheScripts::AddScriptEffectSystem(FxSystem_c* system) {
         return !fx.IsActive();
     });
     if (fx == ScriptEffectSystemArray.end()) {
-        // In vanilla game goes OOB access.
+        // In vanilla game does OOB access.
         NOTSA_UNREACHABLE();
     }
 
@@ -335,7 +335,7 @@ uint32 CTheScripts::AddScriptSearchLight(CVector start, CEntity* entity, CVector
         return !ssl.IsActive();
     });
     if (ssl == ScriptSearchLightArray.end()) {
-        // In vanilla game goes OOB access.
+        // In vanilla game does OOB access.
         NOTSA_UNREACHABLE();
     }
 
@@ -367,7 +367,7 @@ uint32 CTheScripts::AddScriptSphere(uint32 id, CVector posn, float radius) {
         return !sphere.IsActive();
     });
     if (sphere == ScriptSphereArray.end()) {
-        // In vanilla game goes OOB access.
+        // In vanilla game does OOB access.
         NOTSA_UNREACHABLE();
     }
     const auto idx = std::distance(ScriptSphereArray.begin(), sphere);
@@ -407,9 +407,7 @@ void CTheScripts::AddToInvisibilitySwapArray(CEntity* entity, bool visible) {
     if (entity->m_nIplIndex)
         return;
 
-    const auto isa = rng::find_if(InvisibilitySettingArray, [entity](auto& isa) {
-        return isa == entity;
-    });
+    const auto isa = rng::find(InvisibilitySettingArray, entity);
     if (isa != InvisibilitySettingArray.end()) {
         // Already exists.
         if (visible) {
@@ -418,7 +416,7 @@ void CTheScripts::AddToInvisibilitySwapArray(CEntity* entity, bool visible) {
         return;
     }
 
-    const auto free = rng::find_if(InvisibilitySettingArray, [](auto& isa) { return !isa; });
+    const auto free = rng::find(InvisibilitySettingArray, nullptr);
     if (free == InvisibilitySettingArray.end()) {
         return;
     }
@@ -440,7 +438,7 @@ void CTheScripts::AddToListOfConnectedLodObjects(CObject* obj1, CObject* obj2) {
 
     const auto free = rng::find_if(ScriptConnectLodsObjects, [](auto& clo) { return clo.a == -1; });
     if (free == ScriptConnectLodsObjects.end()) {
-        // In vanilla game goes OOB access.
+        // In vanilla game does OOB access.
         NOTSA_UNREACHABLE();
     }
 
@@ -484,11 +482,8 @@ void CTheScripts::AddToVehicleModelsBlockedByScript(eModelID modelIndex) {
 
     const auto free = rng::find(VehicleModelsBlockedByScript, MODEL_INVALID);
     if (free == VehicleModelsBlockedByScript.end()) {
-        // In vanilla, game chooses the last index to be filled, probably unwanted.
-        //
-        // If this asserts then it's reachable. Remove the assert and uncomment the line below:
-        // --free;
-        assert(false);
+        // In vanilla game does OOB access.
+        NOTSA_UNREACHABLE();
     }
 
     *free = modelIndex;
@@ -496,7 +491,22 @@ void CTheScripts::AddToVehicleModelsBlockedByScript(eModelID modelIndex) {
 
 // 0x46AB60
 void CTheScripts::AddToWaitingForScriptBrainArray(CEntity* entity, int16 specialModelIndex) {
-    return plugin::Call<0x46AB60, CEntity*, int16>(entity, specialModelIndex);
+    const auto wfsb = rng::find_if(EntitiesWaitingForScriptBrain, [entity](auto& wfsb) {
+        return wfsb.m_pEntity == entity;
+    });
+    if (wfsb != EntitiesWaitingForScriptBrain.end()) {
+        // Already exists.
+        return;
+    }
+
+    const auto free = rng::find_if(EntitiesWaitingForScriptBrain, [entity](auto& wfsb) { return !wfsb.m_pEntity; });
+    if (free == EntitiesWaitingForScriptBrain.end()) {
+        return;
+    }
+
+    free->m_pEntity = entity;
+    entity->RegisterReference(free->m_pEntity);
+    free->m_nSpecialModelIndex = specialModelIndex;
 }
 
 // 0x4866C0
