@@ -331,7 +331,34 @@ uint32 CTheScripts::AddScriptEffectSystem(FxSystem_c* system) {
 // signature changed (CVector)
 // 0x493000
 uint32 CTheScripts::AddScriptSearchLight(CVector start, CEntity* entity, CVector target, float targetRadius, float baseRadius) {
-    return plugin::CallAndReturn<uint32, 0x493000, CVector, CEntity*, CVector, float, float>(start, entity, target, targetRadius, baseRadius);
+    const auto ssl = rng::find_if(ScriptSearchLightArray, [](auto& ssl) {
+        return !ssl.IsActive();
+    });
+    if (ssl == ScriptSearchLightArray.end()) {
+        // In vanilla game goes OOB access.
+        NOTSA_UNREACHABLE();
+    }
+
+    const auto idx = std::distance(ScriptSearchLightArray.begin(), ssl);
+    RemoveScriptSearchLight(idx);
+
+    ssl->m_bClipIfColliding = false;
+    ssl->bIsUsed            = true;
+    ssl->m_bUsed            = true;
+    ssl->m_bEnableShadow    = true;
+    ssl->m_Origin           = start;
+    ssl->m_Target           = target;
+    ssl->m_fBaseRadius      = baseRadius;
+    ssl->m_fTargetRadius    = targetRadius;
+    ssl->m_PathCoord1       = CVector{};
+    ssl->m_PathCoord2       = CVector{};
+    ssl->m_fPathSpeed       = 0.0f;
+
+    ssl->m_AttachedEntity = entity;
+    entity->RegisterReference(ssl->m_AttachedEntity);
+
+    ++NumberOfScriptSearchLights;
+    return CTheScripts::GetNewUniqueScriptThingIndex(idx, SCRIPT_THING_SEARCH_LIGHT);
 }
 
 // 0x483B30
