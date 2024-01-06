@@ -363,7 +363,19 @@ uint32 CTheScripts::AddScriptSearchLight(CVector start, CEntity* entity, CVector
 
 // 0x483B30
 uint32 CTheScripts::AddScriptSphere(uint32 id, CVector posn, float radius) {
-    return plugin::CallAndReturn<uint32, 0x483B30, uint32, CVector, float>(id, posn, radius);
+    const auto sphere = rng::find_if(ScriptSphereArray, [](auto& sphere) {
+        return !sphere.IsActive();
+    });
+    if (sphere == ScriptSphereArray.end()) {
+        // In vanilla game goes OOB access.
+        NOTSA_UNREACHABLE();
+    }
+    const auto idx = std::distance(ScriptSphereArray.begin(), sphere);
+    sphere->m_nId     = idx + id;
+    sphere->m_vCoords = posn;
+    sphere->m_bUsed   = true;
+    sphere->m_fRadius = radius;
+    return GetNewUniqueScriptThingIndex(idx, SCRIPT_THING_EFFECT_SYSTEM);
 }
 
 // 0x481140
