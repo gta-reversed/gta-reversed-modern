@@ -174,7 +174,6 @@ public:
     float& operator[](size_t i) {
         return (&x)[i];
     }
-
 };
 
 /// Negate all components of the vector

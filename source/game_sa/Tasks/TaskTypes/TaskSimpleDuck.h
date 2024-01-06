@@ -10,8 +10,7 @@
 #include "Vector2D.h"
 class CAnimBlendAssociation;
 
-enum eDuckControlType : uint8
-{
+enum eDuckControlType : uint8 {
     DUCK_STANDALONE = 0,	        // Duck anim removed when task removed
     DUCK_STANDALONE_WEAPON_CROUCH,  // Duck anim removed when task removed
     DUCK_TASK_CONTROLLED,	        // Duck directly linked to a controlling task

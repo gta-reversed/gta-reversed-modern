@@ -931,7 +931,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
                 player->m_fAimingRotation = limitedRadianAngle;
             }
         }
-        duckTask->ControlDuckMove({ moveSpeed.x, moveSpeed.y });
+        duckTask->ControlDuckMove(moveSpeed);
         player->m_pPlayerData->m_fMoveBlendRatio = 0.0f;
     }
 }
