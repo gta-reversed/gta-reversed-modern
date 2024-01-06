@@ -409,7 +409,24 @@ void CTheScripts::AddToInvisibilitySwapArray(CEntity* entity, bool bVisible) {
 
 // 0x470980
 void CTheScripts::AddToListOfConnectedLodObjects(CObject* obj1, CObject* obj2) {
-    plugin::Call<0x470980, CObject*, CObject*>(obj1, obj2);
+    const auto idx1 = GetObjectPool()->GetIndex(obj1), idx2 = GetObjectPool()->GetIndex(obj2);
+
+    const auto clo = rng::find_if(ScriptConnectLodsObjects, [idx1, idx2](auto& clo) {
+        return clo.a == idx1 && clo.b == idx2;
+    });
+    if (clo != ScriptConnectLodsObjects.end()) {
+        // Already exists.
+        return;
+    }
+
+    const auto free = rng::find_if(ScriptConnectLodsObjects, [](auto& clo) { return clo.a == -1; });
+    if (free == ScriptConnectLodsObjects.end()) {
+        // In vanilla game goes OOB access.
+        NOTSA_UNREACHABLE();
+    }
+
+    free->a = idx1;
+    free->b = idx2;
 }
 
 // 0x474750
