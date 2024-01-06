@@ -75,7 +75,7 @@ void CTaskSimpleDuck::DeleteDuckAnimCB(CAnimBlendAssociation* assoc, void* data)
     }
     case ANIM_ID_CROUCH_ROLL_L:
     case ANIM_ID_CROUCH_ROLL_R: {
-        self->m_MoveCmd.x = 0.0;
+        self->m_MoveCmd.x = 0.0f;
         [[fallthrough]];
     }
     case ANIM_ID_GUNCROUCHFWD:
@@ -371,7 +371,7 @@ bool CTaskSimpleDuck::ProcessPed(CPed* ped) {
             tSimplestActiveDuck->AbortBecauseOfOtherDuck(ped);
         } else if (tSimplestActiveDuck == this && tSecondaryDuck) {
             MakeAbortable(ped);
-            return 0;
+            return false;
         }
 
         if (const auto tUseGun = ped->GetIntelligence()->GetTaskUseGun()) {
@@ -435,7 +435,7 @@ bool CTaskSimpleDuck::ProcessPed(CPed* ped) {
 
     m_CountDownFrames--;
     if (m_CountDownFrames || !MakeAbortable(ped) ) { // 0x6945EA
-        return 0;
+        return false;
     }
 
     ped->bIsDucking = false;
