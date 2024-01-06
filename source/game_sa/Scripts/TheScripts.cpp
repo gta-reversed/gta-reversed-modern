@@ -428,15 +428,15 @@ void CTheScripts::AddToInvisibilitySwapArray(CEntity* entity, bool visible) {
 void CTheScripts::AddToListOfConnectedLodObjects(CObject* obj1, CObject* obj2) {
     const auto idx1 = GetObjectPool()->GetIndex(obj1), idx2 = GetObjectPool()->GetIndex(obj2);
 
-    const auto clo = rng::find_if(ScriptConnectLodsObjects, [idx1, idx2](auto& clo) {
-        return clo.a == idx1 && clo.b == idx2;
+    const auto lod = rng::find_if(ScriptConnectLodsObjects, [idx1, idx2](auto& lod) {
+        return lod.a == idx1 && lod.b == idx2;
     });
-    if (clo != ScriptConnectLodsObjects.end()) {
+    if (lod != ScriptConnectLodsObjects.end()) {
         // Already exists.
         return;
     }
 
-    const auto free = rng::find_if(ScriptConnectLodsObjects, [](auto& clo) { return clo.a == -1; });
+    const auto free = rng::find_if(ScriptConnectLodsObjects, [](auto& lod) { return lod.a == -1; });
     if (free == ScriptConnectLodsObjects.end()) {
         // In vanilla game does OOB access.
         NOTSA_UNREACHABLE();
@@ -561,7 +561,11 @@ void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* entity
 
 // 0x5D3390
 void CTheScripts::DoScriptSetupAfterPoolsHaveLoaded() {
-    plugin::Call<0x5D3390>();
+    for (const auto& lod : ScriptConnectLodsObjects) {
+        if (lod.a != -1 && lod.b != -1) {
+            ScriptConnectLodsFunction(lod.a, lod.b);
+        }
+    }
 }
 
 // 0x4839A0
