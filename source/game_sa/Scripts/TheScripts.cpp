@@ -462,8 +462,7 @@ void CTheScripts::AddToListOfSpecialAnimGroupsAttachedToCharModels(int32 modelId
         return aag.m_nModelID == MODEL_INVALID;
     });
     if (free == ScriptAttachedAnimGroups.end()) {
-        // In vanilla game goes OOB access.
-        NOTSA_UNREACHABLE();
+        return;
     }
 
     free->m_nModelID = modelId;
