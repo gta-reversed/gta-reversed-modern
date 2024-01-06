@@ -226,7 +226,7 @@ bool CGangWars::CreateDefendingGroup(int32 unused) {
     if (!node.IsValid())
         return false;
 
-    auto nodePos = ThePaths.GetPathNode(node)->GetNodeCoors();
+    auto nodePos = ThePaths.GetPathNode(node)->GetPosition();
     auto playerPos = FindPlayerCoors();
     if (DistanceBetweenPoints2D(playerPos, nodePos) <= 40.0f)
         return false;
@@ -285,7 +285,7 @@ bool CGangWars::CreateDefendingGroup(int32 unused) {
 
     for (auto i = 0; i < 3; i++) { // todo: magic number
         auto carNode = ThePaths.FindNthNodeClosestToCoors(PointOfAttack, 0, 100.0f, false, false, i, false, true, nullptr);
-        auto carNodePos = ThePaths.GetPathNode(carNode)->GetNodeCoors();
+        auto carNodePos = ThePaths.GetPathNode(carNode)->GetPosition();
 
         if (DistanceBetweenPoints2D(carNodePos, playerPos) <= 25.0f)
             continue;

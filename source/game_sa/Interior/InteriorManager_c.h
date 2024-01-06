@@ -70,14 +70,14 @@ public:
     *
     * @returns The interior the ped (it's position) is within, or null
     */
-    Interior_c* GetPedsInterior(CPed* ped);
+    Interior_c* GetPedsInterior(const CPed* ped);
 
     void SetStealableObjectStolen(CEntity* entity, uint8 a3);
     int32 FindStealableObjectId(CEntity* entity);
     int32 FindStealableObjectId(int32 interiorId, int32 modelId, CVector point);
     bool HasInteriorHadStealDataSetup(Interior_c* interior);
     int8 IsGroupActive(int32 group);
-    InteriorGroup_c* GetPedsInteriorGroup(CPed* ped);
+    InteriorGroup_c* GetPedsInteriorGroup(const CPed* ped);
     void SetEntryExitPtr(CEntryExit* exit);
     bool GetBoundingBox(FurnitureEntity_c* entity, CVector* pos);
     void ActivatePeds(bool enable);
