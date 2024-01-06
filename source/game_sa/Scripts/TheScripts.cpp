@@ -11,6 +11,8 @@
 #include "Scripted2dEffects.h"
 #include "Shadows.h"
 #include "VehicleRecording.h"
+#include "TaskComplexLeaveAnyCar.h"
+#include "TaskComplexWander.h"
 
 static inline bool gAllowScriptedFixedCameraCollision = false;
 
@@ -407,11 +409,11 @@ void CTheScripts::AddToInvisibilitySwapArray(CEntity* entity, bool visible) {
     if (entity->m_nIplIndex)
         return;
 
-    const auto isa = rng::find(InvisibilitySettingArray, entity);
-    if (isa != InvisibilitySettingArray.end()) {
+    const auto is = rng::find(InvisibilitySettingArray, entity);
+    if (is != InvisibilitySettingArray.end()) {
         // Already exists.
         if (visible) {
-            *isa = nullptr;
+            *is = nullptr;
         }
         return;
     }
@@ -524,14 +526,114 @@ void CTheScripts::CleanUpThisObject(CObject* obj) {
 }
 
 // 0x486300
+// TODO: test
 void CTheScripts::CleanUpThisPed(CPed* ped) {
-    plugin::Call<0x486300, CPed*>( ped);
+    if (!ped || ped->IsCreatedByMission()) {
+        return;
+    }
+
+    ped->SetCharCreatedBy(ePedCreatedBy::PED_GAME);
+    if (ped->bDoBloodyFootprints) // ????
+        return;
+
+    notsa::ScopeGuard _([]() {
+        --CPopulation::ms_nTotalMissionPeds;
+    });
+
+    if (auto* veh = ped->GetVehicleIfInOne(); veh && veh->IsDriver(ped)) {
+        const auto FixMission = [veh](eCarMission fix) {
+            auto& mis = veh->m_autoPilot.m_nCarMission;
+            if (mis != MISSION_CRASH_PLANE_AND_BURN && mis != MISSION_CRASH_HELI_AND_BURN) {
+                mis = fix;
+            }
+        };
+
+        switch (veh->GetType()) {
+        case eVehicleType::VEHICLE_TYPE_HELI: {
+            FixMission(MISSION_HELI_FLYTOCOORS);
+
+            // event.__vftable           = (CEventScriptCommand_vtbl*)0x461C4000;
+            // event.m_nTimeActive       = 0xC61C4000;
+            // *(_DWORD*)&event.m_bValid = 0x447A0000;
+            veh->m_autoPilot.m_vecDestinationCoors = CVector{ 10'000.0f, -10'000.0f, 1'000.0f };
+            veh->AsHeli()->m_fMinAltitude          = 1000.0f;
+            veh->AsHeli()->m_fMaxAltitude          = 1000.0f;
+            break;
+        }
+        case eVehicleType::VEHICLE_TYPE_PLANE: {
+            FixMission(MISSION_PLANE_FLYTOCOORS);
+
+            // event.__vftable           = (CEventScriptCommand_vtbl*)0x461C4000;
+            // event.m_nTimeActive       = 0x461C4000;
+            // *(_DWORD*)&event.m_bValid = 0x447A0000;
+            veh->m_autoPilot.m_vecDestinationCoors = CVector{ 10'000.0f, 10'000.0f, 1'000.0f };
+            veh->AsPlane()->m_minAltitude          = 1000.0f;
+            veh->AsPlane()->m_maxAltitude          = 1000.0f;
+            break;
+        }
+        default:
+            if (veh->IsSubAutomobile() || veh->IsSubBike()) {
+                CCarCtrl::JoinCarWithRoadSystem(veh);
+                FixMission(MISSION_CRUISE);
+            }
+        }
+
+        // Quick return: The captain goes down with the ship.
+        ped->bStayInSamePlace = false; // ???
+
+        if (auto* group = CPedGroups::GetPedsGroup(ped)) {
+            if (auto& member = group->GetMembership(); member.IsFollower(ped)) {
+                member.RemoveMember(ped);
+            }
+        }
+        return;
+    }
+    ped->bStayInSamePlace = false; // ???
+
+    if (auto* group = CPedGroups::GetPedsGroup(ped)) {
+        if (auto& member = group->GetMembership(); member.IsFollower(ped)) {
+            member.RemoveMember(ped);
+        }
+    }
+
+    const auto CheckTaskExists = [ped](eTaskType type) {
+        if (auto* event = ped->GetEventGroup().GetEventOfType(EVENT_SCRIPT_COMMAND)) {
+            if (auto* esc = CEvent::DynCast<CEventScriptCommand>(event); esc && esc->m_task->GetTaskType() == type) {
+                return true;
+            }
+        }
+
+        if (auto* task = ped->GetTaskManager().GetTaskPrimary(3); task && task->GetTaskType() == type) {
+            return true;
+        }
+
+        return false;
+    };
+
+    if (ped->IsInVehicle()) {
+        if (CheckTaskExists(TASK_COMPLEX_SEQUENCE)) {
+            return;
+        }
+
+        // Get them out of the car then make them wander.
+        auto* seq = new CTaskComplexSequence;
+        seq->AddTask(new CTaskComplexLeaveAnyCar(0, true, false));
+        seq->AddTask(CTaskComplexWander::GetWanderTaskByPedType(ped));
+        ped->GetEventGroup().Add(CEventScriptCommand(3, seq));
+    } else {
+        if (CheckTaskExists(TASK_COMPLEX_WANDER)) {
+            return;
+        }
+
+        // Get them wander.
+        ped->GetEventGroup().Add(CEventScriptCommand(3, CTaskComplexWander::GetWanderTaskByPedType(ped)));
+    }
 }
 
 // 0x486670
 void CTheScripts::CleanUpThisVehicle(CVehicle* vehicle) {
     //plugin::Call<0x486670, CVehicle*>(vehicle);
-    if (!vehicle || vehicle->m_nCreatedBy != eVehicleCreatedBy::MISSION_VEHICLE) {
+    if (!vehicle || vehicle->IsCreatedBy(eVehicleCreatedBy::MISSION_VEHICLE)) {
         return;
     }
 
