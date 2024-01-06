@@ -149,31 +149,40 @@ struct tScriptText {
 };
 VALIDATE_SIZE(tScriptText, 0x44);
 
+enum class eScriptRectangleType : int32 {
+    TYPE_0,
+    TYPE_1,
+    TYPE_2,
+    TYPE_3,
+    TYPE_4,
+    TYPE_5,
+};
+
 struct tScriptRectangle {
-    int32     m_nType;
-    bool      m_bDrawBeforeFade;
-    char      field_5;
-    int16     m_nTextureId;
-    CVector2D cornerA;
-    CVector2D cornerB;
-    int32     m_nAngle;
-    CRGBA     m_nTransparentColor;
-    char      gxt[8];
-    int32     field_28;
-    int32     field_2C;
-    int32     field_30;
-    int32     field_34;
-    uint32    m_nTextboxStyle;
+    eScriptRectangleType m_nType;
+    bool                 m_bDrawBeforeFade;
+    char                 field_5;
+    int16                m_nTextureId;
+    CVector2D            cornerA;
+    CVector2D            cornerB;
+    float                m_nAngle;
+    CRGBA                m_nTransparentColor;
+    char                 gxt1[8];
+    int16                field_28;
+    char                 gxt2[8];
+    int16                field_32;
+    eFontAlignment       m_Alignment;
+    uint32               m_nTextboxStyle;
 
     tScriptRectangle() { // 0x4691C8
-        m_nType             = 0;
+        m_nType             = eScriptRectangleType::TYPE_0;
         m_bDrawBeforeFade   = false;
         m_nTextureId        = -1;
         cornerA             = CVector2D();
         cornerB             = CVector2D();
         m_nAngle            = 0;
         m_nTransparentColor = CRGBA(255, 255, 255, 255);
-        gxt[0]              = 0;
+        gxt1[0]             = '\0';
         m_nTextboxStyle     = 3;
     }
 };
@@ -533,7 +542,7 @@ public:
     static void DrawDebugAngledSquare(const CVector2D& inf, const CVector2D& sup, const CVector2D& rotSup, const CVector2D& rotInf);
     static void DrawDebugCube(const CVector& inf, const CVector& sup);
     static void DrawDebugAngledCube(const CVector& inf, const CVector& sup, const CVector2D& rotSup, const CVector2D& rotInf);
-    static void DrawScriptSpritesAndRectangles(bool bDrawBeforeFade);
+    static void DrawScriptSpritesAndRectangles(bool drawBeforeFade);
 
     static int32* GetPointerToScriptVariable(uint32 offset) {
         // TODO: find out how this method changed between re3 and GTA:SA

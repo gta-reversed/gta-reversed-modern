@@ -69,6 +69,7 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(UpdateObjectIndices, 0x486780);
 
     RH_ScopedInstall(DrawScriptSpheres, 0x4810E0);
+    RH_ScopedInstall(DrawScriptSpritesAndRectangles, 0x464980);
 
     RH_ScopedInstall(UndoEntityInvisibilitySettings, 0x4812D0);
 
@@ -988,8 +989,70 @@ void CTheScripts::DrawDebugAngledCube(const CVector& inf, const CVector& sup, co
 }
 
 // 0x464980
-void CTheScripts::DrawScriptSpritesAndRectangles(bool bDrawBeforeFade) {
-    return plugin::Call<0x464980, bool>(bDrawBeforeFade);
+void CTheScripts::DrawScriptSpritesAndRectangles(bool drawBeforeFade) {
+    for (const auto& ir : IntroRectangles) {
+        if (ir.m_bDrawBeforeFade != drawBeforeFade) {
+            continue;
+        }
+
+        switch (ir.m_nType) {
+        case eScriptRectangleType::TYPE_1:
+            FrontEndMenuManager.DrawWindowedText(
+                ir.cornerA.x, ir.cornerA.y,
+                ir.cornerB.x, // ?
+                ir.gxt1,
+                ir.gxt2,
+                ir.m_Alignment
+            );
+            break;
+        case eScriptRectangleType::TYPE_2:
+            FrontEndMenuManager.DrawWindow(
+                CRect{ ir.cornerA, ir.cornerB },
+                ir.gxt1,
+                0,
+                CRGBA{ 0, 0, 0, 190 },
+                ir.m_nTextboxStyle, // ?
+                true
+            );
+            break;
+        case eScriptRectangleType::TYPE_3:
+            CSprite2d::DrawRect(
+                CRect{ ir.cornerA, ir.cornerB },
+                ir.m_nTransparentColor
+            );
+            break;
+        case eScriptRectangleType::TYPE_4:
+            ScriptSprites[ir.m_nTextureId].Draw(
+                CRect{ ir.cornerA, ir.cornerB },
+                ir.m_nTransparentColor
+            );
+            break;
+        case eScriptRectangleType::TYPE_5: {
+            // mid: Vector that points to the middle of line A-B from A.
+            // vAM: A to mid.
+            const auto mid = (ir.cornerA + ir.cornerB) / 2.0f;
+            const auto vAM = mid - ir.cornerA;
+            const auto cos = std::cos(ir.m_nAngle), sin = std::sin(ir.m_nAngle);
+
+            // This is 2D rotation, couldn't find a better function aside from
+            // using matricies or quaternions.
+            ScriptSprites[ir.m_nTextureId].Draw(
+                -cos * vAM.x + sin * vAM.y + mid.x,
+                -sin * vAM.x - cos * vAM.y + mid.y,
+                +sin * vAM.y + cos * vAM.x + mid.x,
+                +sin * vAM.x - cos * vAM.y + mid.y,
+                -cos * vAM.x - sin * vAM.y + mid.x,
+                +cos * vAM.y - sin * vAM.x + mid.y,
+                +cos * vAM.x - sin * vAM.y + mid.x,
+                +sin * vAM.x + cos * vAM.y + mid.y,
+                ir.m_nTransparentColor
+            );
+            break;
+        }
+        default:
+            break;
+        }
+    }
 }
 
 // Usage:
