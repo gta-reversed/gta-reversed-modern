@@ -1040,14 +1040,12 @@ void CPed::RemoveGogglesModel() {
     // Release model info
     CVisibilityPlugins::GetClumpModelInfo(m_pGogglesObject)->RemoveRef();
 
-    // Remove atomics anim from skin
-    if (const auto atomic = GetFirstAtomic(m_pGogglesObject)) {
-        if (RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic))) {
-            RpClumpForAllAtomics(m_pGogglesObject, AtomicRemoveAnimFromSkinCB, nullptr);
-        }
+#ifdef SA_SKINNED_PEDS
+    // Remove skin anim
+    if (IsClumpSkinned(m_pGogglesObject)) {
+        RpClumpForAllAtomics(m_pGogglesObject, AtomicRemoveAnimFromSkinCB, nullptr);
     }
-
-    RpClumpGetFrame(m_pGogglesObject);
+#endif
 
     // Destroy clump
     RpClumpDestroy(m_pGogglesObject);
@@ -1837,12 +1835,12 @@ void CPed::RemoveWeaponModel(int32 modelIndex) {
             // Release model info
             CVisibilityPlugins::GetClumpModelInfo(m_pWeaponObject)->RemoveRef();
 
-            // Remove atomics anim from skin
-            if (const auto atomic = GetFirstAtomic(m_pWeaponObject)) {
-                if (RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic))) {
-                    RpClumpForAllAtomics(m_pWeaponObject, AtomicRemoveAnimFromSkinCB, nullptr);
-                }
+#ifdef SA_SKINNED_PEDS
+            // Remove skin anim
+            if (IsClumpSkinned(m_pWeaponObject)) {
+                RpClumpForAllAtomics(m_pWeaponObject, AtomicRemoveAnimFromSkinCB, nullptr);
             }
+#endif
 
             // Destroy clump
             RpClumpDestroy(m_pWeaponObject);

@@ -51,7 +51,7 @@ project "gta_reversed"
 
         "SPDLOG_USE_STD_FORMAT",
 
-        "NOTSA_SKINNED_PEDS"
+        "SA_SKINNED_PEDS"
     }
 
     links { 

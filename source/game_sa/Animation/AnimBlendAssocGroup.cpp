@@ -59,7 +59,7 @@ void CAnimBlendAssocGroup::CreateAssociation(CAnimBlendStaticAssociation* assoc,
     const auto clump = reinterpret_cast<RpClump*>(mi->CreateInstance());
     RpAnimBlendClumpInit(clump);
     assoc->Init(clump, anim);
-#ifdef NOTSA_SKINNED_PEDS
+#ifdef SA_SKINNED_PEDS
     if (IsClumpSkinned(clump)) {
         RpClumpForAllAtomics(clump, AtomicRemoveAnimFromSkinCB, nullptr);
     }

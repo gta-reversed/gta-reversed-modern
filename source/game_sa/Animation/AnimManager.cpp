@@ -318,9 +318,11 @@ void CAnimManager::CreateAnimAssocGroups() {
         }
          
         if (clump) {
+#ifdef SA_SKINNED_PEDS
             if (IsClumpSkinned(clump)) {
                 RpClumpForAllAtomics(clump, AtomicRemoveAnimFromSkinCB, nullptr);
             }
+#endif
             RpClumpDestroy(clump);
         }
     }
