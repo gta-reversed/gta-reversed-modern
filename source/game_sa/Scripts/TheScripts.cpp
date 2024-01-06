@@ -533,8 +533,9 @@ void CTheScripts::CleanUpThisPed(CPed* ped) {
     }
 
     ped->SetCharCreatedBy(ePedCreatedBy::PED_GAME);
-    if (ped->bDoBloodyFootprints) // ????
+    if (ped->bKeepTasksAfterCleanUp) {
         return;
+    }
 
     notsa::ScopeGuard _([]() {
         --CPopulation::ms_nTotalMissionPeds;
