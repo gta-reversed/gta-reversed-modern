@@ -546,12 +546,12 @@ void CTheScripts::CleanUpThisVehicle(CVehicle* vehicle) {
 
 // 0x46A840
 void CTheScripts::ClearAllVehicleModelsBlockedByScript() {
-    memset(&VehicleModelsBlockedByScript, 255, sizeof(VehicleModelsBlockedByScript));
+    rng::fill(VehicleModelsBlockedByScript, MODEL_INVALID);
 }
 
 // 0x46A7C0
 void CTheScripts::ClearAllSuppressedCarModels() {
-    memset(&SuppressedVehicleModels, 255, sizeof(SuppressedVehicleModels));
+    rng::fill(SuppressedVehicleModels, MODEL_INVALID);
 }
 
 // 0x486B00
