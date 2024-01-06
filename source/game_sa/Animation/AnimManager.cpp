@@ -761,7 +761,7 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* stream, bool compress, bo
         }
     } else { // Register a new block
         animBlock = &ms_aAnimBlocks[ms_numAnimBlocks++];
-        strncpy_s(animBlock->Name, buf, MAX_ANIM_BLOCK_NAME);
+        VERIFY(strncpy_s(animBlock->Name, blockName, MAX_ANIM_BLOCK_NAME) == 0);
         animBlock->NumAnims = nAnims;
         animBlock->FirstAnimId = ms_numAnimations;
         animBlock->GroupId = GetFirstAssocGroup(animBlock->Name);
