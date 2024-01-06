@@ -414,7 +414,24 @@ void CTheScripts::AddToListOfConnectedLodObjects(CObject* obj1, CObject* obj2) {
 
 // 0x474750
 void CTheScripts::AddToListOfSpecialAnimGroupsAttachedToCharModels(int32 modelId, Const char* ifpName) {
-    plugin::Call<0x474750, int32, const char*>(modelId, ifpName);
+    const auto aag = rng::find_if(ScriptAttachedAnimGroups, [modelId, ifpName](auto& aag) {
+        return aag.m_nModelID == modelId && !std::strcmp(aag.m_IfpName, ifpName);
+    });
+    if (aag != ScriptAttachedAnimGroups.end()) {
+        // Already exists.
+        return;
+    }
+
+    const auto free = rng::find_if(ScriptAttachedAnimGroups, [](auto& aag) {
+        return aag.m_nModelID == MODEL_INVALID;
+    });
+    if (free == ScriptAttachedAnimGroups.end()) {
+        // In vanilla game goes OOB access.
+        NOTSA_UNREACHABLE();
+    }
+
+    free->m_nModelID = modelId;
+    std::strcpy(free->m_IfpName, ifpName);
 }
 
 // 0x470390
@@ -430,7 +447,7 @@ void CTheScripts::AddToVehicleModelsBlockedByScript(eModelID modelIndex) {
         return;
     }
 
-    auto free = rng::find(VehicleModelsBlockedByScript, MODEL_INVALID);
+    const auto free = rng::find(VehicleModelsBlockedByScript, MODEL_INVALID);
     if (free == VehicleModelsBlockedByScript.end()) {
         // In vanilla, game chooses the last index to be filled, probably unwanted.
         //
