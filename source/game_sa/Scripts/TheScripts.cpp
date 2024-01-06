@@ -403,8 +403,27 @@ void CTheScripts::AddToBuildingSwapArray(CBuilding* building, int32 oldModelId, 
 }
 
 // 0x481200
-void CTheScripts::AddToInvisibilitySwapArray(CEntity* entity, bool bVisible) {
-    plugin::Call<0x481200, CEntity*, bool>(entity, bVisible);
+void CTheScripts::AddToInvisibilitySwapArray(CEntity* entity, bool visible) {
+    if (entity->m_nIplIndex)
+        return;
+
+    const auto isa = rng::find_if(InvisibilitySettingArray, [entity](auto& isa) {
+        return isa == entity;
+    });
+    if (isa != InvisibilitySettingArray.end()) {
+        // Already exists.
+        if (visible) {
+            *isa = nullptr;
+        }
+        return;
+    }
+
+    const auto free = rng::find_if(InvisibilitySettingArray, [](auto& isa) { return !isa; });
+    if (free == InvisibilitySettingArray.end()) {
+        return;
+    }
+
+    *free = entity;
 }
 
 // 0x470980
