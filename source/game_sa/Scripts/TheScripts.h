@@ -331,10 +331,10 @@ public:
     static inline auto& ScriptSpace = *(std::array<uint8,SCRIPT_SPACE_SIZE>*)0xA49960;
 
     //! Reference to \r ScriptSpace's lower portion for MAIN.SCM - Prefer this over `&ScriptSpace[0]`
-    static inline auto& MainSCMBlock = *(std::array<uint8, MAIN_SCRIPT_SIZE>*)(0xA49960 + 0); // Can't use `&ScriptSpace[0]` because init order seems to be messed up...
+    static inline std::span MainSCMBlock{ ScriptSpace.data() + 0, MAIN_SCRIPT_SIZE };
 
     //! Reference to \r ScriptSpace's upper portion for other scripts - Prefer this over `&ScriptSpace[MAIN_SCRIPT_SIZE]`
-    static inline auto& MissionBlock = *(std::array<uint8, MISSION_SCRIPT_SIZE>*)(0xA49960 + MAIN_SCRIPT_SIZE);  // Can't use `&ScriptSpace[MAIN_SCRIPT_SIZE]` because init order seems to be messed up...
+    static inline std::span MissionBlock{ ScriptSpace.data() + MainSCMBlock.size(), MISSION_SCRIPT_SIZE };
 
     static inline auto&   SwitchJumpTable                     = *(std::array<tScriptSwitchCase, MAX_NUM_SwitchJumpTable>*)0xA43CF8;
     static inline uint16& NumberOfEntriesInSwitchTable        = *reinterpret_cast<uint16*>(0xA43F50);
@@ -373,15 +373,15 @@ public:
     // Script things
     //
 
-    static inline std::array<tScriptSphere, MAX_NUM_SCRIPT_SPHERES>&                             ScriptSphereArray              = *(std::array<tScriptSphere, MAX_NUM_SCRIPT_SPHERES>*)0xA91268;
-    static inline std::array<tScriptEffectSystem, MAX_NUM_SCRIPT_EFFECT_SYSTEMS>&                ScriptEffectSystemArray        = *(std::array<tScriptEffectSystem, MAX_NUM_SCRIPT_EFFECT_SYSTEMS>*)0xA44110;
-    static inline std::array<tScriptSearchlight, MAX_NUM_SCRIPT_SEARCH_LIGHT>&                   ScriptSearchLightArray         = *(std::array<tScriptSearchlight, MAX_NUM_SCRIPT_SEARCH_LIGHT>*)0xA94D68;
+    static inline std::array<tScriptSphere, MAX_NUM_SCRIPT_SPHERES>&              ScriptSphereArray       = *(std::array<tScriptSphere, MAX_NUM_SCRIPT_SPHERES>*)0xA91268;
+    static inline std::array<tScriptEffectSystem, MAX_NUM_SCRIPT_EFFECT_SYSTEMS>& ScriptEffectSystemArray = *(std::array<tScriptEffectSystem, MAX_NUM_SCRIPT_EFFECT_SYSTEMS>*)0xA44110;
+    static inline std::array<tScriptSearchlight, MAX_NUM_SCRIPT_SEARCH_LIGHT>&    ScriptSearchLightArray  = *(std::array<tScriptSearchlight, MAX_NUM_SCRIPT_SEARCH_LIGHT>*)0xA94D68;
 
-    static inline std::array<tScriptSequence, MAX_NUM_SCRIPT_SEQUENCE_TASKS>&                    ScriptSequenceTaskArray        = *(std::array<tScriptSequence, MAX_NUM_SCRIPT_SEQUENCE_TASKS>*)0xA43F68;
-    static inline uint16&                                                                        NumberOfScriptSearchLights     = *reinterpret_cast<uint16*>(0xA90830);
+    static inline std::array<tScriptSequence, MAX_NUM_SCRIPT_SEQUENCE_TASKS>& ScriptSequenceTaskArray    = *(std::array<tScriptSequence, MAX_NUM_SCRIPT_SEQUENCE_TASKS>*)0xA43F68;
+    static inline uint16&                                                     NumberOfScriptSearchLights = *reinterpret_cast<uint16*>(0xA90830);
 
-    static inline std::array<tScriptCheckpoint, MAX_NUM_SCRIPT_CHECKPOINTS>&                     ScriptCheckpointArray          = *(std::array<tScriptCheckpoint, MAX_NUM_SCRIPT_CHECKPOINTS>*)0xA44070;
-    static inline uint16&                                                                        NumberOfScriptCheckpoints      = *reinterpret_cast<uint16*>(0xA44068);
+    static inline std::array<tScriptCheckpoint, MAX_NUM_SCRIPT_CHECKPOINTS>& ScriptCheckpointArray     = *(std::array<tScriptCheckpoint, MAX_NUM_SCRIPT_CHECKPOINTS>*)0xA44070;
+    static inline uint16&                                                    NumberOfScriptCheckpoints = *reinterpret_cast<uint16*>(0xA44068);
 
     static inline bool& DbgFlag = *reinterpret_cast<bool*>(0x859CF8);
     static inline void*& SwitchDefaultAddress = *reinterpret_cast<void**>(0xA43F54);
