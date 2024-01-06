@@ -326,7 +326,6 @@ void CTaskSimpleJetPack::ProcessControlInput(CPlayerPed* player) {
         return;
     }
 
-
     const auto walkUpDown = (float)pad->GetPedWalkUpDown();
     const auto walkLeftRight = (float)pad->GetPedWalkLeftRight();
     const auto padMoveMag = std::sqrt(sq(walkUpDown) + sq(walkLeftRight)) / 60.f;
@@ -359,7 +358,10 @@ void CTaskSimpleJetPack::ProcessControlInput(CPlayerPed* player) {
             InterpolateThrustAngle();
         }
     } else { // 0x67E8D1
-        player->m_fAimingRotation = std::copysign(TheCamera.GetActiveCam().m_vecFront.Heading(), TheCamera.GetLookDirection() == LOOKING_DIRECTION_FORWARD ? 1.f : -1.f); // maybe wrong
+        player->m_fAimingRotation = TheCamera.GetActiveCam().m_vecFront.Heading();
+        if (TheCamera.GetLookDirection() != LOOKING_DIRECTION_FORWARD) {
+            player->m_fAimingRotation -= PI;
+        }
         InterpolateThrustAngle();
 
         if (walkLeftRight < 0) {
