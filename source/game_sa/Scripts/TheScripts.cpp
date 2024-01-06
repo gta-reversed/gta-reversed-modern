@@ -43,6 +43,7 @@ void CTheScripts::InjectHooks() {
 
     RH_ScopedInstall(AddToSwitchJumpTable, 0x470390);
     RH_ScopedInstall(AddToVehicleModelsBlockedByScript, 0x46B200);
+    RH_ScopedInstall(AddScriptCheckpoint, 0x4935A0);
 
     RH_ScopedInstall(CleanUpThisObject, 0x4866C0);
     RH_ScopedInstall(CleanUpThisPed, 0x486300, {.reversed = false});
@@ -269,7 +270,46 @@ void CTheScripts::ReadMultiScriptFileOffsetsFromScript() {
 // signature changed (CVector)
 // 0x4935A0
 uint32 CTheScripts::AddScriptCheckpoint(CVector at, CVector pointTo, float radius, int32 type) {
-    return plugin::CallAndReturn<uint32, 0x4935A0, CVector, CVector, float, int32>(at, pointTo, radius, type);
+    const auto cp = rng::find_if(ScriptCheckpointArray, [](auto& cp) { return !cp.IsActive(); });
+    if (cp == ScriptCheckpointArray.end()) {
+        // In vanilla game goes OOB access.
+        NOTSA_UNREACHABLE();
+    }
+
+    cp->m_bUsed = true;
+    const auto color = [&type]() -> CRGBA {
+        // TODO: Checkpoint types
+        switch (type) {
+        case 0:
+        case 1:
+        case 2:
+            return { 255, 0, 0, 32 };
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+            return { 255, 0, 0, 96 };
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();
+    const auto index = GetNewUniqueScriptThingIndex(std::distance(ScriptCheckpointArray.begin(), cp), SCRIPT_THING_CHECKPOINT);
+    cp->m_Checkpoint = CCheckpoints::PlaceMarker(
+        index,
+        type,
+        at,
+        pointTo,
+        radius,
+        color,
+        1024,
+        0.075f,
+        0
+    );
+
+    ++NumberOfScriptCheckpoints;
+    return index;
 }
 
 // 0x492F90
@@ -1216,7 +1256,7 @@ void CTheScripts::RenderTheScriptDebugLines() {
 void CTheScripts::RenderAllSearchLights() {
     ZoneScoped;
 
-    for (auto& light : ScriptSearchLightArray) {
+    for (const auto&& [i, light] : notsa::enumerate(ScriptSearchLightArray)) {
         if (!light.IsActive()) {
             continue;
         }
@@ -1230,7 +1270,7 @@ void CTheScripts::RenderAllSearchLights() {
         }();
 
         CHeli::SearchLightCone(
-            notsa::indexof(ScriptSearchLightArray, light),
+            i,
             origin,
             light.m_Target,
             light.m_fTargetRadius,

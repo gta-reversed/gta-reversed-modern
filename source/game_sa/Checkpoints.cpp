@@ -58,11 +58,11 @@ void CCheckpoints::Update() {
 CCheckpoint* CCheckpoints::PlaceMarker(uint32 id, uint16 type,
                                        CVector& posn, CVector& direction,
                                        float size,
-                                       uint8 red, uint8 green, uint8 blue, uint8 alpha,
+                                       CRGBA color,
                                        uint16 pulsePeriod,
                                        float pulseFraction, int16 rotateRate
 ) {
-    return plugin::CallAndReturn<CCheckpoint*, 0x722C40, uint32, uint16, CVector&, CVector&, float, uint8, uint8, uint8, uint8, uint16, float, uint16>(id, type, posn, direction, size, red, green, blue, alpha, pulsePeriod, pulseFraction, rotateRate);
+    return plugin::CallAndReturn<CCheckpoint*, 0x722C40, uint32, uint16, CVector&, CVector&, float, CRGBA, uint16, float, uint16>(id, type, posn, direction, size, color, pulsePeriod, pulseFraction, rotateRate);
 }
 
 // 0x722900
