@@ -184,14 +184,22 @@ void CHeli::SwitchPoliceHelis(bool enable) {
 
 // 0x6C58E0
 void CHeli::SearchLightCone(int32 coronaIndex,
-                            CVector origin, CVector target,
+                            CVector origin,
+                            CVector target,
                             float targetRadius,
                             float power,
-                            uint8 unknownFlag, uint8 drawShadow,
-                            CVector* useless0, CVector* useless1, CVector* useless2,
-                            bool a11, float baseRadius, float a13,float a14,float a15
+                            uint8 unknownFlag,
+                            uint8 drawShadow,
+                            CVector& useless0,
+                            CVector& useless1,
+                            CVector& useless2,
+                            bool a11,
+                            float baseRadius,
+                            float a13,
+                            float a14,
+                            float a15
 ) {
-    ((void(__cdecl*)(int32, CVector, CVector, float, float, uint8, uint8, CVector*, CVector*, CVector*, bool, float, float, float, float))0x6C58E0)(coronaIndex, origin, target, targetRadius, power, unknownFlag, drawShadow, useless0, useless1, useless2, a11, baseRadius, a13, a14, a15);
+    ((void(__cdecl*)(int32, CVector, CVector, float, float, uint8, uint8, CVector&, CVector&, CVector&, bool, float, float, float, float))0x6C58E0)(coronaIndex, origin, target, targetRadius, power, unknownFlag, drawShadow, useless0, useless1, useless2, a11, baseRadius, a13, a14, a15);
 }
 
 // 0x6C6520

@@ -75,6 +75,7 @@ void CTheScripts::InjectHooks() {
 
     RH_ScopedInstall(IsPlayerOnAMission, 0x464D50);
     RH_ScopedInstall(IsVehicleStopped, 0x4861F0);
+    RH_ScopedInstall(RenderAllSearchLights, 0x493E30);
 }
 
 // 0x468D50
@@ -1215,5 +1216,35 @@ void CTheScripts::RenderTheScriptDebugLines() {
 void CTheScripts::RenderAllSearchLights() {
     ZoneScoped;
 
-    return plugin::Call<0x493E30>();
+    for (auto& light : ScriptSearchLightArray) {
+        if (!light.IsActive()) {
+            continue;
+        }
+
+        const auto origin = [&] {
+            if (auto e = light.m_AttachedEntity; e || (e = light.m_Bulb, e)) {
+                return Multiply3x3(light.m_Origin, e->GetMatrix()) + e->GetPosition();
+            }
+
+            return light.m_Origin;
+        }();
+
+        CHeli::SearchLightCone(
+            notsa::indexof(ScriptSearchLightArray, light),
+            origin,
+            light.m_Target,
+            light.m_fTargetRadius,
+            1.0f,
+            light.m_bClipIfColliding,
+            light.m_bEnableShadow,
+            light.m_TargetSpot,
+            light.vf64,
+            light.vf70,
+            true,
+            light.m_fBaseRadius,
+            0.0f,
+            0.0f,
+            1.0f
+        );
+    }
 }
