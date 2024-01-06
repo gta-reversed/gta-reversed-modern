@@ -1506,3 +1506,8 @@ void CTheScripts::RenderAllSearchLights() {
         );
     }
 }
+
+// 0x470A20
+void CTheScripts::ScriptConnectLodsFunction(int32 objectHandle1, int32 objectHandle2) {
+    plugin::Call<0x470A20, int32, int32>(objectHandle1, objectHandle2);
+}
