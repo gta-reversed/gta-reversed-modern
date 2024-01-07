@@ -68,14 +68,9 @@ project "gta_reversed"
         "dxguid.lib",
         "strmiids.lib",
         "dsound.lib",
-        "d3d9.lib"
+        "d3d9.lib",
+        "dbghelp" 
     }
-
-    filter "configurations:Debug*"
-        links { 
-            "dbghelp" 
-        }
-    filter {}
 
     libdirs { 
         "../libs",
