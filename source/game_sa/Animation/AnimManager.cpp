@@ -63,9 +63,9 @@ void CAnimManager::Initialise() {
 
 // 0x5BC910
 void CAnimManager::ReadAnimAssociationDefinitions() {
-    char name[32], block[32], type[32];
+    char groupName[32], blockName[32], type[32];
     bool                 isAnimSection = false;
-    AnimAssocDefinition* animStyle;
+    AnimAssocDefinition* def;
     uint32               animCount;
 
     CFileMgr::SetDir("");
@@ -79,16 +79,16 @@ void CAnimManager::ReadAnimAssociationDefinitions() {
             continue;
         }
         if (isAnimSection) {
-            if (sscanf_s(l, "%s", SCANF_S_STR(name)) == 1) {
-                if (!memcmp(name, "end", 4)) {
+            if (sscanf_s(l, "%s", SCANF_S_STR(groupName)) == 1) {
+                if (!memcmp(groupName, "end", 4)) {
                     isAnimSection = false;
                 } else {
-                    AddAnimToAssocDefinition(animStyle, name);
+                    AddAnimToAssocDefinition(def, groupName);
                 }
             }
         } else {
-            VERIFY(sscanf_s(l, "%s %s %s %d", SCANF_S_STR(name), SCANF_S_STR(block), SCANF_S_STR(type), &animCount) == 4);
-            animStyle = AddAnimAssocDefinition(name, block, MODEL_MALE01, animCount, aStdAnimDescs);
+            VERIFY(sscanf_s(l, "%s %s %s %d", SCANF_S_STR(groupName), SCANF_S_STR(blockName), SCANF_S_STR(type), &animCount) == 4);
+            def = AddAnimAssocDefinition(groupName, blockName, MODEL_MALE01, animCount, aStdAnimDescs);
             isAnimSection = true;
         }
     }
@@ -144,7 +144,7 @@ int32 CAnimManager::GetAnimationBlockIndex(const char* name) {
 AssocGroupId CAnimManager::GetFirstAssocGroup(const char* name) {
     const auto namesv = notsa::ci_string_view{ name };
     for (auto i = 0; i < ANIM_GROUP_MAN; i++) {
-        if (ms_aAnimAssocDefinitions[i].blockName == namesv) {
+        if (ms_aAnimAssocDefinitions[i].BlockName == namesv) {
             return static_cast<AssocGroupId>(i);
         }
     }
@@ -174,18 +174,18 @@ CAnimBlendHierarchy& CAnimManager::GetAnimation(AnimationId id) {
 
 // 0x4D3A20
 const char* CAnimManager::GetAnimGroupName(AssocGroupId groupId) {
-    return ms_aAnimAssocDefinitions[groupId].groupName;
+    return ms_aAnimAssocDefinitions[groupId].GroupName;
 }
 
 // 0x4D3A30
 const char* CAnimManager::GetAnimBlockName(AssocGroupId groupId) {
-    return ms_aAnimAssocDefinitions[groupId].blockName;
+    return ms_aAnimAssocDefinitions[groupId].BlockName;
 }
 
 // NOTSA
 AssocGroupId CAnimManager::GetAnimationGroupIdByName(notsa::ci_string_view name) {
     for (const auto& [i, gd] : notsa::enumerate(GetAssocGroupDefs())) {
-        if (gd.groupName == name) {
+        if (gd.GroupName == name) {
             return (AssocGroupId)i;
         }
     }
@@ -209,24 +209,27 @@ CAnimBlendStaticAssociation* CAnimManager::GetAnimAssociation(AssocGroupId group
 
 CAnimBlendAssociation* CAnimManager::AddAnimationToClump(RpClump* clump, CAnimBlendAssociation* anim) {
     const auto clumpAnims = &RpClumpGetAnimBlendClumpData(clump)->m_Anims;
-    const auto syncWith = [&]() -> CAnimBlendAssociation* {
-        if (anim->IsMoving()) {
-            for (auto l = clumpAnims->next; l; l = l->next) {
-                const auto a = CAnimBlendAssociation::FromLink(l);
-                if (a->IsMoving()) {
-                    return a;
-                }
+
+    CAnimBlendAssociation* syncWith{};
+    if (anim->IsMoving()) {
+        for (auto l = clumpAnims->next; l; l = l->next) {
+            const auto a = CAnimBlendAssociation::FromLink(l);
+            if (a->IsMoving()) {
+                syncWith = a;
+                break;
             }
         }
-        return nullptr;
-    }();
+    }
+
     if (syncWith) {
         anim->SyncAnimation(syncWith);
         anim->m_Flags |= ANIMATION_STARTED;
     } else {
         anim->Start(0.0f);
     }
+
     clumpAnims->Prepend(&anim->m_Link);
+
     return anim;
 }
 
@@ -260,56 +263,56 @@ CAnimBlendAssociation* CAnimManager::AddAnimationAndSync(RpClump* clump, CAnimBl
 }
 // 0x4D3BA0
 AnimAssocDefinition* CAnimManager::AddAnimAssocDefinition(const char* groupName, const char* blockName, uint32 modelIndex, uint32 animsCount, AnimDescriptor* descriptor) {
-    const auto d = &ms_aAnimAssocDefinitions[ms_numAnimAssocDefinitions++];
+    const auto def = &ms_aAnimAssocDefinitions[ms_numAnimAssocDefinitions++];
 
-    strcpy_s(d->groupName, groupName);
-    strcpy_s(d->blockName, blockName);
+    strcpy_s(def->GroupName, groupName);
+    strcpy_s(def->BlockName, blockName);
 
-    d->modelIndex = modelIndex;
-    d->animsCount = animsCount;
-    d->animDesc   = descriptor;
+    def->ModelIndex = modelIndex;
+    def->NumAnims   = animsCount;
+    def->AnimDescr  = descriptor;
 
-    d->animNames     = new const char*[animsCount];
+    def->AnimNames   = new const char*[animsCount];
     const auto bufsz = AnimAssocDefinition::ANIM_NAME_BUF_SZ * animsCount;
     const auto buf   = new char[bufsz];
     memset(buf, 0, bufsz);
     for (auto i = animsCount; i-->0;) {
-        d->animNames[i] = buf + i * 24;
+        def->AnimNames[i] = buf + i * AnimAssocDefinition::ANIM_NAME_BUF_SZ;
     }
 
-    return d;
+    return def;
 }
 
 // 0x4D3C80
 void CAnimManager::AddAnimToAssocDefinition(AnimAssocDefinition* def, const char* animName) {
     int32 i = 0;
-    for (; *def->animNames[i]; i++) {
-        assert(i < def->animsCount);
+    for (; def->AnimNames[i][0]; i++) {
+        assert(i < def->NumAnims);
     }
     // `const_cast` is fine here, because it's heap allocated [presumeably]
-    strcpy_s(const_cast<char*>(def->animNames[i]), AnimAssocDefinition::ANIM_NAME_BUF_SZ, animName);
+    strcpy_s(const_cast<char*>(def->AnimNames[i]), AnimAssocDefinition::ANIM_NAME_BUF_SZ, animName);
 }
 
 // 0x4D3CC0
 void CAnimManager::CreateAnimAssocGroups() {
     for (auto&& [i, group] : notsa::enumerate(GetAssocGroups())) {
         const auto def   = &ms_aAnimAssocDefinitions[i];
-        const auto block = GetAnimationBlock(def->blockName);
+        const auto block = GetAnimationBlock(def->BlockName);
         if (block == nullptr || !block->IsLoaded || group.m_Anims) {
             continue;
         }
 
         RpClump* clump = nullptr;
-        if (def->modelIndex != MODEL_INVALID) {
-            clump = (RpClump*)CModelInfo::GetModelInfo(def->modelIndex)->CreateInstance();
+        if (def->ModelIndex != MODEL_INVALID) {
+            clump = (RpClump*)CModelInfo::GetModelInfo(def->ModelIndex)->CreateInstance();
             RpAnimBlendClumpInit(clump);
         }
 
         group.m_GroupID = (AssocGroupId)i;
-        group.m_IdOffset = def->animDesc->animId;
-        group.CreateAssociations(def->blockName, clump, def->animNames, def->animsCount);
+        group.m_IdOffset = def->AnimDescr->animId;
+        group.CreateAssociations(def->BlockName, clump, def->AnimNames, def->NumAnims);
         for (auto j = 0u; j < group.m_NumAnims; j++) {
-            group.GetAnimation(def->animDesc[j].animId)->m_Flags |= def->animDesc[j].flags;
+            group.GetAnimation(def->AnimDescr[j].animId)->m_Flags |= def->AnimDescr[j].flags;
         }
 
         if (clump) {

@@ -5,25 +5,6 @@
 #include <extensions/FixedVector.hpp>
 #include <extensions/FixedQuat.hpp>
 
-union Quat16 { // 4096
-    struct {
-        int16 m_wQuatX;
-        int16 m_wQuatY;
-        int16 m_wQuatZ;
-        int16 m_wQuatW;
-    };
-    int16 rot[4];
-};
-
-union Vec16 { // 1024
-    struct {
-        int16 m_wTranslationX;
-        int16 m_wTranslationY;
-        int16 m_wTranslationZ;
-    };
-    int16 trans[3];
-};
-
 /*
  * KeyFrame -> CAnimSequenceChildFrameUncompressed
  * KeyFrameTrans -> CAnimSequenceRootFrameUncompressed

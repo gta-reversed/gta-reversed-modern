@@ -10,6 +10,9 @@ project "gta_reversed"
     filter {"options:allow-script-cmd-hooks"}
         defines { "ENABLE_SCRIPT_COMMAND_HOOKS" }
 
+    filter "configurations:Debug*"
+        floatingpoint "strict"
+
     filter {} -- Clear filter
 
     vpaths {
