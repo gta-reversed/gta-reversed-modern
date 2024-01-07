@@ -165,18 +165,7 @@ void CAnimBlendAssocGroup::DestroyAssociations() {
     if (!m_Anims) {
         return;
     }
-
-    // Compiler generated garbage for the virtual destructor
-    // TODO:
-    // If:
-    // - All `CreateAssociations` are hooked
-    // - `DestroyAssociations` is hooked
-    // - CAnimBlendStaticAssociation::Destructor is changed to just call the actual destructor
-    // then:
-    // - Simple `delete[]` can be used here (and `new CAnimBlendStaticAssociation[]` to allocate the array)
-    const auto numObjects = *(size_t*)((char*)m_Anims - sizeof(size_t));
-    std::invoke(&CAnimBlendStaticAssociation::Destructor, m_Anims, numObjects ? 3 : 2);
-    
+    delete m_Anims;
     m_Anims    = nullptr;
     m_NumAnims = 0;
 }
@@ -227,18 +216,9 @@ CAnimBlock* CAnimBlendAssocGroup::AllocateForBlock(const char* blockName, int32 
         numAnims = (int32)ablock->NumAnims;
     }
 
-    const auto mem = new char[sizeof(CAnimBlendStaticAssociation) * numAnims + sizeof(size_t)]; // Using `size_t` because of alignment (will be uint32 on 32bit anyways)
-
-    assert(mem);
-
-    *(size_t*)mem = numAnims; // Compiler generated garbage for the virtual destructor - Store number of objects before the actual objects, see `DestroyAssociations()` too
-    m_AnimBlock   = ablock;
-    m_Anims       = reinterpret_cast<CAnimBlendStaticAssociation*>(mem + sizeof(size_t));
-    m_NumAnims    = numAnims;
-
-    // Default code does this too - I have no clue what's going on
-    // because the initialization code is compiler generated
-    std::uninitialized_default_construct(m_Anims, m_Anims + m_NumAnims);
+    m_AnimBlock = ablock;
+    m_Anims     = new CAnimBlendStaticAssociation[numAnims];
+    m_NumAnims  = numAnims;
 
     return ablock;
 }

@@ -27,7 +27,7 @@ public:
 
     auto GetHashKey() const noexcept { return m_BlendHier->m_hashKey; }
 
-    // 0x4CDF50 - Virtual deleting destructor wrapper
+    // 0x4CDF50 - Yeah
     auto Destructor(uint32 flags) {
         if (flags & 2) { // Vector (array)
             std::destroy_n(this, *(size_t*)((char*)this - sizeof(size_t))); // Number of objects is stored at the beginning of the array by the compiler ;)
@@ -37,7 +37,7 @@ public:
         } else { // Scalar (single object)
             std::destroy_at(this);
             if (flags & 1) {
-                delete this;
+                delete (void*)this; // cast to void to avoid compiler calling the dtor again
             }
         }
         return this;

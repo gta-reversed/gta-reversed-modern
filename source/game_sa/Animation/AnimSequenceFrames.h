@@ -35,6 +35,8 @@ union Vec16 { // 1024
 struct KeyFrame {
     CQuaternion Rot;
     float       DeltaTime; //< Relative to previous key frame
+
+    void SetDeltaTime(float t) { DeltaTime = t; }
 };
 
 struct KeyFrameTrans : KeyFrame {
@@ -45,9 +47,7 @@ struct KeyFrameCompressed {
     FixedQuat<int16, 4096.f> Rot;
     FixedFloat<int16, 60.f>  DeltaTime;
 
-    void SetTime(float compressedTime) {
-        DeltaTime.Set(compressedTime, true); // NOTE/TODO: I don't really think rounding upwards matters that much, but thats how the code was
-    }
+    void SetDeltaTime(float compressedTime) { DeltaTime.Set(compressedTime, true); }
 };
 
 struct KeyFrameTransCompressed : KeyFrameCompressed {

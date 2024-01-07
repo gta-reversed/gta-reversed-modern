@@ -217,6 +217,10 @@ inline bool approxEqual2(float f1, float f2, float epsilon = 0.01F)
     return f1 == f2 || fabs(f1 - f2) < epsilon;
 }
 
+inline constexpr auto MakeFourCC(const char cc[4]) {
+    return MAKEFOURCC(cc[0], cc[1], cc[2], cc[3]);
+}
+
 // shit
 extern constexpr bool make_fourcc3(const char* line, const char abc[3]) {
     return line[0] == abc[0] &&

@@ -13,6 +13,8 @@
 
 #include <extensions/ci_string.hpp>
 
+struct IFPSectionHeader;
+
 constexpr auto MAX_ANIM_BLOCK_NAME = 16;
 constexpr auto NUM_ANIM_ASSOC_GROUPS = 118;
 constexpr auto NUM_ANIM_BLOCKS = 180;
@@ -88,8 +90,9 @@ public:
     static auto GetAssocGroups() { return std::span{ms_aAnimAssocGroups, ms_numAnimAssocDefinitions}; }
     static auto GetAssocGroupDefs() { return std::span{ms_aAnimAssocDefinitions, ms_numAnimAssocDefinitions}; }
 private:
-    static void LoadAnimFile_ANPK(RwStream* stream, bool compress, const char (*uncompressedAnims)[32]);
-    static void LoadAnimFile_ANP23(RwStream* stream, bool compress, bool isANP3);
+    static void LoadAnimFile_ANPK(RwStream* stream, const IFPSectionHeader& h, bool compress, const char (*uncompressedAnims)[32]);
+    static void LoadAnimFile_ANP23(RwStream* stream, const IFPSectionHeader& h, bool compress, bool isANP3);
+    static auto GetOrCreateAnimBlock(const char* name, uint32 numAnims);
 };
 
 // 0x4C4DC0

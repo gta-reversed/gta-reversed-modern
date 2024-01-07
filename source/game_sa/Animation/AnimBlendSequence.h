@@ -44,7 +44,7 @@ public:
     void RemoveUncompressedData(uint8* frameData);
     void SetBoneTag(int32 boneId);
     void SetName(const char* string);
-    void SetNumFrames(int32 count, bool root, bool compressed, CAnimBlendSequence* frameData); // root -> isTranslated?
+    void SetNumFrames(uint32 count, bool bHasTranslation, bool compressed, void* frameData);
     void Uncompress(uint8* frameData);
 
     // Used to implement copy-paste functions

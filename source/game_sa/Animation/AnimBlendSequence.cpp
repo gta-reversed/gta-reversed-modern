@@ -50,7 +50,7 @@ void CAnimBlendSequence::CompressKeyframes(uint8* frameData) {
         auto* kf = (KeyFrameTrans*)m_Frames;
         for (auto i = 0; i < m_FramesNum; i++, kf++, kftc++) {
             kftc->Rot = kf->Rot;
-            kftc->SetTime(kf->DeltaTime);
+            kftc->SetDeltaTime(kf->DeltaTime);
             kftc->Trans = kf->Trans;
         }
     } else {
@@ -58,7 +58,7 @@ void CAnimBlendSequence::CompressKeyframes(uint8* frameData) {
         auto* kf = (KeyFrame*)m_Frames;
         for (auto i = 0; i < m_FramesNum; i++, kf++, kfc++) {
             kfc->Rot = kf->Rot;
-            kfc->SetTime(kf->DeltaTime);
+            kfc->SetDeltaTime(kf->DeltaTime);
         }
     }
 
@@ -80,11 +80,10 @@ void CAnimBlendSequence::RemoveUncompressedData(uint8* frameData) {
 
 // 0x4D0C90
 size_t CAnimBlendSequence::GetDataSize(bool compressed) const {
-    if (compressed) {
-        return m_FramesNum * (m_bHasTranslation ? sizeof(KeyFrameTransCompressed) : sizeof(KeyFrameCompressed));
-    } else {
-        return m_FramesNum * (m_bHasTranslation ? sizeof(KeyFrameTrans) : sizeof(KeyFrame));
-    }
+    const auto kfSize = compressed
+        ? m_bHasTranslation ? sizeof(KeyFrameTransCompressed) : sizeof(KeyFrameCompressed)
+        : m_bHasTranslation ? sizeof(KeyFrameTrans) : sizeof(KeyFrame);
+    return kfSize * m_FramesNum;
 }
 
 // 0x4D1190
@@ -118,13 +117,13 @@ void CAnimBlendSequence::SetBoneTag(int32 boneId) {
 }
 
 // 0x4D0CD0
-void CAnimBlendSequence::SetNumFrames(int32 count, bool bHasTranslation, bool compressed, CAnimBlendSequence* frameData) {
-    m_bHasTranslation = bHasTranslation;
-    m_FramesNum = (uint16)count;
-    m_Frames = frameData ? frameData : CMemoryMgr::Malloc(GetDataSize(compressed));
+void CAnimBlendSequence::SetNumFrames(uint32 count, bool bHasTranslation, bool compressed, void* frameData) {
+    m_bHasTranslation      = bHasTranslation;
+    m_FramesNum            = (uint16)count;
+    m_Frames               = frameData ? frameData : CMemoryMgr::Malloc(GetDataSize(compressed));
     m_bUsingExternalMemory = frameData != nullptr; // NOTSA
-    m_bHasRotation = true;
-    m_bIsCompressed = compressed; // condition has been removed
+    m_bHasRotation         = true;
+    m_bIsCompressed        = compressed; // condition has been removed
 }
 
 // 0x4D0D40
