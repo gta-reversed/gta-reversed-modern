@@ -43,8 +43,8 @@ void CAnimManager::InjectHooks() {
     RH_ScopedInstall(GetNumRefsToAnimBlock, 0x4D4010);
     RH_ScopedInstall(UncompressAnimation, 0x4D41C0);
     RH_ScopedInstall(RemoveFromUncompressedCache, 0x4D42A0);
-    RH_ScopedOverloadedInstall(BlendAnimation, "id", 0x4D4610, CAnimBlendAssociation*(*)(RpClump*, AssocGroupId, AnimationId, float), { .reversed = false });
-    RH_ScopedOverloadedInstall(BlendAnimation, "hier", 0x4D4410, CAnimBlendAssociation*(*)(RpClump*, CAnimBlendHierarchy*, int32, float), { .reversed = false });
+    RH_ScopedOverloadedInstall(BlendAnimation, "id", 0x4D4610, CAnimBlendAssociation*(*)(RpClump*, AssocGroupId, AnimationId, float));
+    RH_ScopedOverloadedInstall(BlendAnimation, "hier", 0x4D4410, CAnimBlendAssociation*(*)(RpClump*, CAnimBlendHierarchy*, int32, float));
     RH_ScopedInstall(LoadAnimFiles, 0x4D5620);
     RH_ScopedInstall(LoadAnimFile, 0x4D47F0);
 }
@@ -208,7 +208,7 @@ CAnimBlendStaticAssociation* CAnimManager::GetAnimAssociation(AssocGroupId group
 }
 
 CAnimBlendAssociation* CAnimManager::AddAnimationToClump(RpClump* clump, CAnimBlendAssociation* anim) {
-    const auto clumpAnims = &RpClumpGetAnimBlendClumpData(clump)->m_Associations;
+    const auto clumpAnims = &RpClumpGetAnimBlendClumpData(clump)->m_Anims;
     const auto syncWith = [&]() -> CAnimBlendAssociation* {
         if (anim->IsMoving()) {
             for (auto l = clumpAnims->next; l; l = l->next) {
@@ -219,15 +219,15 @@ CAnimBlendAssociation* CAnimManager::AddAnimationToClump(RpClump* clump, CAnimBl
             }
         }
         return nullptr;
-        }();
-        if (syncWith) {
-            anim->SyncAnimation(syncWith);
-            anim->m_Flags |= ANIMATION_STARTED;
-        } else {
-            anim->Start(0.0f);
-        }
-        clumpAnims->Prepend(&anim->m_Link);
-        return anim;
+    }();
+    if (syncWith) {
+        anim->SyncAnimation(syncWith);
+        anim->m_Flags |= ANIMATION_STARTED;
+    } else {
+        anim->Start(0.0f);
+    }
+    clumpAnims->Prepend(&anim->m_Link);
+    return anim;
 }
 
 // 0x4D3AA0
@@ -254,10 +254,10 @@ CAnimBlendAssociation* CAnimManager::AddAnimationAndSync(RpClump* clump, CAnimBl
     } else {
         a->Start(0.0f);
     }
-    clumpAnims->m_Associations.Prepend(&a->m_Link);
+    clumpAnims->m_Anims.Prepend(&a->m_Link);
     return a;
-}
 
+}
 // 0x4D3BA0
 AnimAssocDefinition* CAnimManager::AddAnimAssocDefinition(const char* groupName, const char* blockName, uint32 modelIndex, uint32 animsCount, AnimDescriptor* descriptor) {
     const auto d = &ms_aAnimAssocDefinitions[ms_numAnimAssocDefinitions++];
@@ -423,114 +423,103 @@ void CAnimManager::RemoveFromUncompressedCache(CAnimBlendHierarchy* h) {
 }
 
 // 0x4D4410
-CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, CAnimBlendHierarchy* animBlendHier, int32 flags, float clumpAssocBlendData) {
-    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D4410, RpClump*, CAnimBlendHierarchy*, int32, float>(clump, animBlendHier, flags, clumpAssocBlendData);
+CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, CAnimBlendHierarchy* toBlendHier, int32 toBlendFlags, float blendDelta) {
+    const auto clumpAnimData = RpClumpGetAnimBlendClumpData(clump); // Get running anim data
 
-    /*
-    CAnimBlendClumpData* clumpData = RpClumpGetAnimBlendClumpData(clump);
-    bool isPartial = (flags & ANIMATION_PARTIAL) == 0;
-    int removePrevAnim = 0;
-    CAnimBlendLink* link;
-    CAnimBlendAssociation *anim, *found = nullptr;
-    for (link = clumpData->m_Associations.next; link; link = link->next) {
-    anim = CAnimBlendAssociation::FromLink(link);
-    if (anim->m_pHierarchy == animBlendHier) {
-    found = anim;
-    } else if (isPartial == anim->IsPartial()) {
-    if (anim->m_fBlendAmount > 0.0f) {
-    float blendDelta = -delta * anim->m_fBlendAmount;
-    if (blendDelta < anim->m_fBlendDelta || !isPartial) { // || (anim->m_pHierarchy->animBlockId == animBlendHier->animBlockId && anim->m_pHierarchy->animBlockId)) {
-    if (blendDelta > -0.05f) {
-    blendDelta = -0.05f;
-    }
-    anim->m_fBlendDelta = blendDelta;
-    }
-    } else {
-    anim->m_fBlendDelta = -1.0f;
-    }
-    anim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
-    removePrevAnim = 1;
-    }
+    CAnimBlendAssociation* running{};
+    bool                   bFadeThisOut = false;
+    for (auto l = clumpAnimData->m_Anims.next; l; l = l->next) {
+        const auto a = CAnimBlendAssociation::FromLink(l);
+        assert(a->m_BlendHier);
+        if (a->m_BlendHier && a->m_BlendHier == toBlendHier) { // Found an instance of this anim running
+            running = a;
+        } else if (((toBlendFlags & ANIMATION_PARTIAL) == 0) == a->IsPartial()) {
+            if (a->m_BlendAmount <= 0.f) {
+                a->m_BlendDelta = -1.f;
+            } else if (const auto bd = a->GetBlendAmount() * -blendDelta; (bd >= a->GetBlendDelta() && (toBlendFlags & ANIMATION_PARTIAL)) || (a->m_BlendHier->m_nAnimBlockId && a->m_BlendHier->m_nAnimBlockId == toBlendHier->m_nAnimBlockId)) {
+                a->m_BlendDelta = std::min(-0.05f, bd);
+            }
+            a->SetFlag(ANIMATION_FREEZE_LAST_FRAME);
+            bFadeThisOut = true;
+        }
     }
 
-    if (found) {
-    found->m_fBlendDelta = (1.0f - found->m_fBlendAmount) * delta;
-    if (found->m_fCurrentTime == found->m_pHierarchy->m_fTotalTime) { // !found->IsRunning() && ...
-    found->Start(0.0f);
+    // If already running just re-adjust blend delta (and start it if it has finished)
+    if (running) {
+        running->SetBlendDelta((1.f - running->GetBlendAmount()) * blendDelta);
+        if (running->HasFinished()) {
+            running->Start();
+        }
+        UncompressAnimation(running->m_BlendHier);
+        return running;
     }
+
+    // Otherwise start 
+    const auto a = new CAnimBlendAssociation{clump, toBlendHier};    
+    a->m_Flags = toBlendFlags;
+    a->ReferenceAnimBlock();
+    UncompressAnimation(a->m_BlendHier);
+    clumpAnimData->m_Anims.Prepend(&a->m_Link);
+    a->Start();
+    if (bFadeThisOut || (toBlendFlags & ANIMATION_PARTIAL)) {
+        a->SetBlend(0.f, blendDelta);
+        UncompressAnimation(toBlendHier); // Why call this again?
     } else {
-    found = new CAnimBlendAssociation(clump, animBlendHier);
-    found->m_nFlags |= flags;
-    found->ReferenceAnimBlock();
-    UncompressAnimation(animBlendHier);
-    clumpData->m_Associations.Prepend(&found->m_Associations);
-    found->Start(0.0f);
-    if (!removePrevAnim && !isPartial) {
-    found->m_fBlendAmount = 1.0f;
-    return found;
+        a->m_BlendAmount = 1.f;
     }
-    found->m_fBlendAmount = 0.0f;
-    found->m_fBlendDelta = delta;
-    }
-    UncompressAnimation(found->m_pHierarchy);
-    return found;
-    */
+    return a;
 }
 
 // 0x4D4610
-CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, AssocGroupId groupId, AnimationId animId, float clumpAssocBlendData) {
-    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D4610, RpClump*, AssocGroupId, AnimationId, float>(clump, groupId, animId, clumpAssocBlendData);
+CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, AssocGroupId groupId, AnimationId animId, float blendDelta) {
+    const auto clumpAnimData = RpClumpGetAnimBlendClumpData(clump); // Get running anim data
 
-    /*
-    auto removePrevAnim = false;
-    CAnimBlendClumpData* clumpData = RpClumpGetAnimBlendClumpData(clump);
-    CAnimBlendStaticAssociation* animProps = GetAnimAssociation(groupId, animId);
-    CAnimBlendAssociation* anim;
-    bool isMovement = animProps->IsMovement();
-    bool isPartial = animProps->IsPartial();
-    bool isIndestructible = animProps->IsIndestructible();
-    CAnimBlendLink* link;
-    CAnimBlendAssociation *found = nullptr, *movementAnim = nullptr;
-    for (link = clumpData->link.next; link; link = link->next) {
-    anim = CAnimBlendAssociation::FromLink(link);
-    if (isMovement && anim->IsMovement())
-    movementAnim = anim;
-    if (anim->m_nAnimId == animId && anim->m_nAnimGroup == groupId)
-    found = anim;
-    else {
-    if (isPartial == anim->IsPartial() && isIndestructible == anim->IsIndestructible()) {
-    if (anim->m_fBlendAmount > 0.0f) {
-    float blendDelta = -delta * anim->m_fBlendAmount;
-    if (blendDelta < anim->m_fBlendDelta || !isPartial) {
-    if (blendDelta > -0.05f)
-    blendDelta = -0.05f;
-    anim->m_fBlendDelta = blendDelta;
-    }
-    } else {
-    anim->m_fBlendDelta = -1.0f;
-    }
-    anim->flags |= ANIMATION_FREEZE_LAST_FRAME;
-    removePrevAnim = true;
-    }
-    }
+    const auto toBlendAnim             = GetAssocGroups()[groupId].GetAnimation(animId);
+    const bool toBlendIsMoving         = toBlendAnim->m_Flags & ANIMATION_MOVEMENT;
+    const bool toBlendIsPartial        = toBlendAnim->m_Flags & ANIMATION_PARTIAL;
+    const bool toBlendIsIndestructible = toBlendAnim->m_Flags & ANIMATION_INDESTRUCTIBLE;
+
+    CAnimBlendAssociation *running{}, *movingAnim{};
+    bool                   bFadeThisOut = false;
+    for (auto l = clumpAnimData->m_Anims.next; l; l = l->next) {
+        const auto a = CAnimBlendAssociation::FromLink(l);
+
+        if (toBlendIsMoving && a->IsMoving()) {
+            movingAnim = a;
+        }
+
+        if (a->m_AnimId == animId && a->m_AnimGroupId == groupId) {
+            running = a;
+        } else if (toBlendIsPartial == a->IsPartial() && toBlendIsIndestructible == a->IsIndestructible()) {
+            if (a->m_BlendAmount <= 0.f) {
+                a->m_BlendDelta = -1.f;
+            } else if (const auto bd = a->GetBlendAmount() * -blendDelta; bd <= a->GetBlendDelta() || !toBlendIsPartial) {
+                a->m_BlendDelta = std::min(-0.05f, bd);
+            }
+            a->SetFlag(ANIMATION_FREEZE_LAST_FRAME);
+            bFadeThisOut = true;
+        }
     }
 
-    if (found) {
-    found->m_fBlendDelta = (1.0f - found->m_fBlendAmount) * delta;
-    if (!found->IsRunning() && found->currentTime == found->hierarchy->m_fTotalTime)
-    found->Start(0.0f);
+    // If already running just re-adjust blend delta (and start it if it has finished)
+    if (running) {
+        running->SetBlendDelta((1.f - running->GetBlendAmount()) * blendDelta);
+        if (running->HasFinished()) {
+            running->Start();
+        }
+        UncompressAnimation(running->m_BlendHier);
+        return running;
+    }
+
+    // Otherwise create new anim, and possibly sync it with the last moving anim of the clump
+    const auto anim = AddAnimationAndSync(clump, movingAnim, groupId, animId);
+    if (bFadeThisOut || toBlendIsPartial) {
+        anim->SetBlend(0.f, blendDelta);
+        UncompressAnimation(anim->m_BlendHier);
     } else {
-    found = AddAnimationAndSync(clump, movementAnim, groupId, animId);
-    if (!removePrevAnim && !isPartial) {
-    found->m_fBlendAmount = 1.0f;
-    return found;
+        anim->m_BlendAmount = 1.f;
     }
-    found->m_fBlendAmount = 0.0f;
-    found->m_fBlendDelta = delta;
-    }
-    UncompressAnimation(found->hierarchy);
-    return found;
-    */
+    return anim;
 }
 
 // 0x4D5620

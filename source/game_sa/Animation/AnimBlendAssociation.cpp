@@ -95,6 +95,10 @@ CAnimBlendAssociation::~CAnimBlendAssociation() {
     }
 }
 
+float CAnimBlendAssociation::GetTimeProgress() const {
+    return m_CurrentTime / m_BlendHier->m_fTotalTime;
+}
+
 // 0x4CED50
 void CAnimBlendAssociation::Init(RpClump* clump, CAnimBlendHierarchy* animHierarchy) {
     CAnimBlendClumpData* animClumpData = RpClumpGetAnimBlendClumpData(clump);
@@ -303,6 +307,10 @@ void CAnimBlendAssociation::UpdateTimeStep(float speedMult, float timeMult) {
     }
 }
 
+bool CAnimBlendAssociation::HasFinished() const {
+    return m_CurrentTime == m_BlendHier->m_fTotalTime;
+}
+
 // 0x4CEA50
 void CAnimBlendAssociation::ReferenceAnimBlock() {
     if (m_Flags & ANIMATION_BLOCK_REFERENCED) {
@@ -315,8 +323,4 @@ void CAnimBlendAssociation::ReferenceAnimBlock() {
 // 0x4CEB60
 CAnimBlendNode* CAnimBlendAssociation::GetNode(int32 nodeIndex) {
     return &m_BlendNodes[nodeIndex];
-}
-
-float SClumpAnimAssoc::GetTimeProgress() const {
-    return m_CurrentTime / m_BlendHier->m_fTotalTime;
 }

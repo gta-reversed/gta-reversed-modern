@@ -17,23 +17,23 @@ class CAnimBlendHierarchy;
 class CAnimBlendStaticAssociation;
 
 enum eAnimationFlags {
-    ANIMATION_DEFAULT            = 0x0,
-    ANIMATION_STARTED            = 0x1,
-    ANIMATION_LOOPED             = 0x2,
-    ANIMATION_FREEZE_LAST_FRAME  = 0x4,
-    ANIMATION_UNLOCK_LAST_FRAME  = 0x8,  // Animation will be stuck on last frame, if not set
-    ANIMATION_PARTIAL            = 0x10, // TODO: Flag name is possibly incorrect? Following the usual logic (like `ANIMATION_MOVEMENT`), it should be `ANIMATION_GET_IN_CAR` (See  `RemoveGetInAnims`)
-    ANIMATION_MOVEMENT           = 0x20,
-    ANIMATION_TRANSLATE_Y        = 0x40,
-    ANIMATION_TRANSLATE_X        = 0x80,
-    ANIMATION_WALK               = 0x100,
-    ANIMATION_200                = 0x200,
-    ANIMATION_ADD_TO_BLEND       = 0x400, // Possibly should be renamed to ANIMATION_IDLE, see `CPed::PlayFootSteps()`
-    ANIMATION_800                = 0x800,
-    ANIMATION_SECONDARY_TASK_ANIM= 0x1000,
-    ANIMATION_FREEZE_TRANSLATION = 0x2000,
-    ANIMATION_BLOCK_REFERENCED   = 0x4000,
-    ANIMATION_INDESTRUCTIBLE     = 0x8000 // The animation is never destroyed if this flag is set, NO MATTER WHAT
+    ANIMATION_DEFAULT            = 0,       //0x0,
+    ANIMATION_STARTED            = 1 << 0,  //0x1,
+    ANIMATION_LOOPED             = 1 << 1,  //0x2,
+    ANIMATION_FREEZE_LAST_FRAME  = 1 << 2,  //0x4,
+    ANIMATION_UNLOCK_LAST_FRAME  = 1 << 3,  //0x8,  // Animation will be stuck on last frame, if not set
+    ANIMATION_PARTIAL            = 1 << 4,  //0x10, // TODO: Flag name is possibly incorrect? Following the usual logic (like `ANIMATION_MOVEMENT`), it should be `ANIMATION_GET_IN_CAR` (See  `RemoveGetInAnims`)
+    ANIMATION_MOVEMENT           = 1 << 5,  //0x20,
+    ANIMATION_TRANSLATE_Y        = 1 << 6,  //0x40,
+    ANIMATION_TRANSLATE_X        = 1 << 7,  //0x80,
+    ANIMATION_WALK               = 1 << 8,  //0x100,
+    ANIMATION_200                = 1 << 9,  //0x200,
+    ANIMATION_ADD_TO_BLEND       = 1 << 10, //0x400, // Possibly should be renamed to ANIMATION_IDLE, see `CPed::PlayFootSteps()`
+    ANIMATION_800                = 1 << 11, //0x800,
+    ANIMATION_SECONDARY_TASK_ANIM= 1 << 12, //0x1000,
+    ANIMATION_FREEZE_TRANSLATION = 1 << 13, //0x2000,
+    ANIMATION_BLOCK_REFERENCED   = 1 << 14, //0x4000,
+    ANIMATION_INDESTRUCTIBLE     = 1 << 15, //0x8000 // The animation is never destroyed if this flag is set, NO MATTER WHAT
 };
 
 class CDefaultAnimCallback {
@@ -75,10 +75,20 @@ public:
     }
 };
 
-//! Represents a running animation on a clump.
-//! This data is stored inside the clump.
-//! For more info see `CAnimBlendAssociation`.
-struct SClumpAnimAssoc {
+/*!
+* @brief Represents a running animtion for a clump (Usually peds)
+* 
+* The sequence/frames data is copied from `CAnimBlendHierarchy` to `CAnimBlendAssociation` when a clump requests an animation.
+* The instance of `CAnimBlendAssociation` gets destroyed when the ped/clump stops playing the animation.
+* But `CAnimBlendHierarchy` is never destroyed and stays in memory unless `CStreaming` forces the IFP to unload (to create space in memory)
+* 
+* A clump can have one, or more, instances of this class. Usually there's only 1 primary animation,
+* but there are also partial animations, which can be played alongside primary animations, like hand gestures or smoking.
+* So if an animation moves up to 15 bones in one animation, there'll be 15 instances of `CAnimBlendSequence`,
+* and there'll be always one instance of `CAnimBlendHierarchy` for that animation (containing the `CAnimBlendSequence`'s).
+*/
+class NOTSA_EXPORT_VTABLE CAnimBlendAssociation {
+public:
     CAnimBlendLink                m_Link;
     uint16                        m_NumBlendNodes;
     notsa::WEnumS16<AssocGroupId> m_AnimGroupId;
@@ -92,32 +102,7 @@ struct SClumpAnimAssoc {
     notsa::WEnumS16<AnimationId>  m_AnimId;
     uint16                        m_Flags; // TODO: use bitfield
 
-    float GetTimeProgress()                  const;
-    float GetBlendAmount(float weight = 1.f) const { return IsPartial() ? m_BlendAmount : m_BlendAmount * weight; }
-
-    [[nodiscard]] bool IsRunning()        const { return (m_Flags & ANIMATION_STARTED) != 0; }
-    [[nodiscard]] bool IsRepeating()      const { return (m_Flags & ANIMATION_LOOPED) != 0; }
-    [[nodiscard]] bool IsPartial()        const { return (m_Flags & ANIMATION_PARTIAL) != 0; }
-    [[nodiscard]] bool IsMoving()         const { return (m_Flags & ANIMATION_MOVEMENT) != 0; }
-    [[nodiscard]] bool HasYTranslation()  const { return (m_Flags & ANIMATION_TRANSLATE_X) != 0; }
-    [[nodiscard]] bool HasXTranslation()  const { return (m_Flags & ANIMATION_TRANSLATE_Y) != 0; }
-    [[nodiscard]] bool IsIndestructible() const { return (m_Flags & ANIMATION_INDESTRUCTIBLE) != 0; }
-};
-
-/*!
-* @brief Represents a running animtion for a clump (Usually peds)
-* 
-* The sequence/frames data is copied from `CAnimBlendHierarchy` to `CAnimBlendAssociation` when a clump requests an animation.
-* The instance of `CAnimBlendAssociation` gets destroyed when the ped/clump stops playing the animation.
-* But for `CAnimBlendHierarchy`, it is never destroyed and stays in memory unless CStreaming forces the IFP to unload to create space in memory.
-* 
-* A clump can have one, or more, instances of this class. Usually there's only 1 primary animation,
-* but there are also partial animations, which can be played alongside primary animations, like hand gestures or smoking.
-* So if an animation moves up to 15 bones in one animation, there'll be 15 instances of `CAnimBlendSequence`,
-* and there'll be always one instance of `CAnimBlendHierarchy` for that animation (containing the `CAnimBlendSequence`'s).
-*/
-class NOTSA_EXPORT_VTABLE CAnimBlendAssociation : public SClumpAnimAssoc {
-public:
+    // Callback shit
     eAnimBlendCallbackType m_nCallbackType;
     void (*m_pCallbackFunc)(CAnimBlendAssociation*, void*);
     void* m_pCallbackData;
@@ -127,7 +112,20 @@ public:
     CAnimBlendAssociation(RpClump* clump, CAnimBlendHierarchy* animHierarchy);
     CAnimBlendAssociation(CAnimBlendAssociation& assoc);
     explicit CAnimBlendAssociation(CAnimBlendStaticAssociation& assoc);
+
     virtual ~CAnimBlendAssociation();
+
+    float GetTimeProgress()                  const;
+    float GetBlendAmount(float weight = 1.f) const { return IsPartial() ? m_BlendAmount : m_BlendAmount * weight; }
+    float GetBlendDelta()                    const { return m_BlendDelta; }
+
+    [[nodiscard]] bool IsRunning()        const { return (m_Flags & ANIMATION_STARTED) != 0; }
+    [[nodiscard]] bool IsRepeating()      const { return (m_Flags & ANIMATION_LOOPED) != 0; }
+    [[nodiscard]] bool IsPartial()        const { return (m_Flags & ANIMATION_PARTIAL) != 0; }
+    [[nodiscard]] bool IsMoving()         const { return (m_Flags & ANIMATION_MOVEMENT) != 0; }
+    [[nodiscard]] bool HasYTranslation()  const { return (m_Flags & ANIMATION_TRANSLATE_X) != 0; }
+    [[nodiscard]] bool HasXTranslation()  const { return (m_Flags & ANIMATION_TRANSLATE_Y) != 0; }
+    [[nodiscard]] bool IsIndestructible() const { return (m_Flags & ANIMATION_INDESTRUCTIBLE) != 0; }
 
     void AllocateAnimBlendNodeArray(int32 count);
     void FreeAnimBlendNodeArray();
@@ -149,6 +147,7 @@ public:
     bool UpdateBlend(float mult);
     bool UpdateTime(float a1, float a2);
     void UpdateTimeStep(float speedMult, float timeMult);
+    bool HasFinished() const;
     [[nodiscard]] uint32 GetHashKey() const noexcept;
 
     // NOTSA
