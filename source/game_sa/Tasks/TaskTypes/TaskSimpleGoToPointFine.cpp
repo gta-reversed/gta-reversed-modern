@@ -87,7 +87,7 @@ void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped) {
         float fMoveSpeedY = m_fMoveRatio * 0.5f;
         fMoveSpeedY = std::min(fMoveSpeedY, 1.0f);
         CTaskSimpleDuck* duckTask = ped->m_pIntelligence->GetTaskDuck(false);
-        duckTask->ControlDuckMove(0.0f, -fMoveSpeedY);
+        duckTask->ControlDuckMove({ 0.0f, -fMoveSpeedY });
         return;
     }
 
