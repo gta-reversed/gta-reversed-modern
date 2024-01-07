@@ -658,8 +658,81 @@ void CTheScripts::ClearAllSuppressedCarModels() {
 }
 
 // 0x486B00
-void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* entity) {
-    plugin::Call<0x486B00, const CVector&, CEntity*>(pos, entity);
+void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* ourEntity) {
+    static uint32 dword_A95778 = 0;
+    if (!(dword_A95778 & 1))
+        dword_A95778 |= 1;
+
+    std::array<CEntity*, 16> colEntities{};
+    int16 numColliding{};
+
+    CWorld::FindObjectsKindaColliding(
+        pos,
+        ourEntity->GetModelInfo()->GetColModel()->GetBoundRadius(),
+        false,
+        &numColliding,
+        colEntities.max_size(),
+        colEntities.data(),
+        false,
+        true,
+        true,
+        false,
+        false
+    );
+
+    auto* ourColData = ourEntity->GetColData();
+    if (!ourColData)
+        return;
+
+    const auto cdNumLines = std::exchange(ourColData->m_nNumLines, 0);
+    for (auto& entity : std::span{ colEntities.data(), (size_t)numColliding }) {
+        if (!entity || entity == ourEntity || (entity->IsPed() && entity->AsPed()->IsInVehicle())) {
+            continue;
+        }
+
+        std::array<CColPoint, 32> colPoints{};
+        const auto numCollisions = CCollision::ProcessColModels(
+            ourEntity->GetMatrix(),
+            *ourEntity->GetColModel(),
+            entity->GetMatrix(),
+            *entity->GetColModel(),
+            colPoints,
+            nullptr,
+            nullptr,
+            false
+        );
+
+        if (numCollisions <= 0) {
+            continue;
+        }
+
+        if (entity->IsVehicle()) {
+            auto* vehicle = entity->AsVehicle();
+            if (vehicle->vehicleFlags.bIsLocked || !vehicle->CanBeDeleted())
+                continue;
+
+            if (auto& driver = vehicle->m_pDriver) {
+                CPopulation::RemovePed(driver);
+                CEntity::SafeCleanUpRef(driver);
+            }
+
+            for (auto& passenger : vehicle->GetPassengers()) {
+                if (passenger) {
+                    vehicle->RemovePassenger(passenger);
+                    CPopulation::RemovePed(passenger);
+                }
+            }
+
+            CCarCtrl::RemoveFromInterestingVehicleList(vehicle);
+            CWorld::Remove(vehicle);
+            delete vehicle;
+        }
+
+        if (entity->IsPed() && !entity->AsPed()->IsPlayer() && entity->AsPed()->CanBeDeleted()) {
+            CPopulation::RemovePed(entity->AsPed());
+        }
+    }
+    ourColData->m_nNumLines = cdNumLines;
 }
 
 // 0x5D3390
