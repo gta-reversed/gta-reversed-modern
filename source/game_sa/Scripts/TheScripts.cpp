@@ -1509,6 +1509,12 @@ void CTheScripts::RenderAllSearchLights() {
 }
 
 // 0x470A20
-void CTheScripts::ScriptConnectLodsFunction(int32 objectHandle1, int32 objectHandle2) {
-    plugin::Call<0x470A20, int32, int32>(objectHandle1, objectHandle2);
+void CTheScripts::ScriptConnectLodsFunction(int32 lodRef1, int32 lodRef2) {
+    auto obj1 = GetObjectPool()->GetAtRef(lodRef1), obj2 = GetObjectPool()->GetAtRef(lodRef2);
+
+    obj1->m_pLod = obj2;
+    ++obj2->m_nNumLodChildren;
+    CWorld::Remove(obj2);
+    obj2->SetupBigBuilding();
+    CWorld::Add(obj2);
 }

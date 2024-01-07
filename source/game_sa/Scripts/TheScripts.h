@@ -339,11 +339,11 @@ public:
     //static inline uint8(&ScriptSpace)[SCRIPT_SPACE_SIZE] = *(uint8(*)[SCRIPT_SPACE_SIZE])0xA49960;
     static inline auto& ScriptSpace = *(std::array<uint8,SCRIPT_SPACE_SIZE>*)0xA49960;
 
-    //! Reference to \r ScriptSpace's lower portion for MAIN.SCM - Prefer this over `&ScriptSpace[0]`
-    static inline std::span MainSCMBlock{ ScriptSpace.data() + 0, MAIN_SCRIPT_SIZE };
+    //! Reference to ScriptSpace's lower portion for MAIN.SCM - Prefer this over `&ScriptSpace[0]`
+    static inline std::span<uint8, MAIN_SCRIPT_SIZE> MainSCMBlock{ ScriptSpace.data() + 0, MAIN_SCRIPT_SIZE };
 
-    //! Reference to \r ScriptSpace's upper portion for other scripts - Prefer this over `&ScriptSpace[MAIN_SCRIPT_SIZE]`
-    static inline std::span MissionBlock{ ScriptSpace.data() + MainSCMBlock.size(), MISSION_SCRIPT_SIZE };
+    //! Reference to ScriptSpace's upper portion for other scripts - Prefer this over `&ScriptSpace[MAIN_SCRIPT_SIZE]`
+    static inline std::span<uint8, MISSION_SCRIPT_SIZE> MissionBlock{ ScriptSpace.data() + MainSCMBlock.size(), MISSION_SCRIPT_SIZE };
 
     static inline auto&   SwitchJumpTable                     = *(std::array<tScriptSwitchCase, MAX_NUM_SwitchJumpTable>*)0xA43CF8;
     static inline uint16& NumberOfEntriesInSwitchTable        = *reinterpret_cast<uint16*>(0xA43F50);
