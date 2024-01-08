@@ -1860,11 +1860,11 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
 }
 
 CWeaponInfo& CWeapon::GetWeaponInfo(CPed* owner) const {
-    return GetWeaponInfo(owner ? owner->GetWeaponSkill(m_Type) : eWeaponSkill::STD);
+    return GetWeaponInfo(owner ? owner->GetWeaponSkill(GetType()) : eWeaponSkill::STD);
 }
 
 CWeaponInfo& CWeapon::GetWeaponInfo(eWeaponSkill skill) const {
-    return *CWeaponInfo::GetWeaponInfo(m_Type, skill);
+    return *CWeaponInfo::GetWeaponInfo(GetType(), skill);
 }
 
 // 0x73AF00
