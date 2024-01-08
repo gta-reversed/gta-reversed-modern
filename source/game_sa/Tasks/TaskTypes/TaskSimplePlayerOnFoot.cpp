@@ -911,7 +911,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
 
         player->m_pPlayerData->m_fMoveBlendRatio = pedMoveBlendRatio;
         moveSpeed.x = 0.0f;
-        duckTask->ControlDuckMove(0.0f, moveSpeed.y);
+        duckTask->ControlDuckMove({ 0.0f, moveSpeed.y });
     } else {
         if (CGameLogic::IsPlayerUse2PlayerControls(player)) {
             float radianAngle = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -moveSpeed.x, moveSpeed.y) - TheCamera.m_fOrientation;
@@ -931,7 +931,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
                 player->m_fAimingRotation = limitedRadianAngle;
             }
         }
-        duckTask->ControlDuckMove(moveSpeed.x, moveSpeed.y);
+        duckTask->ControlDuckMove(moveSpeed);
         player->m_pPlayerData->m_fMoveBlendRatio = 0.0f;
     }
 }

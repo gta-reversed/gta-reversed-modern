@@ -153,11 +153,8 @@ void UIRenderer::DebugCode() {
         //);
     }
 
-    if (pad->IsStandardKeyJustPressed('0')) {
-        if (const auto veh = FindPlayerVehicle()) {
-            veh->Fix();
-            veh->AsAutomobile()->SetRandomDamage(false);
-        }
+    if (pad->IsStandardKeyJustPressed('J')) {
+        CCheat::JetpackCheat();
     }
 
     if (pad->IsStandardKeyJustPressed('9')) {

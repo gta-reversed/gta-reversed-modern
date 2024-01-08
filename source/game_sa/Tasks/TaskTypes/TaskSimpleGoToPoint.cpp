@@ -74,7 +74,7 @@ bool CTaskSimpleGoToPoint::ProcessPed_Reversed(CPed* ped) {
             float fMoveSpeedY = 1.1f;
             if (m_moveState == PEDMOVE_WALK)
                 fMoveSpeedY = 0.75f;
-            pDuckTask->ControlDuckMove(0.0f, -fMoveSpeedY);
+            pDuckTask->ControlDuckMove({ 0.0f, -fMoveSpeedY });
         }
         else {
             ped->SetMoveState(static_cast<eMoveState>(m_moveState));
