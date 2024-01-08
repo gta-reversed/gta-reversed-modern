@@ -1,6 +1,8 @@
 #include "StdInc.h"
 
 #include "UIRenderer.h"
+#include "TaskSimpleGoToPoint.h"
+#include "TaskComplexWalkAlongsidePed.h"
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
 #include "TaskComplexFollowNodeRoute.h"
 #include "TaskComplexExtinguishFires.h"
@@ -167,12 +169,6 @@ void UIRenderer::DebugCode() {
         }
     }
 
-    if (pad->IsStandardKeyJustPressed('T')) {
-        FindPlayerPed()->GetTaskManager().SetTask(
-            new CTaskComplexTurnToFaceEntityOrCoord{ CVector{} },
-            TASK_PRIMARY_PRIMARY
-        );
-    }
     if (pad->IsStandardKeyJustPressed('2')) {
         CCheat::MoneyArmourHealthCheat();
     }
@@ -196,6 +192,23 @@ void UIRenderer::DebugCode() {
     }
     if (pad->IsStandardKeyJustPressed('7')) {
         CMessages::AddMessageWithNumberQ("PRESS ~k~~PED_ANSWER_PHONE~TO FUCK ~1~~1~~1~", 1000, 0, 1, 2, 3, 4, 5, 6);
+    }
+
+    if (pad->IsStandardKeyJustPressed('T')) {
+        const auto ped = new CPed(ePedType::PED_TYPE_GANG1);
+        ped->SetCreatedBy(PED_GAME);
+        ped->SetModelIndex(MODEL_MALE01);
+        ped->SetHeading(player->GetHeading());
+        CWorld::Add(ped);
+        ped->SetPosn(player->GetPosition() + player->GetForward() * 6.f);
+        ped->GetTaskManager().SetTask(
+            new CTaskSimpleGoToPoint{PEDMOVE_SPRINT, ped->GetPosition() + ped->GetForward() * 40.f},
+            TASK_PRIMARY_PRIMARY
+        );
+        player->GetTaskManager().SetTask(
+            new CTaskComplexWalkAlongsidePed{ped, 15.f},
+            TASK_PRIMARY_PRIMARY
+        );
     }
 
     //if (pad->IsStandardKeyJustPressed('8')) {
