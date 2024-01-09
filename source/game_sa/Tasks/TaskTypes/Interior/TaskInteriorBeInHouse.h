@@ -9,12 +9,6 @@ class Interior_c;
 class InteriorInfo_t;
 
 class NOTSA_EXPORT_VTABLE CTaskInteriorBeInHouse : public CTaskComplex {
-
-public:
-    InteriorGroup_c* m_intGrp{};  /// Current interior's group (Used to find the interior to use for the ped)
-    Interior_c*      m_int{};     /// Current inerior
-    InteriorInfo_t*  m_intInfo{}; /// Current interior's info
-
 public:
     static void InjectHooks();
 
@@ -38,9 +32,15 @@ private: // Wrappers for hooks
         this->CTaskInteriorBeInHouse::CTaskInteriorBeInHouse(a2);
         return this;
     }
+
     // 0x675000
     CTaskInteriorBeInHouse* Destructor() {
         this->CTaskInteriorBeInHouse::~CTaskInteriorBeInHouse();
         return this;
     }
+
+private:
+    InteriorGroup_c* m_IntGrp{};  //< Current interior's group (Used to find the interior to use for the ped)
+    Interior_c*      m_Int{};     //< Current inerior
+    InteriorInfo_t*  m_IntInfo{}; //< Current interior's info
 };
