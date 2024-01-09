@@ -13,7 +13,6 @@ void CTaskInteriorBeInHouse::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x675000);
 
     RH_ScopedInstall(GetInfoForPedToUse, 0x6750A0);
-
     RH_ScopedVMTInstall(Clone, 0x675010);
     RH_ScopedVMTInstall(GetTaskType, 0x674FF0);
     RH_ScopedVMTInstall(CreateNextSubTask, 0x676200);
@@ -23,13 +22,13 @@ void CTaskInteriorBeInHouse::InjectHooks() {
 
 // 0x674FC0
 CTaskInteriorBeInHouse::CTaskInteriorBeInHouse(InteriorGroup_c* intGrp) :
-    m_intGrp{intGrp}
+    m_IntGrp{intGrp}
 {
 }
 
 // NOTSA
 CTaskInteriorBeInHouse::CTaskInteriorBeInHouse(const CTaskInteriorBeInHouse& o) :
-    CTaskInteriorBeInHouse{o.m_intGrp}
+    CTaskInteriorBeInHouse{o.m_IntGrp}
 {
 }
 
@@ -44,7 +43,7 @@ void CTaskInteriorBeInHouse::GetInfoForPedToUse(CPed* ped, int32* outDuration) {
 
     const auto FindInterior = [this](std::initializer_list<int32> types) {
         for (auto type : types) {
-            if (m_intGrp->FindInteriorInfo(type, &m_intInfo, &m_int)) {
+            if (m_IntGrp->FindInteriorInfo(type, &m_IntInfo, &m_Int)) {
                 return true;
             }
         }
@@ -61,22 +60,22 @@ void CTaskInteriorBeInHouse::GetInfoForPedToUse(CPed* ped, int32* outDuration) {
             FindInterior({ 3, 4 });
         }
     }
-    if (m_intInfo) {
+    if (m_IntInfo) {
         return;
     }
     if (rndChance0To100 < chanceA + chanceB) {
         FindInterior({ 1 });
-        if (m_intInfo) {
+        if (m_IntInfo) {
             return;
         }
 
         FindInterior({ 5 });
-        if (m_intInfo) {
+        if (m_IntInfo) {
             *outDuration = CGeneral::GetRandomNumberInRange(5'000, 30'000);
             return;
         }
     }
-    if (!m_intInfo) {
+    if (!m_IntInfo) {
         FindInterior({ 1, 2 });
     }
 }
