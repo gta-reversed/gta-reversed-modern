@@ -113,16 +113,16 @@ void CAutomobile::InjectHooks()
     RH_ScopedVMTInstall(VehicleDamage, 0x6A7650);
     RH_ScopedVMTInstall(GetComponentWorldPosition, 0x6A2210);
     RH_ScopedVMTInstall(IsComponentPresent, 0x6A2250);
-    RH_ScopedVirtualOverloadedInstall(GetDooorAngleOpenRatio, "enum", 0x6A2270, float (CAutomobile::*)(eDoors));
-    RH_ScopedVirtualOverloadedInstall(GetDooorAngleOpenRatio, "uint", 0x6A62C0, float (CAutomobile::*)(uint32));
-    RH_ScopedVirtualOverloadedInstall(IsDoorReady, "enum", 0x6A2290, bool (CAutomobile::*)(eDoors));
-    RH_ScopedVirtualOverloadedInstall(IsDoorReady, "uint", 0x6A6350, bool (CAutomobile::*)(uint32));
-    RH_ScopedVirtualOverloadedInstall(IsDoorFullyOpen, "enum", 0x6A22D0, bool (CAutomobile::*)(eDoors));
-    RH_ScopedVirtualOverloadedInstall(IsDoorFullyOpen, "uint", 0x6A63E0, bool (CAutomobile::*)(uint32));
-    RH_ScopedVirtualOverloadedInstall(IsDoorClosed, "enum", 0x6A2310, bool (CAutomobile::*)(eDoors));
-    RH_ScopedVirtualOverloadedInstall(IsDoorClosed, "uint", 0x6A6470, bool (CAutomobile::*)(uint32));
-    RH_ScopedVirtualOverloadedInstall(IsDoorMissing, "enum", 0x6A2330, bool (CAutomobile::*)(eDoors));
-    RH_ScopedVirtualOverloadedInstall(IsDoorMissing, "uint", 0x6A6500, bool (CAutomobile::*)(uint32));
+    RH_ScopedVMTInstall(GetDooorAngleOpenRatio, 0x6A2270);
+    RH_ScopedVMTInstall(GetDooorAngleOpenRatioU32, 0x6A62C0);
+    RH_ScopedVMTInstall(IsDoorReady, 0x6A2290);
+    RH_ScopedVMTInstall(IsDoorReadyU32, 0x6A6350);
+    RH_ScopedVMTInstall(IsDoorFullyOpen, 0x6A22D0);
+    RH_ScopedVMTInstall(IsDoorFullyOpenU32, 0x6A63E0);
+    RH_ScopedVMTInstall(IsDoorClosed, 0x6A2310);
+    RH_ScopedVMTInstall(IsDoorClosedU32, 0x6A6470);
+    RH_ScopedVMTInstall(IsDoorMissing, 0x6A2330);
+    RH_ScopedVMTInstall(IsDoorMissingU32, 0x6A6500);
     RH_ScopedVMTInstall(IsOpenTopCar, 0x6A2350);
     RH_ScopedVMTInstall(IsRoomForPedToLeaveCar, 0x6A3850);
     RH_ScopedVMTInstall(SetupDamageAfterLoad, 0x6B3E90);
@@ -2211,7 +2211,7 @@ float CAutomobile::GetDooorAngleOpenRatio(eDoors door)
 }
 
 // 0x6A62C0
-float CAutomobile::GetDooorAngleOpenRatio(uint32 door)
+float CAutomobile::GetDooorAngleOpenRatioU32(uint32 door)
 {
     switch (door) {
     case 8:
@@ -2243,7 +2243,7 @@ bool CAutomobile::IsDoorReady(eDoors door)
 }
 
 // 0x6A6350
-bool CAutomobile::IsDoorReady(uint32 door)
+bool CAutomobile::IsDoorReadyU32(uint32 door)
 {
     switch (door) {
     case 8:
@@ -2275,7 +2275,7 @@ bool CAutomobile::IsDoorFullyOpen(eDoors door)
 }
 
 // 0x6A63E0
-bool CAutomobile::IsDoorFullyOpen(uint32 door) {
+bool CAutomobile::IsDoorFullyOpenU32(uint32 door) {
     switch (door) {
     case 8:  return IsDoorFullyOpen(DOOR_RIGHT_FRONT);
     case 9:  return IsDoorFullyOpen(DOOR_RIGHT_REAR);
@@ -2294,7 +2294,7 @@ bool CAutomobile::IsDoorClosed(eDoors door) {
 }
 
 // 0x6A6470
-bool CAutomobile::IsDoorClosed(uint32 door) {
+bool CAutomobile::IsDoorClosedU32(uint32 door) {
     switch (door) {
     case 8:  return IsDoorClosed(DOOR_RIGHT_FRONT);
     case 9:  return IsDoorClosed(DOOR_RIGHT_REAR);
@@ -2313,7 +2313,7 @@ bool CAutomobile::IsDoorMissing(eDoors door) {
 }
 
 // 0x6A6500
-bool CAutomobile::IsDoorMissing(uint32 door) {
+bool CAutomobile::IsDoorMissingU32(uint32 door) {
     switch (door) {
     case 8:  return IsDoorMissing(DOOR_RIGHT_FRONT);
     case 9:  return IsDoorMissing(DOOR_RIGHT_REAR);
@@ -4927,8 +4927,7 @@ void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately) {
             m_pFireParticle = g_fxMan.CreateFxSystem(
                 typ == 1 ? "fire_car" : "fire_large",
                 &pos,
-                mat
-            );
+                mat);
         }
         if (m_pFireParticle) {
             m_pFireParticle->Play();

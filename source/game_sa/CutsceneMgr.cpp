@@ -406,7 +406,7 @@ void CCutsceneMgr::LoadCutsceneData_loading() {
         }();
 
         // Finally, create the fx
-        csfx.m_pFxSystem = g_fxMan.CreateFxSystem(csfx.m_szEffectName, &fxTransform, objMat, true);
+        csfx.m_pFxSystem = g_fxMan.CreateFxSystem(csfx.m_szEffectName, fxTransform, objMat, true);
     }
 
     // Finally, process attachments
@@ -866,7 +866,7 @@ void CCutsceneMgr::SetCutsceneAnim(const char* animName, CObject* object) {
         return;
     }
 
-    if (theAnim->m_pHierarchy->m_bRunningCompressed) {
+    if (theAnim->m_pHierarchy->m_bIsCompressed) {
         theAnim->m_pHierarchy->m_bKeepCompressed = true;
     }
 
@@ -914,7 +914,7 @@ void CCutsceneMgr::SetupCutsceneToStart() {
                 anim->SetFlag(ANIMATION_STARTED, true);
             } else {
                 // Get anim translation and offset the object's position by it
-                const auto animTrans = anim->m_pHierarchy->m_bRunningCompressed
+                const auto animTrans = anim->m_pHierarchy->m_bIsCompressed
                     ? anim->m_pHierarchy->m_pSequences->GetCompressedFrame(1)->GetTranslation()
                     : anim->m_pHierarchy->m_pSequences->GetUncompressedFrame(1)->translation;
                 SetObjPos(ms_cutsceneOffset + animTrans);

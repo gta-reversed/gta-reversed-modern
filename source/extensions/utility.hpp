@@ -18,6 +18,20 @@ namespace notsa {
 //};
 namespace rng = std::ranges;
 
+template<rng::input_range R>
+ptrdiff_t indexof(R&& r, const rng::range_value_t<R>& v, ptrdiff_t defaultIdx = -1) {
+    const auto it = rng::find(r, v);
+    return it != rng::end(r)
+        ? rng::distance(rng::begin(r), it)
+        : defaultIdx;
+}
+
+//! [mostly] Works like C#'s `??` (null coalescing operator) or GCC's `?:`
+template<typename T>
+T coalesce(T a, T b) {
+    return a ? a : b;
+}
+
 /*!
 * Much like std::stoi [and variants] but takes an `std::string_view` + in debug does error checking [unlike the C stuff]
 * @param str   The string to convert

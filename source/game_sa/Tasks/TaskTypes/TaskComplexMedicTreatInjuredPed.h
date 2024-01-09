@@ -19,8 +19,8 @@ public:
     CTaskComplexMedicTreatInjuredPed(CVehicle* vehicle, CPed* ped, bool isDriver);
     ~CTaskComplexMedicTreatInjuredPed() override;
 
-    eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override;
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
@@ -36,7 +36,7 @@ private:
 
     CTaskComplexMedicTreatInjuredPed* Constructor(CVehicle* vehicle, CPed* ped, bool isDriver);
 
-    CTask* Clone_Reversed();
+    CTask*  Clone_Reversed() const;
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
     CTask* CreateNextSubTask_Reversed(CPed* ped);
     CTask* ControlSubTask_Reversed(CPed* ped);

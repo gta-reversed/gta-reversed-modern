@@ -35,6 +35,8 @@ public:
     CPedDamageResponse m_damageResponse;
 
 public:
+    static constexpr auto Type = eEventType::EVENT_DAMAGE;
+
     CEventDamage(const CEventDamage& event);
     CEventDamage(CEntity* source, uint32 startTime, eWeaponType weaponType, ePedPieceTypes pieceHit, uint8 direction, bool a7, bool bPedInVehicle);
     ~CEventDamage() override;
@@ -58,6 +60,7 @@ public:
     void ComputeBodyPartToRemove(int32& boneFrameId);
     void ComputeDeathAnim(CPed* ped, bool bMakeActiveTaskAbortable);
     void ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable);
+    void ComputeAnim(CPed* ped, bool bMakeActiveTaskAbortable = true);
 
     //! Either computes the damage, or sets it as computed (Without computing it) - Very common logic in the code
     void ComputeDamageResponseIfAffectsPed(CPed* ped, CPedDamageResponseCalculator calculator, bool bSpeak);

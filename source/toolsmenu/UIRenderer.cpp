@@ -1,7 +1,8 @@
 #include "StdInc.h"
 
 #include "UIRenderer.h"
-#include "TaskComplexFollowPointRoute.h"
+#include "TaskComplexTurnToFaceEntityOrCoord.h"
+#include "TaskComplexFollowNodeRoute.h"
 #include "TaskComplexExtinguishFires.h"
 #include "TaskComplexStealCar.h"
 #include "TaskComplexFleeAnyMeans.h"
@@ -63,6 +64,7 @@ void UIRenderer::PreRenderUpdate() {
         m_ImIO->MouseDrawCursor               = m_InputActive;
         m_ImIO->NavActive                     = m_InputActive;
         CPad::GetPad()->DisablePlayerControls = m_InputActive;
+        CPad::GetPad()->Clear(m_InputActive, true);
     }
 }
 
@@ -119,36 +121,40 @@ void UIRenderer::DebugCode() {
     if (UIRenderer::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
         return;
 
-    //if (pad->IsStandardKeyJustPressed('8')) {
-    //
-    //    CPointRoute route{};
-    //
-    //    const auto r = 10.f;
-    //    const auto totalAngle = PI * 2.f;
-    //    for (auto a = 0.f; a < totalAngle; a += totalAngle / 8.f) {
-    //        route.AddPoints(player->GetPosition() + CVector{std::cosf(a), std::sinf(a), 0.f} *r);
-    //    }
-    //
-    //    player->GetTaskManager().SetTask(
-    //        new CTaskComplexFollowPointRoute{
-    //            PEDMOVE_SPRINT,
-    //            route,
-    //            CTaskComplexFollowPointRoute::Mode::ONE_WAY,
-    //            3.f,
-    //            3.f,
-    //            false,
-    //            true,
-    //            true
-    //        },
-    //        TASK_PRIMARY_PRIMARY
-    //    );
-    //}
+    if (pad->IsStandardKeyJustPressed('8')) {
+        player->GetTaskManager().SetTask(
+            new CTaskComplexFollowNodeRoute{
+                PEDMOVE_SPRINT,
+                CVector{0.f, 0.f, 10.f}
+            },
+            TASK_PRIMARY_PRIMARY
+        );
+        DEV_LOG("GOING!");
+        //CPointRoute route{};
+        //
+        //const auto r = 10.f;
+        //const auto totalAngle = PI * 2.f;
+        //for (auto a = 0.f; a < totalAngle; a += totalAngle / 8.f) {
+        //    route.AddPoints(player->GetPosition() + CVector{std::cosf(a), std::sinf(a), 0.f} *r);
+        //}
+        //
+        //player->GetTaskManager().SetTask(
+        //    new CTaskComplexFollowPointRoute{
+        //        PEDMOVE_SPRINT,
+        //        route,
+        //        CTaskComplexFollowPointRoute::Mode::ONE_WAY,
+        //        3.f,
+        //        3.f,
+        //        false,
+        //        true,
+        //        true
+        //    },
+        //    TASK_PRIMARY_PRIMARY
+        //);
+    }
 
-    if (pad->IsStandardKeyJustPressed('0')) {
-        if (const auto veh = FindPlayerVehicle()) {
-            veh->Fix();
-            veh->AsAutomobile()->SetRandomDamage(false);
-        }
+    if (pad->IsStandardKeyJustPressed('J')) {
+        CCheat::JetpackCheat();
     }
 
     if (pad->IsStandardKeyJustPressed('9')) {
@@ -158,8 +164,11 @@ void UIRenderer::DebugCode() {
         }
     }
 
-    if (pad->IsStandardKeyJustPressed('1')) {
-        CCheat::JetpackCheat();
+    if (pad->IsStandardKeyJustPressed('T')) {
+        FindPlayerPed()->GetTaskManager().SetTask(
+            new CTaskComplexTurnToFaceEntityOrCoord{ CVector{} },
+            TASK_PRIMARY_PRIMARY
+        );
     }
     if (pad->IsStandardKeyJustPressed('2')) {
         CCheat::MoneyArmourHealthCheat();
@@ -186,9 +195,9 @@ void UIRenderer::DebugCode() {
         CMessages::AddMessageWithNumberQ("PRESS ~k~~PED_ANSWER_PHONE~TO FUCK ~1~~1~~1~", 1000, 0, 1, 2, 3, 4, 5, 6);
     }
 
-    if (pad->IsStandardKeyJustPressed('8')) {
-        CMessages::AddToPreviousBriefArray("PRESS ~k~~PED_ANSWER_PHONE~ TO FUCK");
-    }
+    //if (pad->IsStandardKeyJustPressed('8')) {
+    //    CMessages::AddToPreviousBriefArray("PRESS ~k~~PED_ANSWER_PHONE~ TO FUCK");
+    //}
 }
 }; // namespace ui
 }; // namespace notsa

@@ -17,9 +17,9 @@ public:
     explicit CTaskComplexUseSwatRope(uint32 ropeId);
     ~CTaskComplexUseSwatRope() override;
 
-    CTask* Clone() override;
-    eTaskType GetTaskType() override { return Type; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    CTask* Clone() const override;
+    eTaskType GetTaskType() const override { return Type; }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
@@ -34,7 +34,7 @@ private:
 
     CTaskComplexUseSwatRope* Constructor(uint32 ropeId, CHeli* heli);
 
-    CTask* Clone_Reversed();
+    CTask*  Clone_Reversed() const;
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     CTask* CreateNextSubTask_Reversed(CPed* ped);
     CTask* CreateFirstSubTask_Reversed(CPed* ped);

@@ -74,7 +74,7 @@ bool CTaskSimpleGoToPoint::ProcessPed_Reversed(CPed* ped) {
             float fMoveSpeedY = 1.1f;
             if (m_moveState == PEDMOVE_WALK)
                 fMoveSpeedY = 0.75f;
-            pDuckTask->ControlDuckMove(0.0f, -fMoveSpeedY);
+            pDuckTask->ControlDuckMove({ 0.0f, -fMoveSpeedY });
         }
         else {
             ped->SetMoveState(static_cast<eMoveState>(m_moveState));
@@ -85,7 +85,7 @@ bool CTaskSimpleGoToPoint::ProcessPed_Reversed(CPed* ped) {
                 }
                 else {
                     bool bSprinting = false;
-                    CWeaponInfo* pWeaponInfo = CWeaponInfo::GetWeaponInfo(ped->GetActiveWeapon().m_nType, eWeaponSkill::STD);
+                    CWeaponInfo* pWeaponInfo = CWeaponInfo::GetWeaponInfo(ped->GetActiveWeapon().m_Type, eWeaponSkill::STD);
                     if (!pWeaponInfo->flags.bHeavy) {
                         auto* task = static_cast<CTaskSimpleHoldEntity*>(ped->GetIntelligence()->GetTaskHold(false));
                         if (!task || !task->m_pAnimBlendAssociation) {

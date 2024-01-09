@@ -3,16 +3,16 @@
 #include "TaskComplexSequence.h"
 
 void CTaskComplexSequence::InjectHooks() {
-    RH_ScopedClass(CTaskComplexSequence);
+    RH_ScopedVirtualClass(CTaskComplexSequence, 0x86e200, 11);
     RH_ScopedCategory("Tasks");
 
     RH_ScopedInstall(Constructor, 0x632BD0);
-    RH_ScopedVirtualInstall(Clone, 0x5F6710);
-    RH_ScopedVirtualInstall(MakeAbortable, 0x632C00);
-    RH_ScopedVirtualInstall(CreateNextSubTask, 0x638A40);
+    RH_ScopedVMTInstall(Clone, 0x5F6710);
+    RH_ScopedVMTInstall(MakeAbortable, 0x632C00);
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x638A40);
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x638A60);
+    RH_ScopedVMTInstall(ControlSubTask, 0x632D00);
     RH_ScopedOverloadedInstall(CreateNextSubTask, "ped", 0x632C70, CTask*(CTaskComplexSequence::*)(CPed*, int32&, int32&));
-    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x638A60);
-    RH_ScopedVirtualInstall(ControlSubTask, 0x632D00);
     RH_ScopedOverloadedInstall(AddTask, "0", 0x632D10, void(CTaskComplexSequence::*)(CTask*));
     RH_ScopedOverloadedInstall(AddTask, "1", 0x632D50, void(CTaskComplexSequence::*)(int32, CTask*));
     RH_ScopedInstall(Flush, 0x632C10);
@@ -29,6 +29,16 @@ CTaskComplexSequence::CTaskComplexSequence() : CTaskComplex() {
     m_bFlushTasks = false;
     m_nReferenceCount = 0;
     std::ranges::fill(m_aTasks, nullptr);
+}
+
+// For 0x5F6710
+CTaskComplexSequence::CTaskComplexSequence(const CTaskComplexSequence& o) :
+    m_bRepeatSequence{o.m_bRepeatSequence},
+    m_nCurrentTaskIndex{o.m_nCurrentTaskIndex}
+{
+    for (auto&& [i, t] : notsa::enumerate(o.m_aTasks)) {
+        m_aTasks[i] = t ? t->Clone() : nullptr;
+    }
 }
 
 // 0x6389F0
@@ -53,11 +63,6 @@ CTaskComplexSequence* CTaskComplexSequence::Constructor() {
     return this;
 }
 
-// 0x5F6710
-CTask* CTaskComplexSequence::Clone() {
-    return Clone_Reversed();
-}
-
 // 0x632C00
 bool CTaskComplexSequence::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return MakeAbortable_Reversed(ped, priority, event);
@@ -76,17 +81,6 @@ CTask* CTaskComplexSequence::CreateFirstSubTask(CPed* ped) {
 // 0x632D00
 CTask* CTaskComplexSequence::ControlSubTask(CPed* ped) {
     return ControlSubTask_Reversed(ped);
-}
-
-CTask* CTaskComplexSequence::Clone_Reversed() {
-    auto* sequence = new CTaskComplexSequence();
-    for (auto taskIndex = 0u; taskIndex < std::size(m_aTasks); taskIndex++) {
-        CTask* task = m_aTasks[taskIndex];
-        sequence->m_aTasks[taskIndex] = task ? task->Clone() : nullptr;
-    }
-    sequence->m_bRepeatSequence   = m_bRepeatSequence;
-    sequence->m_nCurrentTaskIndex = m_nCurrentTaskIndex;
-    return sequence;
 }
 
 bool CTaskComplexSequence::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
@@ -108,9 +102,9 @@ CTask* CTaskComplexSequence::ControlSubTask_Reversed(CPed* ped) {
 
 // 0x632D10
 void CTaskComplexSequence::AddTask(CTask* task) {
-    for (auto& m_aTask : m_aTasks) {
-        if (!m_aTask) {
-            m_aTask = task;
+    for (auto& t : m_aTasks) {
+        if (!t) {
+            t = task;
             return;
         }
     }

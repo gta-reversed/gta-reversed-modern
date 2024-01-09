@@ -45,7 +45,7 @@ public:
     float                  m_fSeeingRange;
     uint32                 m_nDmNumPedsToScan;
     float                  m_fDmRadius;
-    float                  field_CC;
+    float                  m_FollowNodeThresholdDist;
     char                   field_D0;
     uint8                  m_nEventId;
     uint8                  m_nEventPriority;
@@ -100,6 +100,7 @@ public:
     CTaskSimpleJetPack* GetTaskJetPack();
     CTaskSimpleInAir* GetTaskInAir();
     CTaskSimpleClimb* GetTaskClimb();
+    CTaskSimpleDuck* GetTaskSecondaryDuck();
     bool GetUsingParachute();
     void SetTaskDuckSecondary(uint16 nLengthOfDuck);
     void ClearTaskDuckSecondary();
@@ -151,7 +152,8 @@ public:
     //! Get the vehicle the ped is entering now (If any)
     CVehicle* GetEnteringVehicle();
 
-    CEventHandler&   GetEventHandler() { return m_eventHandler; }
+    CEventHandler&   GetEventHandler()    { return m_eventHandler; }
+    CEventGroup&     GetEventGroup()      { return m_eventGroup; }
     CEventScanner&   GetEventScanner()    { return m_eventScanner; }
     CPedScanner&     GetPedScanner()      { return m_pedScanner; }
     CVehicleScanner& GetVehicleScanner()  { return m_vehicleScanner; }

@@ -57,7 +57,7 @@ CTaskComplexGoToPointAndStandStill::~CTaskComplexGoToPointAndStandStill() {
 }
 
 // 0x66CEA0
-CTask* CTaskComplexGoToPointAndStandStill::Clone() {
+CTask* CTaskComplexGoToPointAndStandStill::Clone() const {
     return CTaskComplexGoToPointAndStandStill::Clone_Reversed();
 }
 
@@ -76,7 +76,7 @@ CTask* CTaskComplexGoToPointAndStandStill::ControlSubTask(CPed* ped) {
     return CTaskComplexGoToPointAndStandStill::ControlSubTask_Reversed(ped);
 }
 
-CTask* CTaskComplexGoToPointAndStandStill::Clone_Reversed() {
+CTask* CTaskComplexGoToPointAndStandStill::Clone_Reversed() const {
     return new CTaskComplexGoToPointAndStandStill(m_moveState, m_vecTargetPoint, m_fRadius, m_fMoveStateRadius, m_b01, m_bGoToPoint);
 }
 

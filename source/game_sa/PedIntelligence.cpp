@@ -115,7 +115,7 @@ CPedIntelligence::CPedIntelligence(CPed* ped) :
     m_fSeeingRange                        = 15.0f;
     m_nDmNumPedsToScan                    = 3;
     m_fDmRadius                           = 15.0f;
-    field_CC                              = 30.0f;
+    m_FollowNodeThresholdDist             = 30.0f;
     field_D0                              = -1;
     m_nEventId                            = 0;
     m_nEventPriority                      = 0;
@@ -334,10 +334,15 @@ CTaskSimpleClimb* CPedIntelligence::GetTaskClimb() {
     return CTask::DynCast<CTaskSimpleClimb>(m_TaskMgr.GetSimplestActiveTask());
 }
 
+// @sa [@addr unk]
+CTaskSimpleDuck* CPedIntelligence::GetTaskSecondaryDuck() {
+    return CTask::DynCast<CTaskSimpleDuck>(m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_DUCK));
+}
+
 // 0x6011B0
 bool CPedIntelligence::GetUsingParachute() {
     CWeapon* activeWeapon = &m_pPed->GetActiveWeapon();
-    if (activeWeapon->m_nType != WEAPON_PARACHUTE) {
+    if (activeWeapon->m_Type != WEAPON_PARACHUTE) {
         return false;
     }
 
@@ -369,7 +374,7 @@ bool CPedIntelligence::GetUsingParachute() {
 // 0x601230
 void CPedIntelligence::SetTaskDuckSecondary(uint16 nLengthOfDuck) {
     if (const auto duck = GetTaskDuck()) {
-        if (duck->m_nDuckControlType == DUCK_SCRIPT_CONTROLLED) {
+        if (duck->m_DuckControlType == DUCK_SCRIPT_CONTROLLED) {
             return;
         }
     }
@@ -605,7 +610,7 @@ void CPedIntelligence::ProcessAfterPreRender() {
     }
 
     CWeapon* activeWeapon = &m_pPed->GetActiveWeapon();
-    if (activeWeapon->m_nType == WEAPON_MOLOTOV && activeWeapon->m_pFxSystem)
+    if (activeWeapon->m_Type == WEAPON_MOLOTOV && activeWeapon->m_FxSystem)
     {
         RpHAnimHierarchy* animHierarchy = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
         int32 animIDIndex = RpHAnimIDGetIndex(animHierarchy, 24); // 24 = BONE_R_HAND?
@@ -619,7 +624,7 @@ void CPedIntelligence::ProcessAfterPreRender() {
         memcpy(&matrix, m_pPed->GetModellingMatrix(), sizeof(matrix));
         matrix.pos = pointOut;
         RwMatrixUpdate(&matrix);
-        activeWeapon->m_pFxSystem->SetMatrix(&matrix);
+        activeWeapon->m_FxSystem->SetMatrix(&matrix);
     }
 
     if (m_pPed->bInVehicle)
@@ -664,11 +669,11 @@ bool CPedIntelligence::Respects(CPed* ped) const {
 // 0x601CC0
 bool CPedIntelligence::IsInACarOrEnteringOne() {
     if (const auto task = m_TaskMgr.Find<CTaskComplexEnterCarAsDriver>()) {
-        return !!task->GetVehicle();
+        return !!task->GetTargetCar();
     }
 
     if (const auto task = m_TaskMgr.Find<CTaskComplexEnterCarAsPassenger>()) {
-        return !!task->GetVehicle();
+        return !!task->GetTargetCar();
     }
 
     if (const auto task = m_TaskMgr.Find<CTaskSimpleCarDrive>()) {
@@ -758,16 +763,15 @@ bool CPedIntelligence::TestForStealthKill(CPed* target, bool bFullTest) {
         auto hate = target->GetAcquaintance().GetAcquaintances(ACQUAINTANCE_HATE);
         auto dislike = target->GetAcquaintance().GetAcquaintances(ACQUAINTANCE_DISLIKE);
         auto pedFlag = CPedType::GetPedFlag(m_pPed->m_nPedType);
-
         bool bAcquaintancesFlagSet = (
             (hate && (pedFlag & hate)) ||
             (dislike && (pedFlag & dislike))
         );
-        CPedGroup* pedGroup = CPedGroups::GetPedsGroup(target);
-        if (bAcquaintancesFlagSet && pedGroup) {
-            CEventGroupEvent* eventGroupEvent = pedGroup->GetIntelligence().m_pOldEventGroupEvent;
-            if (eventGroupEvent && eventGroupEvent->GetSourceEntity() == m_pPed && bAcquaintancesFlagSet)
+        if (bAcquaintancesFlagSet && target->GetGroup()) {
+            const auto oe = target->GetGroup()->GetIntelligence().GetOldEvent();
+            if (oe && oe->GetSourceEntity() == m_pPed && bAcquaintancesFlagSet) {
                 return false;
+            }
         }
     }
     return true;
@@ -775,8 +779,7 @@ bool CPedIntelligence::TestForStealthKill(CPed* target, bool bFullTest) {
 
 // 0x602050
 void CPedIntelligence::RecordEventForScript(int32 eventId, int32 eventPriority) {
-    if (eventId != EVENT_SCRIPT_COMMAND && (!eventId || eventPriority > m_nEventPriority))
-    {
+    if (eventId != EVENT_SCRIPT_COMMAND && (!eventId || eventPriority > m_nEventPriority)) {
         m_nEventId = eventId;
         m_nEventPriority = eventPriority;
     }
@@ -1042,7 +1045,7 @@ void CPedIntelligence::operator delete(void* object) {
 CVehicle* CPedIntelligence::GetEnteringVehicle() {
     for (const auto taskt : { TASK_COMPLEX_ENTER_CAR_AS_DRIVER, TASK_COMPLEX_ENTER_CAR_AS_PASSENGER }) {
         if (const auto task = FindTaskByType(taskt)) {
-            return static_cast<CTaskComplexEnterCar*>(task)->GetVehicle();
+            return static_cast<CTaskComplexEnterCar*>(task)->GetTargetCar();
         }
     }
     return nullptr;

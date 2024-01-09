@@ -11,8 +11,8 @@ public:
     CTaskComplexPartnerGreet(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, int32 handShakeType, CVector point);
     ~CTaskComplexPartnerGreet() override = default;
 
-    eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override { return new CTaskComplexPartnerGreet(m_commandName, m_partner, m_leadSpeaker, m_distanceMultiplier, m_handShakeType, m_point); }
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override { return new CTaskComplexPartnerGreet(m_commandName, m_partner, m_leadSpeaker, m_distanceMultiplier, m_handShakeType, m_point); }
     CTask* CreateFirstSubTask(CPed* ped) override;
     void StreamRequiredAnims() override;
     virtual CTaskComplexSequence* GetPartnerSequence();

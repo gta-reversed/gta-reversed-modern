@@ -98,7 +98,7 @@ public:
             return new CTaskComplexTurnToFaceEntityOrCoord{ m_entityToSeek };
         case TASK_COMPLEX_FOLLOW_NODE_ROUTE:
             return new CTaskComplexFollowNodeRoute{
-                (int32)m_moveState,
+                m_moveState,
                 GetSeekPos(ped),
                 m_maxEntityDist2D,
                 m_moveStateRadius,
@@ -137,15 +137,15 @@ public:
         }
     }
 
-    CTask* Clone() override {
+    CTask* Clone() const override {
         return new CTaskComplexSeekEntity{ *this };
     }
 
-    eTaskType GetTaskType() override {
+    eTaskType GetTaskType() const override {
         return eTaskType::TASK_COMPLEX_SEEK_ENTITY;
     }
 
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override {
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override {
         if (priority == ABORT_PRIORITY_LEISURE) {
             m_scanInterval = -1;
             m_scanTimer.SetAsOutOfTime();
@@ -332,7 +332,7 @@ public:
             Multiply3x3(Invert(commonBoat->GetMatrix()), newPedPos - boatPos),
             (int16)CGeneral::LimitRadianAngle(CGeneral::GetRadianAngleBetweenPoints(pedToBoatDir, {})),
             0.2f,
-            ped->GetActiveWeapon().m_nType
+            ped->GetActiveWeapon().m_Type
         );
 
         return new CTaskSimpleStandStill{ 2000 };

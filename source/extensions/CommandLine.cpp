@@ -22,11 +22,11 @@ namespace CommandLine {
 
         if (str == "--unhook-all") {
             if (!unhookExcept.empty()) {
-                DEV_LOG("warn: --unhook-except has been called previously, unhook-all will be effective.");
+                NOTSA_LOG_WARN("--unhook-except has been called previously, unhook-all will be effective.");
                 unhookExcept.clear(); // we aren't gonna use it.
             }
             if (!unhookSome.empty()) {
-                DEV_LOG("warn: --unhook-some has been called previously, unhook-all will be effective.");
+                NOTSA_LOG_WARN("--unhook-some has been called previously, unhook-all will be effective.");
                 unhookSome.clear(); // we aren't gonna use it.
             }
             unhookAll = true;
@@ -35,10 +35,10 @@ namespace CommandLine {
 
         if (str.starts_with("--unhook-except=")) {
             if (unhookAll) {
-                DEV_LOG("warn: --unhook-all has been called previously, unhook-all will be effective.");
+                NOTSA_LOG_WARN("--unhook-all has been called previously, unhook-all will be effective.");
             } else {
                 if (!unhookSome.empty()) {
-                    DEV_LOG("warn: --unhook-some has been called previously, unhook-except will be effective.");
+                    NOTSA_LOG_WARN("--unhook has been called previously, unhook-except will be effective.");
                     unhookSome.clear(); // we aren't gonna use it.
                 }
 
@@ -51,9 +51,9 @@ namespace CommandLine {
 
         if (str.starts_with("--unhook=")) {
             if (unhookAll) {
-                DEV_LOG("warn: --unhook-all has been called previously, unhook-all will be effective.");
+                NOTSA_LOG_WARN("--unhook-all has been called previously, unhook-all will be effective.");
             } else if (!unhookExcept.empty()) {
-                DEV_LOG("warn: --unhook-except has been called previously, unhook-except will be effective.");
+                NOTSA_LOG_WARN("--unhook-except has been called previously, unhook-except will be effective.");
             } else {
                 for (auto hook : SplitStringView(str.substr(str.find('=') + 1), ",")) {
                     unhookSome.emplace_back(std::move(hook));
@@ -62,7 +62,7 @@ namespace CommandLine {
             return;
         }
 
-        DEV_LOG("warn: unknown argument '{}'", str);
+        NOTSA_LOG_WARN("Unknown argument '{}'", str);
     }
 
     void CommandLine::Load(int argc, char** argv) {

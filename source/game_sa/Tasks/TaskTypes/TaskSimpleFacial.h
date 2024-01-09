@@ -33,9 +33,9 @@ public:
     CTaskSimpleFacial(eFacialExpression nFacialExpress, int32 nDuration);
     ~CTaskSimpleFacial() override = default; // 0x690CB0
 
-    eTaskType GetTaskType() override { return Type; } // 0x690CA0
-    CTask* Clone() override { return new CTaskSimpleFacial(m_nFacialExpression, m_nDuration); } // 0x692820
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() const override { return Type; } // 0x690CA0
+    CTask* Clone() const override { return new CTaskSimpleFacial(m_nFacialExpression, m_nDuration); } // 0x692820
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
     static AnimationId GetAnimId(eFacialExpression expression);
 };

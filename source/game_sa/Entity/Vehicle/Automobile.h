@@ -147,16 +147,21 @@ public:
     void GetComponentWorldPosition(int32 componentId, CVector& outPos) override;
     bool IsComponentPresent(int32 componentId) override;
     void OpenDoor(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) override; // eCarNodes = componentId
+
+    //!!!!!!!!!!!!!!!!!!!
+    // PAY CLOSE ATTENTION TO WHICH VERSION OF THE FUNCTIONS DOWN BELOW YOU'RE CALLING!
+    //!!!!!!!!!!!!!!!!!!!
     float GetDooorAngleOpenRatio(eDoors door) override;
-    float GetDooorAngleOpenRatio(uint32 door) override;
+    float GetDooorAngleOpenRatioU32(uint32 door) override;
     bool IsDoorReady(eDoors door) override;
-    bool IsDoorReady(uint32 door) override;
+    bool IsDoorReadyU32(uint32 door) override;
     bool IsDoorFullyOpen(eDoors door) override;
-    bool IsDoorFullyOpen(uint32 door) override;
+    bool IsDoorFullyOpenU32(uint32 door) override;
     bool IsDoorClosed(eDoors door) override;
-    bool IsDoorClosed(uint32 door) override;
+    bool IsDoorClosedU32(uint32 door) override;
     bool IsDoorMissing(eDoors door) override;
-    bool IsDoorMissing(uint32 door) override;
+    bool IsDoorMissingU32(uint32 door) override;
+
     bool IsOpenTopCar() override;
     void RemoveRefsToVehicle(CEntity* entity) override;
     void BlowUpCar(CEntity* damager, bool bHideExplosion) override;
@@ -405,15 +410,7 @@ private:
     bool IsComponentPresent_Reversed(int32 componentId) { return CAutomobile::IsComponentPresent(componentId); }
     void OpenDoor_Reversed(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) { CAutomobile::OpenDoor(ped, componentId, door, doorOpenRatio, playSound); }
     float GetDooorAngleOpenRatio_Reversed(eDoors door) { return CAutomobile::GetDooorAngleOpenRatio(door); }
-    float GetDooorAngleOpenRatio_Reversed(uint32 door) { return CAutomobile::GetDooorAngleOpenRatio(door); }
-    bool IsDoorReady_Reversed(eDoors door) { return CAutomobile::IsDoorReady(door); }
-    bool IsDoorReady_Reversed(uint32 door) { return CAutomobile::IsDoorReady(door); }
-    bool IsDoorFullyOpen_Reversed(eDoors door) { return CAutomobile::IsDoorFullyOpen(door); }
-    bool IsDoorFullyOpen_Reversed(uint32 door) { return CAutomobile::IsDoorFullyOpen(door); }
-    bool IsDoorClosed_Reversed(eDoors door) { return CAutomobile::IsDoorClosed(door); }
-    bool IsDoorClosed_Reversed(uint32 door) { return CAutomobile::IsDoorClosed(door); }
-    bool IsDoorMissing_Reversed(eDoors door) { return CAutomobile::IsDoorMissing(door); }
-    bool IsDoorMissing_Reversed(uint32 door) { return CAutomobile::IsDoorMissing(door); }
+    float GetDooorAngleOpenRatio_Reversed(uint32 door) { return CAutomobile::GetDooorAngleOpenRatioU32(door); }
     bool IsOpenTopCar_Reversed() { return CAutomobile::IsOpenTopCar(); }
     void RemoveRefsToVehicle_Reversed(CEntity* entity) { CAutomobile::RemoveRefsToVehicle(entity); }
     void BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion) { CAutomobile::BlowUpCar(damager, bHideExplosion); }

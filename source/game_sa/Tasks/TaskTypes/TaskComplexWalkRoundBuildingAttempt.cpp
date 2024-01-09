@@ -71,12 +71,12 @@ CTask* CTaskComplexWalkRoundBuildingAttempt::CreateSubTask(eTaskType taskType, C
         * Achieve heading to the first point of the point route
         */
         assert(approxEqual(
-            (m_route->m_vecPoints[0] - ped->GetPosition()).Heading(),
-            CGeneral::LimitRadianAngle(CGeneral::GetRadianAngleBetweenPoints({ m_route->m_vecPoints[0] - ped->GetPosition() }, {})),
+            (m_route->m_Entries[0] - ped->GetPosition()).Heading(),
+            CGeneral::LimitRadianAngle(CGeneral::GetRadianAngleBetweenPoints({ m_route->m_Entries[0] - ped->GetPosition() }, {})),
             0.001f
         )); // TODO: Remove if doesn't assert
         return new CTaskSimpleAchieveHeading{
-            (m_route->m_vecPoints[0] - ped->GetPosition()).Heading(),
+            (m_route->m_Entries[0] - ped->GetPosition()).Heading(),
             1.f,
             0.1f
         };
@@ -133,9 +133,9 @@ void CTaskComplexWalkRoundBuildingAttempt::ComputeCrapRoute(CPed const& ped) {
             if (cpToPedDir.NormaliseAndMag() < 0.35f) {
                 return;
             }
-            m_crapRoute->AddPoints(cp.m_vecPoint - cpToPedDir * 0.35f);
+            m_crapRoute->Add(cp.m_vecPoint - cpToPedDir * 0.35f);
         } else {
-            m_crapRoute->AddPoints(target);
+            m_crapRoute->Add(target);
         }
     }
 
@@ -175,7 +175,7 @@ void CTaskComplexWalkRoundBuildingAttempt::ComputeRoute(CPed const& ped) {
         }
 
         if (CWorld::GetIsLineOfSightClear(target, m_target, true, false, false, false, false, false, false)) {
-            m_route->AddPoints(target);
+            m_route->Add(target);
             m_routeHasPoints = true;
             return;
         }
@@ -191,7 +191,7 @@ void CTaskComplexWalkRoundBuildingAttempt::ComputeRoute(CPed const& ped) {
         }
 
         if (!m_crapRouteHasPoints) {
-            m_crapRoute->MaybeAddPoints(
+            m_crapRoute->AddMultipleUnlessFull(
                 target,
                 targetOffseted
             );
@@ -199,7 +199,7 @@ void CTaskComplexWalkRoundBuildingAttempt::ComputeRoute(CPed const& ped) {
         }
 
         if (CWorld::GetIsLineOfSightClear(targetOffseted, m_target, true, false, false, false, false, false, false)) {
-            m_route->MaybeAddPoints(target, targetOffseted);
+            m_route->AddMultipleUnlessFull(target, targetOffseted);
             m_routeHasPoints = true;
         }
     }
@@ -237,6 +237,7 @@ CTask* CTaskComplexWalkRoundBuildingAttempt::CreateNextSubTask(CPed* ped) {
     case TASK_SIMPLE_GO_TO_POINT:
     case TASK_SIMPLE_SCRATCH_HEAD:
     case TASK_SIMPLE_LOOK_ABOUT:
+    case TASK_SIMPLE_HIT_WALL:
         return CreateSubTask(m_routeHasPoints ? TASK_SIMPLE_ACHIEVE_HEADING : TASK_SIMPLE_LOOK_ABOUT, ped);
     case TASK_SIMPLE_STAND_STILL:
     case TASK_COMPLEX_FOLLOW_POINT_ROUTE:

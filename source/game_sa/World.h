@@ -30,6 +30,7 @@ constexpr int32 MAX_LOD_PTR_LISTS_X = 30;
 constexpr int32 MAX_LOD_PTR_LISTS_Y = 30;
 constexpr int32 MAX_LOD_PTR_LISTS = MAX_LOD_PTR_LISTS_X * MAX_LOD_PTR_LISTS_Y;
 
+constexpr inline float WORLD_BOUND_RANGE = 3000.0f;
 constexpr inline CRect WORLD_BOUNDS{-3000.0F, -3000.0F, 3000.0F, 3000.0F};
 constexpr float MAP_Z_LOW_LIMIT = -100.0f;
 

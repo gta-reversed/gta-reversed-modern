@@ -33,9 +33,9 @@ public:
     CTaskComplexAvoidEntity(eMoveState, CEntity* entity, const CVector& pos);
     ~CTaskComplexAvoidEntity() override;
 
-    eTaskType GetTaskType() override { return Type; } // 0x66AAD0
-    CTask* Clone() override { return new CTaskComplexAvoidEntity(m_moveState, m_Entity, f20); } // 0x66D0C0
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() const override { return Type; } // 0x66AAD0
+    CTask* Clone() const override { return new CTaskComplexAvoidEntity(m_moveState, m_Entity, f20); } // 0x66D0C0
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     CTask* ControlSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;

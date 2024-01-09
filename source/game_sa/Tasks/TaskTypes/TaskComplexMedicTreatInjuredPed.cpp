@@ -71,7 +71,7 @@ CTask* CTaskComplexMedicTreatInjuredPed::CreateSubTask(eTaskType taskType) {
     case TASK_SIMPLE_CAR_DRIVE:
         return new CTaskSimpleCarDrive(m_pVehicle, nullptr, false);
     case TASK_COMPLEX_CAR_DRIVE_TO_POINT:
-        return new CTaskComplexDriveToPoint(m_pVehicle, m_vecAccidentPosition, 30.0F, 0, -1, -1.0F, DRIVING_STYLE_AVOID_CARS);
+        return new CTaskComplexDriveToPoint(m_pVehicle, m_vecAccidentPosition, 30.0F, 0, MODEL_INVALID, -1.0F, DRIVING_STYLE_AVOID_CARS);
     case TASK_COMPLEX_CAR_DRIVE_WANDER:
         return new CTaskComplexCarDriveWander(m_pVehicle, DRIVING_STYLE_AVOID_CARS, 30.0F);
     case TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL:
@@ -115,7 +115,7 @@ void CTaskComplexMedicTreatInjuredPed::FindAccidentPosition(CPed* ped, CPed* tar
 }
 
 // 0x659AF0
-CTask* CTaskComplexMedicTreatInjuredPed::Clone() {
+CTask* CTaskComplexMedicTreatInjuredPed::Clone() const {
     return Clone_Reversed();
 }
 
@@ -134,7 +134,7 @@ CTask* CTaskComplexMedicTreatInjuredPed::ControlSubTask(CPed* ped) {
     return ControlSubTask_Reversed(ped);
 }
 
-CTask* CTaskComplexMedicTreatInjuredPed::Clone_Reversed() {
+CTask* CTaskComplexMedicTreatInjuredPed::Clone_Reversed() const {
     return new CTaskComplexMedicTreatInjuredPed(m_pVehicle, m_pPartnerMedic, m_bIsDriver);
 }
 

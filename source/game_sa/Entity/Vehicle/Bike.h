@@ -120,10 +120,10 @@ public:
     bool IsDoorFullyOpen(eDoors door) override { return false; } // 0x6B58F0
     bool IsDoorClosed(eDoors door) override { return false; }    // 0x6B5900
     bool IsDoorMissing(eDoors door) override { return true; }    // 0x6B5910
-    bool IsDoorReady(uint32 door) override { return true; }      // 0x6B5920
-    bool IsDoorFullyOpen(uint32 door) override { return false; } // 0x6B5930
-    bool IsDoorClosed(uint32 door) override { return false; }    // 0x6B5940
-    bool IsDoorMissing(uint32 door) override { return true; }    // 0x6B5950
+    bool IsDoorReadyU32(uint32 door) override { return true; }      // 0x6B5920
+    bool IsDoorFullyOpenU32(uint32 door) override { return false; } // 0x6B5930
+    bool IsDoorClosedU32(uint32 door) override { return false; }    // 0x6B5940
+    bool IsDoorMissingU32(uint32 door) override { return true; }    // 0x6B5950
 
     bool IsRoomForPedToLeaveCar(uint32 door, CVector* pvecCarJackOffset) override { return true; }              // 0x6B7270
     inline bool IsComponentPresent(int32 componentId) override { return m_aBikeNodes[componentId] != nullptr; } // 0x6B59E0

@@ -77,7 +77,7 @@ auto CTaskSimpleCarOpenDoorFromOutside::ComputeAnimID() -> std::pair<AssocGroupI
             NOTSA_UNREACHABLE();
         }
     }();
-    return { (AssocGroupId)m_veh->GetAnimGroup().GetGroup(animId), animId };
+    return { m_veh->GetAnimGroup().GetGroup(animId), animId };
 }
 
 // 0x645FA0
@@ -128,7 +128,7 @@ bool CTaskSimpleCarOpenDoorFromOutside::ProcessPed(CPed* ped) {
     }
 
     if (!m_anim) {
-        m_doorOpenAngleRatio = m_veh->GetDooorAngleOpenRatio(m_door);
+        m_doorOpenAngleRatio = m_veh->GetDooorAngleOpenRatioU32(m_door);
         StartAnim(ped);
 
         if (m_veh && m_veh->IsDriverAPlayer() && m_disallowPlayerDriverToExitCar) { // NOTE/TODO: Inlined? Double check if `m_veh`

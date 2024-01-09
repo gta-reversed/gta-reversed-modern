@@ -64,7 +64,7 @@ void CTaskSimpleCarCloseDoorFromOutside::ComputeAnimID(AssocGroupId& outGroup, A
         default:  NOTSA_UNREACHABLE();
         }
     }();
-    outGroup = (AssocGroupId)m_veh->GetAnimGroup().GetGroup(outAnimId);
+    outGroup = m_veh->GetAnimGroup().GetGroup(outAnimId);
 }
 
 // NOTSA

@@ -43,9 +43,9 @@ public:
     CTaskSimpleGangDriveBy(CEntity *target, const CVector *targetPos, float abortRange, int8 frequencyPercentage, int8 drivebyStyle, bool seatRHS);
     ~CTaskSimpleGangDriveBy() override;
 
-    eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
 };
 VALIDATE_SIZE(CTaskSimpleGangDriveBy, 0x44);
