@@ -64,7 +64,7 @@ CTask* CTaskInteriorGoToInfo::CreateFirstSubTask(CPed* ped) {
     if (m_bDoInstantly) {
         ped->SetPosn(m_IntInfo->Pos);
 
-        const auto rz = m_IntInfo->Dir.Heading();
+        const auto rz = m_IntInfo->Dir.Heading(true);
         ped->m_fCurrentRotation = rz;
         ped->m_fAimingRotation = rz;
         ped->SetHeading(rz);
