@@ -167,3 +167,4 @@ private:
 };
 
 VALIDATE_SIZE(CPedIntelligence, 0x294);
+VALIDATE_OFFSET(CPedIntelligence, m_AnotherStaticCounter, 0x274);

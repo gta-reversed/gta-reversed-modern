@@ -60,7 +60,7 @@ public:
     int32        m_TimeToFinishMs{};                      //< The the we have to finish going to the point. If not enough time, the ped is teleported and the task is finished
     CTaskTimer   m_FinishedTimer{};                       //< Timer for finishing the task [See `m_TimeToFinishMs`]
     bool         m_bKeepNodesHeadingAwayFromTarget : 1{}; //< Not sure
-    bool         m_LastRoutePointIsTarget : 1{};          //< The last entry in `NodeRoute` is the target node [Eg.; `m_TargetPt`]
+    bool         m_LastRoutePointIsTarget : 1{};          //< If last entry in `NodeRoute` corresponds to `m_TargetPt`
     bool         m_bNewTarget : 1{};                      //< If a new target was set using `SetTarget`
     bool         m_bUseBlending : 1{};                    //< If the task should go rough or fine [by using blending] - It takes more time to finish the task if blending is used
     bool         m_bWillSlowDown : 1{};                   //< Used for blending

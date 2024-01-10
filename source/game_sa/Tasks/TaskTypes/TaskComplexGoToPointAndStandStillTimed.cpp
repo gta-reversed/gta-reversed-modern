@@ -60,19 +60,15 @@ void CTaskComplexGoToPointAndStandStillTimed::StopTimer_Reversed(const CEvent* e
 
 bool CTaskComplexGoToPointAndStandStillTimed::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     bool bSubTaskAbortable = m_pSubTask->MakeAbortable(ped, priority, event);
-    if (bSubTaskAbortable && priority == ABORT_PRIORITY_URGENT && (!event || !CEventHandler::IsTemporaryEvent(*event)))
+    if (bSubTaskAbortable && priority == ABORT_PRIORITY_URGENT && (!event || !CEventHandler::IsTemporaryEvent(*event))) {
         m_timer.Pause();
-
+    }
     return bSubTaskAbortable;
 }
 
 CTask* CTaskComplexGoToPointAndStandStillTimed::CreateFirstSubTask_Reversed(CPed* ped) {
     m_timer.Start(m_nTime);
-    m_bTargetPointUpdated = false;
-    if (ped->bInVehicle)
-        return CTaskComplexGoToPointAndStandStill::CreateFirstSubTask(TASK_COMPLEX_LEAVE_CAR, ped)
-;
-    return CTaskComplexGoToPointAndStandStill::CreateFirstSubTask(TASK_SIMPLE_GO_TO_POINT, ped);
+    return CTaskComplexGoToPointAndStandStill::CreateFirstSubTask(ped);
 }
 
 CTask* CTaskComplexGoToPointAndStandStillTimed::ControlSubTask_Reversed(CPed* ped) {

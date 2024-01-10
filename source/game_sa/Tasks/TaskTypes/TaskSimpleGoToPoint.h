@@ -2,7 +2,7 @@
 
 #include "TaskSimpleGoTo.h"
 
-class CTaskSimpleGoToPoint : public CTaskSimpleGoTo {
+class NOTSA_EXPORT_VTABLE CTaskSimpleGoToPoint : public CTaskSimpleGoTo {
 public:
     union {
         struct {
@@ -34,7 +34,5 @@ public:
 
     static void InjectHooks();
     auto Constructor(eMoveState moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6) { this->CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(moveState, targetPoint, fRadius, bMoveTowardsTargetPoint, a6); return this; }
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
-    bool ProcessPed_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CTaskSimpleGoToPoint, 0x30);
