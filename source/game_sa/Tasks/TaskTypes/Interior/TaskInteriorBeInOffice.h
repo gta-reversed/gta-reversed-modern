@@ -5,7 +5,6 @@
 struct InteriorGroup_c;
 struct Interior_c;
 struct InteriorInfo_t;
-class  CTaskInteriorBeInOffice;
 class  CPed;
 
 class NOTSA_EXPORT_VTABLE CTaskInteriorBeInOffice : public CTaskComplex {
@@ -14,20 +13,19 @@ public:
 
     static void InjectHooks();
 
-    CTaskInteriorBeInOffice(InteriorGroup_c*);
+    CTaskInteriorBeInOffice(InteriorGroup_c* ig);
     CTaskInteriorBeInOffice(const CTaskInteriorBeInOffice&);
     ~CTaskInteriorBeInOffice() override = default;
 
     CTask*    Clone() const override { return new CTaskInteriorBeInOffice{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
-    CTask*    CreateNextSubTask(CPed* ped) override;
-    CTask*    CreateFirstSubTask(CPed* ped) override;
+    CTask*    CreateNextSubTask(CPed* ped) override { return CreateUseInfoTask(ped, false); }
+    CTask*    CreateFirstSubTask(CPed* ped) override { return CreateUseInfoTask(ped, true); }
     CTask*    ControlSubTask(CPed* ped) override { return m_pSubTask; }
 
 private:
-    InteriorGroup_c* m_InteriorGroup{};
-    Interior_c*      m_CurrInterior{};
-    InteriorInfo_t*  m_CurrInteriorInfo{};
+    void   GetInfoForPedToUse(CPed* ped, int32* outDur);
+    CTask* CreateUseInfoTask(CPed* ped, bool bDoInstantly); // notsa
 
 private: // Wrappers for hooks
     // 0x675220
@@ -41,4 +39,9 @@ private: // Wrappers for hooks
         this->CTaskInteriorBeInOffice::~CTaskInteriorBeInOffice();
         return this;
     }
+
+private:
+    InteriorGroup_c* m_IntGrp{};
+    Interior_c*      m_CurrInt{};
+    InteriorInfo_t*  m_CurrIntInfo{};
 };

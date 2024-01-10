@@ -141,8 +141,8 @@ bool InteriorGroup_c::FindClosestInteriorInfo(int32 a, CVector point, float b, I
 }
 
 // 0x594970
-bool InteriorGroup_c::FindInteriorInfo(int32 a2, InteriorInfo_t** a3, Interior_c** a4) {
-    return plugin::CallMethodAndReturn<bool, 0x594970, InteriorGroup_c*, int32, InteriorInfo_t**, Interior_c**>(this, a2, a3, a4);
+bool InteriorGroup_c::FindInteriorInfo(eInteriorInfoType infoType, InteriorInfo_t** a3, Interior_c** a4) {
+    return plugin::CallMethodAndReturn<bool, 0x594970, InteriorGroup_c*, eInteriorInfoType, InteriorInfo_t**, Interior_c**>(this, infoType, a3, a4);
 }
 
 // 0x594920
