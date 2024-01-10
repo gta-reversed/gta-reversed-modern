@@ -257,7 +257,7 @@
 #include "TaskSimpleAchieveHeading.h"
 #include "TaskComplexWalkAlongsidePed.h"
 #include "TaskSimpleCarGoToPointNearDoorUntilDoorNotInUse.h"
-#include "Tasks/TaskTypes/Interior/TaskInteriorBeInOffice.h"
+#include "Interior/TaskInteriorBeInOffice.h"
 #include "TaskSimpleGiveCPR.h"
 #include "TaskSimpleCarSetPedInAsPassenger.h"
 #include "TaskComplexDriveFireTruck.h"
