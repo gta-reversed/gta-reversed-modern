@@ -13,7 +13,7 @@ public:
 
     static void InjectHooks();
 
-    CTaskInteriorUseInfo(InteriorInfo_t* interiorInfo, Interior_c* interior, int32 duration, bool bDoInstantly);
+    CTaskInteriorUseInfo(InteriorInfo_t* interiorInfo, Interior_c* interior, int32 duration = 0, bool bDoInstantly = false);
     CTaskInteriorUseInfo(const CTaskInteriorUseInfo&);
     ~CTaskInteriorUseInfo();
 

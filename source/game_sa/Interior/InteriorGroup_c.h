@@ -9,6 +9,15 @@ class CPed;
 class Interior_c;
 struct InteriorInfo_t;
 
+enum class eInteriorInfoType {
+    UNK_1 = 1,
+    UNK_2 = 2,
+    UNK_3 = 3,
+    UNK_4 = 4,
+    UNK_5 = 5,
+    UNK_10 = 10
+};
+
 class InteriorGroup_c : public ListItem_c<InteriorGroup_c> {
 public:
     CEntity*    m_pEntity;             // 0x8
@@ -57,7 +66,7 @@ public:
     CEntity* GetEntity();
     CPed* GetPed(int32);
     bool FindClosestInteriorInfo(int32 a, CVector point, float b, InteriorInfo_t** interiorInfo, Interior_c** interior, float* pSome);
-    bool FindInteriorInfo(int32 a2, InteriorInfo_t** a3, Interior_c** a4);
+    bool FindInteriorInfo(eInteriorInfoType infoType, InteriorInfo_t** a3, Interior_c** a4);
     int32 GetNumInteriorInfos(int32 a2);
     int32 GetRandomInterior();
     auto GetId() const { return m_id; }

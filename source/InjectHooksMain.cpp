@@ -286,6 +286,7 @@
 #include "TaskComplexWalkRoundBuildingAttempt.h"
 #include "TaskSimpleLookAbout.h"
 #include "TaskComplexPartnerGreet.h"
+#include "TaskInteriorShopKeeper.h"
 #include "TaskComplexWaitForDryWeather.h"
 #include "TaskSimpleShakeFist.h"
 #include "TaskComplexFleeShooting.h"
@@ -816,7 +817,7 @@ void InjectHooksMain() {
         // CTaskInteriorBeInShop::InjectHooks();
         // CTaskInteriorGoToInfo::InjectHooks();
         // CTaskInteriorLieInBed::InjectHooks();
-        // CTaskInteriorShopKeeper::InjectHooks();
+            CTaskInteriorShopKeeper::InjectHooks();
             CTaskInteriorSitAtDesk::InjectHooks();
         // CTaskInteriorSitInChair::InjectHooks();
             CTaskInteriorUseInfo::InjectHooks();
