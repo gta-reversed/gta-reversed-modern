@@ -238,6 +238,7 @@
 #include "TaskSimpleLand.h"
 #include "TaskSimpleJetPack.h"
 #include "TaskSimpleSitIdle.h"
+#include "Interior/TaskInteriorUseInfo.h"
 #include "TaskSimpleSetStayInSamePlace.h"
 #include "TaskSimpleJump.h"
 #include "TaskSimpleFall.h"
@@ -817,7 +818,7 @@ void InjectHooksMain() {
         // CTaskInteriorShopKeeper::InjectHooks();
         // CTaskInteriorSitAtDesk::InjectHooks();
         // CTaskInteriorSitInChair::InjectHooks();
-        // CTaskInteriorUseInfo::InjectHooks();
+            CTaskInteriorUseInfo::InjectHooks();
         };
 
         CTaskSimpleLeaveGroup::InjectHooks();
