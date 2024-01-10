@@ -208,6 +208,7 @@
 #include "TaskSimpleUseGun.h"
 #include "TaskSimpleGangDriveBy.h"
 #include "TaskComplexObserveTrafficLightsAndAchieveHeading.h"
+#include "Interior/TaskInteriorGoToInfo.h"
 #include "TaskSimpleInAir.h"
 #include "TaskComplexHitPedWithCar.h"
 #include "TaskSimplePlayerOnFoot.h"
@@ -813,7 +814,7 @@ void InjectHooksMain() {
         CTaskInteriorBeInHouse::InjectHooks();
         // CTaskInteriorBeInOffice::InjectHooks();
         // CTaskInteriorBeInShop::InjectHooks();
-        // CTaskInteriorGoToInfo::InjectHooks();
+            CTaskInteriorGoToInfo::InjectHooks();
         // CTaskInteriorLieInBed::InjectHooks();
         // CTaskInteriorShopKeeper::InjectHooks();
         // CTaskInteriorSitAtDesk::InjectHooks();
