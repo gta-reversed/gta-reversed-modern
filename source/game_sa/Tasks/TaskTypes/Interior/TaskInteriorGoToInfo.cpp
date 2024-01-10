@@ -35,7 +35,7 @@ CTaskInteriorGoToInfo::CTaskInteriorGoToInfo(InteriorInfo_t* interiorInfo, Inter
 CTaskInteriorGoToInfo::CTaskInteriorGoToInfo(const CTaskInteriorGoToInfo& o) :
     CTaskInteriorGoToInfo{o.m_IntInfo, o.m_Int, o.m_bDoInstantly}
 {
-}
+}   
 
 // 0x675890
 CTask* CTaskInteriorGoToInfo::CreateNextSubTask(CPed* ped) {
@@ -78,6 +78,7 @@ CTask* CTaskInteriorGoToInfo::CreateFirstSubTask(CPed* ped) {
 
     const auto tFollowNodeRoute = new CTaskComplexFollowNodeRoute{ PEDMOVE_WALK, ThePaths.GetPathNode(m_Int->GetNodeAddress())->GetPosition(), 0.2f};
     tFollowNodeRoute->SetStartNode(m_Int->GetNodeAddress());
+    return tFollowNodeRoute;
 }
 
 // 0x675A30
