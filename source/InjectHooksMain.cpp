@@ -286,7 +286,7 @@
 #include "TaskComplexWalkRoundBuildingAttempt.h"
 #include "TaskSimpleLookAbout.h"
 #include "TaskComplexPartnerGreet.h"
-#include "TaskInteriorShopKeeper.h"
+#include "Interior/TaskInteriorShopKeeper.h"
 #include "TaskComplexWaitForDryWeather.h"
 #include "TaskSimpleShakeFist.h"
 #include "TaskComplexFleeShooting.h"
