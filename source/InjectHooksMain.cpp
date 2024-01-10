@@ -213,6 +213,7 @@
 #include "TaskSimplePlayerOnFoot.h"
 #include "TaskComplexStealCar.h"
 #include "TaskComplexFollowPedFootsteps.h"
+#include "Interior/TaskInteriorSitAtDesk.h"
 #include "TaskComplexFollowLeaderAnyMeans.h"
 #include "TaskSimpleFightingControl.h"
 #include "TaskComplexGetUpAndStandStill.h"
@@ -238,6 +239,7 @@
 #include "TaskSimpleLand.h"
 #include "TaskSimpleJetPack.h"
 #include "TaskSimpleSitIdle.h"
+#include "Interior/TaskInteriorUseInfo.h"
 #include "TaskSimpleSetStayInSamePlace.h"
 #include "TaskSimpleJump.h"
 #include "TaskSimpleFall.h"
@@ -253,6 +255,7 @@
 #include "TaskComplexCrossRoadLookAndAchieveHeading.h"
 #include "TaskComplexGoToPointAndStandStill.h"
 #include "TaskSimpleAchieveHeading.h"
+#include "TaskComplexWalkAlongsidePed.h"
 #include "TaskSimpleCarGoToPointNearDoorUntilDoorNotInUse.h"
 #include "Tasks/TaskTypes/Interior/TaskInteriorBeInOffice.h"
 #include "TaskSimpleGiveCPR.h"
@@ -816,9 +819,9 @@ void InjectHooksMain() {
         // CTaskInteriorGoToInfo::InjectHooks();
         // CTaskInteriorLieInBed::InjectHooks();
         // CTaskInteriorShopKeeper::InjectHooks();
-        // CTaskInteriorSitAtDesk::InjectHooks();
+            CTaskInteriorSitAtDesk::InjectHooks();
         // CTaskInteriorSitInChair::InjectHooks();
-        // CTaskInteriorUseInfo::InjectHooks();
+            CTaskInteriorUseInfo::InjectHooks();
         };
 
         CTaskSimpleLeaveGroup::InjectHooks();
@@ -896,14 +899,18 @@ void InjectHooksMain() {
         CTaskComplexRoadRage::InjectHooks();
         // CTaskComplexScreamInCarThenLeave::InjectHooks();
         CTaskComplexSeekCoverUntilTargetDead::InjectHooks();
+
         // CTaskComplexSeekEntity<CEntitySeekPosCalculator>::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculatorDriving>::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculatorEntitySurface>::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculatorStandard>::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculatorVehicleId>::InjectHooks();
+
         CTaskComplexSeekEntityRadiusAngleOffset::InjectHooks();
         CTaskComplexSeekEntityStandard::InjectHooks();
-        CTaskComplexSeekEntityXYOffset::InjectHooks();
+        //CTaskComplexSeekEntityXYOffset::InjectHooks();
+        CTaskComplexSeekEntity<CEntitySeekPosCalculatorXYOffset>::InjectHooks();
+
         // CTaskComplexSeekEntityAiming::InjectHooks();
         CTaskComplexSeekEntityAnyMeansXYOffset::InjectHooks();
         // CTaskComplexShuffleSeats::InjectHooks();
@@ -931,7 +938,7 @@ void InjectHooksMain() {
         CTaskComplexWaitForBus::InjectHooks();
         CTaskComplexWaitForBackup::InjectHooks();
         CTaskComplexWaitForDryWeather::InjectHooks();
-        // CTaskComplexWalkAlongsidePed::InjectHooks();
+        CTaskComplexWalkAlongsidePed::InjectHooks();
         CTaskComplexWalkRoundBuildingAttempt::InjectHooks();
         CTaskComplexWalkRoundFire::InjectHooks();
         CTaskComplexWanderFlee::InjectHooks();
@@ -1096,7 +1103,6 @@ void InjectHooksMain() {
         // CTaskComplexWanderProstitute::InjectHooks();
         CTaskComplexPartnerGreet::InjectHooks();
         // CTaskComplexWalkRoundCar::InjectHooks();
-        // CTaskSimpleDuck::InjectHooks();
         CTaskComplexMedicTreatInjuredPed::InjectHooks();
         CTaskSimplePlayHandSignalAnim::InjectHooks();
         CTaskComplexCarDrive::InjectHooks();
