@@ -70,6 +70,7 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(RemoveThisPed, 0x486240);
 
     RH_ScopedInstall(ReadObjectNamesFromScript, 0x486720);
+    RH_ScopedInstall(ReadMultiScriptFileOffsetsFromScript, 0x4867C0);
     RH_ScopedInstall(UpdateObjectIndices, 0x486780);
 
     RH_ScopedInstall(DrawScriptSpheres, 0x4810E0);
@@ -242,24 +243,28 @@ void CTheScripts::InitialiseSpecialAnimGroup(uint16 index) {
 
 // 0x486720
 void CTheScripts::ReadObjectNamesFromScript() {
-    const auto scriptInfoOffset = notsa::ReadAs<uint32>(&ScriptSpace[3]);
+    auto* usedObjs = GetSCMChunk<tSCMUsedObjectsChunk>();
 
-    // TODO: Make a helper structure
-    NumberOfUsedObjects = notsa::ReadAs<uint16>(&ScriptSpace[scriptInfoOffset + 8]);
-    const auto* objNames = reinterpret_cast<char*>(&ScriptSpace[scriptInfoOffset + 12]);
+#ifdef NOTSA_SCRIPT_DEBUG_LOGS
+    NOTSA_LOG_DEBUG("Number of used objects: {}", usedObjs->m_NumberOfUsedObjects);
+#endif
 
-    for (auto& obj : UsedObjectArray) {
-        obj.nModelIndex = 0; // To be updated via UpdateObjectIndices.
-        std::memcpy(obj.szModelName, objNames, sizeof(obj.szModelName));
+    NumberOfUsedObjects = usedObjs->m_NumberOfUsedObjects;
+    assert(NumberOfUsedObjects < std::size(UsedObjectArray));
 
-        objNames += sizeof(obj.szModelName);
+    for (auto&& [i, name] : notsa::enumerate(usedObjs->GetObjectNames())) {
+        UsedObjectArray[i].nModelIndex = 0; // To be updated via UpdateObjectIndices.
+        std::memcpy(UsedObjectArray[i].szModelName, name, sizeof(name));
+
+#ifdef NOTSA_SCRIPT_DEBUG_LOGS
+        NOTSA_LOG_DEBUG("Script object #{}: \"{}\"", i, usedObjs->m_UsedObjectNames[i]);
+#endif
     }
 }
 
 // 0x486780
 void CTheScripts::UpdateObjectIndices() {
-    // NOTE: We drop the first because first entry has an empty name in vanilla,
-    // so we ignore it?
+    // First one is ignored because it's empty.
     for (auto& obj : UsedObjectArray | std::views::drop(1)) {
         CModelInfo::GetModelInfo(obj.szModelName, &obj.nModelIndex);
     }
@@ -267,7 +272,26 @@ void CTheScripts::UpdateObjectIndices() {
 
 // 0x4867C0
 void CTheScripts::ReadMultiScriptFileOffsetsFromScript() {
-    plugin::Call<0x4867C0>();
+    //plugin::Call<0x4867C0>();
+    auto* sfi = GetSCMChunk<tSCMScriptFileInfoChunk>();
+
+#ifdef NOTSA_SCRIPT_DEBUG_LOGS
+    NOTSA_LOG_DEBUG("Main script size: {}", sfi->m_MainScriptSize);
+    NOTSA_LOG_DEBUG("Largest mission size: {}", sfi->m_LargestMissionScriptSize);
+    NOTSA_LOG_DEBUG("Number of mission scripts: {}", sfi->m_NumberOfMissionScripts);
+    NOTSA_LOG_DEBUG("Number of exclusive mission script: {}", sfi->m_NumberOfExclusiveMissionScripts);
+    NOTSA_LOG_DEBUG("Largest num of mission script local vars: {}", sfi->m_LargestNumberOfMissionScriptLocalVars);
+#endif
+
+    MainScriptSize                             = sfi->m_MainScriptSize;
+    LargestMissionScriptSize                   = sfi->m_LargestMissionScriptSize;
+    NumberOfExclusiveMissionScripts            = sfi->m_NumberOfExclusiveMissionScripts;
+    NumberOfMissionScripts                     = sfi->m_NumberOfMissionScripts;
+    LargestNumberOfMissionScriptLocalVariables = sfi->m_LargestNumberOfMissionScriptLocalVars;
+
+    for (const auto&& [i, missionOffset] : notsa::enumerate(sfi->GetMissionOffsets())) {
+        MultiScriptArray[i] = missionOffset;
+    }
 }
 
 // signature changed (CVector)
@@ -671,7 +695,7 @@ void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* ourEnt
         ourEntity->GetModelInfo()->GetColModel()->GetBoundRadius(),
         false,
         &numColliding,
-        colEntities.max_size(),
+        (int16)colEntities.max_size(),
         colEntities.data(),
         false,
         true,

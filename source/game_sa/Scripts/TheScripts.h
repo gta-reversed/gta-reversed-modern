@@ -19,6 +19,8 @@
 #include "UpsideDownCarCheck.h"
 #include "ScriptsForBrains.h"
 
+#include "extensions/SCMChunks.hpp"
+
 class CCheckpoint;
 
 enum class eCrossHairType : uint32 {
@@ -543,6 +545,35 @@ public:
     static void DrawDebugCube(const CVector& inf, const CVector& sup);
     static void DrawDebugAngledCube(const CVector& inf, const CVector& sup, const CVector2D& rotSup, const CVector2D& rotInf);
     static void DrawScriptSpritesAndRectangles(bool drawBeforeFade);
+
+    // NOTSA
+    template<typename ChunkT = tSCMChunkHeader>
+        requires std::is_base_of_v<tSCMChunkHeader, ChunkT>
+    static const ChunkT* GetSCMChunk() {
+        // This is a sanity check assuming vanilla SCMs. Vanilla SCMs have 6 chunks.
+        //
+        // A SCM file can have any amount of header chunks before the main script,
+        // under these conditions:
+        //
+        // 1. Vanilla EXE expects at most 6 chunks to be available. Having less than that
+        // might crash the game.
+        //
+        // 2. The last chunk must set the main script offset as next chunk offset. So virtual
+        // machine will just jump through all chunks to the main script.
+        constexpr auto NUM_VANILLA_MAIN_CHUNKS = 6u;
+        const auto* header = reinterpret_cast<tSCMChunkHeader*>(&ScriptSpace[0]);
+        for (auto i = 0u; i < NUM_VANILLA_MAIN_CHUNKS; i++) {
+            static constexpr uint8 GoToInst[] = { 0x02, 0x00, 0x01 };
+
+            if (header->m_ChunkIndex == ChunkT::Index)
+                return (ChunkT*)header;
+
+            assert(!memcmp(header->m_InstrGoTo, GoToInst, sizeof(GoToInst)));
+            header = reinterpret_cast<tSCMChunkHeader*>(&ScriptSpace[header->m_NextChunkOffset]);
+        }
+
+        NOTSA_UNREACHABLE();
+    }
 
     static int32* GetPointerToScriptVariable(uint32 offset) {
         // TODO: find out how this method changed between re3 and GTA:SA
