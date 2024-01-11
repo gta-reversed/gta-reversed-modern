@@ -2,20 +2,18 @@
 
 #include "TaskComplex.h"
 
-class CTaskInteriorUseInfo;
-class CPed;
 class CEvent;
-
+class CPed;
 struct InteriorInfo_t;
 class Interior_c;
 
-class NOTSA_EXPORT_VTABLE CTaskInteriorUseInfo final : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskInteriorUseInfo : public CTaskComplex {
 public:
     static constexpr auto Type = eTaskType::TASK_INTERIOR_USE_INFO;
 
     static void InjectHooks();
 
-    CTaskInteriorUseInfo(InteriorInfo_t* interiorInfo, Interior_c* interior, int32 duration, bool bDoInstantly);
+    CTaskInteriorUseInfo(InteriorInfo_t* interiorInfo, Interior_c* interior, int32 duration = 0, bool bDoInstantly = false);
     CTaskInteriorUseInfo(const CTaskInteriorUseInfo&);
     ~CTaskInteriorUseInfo();
 
@@ -25,11 +23,10 @@ public:
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;
-
 private: // Wrappers for hooks
     // 0x675A50
-    CTaskInteriorUseInfo* Constructor(InteriorInfo_t* interiorInfo, Interior_c* interior, int32 duration, uint8 a5) {
-        this->CTaskInteriorUseInfo::CTaskInteriorUseInfo(interiorInfo, interior, duration, a5);
+    CTaskInteriorUseInfo* Constructor(InteriorInfo_t* interiorInfo, Interior_c* interior, int32 duration, bool bDoInstantly) {
+        this->CTaskInteriorUseInfo::CTaskInteriorUseInfo(interiorInfo, interior, duration, bDoInstantly);
         return this;
     }
 

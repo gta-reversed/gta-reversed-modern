@@ -334,6 +334,11 @@ CTaskSimpleClimb* CPedIntelligence::GetTaskClimb() {
     return CTask::DynCast<CTaskSimpleClimb>(m_TaskMgr.GetSimplestActiveTask());
 }
 
+// @sa [@addr unk]
+CTaskSimpleDuck* CPedIntelligence::GetTaskSecondaryDuck() {
+    return CTask::DynCast<CTaskSimpleDuck>(m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_DUCK));
+}
+
 // 0x6011B0
 bool CPedIntelligence::GetUsingParachute() {
     CWeapon* activeWeapon = &m_pPed->GetActiveWeapon();
@@ -369,7 +374,7 @@ bool CPedIntelligence::GetUsingParachute() {
 // 0x601230
 void CPedIntelligence::SetTaskDuckSecondary(uint16 nLengthOfDuck) {
     if (const auto duck = GetTaskDuck()) {
-        if (duck->m_nDuckControlType == DUCK_SCRIPT_CONTROLLED) {
+        if (duck->m_DuckControlType == DUCK_SCRIPT_CONTROLLED) {
             return;
         }
     }

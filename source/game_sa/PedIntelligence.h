@@ -101,6 +101,7 @@ public:
     CTaskSimpleJetPack* GetTaskJetPack();
     CTaskSimpleInAir* GetTaskInAir();
     CTaskSimpleClimb* GetTaskClimb();
+    CTaskSimpleDuck* GetTaskSecondaryDuck();
     bool GetUsingParachute();
     void SetTaskDuckSecondary(uint16 nLengthOfDuck);
     void ClearTaskDuckSecondary();
@@ -168,3 +169,4 @@ private:
 };
 
 VALIDATE_SIZE(CPedIntelligence, 0x294);
+VALIDATE_OFFSET(CPedIntelligence, m_AnotherStaticCounter, 0x274);

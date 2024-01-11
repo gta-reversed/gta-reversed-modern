@@ -10,7 +10,7 @@ void CTaskComplexSequence::InjectHooks() {
 
     RH_ScopedVMTInstall(Clone, 0x5F6710);
     RH_ScopedVMTInstall(MakeAbortable, 0x632C00);
-    RH_ScopedVMTInstall(CreateNextSubTask, 0x638A40);
+    RH_ScopedVMTOverloadedInstall(CreateNextSubTask, "V", 0x638A40, CTask*(CTaskComplexSequence::*)(CPed*));
     RH_ScopedVMTInstall(CreateFirstSubTask, 0x638A60);
     RH_ScopedVMTInstall(ControlSubTask, 0x632D00);
 

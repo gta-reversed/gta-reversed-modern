@@ -3,6 +3,7 @@
 #include "Base.h"
 
 #include "Vector.h"
+#include "InteriorInfo_t.h"
 
 class CEntity;
 class CPed;
@@ -57,7 +58,7 @@ public:
     CEntity* GetEntity();
     CPed* GetPed(int32);
     bool FindClosestInteriorInfo(int32 a, CVector point, float b, InteriorInfo_t** interiorInfo, Interior_c** interior, float* pSome);
-    bool FindInteriorInfo(int32 a2, InteriorInfo_t** a3, Interior_c** a4);
+    bool FindInteriorInfo(eInteriorInfoType infoType, InteriorInfo_t** a3, Interior_c** a4);
     int32 GetNumInteriorInfos(int32 a2);
     int32 GetRandomInterior();
     auto GetId() const { return m_id; }

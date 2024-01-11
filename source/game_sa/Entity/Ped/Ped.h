@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <extensions/EntityRef.hpp>
+
 #include "Physical.h"
 #include "AEPedAudioEntity.h"
 #include "AEPedSpeechAudioEntity.h"
@@ -95,6 +97,8 @@ class CPedStats;
 
 class NOTSA_EXPORT_VTABLE CPed : public CPhysical {
 public:
+    using Ref = notsa::EntityRef<CPed>;
+
     static inline int16 m_sGunFlashBlendStart = 10'000; // 0x8D1370
 
     CAEPedAudioEntity       m_pedAudio;
@@ -511,7 +515,8 @@ public:
     CAcquaintance& GetAcquaintance() { return m_acquaintance; }
     CVehicle* GetVehicleIfInOne() const { return bInVehicle ? m_pVehicle : nullptr; }
 
-    uint8 GetCreatedBy() { return m_nCreatedBy; }
+    uint8 GetCreatedBy() const { return m_nCreatedBy; }
+    void SetCreatedBy(ePedCreatedBy v) { m_nCreatedBy = v; }
     bool IsCreatedBy(ePedCreatedBy v) const noexcept { return v == m_nCreatedBy; }
     bool IsCreatedByMission() const noexcept { return IsCreatedBy(ePedCreatedBy::PED_MISSION); }
 
