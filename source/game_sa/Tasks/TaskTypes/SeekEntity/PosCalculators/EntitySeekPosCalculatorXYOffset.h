@@ -19,5 +19,7 @@ public:
     }
 
     void ComputeEntitySeekPos(const CPed& seeker, const CEntity& target, CVector& outPos) override;
+
+    void SetOffset(CVector v) { m_offsetXY = v; }
 };
 VALIDATE_SIZE(CEntitySeekPosCalculatorXYOffset, 0x10);

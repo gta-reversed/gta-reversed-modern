@@ -8,17 +8,17 @@
 #include "TaskSimpleDuck.h"
 
 void CTaskSimpleGoToPoint::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleGoToPoint);
+    RH_ScopedVirtualClass(CTaskSimpleGoToPoint, 0x86fd50, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x667CD0);
-    RH_ScopedVirtualInstall(MakeAbortable, 0x667D60);
-    RH_ScopedVirtualInstall(ProcessPed, 0x66D710);
-    RH_ScopedInstall(UpdatePoint, 0x645700);
-}
 
-bool CTaskSimpleGoToPoint::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return CTaskSimpleGoToPoint::MakeAbortable_Reversed(ped, priority, event); }
-bool CTaskSimpleGoToPoint::ProcessPed(CPed* ped) { return CTaskSimpleGoToPoint::ProcessPed_Reversed(ped); }
+    RH_ScopedInstall(UpdatePoint, 0x645700);
+    RH_ScopedVMTInstall(Clone, 0x66CC60);
+    RH_ScopedVMTInstall(GetTaskType, 0x667D40);
+    RH_ScopedVMTInstall(MakeAbortable, 0x667D60);
+    RH_ScopedVMTInstall(ProcessPed, 0x66D710);
+}
 
 // 0x667CD0
 CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(eMoveState moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6) :
@@ -30,7 +30,7 @@ CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(eMoveState moveState, const CVector& 
 }
 
 // 0x667D60
-bool CTaskSimpleGoToPoint::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
+bool CTaskSimpleGoToPoint::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (gotoFlags.m_bIsIKChainSet) {
         if (g_ikChainMan.IsLooking(ped))
             g_ikChainMan.AbortLookAt(ped, 250);
@@ -47,7 +47,7 @@ bool CTaskSimpleGoToPoint::MakeAbortable_Reversed(CPed* ped, eAbortPriority prio
 }
 
 // 0x66D710
-bool CTaskSimpleGoToPoint::ProcessPed_Reversed(CPed* ped) {
+bool CTaskSimpleGoToPoint::ProcessPed(CPed* ped) {
     CPlayerPed* player = ped->AsPlayer();
     ped->m_pedIK.bSlopePitch = true;
     if (HasCircledTarget(ped)) {

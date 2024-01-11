@@ -7,17 +7,17 @@
 float& CTaskSimpleGoTo::ms_fLookAtThresholdDotProduct = *(float*)0xC18D48;
 
 void CTaskSimpleGoTo::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleGoTo);
+    RH_ScopedVirtualClass(CTaskSimpleGoTo, 0x86fd1c, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x6679C0);
+
     RH_ScopedInstall(HasCircledTarget, 0x667A10);
     RH_ScopedInstall(SetUpIK, 0x667AD0);
     RH_ScopedInstall(QuitIK, 0x667CA0);
 }
 
-CTaskSimpleGoTo::CTaskSimpleGoTo(eMoveState moveState, const CVector& targetPoint, float fRadius)
-{
+CTaskSimpleGoTo::CTaskSimpleGoTo(eMoveState moveState, const CVector& targetPoint, float fRadius) {
     m_moveState = moveState;
     m_vecTargetPoint = targetPoint;
     m_fRadius = fRadius;

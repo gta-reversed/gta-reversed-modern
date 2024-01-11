@@ -62,6 +62,7 @@ public:
     /*!
     * @addr 0x681740
     * @brief Find the first task with type `taskType`
+    * Can be replced with `Find<T>(true)`
     */
     CTask* FindActiveTaskByType(eTaskType taskType);
 
