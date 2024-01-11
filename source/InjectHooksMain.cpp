@@ -251,6 +251,7 @@
 #include "TaskComplexWanderStandard.h"
 #include "TaskComplexSunbathe.h"
 #include "TaskComplexEnterCar.h"
+#include "Interior/TaskInteriorBeInShop.h"
 #include "TaskSimpleTogglePedThreatScanner.h"
 #include "TaskComplexUseGoggles.h"
 #include "TaskComplexCrossRoadLookAndAchieveHeading.h"
@@ -816,7 +817,7 @@ void InjectHooksMain() {
         const auto Interior = [] {
             CTaskInteriorBeInHouse::InjectHooks();
             CTaskInteriorBeInOffice::InjectHooks();
-        // CTaskInteriorBeInShop::InjectHooks();
+            CTaskInteriorBeInShop::InjectHooks();
             CTaskInteriorGoToInfo::InjectHooks();
         // CTaskInteriorLieInBed::InjectHooks();
         // CTaskInteriorShopKeeper::InjectHooks();
