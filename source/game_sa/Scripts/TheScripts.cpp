@@ -544,18 +544,19 @@ void CTheScripts::AddToWaitingForScriptBrainArray(CEntity* entity, int16 special
 
     free->m_pEntity = entity;
     entity->RegisterReference(free->m_pEntity);
-    free->m_nSpecialModelIndex = specialModelIndex;
+    free->m_ScriptBrainIndex = specialModelIndex;
 }
 
 // 0x4866C0
 void CTheScripts::CleanUpThisObject(CObject* obj) {
-    if (!obj)
+    if (!obj) {
         return;
+    }
 
     if (obj->IsMissionObject()) {
-        obj->m_nObjectType    = OBJECT_TEMPORARY;
-        obj->m_nRemovalTime   = CTimer::GetTimeInMS() + 200'00'000;
-        obj->m_nRefModelIndex = -1;
+        obj->m_nObjectType                = OBJECT_TEMPORARY;
+        obj->m_nRemovalTime               = CTimer::GetTimeInMS() + 20'000'000;
+        obj->m_nRefModelIndex             = -1;
         obj->objectFlags.bChangesVehColor = false;
         CObject::nNoTempObjects++;
     }
@@ -696,11 +697,12 @@ void CTheScripts::ClearAllSuppressedCarModels() {
 // 0x486B00
 void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* ourEntity) {
     static uint32 dword_A95778 = 0;
-    if (!(dword_A95778 & 1))
+    if (!(dword_A95778 & 1)) {
         dword_A95778 |= 1;
+    }
 
     std::array<CEntity*, 16> colEntities{};
-    int16 numColliding{};
+    int16                    numColliding{};
 
     CWorld::FindObjectsKindaColliding(
         pos,
@@ -717,8 +719,9 @@ void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* ourEnt
     );
 
     auto* ourColData = ourEntity->GetColData();
-    if (!ourColData)
+    if (!ourColData) {
         return;
+    }
 
     const auto cdNumLines = std::exchange(ourColData->m_nNumLines, 0);
     for (auto& entity : std::span{ colEntities.data(), (size_t)numColliding }) {
@@ -727,7 +730,7 @@ void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* ourEnt
         }
 
         std::array<CColPoint, 32> colPoints{};
-        const auto numCollisions = CCollision::ProcessColModels(
+        const auto                numCollisions = CCollision::ProcessColModels(
             ourEntity->GetMatrix(),
             *ourEntity->GetColModel(),
             entity->GetMatrix(),
@@ -744,8 +747,9 @@ void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* ourEnt
 
         if (entity->IsVehicle()) {
             auto* vehicle = entity->AsVehicle();
-            if (vehicle->vehicleFlags.bIsLocked || !vehicle->CanBeDeleted())
+            if (vehicle->vehicleFlags.bIsLocked || !vehicle->CanBeDeleted()) {
                 continue;
+            }
 
             if (auto& driver = vehicle->m_pDriver) {
                 CPopulation::RemovePed(driver);
@@ -871,12 +875,12 @@ void CTheScripts::RemoveFromVehicleModelsBlockedByScript(int32 modelIndex) {
 // 0x46ABC0
 void CTheScripts::RemoveFromWaitingForScriptBrainArray(CEntity* entity, int16 modelIndex) {
     for (auto& bwe : EntitiesWaitingForScriptBrain) {
-        if (bwe.m_pEntity != entity || bwe.m_nSpecialModelIndex != modelIndex) {
+        if (bwe.m_pEntity != entity || bwe.m_ScriptBrainIndex != modelIndex) {
             continue;
         }
 
         CEntity::ClearReference(bwe.m_pEntity);
-        bwe.m_nSpecialModelIndex = MODEL_INVALID;
+        bwe.m_ScriptBrainIndex = MODEL_INVALID;
     }
 }
 

@@ -319,7 +319,7 @@ CPed::~CPed() {
 
     // Remove script brain
     if (bWaitingForScriptBrainToLoad) {
-        CStreaming::SetMissionDoesntRequireModel(SCMToModelId(CTheScripts::ScriptsForBrains.m_aScriptForBrains[m_nSpecialModelIndex].m_nIMGindex));
+        CStreaming::SetMissionDoesntRequireModel(SCMToModelId(CTheScripts::ScriptsForBrains.m_aScriptForBrains[m_nSpecialModelIndex].m_StreamedScriptIndex));
         bWaitingForScriptBrainToLoad = false;
         CTheScripts::RemoveFromWaitingForScriptBrainArray(this, m_nSpecialModelIndex);
         m_nSpecialModelIndex = -1;

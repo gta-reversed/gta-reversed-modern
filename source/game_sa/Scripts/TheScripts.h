@@ -283,12 +283,12 @@ VALIDATE_SIZE(tStoredLine, 0x20);
 
 struct tScriptBrainWaitEntity {
     CEntity* m_pEntity;
-    int16    m_nSpecialModelIndex;
+    int16    m_ScriptBrainIndex;
     int16    field_6;
 
     tScriptBrainWaitEntity() { // 0x468E12
-        m_pEntity            = nullptr;
-        m_nSpecialModelIndex = -1;
+        m_pEntity          = nullptr;
+        m_ScriptBrainIndex = -1;
     }
 };
 VALIDATE_SIZE(tScriptBrainWaitEntity, 0x8);

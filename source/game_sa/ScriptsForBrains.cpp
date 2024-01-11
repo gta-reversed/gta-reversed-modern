@@ -44,14 +44,14 @@ void CScriptsForBrains::StartNewStreamedScriptBrain(uint8 index, CEntity* entity
 
 bool CScriptsForBrains::HasAttractorScriptBrainWithThisNameLoaded(const char* name) {
     if (const auto idx = GetIndexOfScriptBrainWithThisName(name, 5); idx >= 0) {
-        return CStreaming::IsModelLoaded(SCMToModelId(m_aScriptForBrains[idx].m_nIMGindex));
+        return CStreaming::IsModelLoaded(SCMToModelId(m_aScriptForBrains[idx].m_StreamedScriptIndex));
     }
     return false;
 }
 
 int16 CScriptsForBrains::GetIndexOfScriptBrainWithThisName(const char* name, int8 attachType) {
     const auto it = rng::find_if(m_aScriptForBrains, [=](tScriptForBrains& script) {
-        return script.m_nAttachType == attachType && !_stricmp(script.m_scriptName, name);
+        return script.m_TypeOfBrain == attachType && !_stricmp(script.m_ScriptName, name);
     });
     return it != m_aScriptForBrains.end()
         ? rng::distance(m_aScriptForBrains.begin(), it)

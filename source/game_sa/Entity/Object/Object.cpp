@@ -133,7 +133,7 @@ CObject::CObject(CDummyObject* dummyObj) : CPhysical() {
 // 0x59F660
 CObject::~CObject() {
     if (objectFlags.b0x200000 || objectFlags.b0x100000) {
-        const auto iIndex = SCMToModelId(CTheScripts::ScriptsForBrains.m_aScriptForBrains[m_wScriptTriggerIndex].m_nIMGindex);
+        const auto iIndex = SCMToModelId(CTheScripts::ScriptsForBrains.m_aScriptForBrains[m_wScriptTriggerIndex].m_StreamedScriptIndex);
         CStreaming::SetMissionDoesntRequireModel(iIndex);
         objectFlags.b0x100000 = false;
         objectFlags.b0x200000 = false;
