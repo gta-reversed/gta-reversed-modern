@@ -313,7 +313,7 @@ enum {
     MAX_NUM_SCRIPT_SEQUENCE_TASKS               = 64,
     MAX_NUM_SCRIPT_CHECKPOINTS                  = 20,
     MAX_NUM_SCRIPT_EFFECT_SYSTEMS               = 32,
-    MAX_NUM_SCRIPT_CONNECT_LODS_OBJECTS         = 20,
+    MAX_NUM_SCRIPT_CONNECT_LODS_OBJECTS         = 10,
     MAX_NUM_SCRIPT_ATTACHED_ANIM_GROUPS         = 8,
     MAX_NUM_ENTITIES_WAITING_FOR_SCRIPT_BRAIN   = 150,
     MAX_NUM_VEHICLE_MODELS_BLOCKED_BY_SCRIPT    = 20,
@@ -384,15 +384,15 @@ public:
     // Script things
     //
 
-    static inline std::array<tScriptSphere, MAX_NUM_SCRIPT_SPHERES>&              ScriptSphereArray       = *(std::array<tScriptSphere, MAX_NUM_SCRIPT_SPHERES>*)0xA91268;
-    static inline std::array<tScriptEffectSystem, MAX_NUM_SCRIPT_EFFECT_SYSTEMS>& ScriptEffectSystemArray = *(std::array<tScriptEffectSystem, MAX_NUM_SCRIPT_EFFECT_SYSTEMS>*)0xA44110;
-    static inline std::array<tScriptSearchlight, MAX_NUM_SCRIPT_SEARCH_LIGHT>&    ScriptSearchLightArray  = *(std::array<tScriptSearchlight, MAX_NUM_SCRIPT_SEARCH_LIGHT>*)0xA94D68;
+    static inline auto& ScriptSphereArray       = *(std::array<tScriptSphere, MAX_NUM_SCRIPT_SPHERES>*)0xA91268;
+    static inline auto& ScriptEffectSystemArray = *(std::array<tScriptEffectSystem, MAX_NUM_SCRIPT_EFFECT_SYSTEMS>*)0xA44110;
+    static inline auto& ScriptSearchLightArray  = *(std::array<tScriptSearchlight, MAX_NUM_SCRIPT_SEARCH_LIGHT>*)0xA94D68;
 
-    static inline std::array<tScriptSequence, MAX_NUM_SCRIPT_SEQUENCE_TASKS>& ScriptSequenceTaskArray    = *(std::array<tScriptSequence, MAX_NUM_SCRIPT_SEQUENCE_TASKS>*)0xA43F68;
-    static inline uint16&                                                     NumberOfScriptSearchLights = *reinterpret_cast<uint16*>(0xA90830);
+    static inline auto&   ScriptSequenceTaskArray    = *(std::array<tScriptSequence, MAX_NUM_SCRIPT_SEQUENCE_TASKS>*)0xA43F68;
+    static inline uint16& NumberOfScriptSearchLights = *reinterpret_cast<uint16*>(0xA90830);
 
-    static inline std::array<tScriptCheckpoint, MAX_NUM_SCRIPT_CHECKPOINTS>& ScriptCheckpointArray     = *(std::array<tScriptCheckpoint, MAX_NUM_SCRIPT_CHECKPOINTS>*)0xA44070;
-    static inline uint16&                                                    NumberOfScriptCheckpoints = *reinterpret_cast<uint16*>(0xA44068);
+    static inline auto&   ScriptCheckpointArray     = *(std::array<tScriptCheckpoint, MAX_NUM_SCRIPT_CHECKPOINTS>*)0xA44070;
+    static inline uint16& NumberOfScriptCheckpoints = *reinterpret_cast<uint16*>(0xA44068);
 
     static inline bool& DbgFlag = *reinterpret_cast<bool*>(0x859CF8);
     static inline void*& SwitchDefaultAddress = *reinterpret_cast<void**>(0xA43F54);
