@@ -50,7 +50,7 @@ solution "gta_reversed"
         optimize "Full"
         flags { "LinkTimeOptimization" }
 
-    filter "toolset:msc"
+    filter "action:vs*"
         flags { "MultiProcessorCompile" }
         linkoptions   { "/ignore:4099,4251,4275" }
         buildoptions { "/EHsc", "/Zc:preprocessor", "/bigobj" }
