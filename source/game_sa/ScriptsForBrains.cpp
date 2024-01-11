@@ -14,8 +14,9 @@ void CScriptsForBrains::InjectHooks() {
     RH_ScopedInstall(HasAttractorScriptBrainWithThisNameLoaded, 0x46AB20);
     //RH_ScopedInstall(StartNewStreamedScriptBrain, 0x46B270, {.reversed = false});
     RH_ScopedInstall(StartAttractorScriptBrainWithThisName, 0x46B390);
-    //RH_ScopedInstall(StartOrRequestNewStreamedScriptBrain, 0x46CD80, {.reversed = false});
+    RH_ScopedInstall(StartOrRequestNewStreamedScriptBrain, 0x46CD80, {.reversed = false});
     //RH_ScopedInstall(StartOrRequestNewStreamedScriptBrainWithThisName, 0x46CED0, {.reversed = false});
+    RH_ScopedInstall(IsObjectWithinBrainActivationRange, 0x46B3D0, {.reversed=false});
 }
 
 
@@ -42,11 +43,19 @@ void CScriptsForBrains::StartNewStreamedScriptBrain(uint8 index, CEntity* entity
     plugin::CallMethodAndReturn<void, 0x46B270, CScriptsForBrains*, uint8, CEntity*, uint8>(this, index, entity, bHasAScriptBrain);
 }
 
+void CScriptsForBrains::StartOrRequestNewStreamedScriptBrain(uint8 index, CEntity* entity, int8 attachType, bool bAddToWaitingArray) {
+    NOTSA_UNREACHABLE();
+}
+
 bool CScriptsForBrains::HasAttractorScriptBrainWithThisNameLoaded(const char* name) {
     if (const auto idx = GetIndexOfScriptBrainWithThisName(name, 5); idx >= 0) {
         return CStreaming::IsModelLoaded(SCMToModelId(m_aScriptForBrains[idx].m_StreamedScriptIndex));
     }
     return false;
+}
+
+bool CScriptsForBrains::IsObjectWithinBrainActivationRange(CObject* entity, const CVector& point) {
+    NOTSA_UNREACHABLE();
 }
 
 int16 CScriptsForBrains::GetIndexOfScriptBrainWithThisName(const char* name, int8 attachType) {

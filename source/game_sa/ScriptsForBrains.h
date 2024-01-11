@@ -44,7 +44,7 @@ public:
     int16 GetIndexOfScriptBrainWithThisName(const char* name, int8 attachType);
 
     bool HasAttractorScriptBrainWithThisNameLoaded(const char* name);
-    bool IsObjectWithinBrainActivationRange(CObject* entity, CVector const* point);
+    bool IsObjectWithinBrainActivationRange(CObject* entity, const CVector& point);
 
     void MarkAttractorScriptBrainWithThisNameAsNoLongerNeeded(const char* name);
     void RequestAttractorScriptBrainWithThisName(const char* name);

@@ -297,7 +297,7 @@ CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
 
     field_758 = 0;
     m_fRemovalDistMultiplier = 1.0f;
-    m_nSpecialModelIndex = -1;
+    m_StreamedScriptBrainToLoad = -1;
 
     CPopulation::UpdatePedCount(this, 0);
 
@@ -319,10 +319,10 @@ CPed::~CPed() {
 
     // Remove script brain
     if (bWaitingForScriptBrainToLoad) {
-        CStreaming::SetMissionDoesntRequireModel(SCMToModelId(CTheScripts::ScriptsForBrains.m_aScriptForBrains[m_nSpecialModelIndex].m_StreamedScriptIndex));
+        CStreaming::SetMissionDoesntRequireModel(SCMToModelId(CTheScripts::ScriptsForBrains.m_aScriptForBrains[m_StreamedScriptBrainToLoad].m_StreamedScriptIndex));
         bWaitingForScriptBrainToLoad = false;
-        CTheScripts::RemoveFromWaitingForScriptBrainArray(this, m_nSpecialModelIndex);
-        m_nSpecialModelIndex = -1;
+        CTheScripts::RemoveFromWaitingForScriptBrainArray(this, m_StreamedScriptBrainToLoad);
+        m_StreamedScriptBrainToLoad = -1;
     }
 
     CWorld::Remove(this);

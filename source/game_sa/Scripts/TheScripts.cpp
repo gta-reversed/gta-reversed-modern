@@ -78,7 +78,7 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(StartTestScript, 0x464D40);
     RH_ScopedInstall(Process, 0x46A000);
     RH_ScopedInstall(ProcessAllSearchLights, 0x4939F0);
-    RH_ScopedInstall(ProcessWaitingForScriptBrainArray, 0x46CF00, {.reversed=false});
+    RH_ScopedInstall(ProcessWaitingForScriptBrainArray, 0x46CF00);
     RH_ScopedInstall(UndoEntityInvisibilitySettings, 0x4812D0);
     RH_ScopedInstall(PrintListSizes, 0x4646D0);
     RH_ScopedOverloadedInstall(DrawDebugSquare, "", 0x486840, void(*)(float,float,float,float));
@@ -1237,10 +1237,64 @@ void CTheScripts::ProcessAllSearchLights() {
     }
 }
 
+// 0x46CF00
 void CTheScripts::ProcessWaitingForScriptBrainArray() {
     ZoneScoped;
 
-    plugin::Call<0x46CF00>();
+    if (!FindPlayerPed())
+        return;
+
+    for (auto& e : EntitiesWaitingForScriptBrain) {
+        if (!e.m_pEntity) {
+            continue;
+        }
+
+        switch (const auto t = ScriptsForBrains.m_aScriptForBrains[e.m_ScriptBrainIndex].m_TypeOfBrain) {
+        case 0: // TODO: enum
+        case 3: // for peds?
+        {
+            auto*      ped = e.m_pEntity->AsPed();
+            const auto idx = ScriptsForBrains.m_aScriptForBrains[ped->m_StreamedScriptBrainToLoad].m_StreamedScriptIndex;
+
+            if (CStreaming::IsModelLoaded(SCMToModelId(idx))) {
+                ScriptsForBrains.StartNewStreamedScriptBrain(
+                    static_cast<uint8>(ped->m_StreamedScriptBrainToLoad), // cast?
+                    ped,
+                    false
+                );
+            } else {
+                CStreaming::RequestModel(SCMToModelId(idx), STREAMING_MISSION_REQUIRED);
+            }
+            break;
+        }
+        case 1:
+        case 4: // for objects?
+        {
+            auto* obj = e.m_pEntity->AsObject();
+
+            switch (obj->objectFlags.b0x100000_0x200000) {
+            case 1:
+                if (!ScriptsForBrains.IsObjectWithinBrainActivationRange(obj, FindPlayerCentreOfWorld()))
+                    break;
+
+                [[fallthrough]];
+            case 2:
+                ScriptsForBrains.StartOrRequestNewStreamedScriptBrain(
+                    static_cast<uint8>(obj->m_nStreamedScriptBrainToLoad), // cast?
+                    obj,
+                    t,
+                    false
+                );
+                break;
+            default:
+                break;
+            }
+            break;
+        }
+        default:
+            break;
+        }
+    }
 }
 
 // 0x4812D0
