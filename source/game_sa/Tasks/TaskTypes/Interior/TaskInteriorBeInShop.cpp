@@ -88,5 +88,6 @@ void CTaskInteriorBeInShop::ScanForStuff(CPed* ped) {
         }
         break;
     }
+    }
     m_CurrIntInfo = closestIntInfo;
 }
