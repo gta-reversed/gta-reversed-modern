@@ -2,8 +2,8 @@
 
 #include "TaskComplex.h"
 
-struct InteriorGroup_c;
-struct Interior_c;
+class InteriorGroup_c;
+class Interior_c;
 struct InteriorInfo_t;
 class  CPed;
 

@@ -4,7 +4,7 @@
 
 class CPed;
 struct InteriorInfo_t;
-struct Interior_c;
+class Interior_c;
 
 class NOTSA_EXPORT_VTABLE CTaskInteriorGoToInfo final : public CTaskComplex {
 public:
