@@ -52,6 +52,7 @@ void CTaskInteriorBeInOffice::GetInfoForPedToUse(CPed* ped, int32* outDur) {
         : CGeneral::GetRandomNumberInRange(5'000, 10'000);
 }
 
+// notsa (code is sa)
 CTask* CTaskInteriorBeInOffice::CreateUseInfoTask(CPed* ped, bool bDoInstantly) {
     int32 dur;
     GetInfoForPedToUse(ped, &dur);
