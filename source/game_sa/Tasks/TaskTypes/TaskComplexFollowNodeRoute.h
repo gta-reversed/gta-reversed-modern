@@ -32,7 +32,8 @@ public:
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;
 
-    void      SetTarget(CPed* ped, const CVector& target, float targetPtTolerance, float slowDownDistance, float followNodeThresholdHeightChange, bool bForce);
+    void SetTarget(CPed* ped, const CVector& target, float targetPtTolerance, float slowDownDistance, float followNodeThresholdHeightChange, bool bForce);
+    void SetStartNode(CNodeAddress naddr) { m_StartNode = naddr; }
 
 protected:
     CTask*    CreateSubTask(eTaskType taskType, CPed* ped) const;
