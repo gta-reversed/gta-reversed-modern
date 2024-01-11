@@ -25,42 +25,38 @@ void CTheScripts::InjectHooks() {
     RH_ScopedClass(CTheScripts);
     RH_ScopedCategory("Scripts");
 
-    RH_ScopedInstall(Init, 0x468D50, { .reversed = true });
-    RH_ScopedOverloadedInstall(StartNewScript, "last-idle", 0x464C20, CRunningScript* (*)(uint8*));
-    RH_ScopedOverloadedInstall(StartNewScript, "indexed", 0x464C90, CRunningScript* (*)(uint8*, uint16));
-    RH_ScopedInstall(StartTestScript, 0x464D40);
-    RH_ScopedInstall(AddToBuildingSwapArray, 0x481140);
-    RH_ScopedInstall(UndoBuildingSwaps, 0x481290);
-    RH_ScopedInstall(IsPedStopped, 0x486110);
-    RH_ScopedInstall(HasCarModelBeenSuppressed, 0x46A810);
-    RH_ScopedInstall(HasVehicleModelBeenBlockedByScript, 0x46A890);
-    RH_ScopedInstall(Process, 0x46A000);
-
-    RH_ScopedInstall(ProcessAllSearchLights, 0x4939F0);
-
+    RH_ScopedInstall(Init, 0x468D50);
     RH_ScopedInstall(InitialiseAllConnectLodObjects, 0x470960);
     RH_ScopedInstall(InitialiseConnectLodObjects, 0x470940);
     RH_ScopedInstall(InitialiseSpecialAnimGroupsAttachedToCharModels, 0x474730);
     RH_ScopedInstall(InitialiseSpecialAnimGroup, 0x474710);
-
-    RH_ScopedInstall(AddToSwitchJumpTable, 0x470390);
-    RH_ScopedInstall(AddToVehicleModelsBlockedByScript, 0x46B200);
+    RH_ScopedInstall(ReadObjectNamesFromScript, 0x486720);
+    RH_ScopedInstall(UpdateObjectIndices, 0x486780);
+    RH_ScopedInstall(ReadMultiScriptFileOffsetsFromScript, 0x4867C0);
     RH_ScopedInstall(AddScriptCheckpoint, 0x4935A0);
     RH_ScopedInstall(AddScriptEffectSystem, 0x492F90);
-
+    RH_ScopedInstall(AddScriptSearchLight, 0x493000);
+    RH_ScopedInstall(AddScriptSphere, 0x483B30);
+    RH_ScopedInstall(AddToBuildingSwapArray, 0x481140);
+    RH_ScopedInstall(AddToInvisibilitySwapArray, 0x481200);
+    RH_ScopedInstall(AddToListOfConnectedLodObjects, 0x470980);
+    RH_ScopedInstall(AddToListOfSpecialAnimGroupsAttachedToCharModels, 0x474750);
+    RH_ScopedInstall(AddToSwitchJumpTable, 0x470390);
+    RH_ScopedInstall(AddToVehicleModelsBlockedByScript, 0x46B200);
+    RH_ScopedInstall(AddToWaitingForScriptBrainArray, 0x46AB60);
     RH_ScopedInstall(CleanUpThisObject, 0x4866C0);
-    RH_ScopedInstall(CleanUpThisPed, 0x486300, {.reversed = false});
-    RH_ScopedInstall(CleanUpThisVehicle, 0x486670, {.reversed = true});
+    RH_ScopedInstall(CleanUpThisPed, 0x486300);
+    RH_ScopedInstall(CleanUpThisVehicle, 0x486670);
     RH_ScopedInstall(ClearAllVehicleModelsBlockedByScript, 0x46A840);
     RH_ScopedInstall(ClearAllSuppressedCarModels, 0x46A7C0);
-    RH_ScopedInstall(ClearSpaceForMissionEntity, 0x486B00, {.reversed = false});
-    RH_ScopedInstall(WipeLocalVariableMemoryForMissionScript, 0x464BB0);
-
-    RH_ScopedInstall(GetActualScriptThingIndex, 0x4839A0, {.reversed = false});
-    RH_ScopedInstall(GetNewUniqueScriptThingIndex, 0x483720, {.reversed = false});
+    RH_ScopedInstall(ClearSpaceForMissionEntity, 0x486B00);
+    RH_ScopedInstall(DoScriptSetupAfterPoolsHaveLoaded, 0x5D3390);
+    RH_ScopedInstall(GetActualScriptThingIndex, 0x4839A0, {.reversed=false});
+    RH_ScopedInstall(GetNewUniqueScriptThingIndex, 0x483720);
     RH_ScopedInstall(GetScriptIndexFromPointer, 0x464D20);
     RH_ScopedInstall(GetUniqueScriptThingIndex, 0x4810C0);
-
+    RH_ScopedInstall(ReinitialiseSwitchStatementData, 0x470370);
+    // RH_ScopedInstall(RemoveFromVehicleModelsBlockedByScript, 0x0);
     RH_ScopedInstall(RemoveFromWaitingForScriptBrainArray, 0x46ABC0);
     RH_ScopedInstall(RemoveScriptCheckpoint, 0x4936C0);
     RH_ScopedInstall(RemoveScriptEffectSystem, 0x492FD0);
@@ -68,19 +64,36 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(RemoveScriptSphere, 0x483BA0);
     RH_ScopedInstall(RemoveScriptTextureDictionary, 0x465A40);
     RH_ScopedInstall(RemoveThisPed, 0x486240);
-
-    RH_ScopedInstall(ReadObjectNamesFromScript, 0x486720);
-    RH_ScopedInstall(ReadMultiScriptFileOffsetsFromScript, 0x4867C0);
-    RH_ScopedInstall(UpdateObjectIndices, 0x486780);
-
-    RH_ScopedInstall(DrawScriptSpheres, 0x4810E0);
-    RH_ScopedInstall(DrawScriptSpritesAndRectangles, 0x464980);
-
-    RH_ScopedInstall(UndoEntityInvisibilitySettings, 0x4812D0);
-
+    RH_ScopedOverloadedInstall(StartNewScript, "last-idle", 0x464C20, CRunningScript* (*)(uint8*));
+    RH_ScopedOverloadedInstall(StartNewScript, "indexed", 0x464C90, CRunningScript* (*)(uint8*, uint16));
+    RH_ScopedInstall(UndoBuildingSwaps, 0x481290);
+    RH_ScopedInstall(IsPedStopped, 0x486110);
     RH_ScopedInstall(IsPlayerOnAMission, 0x464D50);
     RH_ScopedInstall(IsVehicleStopped, 0x4861F0);
+    RH_ScopedInstall(Load, 0x5D4FD0, {.reversed=false});
+    RH_ScopedInstall(Save, 0x5D4C40, {.reversed=false});
+    RH_ScopedInstall(WipeLocalVariableMemoryForMissionScript, 0x464BB0);
+    RH_ScopedInstall(HasCarModelBeenSuppressed, 0x46A810);
+    RH_ScopedInstall(HasVehicleModelBeenBlockedByScript, 0x46A890);
+    RH_ScopedInstall(StartTestScript, 0x464D40);
+    RH_ScopedInstall(Process, 0x46A000);
+    RH_ScopedInstall(ProcessAllSearchLights, 0x4939F0);
+    RH_ScopedInstall(ProcessWaitingForScriptBrainArray, 0x46CF00, {.reversed=false});
+    RH_ScopedInstall(UndoEntityInvisibilitySettings, 0x4812D0);
+    RH_ScopedInstall(PrintListSizes, 0x4646D0);
+    RH_ScopedOverloadedInstall(DrawDebugSquare, "", 0x486840, void(*)(float,float,float,float));
+    RH_ScopedInstall(DrawDebugAngledSquare, 0x486990);
+    // RH_ScopedInstall(DrawDebugCube, 0x0);
+    // RH_ScopedInstall(DrawDebugAngledCube, 0x0)
+    RH_ScopedInstall(DrawScriptSpritesAndRectangles, 0x464980);
+    RH_ScopedInstall(ScriptDebugCircle2D, 0x485C20, {.reversed=false});
+    RH_ScopedInstall(DrawScriptSpheres, 0x4810E0);
+    RH_ScopedOverloadedInstall(HighlightImportantArea, "", 0x485E00, void(*)(uint32,float,float,float,float,float));
+    RH_ScopedInstall(HighlightImportantAngledArea, 0x485EF0);
+    RH_ScopedInstall(ScriptDebugLine3D, 0x485DE0);
+    // RH_ScopedInstall(RenderTheScriptDebugLines, 0x0);
     RH_ScopedInstall(RenderAllSearchLights, 0x493E30);
+    RH_ScopedInstall(ScriptConnectLodsFunction, 0x470A20);
 }
 
 // 0x468D50
@@ -272,7 +285,6 @@ void CTheScripts::UpdateObjectIndices() {
 
 // 0x4867C0
 void CTheScripts::ReadMultiScriptFileOffsetsFromScript() {
-    //plugin::Call<0x4867C0>();
     auto* sfi = GetSCMChunk<tSCMScriptFileInfoChunk>();
 
 #ifdef NOTSA_SCRIPT_DEBUG_LOGS
@@ -776,7 +788,6 @@ int32 CTheScripts::GetActualScriptThingIndex(int32 index, eScriptThingType type)
 // 0x483720
 // TODO: TEST REFACTOR!
 int32 CTheScripts::GetNewUniqueScriptThingIndex(int32 index, eScriptThingType type) {
-    //return plugin::CallAndReturn<uint32, 0x483720, int32, char>(index, type);
     const auto NewUniqueId = [index](auto& id) -> int32 {
         if (id == -1 || id == -2) {
             id = 1;
@@ -940,7 +951,6 @@ void CTheScripts::RemoveScriptTextureDictionary() {
 
 // 0x486240
 void CTheScripts::RemoveThisPed(CPed* ped) {
-    // plugin::Call<0x486240, CPed*>( ped);
     if (!ped) {
         return;
     }
@@ -986,7 +996,6 @@ CRunningScript* CTheScripts::StartNewScript(uint8* startIP) {
 
 // 0x464C90
 CRunningScript* CTheScripts::StartNewScript(uint8* startIP, uint16 index) {
-    //return plugin::CallAndReturn<CRunningScript*, 0x464C90, uint8*, uint16>(startIP, index);
     if (!pIdleScripts) {
         return nullptr;
     }
@@ -1009,6 +1018,7 @@ CRunningScript* CTheScripts::StartNewScript(uint8* startIP, uint16 index) {
     return script;
 }
 
+// 0x481290
 void CTheScripts::UndoBuildingSwaps() {
     for (auto& swap : BuildingSwapArray) {
         if (swap.m_pCBuilding) {
