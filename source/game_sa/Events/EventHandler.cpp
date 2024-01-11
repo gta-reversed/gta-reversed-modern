@@ -1951,7 +1951,7 @@ void CEventHandler::ComputePlayerCollisionWithPedResponse(CEventPlayerCollisionW
                 DoLookAt(plyr, 2'000);
                 return {
                     e->m_victimMoveState != PEDMOVE_WALK
-                        ? new CTaskComplexHitResponse{CPedGeometryAnalyser::ComputePedHitSide(*e->m_victim, *plyr)}
+                        ? new CTaskComplexHitResponse{(eDirection)CPedGeometryAnalyser::ComputePedHitSide(*e->m_victim, *plyr)}
                         : nullptr,
                     new CTaskSimpleSay{28}
                 };
@@ -1975,7 +1975,7 @@ void CEventHandler::ComputePlayerCollisionWithPedResponse(CEventPlayerCollisionW
                 DoLookAt(plyr, 2'000);
                 return {
                     e->m_movestate == PEDMOVE_SPRINT
-                        ? new CTaskComplexHitResponse{plyrHitSide}
+                        ? new CTaskComplexHitResponse{(eDirection)plyrHitSide}
                         : nullptr,
                     new CTaskSimpleSay{28}
                 };
@@ -2297,7 +2297,7 @@ void CEventHandler::ComputeShotFiredWhizzedByResponse(CEventGunShotWhizzedBy* e,
             return nullptr; // 0x4BBE91
         case TASK_SIMPLE_DUCK_WHILE_SHOTS_WHIZZING: { // 0x4BBE68
             const auto ProcessTaskDuck = [this](CTaskSimpleDuck* tDuck) {
-                if (tDuck->m_nShotWhizzingCounter >= 0) {
+                if (tDuck->m_ShotWhizzingCounter >= 0) {
                     tDuck->RestartTask(m_ped);
                 }
             };

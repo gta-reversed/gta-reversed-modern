@@ -391,6 +391,15 @@ public:
     void SetEntityMinDist2D(float v) {
         m_minEntityDist2D = v;
     }
+
+    auto GetEntityToSeek() const {
+        return m_entityToSeek;
+    }
+
+    auto GetMoveStateRadius() const {
+        return m_moveStateRadius;
+    }
+
 private:
     CTask* CreateSubTaskWhenPedIsTooFarFromEntity(CPed* ped, float pedToSeekPosDist2DSq) {
         return CreateSubTask(
@@ -398,9 +407,6 @@ private:
             ped
         );
     }
-
-    auto GetEntityToSeek() const { return m_entityToSeek; }
-    auto GetMoveStateRadius() const { return m_moveStateRadius; }
 
 protected: // Wrappers for hooks
     // 0x493730
