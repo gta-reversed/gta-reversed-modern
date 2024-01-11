@@ -45,7 +45,7 @@ void CTaskInteriorSitAtDesk::FinishAnimCB(CAnimBlendAssociation* anim, void* dat
     assert(self && anim);
     assert(anim == self->m_Anim);
 
-    if (anim->m_nAnimId == ANIM_ID_OFF_SIT_2IDLE_180 || self->m_bTaskAborting && self->m_PrevAnimId == ANIM_ID_OFF_SIT_IN) {
+    if (anim->m_AnimId == ANIM_ID_OFF_SIT_2IDLE_180 || self->m_bTaskAborting && self->m_PrevAnimId == ANIM_ID_OFF_SIT_IN) {
         anim->SetBlendDelta(-1000.f);
         self->m_bTaskFinished = true;
     }

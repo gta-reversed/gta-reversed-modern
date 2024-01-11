@@ -94,7 +94,7 @@ template<typename... Ts>
 // TODO/NOTE: We might need to manually suppress warnings here?
 // Since all the code here is perfectly valid, so the compiler might
 // still complain that, for example, the function doesn't return on all code paths, etc
-#define NOTSA_UNREACHABLE(...) do { notsa::unreachable(__FUNCTION__, __FILE__, __LINE__ __VA_OPT__(,) ##__VA_ARGS__); } while (false)
+#define NOTSA_UNREACHABLE(...) do { notsa::unreachable("__FUNCTION__", __FILE__, __LINE__ __VA_OPT__(,) ##__VA_ARGS__); } while (false)
 #else 
 #define NOTSA_UNREACHABLE(...) UNREACHABLE_INTRINSIC()
 #endif

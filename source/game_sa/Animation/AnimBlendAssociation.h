@@ -119,6 +119,8 @@ public:
     float GetBlendAmount(float weight = 1.f) const { return IsPartial() ? m_BlendAmount : m_BlendAmount * weight; }
     float GetBlendDelta()                    const { return m_BlendDelta; }
 
+    AnimationId GetAnimId() const { return m_AnimId; }
+
     [[nodiscard]] bool IsRunning()        const { return (m_Flags & ANIMATION_STARTED) != 0; }
     [[nodiscard]] bool IsRepeating()      const { return (m_Flags & ANIMATION_LOOPED) != 0; }
     [[nodiscard]] bool IsPartial()        const { return (m_Flags & ANIMATION_PARTIAL) != 0; }

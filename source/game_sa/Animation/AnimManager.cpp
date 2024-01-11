@@ -309,10 +309,10 @@ void CAnimManager::CreateAnimAssocGroups() {
         }
 
         group.m_GroupID = (AssocGroupId)i;
-        group.m_IdOffset = def->AnimDescr->animId;
+        group.m_IdOffset = def->AnimDescr->AnimId;
         group.CreateAssociations(def->BlockName, clump, def->AnimNames, def->NumAnims);
         for (auto j = 0u; j < group.m_NumAnims; j++) {
-            group.GetAnimation(def->AnimDescr[j].animId)->m_Flags |= def->AnimDescr[j].flags;
+            group.GetAnimation(def->AnimDescr[j].AnimId)->m_Flags |= def->AnimDescr[j].Flags;
         }
 
         if (clump) {
