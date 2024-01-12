@@ -106,7 +106,7 @@ class CBuilding;
 
 class CEventBuildingCollision : public CEvent {
 public:
-    int16      m_pieceType;
+    uint16     m_pieceType;
     int16      m_moveState;
     float      m_damageIntensity;
     CBuilding* m_building;
@@ -114,7 +114,7 @@ public:
     CVector    m_impactPos;
 
 public:
-    CEventBuildingCollision(int16 pieceType, float damageIntensity, CBuilding* building, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState);
+    CEventBuildingCollision(uint16 pieceType, float damageIntensity, CBuilding* building, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState);
     ~CEventBuildingCollision() override;
 
     eEventType GetEventType() const override { return EVENT_BUILDING_COLLISION; }

@@ -393,7 +393,6 @@ void CAEWeaponAudioEntity::InjectHooks() {
     RH_ScopedInstall(PlayGoggleSound, 0x503500);
     RH_ScopedInstall(StopFlameThrowerIdleGasLoop, 0x5034E0);
     RH_ScopedInstall(UpdateParameters, 0x504B70, { .reversed = false });
-
 }
 
 CAEWeaponAudioEntity* CAEWeaponAudioEntity::Constructor() {
