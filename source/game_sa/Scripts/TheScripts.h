@@ -304,23 +304,6 @@ struct tScriptConnectLodsObject {
 };
 VALIDATE_SIZE(tScriptBrainWaitEntity, 0x8);
 
-// NOTSA
-// NOTE: Maybe make a generic class named like `SharedThingRef` or something.
-// (Look at tPickupReference)
-union tScriptThingReference {
-    struct {
-        int16 index;
-        int16 refIndex;
-    };
-    int32 num;
-
-    tScriptThingReference() : num(-1) {}
-    tScriptThingReference(int32 value) : num(value) {}
-    tScriptThingReference(int16 idx, int16 refIdx) : index(idx), refIndex(refIdx) {}
-
-    bool IsValid() const { return num != -1; }
-};
-
 enum {
     MAX_NUM_SCRIPTS                             = 96,
     MAX_NUM_SCRIPT_SPRITES                      = 128,
@@ -497,7 +480,7 @@ public:
     static void ClearSpaceForMissionEntity(const CVector& pos, CEntity* entity);
     static void DoScriptSetupAfterPoolsHaveLoaded();
 
-    static int32 GetActualScriptThingIndex(tScriptThingReference ref, eScriptThingType type);
+    static int32 GetActualScriptThingIndex(int32 ref, eScriptThingType type);
     static int32 GetNewUniqueScriptThingIndex(int32 index, eScriptThingType type);
     static int32 GetScriptIndexFromPointer(CRunningScript* thread);
     static int32 GetUniqueScriptThingIndex(int32 playerGroup, eScriptThingType type);

@@ -785,56 +785,58 @@ void CTheScripts::DoScriptSetupAfterPoolsHaveLoaded() {
 }
 
 // 0x4839A0
-int32 CTheScripts::GetActualScriptThingIndex(tScriptThingReference ref, eScriptThingType type) {
-    if (!ref.IsValid()) {
+int32 CTheScripts::GetActualScriptThingIndex(int32 ref, eScriptThingType type) {
+    if (ref == -1) {
         return -1;
     }
 
+    const auto idx = LOWORD(ref), id = HIWORD(ref);
+
     switch (type) {
     case SCRIPT_THING_SPHERE:
-        if (const auto& s = ScriptSphereArray[ref.index]; s.IsActive() && s.m_nUniqueId == ref.refIndex) {
-            return ref.index;
+        if (const auto& s = ScriptSphereArray[idx]; s.IsActive() && s.m_nUniqueId == id) {
+            return idx;
         }
         break;
     case SCRIPT_THING_EFFECT_SYSTEM:
-        if (const auto& fx = ScriptEffectSystemArray[ref.index]; fx.IsActive() && fx.m_nId == ref.refIndex) {
-            return ref.index;
+        if (const auto& fx = ScriptEffectSystemArray[idx]; fx.IsActive() && fx.m_nId == id) {
+            return idx;
         }
         break;
     case SCRIPT_THING_SEARCH_LIGHT:
-        if (const auto& sl = ScriptSearchLightArray[ref.index]; sl.IsActive() && sl.m_nId == ref.refIndex) {
-            return ref.index;
+        if (const auto& sl = ScriptSearchLightArray[idx]; sl.IsActive() && sl.m_nId == id) {
+            return idx;
         }
         break;
     case SCRIPT_THING_CHECKPOINT:
-        if (const auto& cp = ScriptCheckpointArray[ref.index]; cp.IsActive() && cp.m_nId == ref.refIndex) {
-            return ref.index;
+        if (const auto& cp = ScriptCheckpointArray[idx]; cp.IsActive() && cp.m_nId == id) {
+            return idx;
         }
         break;
     case SCRIPT_THING_SEQUENCE_TASK:
-        if (const auto& sqt = ScriptSequenceTaskArray[ref.index]; sqt.IsActive() && sqt.m_nId == ref.refIndex) {
-            return ref.index;
+        if (const auto& sqt = ScriptSequenceTaskArray[idx]; sqt.IsActive() && sqt.m_nId == id) {
+            return idx;
         }
         break;
     case SCRIPT_THING_FIRE:
-        if (const auto& f = gFireManager.m_aFires[ref.index]; f.createdByScript && f.m_nScriptReferenceIndex == ref.refIndex) {
-            return ref.index;
+        if (const auto& f = gFireManager.m_aFires[idx]; f.createdByScript && f.m_nScriptReferenceIndex == id) {
+            return idx;
         }
         break;
     case SCRIPT_THING_2D_EFFECT:
-        if (CScripted2dEffects::ms_activated[ref.index] && CScripted2dEffects::ScriptReferenceIndex[ref.index] == ref.refIndex) {
-            return ref.index;
+        if (CScripted2dEffects::ms_activated[idx] && CScripted2dEffects::ScriptReferenceIndex[idx] == id) {
+            return idx;
         }
         break;
     case SCRIPT_THING_DECISION_MAKER:
         CDecisionMakerTypes::GetInstance();
-        if (CDecisionMakerTypes::m_bIsActive[ref.index] && CDecisionMakerTypes::ScriptReferenceIndex[ref.index] == ref.refIndex) {
-            return ref.index;
+        if (CDecisionMakerTypes::m_bIsActive[idx] && CDecisionMakerTypes::ScriptReferenceIndex[idx] == id) {
+            return idx;
         }
         break;
     case SCRIPT_THING_PED_GROUP:
-        if (CPedGroups::ms_activeGroups[ref.index] && CPedGroups::ScriptReferenceIndex[ref.index] == ref.refIndex) {
-            return ref.index;
+        if (CPedGroups::ms_activeGroups[idx] && CPedGroups::ScriptReferenceIndex[idx] == id) {
+            return idx;
         }
         break;
     default:
