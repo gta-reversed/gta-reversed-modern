@@ -10,6 +10,7 @@
 
 #include "IKChainManager_c.h"
 #include "PedType.h"
+#include "TaskComplexBeInGroup.h"
 #include "TaskSimpleCarDriveTimed.h"
 #include "TaskSimpleStandStill.h"
 #include "TaskComplexFacial.h"
@@ -213,7 +214,7 @@ bool CPedIntelligence::FindRespectedFriendInInformRange() {
 
 // 0x600DB0
 bool CPedIntelligence::IsRespondingToEvent(eEventType eventType) {
-    return m_eventHandler.m_history.IsRespondingToEvent(eventType);
+    return m_eventHandler.GetHistory().IsRespondingToEvent(eventType);
 }
 
 // (CTask *task, bool arg2)
@@ -540,7 +541,7 @@ void CPedIntelligence::FlushImmediately(bool bSetPrimaryDefaultTask) {
 }
 
 // 0x6018D0
-C2dEffect* CPedIntelligence::GetEffectInUse() {
+C2dEffect* CPedIntelligence::GetEffectInUse() const {
     return m_eventScanner.m_attractorScanner.m_pEffectInUse;
 }
 
@@ -601,7 +602,7 @@ void CPedIntelligence::ProcessAfterPreRender() {
     if (activeWeapon->m_Type == WEAPON_MOLOTOV && activeWeapon->m_FxSystem)
     {
         RpHAnimHierarchy* animHierarchy = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
-        int32 animIDIndex = RpHAnimIDGetIndex(animHierarchy, 24); // 24 = BONE_R_HAND?
+        int32 animIDIndex = RpHAnimIDGetIndex(animHierarchy, 24); // 24 = BONE_R_HAND? - "BONE_R" xDDD
         RwMatrix* matrixArray = RpHAnimHierarchyGetMatrixArray(animHierarchy);
 
         RwV3d pointIn = { 0.05f, 0.05f,  0.14f };
@@ -679,18 +680,15 @@ bool CPedIntelligence::AreFriends(const CPed& ped1, const CPed& ped2) {
 // unused
 // 0x601D50
 bool CPedIntelligence::IsPedGoingSomewhereOnFoot() {
-    CTask* task = m_TaskMgr.GetSimplestActiveTask();
-    if (task)
-        return CTask::IsGoToTask(task);
-    else
-        return false;
+    const auto tSimplestActive = m_TaskMgr.GetSimplestActiveTask();
+    return tSimplestActive && CTask::IsGoToTask(tSimplestActive);
 }
 
-// 0x601D70
+// 0x601D70 
 eMoveState CPedIntelligence::GetMoveStateFromGoToTask() {
-    auto* task = m_TaskMgr.GetSimplestActiveTask();
-    if (task && CTask::IsGoToTask(task)) {
-        return static_cast<CTaskSimpleGoTo*>(task)->m_moveState;
+    const auto tSimplestActive = m_TaskMgr.GetSimplestActiveTask();
+    if (tSimplestActive && CTask::IsGoToTask(tSimplestActive)) {
+        return static_cast<CTaskSimpleGoTo*>(tSimplestActive)->m_moveState;
     }
     return PEDMOVE_STILL;
 }
@@ -698,12 +696,8 @@ eMoveState CPedIntelligence::GetMoveStateFromGoToTask() {
 // 0x601DA0
 void CPedIntelligence::FlushIntelligence() {
     m_TaskMgr.Flush();
-    m_eventHandler.m_physicalResponseTask = nullptr;
-    m_eventHandler.m_eventResponseTask = nullptr;
-    m_eventHandler.m_attackTask = nullptr;
-    m_eventHandler.m_sayTask = nullptr;
-    m_eventHandler.m_partialAnimTask = nullptr;
-    m_eventHandler.m_history.ClearAllEvents();
+    m_eventHandler.ResetHistory();
+    m_eventHandler.ResetResponse();
     m_eventGroup.Flush(false);
     m_vehicleScanner.Clear();
     m_pedScanner.Clear();
@@ -736,12 +730,10 @@ bool CPedIntelligence::TestForStealthKill(CPed* target, bool bFullTest) {
     if (DotProduct(distance, target->GetForward()) <= 0.0f)
         return false;
 
-    CTask* activeTask = target->GetTaskManager().GetActiveTask();
-    if (activeTask
-        && activeTask->GetTaskType() == TASK_COMPLEX_KILL_PED_ON_FOOT
-        && static_cast<CTaskComplexKillPedOnFoot*>(activeTask)->m_target == m_pPed
-    ) {
-        return false;
+    if (const auto tKillPedOnFoot = CTask::DynCast<CTaskComplexKillPedOnFoot>(target->GetTaskManager().GetActiveTask())) {
+        if (tKillPedOnFoot->m_target == m_pPed) {
+            return false;
+        }
     }
 
     CEvent* currentEvent = target->GetEventHandlerHistory().GetCurrentEvent();

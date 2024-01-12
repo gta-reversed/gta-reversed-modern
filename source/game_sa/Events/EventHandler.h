@@ -72,20 +72,13 @@ class CEventPedEnteredMyVehicle;
 
 class CEventHandler {
 public:
-    CPed*                m_ped{};
-    CEventHandlerHistory m_history{};
-    CTask*               m_physicalResponseTask{};
-    CTask*               m_eventResponseTask{};
-    CTask*               m_attackTask{};
-    CTask*               m_sayTask{};
-    CTask*               m_partialAnimTask{};
-
-public:
     static void InjectHooks();
 
     explicit CEventHandler(CPed* ped);
     ~CEventHandler() = default;
 
+    void ResetResponse();
+    void ResetHistory() { m_History.ClearAllEvents(); }
     void Flush();
     void FlushImmediately();
 
@@ -164,7 +157,7 @@ public:
     void ComputeEventResponseTask(CEvent* event, CTask* task);
     static CTask* ComputeEventResponseTask(const CPed& ped, const CEvent& e);
 
-    auto& GetHistory() { return m_history; }
+    auto& GetHistory() { return m_History; }
 
 private:
     // 0x4C3E80
@@ -178,6 +171,14 @@ private:
         this->CEventHandler::~CEventHandler();
         return this;
     }
-};
 
+private:
+    CPed*                m_Ped{};
+    CEventHandlerHistory m_History{};
+    CTask*               m_PhysicalResponseTask{};
+    CTask*               m_EventResponseTask{};
+    CTask*               m_AttackTask{};
+    CTask*               m_SayTask{};
+    CTask*               m_PartialAnimTask{};
+};
 VALIDATE_SIZE(CEventHandler, 0x34);

@@ -832,7 +832,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                 }
                 else {
                     int32 currentEventAnimId = -1;
-                    CEvent* pCurrentEvent = ped->m_pIntelligence->m_eventHandler.m_history.GetCurrentEvent();
+                    CEvent* pCurrentEvent = ped->m_pIntelligence->m_eventHandler.GetHistory().GetCurrentEvent();
                     if (pCurrentEvent && pCurrentEvent->GetEventType() == EVENT_DAMAGE)
                         currentEventAnimId = static_cast<CEventDamage*>(pCurrentEvent)->m_nAnimID;
                     switch (m_pedPieceType)

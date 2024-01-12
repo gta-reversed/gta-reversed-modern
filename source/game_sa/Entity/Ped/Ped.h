@@ -530,7 +530,7 @@ public:
     CTaskManager& GetTaskManager() const { return m_pIntelligence->m_TaskMgr; }
     CEventGroup& GetEventGroup() { return m_pIntelligence->m_eventGroup; }
     CEventHandler& GetEventHandler() { return m_pIntelligence->m_eventHandler; }
-    CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.m_history; }
+    CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.GetHistory(); }
     CPedStuckChecker& GetStuckChecker() { return m_pIntelligence->m_pedStuckChecker; }
 
     CWeapon& GetWeaponInSlot(size_t slot) noexcept { return m_aWeapons[slot]; }

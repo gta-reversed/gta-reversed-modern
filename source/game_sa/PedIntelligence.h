@@ -107,7 +107,7 @@ public:
     void ClearTaskDuckSecondary();
     void ClearTasks(bool bClearPrimaryTasks, bool bClearSecondaryTasks);
     void FlushImmediately(bool bSetPrimaryDefaultTask);
-    C2dEffect* GetEffectInUse();
+    C2dEffect* GetEffectInUse() const;
     void SetEffectInUse(C2dEffect* effect);
     void ProcessAfterProcCol();
     void ProcessAfterPreRender();
