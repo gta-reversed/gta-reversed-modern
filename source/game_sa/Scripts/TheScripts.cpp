@@ -51,7 +51,7 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(ClearAllSuppressedCarModels, 0x46A7C0);
     RH_ScopedInstall(ClearSpaceForMissionEntity, 0x486B00);
     RH_ScopedInstall(DoScriptSetupAfterPoolsHaveLoaded, 0x5D3390);
-    RH_ScopedInstall(GetActualScriptThingIndex, 0x4839A0, {.reversed=false});
+    RH_ScopedInstall(GetActualScriptThingIndex, 0x4839A0);
     RH_ScopedInstall(GetNewUniqueScriptThingIndex, 0x483720);
     RH_ScopedInstall(GetScriptIndexFromPointer, 0x464D20);
     RH_ScopedInstall(GetUniqueScriptThingIndex, 0x4810C0);
@@ -785,8 +785,62 @@ void CTheScripts::DoScriptSetupAfterPoolsHaveLoaded() {
 }
 
 // 0x4839A0
-int32 CTheScripts::GetActualScriptThingIndex(int32 index, eScriptThingType type) {
-    return plugin::CallAndReturn<int32, 0x4839A0, int32, eScriptThingType>(index, type);
+int32 CTheScripts::GetActualScriptThingIndex(tScriptThingReference ref, eScriptThingType type) {
+    if (!ref.IsValid()) {
+        return -1;
+    }
+
+    switch (type) {
+    case SCRIPT_THING_SPHERE:
+        if (const auto& s = ScriptSphereArray[ref.index]; s.IsActive() && s.m_nUniqueId == ref.refIndex) {
+            return ref.index;
+        }
+        break;
+    case SCRIPT_THING_EFFECT_SYSTEM:
+        if (const auto& fx = ScriptEffectSystemArray[ref.index]; fx.IsActive() && fx.m_nId == ref.refIndex) {
+            return ref.index;
+        }
+        break;
+    case SCRIPT_THING_SEARCH_LIGHT:
+        if (const auto& sl = ScriptSearchLightArray[ref.index]; sl.IsActive() && sl.m_nId == ref.refIndex) {
+            return ref.index;
+        }
+        break;
+    case SCRIPT_THING_CHECKPOINT:
+        if (const auto& cp = ScriptCheckpointArray[ref.index]; cp.IsActive() && cp.m_nId == ref.refIndex) {
+            return ref.index;
+        }
+        break;
+    case SCRIPT_THING_SEQUENCE_TASK:
+        if (const auto& sqt = ScriptSequenceTaskArray[ref.index]; sqt.IsActive() && sqt.m_nId == ref.refIndex) {
+            return ref.index;
+        }
+        break;
+    case SCRIPT_THING_FIRE:
+        if (const auto& f = gFireManager.m_aFires[ref.index]; f.createdByScript && f.m_nScriptReferenceIndex == ref.refIndex) {
+            return ref.index;
+        }
+        break;
+    case SCRIPT_THING_2D_EFFECT:
+        if (CScripted2dEffects::ms_activated[ref.index] && CScripted2dEffects::ScriptReferenceIndex[ref.index] == ref.refIndex) {
+            return ref.index;
+        }
+        break;
+    case SCRIPT_THING_DECISION_MAKER:
+        CDecisionMakerTypes::GetInstance();
+        if (CDecisionMakerTypes::m_bIsActive[ref.index] && CDecisionMakerTypes::ScriptReferenceIndex[ref.index] == ref.refIndex) {
+            return ref.index;
+        }
+        break;
+    case SCRIPT_THING_PED_GROUP:
+        if (CPedGroups::ms_activeGroups[ref.index] && CPedGroups::ScriptReferenceIndex[ref.index] == ref.refIndex) {
+            return ref.index;
+        }
+        break;
+    default:
+        break;
+    }
+    return -1;
 }
 
 // 0x483720
