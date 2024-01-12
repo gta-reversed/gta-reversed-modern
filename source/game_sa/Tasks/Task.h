@@ -75,7 +75,13 @@ public:
         assert(!task || task->GetTaskType() == T::Type);
         return static_cast<T*>(task);
     }
+
+    //! Clone a task and check if it's of the specified type
+    template<Task T>
+    static T* CloneIfIs(CTask* t) {
+        return t && IsA<T>(t)
+            ? DynCast<T>(t->Clone())
+            : nullptr;
+    }
 };
 VALIDATE_SIZE(CTask, 0x8);
-
-
