@@ -14,7 +14,7 @@ class CEntity;
 
 class CFireManager {
 public:
-    CFire  m_aFires[MAX_NUM_FIRES];
+    std::array<CFire, MAX_NUM_FIRES> m_aFires;
     uint32 m_nMaxFireGenerationsAllowed;
 
 public:
