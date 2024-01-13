@@ -9,7 +9,7 @@
 
 #include "TaskManager.h"
 
-#include "Tasks/TaskTypes/TaskComplexFacial.h"
+#include "TaskComplexFacial.h"
 
 void CTaskManager::InjectHooks() {
     RH_ScopedClass(CTaskManager);
@@ -102,7 +102,7 @@ CTask* CTaskManager::GetTaskSecondary(eSecondaryTask taskIndex) {
 }
 
 CTaskComplexFacial* CTaskManager::GetTaskSecondaryFacial() {
-    return static_cast<CTaskComplexFacial*>(GetTaskSecondary(TASK_SECONDARY_FACIAL_COMPLEX));
+    return CTask::Cast<CTaskComplexFacial>(GetTaskSecondary(TASK_SECONDARY_FACIAL_COMPLEX));
 }
 
 // NOTSA?

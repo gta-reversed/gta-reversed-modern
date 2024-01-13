@@ -154,7 +154,7 @@ public:
     void ComputeVehicleToStealResponse(CEventVehicleToSteal* e, CTask* tactive, CTask* tsimplest);
     void ComputeWaterCannonResponse(CEventHitByWaterCannon* e, CTask* tactive, CTask* tsimplest);
 
-    void ComputeEventResponseTask(CEvent* event, CTask* task);
+    void ComputeEventResponseTask(CEvent* event, CTask* tAbortedTaskEventResponse);
     static CTask* ComputeEventResponseTask(const CPed& ped, const CEvent& e);
 
     auto& GetHistory() { return m_History; }

@@ -73,12 +73,16 @@ public:
     */
     CTask* FindTaskByType(ePrimaryTasks taskIndex, eTaskType taskType);
 
-    /*
+    /*!
     * @addr 0x681810
     * @brief Get the secondary task at `taskIndex`
     */
     CTask* GetTaskSecondary(eSecondaryTask taskIndex);
 
+    /*!
+     * @brief GetTaskSecondary(TASK_SECONDARY_FACIAL_COMPLEX)
+     * @return The facial task (if any)
+    */
     CTaskComplexFacial* GetTaskSecondaryFacial();
 
     /*

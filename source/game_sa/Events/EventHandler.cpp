@@ -350,7 +350,7 @@ void CEventHandler::HandleEvents() {
             const auto activeTask = pedTM->GetActiveTask();
 
             const auto hasStoppedTimers = [&]{
-                if (!activeTask || activeTask->MakeAbortable(m_Ped, ABORT_PRIORITY_URGENT, priorityEvent)) {
+                if (!activeTask || activeTask->MakeAbortable(m_Ped, ABORT_PRIORITY_URGENT, priorityEvent)) { // NOTE/TODO: Don't we need to `m_History.RecordAbortedTask(activeTask)`?
                     pedTM->StopTimers(priorityEvent);
                     return true;
                 }
@@ -365,31 +365,20 @@ void CEventHandler::HandleEvents() {
                     pedEG->RemoveInvalidEvents(false);
                     pedEG->Reorganise();
                     return;
-                } else {
-                    ComputeEventResponseTask(priorityEvent, lastAbortedTask);
-                    m_History.RecordAbortedTask(nullptr);
-                    if (m_EventResponseTask) {
-                        m_History.RecordCurrentEvent(m_Ped, *priorityEvent);
-                    }
                 }
-            } else if (lastAbortedTask) { // 0x4C4176
-                ComputeEventResponseTask(priorityEvent, lastAbortedTask);
                 m_History.RecordAbortedTask(nullptr);
-                if (m_EventResponseTask) {
-                    m_History.RecordCurrentEvent(m_Ped, *priorityEvent);
-                }
-            } else { // 0x4C4135
-                if (!hasStoppedTimers) {
-                    priorityEvent->UnTick();
-                    pedEG->RemoveInvalidEvents(false);
-                    pedEG->Reorganise();
-                    return;
-                } else {
-                    ComputeEventResponseTask(priorityEvent, lastAbortedTask);
-                    if (m_EventResponseTask) {
-                        m_History.RecordCurrentEvent(m_Ped, *priorityEvent);
-                    }
-                }
+            } else if (lastAbortedTask) { // 0x4C4176
+                m_History.RecordAbortedTask(nullptr);
+            } else if (!hasStoppedTimers) {
+                priorityEvent->UnTick();
+                pedEG->RemoveInvalidEvents(false);
+                pedEG->Reorganise();
+                return;
+            }
+
+            ComputeEventResponseTask(priorityEvent, lastAbortedTask);
+            if (m_EventResponseTask) {
+                m_History.RecordCurrentEvent(m_Ped, *priorityEvent);
             }
             SetEventResponseTask(*priorityEvent);
             pedEG->Remove(priorityEvent);
@@ -472,8 +461,8 @@ void CEventHandler::SetEventResponseTask(const CEvent& event) {
 }
 
 // @addr unk
+// NOTE/BUG: Weird, no `delete`s?
 void CEventHandler::ResetResponse() {
-    // Weird, no delete?
     m_PhysicalResponseTask = nullptr;
     m_EventResponseTask    = nullptr;
     m_AttackTask           = nullptr;
@@ -604,8 +593,6 @@ void CEventHandler::ComputeBuildingCollisionResponse(CEventBuildingCollision* e,
             return nullptr;
         }
 
-        const auto randomBool = CGeneral::RandomBool(1.f / 15.f * 100.f); // 0x4BF3D4
-
         if (m_Ped->bIsStanding && e->m_impactNormal.z > COS_45) { // 0x4BF3FE
             return nullptr;
         }
@@ -617,7 +604,7 @@ void CEventHandler::ComputeBuildingCollisionResponse(CEventBuildingCollision* e,
         }
 
         if (isHeadOnCollision) { // 0x4BF4D1
-            if (!tSeekEntity && !tKillPedOnFoot && !tEnterCarPsgrWait && !randomBool) {
+            if (!tSeekEntity && !tKillPedOnFoot && !tEnterCarPsgrWait && !CGeneral::RandomBool(1.f / 15.f * 100.f)) {
                 return new CTaskComplexWalkRoundBuildingAttempt{
                     (eMoveState)e->m_moveState,
                     tGoToPoint->m_vecTargetPoint,
@@ -662,8 +649,8 @@ void CEventHandler::ComputeBuildingCollisionResponse(CEventBuildingCollision* e,
                     e->m_impactNormal,
                     isHeadOnCollision
                 };
-            } else if (const auto targetv = tEnterCarPsgrWait->GetTarget()) {
-                targetEntity = targetv->m_pDriver;
+            } else if (const auto car = tEnterCarPsgrWait->GetCar()) {
+                targetEntity = car->m_pDriver;
             } else {
                 return nullptr;
             }
@@ -2828,7 +2815,9 @@ void CEventHandler::ComputeWaterCannonResponse(CEventHitByWaterCannon* e, CTask*
 }
 
 // 0x4C3870
-void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
+void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* pAbortedTaskEventResponse) {
+    UNUSED(pAbortedTaskEventResponse);
+
     m_PhysicalResponseTask = nullptr;
     m_EventResponseTask    = nullptr;
     m_AttackTask           = nullptr;
