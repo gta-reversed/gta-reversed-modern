@@ -674,9 +674,9 @@ CTask* CTaskComplexEnterCar::CreateSubTask(eTaskType taskType, CPed* ped) {
         if (m_Car) {
             CTaskSimpleCarSetPedOut::PositionPedOutOfCollision(ped, m_Car, m_TargetDoor);
 
-            assert(m_Car->m_nNumGettingIn < m_NumGettingInSet);
+            assert(m_Car->m_nNumGettingIn >= m_NumGettingInSet);
             m_Car->m_nNumGettingIn -= m_NumGettingInSet;
-            m_NumGettingInSet       = false;
+            m_NumGettingInSet       = 0;
 
             m_Car->ClearGettingInFlags(m_DoorFlagsSet);
             m_DoorFlagsSet = 0;

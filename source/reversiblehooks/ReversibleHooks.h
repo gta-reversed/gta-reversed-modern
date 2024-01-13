@@ -90,6 +90,9 @@
 #define RH_ScopedVMTInstall(fn, fnGTAAddr, ...) \
     ReversibleHooks::InstallVirtual(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn, pGTAVTbl, pOurVTbl, (void*)fnGTAAddr, FunctionPointerToVoidP(&RHCurrentNS::fn), nVirtFns __VA_OPT__(,) __VA_ARGS__)
 
+//#define RH_ScopedVMTAddressChange(fn, fnGTAAddr, ...) \
+//    ReversibleHooks::InstallVirtual(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn, pGTAVTbl, pOurVTbl, FunctionPointerToVoidP(fnGTAAddr), nVirtFns __VA_OPT__(,) __VA_ARGS__)
+
 namespace ReversibleHooks {
     class RootHookCategory;
 

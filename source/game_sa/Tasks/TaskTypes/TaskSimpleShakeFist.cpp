@@ -52,7 +52,7 @@ bool CTaskSimpleShakeFist::MakeAbortable(CPed* ped, eAbortPriority priority, CEv
     case ABORT_PRIORITY_URGENT:
     case ABORT_PRIORITY_IMMEDIATE: {
         if (m_anim) {
-            m_anim->m_fBlendDelta = -4.f;
+            m_anim->m_BlendDelta = -4.f;
             m_anim->SetDefaultFinishCallback();
             m_anim = nullptr;
         }
@@ -60,7 +60,7 @@ bool CTaskSimpleShakeFist::MakeAbortable(CPed* ped, eAbortPriority priority, CEv
     }
     case ABORT_PRIORITY_LEISURE: {
         if (m_anim) {
-            m_anim->m_fBlendDelta = -4.f;
+            m_anim->m_BlendDelta = -4.f;
         }
         return false;
     }

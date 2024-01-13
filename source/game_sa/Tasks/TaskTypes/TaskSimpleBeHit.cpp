@@ -42,7 +42,7 @@ CTaskSimpleBeHit::CTaskSimpleBeHit(CPed* attacker, ePedPieceTypes pieceType, int
 // 0x620810
 CTaskSimpleBeHit::~CTaskSimpleBeHit() {
     if (m_Anim) {
-        m_Anim->m_fBlendDelta = -4.0f;
+        m_Anim->m_BlendDelta = -4.0f;
         m_Anim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
     }
     CEntity::SafeCleanUpRef(m_Attacker);
@@ -134,9 +134,9 @@ bool CTaskSimpleBeHit::MakeAbortable(CPed* ped, eAbortPriority priority, const C
     switch (priority) {
     case ABORT_PRIORITY_LEISURE: {
         if (m_Anim) {
-            if ((m_Anim->m_nFlags & ANIMATION_STARTED) == 0) {
-                m_Anim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
-                m_Anim->m_fBlendDelta = -4.f;
+            if ((m_Anim->m_Flags & ANIMATION_STARTED) == 0) {
+                m_Anim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
+                m_Anim->m_BlendDelta = -4.f;
             }
         }
         return false;

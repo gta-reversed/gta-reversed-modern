@@ -41,16 +41,16 @@ CTaskLeanOnVehicle::~CTaskLeanOnVehicle() {
 void CTaskLeanOnVehicle::FinishAnimCB(CAnimBlendAssociation* assoc, void* data) {
     auto task = static_cast<CTaskLeanOnVehicle*>(data);
 
-    task->m_nAnimId = assoc->m_nAnimId;
+    task->m_nAnimId = assoc->m_AnimId;
 
     if (task->m_nAnimId == ANIM_ID_LEANOUT) {
-        assoc->m_fBlendDelta = -1000.0f;
+        assoc->m_BlendDelta = -1000.0f;
         task->m_bFinished = true;
     }
 
     if (task->m_LeanAnimId) {
         if (task->m_nAnimId == ANIM_ID_LEANIN) {
-            assoc->m_fBlendDelta = -1000.0f;
+            assoc->m_BlendDelta = -1000.0f;
             task->m_bFinished = true;
         }
     }
@@ -61,7 +61,7 @@ void CTaskLeanOnVehicle::FinishAnimCB(CAnimBlendAssociation* assoc, void* data) 
 bool CTaskLeanOnVehicle::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (priority == ABORT_PRIORITY_IMMEDIATE) {
         if (m_LeanAnimAssoc) {
-            m_LeanAnimAssoc->m_fBlendDelta = -1000.0f;
+            m_LeanAnimAssoc->m_BlendDelta = -1000.0f;
             m_LeanAnimAssoc->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
             m_LeanAnimAssoc = nullptr;
         }

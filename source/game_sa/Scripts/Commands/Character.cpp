@@ -1216,7 +1216,7 @@ auto SetCharAnimPlayingFlag(CPed& ped, const char* animName, bool started) {
 // GET_CHAR_ANIM_CURRENT_TIME
 auto GetCharAnimCurrentTime(CPed& ped, const char* animName) {
     if (const auto anim = RpAnimBlendClumpGetAssociation(ped.m_pRwClump, animName)) {
-        return anim->m_fCurrentTime / anim->m_pHierarchy->m_fTotalTime;
+        return anim->m_CurrentTime / anim->m_BlendHier->m_fTotalTime;
     }
     return 0.f;
 }
@@ -1224,14 +1224,14 @@ auto GetCharAnimCurrentTime(CPed& ped, const char* animName) {
 // SET_CHAR_ANIM_CURRENT_TIME
 auto SetCharAnimCurrentTime(CPed& ped, const char* animName, float progress) {
     if (const auto anim = RpAnimBlendClumpGetAssociation(ped.m_pRwClump, animName)) {
-        anim->SetCurrentTime(progress * anim->m_pHierarchy->m_fTotalTime);
+        anim->SetCurrentTime(progress * anim->m_BlendHier->m_fTotalTime);
     }
 }
 
 // GET_CHAR_ANIM_TOTAL_TIME (In seconds)
 auto GetCharAnimTotalTime(CPed& ped, const char* animName) {
     if (const auto anim = RpAnimBlendClumpGetAssociation(ped.m_pRwClump, animName)) {
-        return anim->m_pHierarchy->m_fTotalTime * 1000.f;
+        return anim->m_BlendHier->m_fTotalTime * 1000.f;
     }
     return 0.f;
 }

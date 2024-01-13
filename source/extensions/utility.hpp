@@ -166,7 +166,7 @@ using mdarray = typename mdarray_impl<T, Ds...>::type;
 *
 * @brief Check if a range contains a value, uses `rng::find`. NOTE: If you plan on using the iterator, just use `rng::find` instead..
 */
-template<rng::input_range R, class T, class Proj = std::identity>
+template<rng::input_range R, class T = rng::range_value_t<R>, class Proj = std::identity>
     requires std::indirect_binary_predicate<rng::equal_to, std::projected<rng::iterator_t<R>, Proj>, const T*>
 bool contains(R&& r, const T& value, Proj proj = {}) {
     return rng::find(r, value, proj) != rng::end(r);
@@ -176,8 +176,8 @@ bool contains(R&& r, const T& value, Proj proj = {}) {
 /*!
 * Helper (Of your fingers) - Reduces typing needed for Python style `value in {}`
 */
-template<typename Y, typename T>
-bool contains(std::initializer_list<Y> r, const T& value) {
+template<typename Y>
+bool contains(std::initializer_list<Y> r, const Y& value) {
     return contains(r, value, {});
 }
 

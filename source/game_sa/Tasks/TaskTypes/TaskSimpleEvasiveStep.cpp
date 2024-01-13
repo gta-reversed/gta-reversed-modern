@@ -24,7 +24,7 @@ bool CTaskSimpleEvasiveStep::MakeAbortable(CPed* ped, eAbortPriority priority, c
     case ABORT_PRIORITY_URGENT:
     case ABORT_PRIORITY_IMMEDIATE:
         if (m_Assoc) {
-            m_Assoc->m_fBlendDelta = -4.0f;
+            m_Assoc->m_BlendDelta = -4.0f;
             m_Assoc->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
             m_Assoc = nullptr;
         }
@@ -62,8 +62,8 @@ void CTaskSimpleEvasiveStep::StartAnim(CPed* ped) {
 void CTaskSimpleEvasiveStep::FinishAnimEvasiveStepCB(CAnimBlendAssociation* assoc, void* data) {
     auto task = static_cast<CTaskSimpleEvasiveStep*>(data);
     task->m_Assoc->SetFlag(ANIMATION_FREEZE_LAST_FRAME, true);
-    if (task->m_Assoc->m_fBlendDelta >= 0.0f) {
-        task->m_Assoc->m_fBlendDelta = -4.0f;
+    if (task->m_Assoc->m_BlendDelta >= 0.0f) {
+        task->m_Assoc->m_BlendDelta = -4.0f;
     }
     task->m_bFinished = true;
     task->m_Assoc = nullptr;

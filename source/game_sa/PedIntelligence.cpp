@@ -359,8 +359,8 @@ bool CPedIntelligence::GetUsingParachute() {
         return false;
     }
 
-    int32 blockID = animAssoc->m_pHierarchy->m_nAnimBlockId;
-    if (_stricmp(CAnimManager::ms_aAnimBlocks[blockID].szName, "parachute") != 0) {
+    int32 blockID = animAssoc->m_BlendHier->m_nAnimBlockId;
+    if (_stricmp(CAnimManager::ms_aAnimBlocks[blockID].Name, "parachute") != 0) {
         while (true) {
             animAssoc = RpAnimBlendGetNextAssociation(animAssoc);
             if (!animAssoc) {
@@ -699,7 +699,7 @@ bool CPedIntelligence::IsPedGoingSomewhereOnFoot() {
 }
 
 // 0x601D70
-int32 CPedIntelligence::GetMoveStateFromGoToTask() {
+eMoveState CPedIntelligence::GetMoveStateFromGoToTask() {
     auto* task = m_TaskMgr.GetSimplestActiveTask();
     if (task && CTask::IsGoToTask(task)) {
         return static_cast<CTaskSimpleGoTo*>(task)->m_moveState;

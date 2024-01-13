@@ -62,7 +62,7 @@ void CBike::InjectHooks() {
 CBike::CBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy) {
     auto mi = CModelInfo::GetModelInfo(modelIndex)->AsVehicleModelInfoPtr();
     if (mi->m_nVehicleType == VEHICLE_TYPE_BIKE) {
-        const auto& animationStyle = CAnimManager::ms_aAnimBlocks[mi->GetAnimFileIndex()].animationStyle;
+        const auto& animationStyle = CAnimManager::ms_aAnimBlocks[mi->GetAnimFileIndex()].GroupId;
         m_RideAnimData.m_nAnimGroup = animationStyle;
         if (animationStyle < ANIM_GROUP_BIKES || animationStyle > ANIM_GROUP_WAYFARER) {
             m_RideAnimData.m_nAnimGroup = ANIM_GROUP_BIKES;

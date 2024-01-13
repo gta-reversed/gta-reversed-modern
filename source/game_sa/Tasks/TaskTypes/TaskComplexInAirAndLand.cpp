@@ -63,14 +63,14 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped) {
 
         if (m_bUsingFallGlide) {
             if (subTask->m_pAnim) {
-                subTask->m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
-                subTask->m_pAnim->m_fBlendDelta = -8.0F;
+                subTask->m_pAnim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
+                subTask->m_pAnim->m_BlendDelta = -8.0F;
                 subTask->m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
                 subTask->m_pAnim = nullptr;
             }
 
             return new CTaskSimpleLand(ped->m_vecMoveSpeed.z < -0.1F ? ANIM_ID_KO_SKID_BACK : (AnimationId)-1);
-        } else if (subTask->m_pAnim && subTask->m_pAnim->m_nAnimId == ANIM_ID_FALL_FALL) {
+        } else if (subTask->m_pAnim && subTask->m_pAnim->m_AnimId == ANIM_ID_FALL_FALL) {
             CTask* newTask;
 
             if (subTask->m_fMinZSpeed < -0.4F)
@@ -92,7 +92,7 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped) {
 
             if (!ped->IsPlayer())
                 landAnimId = ANIM_ID_FALL_LAND;
-            else if (subTask->m_pAnim && subTask->m_pAnim->m_nAnimId == ANIM_ID_IDLE_HBHB_1)
+            else if (subTask->m_pAnim && subTask->m_pAnim->m_AnimId == ANIM_ID_IDLE_HBHB_1)
                 landAnimId = ANIM_ID_IDLE_TIRED;
             else {
                 auto pad = ped->AsPlayer()->GetPadFromPlayer();

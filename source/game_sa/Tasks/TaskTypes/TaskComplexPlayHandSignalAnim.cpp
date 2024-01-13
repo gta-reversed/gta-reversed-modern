@@ -49,7 +49,7 @@ CTaskComplexPlayHandSignalAnim::~CTaskComplexPlayHandSignalAnim() {
     // Deal with anim
     if (m_bAnimationLoaded) { // Remove anim ref
         CAnimManager::RemoveAnimBlockRef(ms_animBlock);
-    } else if (ms_animBlock != -1 && !CAnimManager::ms_aAnimBlocks[ms_animBlock].usRefs) { 
+    } else if (ms_animBlock != -1 && !CAnimManager::ms_aAnimBlocks[ms_animBlock].RefCnt) { 
         if (!rng::all_of(std::array{ LEFT, RIGHT }, [&, this](auto i) { // Unload anim block if not all of the models has refs
             return CModelInfo::GetModelInfo(handModels[i][m_bUseFatHands ? FAT : NONFAT])->m_nRefCount != 0;
         })) {

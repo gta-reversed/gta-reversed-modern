@@ -31,7 +31,7 @@ AnimationId CTaskSimpleFacial::GetAnimId(eFacialExpression expression) {
 bool CTaskSimpleFacial::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     auto assoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, GetAnimId(m_nFacialExpression));
     if (assoc) {
-        assoc->m_fBlendDelta = -4.0f;
+        assoc->m_BlendDelta = -4.0f;
     }
     return true;
 }
@@ -44,13 +44,13 @@ bool CTaskSimpleFacial::ProcessPed(CPed* ped) {
     if (RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_FACTALK)) {
         if (animId == ANIM_ID_FACTALK) {
             if (CGeneral::GetRandomNumberInRange(0, 100) < 40) {
-                assoc->m_fSpeed = CGeneral::GetRandomNumberInRange(0.5f, 3.0f);
+                assoc->m_Speed = CGeneral::GetRandomNumberInRange(0.5f, 3.0f);
             }
             return false;
         }
         if (assoc) {
             assoc->SetFlag(ANIMATION_FREEZE_LAST_FRAME, true);
-            assoc->m_fBlendDelta = -4.0f;
+            assoc->m_BlendDelta = -4.0f;
         }
         return true;
     }
@@ -72,6 +72,6 @@ bool CTaskSimpleFacial::ProcessPed(CPed* ped) {
     if (!m_Timer.IsOutOfTime())
         return false;
 
-    assoc->m_fBlendDelta = -4.0f;
+    assoc->m_BlendDelta = -4.0f;
     return true;
 }

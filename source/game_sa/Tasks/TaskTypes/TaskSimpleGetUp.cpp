@@ -52,7 +52,7 @@ bool CTaskSimpleGetUp::ProcessPed_Reversed(CPed* ped) {
     if (m_pAnim)
         ped->bStuckUnderCar = false;
 
-    if (!m_pAnim || m_pAnim->m_fCurrentTime < m_pAnim->m_pHierarchy->m_fTotalTime * 0.75F)
+    if (!m_pAnim || m_pAnim->m_CurrentTime < m_pAnim->m_BlendHier->m_fTotalTime * 0.75F)
         ped->bFallenDown = true;
 
     return false;
@@ -89,7 +89,7 @@ bool CTaskSimpleGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
 
     if (priority == ABORT_PRIORITY_IMMEDIATE) {
         if (m_pAnim)
-            m_pAnim->m_fBlendDelta = -1000.0F;
+            m_pAnim->m_BlendDelta = -1000.0F;
         ped->bStuckUnderCar = false;
         return true;
     }
@@ -174,6 +174,6 @@ void CTaskSimpleGetUp::FinishGetUpAnimCB(CAnimBlendAssociation* blendAssoc, void
     auto task = reinterpret_cast<CTaskSimpleGetUp*>(data);
     task->m_bIsFinished = true;
     task->m_bAnimFinished = true;
-    task->m_pAnim->m_fBlendDelta = -1000.0F;
+    task->m_pAnim->m_BlendDelta = -1000.0F;
     task->m_pAnim = nullptr;
 }

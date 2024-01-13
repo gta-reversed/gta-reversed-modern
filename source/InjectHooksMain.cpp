@@ -1292,7 +1292,7 @@ void InjectHooksMain() {
     };
 
     const auto Animation = []() {
-        //CAnimBlendAssocGroup::InjectHooks();
+        CAnimBlendAssocGroup::InjectHooks();
         CAnimBlendAssociation::InjectHooks();
         CAnimBlendClumpData::InjectHooks();
         CAnimBlendHierarchy::InjectHooks();

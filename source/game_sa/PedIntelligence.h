@@ -7,6 +7,7 @@
 #pragma once
 
 #include "eEventType.h"
+#include "Enums/eMoveState.h"
 #include "TaskManager.h"
 #include "EventHandler.h"
 #include "EventGroup.h"
@@ -117,7 +118,7 @@ public:
     bool IsInACarOrEnteringOne();
     static bool AreFriends(const CPed& ped1, const CPed& ped2);
     bool IsPedGoingSomewhereOnFoot();
-    int32 GetMoveStateFromGoToTask();
+    eMoveState GetMoveStateFromGoToTask();
     void FlushIntelligence();
     bool TestForStealthKill(CPed* pTarget, bool bFullTest);
     void RecordEventForScript(int32 eventId, int32 eventPriority);
