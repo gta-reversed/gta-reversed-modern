@@ -44,15 +44,15 @@ CTaskSimpleDuck::CTaskSimpleDuck(const CTaskSimpleDuck& o) :
 CTaskSimpleDuck::~CTaskSimpleDuck() {
     if (m_DuckAnim) {
         m_DuckAnim->SetDefaultFinishCallback();
-        if (m_DuckAnim->m_fBlendAmount > 0.f && m_DuckAnim->m_fBlendDelta >= 0.f && (m_DuckAnim->m_nFlags & ANIMATION_PARTIAL)) {
-            m_DuckAnim->m_fBlendDelta = -8.f;
+        if (m_DuckAnim->m_BlendAmount > 0.f && m_DuckAnim->m_BlendDelta >= 0.f && (m_DuckAnim->m_Flags & ANIMATION_PARTIAL)) {
+            m_DuckAnim->m_BlendDelta = -8.f;
         }
     }
 
     if (m_MoveAnim) {
         m_MoveAnim->SetDefaultFinishCallback();
-        if (m_MoveAnim->m_fBlendAmount > 0.f && m_MoveAnim->m_fBlendDelta >= 0.f) {
-            m_MoveAnim->m_fBlendDelta = -8.f;
+        if (m_MoveAnim->m_BlendAmount > 0.f && m_MoveAnim->m_BlendDelta >= 0.f) {
+            m_MoveAnim->m_BlendDelta = -8.f;
         }
     }
 }
@@ -64,7 +64,7 @@ void CTaskSimpleDuck::DeleteDuckAnimCB(CAnimBlendAssociation* assoc, void* data)
     assert(self);
     assert(assoc);
 
-    switch (assoc->m_nAnimId) {
+    switch (assoc->m_AnimId) {
     case ANIM_ID_WEAPON_CROUCH:
     case ANIM_ID_DUCK_COWER: {
         self->m_DuckAnim = nullptr;
@@ -123,7 +123,7 @@ bool CTaskSimpleDuck::CanPedDuck(CPed* ped) {
 bool CTaskSimpleDuck::IsTaskInUseByOtherTasks() const {
     if (m_MoveCmd.IsZero()) {
         if (m_DuckAnim) {
-            if (m_DuckAnim->m_fBlendAmount >= 1.f && !m_bIsAborting && m_ShotWhizzingCounter <= 0) {
+            if (m_DuckAnim->m_BlendAmount >= 1.f && !m_bIsAborting && m_ShotWhizzingCounter <= 0) {
                 return false;
             }
         }
@@ -139,7 +139,7 @@ void CTaskSimpleDuck::AbortBecauseOfOtherDuck(CPed* ped) {
     }
 
     if (m_MoveAnim) {
-        m_MoveAnim->m_fBlendDelta = -8.0;
+        m_MoveAnim->m_BlendDelta = -8.0;
         m_DuckAnim->SetDefaultFinishCallback();
         m_MoveAnim = nullptr;
     }
@@ -205,12 +205,12 @@ void CTaskSimpleDuck::SetMoveAnim(CPed* ped) {
     };
 
     const auto IsCurrentMoveAnimGunCrouch = [this] {
-        return notsa::contains({ ANIM_ID_GUNCROUCHFWD, ANIM_ID_GUNCROUCHBWD }, m_MoveAnim->m_nAnimId);
+        return notsa::contains<AnimationId>({ ANIM_ID_GUNCROUCHFWD, ANIM_ID_GUNCROUCHBWD }, m_MoveAnim->m_AnimId);
     };
 
     if (m_MoveCmd.x == 0.f) {
         const auto ChangeAnimToIfIts = [&, this, ped](AnimationId toAnimId, AnimationId ifItsAnimId) {
-            if (m_MoveAnim && m_MoveAnim->m_nAnimId != ifItsAnimId) {
+            if (m_MoveAnim && m_MoveAnim->m_AnimId != ifItsAnimId) {
                 return;
             }
             if (m_MoveAnim) {
@@ -263,8 +263,8 @@ bool CTaskSimpleDuck::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent c
     case ABORT_PRIORITY_IMMEDIATE: { // 0x69210C
         // Replace/blend duck anim with idle anim
         if (m_DuckAnim) {
-            if (m_DuckAnim->m_nFlags & ANIMATION_PARTIAL) {
-                m_DuckAnim->m_fBlendDelta = -1000.f;
+            if (m_DuckAnim->m_Flags & ANIMATION_PARTIAL) {
+                m_DuckAnim->m_BlendDelta = -1000.f;
             } else {
                 CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 1000.f);
             }
@@ -273,7 +273,7 @@ bool CTaskSimpleDuck::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent c
         }
 
         if (m_MoveAnim) {
-            m_MoveAnim->m_fBlendDelta = -1000.f;
+            m_MoveAnim->m_BlendDelta = -1000.f;
             m_MoveAnim->SetDefaultFinishCallback();
             m_MoveAnim = nullptr;
         }
@@ -297,7 +297,7 @@ bool CTaskSimpleDuck::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent c
     }
 
     if (m_MoveAnim) { // 0x6921E5
-        switch (m_MoveAnim->m_nAnimId) {
+        switch (m_MoveAnim->m_AnimId) {
         case ANIM_ID_CROUCH_ROLL_L:
         case ANIM_ID_CROUCH_ROLL_R:
             return false;
@@ -307,9 +307,9 @@ bool CTaskSimpleDuck::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent c
     const auto blendDelta = (priority == ABORT_PRIORITY_URGENT) ? -8.f : -4.f;
 
     if (m_DuckAnim) {
-        if (m_DuckAnim->m_fBlendAmount > 0.f && m_DuckAnim->m_fBlendDelta >= 0.f) {
-            if (m_DuckAnim->m_nFlags & ANIMATION_PARTIAL) {
-                m_DuckAnim->m_fBlendDelta = blendDelta;
+        if (m_DuckAnim->m_BlendAmount > 0.f && m_DuckAnim->m_BlendDelta >= 0.f) {
+            if (m_DuckAnim->m_Flags & ANIMATION_PARTIAL) {
+                m_DuckAnim->m_BlendDelta = blendDelta;
             }
             CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, -blendDelta);
             ped->m_nSwimmingMoveState = eMoveState::PEDMOVE_STILL;
@@ -322,9 +322,9 @@ bool CTaskSimpleDuck::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent c
     }
 
     if (m_MoveAnim) {
-        if (m_MoveAnim->m_fBlendAmount > 0.f && m_MoveAnim->m_fBlendDelta >= 0.f) {
-            if (priority == ABORT_PRIORITY_URGENT || notsa::contains({ ANIM_ID_GUNCROUCHFWD, ANIM_ID_GUNCROUCHBWD }, m_MoveAnim->m_nAnimId)) {
-                m_MoveAnim->m_fBlendDelta = blendDelta;
+        if (m_MoveAnim->m_BlendAmount > 0.f && m_MoveAnim->m_BlendDelta >= 0.f) {
+            if (priority == ABORT_PRIORITY_URGENT || notsa::contains({ ANIM_ID_GUNCROUCHFWD, ANIM_ID_GUNCROUCHBWD }, m_MoveAnim->GetAnimId())) {
+                m_MoveAnim->m_BlendDelta = blendDelta;
                 m_MoveAnim->SetFlag(ANIMATION_STARTED, false);
             }                
         }
@@ -416,9 +416,9 @@ bool CTaskSimpleDuck::ProcessPed(CPed* ped) {
             m_DuckAnim->SetFinishCallback(DeleteDuckAnimCB, this);
 
             if (const auto weaponCruchAnim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_WEAPON_CROUCH)) { // 0x69454F
-                if (weaponCruchAnim->m_fBlendAmount > 0 && weaponCruchAnim->m_fBlendDelta >= 0.f) {
-                    if (weaponCruchAnim->m_nFlags & ANIMATION_PARTIAL) {
-                        weaponCruchAnim->m_fBlendDelta = -4.f;
+                if (weaponCruchAnim->m_BlendAmount > 0 && weaponCruchAnim->m_BlendDelta >= 0.f) {
+                    if (weaponCruchAnim->m_Flags & ANIMATION_PARTIAL) {
+                        weaponCruchAnim->m_BlendDelta = -4.f;
                     } else {
                         CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_IDLE, 4.f);
                     }

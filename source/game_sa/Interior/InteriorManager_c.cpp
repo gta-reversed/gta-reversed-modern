@@ -158,7 +158,7 @@ bool InteriorManager_c::AreAnimsLoaded(int32 animBlock) {
         default: return animBlock;
         }
     }();
-    return CAnimManager::GetAnimationBlock((AssocGroupId)animBlock)->bLoaded;
+    return CAnimManager::GetAnimationBlock((AssocGroupId)animBlock)->IsLoaded;
 }
 
 // 0x598010

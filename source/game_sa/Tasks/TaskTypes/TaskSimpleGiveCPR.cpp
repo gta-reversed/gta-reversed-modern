@@ -86,7 +86,7 @@ bool CTaskSimpleGiveCPR::MakeAbortable_Reversed(CPed* ped, eAbortPriority priori
     ) {
         if (m_pAnim) {
             m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
-            m_pAnim->m_fBlendDelta = -1000.0F;
+            m_pAnim->m_BlendDelta = -1000.0F;
             m_pAnim = nullptr;
         }
         return true;

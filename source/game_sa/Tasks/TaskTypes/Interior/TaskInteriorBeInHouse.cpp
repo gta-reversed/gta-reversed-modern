@@ -44,7 +44,7 @@ void CTaskInteriorBeInHouse::GetInfoForPedToUse(CPed* ped, int32* outDuration) {
             return { 0, 100 };
         }
         return { 90, 10 };
-    }();
+        }();
 
     const auto FindInterior = [this](std::initializer_list<eInteriorInfoType> types) {
         for (auto type : types) {
@@ -73,6 +73,11 @@ void CTaskInteriorBeInHouse::GetInfoForPedToUse(CPed* ped, int32* outDuration) {
         if (m_intInfo) {
             return;
         }
+        if (rndChance0To100 < chanceA + chanceB) {
+            FindInterior({ UNK_1 });
+            if (m_intInfo) {
+                return;
+            }
 
         FindInterior({ UNK_5 });
         if (m_intInfo) {

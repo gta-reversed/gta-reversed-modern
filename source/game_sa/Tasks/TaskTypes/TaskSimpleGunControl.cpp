@@ -150,7 +150,7 @@ bool CTaskSimpleGunControl::ProcessPed(CPed* ped) {
     }()) {
         // 0x62546E
         const auto anim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_GANG_GUNSTAND);
-        if (!anim || (anim->m_fBlendAmount < 1.f && anim->m_fBlendDelta <= 0.f)) {
+        if (!anim || (anim->m_BlendAmount < 1.f && anim->m_BlendDelta <= 0.f)) {
             CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_GANG_GUNSTAND);
         }
     }

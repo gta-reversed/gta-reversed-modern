@@ -285,7 +285,7 @@ int8 CAEPedSpeechAudioEntity::GetSexForSpecialPed(uint32 a1) {
 // Methods
 // 0x4E46B0
 bool CAEPedSpeechAudioEntity::IsGlobalContextImportantForWidescreen(int16 globalCtx) {
-    return notsa::contains({4, 2}, m_nVoiceType) || notsa::contains({13, 15, 116}, globalCtx);
+    return notsa::contains<int>({4, 2}, m_nVoiceType) || notsa::contains<int>({13, 15, 116}, globalCtx);
 }
 
 // 0x4E47E0

@@ -3,6 +3,7 @@
 #include "Base.h"
 
 #include "Vector.h"
+#include "InteriorInfo_t.h"
 
 class CEntity;
 class CPed;

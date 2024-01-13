@@ -138,10 +138,10 @@ CTask* CTaskComplexWalkAlongsidePed::ControlSubTask(CPed* ped) {
                     }
 
                     const auto IncreaseWalkAnimSpeed = [](CAnimBlendAssociation* walkAnim) {
-                        walkAnim->SetSpeed(std::min(1.25f, walkAnim->m_fSpeed + 0.0125f));
+                        walkAnim->SetSpeed(std::min(1.25f, walkAnim->m_Speed + 0.0125f));
                     };
                     const auto DecreaseWalkAnimSpeed = [](CAnimBlendAssociation* walkAnim) {
-                        walkAnim->SetSpeed(std::max(0.85f, walkAnim->m_fSpeed - 0.0125f));
+                        walkAnim->SetSpeed(std::max(0.85f, walkAnim->m_Speed - 0.0125f));
                     };
 
                     if (pedToTargetPtDist2DSq >= sq(0.25f)) {

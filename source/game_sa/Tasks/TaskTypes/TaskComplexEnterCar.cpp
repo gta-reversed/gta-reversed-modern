@@ -483,7 +483,7 @@ CTask* CTaskComplexEnterCar::CreateFirstSubTask(CPed* ped) {
 
     if (   !m_Car || m_Car->m_pFire
         || !CCarEnterExit::IsVehicleHealthy(m_Car) || !CCarEnterExit::IsPedHealthy(ped)
-        || !m_bAsDriver && !m_Car->m_nNumPassengers
+        || !m_bAsDriver && !m_Car->m_nMaxPassengers                                         // Wants to enter as passenger, but there are no passenger seats
         || m_Car->IsTrain() && m_Car->AsTrain()->trainFlags.bNotOnARailRoad
     ) {
         return C(TASK_FINISHED);
@@ -491,7 +491,7 @@ CTask* CTaskComplexEnterCar::CreateFirstSubTask(CPed* ped) {
 
     if (m_bAsDriver && !m_bQuitAfterDraggingPedOut && !m_bQuitAfterOpeningDoor) {
         if (const auto pedGrp = ped->GetGroup()) {
-            if (pedGrp->GetMembership().IsLeader(ped)) {
+            if (pedGrp->GetMembership().IsLeader(ped)) { // 0x643B15
                 pedGrp->GetIntelligence().AddEvent(CEventGroupEvent{ ped, new CEventLeaderEnteredCarAsDriver{ m_Car } });
             }
         }
@@ -674,9 +674,9 @@ CTask* CTaskComplexEnterCar::CreateSubTask(eTaskType taskType, CPed* ped) {
         if (m_Car) {
             CTaskSimpleCarSetPedOut::PositionPedOutOfCollision(ped, m_Car, m_TargetDoor);
 
-            assert(m_Car->m_nNumGettingIn < m_NumGettingInSet);
+            assert(m_Car->m_nNumGettingIn >= m_NumGettingInSet);
             m_Car->m_nNumGettingIn -= m_NumGettingInSet;
-            m_NumGettingInSet       = false;
+            m_NumGettingInSet       = 0;
 
             m_Car->ClearGettingInFlags(m_DoorFlagsSet);
             m_DoorFlagsSet = 0;

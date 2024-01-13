@@ -48,6 +48,7 @@ solution "gta_reversed"
         vectorextensions "AVX2"
         defines { "NDEBUG" }
         optimize "Full"
+        flags { "LinkTimeOptimization" }
 
     filter "action:vs*"
         flags { "MultiProcessorCompile" }

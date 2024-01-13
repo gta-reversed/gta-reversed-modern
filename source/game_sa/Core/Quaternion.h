@@ -56,6 +56,7 @@ public:
 
     // Conjugate of a quat
     void Conjugate();
+    CQuaternion Conjugated() const { CQuaternion c = *this; c.Conjugate(); return c; }
 
     // Squared length of a quat
     float GetLengthSquared() const;

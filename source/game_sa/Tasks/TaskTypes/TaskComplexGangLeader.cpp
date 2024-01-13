@@ -210,7 +210,7 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
         }
     } else if (ShouldLoadGangAnims()) {
         const auto blk = CAnimManager::GetAnimationBlockIndex("gangs");
-        if (CAnimManager::ms_aAnimBlocks[blk].bLoaded) {
+        if (CAnimManager::ms_aAnimBlocks[blk].IsLoaded) {
             CAnimManager::AddAnimBlockRef(blk);
             m_animsReferenced = true;
         } else {
@@ -336,7 +336,7 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
                 std::array{ SMKCIG_PRTL, SMKCIG_PRTL_F },
                 [&](auto idx) {
                     const auto anim = anims[idx];
-                    return anim && anim->m_fCurrentTime < 0.5f;
+                    return anim && anim->m_CurrentTime < 0.5f;
                 })
             ) {
                 m_exhaleTimer.Start(2700);
