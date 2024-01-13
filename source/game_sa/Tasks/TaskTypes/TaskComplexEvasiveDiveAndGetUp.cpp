@@ -60,7 +60,7 @@ bool CTaskComplexEvasiveDiveAndGetUp::MakeAbortable(CPed* ped, eAbortPriority pr
     const auto isSubTaskAbortable = m_pSubTask->MakeAbortable(ped, priority, event);
     if (isSubTaskAbortable && priority == ABORT_PRIORITY_IMMEDIATE) {
         if (const auto a = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_EV_DIVE)) {
-            a->m_fBlendDelta = -1000.f;
+            a->m_BlendDelta = -1000.f;
         }
     }
     return isSubTaskAbortable;

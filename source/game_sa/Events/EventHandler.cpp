@@ -953,9 +953,9 @@ void CEventHandler::ComputeDamageResponse(CEventDamage* e, CTask* tactive, CTask
                 }
                 const auto tfall = CTask::Cast<CTaskSimpleFall>(tsimplest);
                 if (const auto a = tfall->m_pAnim) { // 0x4C08ED
-                    if (a->m_fBlendAmount > 0.5f && a->m_fBlendDelta >= 0.f && a->m_fCurrentTime < a->m_pHierarchy->m_fTotalTime) {
-                        e->m_nAnimGroup = (AssocGroupId)a->m_nAnimGroup;
-                        e->m_nAnimID    = (AnimationId)a->m_nAnimId;
+                    if (a->m_BlendAmount > 0.5f && a->m_BlendDelta >= 0.f && a->m_CurrentTime < a->m_BlendHier->m_fTotalTime) {
+                        e->m_nAnimGroup = a->m_AnimGroupId;
+                        e->m_nAnimID    = a->m_AnimId;
                         e->m_fAnimBlend = 4.f;
                         e->m_fAnimSpeed = 1.f;
                         return DoDieMaybeFall();
@@ -984,7 +984,7 @@ void CEventHandler::ComputeDamageResponse(CEventDamage* e, CTask* tactive, CTask
                         : ANIM_ID_FLOOR_HIT;
                     
                 } else if (!tgup->m_bHasPedGotUp) {
-                    e->m_nAnimID = tgup->m_Anim->m_nAnimId == ANIM_ID_GETUP_FRONT
+                    e->m_nAnimID = tgup->m_Anim->m_AnimId == ANIM_ID_GETUP_FRONT
                         ? ANIM_ID_FLOOR_HIT_F
                         : ANIM_ID_FLOOR_HIT;
                 }
@@ -1041,7 +1041,7 @@ void CEventHandler::ComputeDamageResponse(CEventDamage* e, CTask* tactive, CTask
 
             // Otherwise
             if (!e->m_bFallDown && !notsa::contains({ ANIM_ID_NO_ANIMATION_SET, ANIM_ID_DOOR_LHINGE_O }, e->m_nAnimID)) {
-                if (CAnimManager::GetAnimAssociation(e->m_nAnimGroup, e->m_nAnimID)->m_nFlags & ANIMATION_ADD_TO_BLEND) { // 0x4C04B7
+                if (CAnimManager::GetAnimAssociation(e->m_nAnimGroup, e->m_nAnimID)->m_Flags & ANIMATION_ADD_TO_BLEND) { // 0x4C04B7
                     if (!e->GetAnimAdded()) {
                         if (!notsa::contains({ANIM_ID_SHOT_PARTIAL, ANIM_ID_SHOT_LEFTP, ANIM_ID_SHOT_PARTIAL_B, ANIM_ID_SHOT_RIGHTP}, e->m_nAnimID)) {
                             const auto a = CAnimManager::BlendAnimation(m_Ped->m_pRwClump, e->m_nAnimGroup, e->m_nAnimID, e->m_fAnimBlend);
@@ -1946,8 +1946,8 @@ void CEventHandler::ComputePlayerCollisionWithPedResponse(CEventPlayerCollisionW
                 }
                 return {nullptr, new CTaskSimpleSay{28}}; // Just say something, and move on
             }
-        } else if (!notsa::contains({PEDMOVE_RUN, PEDMOVE_SPRINT}, e->m_movestate) || !notsa::contains({PEDMOVE_WALK, PEDMOVE_RUN, PEDMOVE_SPRINT}, e->m_victimMoveState)) { // 0x4B8EDC - One of the peds was walking and the othe was running/sprinting
-            if (e->m_movestate == PEDMOVE_STILL && notsa::contains({ PEDMOVE_WALK, PEDMOVE_RUN, PEDMOVE_SPRINT }, e->m_victimMoveState) && isCollisionBehindVictim) {
+        } else if (!notsa::contains({PEDMOVE_RUN, PEDMOVE_SPRINT}, e->GetMoveState()) || !notsa::contains({PEDMOVE_WALK, PEDMOVE_RUN, PEDMOVE_SPRINT}, e->GetVictimMoveState())) { // 0x4B8EDC - One of the peds was walking and the othe was running/sprinting
+            if (e->m_movestate == PEDMOVE_STILL && notsa::contains({ PEDMOVE_WALK, PEDMOVE_RUN, PEDMOVE_SPRINT }, e->GetVictimMoveState()) && isCollisionBehindVictim) {
                 DoLookAt(plyr, 2'000);
                 return {
                     e->m_victimMoveState != PEDMOVE_WALK
@@ -1955,8 +1955,8 @@ void CEventHandler::ComputePlayerCollisionWithPedResponse(CEventPlayerCollisionW
                         : nullptr,
                     new CTaskSimpleSay{28}
                 };
-            } else if (notsa::contains({PEDMOVE_RUN, PEDMOVE_SPRINT}, e->m_movestate)) { // 0x4B8FBF
-                if (notsa::contains({PEDMOVE_NONE, PEDMOVE_STILL}, e->m_victimMoveState) && isCollisionInFrontOfPlayer && e->m_movestate == PEDMOVE_SPRINT) { // 0x4B8FCD
+            } else if (notsa::contains({PEDMOVE_RUN, PEDMOVE_SPRINT}, e->GetMoveState())) { // 0x4B8FBF
+                if (notsa::contains({PEDMOVE_NONE, PEDMOVE_STILL}, e->GetVictimMoveState()) && isCollisionInFrontOfPlayer && e->GetMoveState() == PEDMOVE_SPRINT) { // 0x4B8FCD
                     DoLookAt(plyr, 2'000);
                     return {nullptr, new CTaskSimpleSay{28}};
                 }

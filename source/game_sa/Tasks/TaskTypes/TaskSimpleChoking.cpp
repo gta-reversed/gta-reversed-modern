@@ -33,7 +33,7 @@ void CTaskSimpleChoking::UpdateChoke(CPed* victim, CPed* attacker, bool bIsTearg
         CEntity::ChangeEntityReference(m_pAttacker, attacker);
     }
     m_bIsFinished = false;
-    if (m_pAnim && m_pAnim->m_nAnimId != ANIM_ID_GAS_CWR) {
+    if (m_pAnim && m_pAnim->m_AnimId != ANIM_ID_GAS_CWR) {
         m_pAnim->SetDefaultFinishCallback();
         m_pAnim = CAnimManager::BlendAnimation(victim->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_GAS_CWR, 4.f);
         m_pAnim->SetFinishCallback([](CAnimBlendAssociation* a, void* data) {
