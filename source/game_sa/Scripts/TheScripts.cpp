@@ -819,7 +819,7 @@ int32 CTheScripts::GetActualScriptThingIndex(int32 ref, eScriptThingType type) {
         }
         break;
     case SCRIPT_THING_FIRE:
-        if (const auto& f = gFireManager.m_aFires[idx]; f.createdByScript && f.m_nScriptReferenceIndex == id) {
+        if (const auto& f = gFireManager.Get(idx); f.createdByScript && f.m_nScriptReferenceIndex == id) {
             return idx;
         }
         break;
@@ -888,7 +888,8 @@ int32 CTheScripts::GetNewUniqueScriptThingIndex(int32 index, eScriptThingType ty
 
 // 0x464D20
 int32 CTheScripts::GetScriptIndexFromPointer(CRunningScript* thread) {
-    return (thread - ScriptsArray.data()) / sizeof(CRunningScript);
+    assert(ScriptsArray.data() <= thread && thread < ScriptsArray.data() + ScriptsArray.size());
+    return std::distance(ScriptsArray.data(), thread);
 }
 
 /*!
