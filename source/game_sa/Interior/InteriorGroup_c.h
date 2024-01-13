@@ -10,15 +10,6 @@ class CPed;
 class Interior_c;
 struct InteriorInfo_t;
 
-enum class eInteriorInfoType {
-    UNK_1 = 1,
-    UNK_2 = 2,
-    UNK_3 = 3,
-    UNK_4 = 4,
-    UNK_5 = 5,
-    UNK_10 = 10
-};
-
 enum class eInteriorGroupType : int8 {
     HOUSE = 0,
     SHOP = 1,
