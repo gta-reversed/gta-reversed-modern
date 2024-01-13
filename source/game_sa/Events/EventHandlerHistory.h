@@ -5,13 +5,6 @@
 class CEvent;
 class CEventHandlerHistory {
 public:
-    CTask* m_AbortedTask{};
-    CEvent* m_CurrentNonTempEvent{};
-    CEvent* m_CurrentTempEvent{};
-    CEvent* m_StoredEventActive{};
-    CTaskTimer m_StoreTimer{};
-
-public:
     static void InjectHooks();
 
     CEventHandlerHistory() = default;
@@ -32,6 +25,13 @@ public:
     void TickStoredEvent(CPed*);
 
     void RecordAbortedTask(CTask* task) { m_AbortedTask = task; }
-};
+    auto GetAbortedTask() const { return m_AbortedTask; }
 
+private:
+    CTask*     m_AbortedTask{}; //< Active task aborted (Using `MakeAbortable`) the lastk tick - It's read/set, but the value (other than null checks) isn't used anywhere
+    CEvent*    m_CurrentNonTempEvent{};
+    CEvent*    m_CurrentTempEvent{};
+    CEvent*    m_StoredEventActive{};
+    CTaskTimer m_StoreTimer{};
+};
 VALIDATE_SIZE(CEventHandlerHistory, 0x1C);

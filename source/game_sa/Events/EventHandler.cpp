@@ -301,7 +301,7 @@ CEventHandler::CEventHandler(CPed* ped) :
 void CEventHandler::HandleEvents() {
     m_History.TickStoredEvent(m_Ped);
 
-    const auto lastAbortedTask  = m_History.m_AbortedTask;
+    const auto lastAbortedTask  = m_History.GetAbortedTask();
 
     const auto pedTM                   = &m_Ped->GetTaskManager();
     const auto primaryTask             = m_Ped->GetIntelligence()->GetActivePrimaryTask();
@@ -350,7 +350,7 @@ void CEventHandler::HandleEvents() {
             const auto activeTask = pedTM->GetActiveTask();
 
             const auto hasStoppedTimers = [&]{
-                if (!activeTask || activeTask->MakeAbortable(m_Ped, ABORT_PRIORITY_URGENT, priorityEvent)) { // NOTE/TODO: Don't we need to `m_History.RecordAbortedTask(activeTask)`?
+                if (!activeTask || activeTask->MakeAbortable(m_Ped, ABORT_PRIORITY_URGENT, priorityEvent)) {
                     pedTM->StopTimers(priorityEvent);
                     return true;
                 }
@@ -383,6 +383,7 @@ void CEventHandler::HandleEvents() {
             SetEventResponseTask(*priorityEvent);
             pedEG->Remove(priorityEvent);
         }
+
         pedEG->RemoveInvalidEvents(false);
         pedEG->Reorganise();
     } else if (!primaryTask) {
@@ -819,6 +820,8 @@ void CEventHandler::ComputeCreatePartnerTaskResponse(CEventCreatePartnerTask* e,
 
 // 0x4C0170
 void CEventHandler::ComputeDamageResponse(CEventDamage* e, CTask* tactive, CTask* tsimplest, CTask* abortedTaskEventResponse) {
+    UNUSED(abortedTaskEventResponse);
+
     m_EventResponseTask = [&]() -> CTask* {
         const auto DoComputeDamageAndResponseForPersonality = [&] {
             const auto ce = m_History.GetCurrentEvent();
@@ -2816,8 +2819,6 @@ void CEventHandler::ComputeWaterCannonResponse(CEventHitByWaterCannon* e, CTask*
 
 // 0x4C3870
 void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* pAbortedTaskEventResponse) {
-    UNUSED(pAbortedTaskEventResponse);
-
     m_PhysicalResponseTask = nullptr;
     m_EventResponseTask    = nullptr;
     m_AttackTask           = nullptr;
@@ -2857,7 +2858,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* pAbortedTaskEvent
         ComputeKnockOffBikeResponse(e, tactive, tsimplest);
         break;
     case EVENT_DAMAGE:
-        ComputeDamageResponse(static_cast<CEventDamage*>(e), tactive, tsimplest, task);
+        ComputeDamageResponse(static_cast<CEventDamage*>(e), tactive, tsimplest, pAbortedTaskEventResponse);
         break;
     case EVENT_DEATH:
         ComputeDeathResponse(static_cast<CEventDeath*>(e), tactive, tsimplest);
