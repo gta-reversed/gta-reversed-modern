@@ -39,7 +39,7 @@ void CTaskSimpleHitHead::FinishAnimCB(CAnimBlendAssociation* anim, void* data) {
 bool CTaskSimpleHitHead::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (priority == ABORT_PRIORITY_URGENT || priority == ABORT_PRIORITY_IMMEDIATE) {
         if (m_pAnim) {
-            m_pAnim->m_fBlendDelta = -4.0F;
+            m_pAnim->m_BlendDelta = -4.0F;
             m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
             m_pAnim = nullptr;
         }
@@ -49,7 +49,7 @@ bool CTaskSimpleHitHead::MakeAbortable_Reversed(CPed* ped, eAbortPriority priori
     }
 
     if (m_pAnim) {
-        m_pAnim->m_fBlendDelta = -4.0F;
+        m_pAnim->m_BlendDelta = -4.0F;
     }
     return false;
 }

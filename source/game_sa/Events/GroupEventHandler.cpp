@@ -290,7 +290,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderExitedCar(const CEventE
             pg->GetIntelligence().SetEventResponseTask(&m, task);
         };
         const auto isVehOnFire = mveh->m_pFireParticle && mveh->m_pFireParticle->GetPlayStatus() == eFxSystemPlayStatus::FX_PLAYING;
-        if (notsa::contains({ 15, 16 }, mveh->m_pHandlingData->m_nAnimGroup)) { // TODO: Enums
+        if (notsa::contains<int>({ 15, 16 }, mveh->m_pHandlingData->m_nAnimGroup)) { // TODO: Enums
             if (isVehOnFire) { // INVERTED - 0x5F9483 
                 SetTask(CTaskComplexSequence{
                     new CTaskComplexLeaveCarAsPassengerWait{mveh},

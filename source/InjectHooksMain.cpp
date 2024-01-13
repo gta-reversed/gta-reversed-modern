@@ -291,6 +291,7 @@
 #include "TaskSimpleLookAbout.h"
 #include "TaskComplexEvasiveDiveAndGetUp.h"
 #include "TaskComplexPartnerGreet.h"
+#include "Interior/TaskInteriorShopKeeper.h"
 #include "TaskComplexWaitForDryWeather.h"
 #include "TaskSimpleShakeFist.h"
 #include "TaskComplexFleeShooting.h"
@@ -828,7 +829,7 @@ void InjectHooksMain() {
         // CTaskInteriorBeInShop::InjectHooks();
             CTaskInteriorGoToInfo::InjectHooks();
         // CTaskInteriorLieInBed::InjectHooks();
-        // CTaskInteriorShopKeeper::InjectHooks();
+            CTaskInteriorShopKeeper::InjectHooks();
             CTaskInteriorSitAtDesk::InjectHooks();
         // CTaskInteriorSitInChair::InjectHooks();
             CTaskInteriorUseInfo::InjectHooks();
@@ -1310,7 +1311,7 @@ void InjectHooksMain() {
     };
 
     const auto Animation = []() {
-        //CAnimBlendAssocGroup::InjectHooks();
+        CAnimBlendAssocGroup::InjectHooks();
         CAnimBlendAssociation::InjectHooks();
         CAnimBlendClumpData::InjectHooks();
         CAnimBlendHierarchy::InjectHooks();

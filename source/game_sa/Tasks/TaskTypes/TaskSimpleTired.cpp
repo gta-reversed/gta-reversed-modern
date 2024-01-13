@@ -41,7 +41,7 @@ void CTaskSimpleTired::StartAnim(CPed* ped) {
 // 0x630FF0
 bool CTaskSimpleTired::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (m_TiredAnim && m_TiredAnim == RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_IDLE_TIRED)) {
-        m_TiredAnim->m_fBlendDelta = -4.f;
+        m_TiredAnim->m_BlendDelta = -4.f;
     }
     return true;
 }

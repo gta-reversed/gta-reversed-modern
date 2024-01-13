@@ -7,6 +7,7 @@
 #pragma once
 
 #include "eEventType.h"
+#include "Enums/eMoveState.h"
 #include "TaskManager.h"
 #include "EventHandler.h"
 #include "EventGroup.h"

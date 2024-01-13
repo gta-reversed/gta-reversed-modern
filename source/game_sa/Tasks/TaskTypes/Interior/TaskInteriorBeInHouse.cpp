@@ -6,7 +6,6 @@
 #include "Interior/InteriorGroup_c.h"
 #include "Interior/InteriorInfo_t.h"
 #include "Interior/Interior_c.h"
-//#include "Interior/TaskInteriorUseInfo.h"
 
 void CTaskInteriorBeInHouse::InjectHooks() {
     RH_ScopedVirtualClass(CTaskInteriorBeInHouse, 0x8701e8, 11);

@@ -263,11 +263,11 @@ void CPlayerPed::ReApplyMoveAnims() {
         if (CAnimBlendAssociation* anim = RpAnimBlendClumpGetAssociation(m_pRwClump, id)) {
             if (anim->GetHashKey() != CAnimManager::GetAnimAssociation(m_nAnimGroup, id)->GetHashKey()) {
                 CAnimBlendAssociation* addedAnim = CAnimManager::AddAnimation(m_pRwClump, m_nAnimGroup, id);
-                addedAnim->m_fBlendDelta = anim->m_fBlendDelta;
-                addedAnim->m_fBlendAmount = anim->m_fBlendAmount;
+                addedAnim->m_BlendDelta = anim->m_BlendDelta;
+                addedAnim->m_BlendAmount = anim->m_BlendAmount;
 
-                anim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
-                anim->m_fBlendDelta = -1000.0f;
+                anim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
+                anim->m_BlendDelta = -1000.0f;
             }
         }
     }
@@ -755,7 +755,7 @@ void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
 
 
     if (auto anim = RpAnimBlendClumpGetAssociation(m_pRwClump, ANIM_ID_FIRE))
-        anim->m_nFlags |= ANIMATION_STARTED & ANIMATION_UNLOCK_LAST_FRAME;
+        anim->m_Flags |= ANIMATION_STARTED & ANIMATION_UNLOCK_LAST_FRAME;
 
     TheCamera.ClearPlayerWeaponMode();
 }
@@ -1034,12 +1034,12 @@ void CPlayerPed::ProcessControl() {
             auto weaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_MINIGUN, eWeaponSkill::STD);
             if (m_pIntelligence->GetTaskUseGun()) {
                 auto animAssoc = m_pIntelligence->GetTaskUseGun()->m_pAnim;
-                if (animAssoc && animAssoc->m_fCurrentTime - animAssoc->m_fTimeStep < weaponInfo->m_fAnimLoopEnd) {
+                if (animAssoc && animAssoc->m_CurrentTime - animAssoc->m_TimeStep < weaponInfo->m_fAnimLoopEnd) {
                     if (m_pPlayerData->m_fGunSpinSpeed < 0.45f) {
                         m_pPlayerData->m_fGunSpinSpeed += CTimer::GetTimeStep() * 0.025f;
                         m_pPlayerData->m_fGunSpinSpeed = std::min(m_pPlayerData->m_fGunSpinSpeed, 0.45f);
                     }
-                    if (pad->GetWeapon(this) && GetActiveWeapon().m_TotalAmmo > 0 && animAssoc->m_fCurrentTime >= weaponInfo->m_fAnimLoopStart) 
+                    if (pad->GetWeapon(this) && GetActiveWeapon().m_TotalAmmo > 0 && animAssoc->m_CurrentTime >= weaponInfo->m_fAnimLoopStart) 
                         m_weaponAudio.AddAudioEvent(AE_WEAPON_FIRE_MINIGUN_AMMO);
                     else 
                         m_weaponAudio.AddAudioEvent(AE_WEAPON_FIRE_MINIGUN_NO_AMMO);

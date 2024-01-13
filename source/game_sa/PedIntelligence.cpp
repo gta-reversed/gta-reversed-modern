@@ -360,8 +360,8 @@ bool CPedIntelligence::GetUsingParachute() {
         return false;
     }
 
-    int32 blockID = animAssoc->m_pHierarchy->m_nAnimBlockId;
-    if (_stricmp(CAnimManager::ms_aAnimBlocks[blockID].szName, "parachute") != 0) {
+    int32 blockID = animAssoc->m_BlendHier->m_nAnimBlockId;
+    if (_stricmp(CAnimManager::ms_aAnimBlocks[blockID].Name, "parachute") != 0) {
         while (true) {
             animAssoc = RpAnimBlendGetNextAssociation(animAssoc);
             if (!animAssoc) {
@@ -687,10 +687,9 @@ bool CPedIntelligence::IsPedGoingSomewhereOnFoot() {
 // 0x601D70 
 eMoveState CPedIntelligence::GetMoveStateFromGoToTask() {
     const auto tSimplestActive = m_TaskMgr.GetSimplestActiveTask();
-    if (tSimplestActive && CTask::IsGoToTask(tSimplestActive)) {
-        return static_cast<CTaskSimpleGoTo*>(tSimplestActive)->m_moveState;
-    }
-    return PEDMOVE_STILL;
+    return tSimplestActive && CTask::IsGoToTask(tSimplestActive)
+        ? static_cast<CTaskSimpleGoTo*>(tSimplestActive)->m_moveState
+        : PEDMOVE_STILL;
 }
 
 // 0x601DA0

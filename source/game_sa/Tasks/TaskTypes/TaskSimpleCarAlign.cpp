@@ -104,7 +104,7 @@ bool CTaskSimpleCarAlign::MakeAbortable(CPed* ped, eAbortPriority priority, CEve
     switch (priority) {
     case ABORT_PRIORITY_IMMEDIATE: {
         if (m_anim) {
-            m_anim->m_fBlendDelta = -1000.f;
+            m_anim->m_BlendDelta = -1000.f;
         }
         return true;
     }

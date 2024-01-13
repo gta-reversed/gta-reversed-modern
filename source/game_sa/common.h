@@ -198,7 +198,7 @@ T stepto(const T& from, const T& to, float step) {
 
 template<typename T>
 T lerp(const T& from, const T& to, float t) {
-    // Same as from + (to - from) * t
+    // Same as `from + (to - from) * t` (Or `from + t * (to - from)`
     return static_cast<T>(to * t + from * (1.f - t));
 }
 
@@ -233,7 +233,7 @@ extern constexpr bool make_fourcc4(const char* line, const char abcd[4]) {
 }
 
 // shit
-extern constexpr uint32 make_fourcc4(const char fourcc[4]) {
+inline constexpr uint32 MakeFourCC(const char fourcc[4]) {
     return fourcc[0] << 0 |
            fourcc[1] << 8 |
            fourcc[2] << 16 |

@@ -284,7 +284,7 @@ AssocGroupId CClothes::GetDefaultPlayerMotionGroup() {
         return ANIM_GROUP_PLAYER;
 
     CAnimBlock* animBlock = CAnimManager::GetAnimationBlock(group);
-    if (!animBlock || !animBlock->bLoaded)
+    if (!animBlock || !animBlock->IsLoaded)
         return ANIM_GROUP_PLAYER;
 
     return group;

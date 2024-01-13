@@ -37,7 +37,7 @@ void CTaskComplexFallToDeath::UpdateAnims(CPed* ped) {
     for (auto& animId : { m_nAnimId, m_nAnimId1 }) {
         if (animId != ANIM_ID_UNDEFINED) {
             if (auto assoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, animId)) {
-                assoc->m_fBlendDelta = -1000.0f;
+                assoc->m_BlendDelta = -1000.0f;
             }
         }
     }
@@ -131,7 +131,7 @@ CTask* CTaskComplexFallToDeath::CreateNextSubTask_Reversed(CPed* ped) {
         if (!b0x4) {
             if (m_nAnimId != ANIM_ID_UNDEFINED) {
                 if (auto assoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, m_nAnimId)) {
-                    assoc->m_fBlendDelta = -1000.0f;
+                    assoc->m_BlendDelta = -1000.0f;
                 }
             }
             m_nAnimId1 = ANIM_ID_KO_SKID_FRONT;
