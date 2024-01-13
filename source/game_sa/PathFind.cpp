@@ -128,7 +128,7 @@ void CPathFind::Init() {
         m_aUnused[i] = nullptr;    // BUG: Out of array bounds write, same as in original code
     }
 
-    rng::fill(m_interiorIDs, 0xFF);
+    rng::fill(m_interiorIDs, (uint32)-1);
 }
 
 // 0x44E4E0
@@ -809,7 +809,7 @@ void CPathFind::StartNewInterior(int32 interiorNum) {
 
     // BUG: Possible endless loop if 8 interiors are loaded i think
     NewInteriorSlot = 0;
-    while (m_interiorIDs[NewInteriorSlot] != -1) {
+    while (m_interiorIDs[NewInteriorSlot] != (uint32)-1) {
         NewInteriorSlot++;
         assert(NewInteriorSlot < 8);
     }
@@ -1179,9 +1179,8 @@ float CPathFind::FindYCoorsForRegion(size_t y) {
 // 0x44DED0
 void CPathFind::AddInteriorLink(int32 intNodeA, int32 intNodeB) {
     const auto AddLink = [](int32 intIdx, int32 linkTo) {
-        // NOTE: Original code compared >= 0, but it's most likely -1.. If anything goes bad use `>= 0`
         const auto it = rng::find(ConnectsToGiven[intIdx], -1); 
-        assert(*it >= 0);
+        assert(!(*it >= 0)); // NOTE: Original code did a `while (*it >= 0), if anything goes bad use `>= 0` for `rng::find`
         *it = linkTo;
     };
     AddLink(intNodeA, intNodeB);
