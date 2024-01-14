@@ -43,13 +43,7 @@ CTask* CTaskComplexOnFire::CreateSubTask(eTaskType taskType) {
         return new CTaskComplexDie{
             WEAPON_UNARMED,
             ANIM_GROUP_DEFAULT,
-            ANIM_ID_KO_SHOT_FRONT_0,
-            4.0,
-            0.0,
-            false,
-            false,
-            eFallDir::FORWARD,
-            false
+            ANIM_ID_KO_SHOT_FRONT_0
         };
     case TASK_COMPLEX_SMART_FLEE_ENTITY:
         return new CTaskComplexSmartFleeEntity{

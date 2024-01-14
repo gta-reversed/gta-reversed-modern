@@ -39,6 +39,7 @@ enum eSecondaryTask : uint32 // array indexes
 class CTaskComplex;
 class CTaskSimple;
 class CPed;
+class CTaskComplexFacial;
 
 class CTaskManager {
 public:
@@ -72,11 +73,17 @@ public:
     */
     CTask* FindTaskByType(ePrimaryTasks taskIndex, eTaskType taskType);
 
-    /*
+    /*!
     * @addr 0x681810
     * @brief Get the secondary task at `taskIndex`
     */
     CTask* GetTaskSecondary(eSecondaryTask taskIndex);
+
+    /*!
+     * @brief GetTaskSecondary(TASK_SECONDARY_FACIAL_COMPLEX)
+     * @return The facial task (if any)
+    */
+    CTaskComplexFacial* GetTaskSecondaryFacial();
 
     /*
     * @addr unknown
@@ -176,9 +183,15 @@ public:
     void ManageTasks();
 
     // Why they doesn't have version for *primary tasks*? :thinking:
-    CTask* GetTaskPrimary(int32 taskIndex) noexcept {
+    CTask* GetTaskPrimary(int32 taskIndex) const noexcept {
         return m_aPrimaryTasks[taskIndex];
     }
+
+    //! @notsa
+    CTask* GetPresistentEventResponseTask() const;
+
+    //! @notsa
+    CTask* GetTemporaryEventResponseTask() const;
 
     /*!
     * Get all the primary tasks [there might be null entries]

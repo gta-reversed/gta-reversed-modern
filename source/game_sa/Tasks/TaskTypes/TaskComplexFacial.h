@@ -31,6 +31,7 @@ public:
     CTask* ControlSubTask(CPed* ped) override;
 
     void StopAll();
+    void SetRequest(eFacialExpression type1, int32 time1, eFacialExpression type2 = eFacialExpression::NONE, int32 duration2 = -1);
 
 private:
     friend void InjectHooksMain();

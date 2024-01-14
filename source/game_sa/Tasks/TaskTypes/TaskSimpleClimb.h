@@ -70,7 +70,14 @@ public:
     bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     eTaskType GetTaskType() const override { return Type; }
 
-    static CEntity* TestForClimb(CPed* ped, CVector& climbPos, float& fAngle, uint8& nSurfaceType, bool theBool);
+    // 0x6803A0
+    static CEntity* TestForClimb(
+        CPed*    ped,             //!< [in]  The ped that will preform the climbing
+        CVector& outClimbPos,     //!< [out] Climbing position
+        float&   outClimbHeading, //!< [out] Climbing heading
+        uint8&   outSurfaceType,  //!< [out] Surface type
+        bool     bLaunch          //!< [in]  Not sure
+    );
     static void* ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CVector& climbPos, float& angle, uint8& pSurfaceType, bool flag1, bool bStandUp, bool bVault);
     static CEntity* ScanToGrab(CPed* ped, CVector& climbPos, float& angle, uint8& pSurfaceType, bool flag1, bool bStandUp, bool bVault, CVector* pedPosition);
     static bool CreateColModel();

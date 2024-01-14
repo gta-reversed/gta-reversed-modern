@@ -19,8 +19,7 @@ public:
     CVector   m_impactNormal;
     CVector   m_impactPos;
     int8      m_moveState;
-    int8      field_31;
-    int8      field_32[2];
+    uint8     m_DirectionToWalkRoundCar;
 
 public:
     static void InjectHooks();

@@ -26,13 +26,9 @@ CScriptedEffectPairs* CScripted2dEffects::GetEffectPairs(const C2dEffect* effect
 }
 
 // 0x6F9F60
-int32 CScripted2dEffects::GetIndex(const C2dEffect* effect) {
-    return plugin::CallAndReturn<int32, 0x6F9F60, const C2dEffect*>(effect);
-
-    for (auto i = 0u; i < ms_effects.size(); i++) {
-        if (&ms_effects[i] == effect) {
-            return i;
-        }
+int32 CScripted2dEffects::GetIndex(const C2dEffectBase* effect) {
+    if (const auto idx = IndexOfEffect(effect)) {
+        return (int32)*idx;
     }
     return -1;
 }
@@ -50,10 +46,10 @@ void CScripted2dEffects::ReturnScripted2DEffect(int32 index) {
     return GetPedAttractorManager()->RemoveEffect(&ms_effects[index]);
 }
 
-auto CScripted2dEffects::IndexOfEffect(const C2dEffect* effect) -> std::optional<size_t> {
-    const auto idx = effect - ms_effects.data();
-    if (idx >= 0 && idx <= (ptrdiff_t)ms_effects.size()) {
-        return (size_t)idx;
+auto CScripted2dEffects::IndexOfEffect(const C2dEffectBase* effect) -> std::optional<size_t> {
+    const auto fx = reinterpret_cast<const C2dEffect*>(effect);
+    if (ms_effects.data() <= fx && fx < ms_effects.data() + ms_effects.size()) {
+        return (size_t)(fx - ms_effects.data());
     }
     return std::nullopt;
 }

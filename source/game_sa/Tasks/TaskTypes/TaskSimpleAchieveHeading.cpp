@@ -11,6 +11,16 @@ CTaskSimpleAchieveHeading::CTaskSimpleAchieveHeading(float fAngle, float changeR
     m_fMaxHeading     = maxHeading;
 }
 
+//! @notsa
+CTaskSimpleAchieveHeading::CTaskSimpleAchieveHeading(CPed* looker, CEntity* lookTowards, float changeRateMult, float maxHeading) :
+    CTaskSimpleAchieveHeading{
+        (lookTowards->GetPosition2D() - looker->GetPosition2D()).Heading(),
+        changeRateMult,
+        maxHeading
+    }
+{
+}
+
 // 0x668060
 bool CTaskSimpleAchieveHeading::ProcessPed(CPed* ped) {
     return plugin::CallMethodAndReturn<bool, 0x668060, CTaskSimpleAchieveHeading*, CPed*>(this, ped); // untested
