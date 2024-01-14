@@ -458,7 +458,7 @@ void CPedIntelligence::ClearTasks(bool bClearPrimaryTasks, bool bClearSecondaryT
             continue;
         }
 
-        if (task->MakeAbortable(m_pPed, ABORT_PRIORITY_URGENT, nullptr)) {
+        if (task->MakeAbortable(m_pPed)) {
             m_TaskMgr.SetTaskSecondary(nullptr, (eSecondaryTask)idx);
         } else {
             task->MakeAbortable(m_pPed, ABORT_PRIORITY_LEISURE, nullptr);

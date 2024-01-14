@@ -271,7 +271,7 @@ public:
                ped->m_pAttachedTo // From 0x496821
             || !commonBoat
             || subTaskType == TASK_SIMPLE_STAND_STILL
-            || m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)
+            || m_pSubTask->MakeAbortable(ped)
         ) {
             notsa::ScopeGuard makePedTalkOnReturn{ [this, ped] {
                 if (m_entityToSeek && m_entityToSeek->IsPed()) {
@@ -297,11 +297,11 @@ public:
             }
 
             if (!m_entityToSeek) {
-                return m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr) ? nullptr : m_pSubTask;
+                return m_pSubTask->MakeAbortable(ped) ? nullptr : m_pSubTask;
             }
 
             if (m_seekTimer.IsOutOfTime()) {
-                if (!m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+                if (!m_pSubTask->MakeAbortable(ped)) {
                     return m_pSubTask;
                 }
 
@@ -324,7 +324,7 @@ public:
             if (subTaskType == TASK_COMPLEX_FOLLOW_NODE_ROUTE) {
                 if (m_minEntityDist2D == 0.f || pedToSeekPosDist2dSq >= sq(m_minEntityDist2D - 1.f)) {
                     static_cast<CTaskComplexFollowNodeRoute*>(m_pSubTask)->SetTarget(ped, seekPos, m_maxEntityDist2D, m_moveStateRadius, m_followNodeThresholdHeightChange, false);
-                } else if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+                } else if (m_pSubTask->MakeAbortable(ped)) {
                     return CreateSubTask(TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL, ped);
                 }
             } else {
@@ -333,7 +333,7 @@ public:
                     return m_pSubTask;      
                 } else if (m_minEntityDist2D == 0.f || pedToSeekPosDist2dSq <= sq(m_minEntityDist2D + 1.f)) {
                     subTaskStandStill->GoToPoint(seekPos, m_maxEntityDist2D, m_moveStateRadius, false);
-                } else if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+                } else if (m_pSubTask->MakeAbortable(ped)) {
                     return CreateSubTask(TASK_COMPLEX_FOLLOW_NODE_ROUTE, ped);
                 }
             }

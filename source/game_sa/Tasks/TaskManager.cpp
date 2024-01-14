@@ -202,7 +202,7 @@ void CTaskManager::ParentsControlChildren(CTask* parent) {
         if (newSubTask == subTask) { // [Invered] Subtask hasn't changed, so continue
             task = subTask;
         } else { // Subtask has changed, abort old, set new
-            subTask->MakeAbortable(m_pPed, ABORT_PRIORITY_URGENT, nullptr);
+            subTask->MakeAbortable(m_pPed);
             ctask->SetSubTask(newSubTask);
             AddSubTasks(newSubTask);
             break;

@@ -102,7 +102,7 @@ bool CTaskSimpleGunControl::ProcessPed(CPed* ped) {
                     useGun->Reset(ped, m_targetEntity, m_targetPos, true, m_burstAmmoCnt);
                 }
             } else {
-                attack->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);
+                attack->MakeAbortable(ped);
                 return false;
             }
         } else {

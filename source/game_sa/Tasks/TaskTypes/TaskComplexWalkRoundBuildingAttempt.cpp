@@ -285,7 +285,7 @@ CTask* CTaskComplexWalkRoundBuildingAttempt::ControlSubTask(CPed* ped) {
 
     if (!m_routeHasPoints
      || m_isFollowingRouteNow
-     || !m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)
+     || !m_pSubTask->MakeAbortable(ped)
     ) {
         if (!m_routeHasPoints) {
             ComputeRoute(*ped);
@@ -293,7 +293,7 @@ CTask* CTaskComplexWalkRoundBuildingAttempt::ControlSubTask(CPed* ped) {
 
         if (m_pSubTask->GetTaskType() != TASK_COMPLEX_FOLLOW_POINT_ROUTE
          || ped->GetIntelligence()->m_AnotherStaticCounter <= 30
-         || !m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)
+         || !m_pSubTask->MakeAbortable(ped)
         ) {
             return m_pSubTask;
         }
