@@ -688,7 +688,9 @@ void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* ourEnt
         return;
     }
 
+    // Disable suspension lines of vehicles.
     const auto cdNumLines = std::exchange(ourColData->m_nNumLines, 0);
+
     for (auto& entity : std::span{ colEntities.data(), (size_t)numColliding }) {
         if (!entity || entity == ourEntity || (entity->IsPed() && entity->AsPed()->IsInVehicle())) {
             continue;
