@@ -19,7 +19,7 @@
 #include "UpsideDownCarCheck.h"
 #include "ScriptsForBrains.h"
 
-#include "extensions/SCMChunks.hpp"
+#include "SCMChunks.hpp"
 
 class CCheckpoint;
 
@@ -566,7 +566,7 @@ public:
             static constexpr uint8 GoToInst[] = { 0x02, 0x00, 0x01 };
 
             if (header->m_ChunkIndex == ChunkT::Index)
-                return (ChunkT*)header;
+                return header->As<ChunkT>();
 
             assert(!memcmp(header->m_InstrGoTo, GoToInst, sizeof(GoToInst)));
             header = reinterpret_cast<tSCMChunkHeader*>(&ScriptSpace[header->m_NextChunkOffset]);

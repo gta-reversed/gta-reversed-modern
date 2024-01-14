@@ -8,13 +8,13 @@ struct tSCMChunkHeader {
 
 	template<typename ChunkT = tSCMChunkHeader> requires std::is_base_of_v<tSCMChunkHeader, ChunkT>
 	ChunkT* As() {
-		// TODO: check m_ChunkIndex
+		assert(m_ChunkIndex == ChunkT::Index);
 		return (ChunkT*)this;
 	}
 
 	template<typename ChunkT = tSCMChunkHeader> requires std::is_base_of_v<tSCMChunkHeader, ChunkT>
 	const ChunkT* As() const {
-		// TODO: check m_ChunkIndex
+		assert(m_ChunkIndex == ChunkT::Index);
 		return (ChunkT*)this;
 	}
 };
