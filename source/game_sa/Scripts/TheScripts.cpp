@@ -303,10 +303,7 @@ void CTheScripts::ReadMultiScriptFileOffsetsFromScript() {
 // 0x4935A0
 uint32 CTheScripts::AddScriptCheckpoint(CVector at, CVector pointTo, float radius, int32 type) {
     const auto cp = rng::find_if(ScriptCheckpointArray, [](auto& cp) { return !cp.IsActive(); });
-    if (cp == ScriptCheckpointArray.end()) {
-        // In vanilla game does OOB access.
-        NOTSA_UNREACHABLE();
-    }
+    assert(cp != ScriptCheckpointArray.end()); // In vanilla game does OOB access.
 
     cp->m_bUsed = true;
     const auto color = [&type]() -> CRGBA {
@@ -349,10 +346,7 @@ uint32 CTheScripts::AddScriptEffectSystem(FxSystem_c* system) {
     const auto fx = rng::find_if(ScriptEffectSystemArray, [](auto& fx) {
         return !fx.IsActive();
     });
-    if (fx == ScriptEffectSystemArray.end()) {
-        // In vanilla game does OOB access.
-        NOTSA_UNREACHABLE();
-    }
+    assert(fx != ScriptEffectSystemArray.end()); // In vanilla game does OOB access.
 
     fx->m_bUsed = true;
     fx->m_pFxSystem = system;
@@ -365,10 +359,7 @@ uint32 CTheScripts::AddScriptSearchLight(CVector start, CEntity* entity, CVector
     const auto ssl = rng::find_if(ScriptSearchLightArray, [](auto& ssl) {
         return !ssl.IsActive();
     });
-    if (ssl == ScriptSearchLightArray.end()) {
-        // In vanilla game does OOB access.
-        NOTSA_UNREACHABLE();
-    }
+    assert(ssl != ScriptSearchLightArray.end()); // In vanilla game does OOB access.
 
     const auto idx = std::distance(ScriptSearchLightArray.begin(), ssl);
     RemoveScriptSearchLight(idx);
@@ -397,10 +388,8 @@ uint32 CTheScripts::AddScriptSphere(uint32 id, CVector posn, float radius) {
     const auto sphere = rng::find_if(ScriptSphereArray, [](auto& sphere) {
         return !sphere.IsActive();
     });
-    if (sphere == ScriptSphereArray.end()) {
-        // In vanilla game does OOB access.
-        NOTSA_UNREACHABLE();
-    }
+    assert(sphere != ScriptSphereArray.end()); // In vanilla game does OOB access.
+
     const auto idx = std::distance(ScriptSphereArray.begin(), sphere);
     sphere->m_nId     = idx + id;
     sphere->m_vCoords = posn;
@@ -468,10 +457,7 @@ void CTheScripts::AddToListOfConnectedLodObjects(CObject* obj1, CObject* obj2) {
     }
 
     const auto free = rng::find_if(ScriptConnectLodsObjects, [](auto& lod) { return lod.a == -1; });
-    if (free == ScriptConnectLodsObjects.end()) {
-        // In vanilla game does OOB access.
-        NOTSA_UNREACHABLE();
-    }
+    assert(free != ScriptConnectLodsObjects.end()); // In vanilla game does OOB access.
 
     free->a = idx1;
     free->b = idx2;
@@ -512,10 +498,7 @@ void CTheScripts::AddToVehicleModelsBlockedByScript(eModelID modelIndex) {
     }
 
     const auto free = rng::find(VehicleModelsBlockedByScript, MODEL_INVALID);
-    if (free == VehicleModelsBlockedByScript.end()) {
-        // In vanilla game does OOB access.
-        NOTSA_UNREACHABLE();
-    }
+    assert(free != VehicleModelsBlockedByScript.end()); // In vanilla game does OOB access.
 
     *free = modelIndex;
 }
