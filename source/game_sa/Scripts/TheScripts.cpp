@@ -641,7 +641,6 @@ void CTheScripts::CleanUpThisPed(CPed* ped) {
 
 // 0x486670
 void CTheScripts::CleanUpThisVehicle(CVehicle* vehicle) {
-    //plugin::Call<0x486670, CVehicle*>(vehicle);
     if (!vehicle || vehicle->IsCreatedBy(eVehicleCreatedBy::MISSION_VEHICLE)) {
         return;
     }
@@ -667,11 +666,6 @@ void CTheScripts::ClearAllSuppressedCarModels() {
 
 // 0x486B00
 void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* ourEntity) {
-    static uint32 dword_A95778 = 0;
-    if (!(dword_A95778 & 1)) {
-        dword_A95778 |= 1;
-    }
-
     std::array<CEntity*, 16> colEntities{};
     int16                    numColliding{};
 
@@ -1443,53 +1437,54 @@ void CTheScripts::DrawDebugAngledCube(const CVector& inf, const CVector& sup, co
 
 // 0x464980
 void CTheScripts::DrawScriptSpritesAndRectangles(bool drawBeforeFade) {
-    for (const auto& ir : IntroRectangles) {
-        if (ir.m_bDrawBeforeFade != drawBeforeFade) {
+    for (const auto& rt : IntroRectangles) {
+        if (rt.m_bDrawBeforeFade != drawBeforeFade) {
             continue;
         }
 
-        switch (ir.m_nType) {
+        switch (rt.m_nType) {
         case eScriptRectangleType::TYPE_1:
             FrontEndMenuManager.DrawWindowedText(
-                ir.cornerA.x, ir.cornerA.y,
-                ir.cornerB.x, // ?
-                ir.gxt1,
-                ir.gxt2,
-                ir.m_Alignment
+                rt.cornerA.x, rt.cornerA.y,
+                rt.cornerB.x, // ?
+                rt.gxt1,
+                rt.gxt2,
+                rt.m_Alignment
             );
             break;
         case eScriptRectangleType::TYPE_2:
             FrontEndMenuManager.DrawWindow(
-                CRect{ ir.cornerA, ir.cornerB },
-                ir.gxt1,
+                CRect{ rt.cornerA, rt.cornerB },
+                rt.gxt1,
                 0,
                 CRGBA{ 0, 0, 0, 190 },
-                ir.m_nTextboxStyle, // ?
+                rt.m_nTextboxStyle, // ?
                 true
             );
             break;
         case eScriptRectangleType::TYPE_3:
             CSprite2d::DrawRect(
-                CRect{ ir.cornerA, ir.cornerB },
-                ir.m_nTransparentColor
+                CRect{ rt.cornerA, rt.cornerB },
+                rt.m_nTransparentColor
             );
             break;
         case eScriptRectangleType::TYPE_4:
-            ScriptSprites[ir.m_nTextureId].Draw(
-                CRect{ ir.cornerA, ir.cornerB },
-                ir.m_nTransparentColor
+            ScriptSprites[rt.m_nTextureId].Draw(
+                CRect{ rt.cornerA, rt.cornerB },
+                rt.m_nTransparentColor
             );
             break;
         case eScriptRectangleType::TYPE_5: {
             // mid: Vector that points to the middle of line A-B from A.
             // vAM: A to mid.
-            const auto mid = (ir.cornerA + ir.cornerB) / 2.0f;
-            const auto vAM = mid - ir.cornerA;
-            const auto cos = std::cos(ir.m_nAngle), sin = std::sin(ir.m_nAngle);
+            const auto mid = (rt.cornerA + rt.cornerB) / 2.0f;
+            const auto vAM = mid - rt.cornerA;
+            const auto cos = std::cos(rt.m_nAngle);
+            const auto sin = std::sin(rt.m_nAngle);
 
             // This is 2D rotation, couldn't find a better function aside from
             // using matricies or quaternions.
-            ScriptSprites[ir.m_nTextureId].Draw(
+            ScriptSprites[rt.m_nTextureId].Draw(
                 -cos * vAM.x + sin * vAM.y + mid.x,
                 -sin * vAM.x - cos * vAM.y + mid.y,
                 +sin * vAM.y + cos * vAM.x + mid.x,
@@ -1498,7 +1493,7 @@ void CTheScripts::DrawScriptSpritesAndRectangles(bool drawBeforeFade) {
                 +cos * vAM.y - sin * vAM.x + mid.y,
                 +cos * vAM.x - sin * vAM.y + mid.x,
                 +sin * vAM.x + cos * vAM.y + mid.y,
-                ir.m_nTransparentColor
+                rt.m_nTransparentColor
             );
             break;
         }
