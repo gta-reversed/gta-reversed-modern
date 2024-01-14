@@ -481,7 +481,7 @@ void CTheScripts::AddToListOfSpecialAnimGroupsAttachedToCharModels(int32 modelId
     }
 
     free->m_nModelID = modelId;
-    std::strcpy(free->m_IfpName, ifpName);
+    std::strncpy(free->m_IfpName, ifpName, sizeof(free->m_IfpName));
 }
 
 // 0x470390
