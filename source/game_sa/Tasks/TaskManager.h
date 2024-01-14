@@ -61,6 +61,12 @@ public:
     CTask* GetActiveTask();
 
     /*!
+    * @notsa
+    * @brief Get the highest priority task's index
+    */
+    size_t GetActiveTaskIndex() const;
+
+    /*!
     * @addr 0x681740
     * @brief Find the first task with type `taskType`
     * Can be replced with `Find<T>(true)`
@@ -111,7 +117,11 @@ public:
 
     /*!
     * @addr 0x681920
-    * @brief Set the next sub task of `task`
+    * @brief Set the next sub task of a task in the task tree of `task`
+    *
+    * Traverses the task tree until up until it can create a new sub-task (Using `CreateNextSubTask`)
+    * All old sub-tasks are deleted (freed) (By `SetSubTask`).
+    * If no new sub-task can be created the last task (that is in one of the task slots) will not be freed.
     */
     void SetNextSubTask(CTaskComplex* task);
 
@@ -121,22 +131,22 @@ public:
     * @addr 0x6819D0
     * @brief Get simplest active primary task
     */
-    CTask* GetSimplestActiveTask() { return GetSimplestTask(GetActiveTask()); }
+    CTask* GetSimplestActiveTask() { return GetLastTaskOf(GetActiveTask()); }
 
     /*
     * @addr 0x681A00
-    * @brief Get the simplest task of the given primary task at `taskIndex`
+    * @brief Last task in the task-chain
     */
-    CTask* GetSimplestTask(ePrimaryTasks taskIndex) { return GetSimplestTask(GetTaskPrimary(taskIndex)); }
+    CTask* GetLastTaskOf(ePrimaryTasks taskIndex) const { return GetLastTaskOf(GetTaskPrimary(taskIndex)); }
 
     /*!
     * @addr 0x681970
     * @param The first task, `nullptr` is allowed, in which case it is returned.
-    * @return Last task in the task-chain
+    * @return Last task in the task-chain (Possible `task` itself) 
     *
-    * This function has a horrible naming, it should be `GetLastSubTask` or of similar nature.
+    * This function had horrible naming, original name was `GetSimplestTask`
     */
-    static CTask* GetSimplestTask(CTask* task);
+    static CTask* GetLastTaskOf(CTask* task);
 
     /*!
     * @addr 0x681A30
@@ -369,6 +379,7 @@ protected:
     * @param changeTo The new slot to be set, allowed to be `nullptr`, in which case `taskInSlot` is deleted and nulled out
     */
     void ChangeTaskInSlot(CTask*& taskInSlot, CTask* changeTo);
+
 private:
     CTaskManager* Constructor(CPed* ped) {
         this->CTaskManager::CTaskManager(ped);

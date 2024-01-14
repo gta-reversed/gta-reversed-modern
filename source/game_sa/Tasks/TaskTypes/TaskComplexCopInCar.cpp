@@ -208,7 +208,7 @@ CTask* CTaskComplexCopInCar::CreateNextSubTask(CPed* ped) {
 CTask* CTaskComplexCopInCar::CreateFirstSubTask(CPed* ped) {
     ped->GetIntelligence()->SetPedDecisionMakerType(DM_EVENT_SHOT_FIRED);
     if (!m_Cop) {
-        m_bSuspectDeadOrLost = true;
+        m_bSuspectDeadOrLost = true; // TODO/NOTE: Weird???
     }
     return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
 }

@@ -7,8 +7,8 @@ public:
     CVehicle*  m_Vehicle;
     int32      m_LeanAnimDurationInMs;
     int8       field_10;
-    CAnimBlendAssociation* m_LeanAnimAssoc;
-    int32      m_nAnimId;
+    CAnimBlendAssociation* m_LeanAnim;
+    int32      m_LastAnimId;
     CTaskTimer m_LeanTimer;
     bool       m_bFinished;
     int8       m_LeanAnimId;

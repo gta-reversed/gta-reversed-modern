@@ -558,7 +558,7 @@ void CPedIntelligence::ProcessAfterProcCol() {
     if (activeSimplestTask && activeSimplestTask->IsSimple()) {
         bool bPositionSet = static_cast<CTaskSimple*>(activeSimplestTask)->SetPedPosition(m_pPed);
         if (!bPositionSet) {
-            auto* simplestTask = m_TaskMgr.GetSimplestTask(TASK_PRIMARY_DEFAULT);
+            auto* simplestTask = m_TaskMgr.GetLastTaskOf(TASK_PRIMARY_DEFAULT);
             if (simplestTask && simplestTask->IsSimple()) {
                 bPositionSet = simplestTask->AsSimple()->SetPedPosition(m_pPed);
             }
@@ -847,21 +847,9 @@ void CPedIntelligence::RemoveAllInterestingEntities() {
 // 0x602350
 bool CPedIntelligence::IsPedGoingForCarDoor() {
     auto* task = m_TaskMgr.GetSimplestActiveTask();
-    if (task) {
-        if (task->GetTaskType() == TASK_COMPLEX_GO_TO_CAR_DOOR_AND_STAND_STILL) {
+    for (auto i = 0; task && i < 3; i++, task = task->GetParent()) {
+        if (CTask::IsA<TASK_COMPLEX_GO_TO_CAR_DOOR_AND_STAND_STILL>(task)) {
             return true;
-        }
-
-        CTask* parentTask = task->m_pParentTask;
-        if (parentTask) {
-            if (parentTask->GetTaskType() == TASK_COMPLEX_GO_TO_CAR_DOOR_AND_STAND_STILL) {
-                return true;
-            }
-
-            CTask* grandParentTask = parentTask->m_pParentTask;
-            if (grandParentTask && grandParentTask->GetTaskType() == TASK_COMPLEX_GO_TO_CAR_DOOR_AND_STAND_STILL) {
-                return true;
-            }
         }
     }
     return false;
