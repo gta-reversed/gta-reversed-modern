@@ -566,9 +566,6 @@ void CTheScripts::CleanUpThisPed(CPed* ped) {
         case eVehicleType::VEHICLE_TYPE_HELI: {
             FixMission(MISSION_HELI_FLYTOCOORS);
 
-            // event.__vftable           = (CEventScriptCommand_vtbl*)0x461C4000;
-            // event.m_nTimeActive       = 0xC61C4000;
-            // *(_DWORD*)&event.m_bValid = 0x447A0000;
             veh->m_autoPilot.m_vecDestinationCoors = CVector{ 10'000.0f, -10'000.0f, 1'000.0f };
             veh->AsHeli()->m_fMinAltitude          = 1000.0f;
             veh->AsHeli()->m_fMaxAltitude          = 1000.0f;
@@ -577,9 +574,6 @@ void CTheScripts::CleanUpThisPed(CPed* ped) {
         case eVehicleType::VEHICLE_TYPE_PLANE: {
             FixMission(MISSION_PLANE_FLYTOCOORS);
 
-            // event.__vftable           = (CEventScriptCommand_vtbl*)0x461C4000;
-            // event.m_nTimeActive       = 0x461C4000;
-            // *(_DWORD*)&event.m_bValid = 0x447A0000;
             veh->m_autoPilot.m_vecDestinationCoors = CVector{ 10'000.0f, 10'000.0f, 1'000.0f };
             veh->AsPlane()->m_minAltitude          = 1000.0f;
             veh->AsPlane()->m_maxAltitude          = 1000.0f;
