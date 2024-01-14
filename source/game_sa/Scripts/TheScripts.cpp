@@ -124,11 +124,11 @@ void CTheScripts::Init() {
 
     if (CGame::bMissionPackGame) {
         while (FrontEndMenuManager.CheckMissionPackValidMenu()) {
+            static char scrFile[MAX_PATH]{};
             CFileMgr::SetDirMyDocuments();
-            //notsa::format_to_sz(gString, "MPACK//MPACK{:d}//SCR.SCM", CGame::bMissionPackGame);
-            const auto scr = std::format("MPACK//MPACK{:d}//SCR.SCM", CGame::bMissionPackGame);
+            notsa::format_to_sz(scrFile, "MPACK//MPACK{:d}//SCR.SCM", CGame::bMissionPackGame);
 
-            if (const auto file = CFileMgr::OpenFile(scr.c_str(), "rb")) {
+            if (const auto file = CFileMgr::OpenFile(scrFile, "rb")) {
                 const auto read = CFileMgr::Read(file, ScriptSpace.data(), MAIN_SCRIPT_SIZE);
                 CFileMgr::CloseFile(file);
 
