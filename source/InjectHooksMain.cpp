@@ -949,7 +949,7 @@ void InjectHooksMain() {
         // CTaskComplexUseClosestFreeScriptedAttractor::InjectHooks();
         // CTaskComplexUseClosestFreeScriptedAttractorRun::InjectHooks();
         // CTaskComplexUseClosestFreeScriptedAttractorSprint::InjectHooks();
-        // CTaskComplexUseEffect::InjectHooks();
+        CTaskComplexUseEffect::InjectHooks();
         CTaskComplexUseEffectRunning::InjectHooks();
         CTaskComplexUseEffectSprinting::InjectHooks();
         // CTaskComplexUseEntryExit::InjectHooks();
