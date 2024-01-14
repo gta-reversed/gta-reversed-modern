@@ -254,6 +254,7 @@
 #include "TaskSimpleTogglePedThreatScanner.h"
 #include "TaskComplexUseGoggles.h"
 #include "TaskComplexUseEffectRunning.h"
+#include "TaskComplexUseEffectSprinting.h"
 #include "TaskComplexCrossRoadLookAndAchieveHeading.h"
 #include "TaskComplexGoToPointAndStandStill.h"
 #include "TaskSimpleAchieveHeading.h"
@@ -950,7 +951,7 @@ void InjectHooksMain() {
         // CTaskComplexUseClosestFreeScriptedAttractorSprint::InjectHooks();
         // CTaskComplexUseEffect::InjectHooks();
         CTaskComplexUseEffectRunning::InjectHooks();
-        // CTaskComplexUseEffectSprinting::InjectHooks();
+        CTaskComplexUseEffectSprinting::InjectHooks();
         // CTaskComplexUseEntryExit::InjectHooks();
         // CTaskComplexUsePairedAttractor::InjectHooks();
         CTaskComplexUseScriptedBrain::InjectHooks();
