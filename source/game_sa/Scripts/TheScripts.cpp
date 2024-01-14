@@ -611,7 +611,7 @@ void CTheScripts::CleanUpThisPed(CPed* ped) {
             }
         }
 
-        if (auto* task = ped->GetTaskManager().GetTaskPrimary(3); task && task->GetTaskType() == type) {
+        if (auto* task = ped->GetTaskManager().GetTaskPrimary(TASK_PRIMARY_PRIMARY); task && task->GetTaskType() == type) {
             return true;
         }
 
@@ -624,17 +624,17 @@ void CTheScripts::CleanUpThisPed(CPed* ped) {
         }
 
         // Get them out of the car then make them wander.
-        auto* seq = new CTaskComplexSequence;
-        seq->AddTask(new CTaskComplexLeaveAnyCar(0, true, false));
-        seq->AddTask(CTaskComplexWander::GetWanderTaskByPedType(ped));
-        ped->GetEventGroup().Add(CEventScriptCommand(3, seq));
+        ped->GetEventGroup().Add(CEventScriptCommand(TASK_PRIMARY_PRIMARY, new CTaskComplexSequence(
+            new CTaskComplexLeaveAnyCar(0, true, false),
+            CTaskComplexWander::GetWanderTaskByPedType(ped)
+        )));
     } else {
         if (CheckTaskExists(TASK_COMPLEX_WANDER)) {
             return;
         }
 
         // Get them wander.
-        ped->GetEventGroup().Add(CEventScriptCommand(3, CTaskComplexWander::GetWanderTaskByPedType(ped)));
+        ped->GetEventGroup().Add(CEventScriptCommand(TASK_PRIMARY_PRIMARY, CTaskComplexWander::GetWanderTaskByPedType(ped)));
     }
 }
 
