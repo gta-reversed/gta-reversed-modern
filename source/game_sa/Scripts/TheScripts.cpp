@@ -258,10 +258,7 @@ void CTheScripts::InitialiseSpecialAnimGroup(uint16 index) {
 void CTheScripts::ReadObjectNamesFromScript() {
     auto* usedObjs = GetSCMChunk<tSCMUsedObjectsChunk>();
 
-#ifdef NOTSA_SCRIPT_DEBUG_LOGS
-    NOTSA_LOG_DEBUG("Number of used objects: {}", usedObjs->m_NumberOfUsedObjects);
-#endif
-
+    NOTSA_LOG_TRACE("Number of used objects: {}", usedObjs->m_NumberOfUsedObjects);
     NumberOfUsedObjects = usedObjs->m_NumberOfUsedObjects;
     assert(NumberOfUsedObjects < std::size(UsedObjectArray));
 
@@ -269,9 +266,7 @@ void CTheScripts::ReadObjectNamesFromScript() {
         UsedObjectArray[i].nModelIndex = 0; // To be updated via UpdateObjectIndices.
         std::memcpy(UsedObjectArray[i].szModelName, name, sizeof(name));
 
-#ifdef NOTSA_SCRIPT_DEBUG_LOGS
-        NOTSA_LOG_DEBUG("Script object #{}: \"{}\"", i, usedObjs->m_UsedObjectNames[i]);
-#endif
+        NOTSA_LOG_TRACE("Script object #{}: \"{}\"", i, usedObjs->m_UsedObjectNames[i]);
     }
 }
 
@@ -287,13 +282,11 @@ void CTheScripts::UpdateObjectIndices() {
 void CTheScripts::ReadMultiScriptFileOffsetsFromScript() {
     auto* sfi = GetSCMChunk<tSCMScriptFileInfoChunk>();
 
-#ifdef NOTSA_SCRIPT_DEBUG_LOGS
-    NOTSA_LOG_DEBUG("Main script size: {}", sfi->m_MainScriptSize);
-    NOTSA_LOG_DEBUG("Largest mission size: {}", sfi->m_LargestMissionScriptSize);
-    NOTSA_LOG_DEBUG("Number of mission scripts: {}", sfi->m_NumberOfMissionScripts);
-    NOTSA_LOG_DEBUG("Number of exclusive mission script: {}", sfi->m_NumberOfExclusiveMissionScripts);
-    NOTSA_LOG_DEBUG("Largest num of mission script local vars: {}", sfi->m_LargestNumberOfMissionScriptLocalVars);
-#endif
+    NOTSA_LOG_TRACE("Main script size: {}", sfi->m_MainScriptSize);
+    NOTSA_LOG_TRACE("Largest mission size: {}", sfi->m_LargestMissionScriptSize);
+    NOTSA_LOG_TRACE("Number of mission scripts: {}", sfi->m_NumberOfMissionScripts);
+    NOTSA_LOG_TRACE("Number of exclusive mission script: {}", sfi->m_NumberOfExclusiveMissionScripts);
+    NOTSA_LOG_TRACE("Largest num of mission script local vars: {}", sfi->m_LargestNumberOfMissionScriptLocalVars);
 
     MainScriptSize                             = sfi->m_MainScriptSize;
     LargestMissionScriptSize                   = sfi->m_LargestMissionScriptSize;
