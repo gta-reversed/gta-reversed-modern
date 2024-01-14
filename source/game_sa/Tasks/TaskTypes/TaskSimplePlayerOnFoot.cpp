@@ -66,7 +66,7 @@ bool CTaskSimplePlayerOnFoot::MakeAbortable(CPed* ped, eAbortPriority priority, 
                     return false;
                 if (event->GetEventType() == EVENT_DAMAGE) {
                     auto secondary = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK);
-                    if (secondary->GetTaskType() == TASK_SIMPLE_THROW_PROJECTILE || eventDamage->m_bKnockOffPed) {
+                    if (secondary->GetTaskType() == TASK_SIMPLE_THROW_PROJECTILE || eventDamage->m_bFallDown) {
                         ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)->MakeAbortable(ped, ABORT_PRIORITY_URGENT, event);
                     }
                     abortable = true;
@@ -85,7 +85,7 @@ bool CTaskSimplePlayerOnFoot::MakeAbortable(CPed* ped, eAbortPriority priority, 
         if ((ped->m_pTargetedObject || (ped->m_pPlayerData->m_nPlayerFlags & 8) != 0 || TheCamera.Using1stPersonWeaponMode()) && event &&
             (event->GetEventType() == EVENT_DAMAGE || event->GetEventType() == EVENT_IN_WATER)) {
             if (event->GetEventType() != EVENT_DAMAGE || eventDamage->m_damageResponse.m_bHealthZero && eventDamage->m_bAddToEventGroup ||
-                !ped->m_pAttachedTo && (eventDamage->m_bKnockOffPed || eventDamage->m_weaponType > WEAPON_LAST_WEAPON && eventDamage->m_weaponType != WEAPON_UZI_DRIVEBY)) {
+                !ped->m_pAttachedTo && (eventDamage->m_bFallDown || eventDamage->m_weaponType > WEAPON_LAST_WEAPON && eventDamage->m_weaponType != WEAPON_UZI_DRIVEBY)) {
                 TheCamera.ClearPlayerWeaponMode();
                 CWeaponEffects::ClearCrossHair(ped->m_nPedType);
                 CEntity::ClearReference(ped->m_pTargetedObject);
@@ -348,27 +348,27 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                     case WEAPON_FIRE_INSTANT_HIT:
                     case WEAPON_FIRE_AREA_EFFECT: {
                         CEntity* targetedObject = player->m_pTargetedObject;
-                        int32 fightCommand = 2;
-                        if (CTaskSimpleUseGun::RequirePistolWhip(player, targetedObject)) {
-                            fightCommand = 5;
-                        } else if (player->GetActiveWeapon().m_State == 2) {
-                            if (!pad->GetTarget() && !targetedObject && !playerData->m_bFreeAiming) {
-                                break;
+                        const auto gunCmd = [&]{
+                            if (CTaskSimpleUseGun::RequirePistolWhip(player, targetedObject)) {
+                                return eGunCommand::PISTOLWHIP;
                             }
-                            fightCommand = 1;
-                        }
+                            if (player->GetActiveWeapon().m_State == 2) {
+                                return eGunCommand::AIM;
+                            }
+                            return eGunCommand::FIRE;
+                        }();
                         CTask* secondaryTask = taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
                         if (secondaryTask) {
                             if (secondaryTask->GetTaskType() == TASK_SIMPLE_USE_GUN) {
                                 CTaskSimpleUseGun* taskUseGun = intelligence->GetTaskUseGun();
                                 if (taskUseGun) {
-                                    taskUseGun->ControlGun(player, targetedObject, fightCommand);
+                                    taskUseGun->ControlGun(player, targetedObject, gunCmd);
                                 }
                             } else {
                                 secondaryTask->MakeAbortable(player, ABORT_PRIORITY_URGENT, nullptr);
                             }
                         } else {
-                            auto* taskUseGun = new CTaskSimpleUseGun(targetedObject, CVector(0.0f, 0.0f, 0.f), fightCommand, 1, false);
+                            auto* taskUseGun = new CTaskSimpleUseGun(targetedObject, CVector(0.0f, 0.0f, 0.f), gunCmd, 1, false);
                             taskManager->SetTaskSecondary(taskUseGun, TASK_SECONDARY_ATTACK);
                             player->m_pPlayerData->m_fAttackButtonCounter = 0;
                         }
@@ -385,22 +385,21 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                         uint8 activeWeaponSlot = player->m_nActiveWeaponSlot;
                         CWeapon* activeWeapon = &player->m_aWeapons[activeWeaponSlot];
                         if (activeWeapon->m_Type == WEAPON_RLAUNCHER || activeWeapon->m_Type == WEAPON_RLAUNCHER_HS) {
-                            int32 fightCommand = 2;
-                            if (activeWeapon->m_State == WEAPONSTATE_RELOADING) {
-                                fightCommand = 1;
-                            }
+                            const auto gunCmd = activeWeapon->m_State == WEAPONSTATE_RELOADING
+                                ? eGunCommand::AIM
+                                : eGunCommand::FIRE;
                             CTask* secondaryTask = taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
                             if (secondaryTask) {
                                 if (secondaryTask->GetTaskType() == TASK_SIMPLE_USE_GUN) {
                                     if (intelligence->GetTaskUseGun()) {
                                         auto* taskUseGun = static_cast<CTaskSimpleUseGun*>(secondaryTask);
-                                        taskUseGun->ControlGun(player, player->m_pTargetedObject, fightCommand);
+                                        taskUseGun->ControlGun(player, player->m_pTargetedObject, gunCmd);
                                     }
                                 } else {
                                     taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)->MakeAbortable(player, ABORT_PRIORITY_URGENT, nullptr);
                                 }
                             } else {
-                                auto* taskUseGun = new CTaskSimpleUseGun(player->m_pTargetedObject, CVector(0.0f, 0.0f, 0.0f), fightCommand, 1, false);
+                                auto* taskUseGun = new CTaskSimpleUseGun(player->m_pTargetedObject, CVector(0.0f, 0.0f, 0.0f), gunCmd, 1, false);
                                 taskManager->SetTaskSecondary(taskUseGun, TASK_SECONDARY_ATTACK);
                             }
                         } else {
@@ -473,7 +472,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
             }
         } else {
             auto taskUseGun = (CTaskSimpleUseGun*)taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
-            taskUseGun->ControlGun(player, player->m_pTargetedObject, 4);
+            taskUseGun->ControlGun(player, player->m_pTargetedObject, eGunCommand::RELOAD);
         }
     }
 
@@ -499,7 +498,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                     taskUseGun->PlayerPassiveControlGun();
                 } else {
                     CTaskSimpleUseGun* taskUseGun = intelligence->GetTaskUseGun();
-                    taskUseGun->ControlGun(player, player->m_pTargetedObject, 7);
+                    taskUseGun->ControlGun(player, player->m_pTargetedObject, eGunCommand::END_NOW);
                 }
 
                 CCam* camera = &CCamera::GetActiveCamera();
@@ -517,13 +516,13 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
             player->Clear3rdPersonMouseTarget();
             playerData->m_bFreeAiming = 0;
         } else if (!taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
-            newSimpleUseGunTask = new CTaskSimpleUseGun(player->m_pTargetedObject, CVector(0.0f, 0.0f, 0.0f), 1, 1, false);
+            newSimpleUseGunTask = new CTaskSimpleUseGun(player->m_pTargetedObject);
             firingPoint.Set(0.0f, 0.0f, 0.0f);
 
             taskManager->SetTaskSecondary(newSimpleUseGunTask, TASK_SECONDARY_ATTACK);
         } else if (intelligence->GetTaskUseGun()) {
             auto taskUseGun = (CTaskSimpleUseGun*)taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
-            taskUseGun->ControlGun(player, player->m_pTargetedObject, 1);
+            taskUseGun->ControlGun(player, player->m_pTargetedObject, eGunCommand::AIM);
         }
         lookAtTarget = true;
     }
@@ -639,10 +638,10 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
             if (taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
                 if (intelligence->GetTaskUseGun()) {
                     auto taskUseGun = (CTaskSimpleUseGun*)taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
-                    taskUseGun->ControlGun(player, player->m_pTargetedObject, 1);
+                    taskUseGun->ControlGun(player, player->m_pTargetedObject, eGunCommand::AIM);
                 }
             } else {
-                newSimpleUseGunTask = new CTaskSimpleUseGun(player->m_pTargetedObject, CVector(0.0f, 0.0f, 0.0f), 1, 1, false);
+                newSimpleUseGunTask = new CTaskSimpleUseGun(player->m_pTargetedObject, CVector(0.0f, 0.0f, 0.0f), eGunCommand::AIM, 1, false);
                 firingPoint.Set(0.0f, 0.0f, 0.0f);
                 taskManager->SetTaskSecondary(newSimpleUseGunTask, TASK_SECONDARY_ATTACK);
             }

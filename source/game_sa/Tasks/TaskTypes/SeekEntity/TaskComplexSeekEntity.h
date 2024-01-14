@@ -4,7 +4,7 @@
 
 #include "TaskComplex.h"
 #include "TaskTimer.h"
-#include "Ped.h" // TODO: eMoveState (When possible move to an enum file)
+#include "eMoveState.h"
 #include "extensions/utility.hpp"
 #include "PedPlacement.h"
 #include "TaskSimpleCarDriveTimed.h"
@@ -18,9 +18,10 @@
 #include "TaskSimpleStandStill.h"
 #include "TaskSimpleTired.h"
 #include "PosCalculators/EntitySeekPosCalculator.h"
+#include "PosCalculators/EntitySeekPosCalculatorStandard.h"
 #include "PosCalculators/EntitySeekPosCalculatorXYOffset.h"
 
-template <std::derived_from<CEntitySeekPosCalculator> T_PosCalc>
+template <std::derived_from<CEntitySeekPosCalculator> T_PosCalc = CEntitySeekPosCalculatorStandard>
 class NOTSA_EXPORT_VTABLE CTaskComplexSeekEntity : public CTaskComplex {
     CEntity* m_entityToSeek{};
     int32 m_seekInterval{};
@@ -32,6 +33,8 @@ class NOTSA_EXPORT_VTABLE CTaskComplexSeekEntity : public CTaskComplex {
     CTaskTimer m_scanTimer{};
     CTaskTimer m_seekTimer{};
     T_PosCalc m_entitySeekPosCalculator{};
+
+    // Everything here mustn't be accesed without the proper `T_PosCalc` type!
     eMoveState m_moveState{ PEDMOVE_RUN };
     bool m_bPlayTiredAnim : 1{};
     bool m_bFaceEntityWhenDone : 1{};
@@ -42,6 +45,8 @@ public:
     * NOTE: Since this task is templated but uses the same task type for all templated tasks
     *       our template magic stuff in TaskManager might not work properly with it,
     *       because at runtime all templated tasks will have the same type.
+    *       Accessing anything before `m_entitySeekPosCalculator` is fine either way
+    *       but anything after it depends on the actual `T_PosCalc` used [which can't [easily] be figured out at runtime]
     */
     static constexpr auto Type = eTaskType::TASK_COMPLEX_SEEK_ENTITY;
 
@@ -386,6 +391,15 @@ public:
     void SetEntityMinDist2D(float v) {
         m_minEntityDist2D = v;
     }
+
+    auto GetEntityToSeek() const {
+        return m_entityToSeek;
+    }
+
+    auto GetMoveStateRadius() const {
+        return m_moveStateRadius;
+    }
+
 private:
     CTask* CreateSubTaskWhenPedIsTooFarFromEntity(CPed* ped, float pedToSeekPosDist2DSq) {
         return CreateSubTask(

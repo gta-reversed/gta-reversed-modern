@@ -285,6 +285,7 @@ public:
     auto AsTrain()            { return reinterpret_cast<CTrain*>(this); }
     auto AsTrain()      const { return reinterpret_cast<const CTrain*>(this); }
     auto AsPed()              { return reinterpret_cast<CPed*>(this); }
+    auto AsPed()        const { return reinterpret_cast<const CPed*>(this); }
     auto AsObject()           { return reinterpret_cast<CObject*>(this); }
     auto AsBuilding()         { return reinterpret_cast<CBuilding*>(this); }
     auto AsDummy()            { return reinterpret_cast<CDummy*>(this); }

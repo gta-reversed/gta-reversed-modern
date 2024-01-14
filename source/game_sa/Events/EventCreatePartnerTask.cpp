@@ -4,7 +4,7 @@
 
 // 0x5F6190
 CEventCreatePartnerTask::CEventCreatePartnerTask(int32 type, CPed* partner, bool isLeadSpeaker, float meetDist) :
-    m_type{type},
+    m_partnerType{type},
     m_partner{partner},
     m_isLeadSpeaker{isLeadSpeaker},
     m_meetDist{meetDist}

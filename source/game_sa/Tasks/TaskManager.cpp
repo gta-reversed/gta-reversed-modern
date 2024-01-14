@@ -9,6 +9,8 @@
 
 #include "TaskManager.h"
 
+#include "TaskComplexFacial.h"
+
 void CTaskManager::InjectHooks() {
     RH_ScopedClass(CTaskManager);
     RH_ScopedCategory("Tasks");
@@ -97,6 +99,10 @@ CTask* CTaskManager::FindTaskByType(ePrimaryTasks taskIndex, eTaskType taskId) {
 // 0x681810
 CTask* CTaskManager::GetTaskSecondary(eSecondaryTask taskIndex) {
     return m_aSecondaryTasks[taskIndex];
+}
+
+CTaskComplexFacial* CTaskManager::GetTaskSecondaryFacial() {
+    return CTask::Cast<CTaskComplexFacial>(GetTaskSecondary(TASK_SECONDARY_FACIAL_COMPLEX));
 }
 
 // NOTSA?
@@ -307,6 +313,19 @@ void CTaskManager::ManageTasks() {
         delete secondaryTask;
         secondaryTask = nullptr;
     }
+}
+// @notsa
+CTask* CTaskManager::GetPresistentEventResponseTask() const {
+    for (const auto i : { TASK_PRIMARY_PHYSICAL_RESPONSE, TASK_PRIMARY_EVENT_RESPONSE_NONTEMP }) {
+        if (const auto t = GetTaskPrimary(i)) {
+            return t;
+        }
+    }
+    return nullptr;
+}
+
+CTask* CTaskManager::GetTemporaryEventResponseTask() const {
+    return  GetTaskPrimary(TASK_PRIMARY_EVENT_RESPONSE_TEMP);
 }
 
 void CTaskManager::ChangeTaskInSlot(CTask*& taskInSlot, CTask* changeTo) {

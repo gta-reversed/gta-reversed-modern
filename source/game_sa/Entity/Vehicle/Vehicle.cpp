@@ -2592,7 +2592,7 @@ CVehicleAnimGroup& CVehicle::GetAnimGroup() const {
 }
 
 AssocGroupId CVehicle::GetAnimGroupId() const {
-    return (AssocGroupId)((int32)ANIM_GROUP_STDCARAMIMS + (int32)m_pHandlingData->m_nAnimGroup);
+    return m_pHandlingData->GetAnimGroupId();
 }
 
 // 0x6D3CB0

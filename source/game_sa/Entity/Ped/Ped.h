@@ -105,7 +105,7 @@ public:
     CAEPedSpeechAudioEntity m_pedSpeech;
     CAEPedWeaponAudioEntity m_weaponAudio;
     char                    field_43C[36];
-    CPed*                   field_460;
+    CPed*                   m_roadRageWith;
     char                    field_464[4];
     int32                   field_468;
 
@@ -121,7 +121,7 @@ public:
         bool bCanPointGunAtTarget : 1 = false;   // can ped point gun at target
         bool bIsTalking : 1 = false;             // is ped talking(see Chat())
 
-        bool bInVehicle : 1 = false;             // is in a vehicle
+        bool bInVehicle : 1 = false;             // is in a vehicle [Sometimes accessed as `(ped->m_nPedFlags >> 8) & 1`]
         bool bIsInTheAir : 1 = false;            // is in the air
         bool bIsLanding : 1 = false;             // is landing after being in the air
         bool bHitSomethingLastFrame : 1 = false; // has been in a collision last frame
@@ -513,7 +513,7 @@ public:
     void SetWeaponAccuracy(uint8 acc) { m_nWeaponAccuracy = acc; }
 
     CAcquaintance& GetAcquaintance() { return m_acquaintance; }
-    CVehicle* GetVehicleIfInOne() { return bInVehicle ? m_pVehicle : nullptr; }
+    CVehicle* GetVehicleIfInOne() const { return bInVehicle ? m_pVehicle : nullptr; }
 
     uint8 GetCreatedBy() const { return m_nCreatedBy; }
     void SetCreatedBy(ePedCreatedBy v) { m_nCreatedBy = v; }
@@ -530,7 +530,7 @@ public:
     CTaskManager& GetTaskManager() const { return m_pIntelligence->m_TaskMgr; }
     CEventGroup& GetEventGroup() { return m_pIntelligence->m_eventGroup; }
     CEventHandler& GetEventHandler() { return m_pIntelligence->m_eventHandler; }
-    CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.m_history; }
+    CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.GetHistory(); }
     CPedStuckChecker& GetStuckChecker() { return m_pIntelligence->m_pedStuckChecker; }
 
     CWeapon& GetWeaponInSlot(size_t slot) noexcept { return m_aWeapons[slot]; }

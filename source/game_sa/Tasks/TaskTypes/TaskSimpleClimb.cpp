@@ -301,12 +301,12 @@ bool CTaskSimpleClimb::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
 }
 
 // 0x6803A0
-CEntity* CTaskSimpleClimb::TestForClimb(CPed* ped, CVector& climbPos, float& fAngle, uint8& nSurfaceType, bool theBool) {
-    auto entity = (CEntity*)ScanToGrab(ped, climbPos, fAngle, nSurfaceType, theBool, false, false, nullptr);
+CEntity* CTaskSimpleClimb::TestForClimb(CPed* ped, CVector& outClimbPos, float& outClimbHeading, uint8& outSurfaceType, bool bLaunch) {
+    auto entity = (CEntity*)ScanToGrab(ped, outClimbPos, outClimbHeading, outSurfaceType, bLaunch, false, false, nullptr);
 
     if (entity) {
-        CVector point = climbPos;
-        float angle = fAngle;
+        CVector point = outClimbPos;
+        float angle = outClimbHeading;
 
         if (entity->IsPhysical()) {
             point = entity->GetMatrix() * point;
@@ -320,7 +320,7 @@ CEntity* CTaskSimpleClimb::TestForClimb(CPed* ped, CVector& climbPos, float& fAn
         if (!ScanToGrab(ped, v, angle, surfaceType2, false, true, false, &point)) {
             return entity;
         }
-        fAngle = -9999.9f;
+        outClimbHeading = -9999.9f;
     }
 
     return nullptr;

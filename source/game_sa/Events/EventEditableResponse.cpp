@@ -28,7 +28,7 @@ CEventEditableResponse::CEventEditableResponse(eTaskType taskType) :
 {
     m_bAddToEventGroup = true;
     m_taskId = (int16)taskType;
-    field_10 = -1;
+    m_FacialExpressionType = -1;
 }
 
 CEventEditableResponse* CEventEditableResponse::Constructor() {
@@ -49,7 +49,7 @@ bool CEventEditableResponse::HasEditableResponse() const {
 CEvent* CEventEditableResponse::Clone_Reversed() {
     CEventEditableResponse* clonedEvent = CloneEditable();
     clonedEvent->m_taskId = m_taskId;
-    clonedEvent->field_10 = field_10;
+    clonedEvent->m_FacialExpressionType = m_FacialExpressionType;
     clonedEvent->m_bAddToEventGroup = m_bAddToEventGroup;
     return clonedEvent;
 }
@@ -170,7 +170,7 @@ void CEventEditableResponse::ComputeResponseTaskType(CPed* ped, bool bDecisionMa
         -1,
         bDecisionMakerTypeInGroup,
         m_taskId,
-        field_10
+        m_FacialExpressionType
     );
 }
 
