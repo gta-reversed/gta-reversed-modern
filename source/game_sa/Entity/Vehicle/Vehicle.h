@@ -7,6 +7,7 @@
 #pragma once
 
 #include <optional>
+#include <extensions/EntityRef.hpp>
 
 #include "Physical.h"
 #include "AEVehicleAudioEntity.h"
@@ -178,6 +179,8 @@ VALIDATE_SIZE(tHydraulicData, 0x28);
 
 class NOTSA_EXPORT_VTABLE CVehicle : public CPhysical {
 public:
+    using Ref = notsa::EntityRef<CVehicle>;
+
     static constexpr auto NUM_VEHICLE_UPGRADES = 15u;
 
 public:
@@ -737,8 +740,8 @@ public: // NOTSA functions
     /// Is the vehicle totally flipped (Should probably be moved to `CPlaceable`)
     [[nodiscard]] bool IsTotallyUpsideDown() const { return GetUp().z < 0.f; }
 
-    /// Is there enough space for at least one more passenger
-    [[nodiscard]] bool HasSpaceForAPassenger() const { return m_nMaxPassengers > m_nNumPassengers + 1; }
+    /// Is there enough space for at least one more passenger - TODO: -1 is only for buses
+    [[nodiscard]] bool HasSpaceForAPassenger() const { return m_nMaxPassengers -1 > m_nNumPassengers; }
 
 private:
     friend void InjectHooksMain();

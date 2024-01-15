@@ -198,6 +198,7 @@
 #include "TaskComplexDestroyCarArmed.h"
 #include "TaskSimpleAbseil.h"
 #include "TaskComplexWanderCop.h"
+#include "TaskComplexEnterCarAsPassengerTimed.h"
 #include "TaskSimpleWaitUntilPedIsInCar.h"
 #include "TaskComplexUseMobilePhone.h"
 #include "TaskSimpleStandStill.h"
@@ -840,7 +841,7 @@ void InjectHooksMain() {
         CTaskComplexDragPedFromCar__InjectHooks();
         CTaskComplexDrivePointRoute::InjectHooks();
         CTaskComplexEnterCarAsDriverTimed::InjectHooks();
-        // CTaskComplexEnterCarAsPassengerTimed::InjectHooks();
+        CTaskComplexEnterCarAsPassengerTimed::InjectHooks();
         // CTaskComplexEnterCarAsPassengerWait::InjectHooks();
         // CTaskComplexEvasiveCower::InjectHooks();
         // CTaskComplexEvasiveDiveAndGetUp::InjectHooks();
