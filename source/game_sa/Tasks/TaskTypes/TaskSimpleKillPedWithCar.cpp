@@ -9,11 +9,11 @@ void CTaskSimpleKillPedWithCar::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x653C10);
     RH_ScopedInstall(Destructor, 0x653C90);
 
-    RH_ScopedInstall(DamageCarBonnet, 0x653CF0, { .reversed = false });
-    RH_ScopedVMTInstall(Clone, 0x655A20, { .reversed = false });
-    RH_ScopedVMTInstall(GetTaskType, 0x653C70, { .reversed = false });
-    RH_ScopedVMTInstall(MakeAbortable, 0x653C80, { .reversed = false });
-    RH_ScopedVMTInstall(ProcessPed, 0x6564A0, { .reversed = false });
+    RH_ScopedInstall(DamageCarBonnet, 0x653CF0);
+    RH_ScopedVMTInstall(Clone, 0x655A20);
+    RH_ScopedVMTInstall(GetTaskType, 0x653C70);
+    RH_ScopedVMTInstall(MakeAbortable, 0x653C80);
+    RH_ScopedVMTInstall(ProcessPed, 0x6564A0);
 }
 
 // 0x653C10
@@ -31,7 +31,19 @@ CTaskSimpleKillPedWithCar::CTaskSimpleKillPedWithCar(const CTaskSimpleKillPedWit
 
 // 0x653CF0
 void CTaskSimpleKillPedWithCar::DamageCarBonnet(CPed const*) {
-    return plugin::CallMethodAndReturn<void, 0x653CF0, CTaskSimpleKillPedWithCar*, CPed const*>(this, );
+    if (!m_Car->IsSubAutomobile()) {
+        return;
+    }
+
+    const auto flyingObj = m_Car->AsAutomobile()->RemoveBonnetInPedCollision();
+    if (!flyingObj) {
+        return;
+    }
+
+    const auto dir = m_Car->GetRight() * 0.1f + m_Car->GetUp() * 0.5f;
+    flyingObj->m_vecMoveSpeed += CGeneral::DoCoinFlip() ? dir : -dir;
+
+    flyingObj->ApplyTurnForce(m_Car->GetUp() * 10.f, m_Car->GetForward());
 }
 
 // 0x6564A0

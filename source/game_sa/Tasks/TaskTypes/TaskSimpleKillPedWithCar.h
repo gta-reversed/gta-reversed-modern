@@ -6,7 +6,7 @@
 class CPed;
 class CEvent;
 
-class NOTSA_EXPORT_VTABLE CTaskSimpleKillPedWithCar : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleKillPedWithCar final : public CTaskSimple {
 public:
     static constexpr auto Type = eTaskType::TASK_SIMPLE_KILL_PED_WITH_CAR;
 
@@ -20,13 +20,13 @@ public:
 
     CTask*    Clone() const override { return new CTaskSimpleKillPedWithCar{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
-    bool      MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, CEvent const* event = nullptr) override;
+    bool      MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, CEvent const* event = nullptr) override { return false; }
     bool      ProcessPed(CPed* ped) override;
 
 private: // Wrappers for hooks
     // 0x653C10
-    CTaskSimpleKillPedWithCar* Constructor(CVehicle*, float) {
-        this->CTaskSimpleKillPedWithCar::CTaskSimpleKillPedWithCar(, );
+    CTaskSimpleKillPedWithCar* Constructor(CVehicle* a, float b) {
+        this->CTaskSimpleKillPedWithCar::CTaskSimpleKillPedWithCar(a, b);
         return this;
     }
 

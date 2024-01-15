@@ -739,21 +739,19 @@ void CPhysical::ApplyMoveForce(CVector force)
 }
 
 // 0x542A50
-void CPhysical::ApplyTurnForce(CVector force, CVector point)
-{
-    if (!physicalFlags.bDisableTurnForce)
-    {
-        CVector vecCentreOfMassMultiplied{};
-        if (!physicalFlags.bInfiniteMass)
-            vecCentreOfMassMultiplied = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
-
-        if (physicalFlags.bDisableMoveForce) {
-            point.z = 0.0f;
-            force.z = 0.0f;
-        }
-        CVector vecDifference = point - vecCentreOfMassMultiplied;
-        m_vecTurnSpeed += CrossProduct(vecDifference, force) / m_fTurnMass;
+void CPhysical::ApplyTurnForce(CVector force, CVector point) {
+    if (physicalFlags.bDisableTurnForce) {
+        return;
     }
+    if (physicalFlags.bDisableMoveForce) {
+        point.z = 0.0f;
+        force.z = 0.0f;
+    }
+    // Adjust point by the centre off mass
+    point -= (physicalFlags.bInfiniteMass ? CVector{} : Multiply3x3(GetMatrix(), m_vecCentreOfMass));
+
+    // Apply angular velocity around this point relative to the centre
+    m_vecTurnSpeed += CrossProduct(point, force) / m_fTurnMass;
 }
 
 // 0x542B50
