@@ -984,14 +984,14 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, bool blend) {
         return;
     }
 
-    if (idleAnim->m_fBlendAmount < 1.0F)
+    if (idleAnim->m_BlendAmount < 1.0F)
         return;
 
     if (lookBackAnim
         && CCamera::GetActiveCamera().m_nMode == eCamMode::MODE_1STPERSON
         && CCamera::GetActiveCamera().m_nDirectionWasLooking == eLookingDirection::LOOKING_DIRECTION_BEHIND
     ) {
-        lookBackAnim->m_fBlendDelta = -1000.0F;
+        lookBackAnim->m_BlendDelta = -1000.0F;
     }
 
     // 0x6DF6DA
@@ -1008,7 +1008,7 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, bool blend) {
     ) {
         if ((CCamera::GetActiveCamera().m_nMode != eCamMode::MODE_1STPERSON
             || CCamera::GetActiveCamera().m_nDirectionWasLooking != eLookingDirection::LOOKING_DIRECTION_BEHIND)
-            && (!lookBackAnim || lookBackAnim->m_fBlendAmount < 1.0F && lookBackAnim->m_fBlendDelta <= 0.0F)
+            && (!lookBackAnim || lookBackAnim->m_BlendAmount < 1.0F && lookBackAnim->m_BlendDelta <= 0.0F)
         ) {
             CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, usedAnims->back, 4.0F);
         }
@@ -1016,9 +1016,9 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, bool blend) {
     }
 
     if (m_fSteerAngle == 0.0F || driveByAnim) {
-        if (lookLeftAnim)  lookLeftAnim->m_fBlendDelta  = -4.0F;
-        if (lookRightAnim) lookRightAnim->m_fBlendDelta = -4.0F;
-        if (lookBackAnim)  lookBackAnim->m_fBlendDelta  = -4.0F;
+        if (lookLeftAnim)  lookLeftAnim->m_BlendDelta  = -4.0F;
+        if (lookRightAnim) lookRightAnim->m_BlendDelta = -4.0F;
+        if (lookBackAnim)  lookBackAnim->m_BlendDelta  = -4.0F;
         return;
     }
 
@@ -1027,30 +1027,30 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, bool blend) {
 
     if (m_fSteerAngle < 0) {
         if (lookLeftAnim) {
-            lookLeftAnim->m_fBlendAmount = 0.0F;
-            lookLeftAnim->m_fBlendDelta  = 0.0F;
+            lookLeftAnim->m_BlendAmount = 0.0F;
+            lookLeftAnim->m_BlendDelta  = 0.0F;
         }
         if (lookRightAnim) {
-            lookRightAnim->m_fBlendAmount = fUsedAngle;
-            lookRightAnim->m_fBlendDelta  = 0.0F;
+            lookRightAnim->m_BlendAmount = fUsedAngle;
+            lookRightAnim->m_BlendDelta  = 0.0F;
         } else {
             CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, usedAnims->right, 4.0F);
         }
     } else {
         if (lookRightAnim) {
-            lookRightAnim->m_fBlendAmount = 0.0f;
-            lookRightAnim->m_fBlendDelta = 0.0F;
+            lookRightAnim->m_BlendAmount = 0.0f;
+            lookRightAnim->m_BlendDelta = 0.0F;
         }
         if (lookLeftAnim) {
-            lookLeftAnim->m_fBlendAmount = fUsedAngle;
-            lookLeftAnim->m_fBlendDelta = 0.0F;
+            lookLeftAnim->m_BlendAmount = fUsedAngle;
+            lookLeftAnim->m_BlendDelta = 0.0F;
         } else {
             CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, usedAnims->left, 4.0F);
         }
     }
 
     if (lookBackAnim) {
-        lookBackAnim->m_fBlendDelta = -4.0F;
+        lookBackAnim->m_BlendDelta = -4.0F;
     }
 }
 
@@ -2592,7 +2592,7 @@ CVehicleAnimGroup& CVehicle::GetAnimGroup() const {
 }
 
 AssocGroupId CVehicle::GetAnimGroupId() const {
-    return (AssocGroupId)((int32)ANIM_GROUP_STDCARAMIMS + (int32)m_pHandlingData->m_nAnimGroup);
+    return m_pHandlingData->GetAnimGroupId();
 }
 
 // 0x6D3CB0

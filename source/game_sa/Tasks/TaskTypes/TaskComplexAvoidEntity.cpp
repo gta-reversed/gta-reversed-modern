@@ -112,8 +112,8 @@ void CTaskComplexAvoidEntity::SetUpIK(CPed *ped) {
     if (!ped->GetIsOnScreen() || m_b1 || g_ikChainMan.GetLookAtEntity(ped) || ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_IK))
         return;
 
-    auto taskType = m_pParentTask->GetTaskType();
-    if (m_pParentTask && (taskType == TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING || taskType == TASK_COMPLEX_AVOID_ENTITY))
+    auto taskType = m_Parent->GetTaskType();
+    if (m_Parent && (taskType == TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING || taskType == TASK_COMPLEX_AVOID_ENTITY))
         return;
 
     CVector out = f20 - ped->GetPosition();

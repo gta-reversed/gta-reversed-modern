@@ -2,6 +2,7 @@
 
 #include "EventEditableResponse.h"
 #include "Vector.h"
+#include "Enums/eMoveState.h"
 
 class CObject;
 class CVehicle;
@@ -64,10 +65,10 @@ public:
     CVector m_firePos;
     float m_fireSize;
     float m_radius;
-    int32 m_moveState;
+    eMoveState m_moveState;
 
 public:
-    CEventPotentialWalkIntoFire(const CVector& firePos, float fireSize, int32 moveState);
+    CEventPotentialWalkIntoFire(const CVector& firePos, float fireSize, eMoveState moveState);
     ~CEventPotentialWalkIntoFire() override = default;
 
     eEventType GetEventType() const override { return EVENT_POTENTIAL_WALK_INTO_FIRE; }
@@ -80,7 +81,7 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CEventPotentialWalkIntoFire* Constructor(const CVector& firePos, float fireSize, int32 moveState);
+    CEventPotentialWalkIntoFire* Constructor(const CVector& firePos, float fireSize, eMoveState moveState);
 
     bool AffectsPed_Reversed(CPed* ped);
 };
@@ -90,12 +91,12 @@ VALIDATE_SIZE(CEventPotentialWalkIntoFire, 0x2C);
 
 class CEventPotentialWalkIntoPed : public CEventEditableResponse {
 public:
-    CVector m_targetPoint;
-    CPed*   m_ped;
-    int32   m_moveState;
+    CVector    m_targetPoint;
+    CPed*      m_ped;
+    eMoveState m_moveState;
 
 public:
-    CEventPotentialWalkIntoPed(CPed* ped, const CVector& targetPoint, int32 moveState);
+    CEventPotentialWalkIntoPed(CPed* ped, const CVector& targetPoint, eMoveState moveState);
     ~CEventPotentialWalkIntoPed() override;
 
     eEventType GetEventType() const override { return EVENT_POTENTIAL_WALK_INTO_PED; }
@@ -110,11 +111,13 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CEventPotentialWalkIntoPed* Constructor(CPed* ped, const CVector& targetPoint, int32 moveState);
+    CEventPotentialWalkIntoPed* Constructor(CPed* ped, const CVector& targetPoint, eMoveState moveState) {
+        this->CEventPotentialWalkIntoPed::CEventPotentialWalkIntoPed(ped, targetPoint, moveState);
+        return this;
+    }
 
     bool AffectsPed_Reversed(CPed* ped);
     bool TakesPriorityOver_Reversed(const CEvent& refEvent);
 };
 
 VALIDATE_SIZE(CEventPotentialWalkIntoPed, 0x28);
-

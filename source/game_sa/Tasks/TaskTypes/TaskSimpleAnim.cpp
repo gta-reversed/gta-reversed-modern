@@ -23,12 +23,12 @@ CTaskSimpleAnim::~CTaskSimpleAnim() {
         return;
 
     m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
-    m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
+    m_pAnim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
     if (!m_bHoldLastFrame &&
-        m_pAnim->m_fBlendAmount > 0.0f &&
-        m_pAnim->m_fBlendDelta >= 0.0f
+        m_pAnim->m_BlendAmount > 0.0f &&
+        m_pAnim->m_BlendDelta >= 0.0f
     ) {
-        m_pAnim->m_fBlendDelta = -4.0f;
+        m_pAnim->m_BlendDelta = -4.0f;
     }
     m_pAnim = nullptr;
 }
@@ -49,7 +49,7 @@ bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
             if (scriptCommand->m_task) {
                 if (scriptCommand->m_task->GetTaskType() == TASK_SIMPLE_NAMED_ANIM) {
                     if (m_pAnim)
-                        m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
+                        m_pAnim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
 
                     bSkipBlend = true;
                 }
@@ -59,10 +59,10 @@ bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
 
     if (!bSkipBlend) {
         if (m_pAnim) {
-            m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
+            m_pAnim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
             if (!m_bHoldLastFrame) {
-                if (m_pAnim->m_nFlags & ANIMATION_PARTIAL)
-                    m_pAnim->m_fBlendDelta = fBlend;
+                if (m_pAnim->m_Flags & ANIMATION_PARTIAL)
+                    m_pAnim->m_BlendDelta = fBlend;
                 else
                     CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, -fBlend);
             }

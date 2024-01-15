@@ -40,7 +40,7 @@ CTaskSimpleArrestPed::~CTaskSimpleArrestPed() {
 bool CTaskSimpleArrestPed::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (priority == ABORT_PRIORITY_IMMEDIATE) {
         if (m_Assoc) {
-            m_Assoc->m_fBlendDelta = -1000.0f;
+            m_Assoc->m_BlendDelta = -1000.0f;
             m_Assoc->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
             m_Assoc = nullptr;
         }
@@ -76,7 +76,7 @@ bool CTaskSimpleArrestPed::ProcessPed_Reversed(CPed* ped) {
         ped->m_fAimingRotation = angle;
         ped->m_fCurrentRotation = angle;
         ped->SetOrientation(0.0f, 0.0f, angle);
-        ped->m_pedIK.PointGunAtPosition(&point, m_Assoc->m_fBlendAmount);
+        ped->m_pedIK.PointGunAtPosition(&point, m_Assoc->m_BlendAmount);
         return false;
     }
 

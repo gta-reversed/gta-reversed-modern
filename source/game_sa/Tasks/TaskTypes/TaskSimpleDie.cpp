@@ -53,7 +53,7 @@ void CTaskSimpleDie::StartAnim(CPed* ped) {
         m_animAssociation = CAnimManager::BlendAnimation(ped->m_pRwClump, m_animGroupId, m_animId, m_blendDelta);
 
     m_animAssociation->SetFinishCallback(FinishAnimDieCB, this);
-    m_animAssociation->m_nFlags &=   ANIMATION_TRANSLATE_X | ANIMATION_TRANSLATE_Y
+    m_animAssociation->m_Flags &=   ANIMATION_TRANSLATE_X | ANIMATION_TRANSLATE_Y
                                    | ANIMATION_MOVEMENT
                                    | ANIMATION_PARTIAL
                                    | ANIMATION_FREEZE_LAST_FRAME
@@ -61,7 +61,7 @@ void CTaskSimpleDie::StartAnim(CPed* ped) {
                                    | ANIMATION_STARTED;
 
     if (m_animSpeed > 0.0f)
-        m_animAssociation->m_fSpeed = m_animSpeed;
+        m_animAssociation->m_Speed = m_animSpeed;
 
     ped->ClearAll();
     ped->m_fHealth = 0.0f;                     // todo: SetHealth or something ?
@@ -82,7 +82,7 @@ CTask* CTaskSimpleDie::Clone() const {
 bool CTaskSimpleDie::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (priority == ABORT_PRIORITY_IMMEDIATE) {
         if (m_animAssociation)
-            m_animAssociation->m_fBlendDelta = -1000.0f;
+            m_animAssociation->m_BlendDelta = -1000.0f;
 
         ped->SetPedState(PEDSTATE_IDLE);
         ped->SetMoveState(PEDMOVE_STILL);

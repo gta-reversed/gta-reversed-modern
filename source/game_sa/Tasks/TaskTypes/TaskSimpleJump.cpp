@@ -66,8 +66,8 @@ CTask* CTaskSimpleJump::Clone_Reversed() const {
 
 bool CTaskSimpleJump::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (m_pAnim) {
-        m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
-        m_pAnim->m_fBlendDelta = -4.0F;
+        m_pAnim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
+        m_pAnim->m_BlendDelta = -4.0F;
     }
 
     return priority == ABORT_PRIORITY_IMMEDIATE;
@@ -136,11 +136,11 @@ void CTaskSimpleJump::Launch(CPed* ped) {
 
     auto pSprintAnim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_SPRINT);
     if (pSprintAnim)
-        fHorizontalJumpSpeed = lerp(0.17F, 0.22F, pSprintAnim->m_fBlendAmount);
+        fHorizontalJumpSpeed = lerp(0.17F, 0.22F, pSprintAnim->m_BlendAmount);
     else {
         auto pRunAnim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_RUN);
         if (pRunAnim)
-            fHorizontalJumpSpeed = lerp(0.1F, 0.17F, pRunAnim->m_fBlendAmount);
+            fHorizontalJumpSpeed = lerp(0.1F, 0.17F, pRunAnim->m_BlendAmount);
     }
 
     float fJumpForce = (ped->IsPlayer() || m_bHighJump) ? 8.5F : 4.5F;
@@ -175,7 +175,7 @@ void CTaskSimpleJump::Launch(CPed* ped) {
     if (!m_pClimbEntity) {
         if (m_bClimbJump) {
             auto anim = CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_CLIMB_JUMP, 8.0F);
-            anim->m_nFlags |= ANIMATION_UNLOCK_LAST_FRAME;
+            anim->m_Flags |= ANIMATION_UNLOCK_LAST_FRAME;
         } else
             CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_JUMP_GLIDE, 8.0F);
     }
@@ -219,14 +219,14 @@ bool CTaskSimpleJump::StartLaunchAnim(CPed* ped) {
     }
 
     auto moveAnim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_SPRINT);
-    if (!moveAnim || moveAnim->m_fBlendAmount < 0.3F)
+    if (!moveAnim || moveAnim->m_BlendAmount < 0.3F)
         moveAnim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_RUN);
-    if (!moveAnim || moveAnim->m_fBlendAmount < 0.3F)
+    if (!moveAnim || moveAnim->m_BlendAmount < 0.3F)
         moveAnim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_WALK);
 
     float fMoveAnimBlendAmount = 0.0F;
-    if (moveAnim && moveAnim->m_fBlendAmount > 0.3F) {
-        fMoveAnimBlendAmount = moveAnim->m_fCurrentTime / moveAnim->m_pHierarchy->m_fTotalTime + 0.367F;
+    if (moveAnim && moveAnim->m_BlendAmount > 0.3F) {
+        fMoveAnimBlendAmount = moveAnim->m_CurrentTime / moveAnim->m_BlendHier->m_fTotalTime + 0.367F;
         if (fMoveAnimBlendAmount > 1.0F)
             fMoveAnimBlendAmount -= 1.0F;
     }
@@ -234,7 +234,7 @@ bool CTaskSimpleJump::StartLaunchAnim(CPed* ped) {
     m_pAnim = CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, fMoveAnimBlendAmount >= 0.5F ? ANIM_ID_JUMP_LAUNCH_R : ANIM_ID_JUMP_LAUNCH, 8.0F);
 
     if (ped->m_pPlayerData)
-        m_pAnim->m_fSpeed = CStats::GetFatAndMuscleModifier(STAT_MOD_2);
+        m_pAnim->m_Speed = CStats::GetFatAndMuscleModifier(STAT_MOD_2);
     m_pAnim->SetFinishCallback(JumpAnimFinishCB, this);
     ped->m_fAimingRotation = ped->m_fCurrentRotation;
 

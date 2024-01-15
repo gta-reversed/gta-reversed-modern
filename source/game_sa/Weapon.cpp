@@ -185,6 +185,7 @@ bool CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType we
             RpAnimBlendClumpGetFirstAssociation(victim->m_pRwClump, ANIMATION_800) ? ANIM_ID_FLOOR_HIT_F : ANIM_ID_FLOOR_HIT
         );
         if (floorHitAnim) {
+            floorHitAnim->SetFlag(ANIMATION_UNLOCK_LAST_FRAME, false);
             floorHitAnim->Start();
         }
         return true;
@@ -194,7 +195,7 @@ bool CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType we
         return true;
     }
 
-    if (!eventDmg.AffectsPed(victim)) {
+    if (!eventDmg.AffectsPed(victim)) { // 0x73A687
         return false;
     }
 
@@ -209,7 +210,10 @@ bool CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType we
     );
 
     bool ret = true;
-    if ((CWeaponInfo::GetWeaponInfo(weaponType)->m_nWeaponFire == eWeaponFire::WEAPON_FIRE_MELEE || weaponType == WEAPON_FALL && creator && creator->GetType() == ENTITY_TYPE_OBJECT) && !victim->bInVehicle) {
+    if (!victim->bInVehicle && (
+           (!notsa::IsFixBugs() || CWeaponInfo::TypeIsWeapon(weaponType)) && CWeaponInfo::GetWeaponInfo(weaponType)->m_nWeaponFire == eWeaponFire::WEAPON_FIRE_MELEE
+        || weaponType == WEAPON_FALL && creator && creator->GetType() == ENTITY_TYPE_OBJECT
+    )) { // 0x73A6F1
         eventDmg.ComputeAnim(victim, true);
         switch (eventDmg.m_nAnimID) {
         case ANIM_ID_SHOT_PARTIAL:
@@ -224,9 +228,9 @@ bool CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType we
                     (AnimationId)eventDmg.m_nAnimID
                 );
             }
-            anim->m_fBlendAmount = 0.f;
-            anim->m_fBlendDelta = eventDmg.m_fAnimBlend;
-            anim->m_fSpeed = eventDmg.m_fAnimSpeed;
+            anim->m_BlendAmount = 0.f;
+            anim->m_BlendDelta = eventDmg.m_fAnimBlend;
+            anim->m_Speed = eventDmg.m_fAnimSpeed;
             anim->Start();
             break;
         }
@@ -242,23 +246,23 @@ bool CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType we
                 (AnimationId)eventDmg.m_nAnimID,
                 eventDmg.m_fAnimBlend
             );
-            a->m_fSpeed = eventDmg.m_fAnimSpeed;
+            a->m_Speed = eventDmg.m_fAnimSpeed;
             a->SetFlag(ANIMATION_STARTED);
             break;
         }
         }
     }
-    bool isStealth = false;
-    if (creator && creator->IsPed()) {
-        const auto pcreator = creator->AsPed();
-        if (pcreator->GetTaskManager().GetActiveTask()->GetTaskType() == TASK_SIMPLE_STEALTH_KILL || weaponType == WEAPON_PISTOL_SILENCED) {
-            isStealth = true;
-        }
-    }
-    eventDmg.m_b05 = isStealth;
+
+    // 0x73A828
+    eventDmg.m_bStealthMode =
+           creator
+        && creator->IsPed()
+        && (weaponType == WEAPON_PISTOL_SILENCED || creator->AsPed()->GetTaskManager().GetActiveTask()->GetTaskType() == TASK_SIMPLE_STEALTH_KILL);
+
     if (!victim->bInVehicle || victim->m_fHealth <= 0.f || !victim->GetTaskManager().GetActiveTask() || victim->GetTaskManager().GetActiveTask()->GetTaskType() != TASK_SIMPLE_GANG_DRIVEBY) {
         victim->GetEventGroup().Add(eventDmg);
     }
+
     return ret;
 
 }
@@ -313,8 +317,8 @@ bool CWeapon::FireSniper(CPed* shooter, CEntity* victim, CVector* target) {
 
     if (shooter->m_nType == ENTITY_TYPE_PED) {
         CCrime::ReportCrime(CRIME_FIRE_WEAPON, shooter, shooter);
-    } else if (shooter->m_nType == ENTITY_TYPE_VEHICLE && shooter->field_460) {
-        CCrime::ReportCrime(CRIME_FIRE_WEAPON, shooter, shooter->field_460);
+    } else if (shooter->m_nType == ENTITY_TYPE_VEHICLE && shooter->m_roadRageWith) {
+        CCrime::ReportCrime(CRIME_FIRE_WEAPON, shooter, shooter->m_roadRageWith);
     }
 
     CVector targetPoint = velocity * 40.0f + activeCam.m_vecSource;
@@ -517,7 +521,7 @@ void CWeapon::DoBulletImpact(CEntity* firedBy, CEntity* victim, const CVector& s
                     CStats::IncrementStat(STAT_BULLETS_THAT_HIT);
                 }
             }
-            if (CWeaponInfo::WeaponHasSkillStats(GetType())) { // 0x73B738
+            if (CWeaponInfo::TypeHasSkillStats(GetType())) { // 0x73B738
                 // Redundant `if` check here was removed
                 if ([&]{
                     const auto victimEntity = notsa::coalesce(firedByPlayer->m_pTargetedObject, victim);
@@ -984,7 +988,7 @@ void CWeapon::Update(CPed* owner) {
                 if (animRLoad) { // 0x73DD30
                     ProcessReloadAudioIf([&](uint32 rloadMs, eAudioEvents ae) {
                         const auto rloadS = (float)rloadMs / 1000.f;
-                        return rloadS <= animRLoad->m_fCurrentTime && animRLoad->m_fCurrentTime - animRLoad->m_fTimeStep < rloadS;
+                        return rloadS <= animRLoad->m_CurrentTime && animRLoad->m_CurrentTime - animRLoad->m_TimeStep < rloadS;
                     });
                     if (CTimer::GetTimeInMS() > m_TimeForNextShotMs) {
                         if (animRLoad->GetTimeProgress() < 0.9f) {
@@ -1652,7 +1656,7 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
         case WEAPON_MINIGUN: { // 0x7424FE
             if (   firedByPed
                 && firedByPed->m_nPedType == PED_TYPE_PLAYER1
-                && notsa::contains({ MODE_M16_1STPERSON, MODE_HELICANNON_1STPERSON }, TheCamera.m_PlayerWeaponMode.m_nMode)
+                && notsa::contains({ MODE_M16_1STPERSON, MODE_HELICANNON_1STPERSON }, (eCamMode)TheCamera.m_PlayerWeaponMode.m_nMode)
             ) {
                 return { FireM16_1stPerson(firedByPed), true };
             }

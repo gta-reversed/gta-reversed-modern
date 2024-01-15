@@ -28,8 +28,8 @@ bool CTaskSimpleFight::IsHitComboSet() {
 }
 
 // 0x4ABDA0
-int32 CTaskSimpleFight::GetComboAnimGroupID() {
-    return plugin::CallMethodAndReturn<int32, 0x4ABDA0, CTaskSimpleFight*>(this);
+AssocGroupId CTaskSimpleFight::GetComboAnimGroupID() {
+    return plugin::CallMethodAndReturn<AssocGroupId, 0x4ABDA0, CTaskSimpleFight*>(this);
 }
 
 // 0x5BEDC0

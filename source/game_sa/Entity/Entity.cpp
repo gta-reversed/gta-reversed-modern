@@ -371,7 +371,7 @@ void CEntity::CreateRwObject_Reversed()
             if (pLodAssoc) {
                 auto pAssoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump);
                 if (pAssoc)
-                    pAssoc->SetCurrentTime(pLodAssoc->m_fCurrentTime);
+                    pAssoc->SetCurrentTime(pLodAssoc->m_CurrentTime);
             }
         }
         break;
@@ -407,9 +407,11 @@ void CEntity::DeleteRwObject_Reversed()
         break;
     }
     case rpCLUMP: {
-        auto firstAtomic = GetFirstAtomic(m_pRwClump);
-        if (firstAtomic && RpSkinGeometryGetSkin(RpAtomicGetGeometry(firstAtomic)))
+#ifdef SA_SKINNED_PEDS
+        if (IsClumpSkinned(m_pRwClump)) {
             RpClumpForAllAtomics(m_pRwClump, AtomicRemoveAnimFromSkinCB, nullptr);
+        }
+#endif
         RpClumpDestroy(m_pRwClump);
         break;
     }

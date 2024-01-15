@@ -99,7 +99,7 @@ CTask* CTaskComplexWanderCop::ControlSubTask_Reversed(CPed* ped) {
         return CTaskComplexWander::ControlSubTask(ped);
     }
 
-    if (m_nSubTaskCreatedTimer.m_bStarted && !m_nSubTaskCreatedTimer.IsOutOfTime() || !m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+    if (m_nSubTaskCreatedTimer.m_bStarted && !m_nSubTaskCreatedTimer.IsOutOfTime() || !m_pSubTask->MakeAbortable(ped)) {
         return m_pSubTask;
     }
 

@@ -13,6 +13,8 @@
 
 #include <extensions/ci_string.hpp>
 
+struct IFPSectionHeader;
+
 constexpr auto MAX_ANIM_BLOCK_NAME = 16;
 constexpr auto NUM_ANIM_ASSOC_GROUPS = 118;
 constexpr auto NUM_ANIM_BLOCKS = 180;
@@ -52,6 +54,7 @@ public:
     static AssocGroupId GetFirstAssocGroup(const char* name);
     static CAnimBlendHierarchy* GetAnimation(uint32 hash, const CAnimBlock* animBlock);
     static CAnimBlendHierarchy* GetAnimation(const char* animName, const CAnimBlock* animBlock);
+    static CAnimBlendHierarchy& GetAnimation(AnimationId id);
     static const char* GetAnimGroupName(AssocGroupId groupId);
     static const char* GetAnimBlockName(AssocGroupId groupId);
     static AssocGroupId GetAnimationGroupIdByName(notsa::ci_string_view name);
@@ -86,7 +89,16 @@ public:
     static auto GetAnimBlocks() { return ms_aAnimBlocks | rng::views::take(ms_numAnimBlocks); }
     static auto GetAssocGroups() { return std::span{ms_aAnimAssocGroups, ms_numAnimAssocDefinitions}; }
     static auto GetAssocGroupDefs() { return std::span{ms_aAnimAssocDefinitions, ms_numAnimAssocDefinitions}; }
+
+    static void StreamAnimBlock(const char* blck, bool shouldBeLoaded, bool& isLoaded);
 private:
-    static void LoadAnimFile_ANPK(RwStream* stream, bool compress, const char (*uncompressedAnims)[32]);
-    static void LoadAnimFile_ANP23(RwStream* stream, bool compress, bool isANP3);
+    static void LoadAnimFile_ANPK(RwStream* stream, const IFPSectionHeader& h, bool compress, const char (*uncompressedAnims)[32]);
+    static void LoadAnimFile_ANP23(RwStream* stream, const IFPSectionHeader& h, bool compress, bool isANP3);
+    static auto GetOrCreateAnimBlock(const char* name, uint32 numAnims);
 };
+
+// 0x4C4DC0
+inline bool IsClumpSkinned(RpClump *clump) {
+    const auto a = GetFirstAtomic(clump);
+    return a && RpSkinGeometryGetSkin(RpAtomicGetGeometry(a));
+}

@@ -20,22 +20,23 @@ void CTaskComplexDie::InjectHooks() {
     RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x6302D0);
 }
 
-CTaskComplexDie* CTaskComplexDie::Constructor(eWeaponType nWeaponType, AssocGroupId animGroup, AnimationId animID, float fBlendDelta, float fAnimSpeed, bool bBeingKilledByStealth, bool bFallingToDeath, eFallDir nFallToDeathDir, bool bFallToDeathOverRailing) { this->CTaskComplexDie::CTaskComplexDie(nWeaponType, animGroup, animID, fBlendDelta, fAnimSpeed, bBeingKilledByStealth, bFallingToDeath, nFallToDeathDir, bFallToDeathOverRailing); return this; }
+CTaskComplexDie* CTaskComplexDie::Constructor(eWeaponType nWeaponType, AssocGroupId animGroup, AnimationId animID, float fBlendDelta, float fAnimSpeed, bool bBeingKilledByStealth, bool bFallingToDeath, eDirection nFallToDeathDir, bool bFallToDeathOverRailing) { this->CTaskComplexDie::CTaskComplexDie(nWeaponType, animGroup, animID, fBlendDelta, fAnimSpeed, bBeingKilledByStealth, bFallingToDeath, nFallToDeathDir, bFallToDeathOverRailing); return this; }
 bool CTaskComplexDie::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable_Reversed(ped, priority, event); }
 CTask* CTaskComplexDie::CreateNextSubTask(CPed* ped) { return CreateNextSubTask_Reversed(ped); }
 CTask* CTaskComplexDie::CreateFirstSubTask(CPed* ped) { return CreateFirstSubTask_Reversed(ped); }
 
 // 0x630040
-CTaskComplexDie::CTaskComplexDie(eWeaponType nWeaponType,
-                                 AssocGroupId animGroup,
-                                 AnimationId animID,
-                                 float fBlendDelta,
-                                 float fAnimSpeed,
-                                 bool bBeingKilledByStealth,
-                                 bool bFallingToDeath,
-                                 eFallDir nFallToDeathDir,
-                                 bool bFallToDeathOverRailing) : CTaskComplex()
-{
+CTaskComplexDie::CTaskComplexDie(
+    eWeaponType nWeaponType,
+    AssocGroupId animGroup,
+    AnimationId animID,
+    float fBlendDelta,
+    float fAnimSpeed,
+    bool bBeingKilledByStealth,
+    bool bFallingToDeath,
+    eDirection nFallToDeathDir,
+    bool bFallToDeathOverRailing
+) {
     m_nWeaponType             = nWeaponType;
     m_nAnimID                 = animID;
     m_fBlendDelta             = fBlendDelta;
@@ -125,10 +126,10 @@ CTask* CTaskComplexDie::CreateFirstSubTask_Reversed(CPed* ped) {
     {
         const auto fallDirection = [&]() -> CVector {
             switch (m_nFallToDeathDir) {
-            case eFallDir::FORWARD:  return ped->m_matrix->GetForward();
-            case eFallDir::LEFT:     return ped->m_matrix->GetRight()   * -1.0f;
-            case eFallDir::BACKWARD: return ped->m_matrix->GetForward() * -1.0f;
-            case eFallDir::RIGHT:    return ped->m_matrix->GetRight();
+            case eDirection::FORWARD:  return ped->m_matrix->GetForward();
+            case eDirection::LEFT:     return ped->m_matrix->GetRight()   * -1.0f;
+            case eDirection::BACKWARD: return ped->m_matrix->GetForward() * -1.0f;
+            case eDirection::RIGHT:    return ped->m_matrix->GetRight();
             default:
                 NOTSA_UNREACHABLE("Originally not initialized");
                 return {};

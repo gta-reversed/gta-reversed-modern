@@ -50,7 +50,7 @@ CTaskSimpleBikeJacked::~CTaskSimpleBikeJacked() {
 bool CTaskSimpleBikeJacked::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
     if (priority == ABORT_PRIORITY_IMMEDIATE) {
         if (m_firstAnim) {
-            m_firstAnim->m_fBlendDelta = -1000.f;
+            m_firstAnim->m_BlendDelta = -1000.f;
         }
         return true;
     }
@@ -94,7 +94,7 @@ bool CTaskSimpleBikeJacked::ProcessPed(CPed* ped) {
             [this, ped] {
                 if (m_jacker) {
                     if (const auto anim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, { ANIM_ID_CAR_PULLOUT_RHS, ANIM_ID_CAR_PULLOUT_LHS, ANIM_ID_CAR_GETIN_BIKE_FRONT })) {
-                        if (anim->m_fCurrentTime <= 0.3f) {
+                        if (anim->m_CurrentTime <= 0.3f) {
                             return false;
                         }
                     }

@@ -2,14 +2,14 @@
 
 #include "Event.h"
 
+#include "TaskSimpleFacial.h"
+
 class NOTSA_EXPORT_VTABLE CEventEditableResponse : public CEvent {
 public:
     bool   m_bAddToEventGroup;
-    bool   field_D;
     int16  m_taskId; // see eTaskType
-    int16  field_10;
-    uint16 field_12;
-
+    int16  m_FacialExpressionType; // eFacialExpression
+   
 public:
     CEventEditableResponse(eTaskType taskType = TASK_NONE/*notsa*/);
     ~CEventEditableResponse() override = default; // 0x4AC480
@@ -26,6 +26,8 @@ public:
     void ComputeResponseTaskType(CPed* ped, bool bDecisionMakerTypeInGroup);
     void ComputeResponseTaskType(CPedGroup* pedGroup);
     bool ComputeResponseTaskOfType(CPed* ped, int32 taskId);
+
+    auto GetFacialExpressionType() const { return (eFacialExpression)m_FacialExpressionType; }
 
 private:
     friend void InjectHooksMain();

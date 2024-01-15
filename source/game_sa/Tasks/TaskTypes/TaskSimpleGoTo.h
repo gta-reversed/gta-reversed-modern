@@ -3,7 +3,7 @@
 #include "TaskSimple.h"
 #include "Vector.h"
 
-class CTaskSimpleGoTo : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleGoTo : public CTaskSimple {
 public:
     eMoveState m_moveState;
     CVector    m_vecTargetPoint;

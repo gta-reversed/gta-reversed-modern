@@ -866,8 +866,8 @@ void CCutsceneMgr::SetCutsceneAnim(const char* animName, CObject* object) {
         return;
     }
 
-    if (theAnim->m_pHierarchy->m_bIsCompressed) {
-        theAnim->m_pHierarchy->m_bKeepCompressed = true;
+    if (theAnim->m_BlendHier->m_bIsCompressed) {
+        theAnim->m_BlendHier->m_bKeepCompressed = true;
     }
 
     CStreaming::ImGonnaUseStreamingMemory();
@@ -878,16 +878,16 @@ void CCutsceneMgr::SetCutsceneAnim(const char* animName, CObject* object) {
     cpyOfTheAnim->Start(0.f);
 
     const auto blendData = RpClumpGetAnimBlendClumpData(object->m_pRwClump);
-    blendData->m_Associations.Prepend(&cpyOfTheAnim->m_Link);
+    blendData->m_Anims.Prepend(&cpyOfTheAnim->m_Link);
 
-    if (cpyOfTheAnim->m_pHierarchy->m_bKeepCompressed) {
+    if (cpyOfTheAnim->m_BlendHier->m_bKeepCompressed) {
         blendData->m_Frames->m_bIsCompressed = true;
     }
 }
 
 // 0x5B0420
 void CCutsceneMgr::SetCutsceneAnimToLoop(const char* animName) {
-    ms_cutsceneAssociations.GetAnimation(animName)->m_nFlags |= ANIMATION_LOOPED;
+    ms_cutsceneAssociations.GetAnimation(animName)->m_Flags |= ANIMATION_LOOPED;
 }
 
 // 0x5B0440
@@ -914,9 +914,9 @@ void CCutsceneMgr::SetupCutsceneToStart() {
                 anim->SetFlag(ANIMATION_STARTED, true);
             } else {
                 // Get anim translation and offset the object's position by it
-                const auto animTrans = anim->m_pHierarchy->m_bIsCompressed
-                    ? anim->m_pHierarchy->m_pSequences->GetCompressedFrame(1)->GetTranslation()
-                    : anim->m_pHierarchy->m_pSequences->GetUncompressedFrame(1)->translation;
+                const CVector animTrans = anim->m_BlendHier->m_bIsCompressed
+                    ? (CVector)anim->m_BlendHier->m_pSequences[0].GetCKeyFrame(1)->Trans
+                    : (CVector)anim->m_BlendHier->m_pSequences[0].GetUKeyFrame(1)->Trans;
                 SetObjPos(ms_cutsceneOffset + animTrans);
 
                 // Start the anim
