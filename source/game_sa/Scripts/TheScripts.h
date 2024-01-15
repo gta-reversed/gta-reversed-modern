@@ -555,7 +555,7 @@ public:
         // A SCM file can have any amount of header chunks before the main script,
         // under these conditions:
         //
-        // 1. Vanilla EXE expects at most 6 chunks to be available. Having less than that
+        // 1. Vanilla EXE expects at least 6 chunks to be available. Having less than that
         // might crash the game.
         //
         // 2. The last chunk must set the main script offset as next chunk offset. So virtual
