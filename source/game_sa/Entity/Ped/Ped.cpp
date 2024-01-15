@@ -1471,7 +1471,7 @@ bool CPed::IsPlayingHandSignal() {
 */
 void CPed::StopPlayingHandSignal() {
     if (const auto task = GetTaskManager().Find<TASK_COMPLEX_HANDSIGNAL_ANIM>()) {
-        task->MakeAbortable(this, ABORT_PRIORITY_URGENT, nullptr);
+        task->MakeAbortable(this);
     }
 }
 

@@ -117,7 +117,7 @@ CTask* CTaskComplexArrestPed::ControlSubTask_Reversed(CPed* ped) {
     // Tries to abort current sub-task and replace it with `taskType`.
     const auto TryReplaceSubTask = [this, ped](auto taskType) {
         // Inverted `if` and got rid of `taskType == TASK_NONE` (in which case `m_pSubTask` was returned always)
-        if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+        if (m_pSubTask->MakeAbortable(ped)) {
             return CreateSubTask(taskType, ped);
         } else {
             return m_pSubTask;
@@ -136,7 +136,7 @@ CTask* CTaskComplexArrestPed::ControlSubTask_Reversed(CPed* ped) {
 
     // 0x68D39F
     if (m_bSubTaskNeedsToBeCreated) {
-        if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+        if (m_pSubTask->MakeAbortable(ped)) {
             m_pSubTask->AsComplex()->CreateFirstSubTask(ped);
         }
         return m_pSubTask;

@@ -51,7 +51,7 @@ void CTaskSimpleGoTo::SetUpIK(CPed* ped)
         && !g_ikChainMan.GetLookAtEntity(ped)
         && !ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_IK)
         && (ped != FindPlayerPed() || CPad::GetPad(0)->DisablePlayerControls)) {
-        if (!m_pParentTask || m_pParentTask->GetTaskType() != TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING && m_pParentTask->GetTaskType() != TASK_COMPLEX_AVOID_ENTITY) {
+        if (!m_Parent || m_Parent->GetTaskType() != TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING && m_Parent->GetTaskType() != TASK_COMPLEX_AVOID_ENTITY) {
             CVector vecDistance = m_vecTargetPoint - ped->GetPosition();
             if (vecDistance.SquaredMagnitude() > 9.0f) {
                 CVector direction(vecDistance);

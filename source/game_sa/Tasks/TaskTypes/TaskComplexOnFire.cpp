@@ -88,7 +88,7 @@ CTask* CTaskComplexOnFire::ControlSubTask(CPed* ped) {
     switch (m_pSubTask->GetTaskType()) {
     case TASK_COMPLEX_SMART_FLEE_ENTITY: {
         if (!ped->m_pFire) {
-            MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);
+            MakeAbortable(ped);
             return nullptr;
         }
 
@@ -98,7 +98,7 @@ CTask* CTaskComplexOnFire::ControlSubTask(CPed* ped) {
 
         CPedDamageResponse resp{};
         ComputeFireDamage(ped, resp);
-        if (resp.m_bHealthZero && MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+        if (resp.m_bHealthZero && MakeAbortable(ped)) {
             CEventHandler::RegisterKill(ped, ped->m_pFire->m_pEntityCreator, WEAPON_MOLOTOV, false);
             return CreateSubTask(TASK_COMPLEX_DIE);
         }

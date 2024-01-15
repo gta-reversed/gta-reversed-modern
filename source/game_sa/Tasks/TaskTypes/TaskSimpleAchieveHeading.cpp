@@ -82,7 +82,7 @@ void CTaskSimpleAchieveHeading::SetUpIK(CPed* ped) {
     if (m_b1 || g_ikChainMan.GetLookAtEntity(ped) || ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_IK))
         return;
 
-    if (m_pParentTask && m_pParentTask->GetTaskType() == TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING || m_pParentTask->GetTaskType() == TASK_COMPLEX_AVOID_ENTITY)
+    if (m_Parent && m_Parent->GetTaskType() == TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING || m_Parent->GetTaskType() == TASK_COMPLEX_AVOID_ENTITY)
         return;
 
     auto pos = CVector{

@@ -365,7 +365,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                                     taskUseGun->ControlGun(player, targetedObject, gunCmd);
                                 }
                             } else {
-                                secondaryTask->MakeAbortable(player, ABORT_PRIORITY_URGENT, nullptr);
+                                secondaryTask->MakeAbortable(player);
                             }
                         } else {
                             auto* taskUseGun = new CTaskSimpleUseGun(targetedObject, CVector(0.0f, 0.0f, 0.f), gunCmd, 1, false);
@@ -396,7 +396,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                                         taskUseGun->ControlGun(player, player->m_pTargetedObject, gunCmd);
                                     }
                                 } else {
-                                    taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)->MakeAbortable(player, ABORT_PRIORITY_URGENT, nullptr);
+                                    taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)->MakeAbortable(player);
                                 }
                             } else {
                                 auto* taskUseGun = new CTaskSimpleUseGun(player->m_pTargetedObject, CVector(0.0f, 0.0f, 0.0f), gunCmd, 1, false);
@@ -406,7 +406,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                             if (taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK) || !pad->WeaponJustDown(player)) {
                                 CTask* secondaryTask = taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
                                 if (secondaryTask && secondaryTask->GetTaskType() != TASK_SIMPLE_THROW_PROJECTILE) {
-                                    secondaryTask->MakeAbortable(player, ABORT_PRIORITY_URGENT, nullptr);
+                                    secondaryTask->MakeAbortable(player);
                                 } else if (intelligence->GetTaskThrow()) {
                                     auto pTaskSimpleThrowProjectile = static_cast<CTaskSimpleThrowProjectile*>(secondaryTask);
                                     pTaskSimpleThrowProjectile->ControlThrow(pad->WeaponJustDown(player), nullptr, nullptr);

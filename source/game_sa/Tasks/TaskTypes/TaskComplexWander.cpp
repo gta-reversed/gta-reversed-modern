@@ -165,7 +165,7 @@ CTask* CTaskComplexWander::ControlSubTask_Reversed(CPed* ped) {
         }
 
         if (ped->m_pIntelligence->m_AnotherStaticCounter > 30) {
-            if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+            if (m_pSubTask->MakeAbortable(ped)) {
                 return CreateSubTask(ped, TASK_SIMPLE_SCRATCH_HEAD);
             }
         }
