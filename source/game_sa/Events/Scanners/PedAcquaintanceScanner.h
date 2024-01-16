@@ -24,10 +24,12 @@ public:
     void FindClosestAcquaintance(CPed & ped, int32 acquaintanceScanTypeExclusive, CEntity ** outNearbyPeds, int32 maxNumPeds, CPed*& outAcquaintancePed, int32 & outAcquaintancePedScanType);
     void ScanForPedAcquaintanceEvents(CPed & ped, CEntity ** outNearbyPeds, int32 maxNumPeds);
 
+    void SetThreatScannerActivationState(bool bActivatedEverywhere, bool bActivatedInVehicle, bool bActivatedDuringScriptCommands);
+
 private:
     CTaskTimer m_timer{};
-    bool       m_bScanAllowedScriptPed{};
-    bool       m_bScanAllowedInVehicle{};
-    bool       m_bScanAllowedScriptedTask{};
+    bool       m_bActivatedEverywhere{};
+    bool       m_bActivatedInVehicle{};
+    bool       m_bActivatedDuringScriptCommands{};
 };
 VALIDATE_SIZE(CPedAcquaintanceScanner, 0x10);

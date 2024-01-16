@@ -34,11 +34,17 @@ int32 CPedAcquaintanceScanner::ScanAcquaintanceTypes(const CPed* ped, const int3
 }
 
 // 0x607A90
-void CPedAcquaintanceScanner::FindClosestAcquaintance(CPed& ped, int32 acquaintanceScanTypeExclusive, CEntity** outNearbyPeds, int32 maxNumPeds, CPed*& outAcquaintancePed, int32& outAcquaintancePedScanType) {
-    return plugin::CallMethodAndReturn<void, 0x607A90, CPedAcquaintanceScanner*, CPed&, int32, CEntity**, int32, CPed*&, int32&>(this, ped, acquaintanceScanTypeExclusive, outNearbyPeds, maxNumPeds, outAcquaintancePed, outAcquaintancePedScanType);
+void CPedAcquaintanceScanner::FindClosestAcquaintance(CPed& ped, int32 acquaintanceScanTypeExclusive, CEntity** nearbyPeds, int32 maxNumNearbyPeds, CPed*& outAcquaintancePed, int32& outAcquaintancePedScanType) {
+    return plugin::CallMethodAndReturn<void, 0x607A90, CPedAcquaintanceScanner*, CPed&, int32, CEntity**, int32, CPed*&, int32&>(this, ped, acquaintanceScanTypeExclusive, nearbyPeds, maxNumNearbyPeds, outAcquaintancePed, outAcquaintancePedScanType);
 }
 
 // 0x607D80
-void CPedAcquaintanceScanner::ScanForPedAcquaintanceEvents(CPed& ped, CEntity** outNearbyPeds, int32 maxNumPeds) {
-    return plugin::CallMethodAndReturn<void, 0x607D80, CPedAcquaintanceScanner*, CPed&, CEntity**, int32>(this, ped, outNearbyPeds, maxNumPeds);
+void CPedAcquaintanceScanner::ScanForPedAcquaintanceEvents(CPed& ped, CEntity** nearbyPeds, int32 maxNumNearbyPeds) {
+    return plugin::CallMethodAndReturn<void, 0x607D80, CPedAcquaintanceScanner*, CPed&, CEntity**, int32>(this, ped, nearbyPeds, maxNumNearbyPeds);
+}
+
+void CPedAcquaintanceScanner::SetThreatScannerActivationState(bool bActivatedEverywhere, bool bActivatedInVehicle, bool bActivatedDuringScriptCommands) {
+    m_bActivatedInVehicle            = bActivatedInVehicle;
+    m_bActivatedEverywhere           = bActivatedEverywhere;
+    m_bActivatedDuringScriptCommands = bActivatedDuringScriptCommands;
 }

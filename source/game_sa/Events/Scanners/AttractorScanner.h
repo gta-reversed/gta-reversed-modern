@@ -17,12 +17,13 @@ public:
 
     //static int8 GetClosestAttractorOfType(CVector const& point, float radius, int32 , int32 , charconst* String1, bool , C2dEffectconst* , C2dEffect*& , CEntity*& );
 
-    void Clear();
-
     void      Clear();
     void      AddEffect(C2dEffectPedAttractor* fx, CEntity* e, const CPed& ped);
     CPtrNode* ScanForAttractorsInPtrList(CPtrList&, const CPed&);
     void      ScanForAttractorsInRange(const CPed& a2);
+
+    auto GetPreviousEffect() const { return m_PreviousEffect; }
+    void SetPreviousEffect(C2dEffectPedAttractor* fx) { m_PreviousEffect = fx; }
 
 private:
     bool                   m_bActivated{};

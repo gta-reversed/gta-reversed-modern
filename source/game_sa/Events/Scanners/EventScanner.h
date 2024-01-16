@@ -17,8 +17,8 @@
 class CPed;
 
 class CEventScanner {
-private:
-    static inline uint32 m_sDeadPedWalkingTimer = *(uint32*)0xC0B038;
+public:
+    static inline uint32& m_sDeadPedWalkingTimer = *(uint32*)0xC0B038;
 
 public:
     static void InjectHooks();
@@ -30,12 +30,18 @@ public:
     void ScanForEvents(CPed& ped);
     void ScanForEventsNow(const CPed& ped, bool bDontScan);
 
+    const auto& GetAttractorScanner() const { return m_AttractorScanner; }
+    auto& GetAttractorScanner() { return m_AttractorScanner; }
+
+    auto& GetAcquaintanceScanner() { return m_AcquaintanceScanner; }
+
 private:
     // 0x605300
     CEventScanner* Constructor() {
         this->CEventScanner::CEventScanner();
         return this;
     }
+
 
 private:
     uint32                            m_NextScanTime{};

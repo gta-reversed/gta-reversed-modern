@@ -541,13 +541,13 @@ void CPedIntelligence::FlushImmediately(bool bSetPrimaryDefaultTask) {
 }
 
 // 0x6018D0
-C2dEffect* CPedIntelligence::GetEffectInUse() const {
-    return m_eventScanner.m_AttractorScanner.m_pEffectInUse;
+C2dEffectPedAttractor* CPedIntelligence::GetEffectInUse() const {
+    return m_eventScanner.GetAttractorScanner().GetPreviousEffect();
 }
 
 // 0x6018E0
-void CPedIntelligence::SetEffectInUse(C2dEffect* effect) {
-    m_eventScanner.m_AttractorScanner.m_pEffectInUse = effect;
+void CPedIntelligence::SetEffectInUse(C2dEffectPedAttractor* effect) {
+    m_eventScanner.GetAttractorScanner().SetPreviousEffect(effect);
 }
 
 // 0x6018F0
@@ -700,7 +700,7 @@ void CPedIntelligence::FlushIntelligence() {
     m_eventGroup.Flush(false);
     m_vehicleScanner.Clear();
     m_pedScanner.Clear();
-    m_eventScanner.m_AttractorScanner.Clear();
+    m_eventScanner.Clear();
 }
 
 // 0x601E00
