@@ -26,7 +26,7 @@ public:
     bool      MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, CEvent const* event = nullptr) final override;
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;
-    CTask*    ControlSubTask(CPed* ped) override { return m_pSubTask; }
+    CTask*    ControlSubTask(CPed* ped) final override { return m_pSubTask; }
 
 private: // Wrappers for hooks
     // 0x6536B0

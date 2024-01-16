@@ -67,7 +67,7 @@ bool CTaskComplexEvasiveDiveAndGetUp::MakeAbortable(CPed* ped, eAbortPriority pr
 
 // 0x656000
 CTask* CTaskComplexEvasiveDiveAndGetUp::CreateNextSubTask(CPed* ped) {
-    switch (m_pSubTask->GetTaskType()) {
+    switch (const auto subtt = m_pSubTask->GetTaskType()) {
     case TASK_SIMPLE_ACHIEVE_HEADING:
         return CreateSubTask(TASK_SIMPLE_EVASIVE_DIVE);
     case TASK_SIMPLE_EVASIVE_DIVE:
@@ -78,6 +78,8 @@ CTask* CTaskComplexEvasiveDiveAndGetUp::CreateNextSubTask(CPed* ped) {
     }
     case TASK_SIMPLE_GET_UP:
         return CreateSubTask(TASK_FINISHED);
+    default:
+        NOTSA_UNREACHABLE("Invalid SubTask: {}", subtt);
     }
 }
 
