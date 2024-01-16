@@ -4,7 +4,7 @@
 
 // 0x653560
 CTaskSimpleEvasiveDive::CTaskSimpleEvasiveDive(CVehicle* vehicle) :
-    m_Vehicle{vehicle}
+    m_EvadeVeh{vehicle}
 {
 }
 
@@ -53,8 +53,8 @@ void CTaskSimpleEvasiveDive::StartAnim(CPed* ped) {
     m_DiveAnim = CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_EV_DIVE, 8.0f);
     m_DiveAnim->SetFinishCallback(FinishAnimEvasiveDiveCB, this);
 
-    if (m_Vehicle && ped->IsCop()) {
-        if (m_Vehicle->m_pDriver && m_Vehicle->m_pDriver->IsPlayer()) {
+    if (m_EvadeVeh && ped->IsCop()) {
+        if (m_EvadeVeh->m_pDriver && m_EvadeVeh->m_pDriver->IsPlayer()) {
             const auto wanted = FindPlayerWanted();
             wanted->RegisterCrime_Immediately(CRIME_VEHICLE_DAMAGE, ped->GetPosition(), ped, 0);
             wanted->RegisterCrime_Immediately(CRIME_TYPE_9, ped->GetPosition(), ped, 0);

@@ -22,17 +22,17 @@ void CTaskComplexEvasiveDiveAndGetUp::InjectHooks() {
 }
 
 // 0x6536B0
-CTaskComplexEvasiveDiveAndGetUp::CTaskComplexEvasiveDiveAndGetUp(CVehicle* targetVeh, int32 unconsciousTime, const CVector& diveDir, bool bAchieveHeadingFirst) :
+CTaskComplexEvasiveDiveAndGetUp::CTaskComplexEvasiveDiveAndGetUp(CVehicle* evadeVeh, int32 unconsciousTime, const CVector& diveDir, bool bAchieveHeadingFirst) :
     m_UnconsciousTime{unconsciousTime},
     m_bAchieveHeadingFirst{bAchieveHeadingFirst},
     m_DiveDir{diveDir},
-    m_TargetVeh{targetVeh}
+    m_EvadeVeh{evadeVeh}
 {
 }
 
 // 0x655940
 CTaskComplexEvasiveDiveAndGetUp::CTaskComplexEvasiveDiveAndGetUp(const CTaskComplexEvasiveDiveAndGetUp& o) :
-    CTaskComplexEvasiveDiveAndGetUp{ o.m_TargetVeh, o.m_UnconsciousTime, o.m_DiveDir, o.m_bAchieveHeadingFirst }
+    CTaskComplexEvasiveDiveAndGetUp{ o.m_EvadeVeh, o.m_UnconsciousTime, o.m_DiveDir, o.m_bAchieveHeadingFirst }
 {
 }
 
@@ -40,7 +40,7 @@ CTaskComplexEvasiveDiveAndGetUp::CTaskComplexEvasiveDiveAndGetUp(const CTaskComp
 CTask* CTaskComplexEvasiveDiveAndGetUp::CreateSubTask(eTaskType taskType) {
     switch (taskType) {
     case TASK_SIMPLE_EVASIVE_DIVE:
-        return new CTaskSimpleEvasiveDive{ m_TargetVeh };
+        return new CTaskSimpleEvasiveDive{ m_EvadeVeh };
     case TASK_SIMPLE_PAUSE:
         return new CTaskSimplePause{ m_UnconsciousTime };
     case TASK_SIMPLE_GET_UP:

@@ -15,7 +15,7 @@ public:
 
     static void InjectHooks();
 
-    CTaskComplexEvasiveDiveAndGetUp(CVehicle* diveFrom, int32 unconsciousTime, const CVector& diveDir, bool bAchieveHeadingFirst);
+    CTaskComplexEvasiveDiveAndGetUp(CVehicle* evadeVeh, int32 unconsciousTime, const CVector& diveDir, bool bAchieveHeadingFirst);
     CTaskComplexEvasiveDiveAndGetUp(const CTaskComplexEvasiveDiveAndGetUp&);
     ~CTaskComplexEvasiveDiveAndGetUp() override = default;
 
@@ -42,8 +42,8 @@ private: // Wrappers for hooks
     }
 
 protected:
-    CVehicle* m_TargetVeh{};
-    int32     m_UnconsciousTime{};
-    CVector   m_DiveDir{};
-    bool      m_bAchieveHeadingFirst{};
+    CVehicle* m_EvadeVeh{};             //< The vehicle to evade from
+    int32     m_UnconsciousTime{};      //< Time to pause after evading the vehicle
+    CVector   m_DiveDir{};              //< The direction the vehicle is coming from
+    bool      m_bAchieveHeadingFirst{}; //< To set the ped's heading before playing the dive anim
 };
