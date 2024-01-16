@@ -361,6 +361,8 @@
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
 #include "TaskComplexEnterAnyCarAsDriver.h"
+#include "TaskSimpleSetKindaStayInSamePlace.h"
+#include "TaskSimpleSetCharIgnoreWeaponRangeFlag.h"
 #include "TaskComplexCarDriveMission.h"
 #include "TaskComplexLeaveAnyCar.h"
 #include "TaskSimpleLeaveGroup.h"
@@ -1024,8 +1026,8 @@ void InjectHooksMain() {
         CTaskSimpleRunTimedAnim::InjectHooks();
         CTaskSimpleSay::InjectHooks();
         CTaskSimpleSetCharDecisionMaker::InjectHooks();
-        // CTaskSimpleSetCharIgnoreWeaponRangeFlag::InjectHooks();
-        // CTaskSimpleSetKindaStayInSamePlace::InjectHooks();
+        CTaskSimpleSetCharIgnoreWeaponRangeFlag::InjectHooks();
+        CTaskSimpleSetKindaStayInSamePlace::InjectHooks();
         CTaskSimpleSetPedAsAutoDriver::InjectHooks();
         CTaskSimpleShakeFist::InjectHooks();
         CTaskSimpleSitDown::InjectHooks();
