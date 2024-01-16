@@ -1,13 +1,9 @@
 #pragma once
 
 #include "TaskSimple.h"
+#include "Vehicle.h"
 
 class CTaskSimpleEvasiveDive : public CTaskSimple {
-public:
-    CVehicle* m_Vehicle;
-    bool      m_bFinished;
-    CAnimBlendAssociation* m_Assoc;
-
 public:
     static constexpr auto Type = TASK_SIMPLE_EVASIVE_DIVE;
 
@@ -21,5 +17,10 @@ public:
 
     void StartAnim(CPed* ped);
     static void FinishAnimEvasiveDiveCB(CAnimBlendAssociation *assoc, void* data);
+
+private:
+    CVehicle::Ref          m_Vehicle{};
+    bool                   m_bFinished{};
+    CAnimBlendAssociation* m_DiveAnim{};
 };
 VALIDATE_SIZE(CTaskSimpleEvasiveDive, 0x14);
