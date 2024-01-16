@@ -103,6 +103,7 @@ public:
     CTaskSimpleInAir* GetTaskInAir();
     CTaskSimpleClimb* GetTaskClimb();
     CTaskSimpleDuck* GetTaskSecondaryDuck();
+    auto& GetTaskManager() { return m_TaskMgr; }
     bool GetUsingParachute();
     void SetTaskDuckSecondary(uint16 nLengthOfDuck);
     void ClearTaskDuckSecondary();

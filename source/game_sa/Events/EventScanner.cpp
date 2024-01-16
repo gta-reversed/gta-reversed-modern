@@ -1,38 +1,51 @@
 #include "StdInc.h"
 
 #include "EventScanner.h"
+#include "PedPotentialCollisionScanner.h"
 
-float& CPedAcquaintanceScanner::ms_fThresholdDotProduct = *(float*)0xC0B034;
+void CEventScanner::InjectHooks() {
+    RH_ScopedClass(CEventScanner);
+    RH_ScopedCategory("Events/Scanners");
+
+    RH_ScopedInstall(Constructor, 0x605300);
+
+    RH_ScopedInstall(ScanForEventsNow, 0x6053D0);
+    RH_ScopedInstall(ScanForEvents, 0x607E30);
+}
 
 // 0x605300
-CEventScanner::CEventScanner() {
-    m_nNextScanTime = CTimer::GetTimeInMS() + CGeneral::GetRandomNumberInRange(3000u); // Originally should be -3000.0f (float value)
+CEventScanner::CEventScanner() :
+    m_NextScanTime{CTimer::GetTimeInMS() + CGeneral::GetRandomNumberInRange<uint32>(3000)}   
+{
+    m_AttractorScanner.Clear();
 }
 
 void CEventScanner::Clear() {
-    m_attractorScanner.Clear();
+    m_AttractorScanner.Clear();
 }
 
 // 0x607E30
 void CEventScanner::ScanForEvents(CPed& ped) {
-    plugin::CallMethod<0x607E30, CEventScanner*, CPed&>(this, ped);
+    if (CTimer::GetTimeInMS() <= m_NextScanTime) {
+        return;
+    }
+    const auto intel = ped.GetIntelligence();
+
+    m_VehCollisionScanner.ScanForVehiclePotentialCollisionEvents(ped, intel->GetVehicleScanner().GetEntitiesPtr(), CEntityScanner::MAX_ENTITIES);
+    CPedPotentialCollisionScanner::ScanForPedPotentialCollisionEvents(ped, intel->GetPedScanner().GetClosestPedInRange());
+    m_ObjCollisionScanner.ScanForObjectPotentialCollisionEvents(ped);
+    m_AcquaintanceScanner.
+    m_AttractorScanner.ScanForAttractorsInRange(ped);
+    m_FireScanner.ScanForNearbyFires(ped);
+    m_SexyPedScanner
 }
 
 // 0x6053D0
 void CEventScanner::ScanForEventsNow(const CPed& ped, bool bDontScan) {
-    if (bDontScan)
+    if (bDontScan) {
         return;
-
-    auto scanner = &m_vehiclePotentialCollisionScanner;
-    if (scanner->m_timer.m_bStarted) { // todo: inlined?
-        scanner->m_timer.m_nStartTime = CTimer::GetTimeInMS();
-        scanner->m_timer.m_nInterval = -1;
-        scanner->m_timer.m_bStarted = true;
     }
-    scanner->ScanForVehiclePotentialCollisionEvents(ped, ped.GetIntelligence()->GetVehicleEntities(), 16);
-}
 
-// 0x603720
-void CVehiclePotentialCollisionScanner::ScanForVehiclePotentialCollisionEvents(const CPed& ped, CEntity** entities, int32 count) {
-    plugin::CallMethod<0x603720, CVehiclePotentialCollisionScanner*, const CPed&, CEntity**, int32>(this, ped, entities, count);
+    m_VehCollisionScanner.ResetTimer();
+    m_VehCollisionScanner.ScanForVehiclePotentialCollisionEvents(ped, ped.GetIntelligence()->GetVehicleEntities(), CEntityScanner::MAX_ENTITIES);
 }

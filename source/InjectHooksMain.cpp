@@ -452,6 +452,12 @@
 #include "EventEscalator.h"
 #include "EventCopCarBeingStolen.h"
 #include "EventDanger.h"
+#include "Events/Scanners/AttractorScanner.h"
+#include "Events/Scanners/ObjectPotentialCollisionScanner.h"
+#include "Events/Scanners/PedPotentialCollisionScanner.h"
+#include "Events/Scanners/NearbyFireScanner.h"
+#include "Events/Scanners/PedAcquaintanceScanner.h"
+#include "Events/Scanners/SexyPedScanner.h"
 
 #include "Plugins/BreakablePlugin/BreakablePlugin.h"
 
@@ -686,7 +692,16 @@ void InjectHooksMain() {
     CHudColours::InjectHooks();
     CTxdStore::InjectHooks();
     CCarEnterExit::InjectHooks();
+
     CEntityScanner::InjectHooks();
+
+    CAttractorScanner::InjectHooks();
+    CObjectPotentialCollisionScanner::InjectHooks();
+    CPedPotentialCollisionScanner::InjectHooks();
+    CNearbyFireScanner::InjectHooks();
+    CSexyPedScanner::InjectHooks();
+    CPedAcquaintanceScanner::InjectHooks();
+
     CPedType::InjectHooks();
     CAcquaintance::InjectHooks();
     CWeather::InjectHooks();

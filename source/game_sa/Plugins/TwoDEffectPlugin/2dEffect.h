@@ -36,6 +36,10 @@ enum ePedAttractorType : int8 {
     PED_ATTRACTOR_SCRIPTED       = 7, // This type is not valid
     PED_ATTRACTOR_PARK           = 8, // Ped lays (at daytime only, ped goes away after 6 PM)
     PED_ATTRACTOR_STEP           = 9, // Ped sits on steps
+
+
+    // Leave this here //
+    PED_ATTRACTOR_NUM
 };
 
 // From https://gtamods.com/wiki/2d_Effect_(RW_Section)

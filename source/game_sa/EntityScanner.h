@@ -18,9 +18,12 @@ class CPed;
 
 class CEntityScanner {
 public:
+    constexpr static size_t MAX_ENTITIES = 16;
+
+public:
     int32    field_4;
     uint32   m_nCount;
-    std::array<CEntity*, 16> m_apEntities; /// SEEMINGLY: The array might have "holes" in it, also it's sorted by distance (closer to further)
+    std::array<CEntity*, MAX_ENTITIES> m_apEntities; /// SEEMINGLY: The array might have "holes" in it, also it's sorted by distance (closer to further)
     CEntity* m_pClosestEntityInRange;
 
 public:
@@ -39,6 +42,7 @@ public:
              | filter(Not(IsNull<CEntity*>)) // Filter all null
              | transform([](CEntity* e) -> T& { return static_cast<T&>(*e); }); // Cast to required type and dereference
     }
+    auto GetEntitiesPtr() { return m_apEntities.data(); }
 
     void Clear();
     virtual void ScanForEntitiesInRange(eRepeatSectorList sectorList, const CPed& ped);
