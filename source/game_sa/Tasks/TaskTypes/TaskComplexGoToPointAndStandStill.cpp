@@ -81,7 +81,7 @@ CTask* CTaskComplexGoToPointAndStandStill::CreateFirstSubTask(CPed* ped) {
 // 0x668570
 CTask* CTaskComplexGoToPointAndStandStill::ControlSubTask(CPed* ped) {
     if (m_bNewTarget) {
-        if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr))
+        if (m_pSubTask->MakeAbortable(ped))
             return CreateFirstSubTask(ped);
 
     } else if (m_pSubTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT) {

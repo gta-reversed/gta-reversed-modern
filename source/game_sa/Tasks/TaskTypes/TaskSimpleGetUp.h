@@ -4,9 +4,9 @@
 
 class CTaskSimpleGetUp : public CTaskSimple {
 public:
-    uint8                  m_bIsFinished;
-    uint8                  m_bAnimFinished;
-    CAnimBlendAssociation* m_pAnim;
+    bool                   m_bHasPedGotUp;
+    bool                   m_bIsFinished;
+    CAnimBlendAssociation* m_Anim;
 
 public:
     static constexpr auto Type = TASK_SIMPLE_GET_UP;

@@ -129,7 +129,7 @@ CTask* CTaskComplexUseSwatRope::ControlSubTask_Reversed(CPed* ped) {
                || m_pHeli->m_autoPilot.m_nCarMission == MISSION_CRASH_HELI_AND_BURN
                || m_pHeli->m_fHealth <= 0.0F
            )
-        && m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)
+        && m_pSubTask->MakeAbortable(ped)
     ) {
         ped->bIsStanding = false;
         ped->m_bUsesCollision = true;
@@ -142,7 +142,7 @@ CTask* CTaskComplexUseSwatRope::ControlSubTask_Reversed(CPed* ped) {
     if (subTaskType == TASK_SIMPLE_PAUSE || subTaskType == TASK_SIMPLE_ABSEIL) {
         CVector groundCoord = ped->GetPosition();
         CPedPlacement::FindZCoorForPed(groundCoord);
-        if (ped->GetPosition().z - 2.0F < groundCoord.z && m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr))
+        if (ped->GetPosition().z - 2.0F < groundCoord.z && m_pSubTask->MakeAbortable(ped))
             return CreateSubTask(TASK_NONE, ped);
 
         m_fCoorAlongRope += CTimer::GetTimeStep() * 0.003F;

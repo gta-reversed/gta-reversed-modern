@@ -10,16 +10,16 @@ class CPed;
 class NOTSA_EXPORT_VTABLE CTaskSimpleSay : public CTaskSimple {
 
 public:
-    uint32      m_sayId{};
-    uint32      m_sayDuration{};
-    CTaskTimer  m_timer{};
+    uint32     m_sayId{};
+    int32      m_sayDuration{};
+    CTaskTimer m_timer{};
 
 public:
     static void InjectHooks();
 
     constexpr static auto Type = eTaskType::TASK_SIMPLE_SAY;
 
-    CTaskSimpleSay(uint32 sayId, uint32 sayDuration);
+    CTaskSimpleSay(uint32 sayId, int32 sayDuration = -1);
     CTaskSimpleSay(const CTaskSimpleSay& o) : CTaskSimpleSay{o.m_sayId, o.m_sayDuration} {} // NOTSA
     ~CTaskSimpleSay() = default;
 

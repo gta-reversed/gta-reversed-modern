@@ -99,7 +99,7 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped) {
 
     if (!m_pClimbEnt || m_pClimbEnt->IsObject() && !m_pClimbEnt->IsStatic() && !m_pClimbEnt->AsPhysical()->physicalFlags.bDisableCollisionForce ||
         m_pClimbEnt->IsVehicle() && m_pClimbEnt->AsVehicle()->IsSubTrain() && m_pClimbEnt->AsVehicle()->m_vecMoveSpeed.Magnitude() > 0.1F) {
-        MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);
+        MakeAbortable(ped);
         return true;
     }
 
@@ -169,7 +169,7 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped) {
                     m_nGetToPosCounter += (uint16)CTimer::GetTimeStepInMS();
                     if (m_nGetToPosCounter > 1000 || m_pAnim->m_AnimId == ANIM_ID_CLIMB_IDLE && m_nGetToPosCounter > 500) {
                         m_bInvalidClimb = true;
-                        MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);
+                        MakeAbortable(ped);
                         ped->ApplyMoveForce(ped->GetForward() * (ped->m_fMass * -0.1F));
                     }
                 }
@@ -265,13 +265,13 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped) {
     }
 
     if (pad && pad->GetExitVehicle()) {
-        MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);
+        MakeAbortable(ped);
     } else if (m_nHeightForPos != CLIMB_STANDUP && m_nHeightForPos != CLIMB_VAULT || !m_pAnim || !(m_pAnim->m_Flags & ANIMATION_STARTED)) {
         if (m_nHeightForAnim == CLIMB_STANDUP && m_nHeightForPos < CLIMB_STANDUP && TestForVault(ped, &posn, fAngle)) {
             m_nHeightForAnim = CLIMB_VAULT;
         }
     } else if (!TestForStandUp(ped, &posn, fAngle)) {
-        MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);
+        MakeAbortable(ped);
     }
 
     ped->m_fAimingRotation = fAngle;
@@ -301,12 +301,12 @@ bool CTaskSimpleClimb::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
 }
 
 // 0x6803A0
-CEntity* CTaskSimpleClimb::TestForClimb(CPed* ped, CVector& climbPos, float& fAngle, uint8& nSurfaceType, bool theBool) {
-    auto entity = (CEntity*)ScanToGrab(ped, climbPos, fAngle, nSurfaceType, theBool, false, false, nullptr);
+CEntity* CTaskSimpleClimb::TestForClimb(CPed* ped, CVector& outClimbPos, float& outClimbHeading, uint8& outSurfaceType, bool bLaunch) {
+    auto entity = (CEntity*)ScanToGrab(ped, outClimbPos, outClimbHeading, outSurfaceType, bLaunch, false, false, nullptr);
 
     if (entity) {
-        CVector point = climbPos;
-        float angle = fAngle;
+        CVector point = outClimbPos;
+        float angle = outClimbHeading;
 
         if (entity->IsPhysical()) {
             point = entity->GetMatrix() * point;
@@ -320,7 +320,7 @@ CEntity* CTaskSimpleClimb::TestForClimb(CPed* ped, CVector& climbPos, float& fAn
         if (!ScanToGrab(ped, v, angle, surfaceType2, false, true, false, &point)) {
             return entity;
         }
-        fAngle = -9999.9f;
+        outClimbHeading = -9999.9f;
     }
 
     return nullptr;

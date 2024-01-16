@@ -11,9 +11,6 @@ class CEvent {
 public:
     int32 m_nTimeActive;
     bool  m_bValid;
-    bool  field_9;
-    bool  field_A;
-    bool  field_B;
 
 public:
     static void* operator new(unsigned size) {
@@ -45,6 +42,8 @@ public:
 
     float GetSoundLevel(const CEntity* entity, CVector& position);
     static float CalcSoundLevelIncrement(float level1, float level2);
+
+    void UnTick() { m_nTimeActive--; }
 
     /// Works like `dynamic_cast` => Checks if the event if ofthe required type, if so, returns it, otherwise nullptr
     template<std::derived_from<CEvent> T>

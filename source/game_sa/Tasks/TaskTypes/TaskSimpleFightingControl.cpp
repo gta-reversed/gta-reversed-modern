@@ -200,7 +200,7 @@ bool CTaskSimpleFightingControl::ProcessPed(CPed* ped) {
 
     const auto pedFightTask = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK);
     if (pedFightTask->GetTaskType() != TASK_SIMPLE_FIGHT) {
-        pedFightTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);
+        pedFightTask->MakeAbortable(ped);
         return false;
     }
 

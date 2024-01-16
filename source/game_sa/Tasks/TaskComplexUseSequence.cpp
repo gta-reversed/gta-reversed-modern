@@ -18,7 +18,7 @@ void CTaskComplexUseSequence::InjectHooks() {
 CTaskComplexUseSequence::CTaskComplexUseSequence(int32 sequenceIndex) :
     m_nSequenceIndex{sequenceIndex}
 {
-    CTaskSequences::ms_taskSequence[m_nSequenceIndex].m_nReferenceCount++;
+    CTaskSequences::ms_taskSequence[m_nSequenceIndex].m_RefCnt++;
 }
 
 CTaskComplexUseSequence::CTaskComplexUseSequence(const CTaskComplexUseSequence& o) :
@@ -31,8 +31,8 @@ CTaskComplexUseSequence::CTaskComplexUseSequence(const CTaskComplexUseSequence& 
 CTaskComplexUseSequence::~CTaskComplexUseSequence() {
     if (m_nSequenceIndex != -1) {
         auto complexSequence = &CTaskSequences::ms_taskSequence[m_nSequenceIndex];
-        bool bFinalReference = complexSequence->m_nReferenceCount == 1;
-        complexSequence->m_nReferenceCount--;
+        bool bFinalReference = complexSequence->m_RefCnt == 1;
+        complexSequence->m_RefCnt--;
         if (bFinalReference && complexSequence->m_bFlushTasks) {
             complexSequence->m_bFlushTasks = false;
             complexSequence->Flush();
@@ -71,8 +71,8 @@ bool CTaskComplexUseSequence::MakeAbortable_Reversed(CPed* ped, eAbortPriority p
         auto* eventDamage = (CEventDamage*)event;
         if (eventDamage->m_damageResponse.m_bHealthZero && eventDamage->m_bAddToEventGroup) {
             CTaskComplexSequence* sequence = &CTaskSequences::ms_taskSequence[m_nSequenceIndex];
-            bool bFinalReference = sequence->m_nReferenceCount == 1;
-            sequence->m_nReferenceCount--;
+            bool bFinalReference = sequence->m_RefCnt == 1;
+            sequence->m_RefCnt--;
             if (bFinalReference && sequence->m_bFlushTasks) {
                 sequence->m_bFlushTasks = false;
                 sequence->Flush();
@@ -98,7 +98,7 @@ CTask* CTaskComplexUseSequence::CreateFirstSubTask_Reversed(CPed* ped) {
     }
 
     CTask* firstSubTask = nullptr;
-    CTask* currentSequenceTask = CTaskSequences::ms_taskSequence[m_nSequenceIndex].m_aTasks[m_nCurrentTaskIndex];
+    CTask* currentSequenceTask = CTaskSequences::ms_taskSequence[m_nSequenceIndex].m_Tasks[m_nCurrentTaskIndex];
     if (currentSequenceTask) {
         firstSubTask = currentSequenceTask->Clone();
     }

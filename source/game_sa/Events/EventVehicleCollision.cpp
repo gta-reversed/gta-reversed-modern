@@ -25,7 +25,7 @@ CEventVehicleCollision::CEventVehicleCollision(int16 pieceType, float damageInte
     m_impactNormal = collisionImpactVelocity;
     m_impactPos       = collisionPosition;
     m_moveState               = moveState;
-    field_31                  = 0;
+    m_DirectionToWalkRoundCar                  = 0;
     CEntity::SafeRegisterRef(m_vehicle);
 }
 
@@ -104,7 +104,7 @@ bool CEventVehicleCollision::AffectsPed_Reversed(CPed* ped)
     if (pActiveTask) {
         if (pActiveTask->GetTaskType() == TASK_COMPLEX_WALK_ROUND_CAR) {
             auto pTaskWalkRoundCar = reinterpret_cast<CTaskComplexWalkRoundCar*>(pActiveTask);
-            CVehicle* walkRoundVehicle = pTaskWalkRoundCar->m_vehicle;
+            CVehicle* walkRoundVehicle = pTaskWalkRoundCar->m_Veh;
             if (walkRoundVehicle == m_vehicle)
                 return false;
             if ((m_vehicle->m_pTrailer && m_vehicle->m_pTrailer == walkRoundVehicle) ||
@@ -115,7 +115,7 @@ bool CEventVehicleCollision::AffectsPed_Reversed(CPed* ped)
         }
         else {
             auto pTaskHitPedWithCar = reinterpret_cast<CTaskComplexHitPedWithCar*>(pActiveTask);
-            if (pActiveTask->GetTaskType() == TASK_COMPLEX_HIT_PED_WITH_CAR && pTaskHitPedWithCar->m_vehicle == m_vehicle)
+            if (pActiveTask->GetTaskType() == TASK_COMPLEX_HIT_PED_WITH_CAR && pTaskHitPedWithCar->m_Veh == m_vehicle)
                 return false;
         }
     }

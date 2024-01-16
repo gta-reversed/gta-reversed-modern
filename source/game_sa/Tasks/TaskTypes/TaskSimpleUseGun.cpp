@@ -3,8 +3,8 @@
 #include "TaskSimpleUseGun.h"
 
 // 0x61DE60
-CTaskSimpleUseGun::CTaskSimpleUseGun(CEntity* targetEntity, CVector vecTarget, uint8 nCommand, uint16 nBurstLength, bool bAimImmediate) : CTaskSimple() {
-    plugin::CallMethodAndReturn<CTaskSimpleUseGun*, 0x61DE60, CTaskSimpleUseGun*, CEntity*, CVector, uint8, uint16, bool>(this, targetEntity, vecTarget, nCommand, nBurstLength, bAimImmediate);
+CTaskSimpleUseGun::CTaskSimpleUseGun(CEntity* targetEntity, CVector vecTarget, eGunCommand nCommand, uint16 nBurstLength, bool bAimImmediate) : CTaskSimple() {
+    plugin::CallMethodAndReturn<CTaskSimpleUseGun*, 0x61DE60, CTaskSimpleUseGun*, CEntity*, CVector, eGunCommand, uint16, bool>(this, targetEntity, vecTarget, nCommand, nBurstLength, bAimImmediate);
 }
 
 // 0x61DF30
@@ -27,8 +27,8 @@ bool CTaskSimpleUseGun::RequirePistolWhip(CPed* ped, CEntity* targetEntity) {
     return plugin::CallAndReturn<bool, 0x61E200, CPed*, CEntity*>(ped, targetEntity);
 }
 
-bool CTaskSimpleUseGun::ControlGun(CPed* ped, CEntity* target, int8 nCount) {
-    return plugin::CallMethodAndReturn<bool, 0x61E040, CTaskSimpleUseGun*, CPed*, CEntity*, int8>(this, ped, target, nCount);
+bool CTaskSimpleUseGun::ControlGun(CPed* ped, CEntity* target, eGunCommand cmd) {
+    return plugin::CallMethodAndReturn<bool, 0x61E040, CTaskSimpleUseGun*, CPed*, CEntity*, eGunCommand>(this, ped, target, cmd);
 }
 
 int32 CTaskSimpleUseGun::SkipAim(CPed* ped) {
@@ -60,7 +60,7 @@ void CTaskSimpleUseGun::InjectHooks() {
     using namespace ReversibleHooks;
 }
 
-CTaskSimpleUseGun* CTaskSimpleUseGun::Constructor(CEntity* targetEntity, CVector vecTarget, uint8 nCommand, uint16 nBurstLength, bool bAimImmediate) {
+CTaskSimpleUseGun* CTaskSimpleUseGun::Constructor(CEntity* targetEntity, CVector vecTarget, eGunCommand nCommand, uint16 nBurstLength, bool bAimImmediate) {
     this->CTaskSimpleUseGun::CTaskSimpleUseGun(targetEntity, vecTarget, nCommand, nBurstLength, bAimImmediate);
     return this;
 }

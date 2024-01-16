@@ -29,7 +29,7 @@ CTask* CTaskComplexDragPedFromCar::ControlSubTask_Reversed(CPed* ped) {
     if (m_NumGettingInSet)
         return CTaskComplexEnterCar::ControlSubTask(ped);
 
-    if (!m_Ped || m_Ped->bInVehicle || !m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr))
+    if (!m_Ped || m_Ped->bInVehicle || !m_pSubTask->MakeAbortable(ped))
         return CTaskComplexEnterCar::ControlSubTask(ped);
 
     return CTaskComplexEnterCar::CreateSubTask(TASK_NONE, nullptr);

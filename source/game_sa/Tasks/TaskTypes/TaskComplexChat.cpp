@@ -85,7 +85,7 @@ CTask* CTaskComplexChat::ControlSubTask(CPed* ped) {
         return nullptr;
     }
 
-    if (m_TaskFinished && m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+    if (m_TaskFinished && m_pSubTask->MakeAbortable(ped)) {
         return nullptr;
     }
 
