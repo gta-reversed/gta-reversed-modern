@@ -11,15 +11,6 @@ class CTaskUtilityLineUpPedWithCar;
 class CTaskComplexShuffleSeats;
 
 class NOTSA_EXPORT_VTABLE CTaskComplexShuffleSeats : public CTaskComplex {
-
-public:
-    CVehicle*                     m_veh{};
-    eTargetDoor                   m_startDoor{};
-    eTargetDoor                   m_targetDoor{};
-    CVector                       m_targetDoorPos{};
-    CTaskUtilityLineUpPedWithCar* m_utilityLineUp{};
-    bool                          m_abort{};
-
 public:
     static void InjectHooks();
 
@@ -50,4 +41,12 @@ private: // Wrappers for hooks
         this->CTaskComplexShuffleSeats::~CTaskComplexShuffleSeats();
         return this;
     }
+
+private:
+    CVehicle*                     m_Veh{};
+    eTargetDoor                   m_OriginDoor{};
+    eTargetDoor                   m_TargetDoor{};
+    CVector                       m_TargetDoorPos{};
+    CTaskUtilityLineUpPedWithCar* m_UtilityLineUp{};
+    bool                          m_bAbort{};
 };
