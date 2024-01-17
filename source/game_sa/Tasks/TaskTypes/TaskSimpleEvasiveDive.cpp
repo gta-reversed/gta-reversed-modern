@@ -1,5 +1,6 @@
 #include "StdInc.h"
 
+#include "EventDamage.h"
 #include "TaskSimpleEvasiveDive.h"
 
 // 0x653560
@@ -23,7 +24,7 @@ bool CTaskSimpleEvasiveDive::MakeAbortable(CPed* ped, eAbortPriority priority, c
         }
         return true;
     }
-    if (const auto eDmg = CEvent::DynCast<CEventDamage>(event)) {
+    if (const auto eDmg = CEvent::DynCast<const CEventDamage>(event)) {
         if (eDmg->m_pSourceEntity && eDmg->m_pSourceEntity->IsVehicle()) {
             switch (eDmg->m_weaponType) {
             case WEAPON_RAMMEDBYCAR:
