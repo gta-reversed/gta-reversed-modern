@@ -41,7 +41,7 @@ bool CTaskSimpleHurtPedWithCar::ProcessPed(CPed* ped) {
         CTimer::GetTimeInMS(),
         WEAPON_RAMMEDBYCAR,
         PED_PIECE_TORSO,
-        CPedGeometryAnalyser::ComputePedHitSide(*ped, *m_Car),
+        (uint8)CPedGeometryAnalyser::ComputePedHitSide(*ped, *m_Car),
         false,
         ped->bInVehicle
     };
