@@ -67,7 +67,7 @@ bool CTaskSimpleCarShuffle::MakeAbortable(CPed* ped, eAbortPriority priority, CE
 
 // 0x64DC40
 bool CTaskSimpleCarShuffle::ProcessPed(CPed* ped) {
-    if (!!m_veh || m_animHasFinished) {
+    if (!m_veh || m_animHasFinished) {
         return true;
     }
     if (!m_anim) {
