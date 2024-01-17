@@ -32,8 +32,8 @@ public:
     CTask* CreateSubTask(eTaskType a2, CPed* ped);
     void   CreateTaskUtilityLineUpPedWithCar(CPed* ped);
 
-    CTask*    Clone() override { return new CTaskComplexShuffleSeats{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
+    CTask*    Clone() const override { return new CTaskComplexShuffleSeats{ *this }; }
+    eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;
