@@ -1,8 +1,8 @@
 #pragma once
 
 #include "TaskSimple.h"
+#include "Vehicle.h"
 
-class CVehicle;
 class CEvent;
 class CPed;
 
@@ -35,7 +35,7 @@ private: // Wrappers for hooks
     }
 
 private:
-    CVehicle::Ref m_Car{};
-    float         m_ImpulseMag{};
-    bool          m_bWillKillPed{};
+    CVehicle::Ref m_Car{};          //< The car that has hit the ped
+    float         m_ImpulseMag{};   //< Unused
+    bool          m_bWillKillPed{}; //< Whenever the damage will kill the ped
 };
