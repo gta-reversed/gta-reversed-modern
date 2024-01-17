@@ -82,7 +82,7 @@ std::pair<AssocGroupId, AnimationId> CTaskSimpleCarSlowDragPedOut::ComputeAnimID
             return ANIM_ID_UNDEFINED;
         }
     }();
-    return { (AssocGroupId)m_Vehicle->GetAnimGroup().GetGroup(animationId), animationId};
+    return { m_Vehicle->GetAnimGroup().GetGroup(animationId), animationId};
 }
 
 // 0x64C010
@@ -108,7 +108,7 @@ CPed* CTaskSimpleCarSlowDragPedOut::GetJackedPed() const {
 bool CTaskSimpleCarSlowDragPedOut::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const*) {
     if (priority == eAbortPriority::ABORT_PRIORITY_IMMEDIATE) {
         if (m_AnimAssoc) {
-            m_AnimAssoc->m_fBlendDelta = -1000.f;
+            m_AnimAssoc->m_BlendDelta = -1000.f;
         }
         if (m_Vehicle) {
             const auto [groupId, animId] = ComputeAnimID();
@@ -161,7 +161,7 @@ bool CTaskSimpleCarSlowDragPedOut::ProcessPed(CPed* ped) {
 
     // Process door open ratio according to animation's current time
     const auto [groupId, animId] = ComputeAnimID();
-    m_Vehicle->ProcessOpenDoor(ped, m_TargetDoor, groupId, animId, m_AnimAssoc->m_fCurrentTime);
+    m_Vehicle->ProcessOpenDoor(ped, m_TargetDoor, groupId, animId, m_AnimAssoc->m_CurrentTime);
 
     return false;
 }

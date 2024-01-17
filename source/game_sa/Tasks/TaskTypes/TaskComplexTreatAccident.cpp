@@ -52,8 +52,7 @@ CTask* CTaskComplexTreatAccident::ControlSubTask(CPed* ped)
 }
 
 // 0x659A90
-CTask* CTaskComplexTreatAccident::Clone()
-{
+CTask* CTaskComplexTreatAccident::Clone() const {
     return Clone_Reversed();
 }
 
@@ -70,7 +69,7 @@ CTask* CTaskComplexTreatAccident::CreateNextSubTask_Reversed(CPed* ped)
 
         if (targetPed && !targetPed->bFadeOut)
         {
-            targetPed->m_nDeathTime = CTimer::GetTimeInMS();
+            targetPed->m_nDeathTimeMS = CTimer::GetTimeInMS();
             auto newSubTask = CreateSubTask(TASK_SIMPLE_GIVE_CPR, ped);
             ped->m_fCurrentRotation = ComputeHeading(ped);
             ped->m_fAimingRotation = ped->m_fCurrentRotation;
@@ -89,7 +88,7 @@ CTask* CTaskComplexTreatAccident::CreateFirstSubTask_Reversed(CPed* ped)
 
     if (targetPed && !targetPed->bFadeOut)
     {
-        targetPed->m_nDeathTime = CTimer::GetTimeInMS();
+        targetPed->m_nDeathTimeMS = CTimer::GetTimeInMS();
         ped->Say(232, 0, 1.0F, false, false, false);
         g_ikChainMan.LookAt("TaskTreatAccident", ped, targetPed, 5000, BONE_HEAD, nullptr, true, 0.25F, 500, 3, false);
         return CreateSubTask(TASK_SIMPLE_ACHIEVE_HEADING, ped);
@@ -103,8 +102,7 @@ CTask* CTaskComplexTreatAccident::ControlSubTask_Reversed(CPed* ped)
     return m_pSubTask;
 }
 
-CTask* CTaskComplexTreatAccident::Clone_Reversed()
-{
+CTask* CTaskComplexTreatAccident::Clone_Reversed() const {
     return new CTaskComplexTreatAccident(m_pAccident);
 }
 

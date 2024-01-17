@@ -28,7 +28,7 @@ void CAnimBlendHierarchy::InjectHooks() {
 CAnimBlendHierarchy::CAnimBlendHierarchy() {
     m_pSequences = nullptr;
     m_nSeqCount = 0;
-    m_bRunningCompressed = false;
+    m_bIsCompressed = false;
     m_bKeepCompressed = false;
     m_nAnimBlockId = -1;
     m_fTotalTime = 0.0f;
@@ -44,14 +44,14 @@ CAnimBlendHierarchy::~CAnimBlendHierarchy() {
 // 0x4CF980
 void CAnimBlendHierarchy::Shutdown() {
     RemoveAnimSequences();
-    m_bRunningCompressed = false;
+    m_bIsCompressed = false;
 }
 
 // 0x4CF8E0
 void CAnimBlendHierarchy::RemoveAnimSequences() {
     void* oldFrameData = nullptr;
-    if (m_pSequences && m_pSequences->m_usingExternalMemory) {
-        oldFrameData = m_pSequences->m_pFrames;
+    if (m_pSequences && m_pSequences->m_bUsingExternalMemory) {
+        oldFrameData = m_pSequences->m_Frames;
     }
     CAnimManager::RemoveFromUncompressedCache(this);
     delete[] m_pSequences;
@@ -64,7 +64,7 @@ void CAnimBlendHierarchy::RemoveAnimSequences() {
 }
 
 // 0x4CF510
-uint8* CAnimBlendHierarchy::AllocSequenceBlock(bool compressed) {
+uint8* CAnimBlendHierarchy::AllocSequenceBlock(bool compressed) const {
     size_t size = 0;
     for (auto& sequence : GetSequences()) {
         size += sequence.GetDataSize(compressed);
@@ -73,17 +73,18 @@ uint8* CAnimBlendHierarchy::AllocSequenceBlock(bool compressed) {
 }
 
 // 0x4CF290
-CAnimBlendSequence* CAnimBlendHierarchy::FindSequence(const char* name) {
-    if (m_nSeqCount <= 0) {
+CAnimBlendSequence* CAnimBlendHierarchy::FindSequence(const char* name) const {
+    if (!m_nSeqCount) {
         return nullptr;
     }
 
-    auto hash = CKeyGen::GetUppercaseKey(name);
+    const auto hash = CKeyGen::GetUppercaseKey(name);
     for (auto& sequence : GetSequences()) {
-        if (sequence.m_hash == hash) {
+        if (sequence.m_FrameHashKey == hash) {
             return &sequence;
         }
     }
+
     return nullptr;
 }
 
@@ -92,71 +93,37 @@ void CAnimBlendHierarchy::SetName(const char* name) {
     m_hashKey = CKeyGen::GetUppercaseKey(name);
 }
 
-// 0x4CF2F0
-void CAnimBlendHierarchy::CalcTotalTime() {
-    m_fTotalTime = 0.0f;
-    for (auto& sequence : GetSequences()) {
-        if (sequence.m_nFrameCount == 0) { // FIX_BUGS by Mitchell Tobass
-            continue;
-        }
-        m_fTotalTime = std::max(m_fTotalTime, sequence.GetUncompressedFrame(sequence.m_nFrameCount - 1)->deltaTime);
-        for (auto j = sequence.m_nFrameCount - 1; j >= 1; j--) {
-            KeyFrame* kf1 = sequence.GetUncompressedFrame(j);
-            KeyFrame* kf2 = sequence.GetUncompressedFrame(j - 1);
-            kf1->deltaTime -= kf2->deltaTime;
-        }
-    }
-}
-
-// 0x4CF3E0
-void CAnimBlendHierarchy::CalcTotalTimeCompressed() {
-    m_fTotalTime = 0.0f;
-    for (auto& sequence : GetSequences()) {
-        if (sequence.m_nFrameCount == 0) { // FIX_BUGS by Mitchell Tobass
-            continue;
-        }
-        m_fTotalTime = std::max(m_fTotalTime, sequence.GetCompressedFrame(sequence.m_nFrameCount - 1)->GetDeltaTime());
-        for (auto j = sequence.m_nFrameCount - 1; j >= 1; j--) {
-            KeyFrameCompressed* kf1 = sequence.GetCompressedFrame(j);
-            KeyFrameCompressed* kf2 = sequence.GetCompressedFrame(j - 1);
-            kf1->deltaTime -= kf2->deltaTime;
-        }
-    }
-}
-
 // 0x4CF4E0
-void CAnimBlendHierarchy::RemoveQuaternionFlips() {
+void CAnimBlendHierarchy::RemoveQuaternionFlips() const {
     for (auto& sequence : GetSequences()) {
         sequence.RemoveQuaternionFlips();
     }
 }
 
 // 0x4CF560
-void* CAnimBlendHierarchy::GetSequenceBlock() {
-    if (m_pSequences->m_usingExternalMemory) {
-        return m_pSequences->m_pFrames;
-    } else {
-        return nullptr;
-    }
+void* CAnimBlendHierarchy::GetSequenceBlock() const {
+    return m_pSequences->m_bUsingExternalMemory
+        ? m_pSequences->m_Frames
+        : nullptr;
 }
 
 // 0x4CF5F0
 void CAnimBlendHierarchy::Uncompress() {
     assert(m_nSeqCount > 0);
 
-    auto frameData = AllocSequenceBlock(false);
-    auto oldFrameData = GetSequenceBlock();
+    auto compressedSeq = GetSequenceBlock();
 
-    for (auto& sequence : GetSequences()) {
-        sequence.Uncompress(frameData);
-        frameData = (uint8*)((size_t)frameData + sequence.GetDataSize(false));
+    auto uncompressedSeq = AllocSequenceBlock(false);
+    for (auto& s : GetSequences()) {
+        s.Uncompress(uncompressedSeq);
+        uncompressedSeq += s.GetDataSize(false);
     }
 
-    if (oldFrameData) {
-        CMemoryMgr::Free(oldFrameData);
+    if (compressedSeq) {
+        CMemoryMgr::Free(compressedSeq);
     }
 
-    m_bRunningCompressed = false;
+    m_bIsCompressed = false;
     if (m_fTotalTime == 0.0f) {
         RemoveQuaternionFlips();
         CalcTotalTime();
@@ -164,7 +131,7 @@ void CAnimBlendHierarchy::Uncompress() {
 }
 
 // 0x4CF6C0
-void CAnimBlendHierarchy::CompressKeyframes() {
+void CAnimBlendHierarchy::CompressKeyframes() const {
     auto frameData = AllocSequenceBlock(true);
     auto oldFrameData = GetSequenceBlock();
 
@@ -194,12 +161,12 @@ void CAnimBlendHierarchy::RemoveUncompressedData() {
         CMemoryMgr::Free(oldFrameData);
     }
 
-    m_bRunningCompressed = true;
+    m_bIsCompressed = true;
 }
 
 // 0x4CF800
 void CAnimBlendHierarchy::MoveMemory() {
-    plugin::CallMethod<0x4CF800, CAnimBlendHierarchy*>(this);
+    NOTSA_UNREACHABLE("Unused Function"); //plugin::CallMethod<0x4CF800, CAnimBlendHierarchy*>(this);
 }
 
 // 0x4CF8A0

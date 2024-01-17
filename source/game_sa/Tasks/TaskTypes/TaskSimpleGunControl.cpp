@@ -21,6 +21,7 @@ void CTaskSimpleGunControl::InjectHooks() {
 // because that took pointers instead for the CVector's, but that's stupid, because
 // they just 0 inited it otherwise, thus we can just default init the args
 // instead of passing nullptr, and it's going to be the same effect.
+// so, tldr, instead of `nullptr` for the CVector&'s pass in `{}`
 CTaskSimpleGunControl::CTaskSimpleGunControl(CEntity* targetEntity, CVector const& targetPos, CVector const& moveTarget, eGunCommand firingTask, int16 burstAmmoCnt, int32 leisureDurMs) :
     m_targetPos{targetPos},
     m_moveTarget{moveTarget},
@@ -102,14 +103,14 @@ bool CTaskSimpleGunControl::ProcessPed(CPed* ped) {
                     useGun->Reset(ped, m_targetEntity, m_targetPos, true, m_burstAmmoCnt);
                 }
             } else {
-                attack->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);
+                attack->MakeAbortable(ped);
                 return false;
             }
         } else {
             const auto useGun = new CTaskSimpleUseGun{
                 m_targetEntity,
                 m_targetPos,
-                (uint8)eGunCommand::AIM,
+                eGunCommand::AIM,
                 (uint16)m_burstAmmoCnt,
                 m_aimImmidiately
             };
@@ -150,7 +151,7 @@ bool CTaskSimpleGunControl::ProcessPed(CPed* ped) {
     }()) {
         // 0x62546E
         const auto anim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_GANG_GUNSTAND);
-        if (!anim || (anim->m_fBlendAmount < 1.f && anim->m_fBlendDelta <= 0.f)) {
+        if (!anim || (anim->m_BlendAmount < 1.f && anim->m_BlendDelta <= 0.f)) {
             CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_GANG_GUNSTAND);
         }
     }
@@ -159,7 +160,7 @@ bool CTaskSimpleGunControl::ProcessPed(CPed* ped) {
     auto [nextGunCmd, dontCheckLeisureDur] = [&, this]() -> std::pair<eGunCommand, bool> {
         using enum eGunCommand;
 
-        if (ped->GetActiveWeapon().m_nState == WEAPONSTATE_RELOADING && winfo.flags.bReload) {
+        if (ped->GetActiveWeapon().m_State == WEAPONSTATE_RELOADING && winfo.flags.bReload) {
             return { RELOAD, false }; // 0x625517
         }
 
@@ -246,7 +247,7 @@ bool CTaskSimpleGunControl::ProcessPed(CPed* ped) {
 
         if (!m_leisureDurMs && useGunTask) {
             m_firingTask = END_LEISURE;
-            useGunTask->ControlGun(ped, m_targetEntity, (int8)END_LEISURE);
+            useGunTask->ControlGun(ped, m_targetEntity, END_LEISURE);
         }
     }
 
@@ -256,7 +257,7 @@ bool CTaskSimpleGunControl::ProcessPed(CPed* ped) {
             ? DEFAULT_GUN_ATTACK_PERIOD * 2
             : DEFAULT_GUN_ATTACK_PERIOD);
 
-        period *= CGeneral::GetRandomNumberInRange(0.75, 1.25f);
+        period *= CGeneral::GetRandomNumberInRange(0.75f, 1.25f);
         period /= (float)ped->m_nWeaponShootingRate * m_attackIntervalMult * 0.04f;
 
         m_nextAtkTimeMs = CTimer::GetTimeInMS() + (uint32)period;
@@ -273,9 +274,8 @@ bool CTaskSimpleGunControl::ProcessPed(CPed* ped) {
     }();
 
     if (useGunTask) {
-        useGunTask->ControlGun(ped, m_targetEntity, (int8)nextGunCmd);
+        useGunTask->ControlGun(ped, m_targetEntity, nextGunCmd);
     }
-
 
     CVector pedToTarget{};
     if (!GetPedToTarget(ped, pedToTarget)) {

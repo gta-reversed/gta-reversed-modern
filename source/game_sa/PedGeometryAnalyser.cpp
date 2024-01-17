@@ -6,67 +6,69 @@ void CPedGeometryAnalyser::InjectHooks() {
     RH_ScopedClass(CPedGeometryAnalyser);
     RH_ScopedCategoryGlobal();
 
-//    RH_ScopedInstall(CanPedJumpObstacle, 0x0);
-//    RH_ScopedInstall(CanPedJumpObstacle, 0x0);
-//    RH_ScopedInstall(CanPedTargetPed, 0x5F1C40);
-//    RH_ScopedInstall(CanPedTargetPoint, 0x5F1B70);
-//    RH_ScopedInstall(ComputeBuildingHitPoints, 0x5F1E30);
-//    RH_ScopedInstall(ComputeClearTarget, 0x0);
+    //RH_ScopedInstall(CanPedJumpObstacle, 0x0, { .reversed = false });
+    //RH_ScopedInstall(CanPedJumpObstacle, 0x0, { .reversed = false });
+    RH_ScopedInstall(CanPedTargetPed, 0x5F1C40);
+    RH_ScopedInstall(CanPedTargetPoint, 0x5F1B70, { .reversed = false });
+    RH_ScopedInstall(ComputeBuildingHitPoints, 0x5F1E30, { .reversed = false });
+    //RH_ScopedInstall(ComputeClearTarget, 0x0, { .reversed = false });
     RH_ScopedOverloadedInstall(ComputeClosestSurfacePoint, "", 0x5F3B70, bool (*)(const CPed& ped, CEntity& entity, CVector& point));
-//    RH_ScopedInstall(ComputeClosestSurfacePoint, 0x0);
-//    RH_ScopedInstall(ComputeClosestSurfacePoint, 0x0);
-//    RH_ScopedInstall(ComputeEntityBoundingBoxCentre, 0x0);
+    //RH_ScopedInstall(ComputeClosestSurfacePoint, 0x0, { .reversed = false });
+    //RH_ScopedInstall(ComputeClosestSurfacePoint, 0x0, { .reversed = false });
+    //RH_ScopedInstall(ComputeEntityBoundingBoxCentre, 0x0, { .reversed = false });
     RH_ScopedInstall(ComputeEntityBoundingBoxCentreUncached, 0x5F1600);
     RH_ScopedInstall(ComputeEntityBoundingBoxCentreUncachedAll, 0x5F3B40);
-//    RH_ScopedInstall(ComputeEntityBoundingBoxCorners, 0x0);
-//    RH_ScopedInstall(ComputeEntityBoundingBoxCornersUncached, 0x5F1FA0);
-//    RH_ScopedInstall(ComputeEntityBoundingBoxPlanes, 0x5F3660);
+    //RH_ScopedInstall(ComputeEntityBoundingBoxCorners, 0x0, { .reversed = false });
+    RH_ScopedInstall(ComputeEntityBoundingBoxCornersUncached, 0x5F1FA0, { .reversed = false });
+    RH_ScopedInstall(ComputeEntityBoundingBoxPlanes, 0x5F3660, { .reversed = false });
     RH_ScopedInstall(ComputeEntityBoundingBoxPlanesUncached, 0x5F1670);
-//    RH_ScopedInstall(ComputeEntityBoundingBoxPlanesUncachedAll, 0x0);
-//    RH_ScopedInstall(ComputeEntityBoundingBoxSegmentPlanes, 0x0);
-//    RH_ScopedInstall(ComputeEntityBoundingBoxSegmentPlanesUncached, 0x5F1750);
+    //RH_ScopedInstall(ComputeEntityBoundingBoxPlanesUncachedAll, 0x0, { .reversed = false });
+    //RH_ScopedInstall(ComputeEntityBoundingBoxSegmentPlanes, 0x0, { .reversed = false });
+    RH_ScopedInstall(ComputeEntityBoundingBoxSegmentPlanesUncached, 0x5F1750, { .reversed = false });
     RH_ScopedInstall(ComputeEntityBoundingBoxSegmentPlanesUncachedAll, 0x5F2BC0);
-//    RH_ScopedInstall(ComputeEntityBoundingSphere, 0x5F3C20);
-//    RH_ScopedInstall(ComputeMoveDirToAvoidEntity, 0x0);
-//    RH_ScopedInstall(ComputeEntityDirs, 0x5F1500);
-//    RH_ScopedOverloadedInstall(ComputeEntityHitSide, "", 0x0, int32 (*)());
-//    RH_ScopedOverloadedInstall(ComputeEntityHitSide, "", 0x0, int32 (*)());
-//    RH_ScopedOverloadedInstall(ComputeEntityHitSide, "", 0x0, int32 (*)());
-//    RH_ScopedInstall(ComputePedHitSide, 0x0);
-//    RH_ScopedInstall(ComputePedHitSide, 0x0);
-//    RH_ScopedInstall(ComputePedShotSide, 0x5F13F0);
-//    RH_ScopedInstall(ComputeRouteRoundEntityBoundingBox, 0x0);
-//    RH_ScopedInstall(ComputeRouteRoundEntityBoundingBox, 0x0);
-//    RH_ScopedInstall(ComputeRouteRoundSphere, 0x5F1890);
-//    RH_ScopedInstall(GetIsLineOfSightClear, 0x0);
-//    RH_ScopedInstall(GetIsLineOfSightClear, 0x0);
-//    RH_ScopedInstall(GetNearestPed, 0x5F3590);
-//    RH_ScopedInstall(IsEntityBlockingTarget, 0x5F3970);
-//    RH_ScopedInstall(IsInAir, 0x5F1CB0);
-//    RH_ScopedInstall(IsWanderPathClear, 0x5F2F70);
-//    RH_ScopedInstall(LiesInsideBoundingBox, 0x5F3880);
+    RH_ScopedInstall(ComputeEntityBoundingSphere, 0x5F3C20, { .reversed = false });
+    //RH_ScopedInstall(ComputeMoveDirToAvoidEntity, 0x0, { .reversed = false });
+    RH_ScopedInstall(ComputeEntityDirs, 0x5F1500, { .reversed = false });
+    //    RH_ScopedOverloadedInstall(ComputeEntityHitSide, "", 0x0, int32 (*)());
+    //    RH_ScopedOverloadedInstall(ComputeEntityHitSide, "", 0x0, int32 (*)());
+    //    RH_ScopedOverloadedInstall(ComputeEntityHitSide, "", 0x0, int32 (*)());
+    //RH_ScopedInstall(ComputePedHitSide, 0x0, { .reversed = false });
+    //RH_ScopedInstall(ComputePedHitSide, 0x0, { .reversed = false });
+    RH_ScopedInstall(ComputePedShotSide, 0x5F13F0, { .reversed = false });
+    //RH_ScopedInstall(ComputeRouteRoundEntityBoundingBox, 0x0, { .reversed = false });
+    //RH_ScopedInstall(ComputeRouteRoundEntityBoundingBox, 0x0, { .reversed = false });
+    RH_ScopedInstall(ComputeRouteRoundSphere, 0x5F1890, { .reversed = false });
+    //RH_ScopedInstall(GetIsLineOfSightClear, 0x0, { .reversed = false });
+    //RH_ScopedInstall(GetIsLineOfSightClear, 0x0, { .reversed = false });
+    RH_ScopedInstall(GetNearestPed, 0x5F3590, { .reversed = false });
+    RH_ScopedInstall(IsEntityBlockingTarget, 0x5F3970, { .reversed = false });
+    RH_ScopedInstall(IsInAir, 0x5F1CB0, { .reversed = false });
+    RH_ScopedInstall(IsWanderPathClear, 0x5F2F70, { .reversed = false });
+    RH_ScopedInstall(LiesInsideBoundingBox, 0x5F3880, { .reversed = false });
 }
 
 // 0x5F1B00
-void CPedGeometryAnalyser::CanPedJumpObstacle(const CPed& ped, const CEntity& entity) {
-    assert(false);
+bool CPedGeometryAnalyser::CanPedJumpObstacle(const CPed& ped, const CEntity& entity) {
+    return plugin::CallAndReturn<bool, 0x5F1B00, CPed const&, CEntity const&>(ped, entity);
 }
 
 // 0x5F32D0
-void CPedGeometryAnalyser::CanPedJumpObstacle(const CPed& ped, const CEntity& entity, const CVector&, const CVector&) {
-    assert(false);
+bool CPedGeometryAnalyser::CanPedJumpObstacle(const CPed& ped, const CEntity& entity, const CVector& contactNormal, const CVector& contactPos) {
+    return plugin::CallAndReturn<bool, 0x5F32D0, CPed const&, CEntity const&, CVector const&, CVector const&>(ped, entity, contactNormal, contactPos);
 }
 
 // 0x5F1C40
-// unused
-void CPedGeometryAnalyser::CanPedTargetPed(CPed& ped, CPed& targetPed, bool a3) {
-    assert(false);
+bool CPedGeometryAnalyser::CanPedTargetPed(CPed& ped, CPed& targetPed, bool checkDirection) {
+    return CanPedTargetPoint(
+        ped,
+        targetPed.GetPosition() + CVector{ 0.f, 0.f, targetPed.GetTaskManager().GetTaskSecondary(TASK_SECONDARY_DUCK) ? -0.25f : 0.75f }, // 0.75f - 1.f = -0.25f
+        checkDirection
+    );
 }
 
 // 0x5F1B70
-// unused
-void CPedGeometryAnalyser::CanPedTargetPoint(const CPed& ped, const CVector& a2, bool a3) {
-    assert(false);
+bool CPedGeometryAnalyser::CanPedTargetPoint(const CPed& ped, const CVector& a2, bool a3) {
+    return plugin::CallMethodAndReturn<bool, 0x5F1B70>(&ped, &a2, a3);
 }
 
 // 0x5F1E30
@@ -86,7 +88,7 @@ void CPedGeometryAnalyser::ComputeClearTarget(const CPed& ped, const CVector&, C
 // 0x5F3B70
 bool CPedGeometryAnalyser::ComputeClosestSurfacePoint(const CPed& ped, CEntity& entity, CVector& point) {
     CVector corners[4];
-    auto posn = ped.GetPosition();
+    const auto& posn = ped.GetPosition();
     ComputeEntityBoundingBoxCornersUncached(posn.z, entity, corners);
     return ComputeClosestSurfacePoint(posn, corners, point);
 }
@@ -201,8 +203,19 @@ void CPedGeometryAnalyser::ComputeEntityBoundingSphere(const CPed& ped, CEntity&
 }
 
 // 0x5F3730
-int32 CPedGeometryAnalyser::ComputeMoveDirToAvoidEntity(const CPed& ped, CEntity& entity, CVector& posn) {
-    return plugin::CallAndReturn<int32, 0x5F3730, const CPed&, CEntity&, CVector&>(ped, entity, posn);
+int32 CPedGeometryAnalyser::ComputeMoveDirToAvoidEntity(const CPed& ped, CEntity& entity, CVector& outDirToAvoidEntity) {
+    return plugin::CallAndReturn<int32, 0x5F3730, const CPed&, CEntity&, CVector&>(ped, entity, outDirToAvoidEntity);
+}
+
+//! @notsa
+CVector CPedGeometryAnalyser::ComputeEntityDir(const CEntity& entity, eDirection dir) {
+    switch (dir) {
+    case eDirection::FORWARD:  return entity.GetForward();
+    case eDirection::LEFT:     return -entity.GetRight();
+    case eDirection::BACKWARD: return -entity.GetForward();
+    case eDirection::RIGHT:    return entity.GetRight();
+    default:                   NOTSA_UNREACHABLE();
+    }
 }
 
 // 0x5F1500
@@ -212,8 +225,7 @@ CVector* CPedGeometryAnalyser::ComputeEntityDirs(const CEntity& entity, CVector*
 
 // 0x5F3BC0
 int32 CPedGeometryAnalyser::ComputeEntityHitSide(const CPed& ped, CEntity& entity) {
-    auto posn = ped.GetPosition();
-    return ComputeEntityHitSide(posn, entity);
+    return ComputeEntityHitSide(ped.GetPosition(), entity);
 }
 
 // 0x5F1450
@@ -282,8 +294,8 @@ bool CPedGeometryAnalyser::IsInAir(const CPed& ped) {
 }
 
 // 0x5F2F70
-bool CPedGeometryAnalyser::IsWanderPathClear(const CVector& a1, const CVector& a2, float a3, int32 a4) {
-    return plugin::CallAndReturn<bool, 0x5F2F70, const CVector&, const CVector&, float, int32>(a1, a2, a3, a4);
+CPedGeometryAnalyser::WanderPathClearness CPedGeometryAnalyser::IsWanderPathClear(const CVector& a1, const CVector& a2, float a3, int32 a4) {
+    return plugin::CallAndReturn<WanderPathClearness, 0x5F2F70, const CVector&, const CVector&, float, int32>(a1, a2, a3, a4);
 }
 
 // 0x5F3880

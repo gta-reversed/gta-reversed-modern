@@ -38,7 +38,7 @@ void CMenuManager::InjectHooks() {
     RH_ScopedInstall(HasLanguageChanged, 0x573CD0);
     RH_ScopedInstall(DoSettingsBeforeStartingAGame, 0x573330);
     RH_ScopedInstall(StretchX, 0x5733E0);
-    // bad registers RH_ScopedInstall(StretchY, 0x573410, true);
+    RH_ScopedInstall(StretchY, 0x573410, { .reversed = false });
     RH_ScopedInstall(SwitchToNewScreen, 0x573680);
     RH_ScopedInstall(ScrollRadioStations, 0x573A00);
     RH_ScopedInstall(SetFrontEndRenderStates, 0x573A60);
@@ -48,13 +48,13 @@ void CMenuManager::InjectHooks() {
 
     RH_ScopedInstall(DrawFrontEnd, 0x57C290);
     RH_ScopedInstall(DrawBackground, 0x57B750);
-    // RH_ScopedInstall(DrawStandardMenus, 0x5794A0);
+    RH_ScopedInstall(DrawStandardMenus, 0x5794A0, { .reversed = false });
     RH_ScopedInstall(DrawWindow, 0x573EE0);
     RH_ScopedInstall(DrawWindowedText, 0x578F50);
     RH_ScopedInstall(DrawQuitGameScreen, 0x57D860);
-    // RH_ScopedInstall(DrawControllerScreenExtraText, 0x57D8D0);
-    // RH_ScopedInstall(DrawControllerBound, 0x57E6E0);
-    // RH_ScopedInstall(DrawControllerSetupScreen, 0x57F300);
+    RH_ScopedInstall(DrawControllerScreenExtraText, 0x57D8D0, { .reversed = false });
+    RH_ScopedInstall(DrawControllerBound, 0x57E6E0, { .reversed = false });
+    RH_ScopedInstall(DrawControllerSetupScreen, 0x57F300, { .reversed = false });
 
     RH_ScopedInstall(CentreMousePointer, 0x57C520);
     RH_ScopedInstall(LoadSettings, 0x57C8F0);
@@ -67,10 +67,10 @@ void CMenuManager::InjectHooks() {
     RH_ScopedInstall(CheckFrontEndDownInput, 0x5738B0);
     RH_ScopedInstall(CheckFrontEndLeftInput, 0x573920);
     RH_ScopedInstall(CheckFrontEndRightInput, 0x573990);
-    RH_ScopedInstall(CheckForMenuClosing, 0x576B70);
+    RH_ScopedInstall(CheckForMenuClosing, 0x576B70, { .locked = true });  // Must be hooked at all times otherwise imgui stops working! [The input at least does]
     RH_ScopedInstall(CheckHover, 0x57C4F0);
     RH_ScopedInstall(CheckMissionPackValidMenu, 0x57D720);
-    // RH_ScopedInstall(CheckCodesForControls, 0x57DB20);
+    RH_ScopedInstall(CheckCodesForControls, 0x57DB20, { .reversed = false });
 
     RH_ScopedInstall(DisplaySlider, 0x576860);
     RH_ScopedInstall(DisplayHelperText, 0x57E240);
@@ -79,20 +79,20 @@ void CMenuManager::InjectHooks() {
     RH_ScopedInstall(MessageScreen, 0x579330);
     RH_ScopedInstall(SmallMessageScreen, 0x574010);
 
-    // RH_ScopedInstall(PrintMap, 0x575130);
-    // RH_ScopedInstall(PrintStats, 0x574900);
+    RH_ScopedInstall(PrintMap, 0x575130, { .reversed = false });
+    RH_ScopedInstall(PrintStats, 0x574900, { .reversed = false });
     RH_ScopedInstall(PrintBriefs, 0x576320);
     RH_ScopedInstall(PrintRadioStationList, 0x5746F0);
 
-    // RH_ScopedInstall(UserInput, 0x57FD70);
-    // RH_ScopedInstall(AdditionalOptionInput, 0x5773D0);
+    RH_ScopedInstall(UserInput, 0x57FD70, { .reversed = false });
+    RH_ScopedInstall(AdditionalOptionInput, 0x5773D0, { .reversed = false });
     RH_ScopedInstall(CheckRedefineControlInput, 0x57E4D0);
-    // RH_ScopedInstall(RedefineScreenUserInput, 0x57EF50);
+    RH_ScopedInstall(RedefineScreenUserInput, 0x57EF50, { .reversed = false });
 
     RH_ScopedInstall(Process, 0x57B440);
     RH_ScopedInstall(ProcessStreaming, 0x573CF0);
     RH_ScopedInstall(ProcessFileActions, 0x578D60);
-    // RH_ScopedInstall(ProcessUserInput, 0x57B480);
+    RH_ScopedInstall(ProcessUserInput, 0x57B480, { .reversed = false });
     RH_ScopedInstall(ProcessMenuOptions, 0x576FE0);
     RH_ScopedInstall(ProcessPCMenuOptions, 0x57CD50);
     RH_ScopedInstall(ProcessMissionPackNewGame, 0x57D520);
@@ -317,7 +317,7 @@ void CMenuManager::DoSettingsBeforeStartingAGame() {
     if (m_bMenuActive)
         AudioEngine.Reset();
 
-    m_nRadioStation = static_cast<int8>(CAEAudioUtility::GetRandomNumberInRange(1, RADIO_COUNT - 1));
+    m_nRadioStation = CAEAudioUtility::GetRandomRadioStation();
     m_bDontDrawFrontEnd = true;
     m_bStartGameLoading = true;
 
@@ -435,12 +435,12 @@ void CMenuManager::ScrollRadioStations(int8 numStations) {
         return;
     }
 
-    m_nRadioStation += numStations;
-    if (m_nRadioStation <= 0) {
-        m_nRadioStation = RADIO_COUNT - 1;
+    m_nRadioStation = static_cast<eRadioID>(m_nRadioStation + numStations);
+    if (m_nRadioStation <= RADIO_EMERGENCY_AA) {
+        m_nRadioStation = RADIO_OFF;
     }
     if (m_nRadioStation >= RADIO_COUNT) {
-        m_nRadioStation = 1;
+        m_nRadioStation = RADIO_CLASSIC_HIP_HOP;
     }
     AudioEngine.RetuneRadio(m_nRadioStation);
     SaveSettings();
@@ -566,12 +566,19 @@ void CMenuManager::JumpToGenericMessageScreen(eMenuScreen screen, const char* ti
     } else if (screen == SCREEN_GAME_LOADED) {
         mscreen.m_aItems[1].m_nTargetMenu = SCREEN_GAME_SAVE;
     }
-    strncpy(mscreen.m_szTitleName, titleKey, sizeof(mscreen.m_szTitleName));
-    strncpy(mscreen.m_aItems[0].m_szName, textKey, sizeof(mscreen.m_aItems[0].m_szName));
+    strncpy_s(mscreen.m_szTitleName, titleKey, sizeof(mscreen.m_szTitleName));
+    strncpy_s(mscreen.m_aItems[0].m_szName, textKey, sizeof(mscreen.m_aItems[0].m_szName));
 }
 
 // 0x57C520
 void CMenuManager::CentreMousePointer() {
+#ifdef FIX_BUGS
+    // Not really a vanilla bug, because the vanilla game stops rendering when not in foreground
+    if (!IsForegroundApp()) {
+        return;
+    }
+#endif
+
     CVector2D pos{ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
     if (pos.x != 0.0f && pos.y != 0.0f) {
         RsMouseSetPos(&pos);
@@ -595,7 +602,7 @@ void CMenuManager::LoadSettings() {
         SetDefaultPreferences(SCREEN_CONTROLLER_SETUP);
         m_nPrefsVideoMode = 0;
         m_nPrefsLanguage = eLanguage::AMERICAN;
-        m_nRadioStation = 1;
+        m_nRadioStation = RADIO_CLASSIC_HIP_HOP;
 
         CFileMgr::CloseFile(file);
         CFileMgr::SetDir("");
@@ -673,7 +680,7 @@ void CMenuManager::LoadSettings() {
     CCamera::m_bUseMouse3rdPerson = m_nController == 0;
     CRenderer::ms_lodDistScale = m_fDrawDistance;
     g_fx.SetFxQuality(fxQuality);
-    SetBrightness(m_PrefsBrightness, true);
+    SetBrightness(static_cast<float>(m_PrefsBrightness), true);
     m_nPrefsAntialiasing = m_nDisplayAntialiasing;
     m_bDoVideoModeUpdate = true;
     AudioEngine.SetMusicMasterVolume(m_nRadioVolume);
@@ -760,7 +767,7 @@ void CMenuManager::SaveStatsToFile() {
     char date[12]{};
     _strdate_s(date, 12u);
 
-    char* lastMissionPassed = TheText.Get("ITBEG"); // In the beginning
+    const char* lastMissionPassed = TheText.Get("ITBEG"); // In the beginning
     if (CStats::LastMissionPassedName[0]) {
         lastMissionPassed = TheText.Get(CStats::LastMissionPassedName);
     }
@@ -777,28 +784,34 @@ void CMenuManager::SaveStatsToFile() {
         return;
     }
 
-    fprintf(file, "<title>Grand Theft Auto San Andreas Stats</title>\n");
-    fprintf(file, "<body bgcolor=\"#000000\" leftmargin=\"10\" topmargin=\"10\" marginwidth=\"10\" marginheight=\"10\">\n");
-    fprintf(file, "<table width=\"560\" align=\"center\" border=\"0\" cellpadding=\"5\" cellspacing=\"0\">\n"
+    const auto ToUpperCase = [](const char* s) {
+        std::string str{s};
+        rng::for_each(str, [](char& c) { c = (char)std::toupper(c); });
+        return str;
+    };
+
+    fprintf_s(file, "<title>Grand Theft Auto San Andreas Stats</title>\n");
+    fprintf_s(file, "<body bgcolor=\"#000000\" leftmargin=\"10\" topmargin=\"10\" marginwidth=\"10\" marginheight=\"10\">\n");
+    fprintf_s(file, "<table width=\"560\" align=\"center\" border=\"0\" cellpadding=\"5\" cellspacing=\"0\">\n"
                   "<tr align=\"center\" valign=\"top\"> \n"
                   "<td height=\"59\" colspan=\"2\" bgcolor=\"#000000\"><div align=\"center\"><font color=\"#FFFFFF\" size=\"5\" face=\"Arial, \n");
-    fprintf(file, "Helvetica, sans-serif\">-------------------------------------------------------------------</font><font \nsize=\"5\" face=\"Arial, Helvetica, sans-serif\"><br>\n");
-    fprintf(file, "<strong><font color=\"#FFFFFF\">GRAND THEFT AUTO SAN ANDREAS ");
-    fprintf(file, "%s</font></strong><br><font\n", _strupr(TheText.Get("FEH_STA"))); // Stats
-    fprintf(file, "color=\"#FFFFFF\">-------------------------------------------------------------------</font></font></div></td> </tr>\n");
-    fprintf(file, "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\">     <td height=\"22\" colspan=\"2\">&nbsp;</td>  </tr>\n"
-                  "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n");
-    fprintf(file, R"(<td height="40" colspan="2"> <p><font color="#F0000C" size="2" face="Arial, Helvetica, sans-serif"><stro)");
-    fprintf(file, "ng><font color=\"#F0000C\" size=\"1\">%s: \n", GxtCharToAscii(TheText.Get("FES_DAT"), 0u)); // DATE
-    fprintf(file, "%s</font><br>        %s: </strong>", date, GxtCharToAscii(TheText.Get("FES_CMI"), 0u));     // LAST MISSION PASSED
-    fprintf(file, "%s<strong><br></strong> </font></p></td></tr>\n", _strupr((char*)GxtCharToAscii(lastMissionPassed, 0u)));
-    fprintf(file, "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> <td height=\"5\" colspan=\"2\"></td> </tr> <tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n"
+    fprintf_s(file, "Helvetica, sans-serif\">-------------------------------------------------------------------</font><font \nsize=\"5\" face=\"Arial, Helvetica, sans-serif\"><br>\n");
+    fprintf_s(file, "<strong><font color=\"#FFFFFF\">GRAND THEFT AUTO SAN ANDREAS ");
+    fprintf_s(file, "%s</font></strong><br><font\n", ToUpperCase(TheText.Get("FEH_STA")).c_str()); // Stats
+    fprintf_s(file, "color=\"#FFFFFF\">-------------------------------------------------------------------</font></font></div></td> </tr>\n");
+    fprintf_s(file, "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\">     <td height=\"22\" colspan=\"2\">&nbsp;</td>  </tr>\n"
+                    "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n");
+    fprintf_s(file, R"(<td height="40" colspan="2"> <p><font color="#F0000C" size="2" face="Arial, Helvetica, sans-serif"><stro)");
+    fprintf_s(file, "ng><font color=\"#F0000C\" size=\"1\">%s: \n", GxtCharToAscii(TheText.Get("FES_DAT"), 0u)); // DATE
+    fprintf_s(file, "%s</font><br>        %s: </strong>", date, GxtCharToAscii(TheText.Get("FES_CMI"), 0u));     // LAST MISSION PASSED
+    fprintf_s(file, "%s<strong><br></strong> </font></p></td></tr>\n", ToUpperCase(GxtCharToAscii(lastMissionPassed, 0u)).c_str());
+    fprintf_s(file, "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> <td height=\"5\" colspan=\"2\"></td> </tr> <tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n"
                   "<td height=\"10\" colspan=\"2\"></td> </tr> <tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n");
-    fprintf(file, R"(<td height="20" colspan="2"><font color="#F0000C" size="2" face="Arial, Helvetica, sans-serif">)");
-    fprintf(file, "<strong> %s</strong>\n ", GxtCharToAscii(TheText.Get("CRIMRA"), 0u)); // Criminal rating:
+    fprintf_s(file, R"(<td height="20" colspan="2"><font color="#F0000C" size="2" face="Arial, Helvetica, sans-serif">)");
+    fprintf_s(file, "<strong> %s</strong>\n ", GxtCharToAscii(TheText.Get("CRIMRA"), 0u)); // Criminal rating:
     TextCopy(gGxtString, CStats::FindCriminalRatingString());
-    fprintf(file, "%s (%d)</font></td>  </tr>", GxtCharToAscii(gGxtString, 0u), CStats::FindCriminalRatingNumber());
-    fprintf(file, "<tr align=\"left\" valign=\"top\" bgcolor=\"#000000\"><td height=\"10\" colspan=\"2\"></td>  </tr>\n");
+    fprintf_s(file, "%s (%d)</font></td>  </tr>", GxtCharToAscii(gGxtString, 0u), CStats::FindCriminalRatingNumber());
+    fprintf_s(file, "<tr align=\"left\" valign=\"top\" bgcolor=\"#000000\"><td height=\"10\" colspan=\"2\"></td>  </tr>\n");
 
     static constexpr const char* strToPrint[] = {
         "FES_PLA", "FES_MON", "FES_WEA", "FES_GAN",
@@ -807,11 +820,11 @@ void CMenuManager::SaveStatsToFile() {
     for (auto menuItem = 0u; menuItem < 8u; menuItem++) {
         auto numStatLines = CStats::ConstructStatLine(99'999, menuItem);
 
-        fprintf(file, "</font></strong></div></td> </tr> <tr align=\"left\" valign=\"top\" bgcolor=\"#000000\">  <td height=\"25\" colspan=\"2\"></td> </tr>\n"
+        fprintf_s(file, "</font></strong></div></td> </tr> <tr align=\"left\" valign=\"top\" bgcolor=\"#000000\">  <td height=\"25\" colspan=\"2\"></td> </tr>\n"
                       "<tr align=\"left\" valign=\"top\"><td height=\"30\" bgcolor=\"#000000\"><font color=\"#009900\" size=\"4\" face=\"Arial, Helvetica, sans-serif\"><strong>\n");
 
-        fprintf(file, "%s", GxtCharToAscii(TheText.Get(strToPrint[menuItem]), 0u));
-        fprintf(file, "</strong></font></td> <td width=\"500\" align=\"right\" valign=\"middle\" bgcolor=\"#000000\"> <div align=\"right\"><strong><font color=\"#FF0CCC\">\n");
+        fprintf_s(file, "%s", GxtCharToAscii(TheText.Get(strToPrint[menuItem]), 0u));
+        fprintf_s(file, "</strong></font></td> <td width=\"500\" align=\"right\" valign=\"middle\" bgcolor=\"#000000\"> <div align=\"right\"><strong><font color=\"#FF0CCC\">\n");
         if (numStatLines <= 0)
             continue;
 
@@ -820,19 +833,19 @@ void CMenuManager::SaveStatsToFile() {
 
             auto str = GxtCharToAscii(gGxtString, 0u);
             if (*str) {
-                fprintf(file, "</font></strong></div></td> </tr> <tr align=\"left\" valign=\"top\" bgcolor=\"#000000\">  <td height=\"10\" colspan=\"2\"></td> </tr>\n");
+                fprintf_s(file, "</font></strong></div></td> </tr> <tr align=\"left\" valign=\"top\" bgcolor=\"#000000\">  <td height=\"10\" colspan=\"2\"></td> </tr>\n");
             }
 
-            fprintf(file, "<tr align=\"left\" valign=\"top\"><td width=\"500\" height=\"22\" bgcolor=\"#555555\"><font color=\"#FFFFFF\" size=\"2\" face=\"Arial, Helvetica, sans-serif\"><strong>\n");
-            fprintf(file, "%s", (*str) ? str : " ");
-            fprintf(file, "</strong></font></td> <td width=\"500\" align=\"right\" valign=\"middle\" bgcolor=\"#555555\"> <div align=\"right\"><strong><font color=\"#FFFFFF\">\n");
+            fprintf_s(file, "<tr align=\"left\" valign=\"top\"><td width=\"500\" height=\"22\" bgcolor=\"#555555\"><font color=\"#FFFFFF\" size=\"2\" face=\"Arial, Helvetica, sans-serif\"><strong>\n");
+            fprintf_s(file, "%s", (*str) ? str : " ");
+            fprintf_s(file, "</strong></font></td> <td width=\"500\" align=\"right\" valign=\"middle\" bgcolor=\"#555555\"> <div align=\"right\"><strong><font color=\"#FFFFFF\">\n");
             auto val = GxtCharToAscii(gGxtString2, 0u);
             auto valFormatted = (char*)val;
 
             // todo. xref: CStats::ConstructStatLine, PrintStats
             static uint16& unk = *reinterpret_cast<uint16*>(0xB794CC);
             if (unk) { // stat line formatted in percents?
-                sprintf(valFormatted, "%0.0f%%", std::min(atoi(val) / 10.0f, 100.0f));
+                sprintf_s(valFormatted, 5u, "%0.0f%%", std::min(atoi(val) / 10.0f, 100.0f)); // max length: "100%\0"
             }
 
             for (auto v = valFormatted; *v; v++) {
@@ -840,7 +853,7 @@ void CMenuManager::SaveStatsToFile() {
                     *v = -70; // double vertical bar
                 }
             }
-            fprintf(file, "%s", valFormatted);
+            fprintf_s(file, "%s", valFormatted);
         }
     }
 
@@ -912,7 +925,7 @@ void CMenuManager::DisplayHelperText(const char* key) {
 
     CFont::SetColor(CRGBA(255, 255, 255, alpha));
 
-    char* text{};
+    const char* text{};
     switch (m_nHelperText) {
     case FET_APP:
         text = TheText.Get("FET_APP"); // CLICK LMB / RETURN - APPLY NEW SETTING
@@ -995,6 +1008,23 @@ void CMenuManager::ResetHelperText() {
     m_nHelperTextFadingAlpha = 300;
 }
 
+// 0x57C5E0
+void CMenuManager::NoDiskInDriveMessage() {
+    DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 0);
+    if (RsGlobal.quit) {
+        return;
+    }
+    MessageLoop();
+    CPad::UpdatePads();
+    MessageScreen("NO_PCCD", true, false);
+    CFont::DrawFonts();
+    DoRWStuffEndOfFrame();
+    if (CPad::IsEscJustPressed()) {
+        m_bQuitGameNoDVD = true;
+        RsEventHandler(rsQUITAPP, NULL);
+    }
+}
+
 // 0x579330
 void CMenuManager::MessageScreen(const char* key, bool blackBackground, bool cameraUpdateStarted) {
     const CRect fullscreen = CRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -1053,27 +1083,31 @@ void CMenuManager::SmallMessageScreen(const char* key) {
         y = StretchY(float(200 - lines * 9));
     }
 
-    char* text = TheText.Get(key);
+    auto text = TheText.Get(key);
     if (!TheText.m_bCdErrorLoaded) {
         for (auto& k : { "NOCD", "OPENCD", "WRONGCD", "CDERROR" }) {
             if (!_stricmp(k, key)) {
-                AsciiToGxtChar(TheText.m_szCdErrorText, text);
+                AsciiToGxtChar(text, TheText.m_szCdErrorText);
             }
         }
     }
     CFont::PrintString(x, y, text);
 }
 
+//! NOTSA
+void CMenuManager::SimulateGameLoad(bool newGame, uint32 slot) {
+    m_bDontDrawFrontEnd     = newGame;
+    m_bSelectedSaveGame     = slot;
+    CGame::bMissionPackGame = false;
+    if (newGame) {
+        DoSettingsBeforeStartingAGame();
+    } else {
+        m_nCurrentScreen = SCREEN_LOAD_FIRST_SAVE;
+        field_1B3C = true;
+    } 
+}
+
 // NOTSA
 void CMenuManager::SetBrightness(float brightness, bool arg2) {
     gamma.SetGamma(brightness / 512.0f, arg2);
-}
-
-// NOTSA 0x748BDD
-const char* CMenuManager::GetMovieFileName() const {
-    if (m_nTitleLanguage == 12 || m_nTitleLanguage == 7) {
-        return "movies\\GTAtitlesGER.mpg";
-    } else {
-        return "movies\\GTAtitles.mpg";
-    }
 }

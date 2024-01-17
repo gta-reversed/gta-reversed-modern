@@ -23,7 +23,7 @@ CAnimBlendClumpData::CAnimBlendClumpData() {
 
 // 0x4CF100
 CAnimBlendClumpData::~CAnimBlendClumpData() {
-    m_Associations.Remove();
+    m_Anims.Remove();
     if (m_Frames) {
         CMemoryMgr::FreeAlign(&m_Frames);
     }

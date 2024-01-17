@@ -62,7 +62,7 @@ CEvent* CEventGroup::Add(CEvent* event, bool bValid) {
                 eventEditable->InformGroup(m_pPed);
             }
             auto* damageEvent = static_cast<CEventDamage*>(event);
-            if (bInformRespectedFriends && (eventEditable->GetEventType() != EVENT_DAMAGE || !damageEvent->m_b05)) {
+            if (bInformRespectedFriends && (eventEditable->GetEventType() != EVENT_DAMAGE || !damageEvent->m_bStealthMode)) {
                 eventEditable->InformRespectedFriends(m_pPed);
             }
             if (bTriggerLookAt)

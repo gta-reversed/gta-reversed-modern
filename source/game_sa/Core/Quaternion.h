@@ -28,7 +28,7 @@ public:
     constexpr CQuaternion(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
 
     // Quat to matrix
-    void Get(RwMatrix* out);
+    void Get(RwMatrix* out) const;
 
     // Quat to euler angles
     void Get(float *x, float *y, float *z);
@@ -56,9 +56,10 @@ public:
 
     // Conjugate of a quat
     void Conjugate();
+    CQuaternion Conjugated() const { CQuaternion c = *this; c.Conjugate(); return c; }
 
     // Squared length of a quat
-    float GetLengthSquared();
+    float GetLengthSquared() const;
 
     // Multiplies quat by a floating point value
     void Scale(float multiplier);
@@ -108,6 +109,9 @@ public:
     CQuaternion operator-() const {
         return { -x, -y, -z, -w };
     }
+
+    // NOTSA
+    RtQuat* AsRtQuat() { return (RtQuat*)this; }
 };
 
 VALIDATE_SIZE(CQuaternion, 0x10);

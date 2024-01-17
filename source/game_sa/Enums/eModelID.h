@@ -10,12 +10,17 @@
 // The list was generated from unmodified data of GTA San Andreas.
 // Author: fastman92
 
-enum eModelID { // Number of entries: 14832
+enum eModelID : int32 { // Number of entries: 14832
     UNLOAD_MODEL  = -2,
     MODEL_INVALID = -1,
 
     MODEL_PLAYER = 0,
     MODEL_CSPLAY = 1,
+
+    // Special values used in cutscene loading
+    MODEL_LOAD_THIS = 2,
+    MODEL_USE_PREV = 3,
+
     MODEL_MALE01 = 7,
     MODEL_BFORI = 9,
     MODEL_BFOST = 10,
@@ -14855,3 +14860,7 @@ enum eModelID { // Number of entries: 14832
     MODEL_CS_LANDBIT_06_A = 18629,
     MODEL_CS_LANDBIT_20_A = 18630,
 };
+
+inline bool IsModelIDForCutScene(eModelID modelId) {
+    return modelId >= MODEL_CUTOBJ01 && modelId <= MODEL_CUTOBJ20;
+}

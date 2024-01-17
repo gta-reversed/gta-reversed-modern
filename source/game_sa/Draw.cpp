@@ -40,6 +40,8 @@ void CDraw::CalculateAspectRatio() {
 
 // 0x53E600
 void DoFade() {
+    ZoneScoped;
+
     if (CTimer::GetIsPaused())
         return;
 
@@ -62,7 +64,7 @@ void DoFade() {
         }
     }
 
-    if (CDraw::FadeValue != 0) {
+    if (CDraw::IsFading()) {
         CRGBA color(0, 0, 0, 0);
 
         if (!TheCamera.m_bFadeTargetIsSplashScreen) {

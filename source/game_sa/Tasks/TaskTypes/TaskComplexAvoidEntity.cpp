@@ -4,22 +4,27 @@
 #include "IKChainManager_c.h"
 #include "TaskSimpleGoToPoint.h"
 
+// !!!!!!!!!!!!!!!!
+// UNUSED TASK
+// !!!!!!!!!!!!!!!!
+
 void CTaskComplexAvoidEntity::InjectHooks() {
     RH_ScopedClass(CTaskComplexAvoidEntity);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    // RH_ScopedInstall(Constructor, 0x66AA20);
-    // RH_ScopedInstall(ComputeDetourTarget, 0x66FD30);
-    // RH_ScopedInstall(ComputeDetourTarget, 0x66ADB0);
-    // RH_ScopedInstall(ComputeAvoidSphere, 0x672080);
-    // RH_ScopedInstall(ComputeSphere, 0x66F6C0);
-    // RH_ScopedInstall(ControlSubTask_Reversed, 0x66ADE0);
-    // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x672530);
-    // RH_ScopedInstall(CreateNextSubTask_Reversed, 0x66AD70);
-    // RH_ScopedInstall(MakeAbortable, 0x66AD40);
-    // RH_ScopedInstall(QuitIK, 0x66AD10);
-    // RH_ScopedInstall(SetUpIK, 0x66AB40);
-    // RH_ScopedInstall(NearbyEntitiesInSphere, 0x66ADA0);
+    RH_ScopedInstall(Constructor, 0x66AA20, { .reversed = false });
+    RH_ScopedInstall(ComputeAvoidSphere, 0x672080, { .reversed = false });
+    RH_ScopedInstall(ComputeSphere, 0x66F6C0, { .reversed = false });
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x66ADE0, { .reversed = false });
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x672530, { .reversed = false });
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x66AD70, { .reversed = false });
+    RH_ScopedInstall(MakeAbortable, 0x66AD40, { .reversed = false });
+    RH_ScopedInstall(QuitIK, 0x66AD10, { .reversed = false });
+    RH_ScopedInstall(SetUpIK, 0x66AB40, { .reversed = false });
+    RH_ScopedInstall(NearbyEntitiesInSphere, 0x66ADA0, { .reversed = false });
+
+    RH_ScopedOverloadedInstall(ComputeDetourTarget, "0", 0x66FD30, bool(CTaskComplexAvoidEntity::*)(const CPed&), { .reversed = false });
+    RH_ScopedOverloadedInstall(ComputeDetourTarget, "1", 0x66ADB0, bool(CTaskComplexAvoidEntity::*)(const CPed&, const CColSphere&), { .reversed = false });
 }
 
 // 0x66AA20
@@ -107,8 +112,8 @@ void CTaskComplexAvoidEntity::SetUpIK(CPed *ped) {
     if (!ped->GetIsOnScreen() || m_b1 || g_ikChainMan.GetLookAtEntity(ped) || ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_IK))
         return;
 
-    auto taskType = m_pParentTask->GetTaskType();
-    if (m_pParentTask && (taskType == TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING || taskType == TASK_COMPLEX_AVOID_ENTITY))
+    auto taskType = m_Parent->GetTaskType();
+    if (m_Parent && (taskType == TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING || taskType == TASK_COMPLEX_AVOID_ENTITY))
         return;
 
     CVector out = f20 - ped->GetPosition();

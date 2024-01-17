@@ -43,7 +43,7 @@ bool CEventVehicleToSteal::AffectsPed_Reversed(CPed* ped)
     if (ped->IsAlive() && m_vehicle) {
         auto enterCarAsDriverTask = reinterpret_cast<CTaskComplexEnterCar*>(FindPlayerPed()->GetTaskManager().FindTaskByType(
             TASK_PRIMARY_PRIMARY, TASK_COMPLEX_ENTER_CAR_AS_DRIVER));
-        if (!enterCarAsDriverTask || !enterCarAsDriverTask->m_pTargetVehicle) {
+        if (!enterCarAsDriverTask || !enterCarAsDriverTask->GetTargetCar()) {
             if (m_vehicle == FindPlayerPed()->m_pVehicle
                 && (CTheScripts::IsPlayerOnAMission() || CPad::GetPad(0)->bPlayerSafe))
             {

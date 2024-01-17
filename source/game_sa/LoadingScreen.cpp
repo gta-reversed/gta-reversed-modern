@@ -9,6 +9,8 @@
 #include "platform.h"
 #include "LoadingScreen.h"
 
+#include "extensions/Configs/FastLoader.hpp"
+
 void CLoadingScreen::InjectHooks() {
     RH_ScopedClass(CLoadingScreen);
     RH_ScopedCategoryGlobal();
@@ -26,7 +28,7 @@ void CLoadingScreen::InjectHooks() {
     RH_ScopedInstall(DisplayNextSplash, 0x5904D0);
     RH_ScopedInstall(StartFading, 0x590530);
     RH_ScopedInstall(DisplayPCScreen, 0x590570);
-    // RH_ScopedInstall(Update, 0x5905E0);
+    RH_ScopedInstall(Update, 0x5905E0, { .reversed = false });
     RH_ScopedInstall(DoPCTitleFadeOut, 0x590860);
     RH_ScopedInstall(DoPCTitleFadeIn, 0x590990);
     RH_ScopedInstall(DoPCScreenChange, 0x590AC0);
@@ -38,15 +40,16 @@ void CLoadingScreen::InjectHooks() {
 
 // 0x5902B0
 void CLoadingScreen::Init(bool unusedFlag, bool loaded) {
-    if (IsActive())
+    if (IsActive()) {
         return;
+    }
 
     if (!loaded) {
         LoadSplashes(false, false);
     }
 
     m_currDisplayedSplash = -1;
-    m_bActive = true;
+    m_bActive             = true;
     m_timeSinceLastScreen = GetClockTime();
 }
 
@@ -78,20 +81,15 @@ void CLoadingScreen::RenderSplash() {
 
         if (m_bFadeInNextSplashFromBlack || m_bFadeOutCurrSplashToBlack) {
             color.Set(0, 0, 0);
-            color.a = (CLoadingScreen::m_bFadeInNextSplashFromBlack) ? 255 - m_FadeAlpha : m_FadeAlpha;
+            color.a = (m_bFadeInNextSplashFromBlack) ? 255 - m_FadeAlpha : m_FadeAlpha;
 
             CSprite2d::DrawRect(rect, color);
         } else {
             color.a = 255 - m_FadeAlpha;
 
-            auto next = &GetCurrentDisplayedSplash();
-            next++;
-            next->Draw(rect, color);
+            m_aSplashes[m_currDisplayedSplash - 1].Draw(rect, color);
         }
-        return;
-    }
-
-    if (!m_bReadyToDelete) {
+    } else if (!m_bReadyToDelete) {
         GetCurrentDisplayedSplash().Draw(rect, color);
     }
 }
@@ -120,14 +118,14 @@ void CLoadingScreen::LoadSplashes(bool starting, bool nvidia) {
     char name[20];
     for (auto id = 0u; id < MAX_SPLASHES; id++) {
         if (starting) {
-            sprintf(name, nvidia ? "nvidia" : "eax");
+            sprintf_s(name, nvidia ? "nvidia" : "eax");
         } else if (id) {
-            sprintf(name, "loadsc%d", screenIdx[id]);
+            sprintf_s(name, "loadsc%d", screenIdx[id]);
         } else {
 #ifdef USE_EU_STUFF
-            sprintf(name, "title_pc_EU");
+            sprintf_s(name, "title_pc_EU");
 #else
-            sprintf(name, "title_pc_US");
+            sprintf_s(name, "title_pc_US");
 #endif
         }
         m_aSplashes[id].SetTexture(name);
@@ -138,7 +136,7 @@ void CLoadingScreen::LoadSplashes(bool starting, bool nvidia) {
 
 // 0x590220
 void CLoadingScreen::DisplayMessage(const char* message) {
-    strcpy(m_PopUpMessage, message);
+    strcpy_s(m_PopUpMessage, message);
 }
 
 // 0x590240
@@ -179,6 +177,27 @@ void CLoadingScreen::Continue() {
 
 // 0x590370
 void CLoadingScreen::RenderLoadingBar() {
+#ifdef PRINT_LOADMSG
+    // NOTSA
+    // TODO: Fix new-line not rendered when using fastload into a savegame
+
+    char loadingMsg[1024];
+    *std::format_to(loadingMsg, "{}\n{}", m_LoadingGxtMsg1, m_LoadingGxtMsg2) = 0;
+    CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
+    CFont::SetDropShadowPosition(2);
+    CFont::SetJustify(false);
+    CFont::PrintString(
+        SCREEN_STRETCH_X(50.0f),
+        SCREEN_STRETCH_Y(40.0f),
+        loadingMsg
+    );
+    CFont::RenderFontBuffer();
+#endif
+
+    if (m_TimeBarAppeared == 0.0f) {
+        m_TimeBarAppeared = GetClockTime();
+    }
+
     if (m_bLegalScreen || gfLoadingPercentage <= 0.0f || gfLoadingPercentage >= 100.0f)
         return;
 
@@ -194,10 +213,6 @@ void CLoadingScreen::RenderLoadingBar() {
         HudColour.GetRGBA(HUD_COLOUR_LIGHT_GRAY, 255),
         CRGBA{ 0, 0, 0, 0 }
     );
-
-    if (m_TimeBarAppeared == 0.0f) {
-        m_TimeBarAppeared = GetClockTime();
-    }
 }
 
 // 0x5904D0, inlined
@@ -229,8 +244,10 @@ void CLoadingScreen::DisplayPCScreen() {
         DefinedState2d();
         RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
         RenderSplash();
-        if (m_currDisplayedSplash > 0 && (!m_bFading || m_currDisplayedSplash != 1)) {
-            RenderLoadingBar();
+        if (!g_FastLoaderConfig.NoLoadBar) {
+            if (m_currDisplayedSplash > 0 && (!m_bFading || m_currDisplayedSplash != 1)) {
+                RenderLoadingBar();
+            }
         }
         RwCameraEndUpdate(Scene.m_pRwCamera);
         RsCameraShowRaster(Scene.m_pRwCamera);
@@ -279,12 +296,18 @@ void CLoadingScreen::DoPCScreenChange(uint32 finish) {
     if (finish) {
         m_bFadeOutCurrSplashToBlack = true;
     } else {
+#ifdef FIX_BUGS // Fix incorrect looping behaviour
+        m_currDisplayedSplash = std::max((m_currDisplayedSplash + 1) % std::size(m_aSplashes), 1u); // 1u = skip copyright screen
+#else
         m_currDisplayedSplash++;
+#endif
     }
 
-    for (auto i = 20; i > 0; i--) {
-        m_FadeAlpha = 0;
-        DisplayPCScreen();
+    if (!g_FastLoaderConfig.NoFading) {
+        for (auto i = 20; i > 0; i--) {
+            m_FadeAlpha = 0;
+            DisplayPCScreen();
+        }
     }
 
     for (auto i = 0u; i < 50u; i++) {
@@ -324,15 +347,21 @@ void CLoadingScreen::NewChunkLoaded() {
         return DoPCScreenChange((uint32)true);
     }
 
-    if ((m_currDisplayedSplash && delta < 5.0f) || delta < 5.5f) {
-        return DisplayPCScreen();
-    }
+#ifdef FIX_BUGS // Fix copyright screen appearing instead of an actual loading screen splash
+    if (m_currDisplayedSplash && delta < g_FastLoaderConfig.ScreenChangeTime) {
+#else
+    if ((m_currDisplayedSplash && delta < 5.0f) || (!m_currDisplayedSplash && delta < 5.5f)) {
+#endif
+        if (!g_FastLoaderConfig.NoLoadScreen || !g_FastLoaderConfig.NoLoadBar) {
+            DisplayPCScreen();
+        }
+    } else { // New splash screen
+        DoPCScreenChange((uint32)false);
+        m_timeSinceLastScreen = now;
 
-    DoPCScreenChange((uint32)false);
-    m_timeSinceLastScreen = now;
-
-    if (m_chunkBarAppeared == -1) {
-        m_chunkBarAppeared = m_numChunksLoaded;
+        if (m_chunkBarAppeared == -1) {
+            m_chunkBarAppeared = m_numChunksLoaded;
+        }
     }
 }
 
@@ -341,9 +370,20 @@ void CLoadingScreen::Update() {
     plugin::Call<0x5905E0>();
 }
 
+void CLoadingScreen::SkipCopyrightSplash() {
+    m_currDisplayedSplash  = 0;     // Copyright splash
+#ifndef FIX_BUGS // Fixed this in DoPCScreenChange
+    m_timeSinceLastScreen -= 1000.f; // Decrease timeSinceLastScreen, so it will change immediately
+#endif // !FIX_BUGS
+    m_bFadeInNextSplashFromBlack = true; // First Loading Splash
+}
+
 // 0x53DED0
 void LoadingScreen(const char* msg1, const char* msg2, const char* msg3) {
     if (msg1) {
+        if (!g_FastLoaderConfig.NoDbgLogScreens) { // Very slow, so skip it
+            DEV_LOG("Loadingscreen: {} [{}][{}]", msg1, msg2 ? msg2 : "NULL", msg3 ? msg3 : "NULL");
+        }
         CLoadingScreen::SetLoadingBarMsg(msg1, msg2);
     }
     CLoadingScreen::NewChunkLoaded();

@@ -27,12 +27,18 @@
 
 #include <ranges>
 namespace rng = std::ranges;
+namespace rngv = std::views;
+
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #include "Base.h"
 #include "config.h"
 
 #include "HookSystem.h"
 #include "reversiblehooks\ReversibleHooks.h"
+
+#include <tracy/Tracy.hpp>
 
 // DirectX
 #include <d3d9.h>
@@ -61,6 +67,8 @@ namespace rng = std::ranges;
 #include "game_sa\RenderWare\rw\rwtexdict.h"
 #include "game_sa\RenderWare\rw\skeleton.h"
 #include "game_sa\RenderWare\RenderWare.h"
+#include <PluginBase.h>
+#include <RenderWare.h>
 
 // oswrapper
 #include "oswrapper/oswrapper.h"
@@ -408,19 +416,9 @@ namespace rng = std::ranges;
 #include "game_sa\Audio\config\eAudioSlot.h"
 #include "game_sa\Audio\config\eSFX.h"
 
-#include "game_sa\Fx\CarFXRenderer.h"
-#include "game_sa\Fx\FxBox.h"
-#include "game_sa\Fx\FxEmitterBP.h"
-#include "game_sa\Fx\FxFrustumInfo.h"
-#include "game_sa\Fx\FxInfoManager.h"
+#include "game_sa\Fx\eFxInfoType.h"
 #include "game_sa\Fx\FxManager.h"
-#include "game_sa\Fx\FxMemoryPool.h"
-#include "game_sa\Fx\FxPlane.h"
-#include "game_sa\Fx\FxPrimBP.h"
 #include "game_sa\Fx\FxPrtMult.h"
-#include "game_sa\Fx\FxSphere.h"
-#include "game_sa\Fx\FxSystemBP.h"
-#include "game_sa\Fx\FxSystem.h"
 #include "game_sa\Fx\Fx.h"
 
 #include "game_sa\Models\AtomicModelInfo.h"
@@ -452,6 +450,8 @@ namespace rng = std::ranges;
 #include "game_sa\Tasks\TaskSequences.h"
 #include "game_sa\Tasks\PedScriptedTaskRecord.h"
 #include "game_sa\Tasks\ScriptedBrainTaskStore.h"
+
+#include "game_sa/RenderBuffer.hpp"
 
 #ifdef EXTRA_DEBUG_FEATURES
 #include "toolsmenu\DebugModules\COcclusionDebugModule.h"

@@ -92,7 +92,7 @@ void CTaskSimpleCarAlign::StartAnim(CPed* ped) {
     }();
     m_anim = CAnimManager::BlendAnimation(
         ped->m_pRwClump,
-        (AssocGroupId)m_veh->GetAnimGroup().GetGroup(animId),
+        m_veh->GetAnimGroup().GetGroup(animId),
         animId,
         4.f
     );
@@ -104,7 +104,7 @@ bool CTaskSimpleCarAlign::MakeAbortable(CPed* ped, eAbortPriority priority, CEve
     switch (priority) {
     case ABORT_PRIORITY_IMMEDIATE: {
         if (m_anim) {
-            m_anim->m_fBlendDelta = -1000.f;
+            m_anim->m_BlendDelta = -1000.f;
         }
         return true;
     }

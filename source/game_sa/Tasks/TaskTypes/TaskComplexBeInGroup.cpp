@@ -33,13 +33,13 @@ CTaskComplexBeInGroup::CTaskComplexBeInGroup(int32 groupId, bool isLeader) : CTa
 CTask* CTaskComplexBeInGroup::MonitorMainGroupTask(CPed* ped) {
     if (const auto groupMainTask = CPedGroups::GetGroup(m_nGroupId).GetIntelligence().GetTaskMain(ped)) {
         if (groupMainTask != m_MainTask || groupMainTask->GetTaskType() != m_nMainTaskId) {
-            if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+            if (m_pSubTask->MakeAbortable(ped)) {
                 m_MainTask = groupMainTask;
                 m_nMainTaskId = groupMainTask->GetTaskType();
                 return groupMainTask->Clone();
             }
         }
-    } else if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+    } else if (m_pSubTask->MakeAbortable(ped)) {
         m_MainTask = nullptr;
         m_nMainTaskId = TASK_NONE;
         return nullptr;
@@ -70,12 +70,12 @@ void CTaskComplexBeInGroup::MonitorSecondaryGroupTask(CPed* ped) {
     } else { // Group has a new task, apply it to the ped
 
         // Abort peds task in the previous stored slot
-        if (const auto task = ped->GetTaskManager().GetTaskSecondary(m_nSecondaryTaskSlot)) {
+        if (const auto task = ped->GetTaskManager().GetTaskSecondary((eSecondaryTask)m_nSecondaryTaskSlot)) {
             task->MakeAbortable(ped, ABORT_PRIORITY_LEISURE, nullptr);
         }
 
         // Make sure ped has the task the new task (and abort current)
-        if (!pedGrpSecTask || pedGrpSecTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+        if (!pedGrpSecTask || pedGrpSecTask->MakeAbortable(ped)) {
             m_SecondaryTask = grpSecTask;
             m_nSecondaryTaskSlot = pedGrpSecTaskSlot;
             if (grpSecTask) { 

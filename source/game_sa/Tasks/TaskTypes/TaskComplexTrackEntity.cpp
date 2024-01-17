@@ -83,7 +83,7 @@ CTask* CTaskComplexTrackEntity::CreateNextSubTask(CPed* ped) {
     }
 
     return new CTaskComplexFollowNodeRoute{
-        6,
+        PEDMOVE_RUN,
         m_toTrack->GetPosition(),
         0.5f,
         0.2f,
@@ -112,7 +112,7 @@ CTask* CTaskComplexTrackEntity::CreateFirstSubTask(CPed* ped) {
 // 0x663640
 CTask* CTaskComplexTrackEntity::ControlSubTask(CPed* ped) {
     const auto TryAbort = [this, ped] {
-        return MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);
+        return MakeAbortable(ped);
     };
 
     const auto TryAbortGetTask = [&, this] {

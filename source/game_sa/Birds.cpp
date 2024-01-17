@@ -38,6 +38,8 @@ void CBirds::InjectHooks() {
 
 // 0x711EC0
 void CBirds::Init() {
+    ZoneScoped;
+
     for (auto& bird : aBirds) {
         bird.m_bCreated = false;
     }
@@ -142,6 +144,8 @@ void CBirds::Shutdown() {
 
 // 0x712330
 void CBirds::Update() {
+    ZoneScoped;
+
     const auto& vecCamPos = TheCamera.GetPosition();
 
     if (!CGame::currArea
@@ -149,7 +153,8 @@ void CBirds::Update() {
         && CClock::ClockHoursInRange(5, 22)
         && (CTimer::GetFrameCounter() % 512) == std::size(aBirds)
     ) {
-        auto iNumBirdsToCreate = (uint32)CGeneral::GetRandomNumberInRange(1, std::size(aBirds) + 1 - uiNumberOfBirds);
+        auto iNumBirdsToCreate = CGeneral::GetRandomNumberInRange(std::size(aBirds) - uiNumberOfBirds) + 1;
+
         eBirdsBiome biome = eBirdsBiome::BIOME_WATER;
 
         if (TheCamera.m_fDistanceToWater > 30.0F) {
@@ -200,7 +205,7 @@ void CBirds::Update() {
                 );
 
                 float fWaterLevel;
-                if (!CWaterLevel::GetWaterLevelNoWaves(vecBirdSpawnPos.x, vecBirdSpawnPos.y, vecBirdSpawnPos.z, &fWaterLevel, nullptr, nullptr) || fWaterLevel + 4.0F < fBirdSpawnZ) {
+                if (!CWaterLevel::GetWaterLevelNoWaves(vecBirdSpawnPos, &fWaterLevel, nullptr, nullptr) || fWaterLevel + 4.0F < fBirdSpawnZ) {
                     auto vecForward = TheCamera.m_mCameraMatrix.GetForward();
                     vecForward.z = 0.0F;
                     vecForward.Normalise();
@@ -248,6 +253,8 @@ void CBirds::Update() {
 
 // 0x712810
 void CBirds::Render() {
+    ZoneScoped;
+
     if (uiNumberOfBirds == 0)
         return;
 
@@ -390,7 +397,7 @@ void CBirds::HandleGunShot(const CVector* pointA, const CVector* pointB) {
             continue;
 
         CColLine line{ *pointA, *pointB };
-        CColSphere sphere{ 0.5f, bird.m_vecPosn };
+        CColSphere sphere{ bird.m_vecPosn, 0.5f };
 
         if (CCollision::TestLineSphere(line, sphere)) {
             vecBirdShotAt = bird.m_vecPosn;

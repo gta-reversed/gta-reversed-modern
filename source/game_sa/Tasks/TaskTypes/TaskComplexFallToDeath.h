@@ -1,15 +1,14 @@
 #pragma once
 
 #include "TaskComplex.h"
-
-enum class eFallDir : uint8;
+#include "Enums/eDirection.h"
 
 class CTaskComplexFallToDeath : public CTaskComplex {
 public:
     CVector     m_Posn;
     AnimationId m_nAnimId;
     AnimationId m_nAnimId1;
-    eFallDir    m_nFallToDeathDir;
+    eDirection    m_nFallToDeathDir;
     union {
         struct {
             uint8 b0x1  : 1;
@@ -31,12 +30,14 @@ public:
     CTaskComplexFallToDeath(int32 direction, const CVector& posn, bool bFallToDeathOverRailing, bool a5);
     ~CTaskComplexFallToDeath() override = default; // 0x6790B0
 
-    eTaskType GetTaskType() override { return Type; }; // 0x6790A0
-    CTask* Clone() override { return new CTaskComplexFallToDeath(static_cast<int32>(m_nFallToDeathDir), m_Posn, b0x8, b0x10); } // 0x67C480
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() const override { return Type; }; // 0x6790A0
+    CTask* Clone() const override { return new CTaskComplexFallToDeath(static_cast<int32>(m_nFallToDeathDir), m_Posn, b0x8, b0x10); } // 0x67C480
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     CTask* ControlSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;
+
+    static bool CalcFall(CPed* ped, int32& fallDir, bool& bFallToDeathOverRailing);
 
 private:
     void UpdateAnims(CPed* ped);

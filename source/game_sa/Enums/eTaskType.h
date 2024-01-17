@@ -10,6 +10,8 @@
 #include "Base.h"
 
 enum eTaskType : int32 {
+    TASK_INVALID = -1,
+
     // player tasks
     TASK_SIMPLE_PLAYER_ON_FOOT = 0,
 
@@ -154,7 +156,7 @@ enum eTaskType : int32 {
     TASK_SIMPLE_HIT_FRONT,
     TASK_SIMPLE_HIT_LEFT,
     TASK_SIMPLE_HIT_RIGHT,
-    TASK_SIMPLE_HIT_BY_GUN_BACK,
+    TASK_SIMPLE_HIT_BY_GUN_BACK, // AKA TASK_SIMPLE_HIT_BY_GUN_REAR
     TASK_SIMPLE_HIT_BY_GUN_FRONT,
     TASK_SIMPLE_HIT_BY_GUN_LEFT,
     TASK_SIMPLE_HIT_BY_GUN_RIGHT,
@@ -404,7 +406,7 @@ enum eTaskType : int32 {
     TASK_SIMPLE_FIGHT,
     TASK_SIMPLE_USE_GUN,
     TASK_SIMPLE_THROW_PROJECTILE,
-    TASK_SIMPLE_FIGHT_CTRL,
+    TASK_SIMPLE_FIGHT_CTRL, // 0x3fb
     TASK_SIMPLE_GUN_CTRL,
     // SCRIPT_DECISION
     TASK_SIMPLE_THROW_CTRL,
@@ -982,3 +984,10 @@ static const char* GetTaskTypeName(eTaskType taskType) {
     }
 #undef CASE_FOR
 }
+
+template <>
+struct std::formatter<eTaskType> : std::formatter<std::string> {
+    auto format(eTaskType tt, format_context& ctx) const {
+        return formatter<string>::format(std::format("{} ({})", GetTaskTypeName(tt), (int)tt), ctx);
+    }
+};

@@ -64,14 +64,14 @@ void CCutsceneObject::ProcessControl_Reversed() {
     }
 
     CPhysical::ProcessControl(); // exactly CPhysical
-    if (m_pAttachTo) {
+    if (m_pAttachToFrame) {
         if (m_pAttachmentObject) {
             auto* hierarchy = GetAnimHierarchyFromClump(m_pAttachmentObject->m_pRwClump);
             auto* matArr = RpHAnimHierarchyGetMatrixArray(hierarchy);
             const auto boneMat = CMatrix(&matArr[m_nAttachBone], false);
             *static_cast<CMatrix*>(m_matrix) = boneMat;
         } else {
-            auto* pLtm = RwFrameGetLTM(m_pAttachTo);
+            auto* pLtm = RwFrameGetLTM(m_pAttachToFrame);
             const auto attachMat = CMatrix(pLtm, false);
             *static_cast<CMatrix*>(m_matrix) = attachMat;
         }
@@ -92,14 +92,14 @@ void CCutsceneObject::ProcessControl_Reversed() {
 
 // 0x5B1E00
 void CCutsceneObject::PreRender_Reversed() {
-    if (m_pAttachTo) {
+    if (m_pAttachToFrame) {
         if (m_pAttachmentObject) {
             auto* hierarchy = GetAnimHierarchyFromClump(m_pAttachmentObject->m_pRwClump);
             auto* matArr = RpHAnimHierarchyGetMatrixArray(hierarchy);
             const auto boneMat = CMatrix(&matArr[m_nAttachBone], false);
             *static_cast<CMatrix*>(m_matrix) = boneMat;
         } else {
-            auto* pLtm = RwFrameGetLTM(m_pAttachTo);
+            auto* pLtm = RwFrameGetLTM(m_pAttachToFrame);
             const auto attachMat = CMatrix(pLtm, false);
             *static_cast<CMatrix*>(m_matrix) = attachMat;
         }
@@ -111,7 +111,7 @@ void CCutsceneObject::PreRender_Reversed() {
                     auto* animData = RpClumpGetAnimBlendClumpData(m_pRwClump);
                     auto* morphTarget = RpGeometryGetMorphTarget(RpAtomicGetGeometry(firstAtomic), 0);
                     auto* sphere = RpMorphTargetGetBoundingSphere(morphTarget);
-                    sphere->center = animData->m_Frames->m_pIFrame->translation;
+                    sphere->center = animData->m_Frames[0].GetFrameTranslation();
                 }
             }
         }
@@ -123,7 +123,7 @@ void CCutsceneObject::PreRender_Reversed() {
     g_realTimeShadowMan.DoShadowThisFrame(this);
     if (!m_pShadowData) {
         CShadows::StoreShadowForPedObject(
-            this,
+            AsPed(),
             CTimeCycle::m_fShadowDisplacementX[CTimeCycle::m_CurrentStoredValue],
             CTimeCycle::m_fShadowDisplacementY[CTimeCycle::m_CurrentStoredValue],
             CTimeCycle::m_fShadowFrontX[CTimeCycle::m_CurrentStoredValue],

@@ -41,7 +41,7 @@ CTaskComplexEnterCarAsDriverTimed::~CTaskComplexEnterCarAsDriverTimed() {
 // 0x63AFF0
 void CTaskComplexEnterCarAsDriverTimed::StopTimer(CEvent const* event) {
     if (!CEventHandler::IsTemporaryEvent(*event)) {
-        m_enterBeganTimer.Stop();
+        m_enterBeganTimer.Pause();
     }
 }
 
@@ -52,7 +52,7 @@ bool CTaskComplexEnterCarAsDriverTimed::MakeAbortable(CPed* ped, eAbortPriority 
             switch (priority) {
             case ABORT_PRIORITY_URGENT:
             case ABORT_PRIORITY_IMMEDIATE:
-                m_enterBeganTimer.Stop();
+                m_enterBeganTimer.Pause();
             }
         }
         return true;
@@ -77,7 +77,7 @@ CTask* CTaskComplexEnterCarAsDriverTimed::ControlSubTask(CPed* ped) {
     }
 
     // Check if ped has got into the vehicle yet
-    if (!m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr) || ped->bInVehicle || m_veh->m_pDriver) {
+    if (!m_pSubTask->MakeAbortable(ped) || ped->bInVehicle || m_veh->m_pDriver) {
         return m_pSubTask;
     }
 

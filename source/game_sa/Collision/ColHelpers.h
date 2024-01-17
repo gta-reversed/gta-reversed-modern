@@ -32,11 +32,11 @@ struct FileHeader {
 
         // Get version based on fourcc
         [[nodiscard]] auto GetVersion() const {
-            switch (make_fourcc4(fourcc)) {
-            case make_fourcc4("COLL"): return ColModelVersion::COLL;
-            case make_fourcc4("COL2"): return ColModelVersion::COL2;
-            case make_fourcc4("COL3"): return ColModelVersion::COL3;
-            case make_fourcc4("COL4"): return ColModelVersion::COL4;
+            switch (MakeFourCC(fourcc)) {
+            case MakeFourCC("COLL"): return ColModelVersion::COLL;
+            case MakeFourCC("COL2"): return ColModelVersion::COL2;
+            case MakeFourCC("COL3"): return ColModelVersion::COL3;
+            case MakeFourCC("COL4"): return ColModelVersion::COL4;
             default:
                 // It's ok if this happens - Since the buffer it was read from might not contain more col data, and we've just read padding.
                 return ColModelVersion::NONE;
@@ -73,7 +73,7 @@ VALIDATE_SIZE(FileHeader, 0x20);
 struct TSurface {
     eSurfaceType material;
     uint8 flag, brightness;
-    uint8 light;
+    tColLighting light;
 };
 
 struct TBox : CBox {
@@ -84,16 +84,17 @@ struct TBox : CBox {
             *reinterpret_cast<const CBox*>(this),
             surface.material,
             surface.flag,
-            *reinterpret_cast<tColLighting*>(surface.light)
+            surface.light
         };
     }
 };
 
+// NOTE: Face = triangle
 struct TFaceGroup {
     // Bounding box of all faces in this group.
     // TODO: Check if all vertices of these triangles are within the BB or not - It might be a useful information to know.
     CBoundingBox bb{};
-    uint16 first{}, last{}; // First and last face index (Inclusive: [first, last])
+    uint16       first{}, last{}; // First and last face index (Inclusive: [first, last])
 };
 
 namespace V1 {
@@ -112,7 +113,7 @@ struct TSphere {
             { center, radius },
             surface.material,
             surface.flag,
-            *reinterpret_cast<tColLighting*>(surface.light)
+            surface.light
         };
     }
 };
@@ -192,17 +193,20 @@ using namespace V2; // Inherit all others stuff
 
 // Header for V3
 struct Header : V2::Header {
+    // NOTE: Face <=> Triangle
+
     uint32 nShdwFaces{};
     uint32 offShdwVerts{}, offShdwFaces{};
 
     // Basically just find the highest shadow vertex index, 0x537510
     uint32 GetNoOfShdwVerts(CCollisionData* cd) const {
-        if (!nShdwFaces)
+        assert(cd->m_nNumShadowTriangles == nShdwFaces);
+        if (!nShdwFaces) {
             return 0;
-
-        uint32 maxVert{};
-        for (auto i = 0u; i < nShdwFaces; i++) {
-            maxVert = std::max(maxVert, (uint32)*std::ranges::max_element(cd->m_pShadowTriangles[i].m_vertIndices));
+        }
+        uint32 maxVert{0};
+        for (auto& tri : cd->GetShdwTris()) {
+            maxVert = std::max<uint32>(maxVert, rng::max(tri.m_vertIndices));
         }
         return maxVert + 1;
     }

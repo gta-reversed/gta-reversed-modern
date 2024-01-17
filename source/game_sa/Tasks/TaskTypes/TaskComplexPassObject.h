@@ -27,11 +27,11 @@ public:
     CTaskComplexPassObject(const CTaskComplexPassObject&);
     ~CTaskComplexPassObject();
 
-    static void __stdcall AbortIK(CPed* ped);
+    void AbortIK(CPed* ped);
 
-    CTask*    Clone() override { return new CTaskComplexPassObject{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
-    bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
+    CTask*    Clone() const override { return new CTaskComplexPassObject{ *this }; }
+    eTaskType GetTaskType() const override { return Type; }
+    bool      MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;

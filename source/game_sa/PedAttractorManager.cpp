@@ -31,24 +31,24 @@ void CPedAttractorManager::InjectHooks() {
     RH_ScopedOverloadedInstall(DeRegisterPed, "", 0x5EC850, void(CPedAttractorManager::*)(CPed*, CPedAttractor*));
     // RH_ScopedOverloadedInstall(RemoveEffect, "array", 0x5EB5F0, void(CPedAttractorManager::*)(const C2dEffect* effect, const SArray<CPedAttractor*>& array));
     // RH_ScopedOverloadedInstall(RemoveEffect, "", 0x5EBA30, void(CPedAttractorManager::*)(const C2dEffect* effect));
-    // RH_ScopedInstall(IsPedRegistered, 0x5EB640);
+    RH_ScopedInstall(IsPedRegistered, 0x5EB640, { .reversed = false });
     RH_ScopedOverloadedInstall(IsPedRegisteredWithEffect, "ped", 0x5EBCB0, bool(CPedAttractorManager::*)(CPed*));
     RH_ScopedOverloadedInstall(IsPedRegisteredWithEffect, "+effect", 0x5EBD70, bool(CPedAttractorManager::*)(CPed*, const C2dEffect*, const CEntity*));
     // RH_ScopedOverloadedInstall(IsPedRegisteredWithEffect, "+array", 0x5EB690, bool(CPedAttractorManager::*)(CPed*, const C2dEffect*, const CEntity*, const SArray<CPedAttractor*>&));
-    // RH_ScopedInstall(FindAssociatedAttractor, 0x5EB6F0);
-    // RH_ScopedInstall(HasQueueTailArrivedAtSlot, 0x5EBBA0);
-    // RH_ScopedInstall(HasEmptySlot, 0x5EBB00);
+    RH_ScopedInstall(FindAssociatedAttractor, 0x5EB6F0, { .reversed = false });
+    RH_ScopedInstall(HasQueueTailArrivedAtSlot, 0x5EBBA0, { .reversed = false });
+    RH_ScopedInstall(HasEmptySlot, 0x5EBB00, { .reversed = false });
     // RH_ScopedOverloadedInstall(GetPedUsingEffect, "array", 0x5EB740, void*(CPedAttractorManager::*)(const C2dEffect*, const CEntity*, const SArray<CPedAttractor*>&));
     // RH_ScopedOverloadedInstall(GetPedUsingEffect, "", 0x5EBE50, void*(CPedAttractorManager::*)(const C2dEffect*, const CEntity*));
     // RH_ScopedOverloadedInstall(GetRelevantAttractor, "array", 0x5EB7B0, void*(CPedAttractorManager::*)(const CPed*, const C2dEffect*, const CEntity*, const SArray<CPedAttractor*>&));
     // RH_ScopedOverloadedInstall(GetRelevantAttractor, "", 0x5EBF50, void*(CPedAttractorManager::*)(const CPed*, const C2dEffect*, const CEntity*));
     RH_ScopedInstall(ComputeEffectPos, 0x5E96C0);
-    // RH_ScopedInstall(ComputeEffectUseDir, 0x5E96E0);
-    // RH_ScopedInstall(ComputeEffectQueueDir, 0x5E9730);
-    // RH_ScopedInstall(ComputeEffectForwardDir, 0x5E9780);
-    // RH_ScopedInstall(RegisterPed, 0x5EF980);
-    // RH_ScopedInstall(RegisterPedWithAttractor, 0x5EFCA0);
-    // RH_ScopedInstall(IsApproachable, 0x5EA220);
+    RH_ScopedInstall(ComputeEffectUseDir, 0x5E96E0, { .reversed = false });
+    RH_ScopedInstall(ComputeEffectQueueDir, 0x5E9730, { .reversed = false });
+    RH_ScopedInstall(ComputeEffectForwardDir, 0x5E9780, { .reversed = false });
+    RH_ScopedInstall(RegisterPed, 0x5EF980, { .reversed = false });
+    RH_ScopedInstall(RegisterPedWithAttractor, 0x5EFCA0, { .reversed = false });
+    RH_ScopedInstall(IsApproachable, 0x5EA220, { .reversed = false });
 }
 
 // 0x? 0x5EF710 ?
@@ -209,8 +209,8 @@ void* CPedAttractorManager::GetPedUsingEffect(const C2dEffect* effect, const CEn
 }
 
 // 0x5EBE50
-void* CPedAttractorManager::GetPedUsingEffect(const C2dEffect* effect, const CEntity* entity) {
-    return plugin::CallMethodAndReturn<void*, 0x5EBE50, CPedAttractorManager*, const C2dEffect*, const CEntity*>(this, effect, entity);
+CPed* CPedAttractorManager::GetPedUsingEffect(const C2dEffect* effect, const CEntity* entity) {
+    return plugin::CallMethodAndReturn<CPed*, 0x5EBE50, CPedAttractorManager*, const C2dEffect*, const CEntity*>(this, effect, entity);
 }
 
 // 0x5EB7B0
@@ -219,13 +219,13 @@ void* CPedAttractorManager::GetRelevantAttractor(const CPed* ped, const C2dEffec
 }
 
 // 0x5EBF50
-void* CPedAttractorManager::GetRelevantAttractor(const CPed* ped, const C2dEffect* effect, const CEntity* entity) {
-    return plugin::CallMethodAndReturn<void*, 0x5EBF50, CPedAttractorManager*, const CPed*, const C2dEffect*, const CEntity*>(this, ped, effect, entity);
+void* CPedAttractorManager::GetRelevantAttractor(const CPed* ped, const C2dEffectBase* effect, const CEntity* entity) {
+    return plugin::CallMethodAndReturn<void*, 0x5EBF50, CPedAttractorManager*, const CPed*, const C2dEffectBase*, const CEntity*>(this, ped, effect, entity);
 }
 
 // 0x5E96C0
 void CPedAttractorManager::ComputeEffectPos(const C2dEffect* effect, const CMatrix& mat, CVector& vec) {
-    vec.FromMultiply(mat, &effect->m_vecPosn);
+    vec.FromMultiply(mat, &effect->m_pos);
 }
 
 // 0x5E96E0
@@ -249,8 +249,8 @@ void CPedAttractorManager::RegisterPed(CPed* ped, C2dEffect*, CEntity*, int32, S
 }
 
 // 0x5EFCA0
-void CPedAttractorManager::RegisterPedWithAttractor(CPed* ped, C2dEffect*, CEntity*, int32) {
-    assert(false);
+CPedAttractor* CPedAttractorManager::RegisterPedWithAttractor(CPed* ped, C2dEffectBase* fx, CEntity* entity, eMoveState ms) {
+    return plugin::CallMethodAndReturn<CPedAttractor*, 0x5EFCA0>(this, ped, fx, entity, ms);
 }
 
 // 0x5EA220

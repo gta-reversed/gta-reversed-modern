@@ -7,11 +7,11 @@ void CScriptResourceManager::InjectHooks() {
     RH_ScopedCategory("Scripts");
 
     RH_ScopedInstall(Initialise, 0x470480);
-    // RH_ScopedInstall(AddToResourceManager, 0x4704B0);
-    // RH_ScopedInstall(RemoveFromResourceManager, 0x470510);
-    // RH_ScopedInstall(HasResourceBeenRequested, 0x470620);
-    // RH_ScopedInstall(Load, 0x0);
-    // RH_ScopedInstall(Save, 0x0);
+    RH_ScopedInstall(AddToResourceManager, 0x4704B0, { .reversed = false });
+    RH_ScopedInstall(RemoveFromResourceManager, 0x470510, { .reversed = false });
+    RH_ScopedInstall(HasResourceBeenRequested, 0x470620, { .reversed = false });
+    //RH_ScopedInstall(Load, 0x0, { .reversed = false });
+    //RH_ScopedInstall(Save, 0x0, { .reversed = false });
 }
 
 // 0x470480
@@ -21,19 +21,17 @@ void CScriptResourceManager::Initialise() {
 
 // 0x4704B0
 void CScriptResourceManager::AddToResourceManager(int32 modelId, eScriptResourceType type, CRunningScript* script) {
-    assert(false);
+    plugin::Call<0x4704B0, int32, eScriptResourceType, CRunningScript*>(modelId, type, script);
 }
 
 // 0x470510
 bool CScriptResourceManager::RemoveFromResourceManager(int32 modelId, eScriptResourceType type, CRunningScript* script) {
-    assert(false);
-    return true;
+    return plugin::CallAndReturn<bool, 0x470510, int32, eScriptResourceType, CRunningScript*>(modelId, type, script);
 }
 
 // 0x470620
 bool CScriptResourceManager::HasResourceBeenRequested(int32 modelId, eScriptResourceType type) {
-    assert(false);
-    return true;
+    return plugin::CallAndReturn<bool, 0x470620, int32, eScriptResourceType>(modelId, type);
 }
 
 // 0x0

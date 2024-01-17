@@ -36,12 +36,14 @@ enum eMonsterTruckNodes {
     MONSTER_NUM_NODES
 };
 
-class CMonsterTruck : public CAutomobile {
+class NOTSA_EXPORT_VTABLE CMonsterTruck : public CAutomobile {
 public:
     float field_988[4]; // unused
     float m_fSuspensionRadius;
 
     static float& DUMPER_COL_ANGLEMULT; // 0.0002f
+
+    static constexpr auto Type = VEHICLE_TYPE_MTRUCK;
 
 public:
     CMonsterTruck(int32 modelIndex, eVehicleCreatedBy createdBy);

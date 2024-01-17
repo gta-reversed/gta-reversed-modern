@@ -56,7 +56,7 @@ void CTaskSimplePlayHandSignalAnim::StartAnim(CPed* ped) {
     const AnimationId animId = static_cast<const AnimationId>(CGeneral::GetRandomNumberInRange((int32)ANIM_ID_GSIGN1, (int32)ANIM_ID_GSIGN5 + 1));
 
     // Pointing / weapon logic
-    if (ped->GetEntityThatThisPedIsHolding() || g_ikChainMan.IsArmPointing(0, ped) || ped->GetActiveWeapon().m_nType != eWeaponType::WEAPON_UNARMED) {
+    if (ped->GetEntityThatThisPedIsHolding() || g_ikChainMan.IsArmPointing(0, ped) || ped->GetActiveWeapon().m_Type != eWeaponType::WEAPON_UNARMED) {
         m_pAnim = CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_HANDSIGNALL, animId, m_fBlendFactor);
         m_pAnim->SetFinishCallback(CTaskSimpleAnim::FinishRunAnimCB, this);
 
@@ -69,7 +69,7 @@ void CTaskSimplePlayHandSignalAnim::StartAnim(CPed* ped) {
             return;
 
         CWorld::Add(m_pLeftHandObject);
-        auto* animHierarchy = CAnimManager::GetAnimAssociation(ANIM_GROUP_LHAND, m_nAnimationBlockIndex)->m_pHierarchy;
+        auto* animHierarchy = CAnimManager::GetAnimAssociation(ANIM_GROUP_LHAND, m_nAnimationBlockIndex)->m_BlendHier;
         CAnimManager::AddAnimation(m_pLeftHandObject->m_pRwClump, animHierarchy, 0);
         ++CObject::nNoTempObjects;
         return;
@@ -85,7 +85,7 @@ void CTaskSimplePlayHandSignalAnim::StartAnim(CPed* ped) {
     m_pLeftHandObject = new CHandObject(leftHandIndex, ped, true);
     if (m_pLeftHandObject) {
         CWorld::Add(m_pLeftHandObject);
-        auto* animHierarchy = CAnimManager::GetAnimAssociation(ANIM_GROUP_LHAND, m_nAnimationBlockIndex)->m_pHierarchy;
+        auto* animHierarchy = CAnimManager::GetAnimAssociation(ANIM_GROUP_LHAND, m_nAnimationBlockIndex)->m_BlendHier;
         CAnimManager::AddAnimation(m_pLeftHandObject->m_pRwClump, animHierarchy, 0);
         ++CObject::nNoTempObjects;
     }
@@ -97,7 +97,7 @@ void CTaskSimplePlayHandSignalAnim::StartAnim(CPed* ped) {
     m_pRightHandObject = new CHandObject(rightHandIndex, ped, false);
     if (m_pRightHandObject) {
         CWorld::Add(m_pRightHandObject);
-        auto* animHierarchy = CAnimManager::GetAnimAssociation(ANIM_GROUP_RHAND, m_nAnimationBlockIndex)->m_pHierarchy;
+        auto* animHierarchy = CAnimManager::GetAnimAssociation(ANIM_GROUP_RHAND, m_nAnimationBlockIndex)->m_BlendHier;
         CAnimManager::AddAnimation(m_pRightHandObject->m_pRwClump, animHierarchy, 0);
         ++CObject::nNoTempObjects;
     }

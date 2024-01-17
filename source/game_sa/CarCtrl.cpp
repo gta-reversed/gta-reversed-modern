@@ -48,7 +48,7 @@ void CCarCtrl::InjectHooks()
     RH_ScopedInstall(CreateCarForScript, 0x431F80);
     RH_ScopedInstall(ChooseBoatModel, 0x421970);
     RH_ScopedInstall(ChooseCarModelToLoad, 0x421900);
-    // RH_ScopedInstall(GetNewVehicleDependingOnCarModel, 0x421440);
+    RH_ScopedInstall(GetNewVehicleDependingOnCarModel, 0x421440, { .reversed = false });
     RH_ScopedInstall(IsAnyoneParking, 0x42C250);
     RH_ScopedInstall(IsThisVehicleInteresting, 0x423EA0);
     RH_ScopedInstall(JoinCarWithRoadAccordingToMission, 0x432CB0);
@@ -64,6 +64,8 @@ void CCarCtrl::InjectHooks()
 
 // 0x4212E0
 void CCarCtrl::Init() {
+    ZoneScoped;
+
     CarDensityMultiplier = 1.0f;
     NumRandomCars = 0;
     NumLawEnforcerCars = 0;
@@ -122,15 +124,22 @@ int32 CCarCtrl::ChooseBoatModel() {
 
 // 0x421900
 int32 CCarCtrl::ChooseCarModelToLoad(int32 arg1) {
-    for (auto i = 0; i < 16; i++) {
-        const auto model = CPopulation::m_CarGroups[i][CGeneral::GetRandomNumberInRange(0, CPopulation::m_nNumCarsInGroup[i])];
-        if (!CStreaming::IsModelLoaded(model))
+    for (auto i = 0; i < 16; i++) { // TODO: Why 16?
+        const auto numCarsInGroup = CPopulation::m_nNumCarsInGroup[i];
+#ifdef FIX_BUGS
+        if (!numCarsInGroup) {
+            continue;
+        }
+#endif
+        const auto model = CPopulation::m_CarGroups[i][CGeneral::GetRandomNumberInRange(numCarsInGroup)];
+        if (!CStreaming::IsModelLoaded(model)) {
             return model;
+        }
     }
     return -1;
 }
 
-int32 CCarCtrl::ChooseGangCarModel(int32 loadedCarGroupId) {
+eModelID CCarCtrl::ChooseGangCarModel(eGangID loadedCarGroupId) {
     return CPopulation::PickGangCar(loadedCarGroupId);
 }
 
@@ -370,6 +379,8 @@ void CCarCtrl::GenerateOneRandomCar() {
 
 // 0x4341C0
 void CCarCtrl::GenerateRandomCars() {
+    ZoneScoped;
+
     plugin::Call<0x4341C0>();
 }
 
@@ -597,6 +608,8 @@ void CCarCtrl::PossiblyRemoveVehicle(CVehicle* vehicle) {
 
 // 0x423F10
 void CCarCtrl::PruneVehiclesOfInterest() {
+    ZoneScoped;
+
     if ((CTimer::GetFrameCounter() % 64) == 19 && FindPlayerCoors(-1).z < 950.0f) {
         for (size_t i = 0; i < std::size(apCarsToKeep); i++) {
             if (apCarsToKeep[i]) {
@@ -620,6 +633,8 @@ void CCarCtrl::RegisterVehicleOfInterest(CVehicle* vehicle) {
 
 // 0x4322B0
 void CCarCtrl::RemoveCarsIfThePoolGetsFull() {
+    ZoneScoped;
+
     if (CTimer::GetFrameCounter() % 8 != 3)
         return;
 
@@ -656,6 +671,8 @@ void CCarCtrl::RemoveCarsIfThePoolGetsFull() {
 
 // 0x42CD10
 void CCarCtrl::RemoveDistantCars() {
+    ZoneScoped;
+
     for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
         if (auto vehicle = GetVehiclePool()->GetAt(i)) {
             PossiblyRemoveVehicle(vehicle);

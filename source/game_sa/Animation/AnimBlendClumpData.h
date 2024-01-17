@@ -12,7 +12,7 @@
 
 class CAnimBlendClumpData {
 public:
-    CAnimBlendLink      m_Associations;
+    CAnimBlendLink      m_Anims;        //< List of `CAnimBlendAssociation`
     uint32              m_NumFrames;
     CVector*            m_PedPosition;
     AnimBlendFrameData* m_Frames;

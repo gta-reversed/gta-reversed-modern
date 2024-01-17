@@ -3,8 +3,6 @@
 #include "TaskSimpleGetUp.h"
 #include "PedPlacement.h"
 
-CColPoint(&CTaskSimpleGetUp::m_aColPoints)[32] = *reinterpret_cast<CColPoint(*)[32]>(0xC18F98);
-
 void CTaskSimpleGetUp::InjectHooks() {
     RH_ScopedClass(CTaskSimpleGetUp);
     RH_ScopedCategory("Tasks/TaskTypes");
@@ -22,14 +20,14 @@ CTaskSimpleGetUp* CTaskSimpleGetUp::Constructor() {
 
 // 0x677F50
 CTaskSimpleGetUp::CTaskSimpleGetUp() {
+    m_bHasPedGotUp = false;
     m_bIsFinished = false;
-    m_bAnimFinished = false;
-    m_pAnim = nullptr;
+    m_Anim = nullptr;
 }
 
 CTaskSimpleGetUp::~CTaskSimpleGetUp() {
-    if (m_pAnim)
-        m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
+    if (m_Anim)
+        m_Anim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
 }
 
 // 0x67FA80
@@ -45,16 +43,16 @@ bool CTaskSimpleGetUp::MakeAbortable(CPed* ped, eAbortPriority priority, const C
 bool CTaskSimpleGetUp::ProcessPed_Reversed(CPed* ped) {
     ped->m_pedIK.bSlopePitch = true;
 
-    if (m_bAnimFinished)
+    if (m_bIsFinished)
         return true;
 
-    if (!m_pAnim)
+    if (!m_Anim)
         StartAnim(ped);
 
-    if (m_pAnim)
+    if (m_Anim)
         ped->bStuckUnderCar = false;
 
-    if (!m_pAnim || m_pAnim->m_fCurrentTime < m_pAnim->m_pHierarchy->m_fTotalTime * 0.75F)
+    if (!m_Anim || m_Anim->m_CurrentTime < m_Anim->m_BlendHier->m_fTotalTime * 0.75F)
         ped->bFallenDown = true;
 
     return false;
@@ -77,12 +75,12 @@ bool CTaskSimpleGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
                 return false;
         }
 
-        if (m_pAnim && !bTooMuchTimePassed) {
-            m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
-            m_pAnim = nullptr;
+        if (m_Anim && !bTooMuchTimePassed) {
+            m_Anim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
+            m_Anim = nullptr;
+            m_bHasPedGotUp = true;
             m_bIsFinished = true;
-            m_bAnimFinished = true;
-        } else if (!m_bIsFinished && !bFatalDamage)
+        } else if (!m_bHasPedGotUp && !bFatalDamage)
             return false;
 
         ped->bStuckUnderCar = false;
@@ -90,8 +88,8 @@ bool CTaskSimpleGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
     }
 
     if (priority == ABORT_PRIORITY_IMMEDIATE) {
-        if (m_pAnim)
-            m_pAnim->m_fBlendDelta = -1000.0F;
+        if (m_Anim)
+            m_Anim->m_BlendDelta = -1000.0F;
         ped->bStuckUnderCar = false;
         return true;
     }
@@ -110,7 +108,6 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped) {
         || vehicle == ped->m_standingOnEntity
     ) {
         auto& entity = ped->m_pEntityIgnoredCollision;
-
         if (!entity
             || !entity->IsVehicle()
             || entity->AsVehicle()->IsBike()
@@ -130,14 +127,14 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped) {
         ) {
             ped->m_pEntityIgnoredCollision = nullptr;
 
-            m_pAnim = CAnimManager::BlendAnimation(
+            m_Anim = CAnimManager::BlendAnimation(
                 ped->m_pRwClump,
                 ANIM_GROUP_DEFAULT,
                 RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIMATION_800) ? ANIM_ID_GETUP_FRONT : ANIM_ID_GETUP_0,
                 1000.0F
             );
 
-            m_pAnim->SetFinishCallback(FinishGetUpAnimCB, this);
+            m_Anim->SetFinishCallback(FinishGetUpAnimCB, this);
             ped->SetPedState(PEDSTATE_IDLE);
             return true;
         }
@@ -175,8 +172,8 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped) {
 // 0x678110
 void CTaskSimpleGetUp::FinishGetUpAnimCB(CAnimBlendAssociation* blendAssoc, void* data) {
     auto task = reinterpret_cast<CTaskSimpleGetUp*>(data);
+    task->m_bHasPedGotUp = true;
     task->m_bIsFinished = true;
-    task->m_bAnimFinished = true;
-    task->m_pAnim->m_fBlendDelta = -1000.0F;
-    task->m_pAnim = nullptr;
+    task->m_Anim->m_BlendDelta = -1000.0F;
+    task->m_Anim = nullptr;
 }

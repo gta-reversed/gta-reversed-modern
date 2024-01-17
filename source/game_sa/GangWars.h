@@ -29,6 +29,24 @@ enum eGangWarState {
     THIRD_WAVE      = 6
 };
 
+constexpr union {
+    struct {
+        uint8 r, g, b;
+    };
+    uint8 components[3];
+} gaGangColors[TOTAL_GANGS]{ // based on gaGangColorsR, gaGangColorsG, gaGangColorsB
+    { 200, 0,   200 },
+    { 70,  200, 0   },
+    { 255, 200, 0   },
+    { 0,   0,   200 },
+    { 255, 220, 190 },
+    { 200, 200, 200 },
+    { 240, 140, 240 },
+    { 0,   200, 255 },
+    { 255, 255, 255 },
+    { 255, 255, 255 },
+};
+
 class CGangWars {
 public:
     static inline int32& ZoneInfoForTraining = *(int32*)0x8A5F40; // -1
@@ -48,7 +66,7 @@ public:
     static inline eGangAttackState& State2 = *(eGangAttackState*)0x96AB4C;
     static inline std::array<int32, 6> aSpecificZones = *(std::array<int32, 6>*)0x96AB68;
     static inline float& Difficulty = *(float*)0x96AB80;
-    static inline int32& Gang1 = *(int32*)0x96AB84;
+    static inline eGangID& Gang1 = *(eGangID*)0x96AB84;
     static inline CZone*& pZoneToFightOver = *(CZone**)0x96AB88;
     static inline CZoneInfo*& pZoneInfoToFightOver = *(CZoneInfo**)0x96AB8C;
     static inline bool& bGangWarsActive = *(bool*)0x96AB90;
@@ -113,5 +131,5 @@ public:
     static void UpdateTerritoryUnderControlPercentage();
 
 private:
-    static uint32 GetGangColor(int32 gang);
+    static eBlipColour GetGangColor(int32 gang);
 };

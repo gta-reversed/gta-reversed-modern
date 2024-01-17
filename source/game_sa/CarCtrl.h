@@ -54,7 +54,7 @@ public:
     static int32 ChooseCarModelToLoad(int32 arg1);
     static int32 ChooseModel(int32* arg1);
     static int32 ChoosePoliceCarModel(uint32 arg0);
-    static int32 ChooseGangCarModel(int32 loadedCarGroupId);
+    static eModelID ChooseGangCarModel(eGangID loadedCarGroupId);
     static void ClearInterestingVehicleList();
     static void ClitargetOrientationToLink(CVehicle* vehicle, CCarPathLinkAddress arg2, int8 arg3, float* arg4, float arg5, float arg6);
     static CVehicle* CreateCarForScript(int32 modelId, CVector posn, bool doMissionCleanup);

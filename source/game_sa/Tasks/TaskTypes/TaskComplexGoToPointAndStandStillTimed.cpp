@@ -25,7 +25,7 @@ CTaskComplexGoToPointAndStandStillTimed::~CTaskComplexGoToPointAndStandStillTime
 }
 
 // 0x66CF30
-CTask* CTaskComplexGoToPointAndStandStillTimed::Clone() {
+CTask* CTaskComplexGoToPointAndStandStillTimed::Clone() const {
     return CTaskComplexGoToPointAndStandStillTimed::Clone_Reversed();
 }
 
@@ -49,30 +49,26 @@ CTask* CTaskComplexGoToPointAndStandStillTimed::ControlSubTask(CPed* ped) {
     return CTaskComplexGoToPointAndStandStillTimed::ControlSubTask_Reversed(ped);
 }
 
-CTask* CTaskComplexGoToPointAndStandStillTimed::Clone_Reversed() {
+CTask* CTaskComplexGoToPointAndStandStillTimed::Clone_Reversed() const {
     return new CTaskComplexGoToPointAndStandStillTimed(m_moveState, m_vecTargetPoint, m_fRadius, m_fMoveStateRadius, m_nTime);
 }
 
 void CTaskComplexGoToPointAndStandStillTimed::StopTimer_Reversed(const CEvent* event) {
     if (!CEventHandler::IsTemporaryEvent(*event))
-        m_timer.Stop();
+        m_timer.Pause();
 }
 
 bool CTaskComplexGoToPointAndStandStillTimed::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     bool bSubTaskAbortable = m_pSubTask->MakeAbortable(ped, priority, event);
-    if (bSubTaskAbortable && priority == ABORT_PRIORITY_URGENT && (!event || !CEventHandler::IsTemporaryEvent(*event)))
-        m_timer.Stop();
-
+    if (bSubTaskAbortable && priority == ABORT_PRIORITY_URGENT && (!event || !CEventHandler::IsTemporaryEvent(*event))) {
+        m_timer.Pause();
+    }
     return bSubTaskAbortable;
 }
 
 CTask* CTaskComplexGoToPointAndStandStillTimed::CreateFirstSubTask_Reversed(CPed* ped) {
     m_timer.Start(m_nTime);
-    m_bTargetPointUpdated = false;
-    if (ped->bInVehicle)
-        return CTaskComplexGoToPointAndStandStill::CreateFirstSubTask(TASK_COMPLEX_LEAVE_CAR, ped)
-;
-    return CTaskComplexGoToPointAndStandStill::CreateFirstSubTask(TASK_SIMPLE_GO_TO_POINT, ped);
+    return CTaskComplexGoToPointAndStandStill::CreateFirstSubTask(ped);
 }
 
 CTask* CTaskComplexGoToPointAndStandStillTimed::ControlSubTask_Reversed(CPed* ped) {

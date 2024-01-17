@@ -14,15 +14,15 @@ class CTaskComplexBeInGroup : public CTaskComplex {
 public:
     static constexpr auto Type = TASK_COMPLEX_BE_IN_GROUP;
 
-    CTaskComplexBeInGroup(int32 groupId, bool isLeader);
+    explicit CTaskComplexBeInGroup(int32 groupId, bool isLeader = false);
     ~CTaskComplexBeInGroup() override = default; // 0x632EA0
 
     CTask* MonitorMainGroupTask(CPed* ped);
     void MonitorSecondaryGroupTask(CPed* ped);
 
-    CTask*    Clone() override { return new CTaskComplexBeInGroup(m_nGroupId, m_bIsLeader); }
-    eTaskType GetTaskType() override { return Type; }
-    bool      MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    CTask*    Clone() const override { return new CTaskComplexBeInGroup(m_nGroupId, m_bIsLeader); }
+    eTaskType GetTaskType() const override { return Type; }
+    bool      MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;

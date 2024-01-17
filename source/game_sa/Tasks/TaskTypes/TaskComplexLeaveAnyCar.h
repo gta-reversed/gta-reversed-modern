@@ -14,8 +14,8 @@ public:
     CTaskComplexLeaveAnyCar(int32 delayTime, bool sensibleLeaveCar, bool forceGetOut);
     ~CTaskComplexLeaveAnyCar() = default;
 
-    CTask* Clone() override { return new CTaskComplexLeaveAnyCar(m_nDelayTime, m_sensibleLeaveCar, m_forceGetOut); }
-    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() const override { return new CTaskComplexLeaveAnyCar(m_nDelayTime, m_sensibleLeaveCar, m_forceGetOut); }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* CreateNextSubTask(CPed* ped) override { return nullptr; }
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override { return m_pSubTask; }

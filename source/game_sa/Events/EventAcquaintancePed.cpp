@@ -21,15 +21,16 @@ void CEventSeenCop::InjectHooks()
     RH_ScopedInstall(Constructor1, 0x5FF380);
 }
 
-CEventAcquaintancePed::CEventAcquaintancePed(CPed* ped)
+CEventAcquaintancePed::CEventAcquaintancePed(CPed* ped, eTaskType taskType) :
+    CEventEditableResponse(taskType)
 {
-    m_ped = ped;
-    CEntity::SafeRegisterRef(m_ped);
+    m_AcquaintancePed = ped;
+    CEntity::SafeRegisterRef(m_AcquaintancePed);
 }
 
 CEventAcquaintancePed::~CEventAcquaintancePed()
 {
-    CEntity::SafeCleanUpRef(m_ped);
+    CEntity::SafeCleanUpRef(m_AcquaintancePed);
 }
 
 CEventAcquaintancePed* CEventAcquaintancePed::Constructor(CPed* ped)
@@ -58,24 +59,24 @@ bool CEventAcquaintancePed::TakesPriorityOver(const CEvent& refEvent)
 
 bool CEventAcquaintancePed::AffectsPed_Reversed(CPed* ped)
 {
-    if (m_ped && !ped->m_pFire && ped->IsAlive() && m_ped->IsAlive())
-        return !CPedGroups::AreInSameGroup(ped, m_ped);
+    if (m_AcquaintancePed && !ped->m_pFire && ped->IsAlive() && m_AcquaintancePed->IsAlive())
+        return !CPedGroups::AreInSameGroup(ped, m_AcquaintancePed);
     return false;
 }
 
 bool CEventAcquaintancePed::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
 {
-    if (m_ped) {
+    if (m_AcquaintancePed) {
         CPedGroupMembership& membership = pedGroup->GetMembership();
-        if (!membership.IsMember(m_ped)
-            && (GetEventType() != EVENT_ACQUAINTANCE_PED_RESPECT && GetEventType() != EVENT_ACQUAINTANCE_PED_LIKE || m_ped != pedGroup->m_pPed))
+        if (!membership.IsMember(m_AcquaintancePed)
+            && (GetEventType() != EVENT_ACQUAINTANCE_PED_RESPECT && GetEventType() != EVENT_ACQUAINTANCE_PED_LIKE || m_AcquaintancePed != pedGroup->m_pPed))
         {
             if (GetEventType() != EVENT_ACQUAINTANCE_PED_RESPECT && GetEventType() != EVENT_ACQUAINTANCE_PED_LIKE)
                 return true;
             CPed* leader = membership.GetLeader();
             if (leader && leader->IsPlayer())
                 return false;
-            return FindPlayerPed()->GetPlayerGroup().GetMembership().IsMember(m_ped);
+            return FindPlayerPed()->GetPlayerGroup().GetMembership().IsMember(m_AcquaintancePed);
         }
     }
     return false;
@@ -85,8 +86,8 @@ bool CEventAcquaintancePed::TakesPriorityOver_Reversed(const CEvent& refEvent)
 {
     if (refEvent.GetEventType() == GetEventType()) {
         const auto theRefEvent = static_cast<const CEventAcquaintancePed*>(&refEvent);
-        if (m_ped && m_ped->IsPlayer())
-            return theRefEvent->m_ped && !theRefEvent->m_ped->IsPlayer();
+        if (m_AcquaintancePed && m_AcquaintancePed->IsPlayer())
+            return theRefEvent->m_AcquaintancePed && !theRefEvent->m_AcquaintancePed->IsPlayer();
         return false;
     }
     return CEvent::TakesPriorityOver(refEvent);

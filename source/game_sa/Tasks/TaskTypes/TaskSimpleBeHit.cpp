@@ -42,14 +42,14 @@ CTaskSimpleBeHit::CTaskSimpleBeHit(CPed* attacker, ePedPieceTypes pieceType, int
 // 0x620810
 CTaskSimpleBeHit::~CTaskSimpleBeHit() {
     if (m_Anim) {
-        m_Anim->m_fBlendDelta = -4.0f;
+        m_Anim->m_BlendDelta = -4.0f;
         m_Anim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
     }
     CEntity::SafeCleanUpRef(m_Attacker);
 }
 
 // 0x623290
-CTask* CTaskSimpleBeHit::Clone() {
+CTask* CTaskSimpleBeHit::Clone() const {
     auto task = new CTaskSimpleBeHit(m_Attacker, m_eHitZone, m_nDirn, m_nHitPower);
     task->m_bAnimAdded = m_bAnimAdded;
     task->m_nAnimId = m_nAnimId;
@@ -134,9 +134,9 @@ bool CTaskSimpleBeHit::MakeAbortable(CPed* ped, eAbortPriority priority, const C
     switch (priority) {
     case ABORT_PRIORITY_LEISURE: {
         if (m_Anim) {
-            if ((m_Anim->m_nFlags & ANIMATION_STARTED) == 0) {
-                m_Anim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
-                m_Anim->m_fBlendDelta = -4.f;
+            if ((m_Anim->m_Flags & ANIMATION_STARTED) == 0) {
+                m_Anim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
+                m_Anim->m_BlendDelta = -4.f;
             }
         }
         return false;
@@ -174,23 +174,21 @@ bool CTaskSimpleBeHit::ProcessPed(CPed* ped) {
     }
 
     if (m_nDirn == 0 && m_Attacker && !m_Attacker->IsPlayer()) { // todo: m_nDirn == 0
-        const auto dir = m_Attacker->GetPosition() - ped->GetPosition();
-        ped->m_fAimingRotation = dir.Heading();
+        ped->m_fAimingRotation = (m_Attacker->GetPosition() - ped->GetPosition()).Heading();
     }
 
-    if (m_Anim)
+    if (m_Anim) {
         return false;
+    }
 
-    const auto ResetAndSay = [ped] {
-        ped->DisablePedSpeech(true);
-        ped->EnablePedSpeech();
-        return ped->Say(16, 1000) >= 0;
-    };
-    if (m_Attacker && m_Attacker->IsPlayer() && m_Attacker->m_nPedType != PED_TYPE_GANG2 && ResetAndSay()) {
-        // NOP todo: remove lambda
-    } else {
+    if (   !m_Attacker
+        || !m_Attacker->IsPlayer()
+        || m_Attacker->m_nPedType != PED_TYPE_GANG2
+        || (ped->DisablePedSpeech(true), ped->EnablePedSpeech(), ped->Say(16, 1000) < 0)
+    ) {
         ped->Say(345);
     }
+
     StartAnim(ped);
     return false;
 }

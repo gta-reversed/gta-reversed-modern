@@ -9,21 +9,21 @@ void CRope::InjectHooks() {
 
     RH_ScopedInstall(ReleasePickedUpObject, 0x556030);
     RH_ScopedInstall(CreateHookObjectForRope, 0x556070);
-    // RH_ScopedInstall(UpdateWeightInRope, 0x5561B0);
+    RH_ScopedInstall(UpdateWeightInRope, 0x5561B0, { .reversed = false });
     RH_ScopedInstall(Remove, 0x556780);
     RH_ScopedInstall(Render, 0x556800);
     RH_ScopedInstall(PickUpObject, 0x5569C0);
-    // RH_ScopedInstall(Update, 0x557530);
+    RH_ScopedInstall(Update, 0x557530, { .reversed = false });
 }
 
 // inlined see 0x557959
 // use switch like in Android?
 // 0x555FB0
 bool CRope::DoControlsApply() const {
-    return    m_nType == eRopeType::CRANE_MAGNO && CRopes::PlayerControlsCrane == 1
-           || m_nType == eRopeType::WRECKING_BALL && CRopes::PlayerControlsCrane == 2
-           || m_nType == eRopeType::CRANE_TROLLEY && CRopes::PlayerControlsCrane == 3
-           || m_nType == eRopeType::QUARRY_CRANE_ARM && CRopes::PlayerControlsCrane == 4
+    return    m_nType == eRopeType::CRANE_MAGNO && CRopes::PlayerControlsCrane == eControlledCrane::MAGNO_CRANE
+           || m_nType == eRopeType::WRECKING_BALL && CRopes::PlayerControlsCrane == eControlledCrane::WRECKING_BALL
+           || m_nType == eRopeType::CRANE_TROLLEY && CRopes::PlayerControlsCrane == eControlledCrane::LAS_VEGAS_CRANE
+           || m_nType == eRopeType::QUARRY_CRANE_ARM && CRopes::PlayerControlsCrane == eControlledCrane::QUARRY_CRANE
            || m_nType == eRopeType::CRANE_MAGNET1
            || m_nType == eRopeType::MAGNET
            || m_nType == eRopeType::CRANE_HARNESS;

@@ -6,14 +6,16 @@ void CTaskComplexFacial::InjectHooks() {
     RH_ScopedClass(CTaskComplexFacial);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    // RH_ScopedInstall(Constructor, 0x690D20);
-    // RH_ScopedInstall(StopAll, 0x691250);
-    // RH_ScopedVirtualInstall(Clone, 0x6928B0);
-    // RH_ScopedVirtualInstall(GetTaskType, 0x690D80);
-    // RH_ScopedVirtualInstall(MakeAbortable, 0x690DA0);
-    // RH_ScopedVirtualInstall(CreateNextSubTask, 0x690DC0);
-    // RH_ScopedVirtualInstall(CreateFirstSubTask, 0x690F30);
-    // RH_ScopedVirtualInstall(ControlSubTask, 0x690FC0);
+    RH_ScopedInstall(Constructor, 0x690D20);
+
+    RH_ScopedInstall(SetRequest, 0x691230);
+    RH_ScopedInstall(StopAll, 0x691250);
+    RH_ScopedVirtualInstall(Clone, 0x6928B0, { .reversed = false });
+    RH_ScopedVirtualInstall(GetTaskType, 0x690D80, { .reversed = false });
+    RH_ScopedVirtualInstall(MakeAbortable, 0x690DA0);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x690DC0, { .reversed = false });
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x690F30, { .reversed = false });
+    RH_ScopedVirtualInstall(ControlSubTask, 0x690FC0, { .reversed = false });
 }
 
 // 0x690D20
@@ -30,6 +32,15 @@ void CTaskComplexFacial::StopAll() {
     if (m_pSubTask->GetTaskType() == TASK_SIMPLE_FACIAL) {
         m_bIsAborting = true;
     }
+}
+
+// 0x691230
+void CTaskComplexFacial::SetRequest(eFacialExpression type1, int32 duration1, eFacialExpression type2, int32 duration2) {
+    m_nFacialExpression1 = type1;
+    m_nDuration1         = duration1;
+
+    m_nFacialExpression2 = type2;
+    m_nDuration2         = duration2;
 }
 
 // 0x690DA0

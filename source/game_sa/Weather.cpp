@@ -59,23 +59,25 @@ void CWeather::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x72A480);
-    // RH_ScopedInstall(AddRain, 0x72A9A0);
+    RH_ScopedInstall(AddRain, 0x72A9A0, { .reversed = false });
     RH_ScopedInstall(AddSandStormParticles, 0x72A820);
     RH_ScopedInstall(FindWeatherTypesList, 0x72A520);
     RH_ScopedInstall(ForceWeather, 0x72A4E0);
     RH_ScopedInstall(ForceWeatherNow, 0x72A4F0);
-    // RH_ScopedInstall(ForecastWeather, 0x72A590);
+    RH_ScopedInstall(ForecastWeather, 0x72A590, { .reversed = false });
     RH_ScopedInstall(ReleaseWeather, 0x72A510);
     RH_ScopedInstall(RenderRainStreaks, 0x72AF70);
     RH_ScopedInstall(SetWeatherToAppropriateTypeNow, 0x72A790);
-    // RH_ScopedInstall(Update, 0x72B850);
-    // RH_ScopedInstall(UpdateInTunnelness, 0x72B630);
-    // RH_ScopedInstall(UpdateWeatherRegion, 0x72A640, true); // bad
+    RH_ScopedInstall(Update, 0x72B850, { .reversed = false });
+    RH_ScopedInstall(UpdateInTunnelness, 0x72B630, { .reversed = false });
+    //RH_ScopedInstall(UpdateWeatherRegion, 0x72A640, true, { .reversed = false }); // bad
     RH_ScopedInstall(IsRainy, 0x4ABF50);
 }
 
 // 0x72A480
 void CWeather::Init() {
+    ZoneScoped;
+
     NewWeatherType = WEATHER_EXTRASUNNY_LA;
     OldWeatherType = WEATHER_EXTRASUNNY_LA;
     WeatherRegion  = WEATHER_REGION_DEFAULT;
@@ -298,6 +300,8 @@ void CWeather::SetWeatherToAppropriateTypeNow() {
 
 // 0x72B850
 void CWeather::Update() {
+    ZoneScoped;
+
     plugin::Call<0x72B850>();
 }
 

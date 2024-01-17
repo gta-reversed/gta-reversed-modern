@@ -9,12 +9,12 @@ void CPedDamageResponseCalculator::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Constructor, 0x4AD3F0);
-    // RH_ScopedInstall(AccountForPedDamageStats, 0x4AD430);
-    // RH_ScopedInstall(AccountForPedArmour, 0x4AD550);
-    // RH_ScopedInstall(ComputeWillForceDeath, 0x4AD610);
-    // RH_ScopedInstall(ComputeWillKillPed, 0x4B3210);
-    // RH_ScopedInstall(IsBleedingWeapon, 0x4B5C2A);
-    // RH_ScopedInstall(ComputeDamageResponse, 0x4B5AC0);
+    RH_ScopedInstall(AccountForPedDamageStats, 0x4AD430, { .reversed = false });
+    RH_ScopedInstall(AccountForPedArmour, 0x4AD550, { .reversed = false });
+    RH_ScopedInstall(ComputeWillForceDeath, 0x4AD610, { .reversed = false });
+    RH_ScopedInstall(ComputeWillKillPed, 0x4B3210, { .reversed = false });
+    RH_ScopedInstall(IsBleedingWeapon, 0x4B5C2A, { .reversed = false });
+    RH_ScopedInstall(ComputeDamageResponse, 0x4B5AC0, { .reversed = false });
 }
 
 // 0x4AD3F0
@@ -128,3 +128,4 @@ bool CPedDamageResponseCalculator::IsBleedingWeapon(CPed* ped) const {
 void CPedDamageResponseCalculator::ComputeDamageResponse(CPed* ped, CPedDamageResponse& response, bool bSpeak) {
     plugin::CallMethod<0x4B5AC0, CPedDamageResponseCalculator*, CPed*, CPedDamageResponse&, bool>(this, ped, response, bSpeak);
 }
+

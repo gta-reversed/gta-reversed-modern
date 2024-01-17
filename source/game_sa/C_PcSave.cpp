@@ -30,7 +30,9 @@ void C_PcSave::SetSaveDirectory(const char* path) {
 // 0x6190A0
 void C_PcSave::GenerateGameFilename(int32 slot, char* out) {
     assert(slot < MAX_SAVEGAME_SLOTS);
-    sprintf(out, "%s%i%s", DefaultPCSaveFileName, slot + 1, ".b");
+
+    const auto maxSize = std::size(DefaultPCSaveFileName) + std::size(std::to_string(MAX_SAVEGAME_SLOTS)) + std::size(".b") - 2u;
+    sprintf_s(out, maxSize, "%s%i%s", DefaultPCSaveFileName, slot + 1, ".b");
 }
 
 // 0x619140
@@ -97,14 +99,5 @@ bool C_PcSave::DeleteSlot(int32 slot) {
     char path[MAX_PATH]{};
     s_PcSaveHelper.error = eErrorCode::NONE;
     GenerateGameFilename(slot, path);
-#ifdef DEFAULT_FUNCTIONS
-    DeleteFile(path);
-    if (auto f = CFileMgr::OpenFile(path, "rb")) {
-        CFileMgr::CloseFile(f);
-        return true;
-    }
-    return false;
-#else
     return std::filesystem::remove(path);
-#endif
 }

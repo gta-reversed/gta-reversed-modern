@@ -63,7 +63,7 @@ CTask* CTaskComplexGetUpAndStandStill::CreateNextSubTask_Reversed(CPed* ped) {
     if (subTaskType == TASK_SIMPLE_GET_UP) {
         auto pSubTask = reinterpret_cast<CTaskSimpleGetUp*>(m_pSubTask);
 
-        if (pSubTask->m_bIsFinished)
+        if (pSubTask->m_bHasPedGotUp)
             return CreateSubTask(TASK_SIMPLE_STAND_STILL);
         else
             return CreateSubTask(TASK_FINISHED);

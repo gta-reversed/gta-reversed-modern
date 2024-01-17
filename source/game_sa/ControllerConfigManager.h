@@ -92,13 +92,6 @@ enum eControllerAction {
     CA_SHOW_MOUSE_POINTER_TOGGLE
 };
 
-enum eControllerType {
-    CONTROLLER_KEYBOARD1 = 0,
-    CONTROLLER_KEYBOARD2 = 1,
-    CONTROLLER_MOUSE = 2,
-    CONTROLLER_PAD = 3,
-};
-
 struct CControllerKey {
     uint32 KeyCode;
     uint32 Priority;
@@ -108,6 +101,22 @@ struct CControllerAction {
     CControllerKey Keys[4];
 };
 
+struct CPadConfig {
+    int32 field_0{};
+    bool present{};         // Device exists
+    bool zAxisPresent{};    // Has property DIJOFS_Z
+    bool rzAxisPresent{};   // Has property DIJOFS_RZ
+private:
+    char __align{};
+public:
+    int32 vendorId{};
+    int32 productId{};
+};
+VALIDATE_SIZE(CPadConfig, 16);
+static inline auto& PadConfigs = StaticRef<std::array<CPadConfig, 2>, 0xC92144>();
+
+using ControlName = char[40];
+
 class CControllerConfigManager {
 public:
     bool              m_bJoyJustInitialised;
@@ -116,7 +125,7 @@ public:
     DIJOYSTATE2       m_NewJoyState;
 
     char              m_arrControllerActionName[59][40]; // todo: 182
-    bool              m_ButtonStates[17];
+    bool              m_ButtonStates[17];   // True if down, false if up or missing
     CControllerAction m_Actions[59];
 
     bool m_bStickL_X_Rgh_Lft_MovementBothDown[4];
@@ -132,17 +141,23 @@ public:
     CControllerConfigManager();
     CControllerConfigManager* Constructor();
 
+
     bool LoadSettings(FILESTREAM file);
     void SaveSettings(FILESTREAM file);
 
     void InitDefaultControlConfiguration();
+    void InitDefaultControlConfigMouse(const CMouseControllerState& state, bool controller);
     void InitialiseControllerActionNameArray();
     void ReinitControls();
 
+    void SetMouseButtonAssociatedWithAction(eControllerAction action, RsKeyCodes button);
+
     void StoreMouseButtonState(eMouseButtons button, bool state);
     void UpdateJoyInConfigMenus_ButtonDown(ePadButton button, int32 padNumber);
+    void UpdateJoy_ButtonDown(ePadButton button, int32 unk);
     void AffectControllerStateOn_ButtonDown_DebugStuff(int32, eControllerType);
     void UpdateJoyInConfigMenus_ButtonUp(ePadButton button, int32 padNumber);
+    void UpdateJoy_ButtonUp(ePadButton button, int32 unk);
     void AffectControllerStateOn_ButtonUp_DebugStuff(int32, eControllerType);
     void ClearSimButtonPressCheckers();
 
@@ -157,12 +172,19 @@ public:
     eActionType GetActionType(eControllerAction action);
     char* GetControllerSettingTextMouse(eControllerAction action);
     char* GetControllerSettingTextJoystick(eControllerAction action);
+    void StoreJoyButtonStates();
+    void HandleJoyButtonUpDown(int32 joyNo, bool isDown); // NOTSA
 
     void ClearSettingsAssociatedWithAction(eControllerAction action, eControllerType type);
     void MakeControllerActionsBlank();
     void AffectPadFromKeyBoard();
     void AffectPadFromMouse();
     void DeleteMatchingActionInitiators(eControllerAction Action, int32 KeyToBeChecked, eControllerType ControllerTypeToBeChecked);
+
+    void GetDefinedKeyByGxtName(uint16 actionId, char* buf, uint16 bufsz);
+
+    // NOTSA
+    uint16 GetActionIDByName(std::string_view name);
 };
 VALIDATE_SIZE(CControllerConfigManager, 0x12E4);
 

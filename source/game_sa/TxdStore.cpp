@@ -117,9 +117,11 @@ bool CTxdStore::LoadTxd(int32 index, RwStream* stream) {
 // load txd from file
 // 0x7320B0
 bool CTxdStore::LoadTxd(int32 index, const char* filename) {
+    ZoneScoped;
+
     char data[260];
     RwStream* stream;
-    sprintf(data, "%s", filename);
+    sprintf_s(data, "%s", filename);
     do {
         stream = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, data);
     } while (!stream);

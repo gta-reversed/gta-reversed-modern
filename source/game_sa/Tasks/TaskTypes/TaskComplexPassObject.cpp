@@ -44,7 +44,7 @@ CTaskComplexPassObject::~CTaskComplexPassObject() {
 }
 
 // 0x661290
-void __stdcall CTaskComplexPassObject::AbortIK(CPed* ped) {
+void CTaskComplexPassObject::AbortIK(CPed* ped) {
     if (g_ikChainMan.IsArmPointing(0, ped)) {
         g_ikChainMan.AbortPointArm(0, ped, 500);
     }

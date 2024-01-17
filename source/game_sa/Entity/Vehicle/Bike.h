@@ -26,7 +26,8 @@ enum eBikeNodes {
     BIKE_NUM_NODES
 };
 
-class CBike : public CVehicle {
+class NOTSA_EXPORT_VTABLE CBike : public CVehicle {
+    static constexpr auto NUM_SUSP_LINES = 4;
 public:
     RwFrame* m_aBikeNodes[BIKE_NUM_NODES];
     bool     m_bLeanMatrixCalculated;
@@ -50,10 +51,10 @@ public:
     tBikeHandlingData* m_BikeHandling;
     CRideAnimData m_RideAnimData;
     uint8 m_nWheelStatus[2];
-    CColPoint m_aWheelColPoints[4];
-    float m_aWheelRatios[4];
-    float m_aRatioHistory[4];
-    float m_aWheelCounts[4];
+    CColPoint m_aWheelColPoints[NUM_SUSP_LINES];
+    float m_aWheelRatios[NUM_SUSP_LINES];
+    float m_aRatioHistory[NUM_SUSP_LINES];
+    float m_aWheelCounts[NUM_SUSP_LINES];
     float m_fBrakeCount;
     eSkidmarkType m_aWheelSkidmarkType[2];
     bool m_bWheelBloody[2];
@@ -62,8 +63,8 @@ public:
     float m_aWheelAngularVelocity[2];
     float m_aWheelSuspensionHeights[2];
     float m_aWheelOrigHeights[2];
-    float m_fSuspensionLength[4];
-    float m_fLineLength[4];
+    float m_fSuspensionLength[NUM_SUSP_LINES];
+    float m_fLineLength[NUM_SUSP_LINES];
     float m_fHeightAboveRoad;
     float m_fExtraTractionMult;
     float m_fSwingArmLength;
@@ -86,6 +87,8 @@ public:
     uint8 m_nDriveWheelsOnGroundLastFrame;
     float m_fGasPedalAudioRevs;
     tWheelState m_aWheelState[2];
+
+    static constexpr auto Type = VEHICLE_TYPE_BIKE;
 
 public:
     CBike(int32 modelIndex, eVehicleCreatedBy createdBy); // 0x6BF430
@@ -117,10 +120,10 @@ public:
     bool IsDoorFullyOpen(eDoors door) override { return false; } // 0x6B58F0
     bool IsDoorClosed(eDoors door) override { return false; }    // 0x6B5900
     bool IsDoorMissing(eDoors door) override { return true; }    // 0x6B5910
-    bool IsDoorReady(uint32 door) override { return true; }      // 0x6B5920
-    bool IsDoorFullyOpen(uint32 door) override { return false; } // 0x6B5930
-    bool IsDoorClosed(uint32 door) override { return false; }    // 0x6B5940
-    bool IsDoorMissing(uint32 door) override { return true; }    // 0x6B5950
+    bool IsDoorReadyU32(uint32 door) override { return true; }      // 0x6B5920
+    bool IsDoorFullyOpenU32(uint32 door) override { return false; } // 0x6B5930
+    bool IsDoorClosedU32(uint32 door) override { return false; }    // 0x6B5940
+    bool IsDoorMissingU32(uint32 door) override { return true; }    // 0x6B5950
 
     bool IsRoomForPedToLeaveCar(uint32 door, CVector* pvecCarJackOffset) override { return true; }              // 0x6B7270
     inline bool IsComponentPresent(int32 componentId) override { return m_aBikeNodes[componentId] != nullptr; } // 0x6B59E0

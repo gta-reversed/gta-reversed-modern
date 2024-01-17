@@ -46,10 +46,10 @@ public:
 public:
     static constexpr auto Type = TASK_COMPLEX_WANDER;
 
-    CTaskComplexWander(int32 moveState, uint8 dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);
+    CTaskComplexWander(eMoveState moveState, uint8 dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);
     ~CTaskComplexWander() override = default;
 
-    eTaskType GetTaskType() override { return Type; } // 0x460CD0
+    eTaskType GetTaskType() const override { return Type; } // 0x460CD0
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
@@ -66,12 +66,14 @@ public:
     bool ScanForBlockedNode(CPed* ped, const CNodeAddress& targetNodeAddress);
     bool ScanForBlockedNode(const CVector& position, class CEntity* entity);
 
-    static CTaskComplexWander* GetWanderTaskByPedType(CPed* ped);
+    /// Get sq. distance of the path node (either `m_LastNode` or `m_NextNode`) closest to the ped
+    float GetDistSqOfClosestPathNodeToPed(CPed* ped);
 
+    static CTaskComplexWander* GetWanderTaskByPedType(CPed* ped);
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
-    CTaskComplexWander* Constructor(int32 moveState, uint8 dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);
+    CTaskComplexWander* Constructor(eMoveState moveState, uint8 dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);
     CTask* CreateNextSubTask_Reversed(CPed* ped);
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
     CTask* ControlSubTask_Reversed(CPed* ped);

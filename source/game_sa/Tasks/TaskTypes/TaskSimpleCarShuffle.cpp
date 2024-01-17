@@ -20,57 +20,69 @@ void CTaskSimpleCarShuffle::InjectHooks() {
 }
 
 // 0x646810
-CTaskSimpleCarShuffle::CTaskSimpleCarShuffle(CVehicle* veh, eTargetDoor targetDoor, CTaskUtilityLineUpPedWithCar* lineUpUtility) :
-    m_veh{veh},
-    m_targetDoor{targetDoor},
-    m_lineUpUtility{ lineUpUtility }
+CTaskSimpleCarShuffle::CTaskSimpleCarShuffle(CVehicle* car, int32 targetDoor, CTaskUtilityLineUpPedWithCar* lineUpTask) :
+    m_Car{ car },
+    m_TargetDoor{ targetDoor },
+    m_LineUpUtility{ lineUpTask }
 {
-    CEntity::SafeRegisterRef(m_veh);
+    CEntity::SafeRegisterRef(m_Car);
 }
 
-CTaskSimpleCarShuffle::CTaskSimpleCarShuffle(const CTaskSimpleCarShuffle& o) :
-    CTaskSimpleCarShuffle{o.m_veh, o.m_targetDoor, o.m_lineUpUtility}
+// 0x649C40
+CTaskSimpleCarShuffle::CTaskSimpleCarShuffle(const CTaskSimpleCarShuffle&) :
+    CTaskSimpleCarShuffle{ m_Car, m_TargetDoor, m_LineUpUtility }
 {
 }
 
 // 0x646890
 CTaskSimpleCarShuffle::~CTaskSimpleCarShuffle() {
-    CEntity::SafeCleanUpRef(m_veh);
-    if (m_anim) {
-        m_anim->SetDefaultFinishCallback();
+    CEntity::SafeCleanUpRef(m_Car);
+    if (m_Anim) {
+        m_Anim->SetDefaultFinishCallback();
     }
 }
 
 // 0x646970
-void CTaskSimpleCarShuffle::FinishAnimCarShuffleCB(CAnimBlendAssociation* assoc, void* task) {
-    const auto self = CTask::Cast<CTaskSimpleCarShuffle>(task);
-    self->m_animHasFinished = true;
-    self->m_anim = nullptr;
+void CTaskSimpleCarShuffle::FinishAnimCarShuffleCB(CAnimBlendAssociation* assoc, void* data) {
+    const auto self = static_cast<CTaskSimpleCarShuffle*>(data);
+
+    assert(self->m_Anim);
+
+    self->m_Anim->SetBlendDelta(-1000.f);
+    self->m_Anim = nullptr;
+
+    self->m_bFinished = true;
 }
 
 // 0x64B3E0
-void CTaskSimpleCarShuffle::StartAnim(CPed const* ped) {
-    m_anim = CAnimManager::BlendAnimation(ped->m_pRwClump, (AssocGroupId)m_veh->GetAnimGroup().GetGroup(ANIM_ID_CAR_SHUFFLE_RHS_1), ANIM_ID_CAR_SHUFFLE_RHS_1, 1000.f);
-    m_anim->SetFinishCallback(FinishAnimCarShuffleCB, this);
+void CTaskSimpleCarShuffle::StartAnim(const CPed* a2) {
+    assert(!m_Anim);
+    m_Anim = CAnimManager::BlendAnimation(
+        m_Car->m_pRwClump,
+        m_Car->GetAnimGroup().GetGroup(ANIM_ID_CAR_SHUFFLE_RHS_1),
+        ANIM_ID_CAR_SHUFFLE_RHS_1,
+        1000.f
+    );
+    m_Anim->SetFinishCallback(FinishAnimCarShuffleCB, this);
 }
 
 // 0x646900
-bool CTaskSimpleCarShuffle::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
-    if (priority == ABORT_PRIORITY_IMMEDIATE) {
-        if (m_anim) {
-            m_anim->m_fBlendDelta = -1000.f;
-        }
-        return true;
+bool CTaskSimpleCarShuffle::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
+    if (priority != ABORT_PRIORITY_IMMEDIATE) {
+        return false;
     }
-    return false;
+    if (m_Anim) {
+        m_Anim->SetBlendDelta(-1000.f);
+    }
+    return true;
 }
 
 // 0x64DC40
 bool CTaskSimpleCarShuffle::ProcessPed(CPed* ped) {
-    if (!!m_veh || m_animHasFinished) {
+    if (m_bFinished || !m_Car) {
         return true;
     }
-    if (!m_anim) {
+    if (!m_Anim) {
         StartAnim(ped);
     }
     return false;
@@ -78,8 +90,8 @@ bool CTaskSimpleCarShuffle::ProcessPed(CPed* ped) {
 
 // 0x646920
 bool CTaskSimpleCarShuffle::SetPedPosition(CPed* ped) {
-    if (!ped->bInVehicle || m_anim && m_anim->m_fBlendAmount > 0.9f) {
-        m_lineUpUtility->ProcessPed(ped, m_veh, m_anim);
+    if (!ped->bInVehicle || m_Anim && m_Anim->GetBlendAmount() >= 0.9f) {
+        m_LineUpUtility->ProcessPed(ped, m_Car, m_Anim);
     } else {
         ped->SetPedPositionInCar();
     }

@@ -9,7 +9,7 @@ void CTaskComplexSeekCoverUntilTargetDead::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor_Ped, 0x622BC0);
-    RH_ScopedInstall(Constructor_Grp, 0x622BC0);
+    RH_ScopedInstall(Constructor_Grp, 0x622B80);
     RH_ScopedInstall(Destructor, 0x622C20);
 
     RH_ScopedInstall(GetCoverPed, 0x622D50);
@@ -112,7 +112,7 @@ CTask* CTaskComplexSeekCoverUntilTargetDead::ControlSubTask(CPed* ped) {
         CEntity::ChangeEntityReference(m_targetPed, GetTargetPed()); // Try finding a new one
 
         // If no new one is found, try aborting current subtask, and finish up
-        if (!m_targetPed && m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+        if (!m_targetPed && m_pSubTask->MakeAbortable(ped)) {
             return new CTaskSimpleStandStill{ -1 };
         }
     }
@@ -125,7 +125,7 @@ CTask* CTaskComplexSeekCoverUntilTargetDead::ControlSubTask(CPed* ped) {
         CEntity::ChangeEntityReference(m_coverPed, GetTargetPed());
 #endif
         // Try aborting current subtask and returning new
-        if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) { // Moved out as common code
+        if (m_pSubTask->MakeAbortable(ped)) { // Moved out as common code
             if (m_coverPed) { // Found a new ped to cover, do it all over again
                 return CreateSequence(ped);
             }

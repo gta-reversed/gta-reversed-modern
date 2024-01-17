@@ -3,7 +3,7 @@
 #include "TaskSimple.h"
 #include "Vector.h"
 
-class CTaskSimpleGoTo : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleGoTo : public CTaskSimple {
 public:
     eMoveState m_moveState;
     CVector    m_vecTargetPoint;
@@ -27,6 +27,13 @@ public:
     bool HasCircledTarget(CPed* ped);
     void SetUpIK(CPed* ped);
     void QuitIK(CPed* ped);
+
+    auto GetTargetPt()           const { return m_vecTargetPoint; }
+    void SetTargetPt(CVector pt)       { m_vecTargetPoint = pt;   }
+
+    auto GetTargetPtRadius()        const { return m_fRadius; }
+    void SetTargetPtRadius(float r)       { m_fRadius = r;    }
+
 
 private:
     friend void InjectHooksMain();
