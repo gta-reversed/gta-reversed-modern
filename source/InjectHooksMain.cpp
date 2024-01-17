@@ -275,6 +275,7 @@
 #include "TaskSimpleThrowProjectile.h"
 #include "TaskSimpleGoToPoint.h"
 #include "TaskComplexWanderMedic.h"
+#include "TaskComplexEvasiveDiveAndGetUp.h"
 #include "TaskComplexMoveBackAndJump.h"
 #include "TaskComplexSeekEntityAiming.h"
 #include "TaskSimpleCarDriveTimed.h"
