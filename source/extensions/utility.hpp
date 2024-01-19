@@ -289,7 +289,7 @@ template<typename T>
 inline constexpr bool is_standard_integer = std::is_integral_v<T> && !is_any_of_type_v<T, bool, char, wchar_t, char8_t, char16_t, char32_t>;
 
 //! Null terminated `std::format_to`. Use inplace of sprintf.
-//! NOTE: Note a complete replacement for std::format_to,
+//! NOTE: Not a complete replacement for std::format_to,
 //! e.g. it doesn't use output iterators. i don't care.
 template<size_t N, class... Args>
 void format_to_sz(char(&out)[N], std::string_view fmt, Args&&... args) {

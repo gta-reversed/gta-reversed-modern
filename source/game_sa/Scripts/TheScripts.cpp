@@ -14,6 +14,8 @@
 #include "TaskComplexLeaveAnyCar.h"
 #include "TaskComplexWander.h"
 
+#include "extensions/File.hpp"
+
 static inline bool gAllowScriptedFixedCameraCollision = false;
 
 void CTheScripts::InjectHooks() {
@@ -123,26 +125,20 @@ void CTheScripts::Init() {
     rng::fill(EntitiesWaitingForScriptBrain, tScriptBrainWaitEntity{});
 
     if (CGame::bMissionPackGame) {
+        char scrFile[MAX_PATH]{};
+
         while (FrontEndMenuManager.CheckMissionPackValidMenu()) {
-            static char scrFile[MAX_PATH]{};
             CFileMgr::SetDirMyDocuments();
             notsa::format_to_sz(scrFile, "MPACK//MPACK{:d}//SCR.SCM", CGame::bMissionPackGame);
 
-            if (const auto file = CFileMgr::OpenFile(scrFile, "rb")) {
-                const auto read = CFileMgr::Read(file, ScriptSpace.data(), MAIN_SCRIPT_SIZE);
-                CFileMgr::CloseFile(file);
-
-                if (read >= 1) {
-                    break;
-                }
+            if (auto f = notsa::File(scrFile, "rb"); f && f.Read(ScriptSpace.data(), MAIN_SCRIPT_SIZE) >= 1) {
+                break;
             }
         }
     } else {
         CFileMgr::SetDir("data\\script");
 
-        const auto file = CFileMgr::OpenFile("main.scm", "rb");
-        VERIFY(CFileMgr::Read(file, ScriptSpace.data(), MAIN_SCRIPT_SIZE) >= 1);
-        CFileMgr::CloseFile(file);
+        VERIFY(notsa::File("main.scm", "rb").Read(ScriptSpace.data(), MAIN_SCRIPT_SIZE) >= 1);
     }
     CFileMgr::SetDir("");
 
@@ -634,7 +630,7 @@ void CTheScripts::CleanUpThisPed(CPed* ped) {
             return;
         }
 
-        // Get them wander.
+        // Make them wander.
         ped->GetEventGroup().Add(CEventScriptCommand(TASK_PRIMARY_PRIMARY, CTaskComplexWander::GetWanderTaskByPedType(ped)));
     }
 }
