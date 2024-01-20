@@ -123,7 +123,7 @@ void CAnimBlendSequence::SetNumFrames(uint32 count, bool bHasTranslation, bool c
     m_Frames               = frameData ? frameData : CMemoryMgr::Malloc(GetDataSize(compressed));
     m_bUsingExternalMemory = frameData != nullptr; // NOTSA
     m_bHasRotation         = true;
-    m_bIsCompressed        = compressed; // condition has been removed
+    m_bIsCompressed        = compressed;
 }
 
 // 0x4D0D40
