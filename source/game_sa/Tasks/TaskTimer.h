@@ -38,14 +38,6 @@ public:
         return false;
     }
 
-    void StartIfNotAlready(int32 interval) { // NOTSA
-        if (!m_bStarted) {
-            m_nStartTime = CTimer::GetTimeInMS();
-            m_nInterval = (int32)interval;
-            m_bStarted = true;
-        }
-    }
-
     bool Pause() {
         if (m_bStarted) {
             m_bStopped = true;
@@ -53,6 +45,13 @@ public:
             return true;
         }
         return false;
+    }
+
+    void UnPause() {
+        if (m_bStopped) {
+            m_nStartTime = CTimer::GetTimeInMS();
+            m_bStopped = false;
+        }
     }
 
     void Stop() {

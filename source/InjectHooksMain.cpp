@@ -464,6 +464,7 @@
 #include "Events/Scanners/NearbyFireScanner.h"
 #include "Events/Scanners/PedAcquaintanceScanner.h"
 #include "Events/Scanners/SexyPedScanner.h"
+#include "Events/Scanners/VehiclePotentialCollisionScanner.h"
 
 #include "Plugins/BreakablePlugin/BreakablePlugin.h"
 
@@ -701,6 +702,7 @@ void InjectHooksMain() {
 
     CEntityScanner::InjectHooks();
 
+    CVehiclePotentialCollisionScanner::InjectHooks();
     CAttractorScanner::InjectHooks();
     CObjectPotentialCollisionScanner::InjectHooks();
     CPedPotentialCollisionScanner::InjectHooks();
