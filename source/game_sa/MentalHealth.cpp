@@ -7,6 +7,6 @@ void CMentalState::IncrementAnger(int32 anger) {
 }
 
 // 0x6008A0
-void CMentalState::Process() {
-    plugin::CallMethod<0x6008A0, CMentalState*>(this);
+void CMentalState::Process(const CPed& ped) {
+    plugin::CallMethod<0x6008A0>(this, &ped);
 }

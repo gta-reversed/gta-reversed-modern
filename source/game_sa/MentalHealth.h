@@ -22,6 +22,6 @@ public:
     ~CMentalState() = default;
 
     void IncrementAnger(int32 anger);
-    void Process();
+    void Process(const CPed& ped);
 };
 VALIDATE_SIZE(CMentalState, 0x14);
