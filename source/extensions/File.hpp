@@ -21,10 +21,6 @@ public:
 
     auto Read(void* buf, size_t size) { return CFileMgr::Read(m_file, buf, size); }
     auto Write(const void* buf, size_t size) { return CFileMgr::Write(m_file, buf, size); }
-
-    // TODO: template<typaneme T> void Read(T& out);
-    // TODO: template<typaneme T> void Write(const T& out);
-
     auto Seek(long offset, int32 origin) { return CFileMgr::Seek(m_file, offset, origin); }
     auto ReadLine(char* str, int32 num) { return CFileMgr::ReadLine(m_file, str, num); }
     auto CloseFile() { return CFileMgr::CloseFile(std::exchange(m_file, nullptr)); }
