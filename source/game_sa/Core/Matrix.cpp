@@ -480,8 +480,7 @@ void CMatrix::ConvertFromEulerAngles(float x, float y, float z, uint32 uiFlags)
         fArr[iInd3][iInd1] = -(fCosZ*fSinY);
         fArr[iInd3][iInd2] =   fCosX*fSinZ  + fCosY*fCosZ*fSinX;
         fArr[iInd3][iInd3] = -(fSinX*fSinZ) + fCosX*fCosY*fCosZ;
-    }
-    else { // Use Tait-Bryan angles
+    } else { // Use Tait-Bryan angles
         fArr[iInd1][iInd1] =   fCosY*fCosZ;
         fArr[iInd1][iInd2] = -(fCosX*fSinZ) + fCosZ*fSinX*fSinY;
         fArr[iInd1][iInd3] =   fSinX*fSinZ  + fCosX*fCosZ*fSinY;
@@ -549,25 +548,13 @@ CMatrix operator+(const CMatrix& a, const CMatrix& b)
 
 CMatrix& Invert(CMatrix& in, CMatrix& out)
 {
-    out.GetPosition().Set(0.0F, 0.0F, 0.0F);
-
-    out.GetRight().Set(in.GetRight().x, in.GetForward().x, in.GetUp().x);
-    out.GetForward().Set(in.GetRight().y, in.GetForward().y, in.GetUp().y);
-    out.GetUp().Set(in.GetRight().z, in.GetForward().z, in.GetUp().z);
-
-    out.GetPosition() += in.GetPosition().x * out.GetRight();
-    out.GetPosition() += in.GetPosition().y * out.GetForward();
-    out.GetPosition() += in.GetPosition().z * out.GetUp();
-    out.GetPosition() *= -1.0F;
-
+    out = in.Inverted();
     return out;
 }
 
 CMatrix Invert(const CMatrix& in)
 {
-    CMatrix result;
-    Invert(const_cast<CMatrix&>(in), result); // const cast necessary because it's fucked - but it wont be modified.
-    return result;
+    return in.Inverted();
 }
 
 CMatrix Lerp(CMatrix from, CMatrix to, float t) {
