@@ -72,7 +72,9 @@ private: // Generic implementations
         const auto kfA = m_BlendSeq->GetKeyFrame<IsCompressed>(m_KeyFrameA),
                    kfB = m_BlendSeq->GetKeyFrame<IsCompressed>(m_KeyFrameB);
 
-        const auto t = (kfA->DeltaTime - m_RemainingTime) / kfA->DeltaTime;
+        const auto t = kfA->DeltaTime != 0.f
+            ? (kfA->DeltaTime - m_RemainingTime) / kfA->DeltaTime
+            : 0.f;
 
         if (m_BlendSeq->m_bHasTranslation) {
             trans = lerp<CVector>(kfB->Trans, kfA->Trans, t) * blend;
@@ -110,8 +112,7 @@ private: // Generic implementations
             m_KeyFrameA++;
 
             if (m_KeyFrameA >= m_BlendSeq->m_FramesNum) {
-                // reached end of animation
-                if (!m_BlendAssoc->IsRepeating()) {
+                if (!m_BlendAssoc->IsRepeating()) { // Reached end of animation
                     m_KeyFrameA--;
                     m_RemainingTime = 0.0f;
                     return false;
@@ -157,9 +158,9 @@ private: // Generic implementations
             const auto kfB = m_BlendSeq->GetKeyFrame<IsCompressed>(m_KeyFrameB);
 
             // Calculate interpolation t
-            const float t = kfA->DeltaTime == 0.0f
-                ? 0.0f
-                : (kfA->DeltaTime - m_RemainingTime) / kfA->DeltaTime;
+            const float t = kfA->DeltaTime != 0.0f
+                ? (kfA->DeltaTime - m_RemainingTime) / kfA->DeltaTime
+                : 0.0f;
 
             // Update translation
             if (m_BlendSeq->m_bHasTranslation) {
