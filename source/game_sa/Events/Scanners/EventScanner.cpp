@@ -44,7 +44,7 @@ void CEventScanner::ScanForEvents(CPed& ped) {
     m_AcquaintanceScanner.ScanForPedAcquaintanceEvents(ped, intel->GetPedScanner().GetEntitiesPtr(), CEntityScanner::MAX_ENTITIES);
     m_AttractorScanner.ScanForAttractorsInRange(ped);
     m_FireScanner.ScanForNearbyFires(ped);
-    intel->m_mentalState.Process();
+    intel->m_mentalState.Process(ped);
 
     // 0x607ECE
     if (!ped.bIsStanding && (ped.bIsInTheAir || CPedGeometryAnalyser::IsInAir(ped))) {

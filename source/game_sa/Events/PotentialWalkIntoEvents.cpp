@@ -46,7 +46,9 @@ void CEventPotentialWalkIntoPed::InjectHooks()
     RH_ScopedVirtualInstall(TakesPriorityOver, 0x4AE950);
 }
 
-CEventPotentialWalkIntoVehicle::CEventPotentialWalkIntoVehicle(CVehicle* vehicle, int32 moveState) {
+CEventPotentialWalkIntoVehicle::CEventPotentialWalkIntoVehicle(CVehicle* vehicle, eMoveState moveState) {
+    NOTSA_LOG_DEBUG("CEventPotentialWalkIntoVehicle({:x})", LOG_PTR(vehicle));
+
     m_vehicle = vehicle;
     m_moveState = moveState;
     CEntity::SafeRegisterRef(m_vehicle);
@@ -57,7 +59,7 @@ CEventPotentialWalkIntoVehicle::~CEventPotentialWalkIntoVehicle() {
     CEntity::SafeCleanUpRef(m_vehicle);
 }
 
-CEventPotentialWalkIntoVehicle* CEventPotentialWalkIntoVehicle::Constructor(CVehicle* vehicle, int32 moveState) {
+CEventPotentialWalkIntoVehicle* CEventPotentialWalkIntoVehicle::Constructor(CVehicle* vehicle, eMoveState moveState) {
     this->CEventPotentialWalkIntoVehicle::CEventPotentialWalkIntoVehicle(vehicle, moveState);
     return this;
 }
