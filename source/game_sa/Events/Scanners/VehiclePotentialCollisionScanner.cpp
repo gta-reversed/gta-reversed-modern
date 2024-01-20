@@ -42,12 +42,12 @@ void CVehiclePotentialCollisionScanner::ScanForVehiclePotentialCollisionEvents(c
     {
         const auto& vehBB  = closestVeh->GetBoundingBox();
         const auto& vehMat = closestVeh->GetMatrix();
-
+    
         const auto CheckPedInBB = [
             &,
             pedPosOS = vehMat.InverseTransformPoint(ped.GetPosition())
         ](CVector dir, CVector bbPt) {
-            return dir.Dot(pedPosOS - bbPt) >= VEH_BB_UP_DOWN_THRESHHOLD;
+            return dir.Dot(pedPosOS - bbPt) <= VEH_BB_UP_DOWN_THRESHHOLD;
         };
         if (!CheckPedInBB(vehMat.GetUp(), vehBB.m_vecMax) || !CheckPedInBB(-vehMat.GetUp(), vehBB.m_vecMin)) {
             return;
@@ -62,7 +62,7 @@ void CVehiclePotentialCollisionScanner::ScanForVehiclePotentialCollisionEvents(c
     }
 
     // Now, a more accuracte check
-    float intersectionMag;
+    float intersectionMag{};
     if (CPedGeometryAnalyser::GetIsLineOfSightClear(
         ped,
         pedGoToTask->GetTargetPt(),
