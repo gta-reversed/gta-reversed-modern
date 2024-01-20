@@ -8,5 +8,5 @@ class CPedPotentialCollisionScanner {
 public:
     static void InjectHooks();
 
-    static void ScanForPedPotentialCollisionEvents(const CPed& ped, CPed* closestPed);
+    static void __stdcall ScanForPedPotentialCollisionEvents(const CPed& ped, CPed* closestPed);
 };
