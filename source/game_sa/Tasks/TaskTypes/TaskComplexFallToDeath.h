@@ -1,15 +1,14 @@
 #pragma once
 
 #include "TaskComplex.h"
-
-enum class eFallDir : uint8;
+#include "Enums/eDirection.h"
 
 class CTaskComplexFallToDeath : public CTaskComplex {
 public:
     CVector     m_Posn;
     AnimationId m_nAnimId;
     AnimationId m_nAnimId1;
-    eFallDir    m_nFallToDeathDir;
+    eDirection    m_nFallToDeathDir;
     union {
         struct {
             uint8 b0x1  : 1;
@@ -37,6 +36,8 @@ public:
     CTask* ControlSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;
+
+    static bool CalcFall(CPed* ped, int32& fallDir, bool& bFallToDeathOverRailing);
 
 private:
     void UpdateAnims(CPed* ped);

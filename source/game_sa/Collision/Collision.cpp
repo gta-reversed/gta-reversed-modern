@@ -1265,7 +1265,7 @@ bool CCollision::ProcessDiscCollision(
 
 /*!
 * Process line-triangle intersection, internal function (used to implement `ProcessLineTriangle` and `TestLineTriangle`)
-* @tparam TestOnly If we're only doing an intersecetion check, and are not interested in the intersection point, normal, etc. In this case the last 3 arguments can be nullptr.
+* @tparam TestOnly If we're only doing an intersection check, and are not interested in the intersection point, normal, etc. In this case the last 3 arguments can be nullptr.
 * @notsa
 */
 template<bool TestOnly>
@@ -2039,12 +2039,15 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
                 if (TestSphereBox(colABoundSphereSpaceB, group.bb)) { // Quick BB check
                     for (auto triIdx{group.first}; triIdx <= group.last; triIdx++) { // Check all triangles in this group
                         ProcessOneTri(triIdx);
+                        if (numCollTrisB >= MAX_TRIS) {
+                            break;
+                        }
                     }
                 }
             }
         } else { // Game checked here if B.m_nNumTriangles > 0, but that is a redundant check.
             // 0x418C40
-            for (auto triIdx = 0u; triIdx < cdB.m_nNumTriangles; triIdx++) {
+            for (auto triIdx = 0u; triIdx < cdB.m_nNumTriangles && numCollTrisB < MAX_TRIS; triIdx++) {
                 ProcessOneTri(triIdx);
             }
         }

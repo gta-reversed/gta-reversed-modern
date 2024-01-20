@@ -125,7 +125,7 @@ CTask* CTaskComplexStealCar::CreateFirstSubTask(CPed* ped) {
 CTask* CTaskComplexStealCar::ControlSubTask(CPed* ped) {
     if (const auto enter = CTask::DynCast<CTaskComplexEnterCarAsDriver>(m_pSubTask)) {
         if (m_enterTimer.IsOutOfTime()) {
-            if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+            if (m_pSubTask->MakeAbortable(ped)) {
                 return CreateSubTask(TASK_SIMPLE_PAUSE, ped);
             }
         }

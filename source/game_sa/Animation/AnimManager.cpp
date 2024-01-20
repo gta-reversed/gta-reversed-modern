@@ -525,6 +525,24 @@ CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, AssocGroupId
     return anim;
 }
 
+//! @notsa
+//! @brief Function for the very common pattern found in many tasks. See xrefs to `CTaskComplexGangLeader::ShouldLoadGangAnims()`
+//! Usual usage would be: `StreamAnimBlock(m_animBlockName, CTaskComplexGangLeader::ShouldLoadGangAnims(), m_areAnimsReferenced)`
+void CAnimManager::StreamAnimBlock(const char* blck, bool shouldBeLoaded, bool& isLoaded) {
+    if (shouldBeLoaded && !isLoaded) {
+        RemoveAnimBlockRef(GetAnimationBlockIndex(blck));
+        isLoaded = false;
+    } else if (!shouldBeLoaded && isLoaded) {
+        const auto idx = GetAnimationBlockIndex(blck);
+        if (GetAnimBlocks()[idx].IsLoaded) {
+            AddAnimBlockRef(idx);
+            isLoaded = true;
+        } else {
+            CStreaming::RequestModel(IFPToModelId(idx), STREAMING_KEEP_IN_MEMORY);
+        }
+    }
+}
+
 // 0x4D5620
 void CAnimManager::LoadAnimFiles() {
     RwStream* stream = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, "ANIM\\PED.IFP");

@@ -24,6 +24,7 @@
 #include "FxSystem.h"
 #include "Fire.h"
 
+#include <extensions/EntityRef.hpp>
 #include <Enums/eControllerType.h>
 
 /*  Thanks to MTA team for https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CVehicleSA.cpp */
@@ -180,7 +181,8 @@ VALIDATE_SIZE(tHydraulicData, 0x28);
 class NOTSA_EXPORT_VTABLE CVehicle : public CPhysical {
 public:
     using Ref = notsa::EntityRef<CVehicle>;
-
+  
+public:
     static constexpr auto NUM_VEHICLE_UPGRADES = 15u;
 
 public:
@@ -189,6 +191,7 @@ public:
         STEER_RIGHT,
         STEER_LEFT
     };
+  
 public:
     CAEVehicleAudioEntity m_vehicleAudio;
     tHandlingData*        m_pHandlingData;

@@ -4,7 +4,7 @@
 
 #include "TaskComplex.h"
 #include "TaskTimer.h"
-#include "Ped.h" // TODO: eMoveState (When possible move to an enum file)
+#include "eMoveState.h"
 #include "extensions/utility.hpp"
 #include "PedPlacement.h"
 #include "TaskSimpleCarDriveTimed.h"
@@ -18,9 +18,10 @@
 #include "TaskSimpleStandStill.h"
 #include "TaskSimpleTired.h"
 #include "PosCalculators/EntitySeekPosCalculator.h"
+#include "PosCalculators/EntitySeekPosCalculatorStandard.h"
 #include "PosCalculators/EntitySeekPosCalculatorXYOffset.h"
 
-template <std::derived_from<CEntitySeekPosCalculator> T_PosCalc>
+template <std::derived_from<CEntitySeekPosCalculator> T_PosCalc = CEntitySeekPosCalculatorStandard>
 class NOTSA_EXPORT_VTABLE CTaskComplexSeekEntity : public CTaskComplex {
     CEntity* m_entityToSeek{};
     int32 m_seekInterval{};
@@ -32,6 +33,8 @@ class NOTSA_EXPORT_VTABLE CTaskComplexSeekEntity : public CTaskComplex {
     CTaskTimer m_scanTimer{};
     CTaskTimer m_seekTimer{};
     T_PosCalc m_entitySeekPosCalculator{};
+
+    // Everything here mustn't be accesed without the proper `T_PosCalc` type!
     eMoveState m_moveState{ PEDMOVE_RUN };
     bool m_bPlayTiredAnim : 1{};
     bool m_bFaceEntityWhenDone : 1{};
@@ -42,6 +45,8 @@ public:
     * NOTE: Since this task is templated but uses the same task type for all templated tasks
     *       our template magic stuff in TaskManager might not work properly with it,
     *       because at runtime all templated tasks will have the same type.
+    *       Accessing anything before `m_entitySeekPosCalculator` is fine either way
+    *       but anything after it depends on the actual `T_PosCalc` used [which can't [easily] be figured out at runtime]
     */
     static constexpr auto Type = eTaskType::TASK_COMPLEX_SEEK_ENTITY;
 
@@ -271,7 +276,7 @@ public:
                ped->m_pAttachedTo // From 0x496821
             || !commonBoat
             || subTaskType == TASK_SIMPLE_STAND_STILL
-            || m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)
+            || m_pSubTask->MakeAbortable(ped)
         ) {
             notsa::ScopeGuard makePedTalkOnReturn{ [this, ped] {
                 if (m_entityToSeek && m_entityToSeek->IsPed()) {
@@ -297,11 +302,11 @@ public:
             }
 
             if (!m_entityToSeek) {
-                return m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr) ? nullptr : m_pSubTask;
+                return m_pSubTask->MakeAbortable(ped) ? nullptr : m_pSubTask;
             }
 
             if (m_seekTimer.IsOutOfTime()) {
-                if (!m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+                if (!m_pSubTask->MakeAbortable(ped)) {
                     return m_pSubTask;
                 }
 
@@ -324,7 +329,7 @@ public:
             if (subTaskType == TASK_COMPLEX_FOLLOW_NODE_ROUTE) {
                 if (m_minEntityDist2D == 0.f || pedToSeekPosDist2dSq >= sq(m_minEntityDist2D - 1.f)) {
                     static_cast<CTaskComplexFollowNodeRoute*>(m_pSubTask)->SetTarget(ped, seekPos, m_maxEntityDist2D, m_moveStateRadius, m_followNodeThresholdHeightChange, false);
-                } else if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+                } else if (m_pSubTask->MakeAbortable(ped)) {
                     return CreateSubTask(TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL, ped);
                 }
             } else {
@@ -333,7 +338,7 @@ public:
                     return m_pSubTask;      
                 } else if (m_minEntityDist2D == 0.f || pedToSeekPosDist2dSq <= sq(m_minEntityDist2D + 1.f)) {
                     subTaskStandStill->GoToPoint(seekPos, m_maxEntityDist2D, m_moveStateRadius, false);
-                } else if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+                } else if (m_pSubTask->MakeAbortable(ped)) {
                     return CreateSubTask(TASK_COMPLEX_FOLLOW_NODE_ROUTE, ped);
                 }
             }
@@ -386,6 +391,15 @@ public:
     void SetEntityMinDist2D(float v) {
         m_minEntityDist2D = v;
     }
+
+    auto GetEntityToSeek() const {
+        return m_entityToSeek;
+    }
+
+    auto GetMoveStateRadius() const {
+        return m_moveStateRadius;
+    }
+
 private:
     CTask* CreateSubTaskWhenPedIsTooFarFromEntity(CPed* ped, float pedToSeekPosDist2DSq) {
         return CreateSubTask(

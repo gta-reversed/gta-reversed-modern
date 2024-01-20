@@ -23,7 +23,7 @@ public:
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;
 
-    auto GetTarget() const { return m_Target; }
+    auto GetCar() const { return m_Car; }
 
 private: // Wrappers for hooks
     // 0x63B320
@@ -37,7 +37,7 @@ private: // Wrappers for hooks
         return this;
     }
 private:
-    CVehicle*  m_Target{};
+    CVehicle*  m_Car{};
     CPed*      m_WaitForPed{};
     uint32     m_EnterCarFails{};
     bool       m_bForceFrontSeat{};

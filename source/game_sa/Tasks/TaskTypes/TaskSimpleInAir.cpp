@@ -124,7 +124,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
     {
         if (!m_bUsingFallGlide)
         {
-            if (m_pParentTask && m_pParentTask->m_pParentTask && m_pParentTask->m_pParentTask->GetTaskType() == TASK_COMPLEX_JUMP)
+            if (GetParent() && GetParent()->GetParent() && GetParent()->GetParent()->GetTaskType() == TASK_COMPLEX_JUMP) // God bless you
             {
                 float moveSpeedForward = DotProduct(ped->GetForward(), ped->m_vecMoveSpeed);
                 float maxMoveSpeedForward = 0.1F * 0.5F;
@@ -199,16 +199,16 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
         && ped->m_vecMoveSpeed.Magnitude2D() > 0.05F)
     {
         if (!(
-            m_pParentTask
-            && m_pParentTask->GetTaskType() == TASK_COMPLEX_IN_AIR_AND_LAND
-            && reinterpret_cast<CTaskComplexInAirAndLand*>(m_pParentTask)->m_bInvalidClimb
+            m_Parent
+            && m_Parent->GetTaskType() == TASK_COMPLEX_IN_AIR_AND_LAND
+            && reinterpret_cast<CTaskComplexInAirAndLand*>(m_Parent)->m_bInvalidClimb
             ))
         {
             m_pClimbEntity = CTaskSimpleClimb::TestForClimb(ped, m_vecPosn, m_fAngle, m_nSurfaceType, false);
             if (m_pClimbEntity)
                 m_pClimbEntity->RegisterReference(&m_pClimbEntity);
-            else if (m_fAngle < -1000.0F && m_pParentTask)
-                reinterpret_cast<CTaskComplexInAirAndLand*>(m_pParentTask)->m_bInvalidClimb = true;
+            else if (m_fAngle < -1000.0F && m_Parent)
+                reinterpret_cast<CTaskComplexInAirAndLand*>(m_Parent)->m_bInvalidClimb = true;
         }
     }
 

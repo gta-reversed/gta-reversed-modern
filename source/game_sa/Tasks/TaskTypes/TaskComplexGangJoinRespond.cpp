@@ -18,9 +18,9 @@ void CTaskComplexGangJoinRespond::InjectHooks() {
 }
 
 // 0x6616F0
-CTaskComplexGangJoinRespond::CTaskComplexGangJoinRespond(uint8 a2) : CTaskComplex() {
-    m_response = a2;
-    m_animsReferenced = false;
+CTaskComplexGangJoinRespond::CTaskComplexGangJoinRespond(bool response) :
+    m_response{response}
+{
 }
 
 // 0x661720

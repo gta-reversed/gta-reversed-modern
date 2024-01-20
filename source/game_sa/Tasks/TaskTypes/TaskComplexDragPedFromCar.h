@@ -10,7 +10,7 @@ public:
 public:
     static constexpr auto Type = TASK_COMPLEX_DRAG_PED_FROM_CAR;
 
-    CTaskComplexDragPedFromCar(CPed* ped, int32 draggedPedDownTime);
+    CTaskComplexDragPedFromCar(CPed* ped, int32 draggedPedDownTime = 0);
     ~CTaskComplexDragPedFromCar() override;
 
     eTaskType GetTaskType() const override { return Type; } // 0x6404C0
