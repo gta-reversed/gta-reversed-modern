@@ -21,7 +21,9 @@ enum eMatrixEulerFlags : uint32 {
     ORDER_YXZ = 0x0C,
     ORDER_ZXY = 0x10,
     ORDER_ZYX = 0x14,
-    _ORDER_MASK = 0x1C,
+
+    // Special combined masks, do not use
+    _ORDER_MASK = ORDER_XYZ | ORDER_XZY | ORDER_YZX | ORDER_YXZ | ORDER_ZXY | ORDER_ZYX,
     _ORDER_NEEDS_SWAP = 0x4
 };
 
@@ -129,6 +131,62 @@ public:
     void ForceUpVector(CVector vecUp);
     void ConvertToEulerAngles(float* pX, float* pY, float* pZ, uint32 uiFlags);
     void ConvertFromEulerAngles(float x, float y, float z, uint32 uiFlags);
+
+    /*!
+     * @notsa
+     * @brief Calculate the inverse of this matrix
+     */
+    CMatrix Inverted() const {
+        CMatrix o;
+
+        // Transpose rotation
+        o.m_right   = CVector{ m_right.x, m_forward.x, m_up.x };
+        o.m_forward = CVector{ m_right.y, m_forward.y, m_up.y };
+        o.m_up      = CVector{ m_right.z, m_forward.z, m_up.z };
+
+        // Transform translation using the calculated rotation matrix
+        o.m_pos     = -o.TransformVector(m_pos);
+
+        return o;
+    }
+
+    /*!
+     * @notsa
+     * @brief Transform a point (position) - will take into account translation part of the Matrix.
+     * @param pt The position (point) to transform
+    */
+    CVector TransformPoint(CVector pt) const {
+        return TransformVector(pt) + m_pos;
+    }
+
+    /*!
+     * @notsa
+     * @brief Transform a direction vector - will not take into account translation part of the Matrix.
+     * @param pt The vector (direction) to transform
+     */
+    CVector TransformVector(CVector v) const {
+        return v.x * m_right + v.y * m_forward + v.z * m_up;
+    }
+
+    /*!
+     * @notsa
+     * @brief Transform a point (position) using the inverse of the matrix - Will take into account translation part of the matrix.
+     * @param pt The position (point) to transform
+     */
+    CVector InverseTransformPoint(CVector pt) const {
+        return InverseTransformVector(pt - m_pos);
+    }
+
+    /*!
+     * @notsa
+     * @brief Transform the vector using the inverse of this Matrix
+     * @param pt The vector (direction) to transform
+     */
+    CVector InverseTransformVector(CVector v) const {
+        // I got this by transposing the rotation matrix, and then applying a transform...
+        // So I ended up with dot products (which make sense if you think about it)
+        return { m_right.Dot(v), m_forward.Dot(v), m_up.Dot(v) }; 
+    }
 
     void operator=(const CMatrix& right);
     void operator+=(const CMatrix& right);
