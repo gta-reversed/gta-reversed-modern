@@ -1237,7 +1237,7 @@ bool CCollision::ProcessDiscCollision(
     ZoneScoped;
 
     const auto cp       = matBA * tempTriCol.m_vecPoint;
-    const auto cpNormal = Multiply3x3_MV(matBA, tempTriCol.m_vecNormal);
+    const auto cpNormal = matBA.TransformVector(tempTriCol.m_vecNormal);
     
     if (std::abs((cpNormal * disk.m_vThickness).ComponentwiseSum()) >= 0.77f ||
         std::abs((((cp - disk.m_vecCenter) * disk.m_vThickness).ComponentwiseSum()) >= disk.m_fThickness)
@@ -1757,7 +1757,7 @@ bool CCollision::ProcessLineOfSight(const CColLine& lnws, const CMatrix& transfo
 
     if (localMinTouchDist < maxTouchDistance) {
         colPoint.m_vecPoint = MultiplyMatrixWithVector(transform, colPoint.m_vecPoint);
-        colPoint.m_vecNormal = Multiply3x3_MV(transform, colPoint.m_vecNormal);
+        colPoint.m_vecNormal = transform.TransformVector(colPoint.m_vecNormal);
         maxTouchDistance = localMinTouchDist;
         return true;
     }
@@ -1832,7 +1832,7 @@ bool CCollision::ProcessVerticalLine(
 
     // Transform back from object space
     cp.m_vecPoint  = transform * cp.m_vecPoint;
-    cp.m_vecNormal = Multiply3x3_MV(transform, cp.m_vecNormal);
+    cp.m_vecNormal = transform.TransformVector(cp.m_vecNormal);
 
     if (outColPoly && storedColPoly.valid) {
         for (auto& vtx : storedColPoly.verts) {

@@ -475,7 +475,7 @@ uint8 CObject::SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionB
     if (!physicalFlags.bDisableMoveForce) {
         if (physicalFlags.bInfiniteMass) {
             auto cm = CEntity::GetColModel();
-            auto vecMin = Multiply3x3_MV(GetMatrix(), cm->GetBoundingBox().m_vecMin);
+            auto vecMin = GetMatrix().TransformVector(cm->GetBoundingBox().m_vecMin);
             auto vecSpeed = CPhysical::GetSpeed(vecMin);
             const auto fMove = vecSpeed.SquaredMagnitude() * sq(CTimer::GetTimeStep());
             if (fMove >= 0.0225F) // std::pow(0.15F, 2.0F)
@@ -491,11 +491,11 @@ uint8 CObject::SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionB
             auto* cm = GetModelInfo()->GetColModel();
 
             auto vecMin = CVector(0.0F, 0.0F, cm->GetBoundingBox().m_vecMin.z);
-            vecMin = Multiply3x3_MV(GetMatrix(), vecMin);
+            vecMin = GetMatrix().TransformVector(vecMin);
             vecMin = CPhysical::GetSpeed(vecMin);
 
             auto vecMax = CVector(0.0F, 0.0F, cm->GetBoundingBox().m_vecMax.z);
-            vecMax = Multiply3x3_MV(GetMatrix(), vecMax);
+            vecMax = GetMatrix().TransformVector(vecMax);
             vecMax = CPhysical::GetSpeed(vecMax);
 
             auto& vecUsed = vecMin.SquaredMagnitude() >= vecMax.SquaredMagnitude() ? vecMin : vecMax;

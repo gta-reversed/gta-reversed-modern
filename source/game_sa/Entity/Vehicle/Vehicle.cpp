@@ -1979,7 +1979,7 @@ void CVehicle::ApplyBoatWaterResistance(tBoatHandlingData* boatHandling, float f
     m_vecMoveSpeed = vecMoveSpeedMatrixDotProduct * vecSpeedMult;
 
     auto fMassMult = (vecSpeedMult.y - 1.0F) * m_vecMoveSpeed.y * m_fMass;
-    CVector vecTransformedMoveSpeed = Multiply3x3_MV(GetMatrix(), m_vecMoveSpeed);
+    CVector vecTransformedMoveSpeed = GetMatrix().TransformVector(m_vecMoveSpeed);
     m_vecMoveSpeed = vecTransformedMoveSpeed;
 
     auto vecDown = GetUp() * -1.0F;
@@ -3454,7 +3454,7 @@ bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
     };
 
     const auto [rotorUp, rotorSizeMS] = GetRotorDirUpAndThickness();
-    const auto rotorSize              = Multiply3x3_MV(matrix, rotorSizeMS);
+    const auto rotorSize              = matrix.TransformVector(rotorSizeMS);
     const auto colModelCenter         = MultiplyMatrixWithVector(matrix, colModel.GetBoundCenter());
     const auto& thisPosn              = GetPosition();
 
@@ -3761,7 +3761,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
             const auto& vecBoundingMin = CEntity::GetColModel()->m_boundBox.m_vecMin;
             CVector vecThrustPoint(0.0F, vecBoundingMin.y * boatHandling->m_fThrustY, vecBoundingMin.z * boatHandling->m_fThrustZ);
-            auto vecTransformedThrustPoint = Multiply3x3_MV(GetMatrix(), vecThrustPoint);
+            auto vecTransformedThrustPoint = GetMatrix().TransformVector(vecThrustPoint);
 
             auto vecWorldThrustPos = GetPosition() + vecTransformedThrustPoint;
             float fWaterLevel;
@@ -3788,7 +3788,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
                     auto fSteerAngle = std::fabs(m_fSteerAngle);
                     CVector vecSteer(-fSteerAngleSin, fSteerAngleCos, -fSteerAngle);
-                    CVector vecSteerMoveForce = Multiply3x3_MV(GetMatrix(), vecSteer);
+                    CVector vecSteerMoveForce = GetMatrix().TransformVector(vecSteer);
                     vecSteerMoveForce *= fThrustDepth * m_fGasPedal * 40.0F * m_pHandlingData->m_transmissionData.m_fEngineAcceleration * m_fMass;
 
                     if (vecSteerMoveForce.z > 0.2F)
@@ -3841,7 +3841,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
                     CVector vecTractionLoss(-fSteerAngleSin, 0.0F, 0.0F);
                     vecTractionLoss *= fTractionLoss;
-                    CVector vecTractionLossTransformed = Multiply3x3_MV(GetMatrix(), vecTractionLoss);
+                    CVector vecTractionLossTransformed = GetMatrix().TransformVector(vecTractionLoss);
                     vecTractionLossTransformed *= fThrustDepth * CTimer::GetTimeStep();
 
                     CPhysical::ApplyMoveForce(vecTractionLossTransformed);
@@ -3897,8 +3897,8 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
         fMult *= m_fTurnMass;
         auto vecTurnForce = GetUp() * fMult;
 
-        m_vecTurnSpeed = Multiply3x3_MV(GetMatrix(), m_vecTurnSpeed);
-        auto vecCentreOfMass = Multiply3x3_MV(GetMatrix(), m_vecCentreOfMass);
+        m_vecTurnSpeed = GetMatrix().TransformVector(m_vecTurnSpeed);
+        auto vecCentreOfMass = GetMatrix().TransformVector(m_vecCentreOfMass);
         auto vecTurnPoint = GetForward() + vecCentreOfMass;
         CPhysical::ApplyTurnForce(vecTurnForce, vecTurnPoint);
     }
@@ -4267,7 +4267,7 @@ void CVehicle::DoHeadLightBeam(eVehicleDummy dummyId, CMatrix& matrix, bool arg2
     if (dummyId == DUMMY_LIGHT_REAR_MAIN && pointModelSpace.IsZero())
         return;
 
-    CVector point = matrix.GetPosition() + Multiply3x3_MV(matrix, pointModelSpace);
+    CVector point = matrix.GetPosition() + matrix.TransformVector(pointModelSpace);
     if (!arg2) {
         point -= 2 * pointModelSpace.x * matrix.GetRight();
     }

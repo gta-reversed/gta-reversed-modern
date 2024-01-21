@@ -561,7 +561,7 @@ void CGlass::BreakGlassPhysically(CVector point, float radius) {
         // Test if point touches any of the model's triangles
         {
             const CColSphere sphere{
-                Multiply3x3_MV(object->GetMatrix(), point - objPos),
+                object->GetMatrix().TransformVector(point - objPos),
                 radius
             };
             CCollision::CalculateTrianglePlanes(colModel);

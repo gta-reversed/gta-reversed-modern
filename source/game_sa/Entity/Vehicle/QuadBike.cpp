@@ -237,13 +237,13 @@ void CQuadBike::ProcessControl() {
         vecQuadResistance.y / (velocityOS.y * velocityOS.y + 1.0f),
         1.0f
     };
-    const auto worldCentreOfMass = m_matrix->InverseTransformVector(m_vecCentreOfMass);
+    const auto centreOfMassOS = m_matrix->InverseTransformVector(m_vecCentreOfMass);
 
     const float v9 = std::pow(unk.y, CTimer::GetTimeStep()) * velocityOS.y - velocityOS.y;
-    ApplyTurnForce(m_matrix->GetUp() * -1.0f * v9 * m_fTurnMass, m_matrix->GetRight() + worldCentreOfMass);
+    ApplyTurnForce(m_matrix->GetUp() * -1.0f * v9 * m_fTurnMass, m_matrix->GetRight() + centreOfMassOS);
 
     const float v19 = velocityOS.x * unk.x - velocityOS.x;
-    ApplyTurnForce(m_matrix->GetUp() * v19 * m_fTurnMass, m_matrix->GetForward() + worldCentreOfMass);
+    ApplyTurnForce(m_matrix->GetUp() * v19 * m_fTurnMass, m_matrix->GetForward() + centreOfMassOS);
 
     CAutomobile::ProcessControl();
 }
