@@ -2236,7 +2236,7 @@ void CPhysical::PositionAttachedEntity()
         RtQuatConvertToMatrix((RtQuat*)&m_qAttachedEntityRotation, &rotationMatrix);
         attachedEntityMatrix.UpdateMatrix(&rotationMatrix);
         attachedEntityMatrix = attachedToEntityMatrix * attachedEntityMatrix;
-        CVector vecTranslation = attachedToEntityMatrix * m_vecAttachOffset;
+        CVector vecTranslation = attachedToEntityMatrix.TransformPoint(m_vecAttachOffset);
         attachedEntityMatrix.SetTranslateOnly(vecTranslation);
     }
     else {
@@ -4463,7 +4463,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                             if (entityObject->m_nColDamageEffect >= COL_DAMAGE_EFFECT_SMASH_COMPLETELY) {
                                 CBaseModelInfo* pEntityModelInfo = CModelInfo::GetModelInfo(entity->m_nModelIndex);
                                 CColModel* colModel = pEntityModelInfo->GetColModel();
-                                CVector boundBoxPos = entity->GetMatrix() * colModel->m_boundBox.GetSize();
+                                CVector boundBoxPos = entity->GetMatrix().TransformPoint(colModel->m_boundBox.GetSize());
 
                                 bool bObjectDamage = false;
                                 if (GetPosition().z > boundBoxPos.z) {
@@ -4471,7 +4471,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                                 } else {
                                     CMatrix invertedMatrix;
                                     invertedMatrix = Invert(*m_matrix, invertedMatrix);
-                                    if ((invertedMatrix * boundBoxPos).z < 0.0f)
+                                    if ((invertedMatrix.TransformPoint(boundBoxPos)).z < 0.0f)
                                         bObjectDamage = true;
                                 }
                                 if (bObjectDamage)
@@ -4486,7 +4486,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                             if (entityObject->m_nColDamageEffect >= COL_DAMAGE_EFFECT_SMASH_COMPLETELY) {
 
                                 CColModel* colModel = mi->GetColModel();
-                                CVector boundBoxPos = (*m_matrix) * colModel->m_boundBox.GetSize();
+                                CVector boundBoxPos = (*m_matrix).TransformPoint(colModel->m_boundBox.GetSize());
 
                                 bool bObjectDamage = false;
                                 if (boundBoxPos.z < entity->GetPosition().z) {

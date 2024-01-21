@@ -1533,8 +1533,8 @@ void CAutomobile::DoHoverSuspensionRatios()
         auto colData = GetColModel()->m_pColData;
         for (int32 i = 0; i < 4; i++)  {
             CColLine& line = colData->m_pLines[i];
-            CVector start = *m_matrix * line.m_vecStart;
-            CVector end = *m_matrix * line.m_vecEnd;
+            CVector start = m_matrix->TransformPoint(line.m_vecStart);
+            CVector end = m_matrix->TransformPoint(line.m_vecEnd);
             float colPointZ = MAP_Z_LOW_LIMIT;
             if (m_fWheelsSuspensionCompression[i] < 1.0f) {
                 colPointZ = m_wheelColPoint[i].m_vecPoint.z;
@@ -3834,7 +3834,7 @@ bool CAutomobile::UpdateMovingCollision(float angle) {
                 for (int32 i = 0; i < 3; i++) {
                     CVector vertexPos = UncompressVector(colData->m_pVertices[colTriangle.m_vertIndices[i]]);
                     CVector distance  = vertexPos - componentPos;
-                    vertexPos = (rotMatrix * distance) + componentPos;
+                    vertexPos = rotMatrix.TransformPoint(distance) + componentPos;
                     specialColData->m_pVertices[specialColTriangle.m_vertIndices[i]] = CompressVector(vertexPos);
                     if (maxZ < vertexPos.z)
                         maxZ = vertexPos.z;
@@ -3856,7 +3856,7 @@ bool CAutomobile::UpdateMovingCollision(float angle) {
             if (specialColSphere.m_Surface.m_nMaterial == SURFACE_CAR_MOVINGCOMPONENT) {
                 CColSphere& colSphere = colData->m_pSpheres[i];
                 CVector distance = colSphere.m_vecCenter - componentPos;
-                specialColSphere.m_vecCenter = (rotMatrix * distance) + componentPos;
+                specialColSphere.m_vecCenter = (rotMatrix.TransformPoint(distance)) + componentPos;
                 const float newMaxZ = specialColSphere.m_fRadius + specialColSphere.m_vecCenter.z;
                 const float newMinZ = specialColSphere.m_vecCenter.z - specialColSphere.m_fRadius;
                 if (maxZ < newMaxZ)
@@ -4305,7 +4305,7 @@ void CAutomobile::DoNitroEffect(float power) {
     bool secondExhaustSubmergedInWater = false;
     float level = 0.0f;
     if (physicalFlags.bTouchingWater) {
-        CVector point = *m_matrix * exhaustPosition;
+        CVector point = m_matrix->TransformPoint(exhaustPosition);
         if (CWaterLevel::GetWaterLevel(point.x, point.y, point.z, level, true, nullptr)) {
             if (level >= point.z)
                 firstExhaustSubmergedInWater = true;

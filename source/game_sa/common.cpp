@@ -118,7 +118,7 @@ bool CalcScreenCoors(const CVector& in, CVector* out, float* screenX, float* scr
 bool CalcScreenCoors(const CVector& in, CVector* out) {
     return plugin::CallAndReturn<bool, 0x71DAB0, const CVector&, CVector*>(in, out);
 
-    *out = TheCamera.GetViewMatrix() * in;
+    *out = TheCamera.GetViewMatrix().TransformPoint(in);
     if (out->z <= 1.0f)
         return false;
 

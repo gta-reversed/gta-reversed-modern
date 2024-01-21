@@ -365,7 +365,7 @@ void* CTaskSimpleClimb::ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CV
                 )
             )
         {
-            if (DistanceBetweenPoints(entity->GetBoundCentre(), ped->GetMatrix() * cm->GetBoundCenter()) >= entity->GetModelInfo()->GetColModel()->GetBoundRadius() + cm->GetBoundRadius())
+            if (DistanceBetweenPoints(entity->GetBoundCentre(), ped->GetMatrix().TransformPoint(cm->GetBoundCenter())) >= entity->GetModelInfo()->GetColModel()->GetBoundRadius() + cm->GetBoundRadius())
                 continue;
 
             int32 numSpheres = -1;
@@ -490,7 +490,7 @@ CEntity* CTaskSimpleClimb::ScanToGrab(CPed* ped, CVector& climbPos, float& fAngl
 
     climbPos = ped->GetPosition() + ped->GetForward() * 10.0f;
 
-    auto outPoint = *ped->m_matrix * ms_ClimbColModel.GetBoundCenter();
+    auto outPoint = ped->m_matrix->TransformPoint(ms_ClimbColModel.GetBoundCenter());
 
     int32 startSectorX = CWorld::GetSectorX(outPoint.x - ms_ClimbColModel.GetBoundRadius());
     int32 startSectorY = CWorld::GetSectorY(outPoint.y - ms_ClimbColModel.GetBoundRadius());
@@ -530,7 +530,7 @@ CEntity* CTaskSimpleClimb::ScanToGrab(CPed* ped, CVector& climbPos, float& fAngl
 
     if (collidedEntity) {
         if (collidedEntity->IsPhysical()) {
-            climbPos = Invert(collidedEntity->GetMatrix()) * climbPos;
+            climbPos = Invert(collidedEntity->GetMatrix()).TransformPoint(climbPos);
             fAngle -= collidedEntity->GetHeading();
         }
     }

@@ -1137,7 +1137,7 @@ bool CVehicle::GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CV
 
     auto const fColFront = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox().m_vecMax.y;
     outPos.Set(0.0F, fColFront + 1.0F, 0.0F);
-    outPos = *m_matrix * outPos;
+    outPos = m_matrix->TransformPoint(outPos);
     return true;
 }
 
@@ -1151,7 +1151,7 @@ bool CVehicle::GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVeh
 
     auto const fColRear = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox().m_vecMin.y;
     outPos.Set(0.0F, fColRear - 1.0F, 0.0F);
-    outPos = *m_matrix * outPos;
+    outPos = m_matrix->TransformPoint(outPos);
     return true;
 }
 
@@ -2596,27 +2596,27 @@ AssocGroupId CVehicle::GetAnimGroupId() const {
 }
 
 // 0x6D3CB0
-void CVehicle::ReleasePickedUpEntityWithWinch() {
+void CVehicle::ReleasePickedUpEntityWithWinch() const {
     return CRopes::GetRope(GetRopeID()).ReleasePickedUpObject();
 }
 
 // 0x6D3CD0
-void CVehicle::PickUpEntityWithWinch(CEntity* entity) {
+void CVehicle::PickUpEntityWithWinch(CEntity* entity) const {
     return CRopes::GetRope(GetRopeID()).PickUpObject(entity);
 }
 
 // 0x6D3CF0
-CEntity* CVehicle::QueryPickedUpEntityWithWinch() {
+CEntity* CVehicle::QueryPickedUpEntityWithWinch() const {
     return CRopes::GetRope(GetRopeID()).m_pRopeAttachObject;
 }
 
 // 0x6D3D10
-float CVehicle::GetRopeHeightForHeli() {
+float CVehicle::GetRopeHeightForHeli() const {
     return CRopes::GetRope(GetRopeID()).m_fSegmentLength;
 }
 
 // 0x6D3D30
-void CVehicle::SetRopeHeightForHeli(float height) {
+void CVehicle::SetRopeHeightForHeli(float height) const {
     CRopes::GetRope(GetRopeID()).m_fSegmentLength = height;
 }
 

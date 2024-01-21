@@ -361,7 +361,7 @@ void CBirds::Render() {
 
                     // Mirror on the other side with slightly changed colors
                     point.x = -point.x;
-                    vecWorldPos = matBirdTransform * point;
+                    vecWorldPos = matBirdTransform.TransformPoint(point);
                     color.Scale(0.8F);
                     rwColor = CRGBA(color.cRed, color.cGreen, color.cBlue, cAlpha).ToRwRGBA();
 

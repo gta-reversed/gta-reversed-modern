@@ -2437,7 +2437,7 @@ bool CEntity::IsEntityOccluded()
             const auto& bounding = mi->GetColModel()->GetBoundingBox();
             CVector vecScreen;
 
-            auto vecMin = GetMatrix() * bounding.m_vecMin;
+            auto vecMin = GetMatrix().TransformPoint(bounding.m_vecMin);
             if (!CalcScreenCoors(vecMin, &vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
                 || !activeOccluder.IsPointBehindOccluder(vecMin, 0.0F)
@@ -2445,7 +2445,7 @@ bool CEntity::IsEntityOccluded()
                 bInView = true;
             }
 
-            auto vecMax = GetMatrix() * bounding.m_vecMax;
+            auto vecMax = GetMatrix().TransformPoint(bounding.m_vecMax);
             if (bInView
                 || !CalcScreenCoors(vecMax, &vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)

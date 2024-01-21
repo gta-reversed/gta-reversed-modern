@@ -153,6 +153,7 @@ public:
     /*!
      * @notsa
      * @brief Transform a point (position) - will take into account translation part of the Matrix.
+     * @brief Use instead of `MultiplyMatrixWithVector` (0x59C890)
      * @param pt The position (point) to transform
     */
     CVector TransformPoint(CVector pt) const {
@@ -175,6 +176,7 @@ public:
     /*!
      * @notsa
      * @brief Transform a point (position) using the inverse of the matrix - Will take into account translation part of the matrix.
+     * @brief Use this instead of `Multiply3x3(_VM)` (0x59C810)
      * @param pt The position (point) to transform
      */
     CVector InverseTransformPoint(CVector pt) const {
