@@ -35,8 +35,8 @@ float CBouncingPanel::GetAngleChange(float velocity) const {
 void CBouncingPanel::ProcessPanel(CVehicle* vehicle, RwFrame* frame, CVector moveForce, CVector turnForce, float fReturnMultiplier, float fDampMultiplier) {
     CMatrix  frameMat{RwFrameGetMatrix(frame)};
     CMatrix& vehMat = vehicle->GetMatrix();
-    CVector  compPos = Multiply3x3(vehMat, frameMat.GetPosition());
-    CVector  angularVelocity = Multiply3x3(vehicle->GetSpeed(compPos) - moveForce + CrossProduct(compPos, turnForce), vehMat);
+    CVector  compPos = Multiply3x3_MV(vehMat, frameMat.GetPosition());
+    CVector  angularVelocity = Multiply3x3_VM(vehicle->GetSpeed(compPos) - moveForce + CrossProduct(compPos, turnForce), vehMat);
 
     switch (m_nAxis) {
     case 0: {

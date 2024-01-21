@@ -107,7 +107,7 @@ void CCover::FindCoverPointsForThisBuilding(CBuilding* building) {
             continue;
 
         auto vecDir = CVector(effect->coverPoint.m_vecDirection.x, effect->coverPoint.m_vecDirection.y, 0.0F);
-        const auto vedTransformed = Multiply3x3(building->GetMatrix(), vecDir);
+        const auto vedTransformed = Multiply3x3_MV(building->GetMatrix(), vecDir);
 
         const auto fTwoPiToChar = 256.0F / TWO_PI;
         const auto ucAngle = static_cast<uint8>(atan2(vedTransformed.x, vedTransformed.y) * fTwoPiToChar);

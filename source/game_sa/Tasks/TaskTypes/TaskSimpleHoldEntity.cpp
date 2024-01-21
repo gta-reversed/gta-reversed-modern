@@ -314,7 +314,7 @@ bool CTaskSimpleHoldEntity::SetPedPosition_Reversed(CPed* ped) {
                     m_pEntityToHold->SetPosn(entityToHoldPos);
                 }
                 else {
-                    CVector entityToHoldPos = Multiply3x3(ped->GetMatrix(), m_vecPosition);
+                    CVector entityToHoldPos = Multiply3x3_MV(ped->GetMatrix(), m_vecPosition);
                     RpHAnimHierarchy* pHAnimHierarchy = GetAnimHierarchyFromSkinClump(ped->m_pRwClump);
                     int32 animIndex = RpHAnimIDGetIndex(pHAnimHierarchy, ped->m_apBones[m_nBoneFrameId]->m_nNodeId);
                     RwMatrix* pBoneMatrix = RpHAnimHierarchyGetMatrixArray(pHAnimHierarchy);

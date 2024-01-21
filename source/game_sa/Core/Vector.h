@@ -267,6 +267,6 @@ static CVector ProjectVector(const CVector& what, const CVector& onto) {
     return onto * (DotProduct(what, onto) / onto.SquaredMagnitude());
 }
 
-CVector Multiply3x3(const CMatrix& m, const CVector& v);
-CVector Multiply3x3(const CVector& v, const CMatrix& m);
+CVector Multiply3x3_MV(const CMatrix& m, const CVector& v);
+CVector Multiply3x3_VM(const CVector& v, const CMatrix& m);
 CVector MultiplyMatrixWithVector(const CMatrix& mat, const CVector& vec);

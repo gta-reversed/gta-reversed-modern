@@ -210,13 +210,13 @@ float DotProduct2D(const CVector& v1, const CVector& v2)
 
 // NOTE: This function doesn't add m.GetPosition() like
 //       MultiplyMatrixWithVector @ 0x59C890 does.
-CVector Multiply3x3(const CMatrix& m, const CVector& v) {
-    return m.TransformVector(v);
+CVector Multiply3x3_MV(const CMatrix& m, const CVector& v) {
+    NOTSA_UNREACHABLE("Use `m.TransformVector(v)` instead");
 }
 
 // vector by matrix mult, resulting in a vector where each component is the dot product of the in vector and a matrix direction
-CVector Multiply3x3(const CVector& v, const CMatrix& constm) {
-    return constm.InverseTransformVector(v);
+CVector Multiply3x3_VM(const CVector& v, const CMatrix& m) {
+    NOTSA_UNREACHABLE("Use `m.InverseTransformVector(v)` m");
 }
 
 CVector MultiplyMatrixWithVector(const CMatrix& mat, const CVector& vec) {

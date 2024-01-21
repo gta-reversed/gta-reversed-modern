@@ -215,7 +215,7 @@ void CQuadBike::ProcessControl() {
         return;
     }
 
-    const auto turnSpeed_Mult_Matrix = Multiply3x3(m_vecTurnSpeed, *m_matrix);
+    const auto turnSpeed_Mult_Matrix = Multiply3x3_VM(m_vecTurnSpeed, *m_matrix);
     float v2 = vecQuadResistance.y, v5 = vecQuadResistance.x;
     if (AreFrontWheelsNotTouchingGround()) {
         if (!AreRearWheelsNotTouchingGround() && m_matrix->GetForward().z > 0.0f) {
@@ -231,13 +231,13 @@ void CQuadBike::ProcessControl() {
         }
     }
 
-    const CVector worldSpaceSpeed = Multiply3x3(m_vecTurnSpeed, *m_matrix);
+    const CVector worldSpaceSpeed = Multiply3x3_VM(m_vecTurnSpeed, *m_matrix);
     CVector unk{ // In the original code `x` is calculated once then immediately overwritten by the below line
         std::pow(vecQuadResistance.x, CTimer::GetTimeStep()),
         vecQuadResistance.y / (worldSpaceSpeed.y * worldSpaceSpeed.y + 1.0f),
         1.0f
     };
-    const auto worldCentreOfMass = Multiply3x3(m_vecCentreOfMass, *m_matrix);
+    const auto worldCentreOfMass = Multiply3x3_VM(m_vecCentreOfMass, *m_matrix);
 
     const float v9 = std::pow(unk.y, CTimer::GetTimeStep()) * worldSpaceSpeed.y - worldSpaceSpeed.y;
     ApplyTurnForce(m_matrix->GetUp() * -1.0f * v9 * m_fTurnMass, m_matrix->GetRight() + worldCentreOfMass);

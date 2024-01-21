@@ -175,7 +175,7 @@ void CRope::PickUpObject(CEntity* obj) {
     // TODO: Move model => world space translation into CEntity
     // MultiplyMatrixWithVector should be used here
     CVector height = { {}, {}, CRopes::FindPickupHeight(obj) };
-    m_pAttachedEntity->SetPosn(obj->GetPosition() + Multiply3x3(obj->GetMatrix(), height));
+    m_pAttachedEntity->SetPosn(obj->GetPosition() + Multiply3x3_MV(obj->GetMatrix(), height));
     m_pAttachedEntity->m_bUsesCollision = false;
 
     obj->AsPhysical()->physicalFlags.bAttachedToEntity = true;

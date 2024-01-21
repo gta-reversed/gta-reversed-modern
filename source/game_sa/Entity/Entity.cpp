@@ -2161,7 +2161,7 @@ void CEntity::ProcessLightsForEntity()
                     static_cast<float>(effect->light.offsetY),
                     static_cast<float>(effect->light.offsetZ)
                 };
-                auto vecLightPos = Multiply3x3(GetMatrix(), lightOffset);
+                auto vecLightPos = Multiply3x3_MV(GetMatrix(), lightOffset);
 
                 auto fDot = DotProduct(vecLightPos, (camPos - vecEffPos));
                 bCanCreateLight = fDot >= 0.0F;

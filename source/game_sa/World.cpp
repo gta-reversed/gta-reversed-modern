@@ -949,7 +949,7 @@ void CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& ptrLi
         entity->SetCurrentScanCode();
 
         CColSphere sphere{
-            Multiply3x3(entity->GetPosition() - point, transform),
+            Multiply3x3_VM(entity->GetPosition() - point, transform),
             entity->GetColModel()->GetBoundRadius()
         };
         if (CCollision::TestSphereBox(sphere, box)) {
@@ -1851,12 +1851,12 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
             CColPoint cp{};
             float maxTouchDist{ 100'000.f };
             if (CCollision::ProcessSphereBox(
-                CColSphere{ Multiply3x3(veh->GetMatrix(), -entityToPointDir), entityToPointDist },
+                CColSphere{ Multiply3x3_MV(veh->GetMatrix(), -entityToPointDir), entityToPointDist },
                 veh->GetColModel()->m_boundBox,
                 cp,
                 maxTouchDist)
             ) {
-                auto colNormal = Multiply3x3(veh->GetMatrix(), -cp.m_vecNormal);
+                auto colNormal = Multiply3x3_MV(veh->GetMatrix(), -cp.m_vecNormal);
                 if (auto& z = colNormal.z; z >= -0.f) { // TODO: Wat is dis?
                     if (z < 0.2f && z > 0.f)
                         z += 0.2f;
@@ -1864,7 +1864,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
                     z = -0.2f;
                 }
 
-                colPointPos  = Multiply3x3(veh->GetMatrix(), cp.m_vecPoint);
+                colPointPos  = Multiply3x3_MV(veh->GetMatrix(), cp.m_vecPoint);
                 const auto colPointToExploPointDist = ((colPointPos + veh->GetPosition()) - point).Magnitude();
 
                 // TODO: Document this a little better pls
@@ -2473,7 +2473,7 @@ void CWorld::RepositionOneObject(CEntity* object) {
     })) {
         if (const auto CD = colModel->m_pColData) {
             if (CD->m_nNumBoxes == 1) {
-                RecalcZPosAtPoint(Multiply3x3(object->GetMatrix(), CD->m_pBoxes[0].GetCenter()));
+                RecalcZPosAtPoint(Multiply3x3_MV(object->GetMatrix(), CD->m_pBoxes[0].GetCenter()));
             } else if (CD->m_nNumSpheres) {
                 auto point{ object->GetPosition() };
                 point.z = 1000.f;
@@ -2487,7 +2487,7 @@ void CWorld::RepositionOneObject(CEntity* object) {
                 if (point.z >= 1000.f)
                     RecalcZPosAtPoint(object->GetPosition());
                 else
-                    RecalcZPosAtPoint(Multiply3x3(object->GetMatrix(), point));
+                    RecalcZPosAtPoint(Multiply3x3_MV(object->GetMatrix(), point));
             }
         } else {
             RecalcZPosAtPoint(object->GetPosition());
