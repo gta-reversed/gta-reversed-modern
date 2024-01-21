@@ -246,18 +246,13 @@ private:
     friend class CVector; // So Vector methods have access to private fields of matrix whitout accessor methods, for more readable code
     friend class CVector2D;
     friend CMatrix operator*(const CMatrix& a, const CMatrix& b);
-    // static CMatrix* impl_operatorMul(CMatrix* out, const CMatrix& a, const CMatrix& b);
-
     friend CVector operator*(const CMatrix& a, const CVector& b);
-    // static CVector* impl_operatorMul(CVector* out, const CMatrix& a, const CVector& b);
-
     friend CMatrix operator+(const CMatrix& a, const CMatrix& b);
-    // static CMatrix* impl_operatorAdd(CMatrix* out, const CMatrix& a, const CMatrix& b);
 };
 VALIDATE_SIZE(CMatrix, 0x48);
 
 CMatrix operator*(const CMatrix& a, const CMatrix& b);
-CVector operator*(const CMatrix& a, const CVector& b);
+[[deprecated]] CVector operator*(const CMatrix& a, const CVector& b);
 CMatrix operator+(const CMatrix& a, const CMatrix& b);
 
 CMatrix& Invert(CMatrix& in, CMatrix& out);

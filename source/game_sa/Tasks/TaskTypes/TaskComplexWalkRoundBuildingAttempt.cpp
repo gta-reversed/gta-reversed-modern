@@ -265,7 +265,7 @@ CTask* CTaskComplexWalkRoundBuildingAttempt::CreateFirstSubTask(CPed* ped) {
             ped->bIgnoreHeightCheckOnGotoPointTask = false;
             return nullptr;
         }
-        m_targetPos = m_targetEntity->GetMatrix() * m_offset;
+        m_targetPos = m_targetEntity->GetMatrix().TransformPoint(m_offset);
     }
 
     ped->bIgnoreHeightCheckOnGotoPointTask = true;

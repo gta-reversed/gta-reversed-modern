@@ -190,7 +190,7 @@ void CTrafficLights::DisplayActualLight(CEntity* entity) {
         if (effect->m_type != e2dEffectType::EFFECT_LIGHT)
             continue;
 
-        auto vecLightPos = entity->GetMatrix() * effect->m_pos;
+        auto vecLightPos = entity->GetMatrix().TransformPoint(effect->m_pos);
         vecCenter += vecLightPos;
         int32 iColorState = eTrafficLightsState::LIGHT_GREEN;
         if (effect->light.m_color.red > 200) {

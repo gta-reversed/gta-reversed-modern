@@ -417,8 +417,8 @@ bool CCarEnterExit::IsPathToDoorBlockedByVehicleCollisionModel(const CPed* ped, 
 
     const auto vehMatInv = Invert(*vehicle->m_matrix);
     const CColLine line{
-        vehMatInv * ped->GetPosition(),
-        vehMatInv * pos
+        vehMatInv.TransformPoint(ped->GetPosition()),
+        vehMatInv.TransformPoint(pos)
     };
 
     for (const auto& sp : vehicle->GetColModel()->GetData()->GetSpheres()) {

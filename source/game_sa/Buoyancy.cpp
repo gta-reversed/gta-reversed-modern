@@ -289,7 +289,7 @@ void cBuoyancy::AddSplashParticles(CPhysical* entity, CVector vecFrom, CVector v
     for (int32 iIter = 0; iIter < iNumParticles; ++iIter) {
         auto fCurrentProgress = static_cast<float>(iIter) / static_cast<float>(iNumParticles);
         auto vecCurPoint = Lerp(vecFrom, vecTo, fCurrentProgress);
-        auto vecTransformedPoint = (*entity->m_matrix) * vecCurPoint;
+        auto vecTransformedPoint = entity->m_matrix->TransformPoint(vecCurPoint);
 
         if (!entity->IsPed()) {
             const auto& vecEntPos = entity->GetPosition();

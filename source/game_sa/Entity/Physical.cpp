@@ -319,8 +319,8 @@ void CPhysical::ProcessCollision() {
 
                 CColPoint* wheelColPoint = &wheelsColPoints[collisionIndex];
                 CColLine* colLine = &colData->m_pLines[collisionIndex];
-                CVector vecColLinePosStart = *m_matrix * colLine->m_vecStart;
-                CVector vecColLinePosEnd = *m_matrix * colLine->m_vecEnd;
+                CVector vecColLinePosStart = m_matrix->TransformPoint(colLine->m_vecStart);
+                CVector vecColLinePosEnd = m_matrix->TransformPoint(colLine->m_vecEnd);
                 wheelColPoint->m_vecNormal = CVector(0.0f, 0.0f, 1.0f);
                 wheelColPoint->m_nSurfaceTypeA = SURFACE_WHEELBASE;
                 wheelColPoint->m_nSurfaceTypeB = SURFACE_TARMAC;
@@ -2188,7 +2188,7 @@ bool CPhysical::ProcessShiftSectorList(int32 sectorX, int32 sectorY)
 // 0x546DB0
 void CPhysical::PlacePhysicalRelativeToOtherPhysical(CPhysical* relativeToPhysical, CPhysical* physicalToPlace, CVector offset)
 {
-    CVector vecRelativePosition = *relativeToPhysical->m_matrix * offset;
+    CVector vecRelativePosition = relativeToPhysical->m_matrix->TransformPoint(offset);
     vecRelativePosition += (CTimer::GetTimeStep() * 0.9f) * relativeToPhysical->m_vecMoveSpeed;
     CWorld::Remove(physicalToPlace);
     *(CMatrix*)physicalToPlace->m_matrix = *relativeToPhysical->m_matrix;

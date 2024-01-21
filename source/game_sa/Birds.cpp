@@ -349,7 +349,7 @@ void CBirds::Render() {
                         NOTSA_UNREACHABLE("CBirds::Render::lambda suppress warning");
                         return std::make_pair(CVector(), CBirdColor());
                     }();
-                    auto vecWorldPos = matBirdTransform * point;
+                    auto vecWorldPos = matBirdTransform.TransformPoint(point);
 
                     auto iBufferInd = uiTempBufferVerticesStored + uiVertInd;
                     auto vert1 = &aTempBufferVertices[iBufferInd];

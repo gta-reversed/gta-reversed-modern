@@ -423,7 +423,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                         CWeapon* activeWeapon = &player->m_aWeapons[activeWeaponSlot];
                         if (CCamera::GetActiveCamera().m_nMode == MODE_CAMERA && CTimer::GetTimeInMS() > activeWeapon->m_TimeForNextShotMs) {
                             CVector firingPoint(0.0f, 0.0f, 0.6f);
-                            CVector outputFiringPoint = *player->m_matrix * firingPoint;
+                            CVector outputFiringPoint = player->m_matrix->TransformPoint(firingPoint);
                             activeWeapon->Fire(player, &outputFiringPoint, nullptr, nullptr, nullptr, nullptr);
                         }
                         break;

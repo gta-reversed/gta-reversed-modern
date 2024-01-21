@@ -1236,7 +1236,7 @@ bool CCollision::ProcessDiscCollision(
 ) {
     ZoneScoped;
 
-    const auto cp       = matBA * tempTriCol.m_vecPoint;
+    const auto cp       = matBA.TransformPoint(tempTriCol.m_vecPoint);
     const auto cpNormal = matBA.TransformVector(tempTriCol.m_vecNormal);
     
     if (std::abs((cpNormal * disk.m_vThickness).ComponentwiseSum()) >= 0.77f ||
@@ -1831,12 +1831,12 @@ bool CCollision::ProcessVerticalLine(
     maxTouchDistance = localMaxTouchDist;
 
     // Transform back from object space
-    cp.m_vecPoint  = transform * cp.m_vecPoint;
+    cp.m_vecPoint  = transform.TransformPoint(cp.m_vecPoint);
     cp.m_vecNormal = transform.TransformVector(cp.m_vecNormal);
 
     if (outColPoly && storedColPoly.valid) {
         for (auto& vtx : storedColPoly.verts) {
-            vtx = transform * vtx; // Transform back from object space
+            vtx = transform.TransformPoint(vtx); // Transform back from object space
         }
         *outColPoly = storedColPoly;
     }

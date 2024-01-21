@@ -111,7 +111,7 @@ void CCover::FindCoverPointsForThisBuilding(CBuilding* building) {
 
         const auto fTwoPiToChar = 256.0F / TWO_PI;
         const auto ucAngle = static_cast<uint8>(atan2(vedTransformed.x, vedTransformed.y) * fTwoPiToChar);
-        auto vecPoint = building->GetMatrix() * effect->m_pos;
+        auto vecPoint = building->GetMatrix().TransformPoint(effect->m_pos);
         CCover::AddCoverPoint(3, building, &vecPoint, effect->coverPoint.m_nType, ucAngle);
     }
 }

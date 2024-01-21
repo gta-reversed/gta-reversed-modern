@@ -581,14 +581,14 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, b
                     if (vecMax.x < 1.0F && vecMax.y < 1.0F && vecMax.z < 1.0F)
                     {
                         const auto vecSize = cm->GetBoundingBox().GetSize();
-                        const auto vecTransformed = *colPhysical->m_matrix * vecSize;
+                        const auto vecTransformed = colPhysical->m_matrix->TransformPoint(vecSize);
 
                         if (GetPosition().z > vecTransformed.z)
                             bCollidedEntityCollisionIgnored = true;
                         else
                         {
                             Invert(*m_matrix, tempMat);
-                            if ((tempMat * vecTransformed).z < 0.0F)
+                            if (tempMat.TransformPoint(vecTransformed).z < 0.0F) // `m_matrix->GetUp().Dot(vecTransformed)` should work too
                                 bCollidedEntityCollisionIgnored = true;
                         }
                     }
@@ -2017,7 +2017,7 @@ CVector CVehicle::GetDummyPositionObjSpace(eVehicleDummy dummy) const {
 CVector CVehicle::GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace) {
     CVector pos = GetDummyPositionObjSpace(dummy);
     if (bWorldSpace)
-        pos = GetMatrix() * pos; // transform to world-space
+        pos = GetMatrix().TransformPoint(pos); // transform to world-space
     return pos;
 }
 
@@ -2584,7 +2584,7 @@ CVector CVehicle::GetDriverSeatDummyPositionOS() const {
 }
 
 CVector CVehicle::GetDriverSeatDummyPositionWS() {
-    return GetMatrix() * GetDriverSeatDummyPositionOS();
+    return GetMatrix().TransformPoint(GetDriverSeatDummyPositionOS())
 }
 
 CVehicleAnimGroup& CVehicle::GetAnimGroup() const {

@@ -50,13 +50,13 @@ bool COccluder::ProcessOneOccluder(CActiveOccluder* activeOccluder)
         && fWidth  / 4.0F != 0.0F
         && fHeight / 4.0F != 0.0F) {
         auto vecWidth = CVector(fWidth / 8.0F, 0.0F, 0.0F);
-        auto vecTransWidth = matTransform * vecWidth;
+        auto vecTransWidth = matTransform.TransformPoint(vecWidth);
 
         auto vecLength = CVector(0.0F, fLength / 8.0F, 0.0F);
-        auto vecTransLength = matTransform * vecLength;
+        auto vecTransLength = matTransform.TransformPoint(vecLength);
 
         auto vecHeight = CVector(0.0F, 0.0F, fHeight / 8.0F);
-        auto vecTransHeight = matTransform * vecHeight;
+        auto vecTransHeight = matTransform.TransformPoint(vecHeight);
 
         CVector aVecArr[6]{
             vecTransLength, -vecTransLength,

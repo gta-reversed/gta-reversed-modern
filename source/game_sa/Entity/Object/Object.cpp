@@ -413,7 +413,7 @@ void CObject::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bo
                         auto tempMat = CMatrix();
                         auto* cm = CEntity::GetColModel();
                         auto vecSize = cm->GetBoundingBox().GetSize();
-                        auto vecTransformed = *m_matrix * vecSize;
+                        auto vecTransformed = m_matrix->TransformPoint(vecSize);
 
                         auto& vecCollidedPos = colPhysical->GetPosition();
                         if (vecTransformed.z < vecCollidedPos.z)

@@ -115,7 +115,7 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped) {
     CVector posn = m_vecHandholdPos;
 
     if (m_pClimbEnt->IsPhysical()) {
-        posn = m_pClimbEnt->GetMatrix() * posn;
+        posn = m_pClimbEnt->GetMatrix().TransformPoint(posn);
         fAngle += m_pClimbEnt->GetHeading();
     }
 
@@ -309,7 +309,7 @@ CEntity* CTaskSimpleClimb::TestForClimb(CPed* ped, CVector& outClimbPos, float& 
         float angle = outClimbHeading;
 
         if (entity->IsPhysical()) {
-            point = entity->GetMatrix() * point;
+            point = entity->GetMatrix().TransformPoint(point);
             angle += entity->GetHeading();
         }
 
@@ -769,7 +769,7 @@ void CTaskSimpleClimb::GetCameraTargetPos(CPed* ped, CVector& vecTarget) {
     CVector point = m_vecHandholdPos;
     float fAngle = m_fHandholdHeading;
     if (m_pClimbEnt->IsPhysical()) {
-        point = m_pClimbEnt->GetMatrix() * point;
+        point = m_pClimbEnt->GetMatrix().TransformPoint(point);
         fAngle += m_pClimbEnt->GetHeading();
     }
 
