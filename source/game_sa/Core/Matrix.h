@@ -184,7 +184,7 @@ public:
     /*!
      * @notsa
      * @brief Transform the vector using the inverse of this Matrix
-     * @brief Use this instead of `Multiply3x3` (0x59C790)
+     * @brief Use this instead of `Multiply3x3(_MV)` (0x59C790)
      * @param pt The vector (direction) to transform
      */
     CVector InverseTransformVector(CVector v) const {

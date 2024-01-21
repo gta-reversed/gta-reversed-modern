@@ -949,7 +949,7 @@ void CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& ptrLi
         entity->SetCurrentScanCode();
 
         CColSphere sphere{
-            Multiply3x3_VM(entity->GetPosition() - point, transform),
+            transform.InverseTransformVector(entity->GetPosition() - point),
             entity->GetColModel()->GetBoundRadius()
         };
         if (CCollision::TestSphereBox(sphere, box)) {

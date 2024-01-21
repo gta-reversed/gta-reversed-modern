@@ -36,7 +36,7 @@ void CBouncingPanel::ProcessPanel(CVehicle* vehicle, RwFrame* frame, CVector mov
     CMatrix  frameMat{RwFrameGetMatrix(frame)};
     CMatrix& vehMat = vehicle->GetMatrix();
     CVector  compPos = Multiply3x3_MV(vehMat, frameMat.GetPosition());
-    CVector  angularVelocity = Multiply3x3_VM(vehicle->GetSpeed(compPos) - moveForce + CrossProduct(compPos, turnForce), vehMat);
+    CVector  angularVelocity = vehMat.InverseTransformVector(vehicle->GetSpeed(compPos) - moveForce + CrossProduct(compPos, turnForce));
 
     switch (m_nAxis) {
     case 0: {

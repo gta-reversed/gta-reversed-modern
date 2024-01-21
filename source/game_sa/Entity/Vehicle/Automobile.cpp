@@ -5680,7 +5680,7 @@ void CAutomobile::TankControl()
         m_fDoomVerticalRotation   -= ((float)pad->GetCarGunLeftRight() * CTimer::GetTimeStep() * 0.015f) / 128.0f;
         m_fDoomHorizontalRotation += ((float)pad->GetCarGunUpDown() * CTimer::GetTimeStep() * 0.005f) / 128.0f;
     } else {
-        CVector frontDot = Multiply3x3_VM(activeCam.m_vecFront, GetMatrix());
+        CVector frontDot = GetMatrix().InverseTransformVector(activeCam.m_vecFront);
         float doomVerticalRotation   = std::atan2(-frontDot.x, frontDot.y);
         float doomHorizontalRotation = std::atan2(frontDot.z, frontDot.Magnitude2D()) + DegreesToRadians(15);
 
@@ -6382,7 +6382,7 @@ void CAutomobile::FireTruckControl(CFire* fire) {
             m_fDoomHorizontalRotation += ((float)pad->GetCarGunUpDown()    * CTimer::GetTimeStepInSeconds()) / 128.0f;
         }
         else {
-            CVector frontDot = Multiply3x3_VM(activeCam.m_vecFront, GetMatrix());
+            CVector frontDot = GetMatrix().InverseTransformVector(activeCam.m_vecFront);
             float doomVerticalRotation   = std::atan2(-frontDot.x, frontDot.y);
             float doomHorizontalRotation = std::atan2(+frontDot.z, frontDot.Magnitude2D());
 
