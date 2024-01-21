@@ -528,14 +528,10 @@ CMatrix operator*(const CMatrix& a, const CMatrix& b)
     return result;
 }
 
-CVector operator*(const CMatrix& a, const CVector& b)
-{
-    CVector result;
-    result.x = a.m_pos.x + a.m_right.x * b.x + a.m_forward.x * b.y + a.m_up.x * b.z;
-    result.y = a.m_pos.y + a.m_right.y * b.x + a.m_forward.y * b.y + a.m_up.y * b.z;
-    result.z = a.m_pos.z + a.m_right.z * b.x + a.m_forward.z * b.y + a.m_up.z * b.z;
-    return result;
+CVector operator*(const CMatrix& a, const CVector& b) {
+    return a.TransformPoint(b);
 }
+
 CMatrix operator+(const CMatrix& a, const CMatrix& b)
 {
     CMatrix result;
