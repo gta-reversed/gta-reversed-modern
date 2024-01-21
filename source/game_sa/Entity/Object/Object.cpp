@@ -1313,7 +1313,7 @@ void CObject::GrabObjectToCarryWithRope(CPhysical* attachTo) {
 
     auto vecRopePoint = CVector();
     vecRopePoint.z = CRopes::FindPickupHeight(attachTo);
-    vecRopePoint *= *attachTo->m_matrix * vecRopePoint;
+    vecRopePoint *= attachTo->m_matrix->TransformPoint(vecRopePoint);
 
     rope.m_pRopeAttachObject->SetPosn(vecRopePoint);
     rope.m_pRopeAttachObject->m_bUsesCollision = false;
@@ -1402,16 +1402,16 @@ void CObject::ProcessControlLogic() {
         }
 
         if (m_nModelIndex == ModelIndices::MI_MAGNOCRANE) {
-            auto vecRopePoint = *m_matrix * CVector(0.0F, 36.64F, -1.69F);
+            auto vecRopePoint = m_matrix->TransformPoint(CVector(0.0F, 36.64F, -1.69F));
             vecRopePoint.z += fRopeLengthChange;
             CRopes::RegisterRope((uint32)this, static_cast<uint32>(eRopeType::CRANE_MAGNO), vecRopePoint, false, nSegments, 1u, this, 20'000u);
         } else if (m_nModelIndex == ModelIndices::MI_CRANETROLLEY) {
             const auto nRopeType = static_cast<const uint32>(GetPosition().x >= 0 ? eRopeType::CRANE_TROLLEY : eRopeType::WRECKING_BALL);
-            auto vecRopePoint = *m_matrix * CVector(0.0F, 0.0F, 0.0F);
+            auto vecRopePoint = m_matrix->TransformPoint(CVector(0.0F, 0.0F, 0.0F));
             vecRopePoint.z += fRopeLengthChange;
             CRopes::RegisterRope((uint32)this, nRopeType, vecRopePoint, false, nSegments, 1u, this, 20'000u);
         } else {
-            auto vecRopePoint = *m_matrix * CVector(0.0F, 0.0F, 59.0F);
+            auto vecRopePoint = m_matrix->TransformPoint(CVector(0.0F, 0.0F, 59.0F));
             vecRopePoint.z += fRopeLengthChange;
             CRopes::RegisterRope((uint32)this, static_cast<uint32>(eRopeType::QUARRY_CRANE_ARM), vecRopePoint, false, nSegments, 1u, this, 20'000u);
         }

@@ -694,7 +694,7 @@ void CTaskSimpleClimb::GetCameraStickModifier(CEntity* entity, float& fVerticalA
         float fAngle = m_fHandholdHeading;
 
         if (m_pClimbEnt->IsPhysical()) {
-            vec = *m_pClimbEnt->m_matrix * vec;
+            vec = m_pClimbEnt->m_matrix->TransformPoint(vec);
             fAngle += m_pClimbEnt->GetHeading();
         }
 

@@ -4494,7 +4494,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                                 } else {
                                     CMatrix invertedMatrix;
                                     invertedMatrix = Invert(entity->GetMatrix(), invertedMatrix);
-                                    if ((invertedMatrix * boundBoxPos).z < 0.0f)
+                                    if ((invertedMatrix.TransformPoint(boundBoxPos)).z < 0.0f)
                                         bObjectDamage = true;
                                 }
 

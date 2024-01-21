@@ -2584,7 +2584,7 @@ CVector CVehicle::GetDriverSeatDummyPositionOS() const {
 }
 
 CVector CVehicle::GetDriverSeatDummyPositionWS() {
-    return GetMatrix().TransformPoint(GetDriverSeatDummyPositionOS())
+    return GetMatrix().TransformPoint(GetDriverSeatDummyPositionOS());
 }
 
 CVehicleAnimGroup& CVehicle::GetAnimGroup() const {
@@ -4112,7 +4112,7 @@ void CVehicle::AddExhaustParticles() {
         vecParticleVelocity = randomFactor * GetForward();
     }
 
-    firstExhaustPos = entityMatrix * firstExhaustPos;
+    firstExhaustPos = entityMatrix.TransformPoint(firstExhaustPos);
     bool bFirstExhaustSubmergedInWater = false;
     bool bSecondExhaustSubmergedInWater = false;
     float pLevel = 0.0f;
@@ -4122,7 +4122,7 @@ void CVehicle::AddExhaustParticles() {
     }
 
     if (bHasDoubleExhaust) {
-        secondExhaustPos = entityMatrix * secondExhaustPos;
+        secondExhaustPos = entityMatrix.TransformPoint(secondExhaustPos);
         if (physicalFlags.bTouchingWater && CWaterLevel::GetWaterLevel(secondExhaustPos, pLevel, true) &&
             pLevel >= secondExhaustPos.z) {
             bSecondExhaustSubmergedInWater = true;

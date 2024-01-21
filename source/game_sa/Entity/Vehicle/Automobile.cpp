@@ -4316,7 +4316,7 @@ void CAutomobile::DoNitroEffect(float power) {
         secondExhaustPosition = exhaustPosition;
         secondExhaustPosition.x *= -1.0f;
         if (!physicalFlags.bTouchingWater) {
-            CVector point = *m_matrix * secondExhaustPosition;
+            CVector point = m_matrix->TransformPoint(secondExhaustPosition);
             if (CWaterLevel::GetWaterLevel(point, level, true)) {
                 if (level >= point.z)
                     secondExhaustSubmergedInWater = true;
@@ -5415,7 +5415,7 @@ void CAutomobile::ProcessHarvester()
     if (!m_harvesterParticleCounter)
         return;
 
-    CVector pos = *m_matrix * CVector(-1.2f, -3.8f, 1.5f);
+    CVector pos = m_matrix->TransformPoint(CVector(-1.2f, -3.8f, 1.5f));
     CVector velocity = GetForward() * -0.1f;
     velocity.x += CGeneral::GetRandomNumberInRange(0.05f, -0.05f);
     velocity.y += CGeneral::GetRandomNumberInRange(0.05f, -0.05f);
@@ -5654,7 +5654,7 @@ void CAutomobile::TankControl()
         if (CPad::GetPad()->CarGunJustDown()) {
             if (CTimer::GetTimeInMS() > m_nGunFiringTime + TIGER_GUNFIRE_RATE) {
                 CWeapon minigun(WEAPON_MINIGUN, 5000);
-                CVector point = *m_matrix * TIGER_GUN_POS + CTimer::GetTimeStep() * m_vecMoveSpeed;
+                CVector point = m_matrix->TransformPoint(TIGER_GUN_POS + CTimer::GetTimeStep() * m_vecMoveSpeed);
                 minigun.FireInstantHit(this, &point, &point, nullptr, nullptr, nullptr, false, true);
                 CVector2D direction(0.0f, 0.1f);
                 minigun.AddGunshell(this, point, direction, 0.025f);
@@ -5765,7 +5765,7 @@ void CAutomobile::TankControl()
                 // BUG?: This statement is not assigned to any variable.
                 // It should be `newTurretPosition =  *m_matrix * doomOffset`
                 // Izzotop: Fixed, equal to OG code; untested -> remove ^ after tests
-                newTurretPosition = *m_matrix * doomOffset;
+                newTurretPosition = m_matrix->TransformPoint(doomOffset);
             }
 
             CVector distance = newTurretPosition - GetPosition();
@@ -6310,7 +6310,7 @@ bool CAutomobile::RcbanditCheck1CarWheels(CPtrList& ptrList)
                 wheelMatrix = Invert(*m_matrix, wheelMatrix);
 
                 CColSphere sphere;
-                sphere.m_vecCenter = wheelMatrix * (*vehicle->m_matrix * wheelPos);
+                sphere.m_vecCenter = wheelMatrix.TransformPoint(vehicle->m_matrix->TransformPoint(wheelPos));
                 sphere.m_fRadius = modelInfo->m_fWheelSizeFront * 0.25f;
                 if (CCollision::TestSphereBox(sphere, colModel->m_boundBox))
                     return true;
@@ -6429,9 +6429,8 @@ void CAutomobile::FireTruckControl(CFire* fire) {
     if (m_aCarNodes[CAR_MISC_A]) {
         RwMatrix* carNodeMiscMatrix = RwFrameGetLTM(m_aCarNodes[CAR_MISC_A]);
         newTurretPosition = *RwMatrixGetPos(carNodeMiscMatrix);
-    }
-    else {
-        newTurretPosition = *m_matrix * CVector(0.0f, 1.5f, 1.8f);
+    } else {
+        newTurretPosition = m_matrix->TransformPoint(CVector(0.0f, 1.5f, 1.8f));
     }
 
     CVector point{
