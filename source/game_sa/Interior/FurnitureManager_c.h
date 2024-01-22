@@ -2,6 +2,7 @@
 
 #include "Base.h"
 #include "FurnitureGroup_c.h"
+#include "FurnitureSubGroup_c.h"
 #include "FurnitureItem.h"
 #include "List_c.h"
 
@@ -30,3 +31,7 @@ public:
 VALIDATE_SIZE(FurnitureManager_c, 0x2078);
 
 static inline auto& g_furnitureMan = StaticRef<FurnitureManager_c, 0xBAB380>();
+
+extern uint32& g_currSubGroupId;
+extern uint32& g_currFurnitureId;
+extern FurnitureSubGroup_c (&g_subGroupStore)[128];

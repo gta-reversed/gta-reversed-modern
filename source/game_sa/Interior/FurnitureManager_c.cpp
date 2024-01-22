@@ -1,8 +1,9 @@
 #include "StdInc.h"
 #include "FurnitureManager_c.h"
 
-auto& g_currSubGroupId = StaticRef<uint32, 0xBAB37C>();
-auto& g_currFurnitureId = StaticRef<uint32, 0xBAB378>();
+uint32& g_currSubGroupId = StaticRef<uint32, 0xBAB37C>();
+uint32& g_currFurnitureId = StaticRef<uint32, 0xBAB378>();
+FurnitureSubGroup_c (&g_subGroupStore)[128] = *(FurnitureSubGroup_c(*)[128])0xBAD3F8;
 
 void FurnitureManager_c::InjectHooks() {
     RH_ScopedClass(FurnitureManager_c);
