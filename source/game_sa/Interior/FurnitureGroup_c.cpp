@@ -5,7 +5,7 @@ void FurnitureGroup_c::InjectHooks() {
     RH_ScopedClass(FurnitureGroup_c);
     RH_ScopedCategory("Interior");
 
-    RH_ScopedInstall(Init, 0x5910A0, { .reversed = false });
+    RH_ScopedInstall(Init, 0x5910A0);
     RH_ScopedInstall(Exit, 0x5910B0, { .reversed = false });
     RH_ScopedInstall(AddSubGroup, 0x5910E0, { .reversed = false });
     RH_ScopedInstall(GetFurniture, 0x591130, { .reversed = false });
