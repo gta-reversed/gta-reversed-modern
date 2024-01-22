@@ -5,10 +5,11 @@
 #include "List_c.h"
 
 class Furniture_c;
+class FurnitureSubGroup_c;
 
 class FurnitureGroup_c {
 public:
-    TList_c<void> m_subGroupsList;
+    TList_c<FurnitureSubGroup_c> m_subGroupsList;
 
 public:
     static void InjectHooks();
