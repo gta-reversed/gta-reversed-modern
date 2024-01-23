@@ -36,20 +36,9 @@ bool CEventSexyPed::AffectsPed(CPed* ped) {
         return false;
     }
 
-    auto pedTaskMgr = ped->GetTaskManager();
-    CTask* pedTask = nullptr;
-    CTask* sexyPedTask = nullptr;
-    if ((pedTask = pedTaskMgr.FindActiveTaskByType(TASK_COMPLEX_PARTNER_DEAL)) ||
-        (pedTask = pedTaskMgr.FindActiveTaskByType(TASK_COMPLEX_BE_IN_COUPLE)) ||
-        (pedTask = pedTaskMgr.FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET))) {
-        auto sexyPedTaskMgr = m_SexyPed->GetTaskManager();
-        if ((sexyPedTask = sexyPedTaskMgr.FindActiveTaskByType(TASK_COMPLEX_PARTNER_DEAL)) ||
-            (sexyPedTask = sexyPedTaskMgr.FindActiveTaskByType(TASK_COMPLEX_BE_IN_COUPLE)) ||
-            (sexyPedTask = sexyPedTaskMgr.FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET))) {
-            if (pedTask && sexyPedTask && pedTask->GetTaskType() == sexyPedTask->GetTaskType()) {
-                return false;
-            }
-        }
+    if (ped->GetTaskManager().IsFirstFoundTaskMatching<TASK_COMPLEX_PARTNER_DEAL, TASK_COMPLEX_BE_IN_COUPLE, TASK_COMPLEX_PARTNER_GREET>(m_SexyPed->GetTaskManager())) {
+        return false;
     }
+
     return true;
 }
