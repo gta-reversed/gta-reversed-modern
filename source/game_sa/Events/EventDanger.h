@@ -1,5 +1,7 @@
 #pragma
 
+#include "EventEditableResponse.h"
+
 class CEventDanger : public CEventEditableResponse {
 public:
     CEntity* m_dangerFrom;
