@@ -2,6 +2,10 @@
 
 #include "Event.h"
 
+#include "EventRevived.h"
+#include "Event.h"
+
+
 class CEventRevived : public CEvent {
 public:
     CEventRevived() = default;

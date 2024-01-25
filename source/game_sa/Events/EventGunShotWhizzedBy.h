@@ -2,6 +2,10 @@
 
 #include "EventGunShot.h"
 
+#include "EventGunShot.h"
+#include "EventGunShotWhizzedBy.h"
+
+
 class NOTSA_EXPORT_VTABLE CEventGunShotWhizzedBy : public CEventGunShot {
 public:
     constexpr static auto Type = eEventType::EVENT_SHOT_FIRED_WHIZZED_BY;
@@ -22,3 +26,4 @@ private:
     CEventGunShotWhizzedBy* Constructor(CEntity* entity, const CVector& startPoint, const CVector& endPoint, bool bHasNoSound);
     bool AffectsPed_Reversed(CPed* ped);
 };
+VALIDATE_SIZE(CEventGunShotWhizzedBy, 0x34);

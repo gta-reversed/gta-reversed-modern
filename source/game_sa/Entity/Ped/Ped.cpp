@@ -16,6 +16,7 @@
 #include "TaskSimpleLand.h"
 #include "AEAudioUtility.h"
 #include "PedClothesDesc.h"
+#include "EventAcquaintancePedHate.h"
 #include "TaskSimpleHoldEntity.h"
 #include "TaskComplexGoPickUpEntity.h"
 #include "Radar.h"
@@ -304,9 +305,7 @@ CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
     if (CCheat::IsActive(CHEAT_HAVE_ABOUNTY_ON_YOUR_HEAD)) {
         if (!IsPlayer()) {
             GetAcquaintance().SetAsAcquaintance(ACQUAINTANCE_HATE, CPedType::GetPedFlag(ePedType::PED_TYPE_PLAYER1));
-
-            CEventAcquaintancePedHate event(FindPlayerPed());
-            GetEventGroup().Add(&event);
+            GetEventGroup().Add(CEventAcquaintancePedHate{FindPlayerPed()});
         }
     }
 }

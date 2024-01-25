@@ -2,6 +2,10 @@
 
 #include "Event.h"
 
+#include "EventLeanOnVehicle.h"
+#include "Event.h"
+
+
 class CEventLeanOnVehicle : public CEvent {
 public:
     CVehicle* m_vehicle;

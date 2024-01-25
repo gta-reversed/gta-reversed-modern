@@ -1,6 +1,9 @@
 #pragma once
 
-class CEventEditableResponse;
+#include "EventEditableResponse.h"
+
+#include "EventVehicleThreat.h"
+
 
 class NOTSA_EXPORT_VTABLE CEventVehicleThreat : public CEventEditableResponse {
 public:
@@ -16,3 +19,4 @@ public:
     bool AffectsPed(CPed* ped) override;
     CEventEditableResponse* CloneEditable() override { return new CEventVehicleThreat(m_Vehicle); }
 };
+VALIDATE_SIZE(CEventVehicleThreat, 0x18);

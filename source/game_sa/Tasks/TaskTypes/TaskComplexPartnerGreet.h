@@ -1,3 +1,5 @@
+#pragma once
+
 #include "TaskComplexPartner.h"
 
 class NOTSA_EXPORT_VTABLE CTaskComplexPartnerGreet final : public CTaskComplexPartner {

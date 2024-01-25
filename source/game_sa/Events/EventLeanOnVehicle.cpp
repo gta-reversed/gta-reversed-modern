@@ -1,6 +1,6 @@
 #include "StdInc.h"
-
 #include "EventLeanOnVehicle.h"
+
 
 void CEventLeanOnVehicle::InjectHooks() {
     RH_ScopedClass(CEventLeanOnVehicle);
@@ -10,7 +10,10 @@ void CEventLeanOnVehicle::InjectHooks() {
     RH_ScopedVirtualInstall(IsValid, 0x4B16C0);
 }
 
+// 0x65DAF0
 CEventLeanOnVehicle* CEventLeanOnVehicle::Constructor(CVehicle* vehicle, int32 leanAnimDurationInMs) { this->CEventLeanOnVehicle::CEventLeanOnVehicle(vehicle, leanAnimDurationInMs); return this; }
+
+// 0x4B16C0
 bool CEventLeanOnVehicle::IsValid(CPed* ped) { return CEventLeanOnVehicle::IsValid_Reversed(ped); }
 
 // 0x65DAF0
@@ -20,12 +23,10 @@ CEventLeanOnVehicle::CEventLeanOnVehicle(CVehicle* vehicle, int32 leanAnimDurati
     CEntity::SafeRegisterRef(m_vehicle);
 }
 
-// 0x65DC10
 CEventLeanOnVehicle::~CEventLeanOnVehicle() {
     CEntity::SafeCleanUpRef(m_vehicle);
 }
 
-// 0x4B16C0
 bool CEventLeanOnVehicle::IsValid_Reversed(CPed* ped) {
     if (ped)
         return ped->IsAlive();
@@ -35,3 +36,4 @@ bool CEventLeanOnVehicle::IsValid_Reversed(CPed* ped) {
 
     return false;
 }
+

@@ -1,5 +1,10 @@
 #pragma once
 
+#include "EventEditableResponse.h"
+
+#include "EventFireNearby.h"
+
+
 class CEventFireNearby : public CEventEditableResponse {
 public:
     CVector m_position;

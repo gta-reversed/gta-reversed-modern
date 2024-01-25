@@ -2,9 +2,14 @@
 
 #include "Base.h"
 
+#include "Enums/ePedBones.h"
+#include "Vector.h"
+#include "Matrix.h"
+#include "Quaternion.h"
 #include "List_c.h"
 #include "ListItem_c.h"
 
+#include "RpHAnimBlendInterpFrame.h"
 #include <rwplcore.h>
 #include <rtquat.h>
 

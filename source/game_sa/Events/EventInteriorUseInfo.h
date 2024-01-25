@@ -2,8 +2,11 @@
 
 #include "Event.h"
 
-struct InteriorInfo_t;
-class Interior_c;
+#include "Event.h"
+#include "EventInteriorUseInfo.h"
+#include "Interior_c.h"
+#include "InteriorInfo_t.h"
+
 
 class CEventInteriorUseInfo : public CEvent {
 public:

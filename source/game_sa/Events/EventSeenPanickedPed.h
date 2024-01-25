@@ -1,5 +1,10 @@
 #pragma once
 
+#include "EventEditableResponse.h"
+
+#include "EventSeenPanickedPed.h"
+
+
 class CEventSeenPanickedPed : public CEventEditableResponse {
 public:
     CPed* m_ped;

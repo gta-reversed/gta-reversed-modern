@@ -778,15 +778,16 @@ auto ExplodeCharHead(CPed& ped) {
         false,
         (bool)(ped.bInVehicle)
     };
+    CPedDamageResponseCalculator dmgCalc{
+        nullptr,
+        1000.f,
+        WEAPON_SNIPERRIFLE,
+        PED_PIECE_HEAD,
+        false
+    };
     dmgEvent.ComputeDamageResponseIfAffectsPed(
         &ped,
-        CPedDamageResponseCalculator{
-            nullptr,
-            1000.f,
-            WEAPON_SNIPERRIFLE,
-            PED_PIECE_HEAD,
-            false
-        },
+        dmgCalc,
         true
     );
     ped.GetEventGroup().Add(dmgEvent);

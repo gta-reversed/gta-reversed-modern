@@ -1,6 +1,6 @@
 #include "StdInc.h"
-
 #include "EventCarUpsideDown.h"
+
 
 void CEventCarUpsideDown::InjectHooks() {
     RH_ScopedClass(CEventCarUpsideDown);
@@ -10,7 +10,10 @@ void CEventCarUpsideDown::InjectHooks() {
     RH_ScopedVirtualInstall(AffectsPed, 0x4B1DB0);
 }
 
+// 0x4B1CC0
 CEventCarUpsideDown* CEventCarUpsideDown::Constructor(CVehicle* vehicle) { this->CEventCarUpsideDown::CEventCarUpsideDown(vehicle); return this; }
+
+// 0x4B1DB0
 bool CEventCarUpsideDown::AffectsPed(CPed* ped) { return CEventCarUpsideDown::AffectsPed_Reversed(ped); }
 
 // 0x4B1CC0
@@ -19,7 +22,6 @@ CEventCarUpsideDown::CEventCarUpsideDown(CVehicle* vehicle) : CEvent() {
     CEntity::SafeRegisterRef(m_vehicle);
 }
 
-// 0x4B67F0
 CEventCarUpsideDown::~CEventCarUpsideDown() {
 #if FIX_BUGS
     CEntity::SafeCleanUpRef(m_vehicle);
@@ -28,7 +30,6 @@ CEventCarUpsideDown::~CEventCarUpsideDown() {
 #endif
 }
 
-// 0x4B1DB0
 bool CEventCarUpsideDown::AffectsPed_Reversed(CPed* ped) {
     if (ped->IsPlayer()) return false;
     if (ped->bGetOutUpsideDownCar == 0u) return false;
@@ -37,3 +38,4 @@ bool CEventCarUpsideDown::AffectsPed_Reversed(CPed* ped) {
     if (ped->m_pVehicle->IsBike() || ped->m_pVehicle->IsQuad()) return false;
     return ped->IsAlive();
 }
+

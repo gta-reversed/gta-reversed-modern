@@ -2,8 +2,11 @@
 
 #include "Event.h"
 
-class CVehicle;
-class CVector;
+#include "Event.h"
+#include "EventVehicleCollision.h"
+#include "TaskSimpleGoTo.h"
+#include "TaskComplexWalkRoundCar.h"
+#include "TaskComplexHitPedWithCar.h"
 
 enum eVehicleEvadeType {
     VEHICLE_EVADE_NONE = 0,
@@ -39,5 +42,4 @@ private:
     CEvent* Clone_Reversed();
     bool AffectsPed_Reversed(CPed* ped);
 };
-
 VALIDATE_SIZE(CEventVehicleCollision, 0x34);

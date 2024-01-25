@@ -1,6 +1,6 @@
 #include "StdInc.h"
-
 #include "EventEscalator.h"
+
 
 void CEventEscalator::InjectHooks() {
     RH_ScopedClass(CEventEscalator);
@@ -8,9 +8,10 @@ void CEventEscalator::InjectHooks() {
 
     RH_ScopedVirtualInstall(AffectsPed, 0x4B2580);
 }
-bool CEventEscalator::AffectsPed(CPed* ped) { return CEventEscalator::AffectsPed_Reversed(ped); }
 
 // 0x4B2580
+bool CEventEscalator::AffectsPed(CPed* ped) { return CEventEscalator::AffectsPed_Reversed(ped); }
+
 bool CEventEscalator::AffectsPed_Reversed(CPed* ped) {
     if (ped->IsAlive() && !ped->IsPlayer() && ped->m_pContactEntity) {
         auto modelId = ped->m_pContactEntity->m_nModelIndex;
@@ -19,3 +20,4 @@ bool CEventEscalator::AffectsPed_Reversed(CPed* ped) {
     }
     return false;
 }
+

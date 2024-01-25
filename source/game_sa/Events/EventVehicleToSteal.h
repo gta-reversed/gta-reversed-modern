@@ -2,7 +2,11 @@
 
 #include "Event.h"
 
-class CVehicle;
+#include "Event.h"
+#include "EventVehicleToSteal.h"
+#include "TaskComplexEnterCar.h"
+#include "TheScripts.h"
+
 
 class NOTSA_EXPORT_VTABLE CEventVehicleToSteal : public CEvent {
 public:
@@ -26,3 +30,4 @@ private:
 
     bool AffectsPed_Reversed(CPed* ped);
 };
+VALIDATE_SIZE(CEventVehicleToSteal, 0x10);

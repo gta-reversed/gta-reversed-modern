@@ -4,6 +4,7 @@
 #include "TaskComplexGoToAttractor.h"
 #include "TaskSimpleNone.h"
 
+#include "EventPedCollisionWithPed.h"
 #include "Scripted2dEffects.h"
 
 void CTaskComplexUseEffect::InjectHooks() {

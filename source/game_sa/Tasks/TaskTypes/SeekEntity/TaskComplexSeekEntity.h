@@ -3,6 +3,9 @@
 #include <concepts>
 
 #include "TaskComplex.h"
+#include "World.h"
+#include "Ped.h"
+#include "General.h"
 #include "TaskTimer.h"
 #include "eMoveState.h"
 #include "extensions/utility.hpp"

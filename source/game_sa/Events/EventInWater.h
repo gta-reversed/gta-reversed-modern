@@ -2,6 +2,10 @@
 
 #include "Event.h"
 
+#include "Event.h"
+#include "EventInWater.h"
+
+
 class NOTSA_EXPORT_VTABLE CEventInWater : public CEvent {
 public:
     float m_acceleration;

@@ -2,6 +2,10 @@
 
 #include "Event.h"
 
+#include "Event.h"
+#include "EventSignalAtPed.h"
+
+
 class CEventSignalAtPed final : public CEvent {
 public:
     CPed* m_SignalAt;
@@ -19,3 +23,4 @@ public:
    CEvent* Clone() override { return new CEventSignalAtPed(m_SignalAt, m_InitialPause, m_bPlayAnimAtEnd); }
    bool IsValid(CPed* ped) override;
 };
+

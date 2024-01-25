@@ -15,14 +15,6 @@ void CEventAttractor::InjectHooks()
     RH_ScopedInstall(IsEffectActive, 0x4AF460);
 }
 
-void CEventScriptedAttractor::InjectHooks()
-{
-    RH_ScopedClass(CEventScriptedAttractor);
-    RH_ScopedCategory("Events");
-
-    RH_ScopedInstall(Constructor, 0x5FEF40);
-}
-
 CEventAttractor::CEventAttractor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor, eTaskType taskType) :
     CEventEditableResponse{taskType}
 {
@@ -108,15 +100,4 @@ bool CEventAttractor::IsEffectActive(CEntity* entity, const C2dEffect* effect)
             return true;
     }
     return false;
-}
-
-CEventScriptedAttractor::CEventScriptedAttractor(C2dEffect* the2dEffect, CEntity* entity, bool bAvoidLookingAtAttractor) :
-    CEventAttractor(the2dEffect, entity, false)
-{
-}
-
-CEventScriptedAttractor* CEventScriptedAttractor::Constructor(C2dEffect* the2dEffect, CEntity* entity, bool bAvoidLookingAtAttractor)
-{
-    this->CEventScriptedAttractor::CEventScriptedAttractor(the2dEffect, entity, bAvoidLookingAtAttractor);
-    return this;
 }

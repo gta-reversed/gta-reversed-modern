@@ -1,11 +1,12 @@
 #pragma once
 
+
 #include "eEventType.h"
+#include "Event.h"
+
 
 class CPed;
-class CPedGroup;
 class CEntity;
-enum eEventType;
 
 class CEvent {
 public:

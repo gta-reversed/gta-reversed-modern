@@ -1,5 +1,10 @@
 #pragma once
 
+#include "EventEditableResponse.h"
+
+#include "EventSpecial.h"
+
+
 class CEventSpecial : public CEventEditableResponse {
 public:
     CEventSpecial() = default; // 0x4B1AE0
