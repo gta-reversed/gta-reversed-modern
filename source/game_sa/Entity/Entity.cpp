@@ -133,9 +133,7 @@ void CEntity::Add()
 }
 void CEntity::Add_Reversed()
 {
-    auto rect = CRect();
-    GetBoundRect(&rect);
-    Add(rect);
+    Add(GetBoundRect());
 }
 
 void CEntity::Add(const CRect& rect)
@@ -210,8 +208,7 @@ void CEntity::Add_Reversed(const CRect& rect)
 // 0x534AE0
 void CEntity::Remove()
 {
-    auto usedRect = CRect();
-    GetBoundRect(&usedRect);
+    auto usedRect = GetBoundRect();
 
     if (usedRect.left < -3000.0F)
         usedRect.left = -3000.0F;
@@ -417,11 +414,13 @@ void CEntity::DeleteRwObject()
 
     CEntity::DestroyEffects();
     CEntity::RemoveEscalatorsForEntity();
-}CRect* CEntity::GetBoundRect(CRect* pRect)
-{
-    return CEntity::GetBoundRect_Reversed(pRect);
 }
-CRect* CEntity::GetBoundRect_Reversed(CRect* outRect)
+
+CRect CEntity::GetBoundRect()
+{
+    return CEntity::GetBoundRect_Reversed();
+}
+CRect CEntity::GetBoundRect_Reversed()
 {
     CColModel* colModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
     CVector vecMin = colModel->m_boundBox.m_vecMin;
@@ -439,8 +438,7 @@ CRect* CEntity::GetBoundRect_Reversed(CRect* outRect)
     rect.StretchToPoint(point.x, point.y);
     TransformFromObjectSpace(point, vecMax);
     rect.StretchToPoint(point.x, point.y);
-    *outRect = rect;
-    return outRect;
+    return rect;
 }
 
 // 0x403E40
@@ -965,13 +963,9 @@ void CEntity::ModifyMatrixForPoleInWind()
 // 0x533050
 bool CEntity::LivesInThisNonOverlapSector(int32 sectorX, int32 sectorY)
 {
-    auto rect = CRect();
-    GetBoundRect(&rect);
     float xCenter, yCenter;
-    rect.GetCenter(&xCenter, &yCenter);
-
+    GetBoundRect().GetCenter(&xCenter, &yCenter);
     return sectorX == CWorld::GetSectorX(xCenter) && sectorY == CWorld::GetSectorY(yCenter);
-
 }
 
 // 0x533150

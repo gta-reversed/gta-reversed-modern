@@ -158,7 +158,7 @@ public:
     // originally virtual functions
     void Add() override;
     void Remove() override;
-    CRect* GetBoundRect(CRect* rect) override;
+    CRect GetBoundRect() override;
     void ProcessControl() override;
     void ProcessCollision() override;
     void ProcessShift() override;
@@ -256,7 +256,7 @@ private:
 
     void Add_Reversed() { CPhysical::Add(); }
     void Remove_Reversed() { CPhysical::Remove(); }
-    CRect* GetBoundRect_Reversed(CRect* rect) { return CPhysical::GetBoundRect(rect); }
+    CRect GetBoundRect_Reversed() { return CPhysical::GetBoundRect(); }
     void ProcessControl_Reversed() { CPhysical::ProcessControl(); }
     int32 ProcessEntityCollision_Reversed(CEntity* entity, CColPoint* colPoint) { return CPhysical::ProcessEntityCollision(entity, colPoint); }
     void ProcessCollision_Reversed() { CPhysical::ProcessCollision(); }

@@ -118,7 +118,7 @@ public:
     virtual void SetModelIndexNoCreate(uint32 index);               // VTab: 6
     virtual void CreateRwObject();                                  // VTab: 7
     virtual void DeleteRwObject();                                  // VTab: 8
-    virtual CRect* GetBoundRect(CRect* pRect);                      // VTab: 9 - TODO: Most likely RVO'd. Should probably return a `CRect`, and take no args.
+    virtual CRect GetBoundRect();                                   // VTab: 9
     virtual void ProcessControl();                                  // VTab: 10
     virtual void ProcessCollision();                                // VTab: 11
     virtual void ProcessShift();                                    // VTab: 12
@@ -298,19 +298,13 @@ public:
 
     bool IsScanCodeCurrent() const;
     void SetCurrentScanCode();
-
-    auto GetBoundRect() {
-        CRect r{};
-        GetBoundRect(&r);
-        return r;
-    }
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
     void Add_Reversed();
     void Add_Reversed(const CRect& rect);
-    CRect* GetBoundRect_Reversed(CRect* pRect);
+    CRect GetBoundRect_Reversed();
 };
 
 VALIDATE_SIZE(CEntity, 0x38);

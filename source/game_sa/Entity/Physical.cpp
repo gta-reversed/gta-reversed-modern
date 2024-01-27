@@ -157,8 +157,7 @@ void CPhysical::Add()
         return;
     }
 
-    CRect boundRect;
-    GetBoundRect(&boundRect);
+    const auto boundRect = GetBoundRect();
     int32 startSectorX = CWorld::GetSectorX(boundRect.left);
     int32 startSectorY = CWorld::GetSectorY(boundRect.bottom);
     int32 endSectorX = CWorld::GetSectorX(boundRect.right);
@@ -210,13 +209,17 @@ void CPhysical::Remove()
 }
 
 // 0x5449B0
-CRect* CPhysical::GetBoundRect(CRect* rect)
+CRect CPhysical::GetBoundRect()
 {
     CVector boundCentre;
     CEntity::GetBoundCentre(&boundCentre);
-    float fRadius = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundRadius();
-    *rect = CRect(boundCentre.x - fRadius, boundCentre.y - fRadius, boundCentre.x + fRadius, boundCentre.y + fRadius);
-    return rect;
+    const float fRadius = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundRadius();
+    return CRect(
+        boundCentre.x - fRadius, 
+        boundCentre.y - fRadius, 
+        boundCentre.x + fRadius, 
+        boundCentre.y + fRadius
+    );
 }
 
 // 0x5485E0
@@ -466,8 +469,7 @@ void CPhysical::ProcessCollision() {
 void CPhysical::ProcessShift() {
     ZoneScoped;
 
-    CRect boundingBox;
-    GetBoundRect(&boundingBox);
+    CRect boundingBox = GetBoundRect();
     m_fMovingSpeed = 0.0f;
 
     bool bPhysicalFlagsSet = m_nPhysicalFlags & (PHYSICAL_DISABLE_MOVE_FORCE | PHYSICAL_INFINITE_MASS | PHYSICAL_DISABLE_Z);
@@ -4846,8 +4848,7 @@ bool CPhysical::CheckCollision()
 
     CWorld::IncrementCurrentScanCode();
 
-    CRect boundRect;
-    GetBoundRect(&boundRect);
+    CRect boundRect = GetBoundRect();
     int32 startSectorX = CWorld::GetSectorX(boundRect.left);
     int32 startSectorY = CWorld::GetSectorY(boundRect.bottom);
     int32 endSectorX = CWorld::GetSectorX(boundRect.right);
