@@ -3,7 +3,6 @@
 #include "Event.h"
 
 #include "Event.h"
-#include "EventVehicleCollision.h"
 #include "TaskSimpleGoTo.h"
 #include "TaskComplexWalkRoundCar.h"
 #include "TaskComplexHitPedWithCar.h"

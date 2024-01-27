@@ -2,7 +2,6 @@
 
 #include "Event.h"
 
-#include "EventEscalator.h"
 #include "Event.h"
 
 

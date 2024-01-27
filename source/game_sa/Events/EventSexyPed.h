@@ -4,7 +4,6 @@
 
 #include <Enums/eTaskType.h>
 #include "./EventEditableResponse.h"
-#include "EventSexyPed.h"
 #include "IKChainManager_c.h"
 
 

@@ -3,7 +3,6 @@
 #include "Event.h"
 
 #include "Event.h"
-#include "EventVehicleToSteal.h"
 #include "TaskComplexEnterCar.h"
 #include "TheScripts.h"
 

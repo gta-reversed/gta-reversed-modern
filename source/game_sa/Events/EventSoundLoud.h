@@ -2,7 +2,6 @@
 
 #include "EventEditableResponse.h"
 
-#include "EventSoundLoud.h"
 #include "EventEditableResponse.h"
 
 

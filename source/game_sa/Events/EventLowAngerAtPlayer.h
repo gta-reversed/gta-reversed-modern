@@ -2,7 +2,6 @@
 
 #include "EventEditableResponse.h"
 
-#include "EventLowAngerAtPlayer.h"
 #include "EventEditableResponse.h"
 
 
