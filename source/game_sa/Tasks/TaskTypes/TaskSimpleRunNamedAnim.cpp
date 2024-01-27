@@ -61,6 +61,6 @@ void CTaskSimpleRunNamedAnim::OffsetPedPosition(CPed* ped) {
     ped->UpdateRpHAnim();
     ped->m_bDontUpdateHierarchy = true;
     auto& pos = ped->GetPosition();
-    pos += Multiply3x3(*ped->m_matrix, m_vecOffsetAtEnd);
+    pos += ped->m_matrix->TransformVector(m_vecOffsetAtEnd);
     m_bOffsetAvailable = false;
 }

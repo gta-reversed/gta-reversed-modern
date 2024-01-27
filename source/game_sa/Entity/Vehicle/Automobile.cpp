@@ -696,10 +696,10 @@ void CAutomobile::ProcessControl()
                     CVector& point = contactPoints[i];
                     point = colDisk.m_vecCenter;
                     point.z -= colDisk.m_fRadius;
-                    point = Multiply3x3(GetMatrix(), contactPoints[i]);
+                    point = GetMatrix().TransformVector(contactPoints[i]);
                 }
                 else {
-                    contactPoints[i] = Multiply3x3(GetMatrix(), colLine.m_vecEnd);
+                    contactPoints[i] = GetMatrix().TransformVector(colLine.m_vecEnd);
                 }
             }
             else {
@@ -1037,7 +1037,7 @@ void CAutomobile::ProcessControl()
             speed -= turnSpeedForward;
 
             CVector force = speed * GetUp() * -1.0f * m_fTurnMass;
-            CVector point = GetRight() + Multiply3x3(GetMatrix(), m_vecCentreOfMass);
+            CVector point = GetRight() + GetMatrix().TransformVector(m_vecCentreOfMass);
             ApplyTurnForce(force, point);
         }
     }
@@ -1175,8 +1175,8 @@ CVector CAutomobile::AddMovingCollisionSpeed(CVector& point) {
         colPivot = RwFrameGetMatrix(carNodeMisc)->pos;
     }
     CVector rotation(float(angleDiff) / CTimer::GetTimeStep() * colAngleMult, 0.0f, 0.0f);
-    CVector pos = Multiply3x3(GetMatrix(), rotation);
-    CVector pivotPos = Multiply3x3(GetMatrix(), colPivot);
+    CVector pos = GetMatrix().TransformVector(rotation);
+    CVector pivotPos = GetMatrix().TransformVector(colPivot);
     CVector distance = point - pivotPos;
     return CrossProduct(pos, distance);
 }
@@ -1533,8 +1533,8 @@ void CAutomobile::DoHoverSuspensionRatios()
         auto colData = GetColModel()->m_pColData;
         for (int32 i = 0; i < 4; i++)  {
             CColLine& line = colData->m_pLines[i];
-            CVector start = *m_matrix * line.m_vecStart;
-            CVector end = *m_matrix * line.m_vecEnd;
+            CVector start = m_matrix->TransformPoint(line.m_vecStart);
+            CVector end = m_matrix->TransformPoint(line.m_vecEnd);
             float colPointZ = MAP_Z_LOW_LIMIT;
             if (m_fWheelsSuspensionCompression[i] < 1.0f) {
                 colPointZ = m_wheelColPoint[i].m_vecPoint.z;
@@ -1692,7 +1692,7 @@ void CAutomobile::ProcessSuspension() {
             CColLine& colLine   = colData->m_pLines[wheelLineIndices[i]];
             contactPoints[i]    = colLine.m_vecStart;
             contactPoints[i].z -= m_aSuspensionLineLength[i] * springLength[i];
-            contactPoints[i]    = Multiply3x3(GetMatrix(), contactPoints[i]);
+            contactPoints[i]    = GetMatrix().TransformVector(contactPoints[i]);
         }
     }
 
@@ -3834,7 +3834,7 @@ bool CAutomobile::UpdateMovingCollision(float angle) {
                 for (int32 i = 0; i < 3; i++) {
                     CVector vertexPos = UncompressVector(colData->m_pVertices[colTriangle.m_vertIndices[i]]);
                     CVector distance  = vertexPos - componentPos;
-                    vertexPos = (rotMatrix * distance) + componentPos;
+                    vertexPos = rotMatrix.TransformPoint(distance) + componentPos;
                     specialColData->m_pVertices[specialColTriangle.m_vertIndices[i]] = CompressVector(vertexPos);
                     if (maxZ < vertexPos.z)
                         maxZ = vertexPos.z;
@@ -3856,7 +3856,7 @@ bool CAutomobile::UpdateMovingCollision(float angle) {
             if (specialColSphere.m_Surface.m_nMaterial == SURFACE_CAR_MOVINGCOMPONENT) {
                 CColSphere& colSphere = colData->m_pSpheres[i];
                 CVector distance = colSphere.m_vecCenter - componentPos;
-                specialColSphere.m_vecCenter = (rotMatrix * distance) + componentPos;
+                specialColSphere.m_vecCenter = (rotMatrix.TransformPoint(distance)) + componentPos;
                 const float newMaxZ = specialColSphere.m_fRadius + specialColSphere.m_vecCenter.z;
                 const float newMinZ = specialColSphere.m_vecCenter.z - specialColSphere.m_fRadius;
                 if (maxZ < newMaxZ)
@@ -4305,7 +4305,7 @@ void CAutomobile::DoNitroEffect(float power) {
     bool secondExhaustSubmergedInWater = false;
     float level = 0.0f;
     if (physicalFlags.bTouchingWater) {
-        CVector point = *m_matrix * exhaustPosition;
+        CVector point = m_matrix->TransformPoint(exhaustPosition);
         if (CWaterLevel::GetWaterLevel(point.x, point.y, point.z, level, true, nullptr)) {
             if (level >= point.z)
                 firstExhaustSubmergedInWater = true;
@@ -4316,7 +4316,7 @@ void CAutomobile::DoNitroEffect(float power) {
         secondExhaustPosition = exhaustPosition;
         secondExhaustPosition.x *= -1.0f;
         if (!physicalFlags.bTouchingWater) {
-            CVector point = *m_matrix * secondExhaustPosition;
+            CVector point = m_matrix->TransformPoint(secondExhaustPosition);
             if (CWaterLevel::GetWaterLevel(point, level, true)) {
                 if (level >= point.z)
                     secondExhaustSubmergedInWater = true;
@@ -5415,7 +5415,7 @@ void CAutomobile::ProcessHarvester()
     if (!m_harvesterParticleCounter)
         return;
 
-    CVector pos = *m_matrix * CVector(-1.2f, -3.8f, 1.5f);
+    CVector pos = m_matrix->TransformPoint(CVector(-1.2f, -3.8f, 1.5f));
     CVector velocity = GetForward() * -0.1f;
     velocity.x += CGeneral::GetRandomNumberInRange(0.05f, -0.05f);
     velocity.y += CGeneral::GetRandomNumberInRange(0.05f, -0.05f);
@@ -5499,7 +5499,7 @@ void CAutomobile::ProcessSwingingDoor(eCarNodes nodeIdx, eDoors doorIdx)
             this,
             m_moveForce,
             m_turnForce,
-            Multiply3x3(*m_matrix, frameMatrix.GetPosition())
+            m_matrix->TransformVector(frameMatrix.GetPosition())
         )) {
             m_damageManager.SetDoorOpen(doorIdx);
         }
@@ -5525,7 +5525,7 @@ void CAutomobile::ProcessSwingingDoor(eCarNodes nodeIdx, eDoors doorIdx)
         this,
         m_moveForce,
         m_turnForce,
-        Multiply3x3(*m_matrix, frameMatrix.GetPosition())
+        m_matrix->TransformVector(frameMatrix.GetPosition())
     )) {
         m_damageManager.SetDoorClosed(doorIdx);
         m_vehicleAudio.AddAudioEvent((eAudioEvents)((int32)AE_CAR_BONNET_CLOSE + (int32)doorIdx), 0.f);
@@ -5654,7 +5654,7 @@ void CAutomobile::TankControl()
         if (CPad::GetPad()->CarGunJustDown()) {
             if (CTimer::GetTimeInMS() > m_nGunFiringTime + TIGER_GUNFIRE_RATE) {
                 CWeapon minigun(WEAPON_MINIGUN, 5000);
-                CVector point = *m_matrix * TIGER_GUN_POS + CTimer::GetTimeStep() * m_vecMoveSpeed;
+                CVector point = m_matrix->TransformPoint(TIGER_GUN_POS + CTimer::GetTimeStep() * m_vecMoveSpeed);
                 minigun.FireInstantHit(this, &point, &point, nullptr, nullptr, nullptr, false, true);
                 CVector2D direction(0.0f, 0.1f);
                 minigun.AddGunshell(this, point, direction, 0.025f);
@@ -5680,7 +5680,7 @@ void CAutomobile::TankControl()
         m_fDoomVerticalRotation   -= ((float)pad->GetCarGunLeftRight() * CTimer::GetTimeStep() * 0.015f) / 128.0f;
         m_fDoomHorizontalRotation += ((float)pad->GetCarGunUpDown() * CTimer::GetTimeStep() * 0.005f) / 128.0f;
     } else {
-        CVector frontDot = Multiply3x3(activeCam.m_vecFront, GetMatrix());
+        CVector frontDot = GetMatrix().InverseTransformVector(activeCam.m_vecFront);
         float doomVerticalRotation   = std::atan2(-frontDot.x, frontDot.y);
         float doomHorizontalRotation = std::atan2(frontDot.z, frontDot.Magnitude2D()) + DegreesToRadians(15);
 
@@ -5737,7 +5737,7 @@ void CAutomobile::TankControl()
             point.x = std::sin(-m_fDoomVerticalRotation);
             point.y = std::cos(m_fDoomVerticalRotation);
             point.z = std::sin(m_fDoomHorizontalRotation);
-            point = Multiply3x3(GetMatrix(), point);
+            point = GetMatrix().TransformVector(point);
 
             CVector newTurretPosition;
             if (m_aCarNodes[CAR_MISC_C]) { // 0x6AED5D
@@ -5765,7 +5765,7 @@ void CAutomobile::TankControl()
                 // BUG?: This statement is not assigned to any variable.
                 // It should be `newTurretPosition =  *m_matrix * doomOffset`
                 // Izzotop: Fixed, equal to OG code; untested -> remove ^ after tests
-                newTurretPosition = *m_matrix * doomOffset;
+                newTurretPosition = m_matrix->TransformPoint(doomOffset);
             }
 
             CVector distance = newTurretPosition - GetPosition();
@@ -6310,7 +6310,7 @@ bool CAutomobile::RcbanditCheck1CarWheels(CPtrList& ptrList)
                 wheelMatrix = Invert(*m_matrix, wheelMatrix);
 
                 CColSphere sphere;
-                sphere.m_vecCenter = wheelMatrix * (*vehicle->m_matrix * wheelPos);
+                sphere.m_vecCenter = wheelMatrix.TransformPoint(vehicle->m_matrix->TransformPoint(wheelPos));
                 sphere.m_fRadius = modelInfo->m_fWheelSizeFront * 0.25f;
                 if (CCollision::TestSphereBox(sphere, colModel->m_boundBox))
                     return true;
@@ -6382,7 +6382,7 @@ void CAutomobile::FireTruckControl(CFire* fire) {
             m_fDoomHorizontalRotation += ((float)pad->GetCarGunUpDown()    * CTimer::GetTimeStepInSeconds()) / 128.0f;
         }
         else {
-            CVector frontDot = Multiply3x3(activeCam.m_vecFront, GetMatrix());
+            CVector frontDot = GetMatrix().InverseTransformVector(activeCam.m_vecFront);
             float doomVerticalRotation   = std::atan2(-frontDot.x, frontDot.y);
             float doomHorizontalRotation = std::atan2(+frontDot.z, frontDot.Magnitude2D());
 
@@ -6429,9 +6429,8 @@ void CAutomobile::FireTruckControl(CFire* fire) {
     if (m_aCarNodes[CAR_MISC_A]) {
         RwMatrix* carNodeMiscMatrix = RwFrameGetLTM(m_aCarNodes[CAR_MISC_A]);
         newTurretPosition = *RwMatrixGetPos(carNodeMiscMatrix);
-    }
-    else {
-        newTurretPosition = *m_matrix * CVector(0.0f, 1.5f, 1.8f);
+    } else {
+        newTurretPosition = m_matrix->TransformPoint(CVector(0.0f, 1.5f, 1.8f));
     }
 
     CVector point{
@@ -6439,7 +6438,7 @@ void CAutomobile::FireTruckControl(CFire* fire) {
         std::cos(m_fDoomVerticalRotation)   * std::cos(m_fDoomHorizontalRotation),
         std::sin(m_fDoomHorizontalRotation),
     };
-    point = Multiply3x3(GetMatrix(), point); // 0x72A062
+    point = GetMatrix().TransformVector(point); // 0x72A062
 
     if (m_aCarNodes[CAR_MISC_A]) {
         if (ModelIndices::IsSwatVan(m_nModelIndex))

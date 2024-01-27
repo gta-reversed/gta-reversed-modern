@@ -1122,7 +1122,7 @@ CVector* CEntity::FindTriggerPointCoors(CVector* outVec, int32 triggerIndex)
     for (int32 iFxInd = 0; iFxInd < mi->m_n2dfxCount; ++iFxInd) {
         auto effect = mi->Get2dEffect(iFxInd);
         if (effect->m_type == e2dEffectType::EFFECT_TRIGGER_POINT && effect->slotMachineIndex.m_nId == triggerIndex) {
-            *outVec = GetMatrix() * effect->m_pos;
+            *outVec = GetMatrix().TransformPoint(effect->m_pos);
             return outVec;
         }
     }
@@ -1172,7 +1172,7 @@ CVector CEntity::TransformFromObjectSpace(const CVector& offset)
 {
     auto result = CVector();
     if (m_matrix) {
-        result = *m_matrix * offset;
+        result = m_matrix->TransformPoint(offset);
         return result;
     }
 
@@ -2161,7 +2161,7 @@ void CEntity::ProcessLightsForEntity()
                     static_cast<float>(effect->light.offsetY),
                     static_cast<float>(effect->light.offsetZ)
                 };
-                auto vecLightPos = Multiply3x3(GetMatrix(), lightOffset);
+                auto vecLightPos = GetMatrix().TransformVector(lightOffset);
 
                 auto fDot = DotProduct(vecLightPos, (camPos - vecEffPos));
                 bCanCreateLight = fDot >= 0.0F;
@@ -2437,7 +2437,7 @@ bool CEntity::IsEntityOccluded()
             const auto& bounding = mi->GetColModel()->GetBoundingBox();
             CVector vecScreen;
 
-            auto vecMin = GetMatrix() * bounding.m_vecMin;
+            auto vecMin = GetMatrix().TransformPoint(bounding.m_vecMin);
             if (!CalcScreenCoors(vecMin, &vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
                 || !activeOccluder.IsPointBehindOccluder(vecMin, 0.0F)
@@ -2445,7 +2445,7 @@ bool CEntity::IsEntityOccluded()
                 bInView = true;
             }
 
-            auto vecMax = GetMatrix() * bounding.m_vecMax;
+            auto vecMax = GetMatrix().TransformPoint(bounding.m_vecMax);
             if (bInView
                 || !CalcScreenCoors(vecMax, &vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
@@ -2454,7 +2454,7 @@ bool CEntity::IsEntityOccluded()
                 bInView = true;
             }
 
-            auto vecDiag1 = GetMatrix() * CVector(bounding.m_vecMin.x, bounding.m_vecMax.y, bounding.m_vecMax.z);
+            auto vecDiag1 = GetMatrix().TransformVector(CVector(bounding.m_vecMin.x, bounding.m_vecMax.y, bounding.m_vecMax.z));
             if (bInView
                 || !CalcScreenCoors(vecDiag1, &vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
@@ -2463,7 +2463,7 @@ bool CEntity::IsEntityOccluded()
                 bInView = true;
             }
 
-            auto vecDiag2 = GetMatrix() * CVector(bounding.m_vecMax.x, bounding.m_vecMin.y, bounding.m_vecMin.z);
+            auto vecDiag2 = GetMatrix().TransformVector(CVector(bounding.m_vecMax.x, bounding.m_vecMin.y, bounding.m_vecMin.z));
             if (!bInView
                 && CalcScreenCoors(vecDiag2, &vecScreen)
                 && activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
@@ -2478,7 +2478,7 @@ bool CEntity::IsEntityOccluded()
                 if (bounding.GetHeight() <= 30.0F)
                     return true;
 
-                auto vecDiag3 = GetMatrix() * CVector(bounding.m_vecMin.x, bounding.m_vecMin.y, bounding.m_vecMax.z);
+                auto vecDiag3 = GetMatrix().TransformVector(CVector(bounding.m_vecMin.x, bounding.m_vecMin.y, bounding.m_vecMax.z));
                 if (!CalcScreenCoors(vecDiag3, &vecScreen)
                     || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
                     || !activeOccluder.IsPointBehindOccluder(vecDiag3, 0.0F)) {
@@ -2486,7 +2486,7 @@ bool CEntity::IsEntityOccluded()
                     bInView = true;
                 }
 
-                auto vecDiag4 = GetMatrix() * CVector(bounding.m_vecMax.x, bounding.m_vecMin.y, bounding.m_vecMax.z);
+                auto vecDiag4 = GetMatrix().TransformVector(CVector(bounding.m_vecMax.x, bounding.m_vecMin.y, bounding.m_vecMax.z));
                 if (!bInView
                     && CalcScreenCoors(vecDiag4, &vecScreen)
                     && activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
