@@ -267,6 +267,6 @@ static CVector ProjectVector(const CVector& what, const CVector& onto) {
     return onto * (DotProduct(what, onto) / onto.SquaredMagnitude());
 }
 
-[[deprecated]] CVector Multiply3x3_MV(const CMatrix& m, const CVector& v) { NOTSA_UNREACHABLE("Use `m.TransformVector(v)` instead"); }
-[[deprecated]] CVector Multiply3x3_VM(const CVector& v, const CMatrix& m) { NOTSA_UNREACHABLE("Use `m.InverseTransformVector(v)` m"); }
-[[deprecated]] CVector MultiplyMatrixWithVector(const CMatrix& mat, const CVector& vec) { NOTSA_UNREACHABLE("Use `m.TransformPoint(v)` instead"); }
+[[deprecated]] inline CVector Multiply3x3_MV(const CMatrix& m, const CVector& v) { NOTSA_UNREACHABLE("Use `m.TransformVector(v)` instead"); }
+[[deprecated]] inline CVector Multiply3x3_VM(const CVector& v, const CMatrix& m) { NOTSA_UNREACHABLE("Use `m.InverseTransformVector(v)` m"); }
+[[deprecated]] inline CVector MultiplyMatrixWithVector(const CMatrix& mat, const CVector& vec) { NOTSA_UNREACHABLE("Use `m.TransformPoint(v)` instead"); }
