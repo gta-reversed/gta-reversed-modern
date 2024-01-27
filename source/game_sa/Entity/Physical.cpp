@@ -614,8 +614,7 @@ void CPhysical::RemoveAndAdd()
     }
 
     CEntryInfoNode* entryInfoNode = m_pCollisionList.m_node;
-    CRect boundRect;
-    GetBoundRect(&boundRect);
+    CRect boundRect = GetBoundRect();
     int32 startSectorX = CWorld::GetSectorX(boundRect.left);
     int32 startSectorY = CWorld::GetSectorY(boundRect.bottom);
     int32 endSectorX = CWorld::GetSectorX(boundRect.right);
