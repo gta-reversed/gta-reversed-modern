@@ -581,14 +581,14 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, b
                     if (vecMax.x < 1.0F && vecMax.y < 1.0F && vecMax.z < 1.0F)
                     {
                         const auto vecSize = cm->GetBoundingBox().GetSize();
-                        const auto vecTransformed = *colPhysical->m_matrix * vecSize;
+                        const auto vecTransformed = colPhysical->m_matrix->TransformPoint(vecSize);
 
                         if (GetPosition().z > vecTransformed.z)
                             bCollidedEntityCollisionIgnored = true;
                         else
                         {
                             Invert(*m_matrix, tempMat);
-                            if ((tempMat * vecTransformed).z < 0.0F)
+                            if (tempMat.TransformPoint(vecTransformed).z < 0.0F) // `m_matrix->GetUp().Dot(vecTransformed)` should work too
                                 bCollidedEntityCollisionIgnored = true;
                         }
                     }
@@ -1137,7 +1137,7 @@ bool CVehicle::GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CV
 
     auto const fColFront = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox().m_vecMax.y;
     outPos.Set(0.0F, fColFront + 1.0F, 0.0F);
-    outPos = *m_matrix * outPos;
+    outPos = m_matrix->TransformPoint(outPos);
     return true;
 }
 
@@ -1151,7 +1151,7 @@ bool CVehicle::GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVeh
 
     auto const fColRear = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox().m_vecMin.y;
     outPos.Set(0.0F, fColRear - 1.0F, 0.0F);
-    outPos = *m_matrix * outPos;
+    outPos = m_matrix->TransformPoint(outPos);
     return true;
 }
 
@@ -1975,11 +1975,11 @@ void CVehicle::ApplyBoatWaterResistance(tBoatHandlingData* boatHandling, float f
     float fUsedTimeStep = CTimer::GetTimeStep() * 0.5F;
     auto vecSpeedMult = Pow(boatHandling->m_vecMoveRes * fSpeedMult, fUsedTimeStep);
 
-    CVector vecMoveSpeedMatrixDotProduct = Multiply3x3(m_vecMoveSpeed, GetMatrix());
+    CVector vecMoveSpeedMatrixDotProduct = GetMatrix().InverseTransformVector(m_vecMoveSpeed);
     m_vecMoveSpeed = vecMoveSpeedMatrixDotProduct * vecSpeedMult;
 
     auto fMassMult = (vecSpeedMult.y - 1.0F) * m_vecMoveSpeed.y * m_fMass;
-    CVector vecTransformedMoveSpeed = Multiply3x3(GetMatrix(), m_vecMoveSpeed);
+    CVector vecTransformedMoveSpeed = GetMatrix().TransformVector(m_vecMoveSpeed);
     m_vecMoveSpeed = vecTransformedMoveSpeed;
 
     auto vecDown = GetUp() * -1.0F;
@@ -2017,7 +2017,7 @@ CVector CVehicle::GetDummyPositionObjSpace(eVehicleDummy dummy) const {
 CVector CVehicle::GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace) {
     CVector pos = GetDummyPositionObjSpace(dummy);
     if (bWorldSpace)
-        pos = GetMatrix() * pos; // transform to world-space
+        pos = GetMatrix().TransformPoint(pos); // transform to world-space
     return pos;
 }
 
@@ -2584,7 +2584,7 @@ CVector CVehicle::GetDriverSeatDummyPositionOS() const {
 }
 
 CVector CVehicle::GetDriverSeatDummyPositionWS() {
-    return GetMatrix() * GetDriverSeatDummyPositionOS();
+    return GetMatrix().TransformPoint(GetDriverSeatDummyPositionOS());
 }
 
 CVehicleAnimGroup& CVehicle::GetAnimGroup() const {
@@ -2596,27 +2596,27 @@ AssocGroupId CVehicle::GetAnimGroupId() const {
 }
 
 // 0x6D3CB0
-void CVehicle::ReleasePickedUpEntityWithWinch() {
+void CVehicle::ReleasePickedUpEntityWithWinch() const {
     return CRopes::GetRope(GetRopeID()).ReleasePickedUpObject();
 }
 
 // 0x6D3CD0
-void CVehicle::PickUpEntityWithWinch(CEntity* entity) {
+void CVehicle::PickUpEntityWithWinch(CEntity* entity) const {
     return CRopes::GetRope(GetRopeID()).PickUpObject(entity);
 }
 
 // 0x6D3CF0
-CEntity* CVehicle::QueryPickedUpEntityWithWinch() {
+CEntity* CVehicle::QueryPickedUpEntityWithWinch() const {
     return CRopes::GetRope(GetRopeID()).m_pRopeAttachObject;
 }
 
 // 0x6D3D10
-float CVehicle::GetRopeHeightForHeli() {
+float CVehicle::GetRopeHeightForHeli() const {
     return CRopes::GetRope(GetRopeID()).m_fSegmentLength;
 }
 
 // 0x6D3D30
-void CVehicle::SetRopeHeightForHeli(float height) {
+void CVehicle::SetRopeHeightForHeli(float height) const {
     CRopes::GetRope(GetRopeID()).m_fSegmentLength = height;
 }
 
@@ -3454,7 +3454,7 @@ bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
     };
 
     const auto [rotorUp, rotorSizeMS] = GetRotorDirUpAndThickness();
-    const auto rotorSize              = Multiply3x3(matrix, rotorSizeMS);
+    const auto rotorSize              = matrix.TransformVector(rotorSizeMS);
     const auto colModelCenter         = MultiplyMatrixWithVector(matrix, colModel.GetBoundCenter());
     const auto& thisPosn              = GetPosition();
 
@@ -3761,7 +3761,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
             const auto& vecBoundingMin = CEntity::GetColModel()->m_boundBox.m_vecMin;
             CVector vecThrustPoint(0.0F, vecBoundingMin.y * boatHandling->m_fThrustY, vecBoundingMin.z * boatHandling->m_fThrustZ);
-            auto vecTransformedThrustPoint = Multiply3x3(GetMatrix(), vecThrustPoint);
+            auto vecTransformedThrustPoint = GetMatrix().TransformVector(vecThrustPoint);
 
             auto vecWorldThrustPos = GetPosition() + vecTransformedThrustPoint;
             float fWaterLevel;
@@ -3788,7 +3788,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
                     auto fSteerAngle = std::fabs(m_fSteerAngle);
                     CVector vecSteer(-fSteerAngleSin, fSteerAngleCos, -fSteerAngle);
-                    CVector vecSteerMoveForce = Multiply3x3(GetMatrix(), vecSteer);
+                    CVector vecSteerMoveForce = GetMatrix().TransformVector(vecSteer);
                     vecSteerMoveForce *= fThrustDepth * m_fGasPedal * 40.0F * m_pHandlingData->m_transmissionData.m_fEngineAcceleration * m_fMass;
 
                     if (vecSteerMoveForce.z > 0.2F)
@@ -3841,7 +3841,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
                     CVector vecTractionLoss(-fSteerAngleSin, 0.0F, 0.0F);
                     vecTractionLoss *= fTractionLoss;
-                    CVector vecTractionLossTransformed = Multiply3x3(GetMatrix(), vecTractionLoss);
+                    CVector vecTractionLossTransformed = GetMatrix().TransformVector(vecTractionLoss);
                     vecTractionLossTransformed *= fThrustDepth * CTimer::GetTimeStep();
 
                     CPhysical::ApplyMoveForce(vecTractionLossTransformed);
@@ -3889,7 +3889,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
     // 0x6DCD63
     if ((m_nModelIndex != MODEL_SKIMMER || m_f2ndSteerAngle == 0.0F) && !bCollidedWithWorld) {
         auto vecTurnRes = Pow(boatHandling->m_vecTurnRes, CTimer::GetTimeStep());
-        m_vecTurnSpeed = Multiply3x3(m_vecTurnSpeed, GetMatrix());
+        m_vecTurnSpeed = GetMatrix().InverseTransformVector(m_vecTurnSpeed);
         m_vecTurnSpeed.y *= vecTurnRes.y;
         m_vecTurnSpeed.z *= vecTurnRes.z;
 
@@ -3897,8 +3897,8 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
         fMult *= m_fTurnMass;
         auto vecTurnForce = GetUp() * fMult;
 
-        m_vecTurnSpeed = Multiply3x3(GetMatrix(), m_vecTurnSpeed);
-        auto vecCentreOfMass = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
+        m_vecTurnSpeed = GetMatrix().TransformVector(m_vecTurnSpeed);
+        auto vecCentreOfMass = GetMatrix().TransformVector(m_vecCentreOfMass);
         auto vecTurnPoint = GetForward() + vecCentreOfMass;
         CPhysical::ApplyTurnForce(vecTurnForce, vecTurnPoint);
     }
@@ -4112,7 +4112,7 @@ void CVehicle::AddExhaustParticles() {
         vecParticleVelocity = randomFactor * GetForward();
     }
 
-    firstExhaustPos = entityMatrix * firstExhaustPos;
+    firstExhaustPos = entityMatrix.TransformPoint(firstExhaustPos);
     bool bFirstExhaustSubmergedInWater = false;
     bool bSecondExhaustSubmergedInWater = false;
     float pLevel = 0.0f;
@@ -4122,7 +4122,7 @@ void CVehicle::AddExhaustParticles() {
     }
 
     if (bHasDoubleExhaust) {
-        secondExhaustPos = entityMatrix * secondExhaustPos;
+        secondExhaustPos = entityMatrix.TransformPoint(secondExhaustPos);
         if (physicalFlags.bTouchingWater && CWaterLevel::GetWaterLevel(secondExhaustPos, pLevel, true) &&
             pLevel >= secondExhaustPos.z) {
             bSecondExhaustSubmergedInWater = true;
@@ -4267,7 +4267,7 @@ void CVehicle::DoHeadLightBeam(eVehicleDummy dummyId, CMatrix& matrix, bool arg2
     if (dummyId == DUMMY_LIGHT_REAR_MAIN && pointModelSpace.IsZero())
         return;
 
-    CVector point = matrix.GetPosition() + Multiply3x3(matrix, pointModelSpace);
+    CVector point = matrix.GetPosition() + matrix.TransformVector(pointModelSpace);
     if (!arg2) {
         point -= 2 * pointModelSpace.x * matrix.GetRight();
     }

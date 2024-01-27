@@ -1577,7 +1577,7 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
         ? barrelPosn
         : &point;
     if (!startPosn) {
-        point     = firedBy->GetMatrix() * point;
+        point     = firedBy->GetMatrix().TransformPoint(point);
         startPosn = &point;
     }
 

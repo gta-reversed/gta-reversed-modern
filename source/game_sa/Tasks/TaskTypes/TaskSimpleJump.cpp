@@ -114,7 +114,7 @@ bool CTaskSimpleJump::CheckIfJumpBlocked(CPed* ped) {
     m_bClimbJump = CWorld::TestSphereAgainstWorld(posn, 0.25F, 0, true, true, false, true, false, false) != 0;
 
     CVector savedPedPosition = ped->GetPosition();
-    ped->SetPosn((*ped->m_matrix) * CVector(0.0F, 0.0F, 0.75F));
+    ped->SetPosn((*ped->m_matrix).TransformPoint(CVector(0.0F, 0.0F, 0.75F)));
 
     for (uint32 i = 0; i < pedColData->m_nNumSpheres; i++)
         pedColData->m_pSpheres[i].m_fRadius = 0.3F;

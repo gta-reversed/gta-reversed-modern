@@ -23,6 +23,7 @@
 #include "FxSystem.h"
 #include "Fire.h"
 
+#include <extensions/EntityRef.hpp>
 #include <Enums/eControllerType.h>
 
 /*  Thanks to MTA team for https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CVehicleSA.cpp */
@@ -177,6 +178,8 @@ struct tHydraulicData {
 VALIDATE_SIZE(tHydraulicData, 0x28);
 
 class NOTSA_EXPORT_VTABLE CVehicle : public CPhysical {
+public:
+    using Ref = notsa::EntityRef<CVehicle>;
 public:
     static constexpr auto NUM_VEHICLE_UPGRADES = 15u;
 
@@ -574,11 +577,11 @@ public:
     void InitWinch(int32 arg0);
     void UpdateWinch();
     void RemoveWinch();
-    void ReleasePickedUpEntityWithWinch();
-    void PickUpEntityWithWinch(CEntity* entity);
-    CEntity* QueryPickedUpEntityWithWinch();
-    float GetRopeHeightForHeli();
-    void SetRopeHeightForHeli(float height);
+    void ReleasePickedUpEntityWithWinch() const;
+    void PickUpEntityWithWinch(CEntity* entity) const;
+    CEntity* QueryPickedUpEntityWithWinch() const;
+    float GetRopeHeightForHeli() const;
+    void SetRopeHeightForHeli(float height) const;
     void RenderDriverAndPassengers();
     void PreRenderDriverAndPassengers();
     float GetPlaneGunsAutoAimAngle();

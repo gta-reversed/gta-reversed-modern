@@ -359,7 +359,7 @@ public:
     
         ped->AttachPedToEntity(
             commonBoat,
-            Multiply3x3(Invert(commonBoat->GetMatrix()), newPedPos - boatPos),
+            Invert(commonBoat->GetMatrix()).TransformVector(newPedPos - boatPos),
             (int16)CGeneral::LimitRadianAngle(CGeneral::GetRadianAngleBetweenPoints(pedToBoatDir, {})),
             0.2f,
             ped->GetActiveWeapon().m_Type

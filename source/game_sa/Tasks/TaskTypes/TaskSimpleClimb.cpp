@@ -115,7 +115,7 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped) {
     CVector posn = m_vecHandholdPos;
 
     if (m_pClimbEnt->IsPhysical()) {
-        posn = m_pClimbEnt->GetMatrix() * posn;
+        posn = m_pClimbEnt->GetMatrix().TransformPoint(posn);
         fAngle += m_pClimbEnt->GetHeading();
     }
 
@@ -309,7 +309,7 @@ CEntity* CTaskSimpleClimb::TestForClimb(CPed* ped, CVector& outClimbPos, float& 
         float angle = outClimbHeading;
 
         if (entity->IsPhysical()) {
-            point = entity->GetMatrix() * point;
+            point = entity->GetMatrix().TransformPoint(point);
             angle += entity->GetHeading();
         }
 
@@ -365,7 +365,7 @@ void* CTaskSimpleClimb::ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CV
                 )
             )
         {
-            if (DistanceBetweenPoints(entity->GetBoundCentre(), ped->GetMatrix() * cm->GetBoundCenter()) >= entity->GetModelInfo()->GetColModel()->GetBoundRadius() + cm->GetBoundRadius())
+            if (DistanceBetweenPoints(entity->GetBoundCentre(), ped->GetMatrix().TransformPoint(cm->GetBoundCenter())) >= entity->GetModelInfo()->GetColModel()->GetBoundRadius() + cm->GetBoundRadius())
                 continue;
 
             int32 numSpheres = -1;
@@ -490,7 +490,7 @@ CEntity* CTaskSimpleClimb::ScanToGrab(CPed* ped, CVector& climbPos, float& fAngl
 
     climbPos = ped->GetPosition() + ped->GetForward() * 10.0f;
 
-    auto outPoint = *ped->m_matrix * ms_ClimbColModel.GetBoundCenter();
+    auto outPoint = ped->m_matrix->TransformPoint(ms_ClimbColModel.GetBoundCenter());
 
     int32 startSectorX = CWorld::GetSectorX(outPoint.x - ms_ClimbColModel.GetBoundRadius());
     int32 startSectorY = CWorld::GetSectorY(outPoint.y - ms_ClimbColModel.GetBoundRadius());
@@ -530,7 +530,7 @@ CEntity* CTaskSimpleClimb::ScanToGrab(CPed* ped, CVector& climbPos, float& fAngl
 
     if (collidedEntity) {
         if (collidedEntity->IsPhysical()) {
-            climbPos = Invert(collidedEntity->GetMatrix()) * climbPos;
+            climbPos = Invert(collidedEntity->GetMatrix()).TransformPoint(climbPos);
             fAngle -= collidedEntity->GetHeading();
         }
     }
@@ -694,7 +694,7 @@ void CTaskSimpleClimb::GetCameraStickModifier(CEntity* entity, float& fVerticalA
         float fAngle = m_fHandholdHeading;
 
         if (m_pClimbEnt->IsPhysical()) {
-            vec = *m_pClimbEnt->m_matrix * vec;
+            vec = m_pClimbEnt->m_matrix->TransformPoint(vec);
             fAngle += m_pClimbEnt->GetHeading();
         }
 
@@ -769,7 +769,7 @@ void CTaskSimpleClimb::GetCameraTargetPos(CPed* ped, CVector& vecTarget) {
     CVector point = m_vecHandholdPos;
     float fAngle = m_fHandholdHeading;
     if (m_pClimbEnt->IsPhysical()) {
-        point = m_pClimbEnt->GetMatrix() * point;
+        point = m_pClimbEnt->GetMatrix().TransformPoint(point);
         fAngle += m_pClimbEnt->GetHeading();
     }
 

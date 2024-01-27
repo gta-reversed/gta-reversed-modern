@@ -18,8 +18,6 @@ CEventSexyPed::~CEventSexyPed() {
 }
 
 bool CEventSexyPed::AffectsPed(CPed* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x4AEF00, CEventSexyPed*, CPed*>(this, ped);
-
     if (!ped->IsAlive())
         return false;
 
@@ -33,18 +31,10 @@ bool CEventSexyPed::AffectsPed(CPed* ped) {
         return false;
     }
 
-    /*
-    // todo:
-    if (((task = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_DEAL)) != 0 ||
-         (task = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_BE_IN_COUPLE)) != 0 ||
-         (task = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET)) != 0) &&
-        ((v5 = m_SexyPed->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_DEAL)) != 0 ||
-         (v5 = m_SexyPed->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_BE_IN_COUPLE)) != 0 ||
-         (v5 = m_SexyPed->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET)) != 0) &&
-        (task->GetTaskType() == v5->GetTaskType())) {
+    if (ped->GetTaskManager().IsFirstFoundTaskMatching<TASK_COMPLEX_PARTNER_DEAL, TASK_COMPLEX_BE_IN_COUPLE, TASK_COMPLEX_PARTNER_GREET>(m_SexyPed->GetTaskManager())) {
         return false;
     }
-    */
+
     return true;
 }
 

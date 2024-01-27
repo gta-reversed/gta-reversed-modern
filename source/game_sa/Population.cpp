@@ -1680,7 +1680,7 @@ int32 CPopulation::GeneratePedsAtAttractors(
                 }
             }
 
-            const auto effectPosWS = ent->GetMatrix() * effect->m_pos; // ws = world space
+            const auto effectPosWS = ent->GetMatrix().TransformPoint(effect->m_pos); // ws = world space
             if (!IsEffectInRadius(effectPosWS)) {
                 continue;
             }
