@@ -4,8 +4,6 @@
 
 #include "EventEditableResponse.h"
 #include "Vector.h"
-#include "EventAcquaintancePed.h"
-
 
 class NOTSA_EXPORT_VTABLE CEventAcquaintancePed : public CEventEditableResponse {
 public:

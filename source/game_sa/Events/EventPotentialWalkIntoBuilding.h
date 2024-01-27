@@ -2,8 +2,6 @@
 
 #include "EventBuildingCollision.h"
 
-#include "EventPotentialWalkIntoBuilding.h"
-
 
 
 class CEventPotentialWalkIntoBuilding : public CEventBuildingCollision {

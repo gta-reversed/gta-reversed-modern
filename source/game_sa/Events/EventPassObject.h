@@ -3,8 +3,6 @@
 #include "Event.h"
 
 #include "Event.h"
-#include "EventPassObject.h"
-
 
 class CEventPassObject : public CEvent {
 public:

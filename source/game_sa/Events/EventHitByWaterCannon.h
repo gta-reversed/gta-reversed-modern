@@ -3,8 +3,6 @@
 #include "Event.h"
 
 #include "Event.h"
-#include "EventHitByWaterCannon.h"
-
 
 class NOTSA_EXPORT_VTABLE CEventHitByWaterCannon : public CEvent {
 public:

@@ -3,8 +3,6 @@
 #include "Event.h"
 
 #include "Event.h"
-#include "EventSexyVehicle.h"
-
 
 class CEventSexyVehicle : public CEvent {
 public:

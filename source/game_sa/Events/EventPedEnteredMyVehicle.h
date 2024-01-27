@@ -3,8 +3,6 @@
 #include "EventEditableResponse.h"
 
 #include "EventEditableResponse.h"
-#include "EventPedEnteredMyVehicle.h"
-
 
 class CEventPedEnteredMyVehicle : public CEventEditableResponse {
 public:

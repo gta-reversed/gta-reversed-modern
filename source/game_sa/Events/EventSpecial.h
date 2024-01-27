@@ -2,8 +2,6 @@
 
 #include "EventEditableResponse.h"
 
-#include "EventSpecial.h"
-
 
 class CEventSpecial : public CEventEditableResponse {
 public:

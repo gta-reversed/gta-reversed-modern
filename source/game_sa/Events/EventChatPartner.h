@@ -3,8 +3,6 @@
 #include "Event.h"
 
 #include "Event.h"
-#include "EventChatPartner.h"
-
 
 class CEventChatPartner : public CEvent {
 public:

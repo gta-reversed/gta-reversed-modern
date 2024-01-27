@@ -3,8 +3,6 @@
 #include "EventGunShot.h"
 
 #include "EventGunShot.h"
-#include "EventGunShotWhizzedBy.h"
-
 
 class NOTSA_EXPORT_VTABLE CEventGunShotWhizzedBy : public CEventGunShot {
 public:

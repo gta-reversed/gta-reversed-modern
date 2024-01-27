@@ -1,8 +1,6 @@
 #pragma once
 
 
-#include "EventSource.h"
-
 
 class CEventSource {
 public:

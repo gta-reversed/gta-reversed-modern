@@ -3,8 +3,6 @@
 #include "Event.h"
 
 #include "Event.h"
-#include "EventInAir.h"
-
 
 class NOTSA_EXPORT_VTABLE CEventInAir : public CEvent {
 public:

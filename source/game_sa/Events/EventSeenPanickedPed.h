@@ -2,8 +2,6 @@
 
 #include "EventEditableResponse.h"
 
-#include "EventSeenPanickedPed.h"
-
 
 class CEventSeenPanickedPed : public CEventEditableResponse {
 public:

@@ -3,8 +3,6 @@
 #include "EventGroup.h"
 
 #include "EventGroup.h"
-#include "EventGlobalGroup.h"
-
 
 class NOTSA_EXPORT_VTABLE CEventGlobalGroup : public CEventGroup {
 public:

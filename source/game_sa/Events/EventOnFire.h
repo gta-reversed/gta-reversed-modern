@@ -3,8 +3,6 @@
 #include "Event.h"
 
 #include "Event.h"
-#include "EventOnFire.h"
-
 
 class CEventOnFire : public CEvent {
 public:

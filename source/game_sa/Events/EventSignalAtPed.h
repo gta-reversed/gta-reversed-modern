@@ -3,8 +3,6 @@
 #include "Event.h"
 
 #include "Event.h"
-#include "EventSignalAtPed.h"
-
 
 class CEventSignalAtPed final : public CEvent {
 public:

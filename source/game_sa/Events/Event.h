@@ -2,8 +2,6 @@
 
 
 #include "eEventType.h"
-#include "Event.h"
-
 
 class CPed;
 class CEntity;
