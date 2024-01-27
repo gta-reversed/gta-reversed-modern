@@ -598,7 +598,7 @@ public:
     }
 
     auto GetPedModelInfo() const { return reinterpret_cast<CPedModelInfo*>(GetModelInfo()); }
-    
+
     /*!
      * @notsa
      * @brief Returns vehicle's position if ped is in one, ped's otherwise.
@@ -613,17 +613,6 @@ private:
     // Virtual method wrappers
     auto Constructor(ePedType pt) { this->CPed::CPed(pt); return this; }
     auto Destructor() { this->CPed::~CPed(); return this; }
-    void SetModelIndex_Reversed(uint32 model) { CPed::SetModelIndex(model); }
-    void DeleteRwObject_Reversed() { CPed::DeleteRwObject(); }
-    void Teleport_Reversed(CVector dest, bool resetRot) { CPed::Teleport(dest, resetRot); }
-    void PreRender_Reversed() { CPed::PreRender(); }
-    void Render_Reversed() { CPed::Render(); }
-    bool SetupLighting_Reversed() { return CPed::SetupLighting(); }
-    void RemoveLighting_Reversed(bool bRemove) { CPed::RemoveLighting(bRemove); }
-    void FlagToDestroyWhenNextProcessed_Reversed() { CPed::FlagToDestroyWhenNextProcessed(); }
-    void SetMoveAnim_Reversed() { CPed::SetMoveAnim(); }
-    void Save_Reversed() { CPed::Save(); }
-    void Load_Reversed() { CPed::Load(); }
 };
 VALIDATE_SIZE(CPed, 0x79C);
 

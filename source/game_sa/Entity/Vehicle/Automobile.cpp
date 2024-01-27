@@ -1503,6 +1503,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags) {
     return false;
 }
 
+// 0x6A2AE0
 void CAutomobile::ResetSuspension()
 {
     for (int32 i = 0; i < 4; i++) {
@@ -1560,6 +1561,7 @@ void CAutomobile::DoHoverSuspensionRatios()
     }
 }
 
+// 0x6AFB10
 void CAutomobile::ProcessSuspension() {
     float springLength[4]{};
     float wheelSpringForceDampingLimits[4]{};
@@ -6225,7 +6227,7 @@ void CAutomobile::SetDoorDamage(eDoors doorIdx, bool withoutVisualEffect)
             switch (m_damageManager.GetDoorStatus(doorIdx)) { // 0x6B1659
             case eDoorStatus::DAMSTATE_OPENED_DAMAGED:
             case eDoorStatus::DAMSTATE_NOTPRESENT: {
-                // 0x0x6B1667
+                // 0x6B1667
                 door.Open(0.f);
                 m_damageManager.SetDoorStatus(doorIdx, eDoorStatus::DAMSTATE_DAMAGED);
                 return;
@@ -6485,6 +6487,7 @@ void CAutomobile::PreRender() {
     plugin::CallMethod<0x6AAB50, CAutomobile*>(this);
 }
 
+// 0x6A9CA0
 void CAutomobile::Teleport(CVector destination, bool resetRotation) {
     CWorld::Remove(this);
     GetPosition() = destination;

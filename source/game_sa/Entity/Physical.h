@@ -254,14 +254,6 @@ private:
     CPhysical* Constructor() { this->CPhysical::CPhysical(); return this; }
     CPhysical* Destructor() { this->CPhysical::~CPhysical(); return this; }
 
-    void Add_Reversed() { CPhysical::Add(); }
-    void Remove_Reversed() { CPhysical::Remove(); }
-    CRect GetBoundRect_Reversed() { return CPhysical::GetBoundRect(); }
-    void ProcessControl_Reversed() { CPhysical::ProcessControl(); }
-    int32 ProcessEntityCollision_Reversed(CEntity* entity, CColPoint* colPoint) { return CPhysical::ProcessEntityCollision(entity, colPoint); }
-    void ProcessCollision_Reversed() { CPhysical::ProcessCollision(); }
-    void ProcessShift_Reversed() { CPhysical::ProcessShift(); }
-    bool TestCollision_Reversed(bool bApplySpeed) { return CPhysical::TestCollision(bApplySpeed); }
 };
 
 VALIDATE_SIZE(CPhysical, 0x138);
