@@ -10,6 +10,11 @@ class Furniture_c;
 
 class FurnitureManager_c {
 public:
+    static uint32& g_currSubGroupId;
+    static uint32& g_currFurnitureId;
+    static FurnitureSubGroup_c (&g_subGroupStore)[128];
+
+public:
     FurnitureGroup_c m_groups[9];
     FurnitureItem    m_furnitureItem[512];
     TList_c<FurnitureItem> m_furnitureList;
@@ -31,7 +36,3 @@ public:
 VALIDATE_SIZE(FurnitureManager_c, 0x2078);
 
 static inline auto& g_furnitureMan = StaticRef<FurnitureManager_c, 0xBAB380>();
-
-extern uint32& g_currSubGroupId;
-extern uint32& g_currFurnitureId;
-extern FurnitureSubGroup_c (&g_subGroupStore)[128];

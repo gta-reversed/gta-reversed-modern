@@ -1,9 +1,78 @@
 #include "StdInc.h"
 #include "FurnitureManager_c.h"
 
-uint32& g_currSubGroupId = StaticRef<uint32, 0xBAB37C>();
-uint32& g_currFurnitureId = StaticRef<uint32, 0xBAB378>();
-FurnitureSubGroup_c (&g_subGroupStore)[128] = *(FurnitureSubGroup_c(*)[128])0xBAD3F8;
+uint32& FurnitureManager_c::g_currSubGroupId  = StaticRef<uint32, 0xBAB37C>();
+uint32& FurnitureManager_c::g_currFurnitureId = StaticRef<uint32, 0xBAB378>();
+FurnitureSubGroup_c (&FurnitureManager_c::g_subGroupStore)[128] = *(FurnitureSubGroup_c(*)[128])0xBAD3F8;
+
+std::map<std::string_view, int32> groups = {
+    { "IT_SHOP",    0},
+    { "IT_OFFICE",  1},
+    { "IT_LOUNGE",  2},
+    { "IT_BEDROOM", 3},
+    { "IT_KITCHEN", 4},
+    { "IT_MISC",    8},
+};
+
+std::map<std::string_view, int32> subGroups = {
+// SHOP
+    { "SHOP_UNIT1_L",         0 },
+    { "SHOP_UNIT1_R",         1 },
+    { "SHOP_UNIT1_M",         2 },
+    { "SHOP_UNIT2_L",         3 },
+    { "SHOP_UNIT2_R",         4 },
+    { "SHOP_UNIT2_M",         5 },
+    { "SHOP_UNIT3_L",         6 },
+    { "SHOP_UNIT3_R",         7 },
+    { "SHOP_UNIT3_M",         8 },
+    { "SHOP_UNIT4_L",         9 },
+    { "SHOP_UNIT4_R",         10},
+    { "SHOP_UNIT4_M",         11},
+    { "SHOP_CHECKOUTS",       12},
+    { "SHOP_BASKETS",         13},
+    { "SHOP_LIGHTS",          14},
+ // OFFICE
+    { "OFFICE_DESKS",         0 },
+    { "OFFICE_CHAIRS",        1 },
+    { "OFFICE_WATERCOOLERS",  2 },
+    { "OFFICE_FILINGCABS",    3 },
+ // LOUNGE
+    { "LOUNGE_SOFAS",         0 },
+    { "LOUNGE_CHAIRS",        1 },
+    { "LOUNGE_TVSTANDS",      2 },
+    { "LOUNGE_TVS",           3 },
+    { "LOUNGE_TABLES",        4 },
+    { "LOUNGE_LAMPS",         5 },
+    { "LOUNGE_HIFI_TABLES",   6 },
+    { "LOUNGE_VIDEOS",        7 },
+    { "LOUNGE_HIFIS",         8 },
+    { "LOUNGE_CONSOLES",      9 },
+ // BEDROOM
+    { "BEDROOM_BEDS",         0 },
+    { "BEDROOM_TABLES",       1 },
+    { "BEDROOM_DRAWERS",      2 },
+    { "BEDROOM_WARDROBES",    3 },
+ // KITCHEN
+    { "KITCHEN_UNIT_L",       0 },
+    { "KITCHEN_UNIT_M",       1 },
+    { "KITCHEN_UNIT_R",       2 },
+    { "KITCHEN_UNIT_SINKS",   3 },
+    { "KITCHEN_UNIT_FRIDGES", 4 },
+    { "KITCHEN_UNIT_OVENS",   5 },
+    { "KITCHEN_UNIT_WASHERS", 6 },
+    { "KITCHEN_UNIT_CORNERS", 7 },
+    { "KITCHEN_MICROWAVES",   8 },
+    { "KITCHEN_TOASTERS",     9 },
+    { "KITCHEN_TVS",          10},
+ // MISC
+    { "MISC_PLANTS",          0 },
+    { "MISC_LIGHTS",          1 },
+    { "MISC_RUGS",            2 },
+    { "MISC_PLATES",          3 },
+    { "MISC_FOOD",            4 },
+    { "MISC_MAGAZINES",       5 },
+    { "MISC_CLOTHES",         6 },
+};
 
 void FurnitureManager_c::InjectHooks() {
     RH_ScopedClass(FurnitureManager_c);
@@ -25,13 +94,11 @@ bool FurnitureManager_c::Init() {
     g_currSubGroupId = 0;
     g_currFurnitureId = 0;
 
-    for (int i = 0; i < 512; i++) {
+    for (int i = 0; i < std::size(m_furnitureItem); i++) {
         m_furnitureList.AddItem(&m_furnitureItem[i]);
     }
 
-    for (int i = 0; i < 9; i++) {
-        m_groups[i].Init();
-    }
+    rng::for_each(m_groups, &FurnitureGroup_c::Init);
 
     LoadFurniture();
     return true;
@@ -41,46 +108,38 @@ bool FurnitureManager_c::Init() {
 void FurnitureManager_c::Exit() {
     m_furnitureList.RemoveAll();
 
-    for (int g = 0; g < 9; g++) {
-        for (List_c* i = reinterpret_cast<List_c*>(this->m_groups[g].m_subGroupsList.GetHead()); i; i = reinterpret_cast<List_c*>(i->GetTail())) {
-            reinterpret_cast<List_c*>(i->GetHead())->RemoveAll();
-        }
-        this->m_groups[g].m_subGroupsList.RemoveAll();
-    }
+    rng::for_each(m_groups, &FurnitureGroup_c::Exit);
 }
 
 // 0x5C0280
 void FurnitureManager_c::LoadFurniture() {
     auto file = CFileMgr::OpenFile("data\\furnitur.dat", "rb");
     for (auto i = (char*)CFileLoader::LoadLine(file); i; i = (char*)CFileLoader::LoadLine(file)) {
-        if (*i != 35 && *i) {
-            int  groupId    = -1;
-            int  subGroupId = -1;
-            char tag[32];
-            char groupString[128];
+        if (*i == 0 || *i != '#') { // Skip empty and comment lines
+            continue;
+        }
 
-            RET_IGNORED(sscanf(i, "%s", tag));
-            if (!strcmp(tag, "GROUP:")) {
-                RET_IGNORED(sscanf(i, "%s %s", tag, groupString));
-                groupId = FurnitureManager_c::GetGroupId(groupString);
-            } else if (!strcmp(tag, "SUBGROUP:")) {
-                int  minWidth, minDepth, maxWidth, maxDepth, canPlaceInFrontOfWindow, isTall, canSteal;
-                VERIFY(sscanf_s(i, "%s %s %d %d %d %d %d %d %d", tag, std::size(tag), groupString, std::size(groupString), &minWidth, &minDepth, &maxWidth, &maxDepth, &canPlaceInFrontOfWindow, &isTall, &canSteal) == 9);
-                subGroupId = FurnitureManager_c::GetSubGroupId(groupString);
-                m_groups[groupId].AddSubGroup(subGroupId, minWidth, minDepth, maxWidth, maxDepth, canPlaceInFrontOfWindow, isTall == 1, canSteal == 1);
-            } else if (!strcmp(tag, "ITEM:")) {
-                char modelName[64];
-                int id, wealthMin, wealthMax, maxAng;
-                uint16 modelIndex = -1;
-                VERIFY(sscanf_s(i, "%s %s %d %d %d %d", tag, std::size(tag), modelName, std::size(modelName), &id, &wealthMin, &wealthMax, &maxAng) == 6);
-                if (CModelInfo::GetModelInfoUInt16(modelName, &modelIndex)) {
-                    m_groups[groupId].AddFurniture(subGroupId, modelIndex, id, wealthMin, wealthMax, maxAng);
-                } else {
-                    // I guess this is used for debug mode? because the variable string is written to is never used.
-                    // So maybe the usage got removed during compilation in release mode.
-                    // sprintf(v23, "Cannot find model %s", modelName);
-                }
-            }
+        int  groupId = -1;
+        int  subGroupId = -1;
+        char tag[32];
+        char groupString[128];
+
+        VERIFY(sscanf(i, "%s", tag) == 1);
+        if (!strcmp(tag, "GROUP:")) {
+            VERIFY(sscanf(i, "%s %s", tag, groupString) == 2);
+            groupId = FurnitureManager_c::GetGroupId(groupString);
+        } else if (!strcmp(tag, "SUBGROUP:")) {
+            int  minWidth, minDepth, maxWidth, maxDepth, canPlaceInFrontOfWindow, isTall, canSteal;
+            VERIFY(sscanf_s(i, "%s %s %d %d %d %d %d %d %d", SCANF_S_STR(tag), SCANF_S_STR(groupString), &minWidth, &minDepth, &maxWidth, &maxDepth, &canPlaceInFrontOfWindow, &isTall, &canSteal) == 9);
+            subGroupId = FurnitureManager_c::GetSubGroupId(groupString);
+            m_groups[groupId].AddSubGroup(subGroupId, minWidth, minDepth, maxWidth, maxDepth, canPlaceInFrontOfWindow, isTall == 1, canSteal == 1);
+        } else if (!strcmp(tag, "ITEM:")) {
+            char modelName[64];
+            int id, wealthMin, wealthMax, maxAng;
+            uint16 modelIndex = -1;
+            VERIFY(sscanf_s(i, "%s %s %d %d %d %d", tag, std::size(tag), modelName, std::size(modelName), &id, &wealthMin, &wealthMax, &maxAng) == 6);
+            VERIFY(CModelInfo::GetModelInfoUInt16(modelName, &modelIndex) != nullptr);
+            m_groups[groupId].AddFurniture(subGroupId, modelIndex, id, wealthMin, wealthMax, maxAng);
         }
     }
     CFileMgr::CloseFile(file);
@@ -88,182 +147,27 @@ void FurnitureManager_c::LoadFurniture() {
 
 // 0x5BFB40
 int32 FurnitureManager_c::GetGroupId(const char* name) {
-    if (!strcmp(name, "IT_SHOP")) {
-        return 0;
+    const auto it = groups.find(name);
+    if (it != groups.end()) {
+        return it->second;
+    } else {
+        return -1;
     }
-    if (!strcmp(name, "IT_OFFICE")) {
-        return 1;
-    }
-    if (!strcmp(name, "IT_LOUNGE")) {
-        return 2;
-    }
-    if (!strcmp(name, "IT_BEDROOM")) {
-        return 3;
-    }
-    if (!strcmp(name, "IT_KITCHEN")) {
-        return 4;
-    }
-    return strcmp(name, "IT_MISC") != 0 ? -1 : 8;
 }
 
 // 0x5BFBF0
 int32 FurnitureManager_c::GetSubGroupId(const char* name) {
-    if (!strcmp(name, "SHOP_UNIT1_L")) {
-        return 0;
+    const auto it = subGroups.find(name);
+    if (it != subGroups.end()) {
+        return it->second;
+    } else {
+        return -1;
     }
-    if (!strcmp(name, "SHOP_UNIT1_R")) {
-        return 1;
-    }
-    if (!strcmp(name, "SHOP_UNIT1_M")) {
-        return 2;
-    }
-    if (!strcmp(name, "SHOP_UNIT2_L")) {
-        return 3;
-    }
-    if (!strcmp(name, "SHOP_UNIT2_R")) {
-        return 4;
-    }
-    if (!strcmp(name, "SHOP_UNIT2_M")) {
-        return 5;
-    }
-    if (!strcmp(name, "SHOP_UNIT3_L")) {
-        return 6;
-    }
-    if (!strcmp(name, "SHOP_UNIT3_R")) {
-        return 7;
-    }
-    if (!strcmp(name, "SHOP_UNIT3_M")) {
-        return 8;
-    }
-    if (!strcmp(name, "SHOP_UNIT4_L")) {
-        return 9;
-    }
-    if (!strcmp(name, "SHOP_UNIT4_R")) {
-        return 10;
-    }
-    if (!strcmp(name, "SHOP_UNIT4_M")) {
-        return 11;
-    }
-    if (!strcmp(name, "SHOP_CHECKOUTS")) {
-        return 12;
-    }
-    if (!strcmp(name, "SHOP_BASKETS")) {
-        return 13;
-    }
-    if (!strcmp(name, "SHOP_LIGHTS")) {
-        return 14;
-    }
-    if (!strcmp(name, "OFFICE_DESKS")) {
-        return 0;
-    }
-    if (!strcmp(name, "OFFICE_CHAIRS")) {
-        return 1;
-    }
-    if (!strcmp(name, "OFFICE_WATERCOOLERS")) {
-        return 2;
-    }
-    if (!strcmp(name, "OFFICE_FILINGCABS")) {
-        return 3;
-    }
-    if (!strcmp(name, "LOUNGE_SOFAS")) {
-        return 0;
-    }
-    if (!strcmp(name, "LOUNGE_CHAIRS")) {
-        return 1;
-    }
-    if (!strcmp(name, "LOUNGE_TVSTANDS")) {
-        return 2;
-    }
-    if (!strcmp(name, "LOUNGE_TVS")) {
-        return 3;
-    }
-    if (!strcmp(name, "LOUNGE_TABLES")) {
-        return 4;
-    }
-    if (!strcmp(name, "LOUNGE_LAMPS")) {
-        return 5;
-    }
-    if (!strcmp(name, "LOUNGE_HIFI_TABLES")) {
-        return 6;
-    }
-    if (!strcmp(name, "LOUNGE_VIDEOS")) {
-        return 7;
-    }
-    if (!strcmp(name, "LOUNGE_HIFIS")) {
-        return 8;
-    }
-    if (!strcmp(name, "LOUNGE_CONSOLES")) {
-        return 9;
-    }
-    if (!strcmp(name, "BEDROOM_BEDS")) {
-        return 0;
-    }
-    if (!strcmp(name, "BEDROOM_TABLES")) {
-        return 1;
-    }
-    if (!strcmp(name, "BEDROOM_DRAWERS")) {
-        return 2;
-    }
-    if (!strcmp(name, "BEDROOM_WARDROBES")) {
-        return 3;
-    }
-    if (!strcmp(name, "KITCHEN_UNIT_L")) {
-        return 0;
-    }
-    if (!strcmp(name, "KITCHEN_UNIT_M")) {
-        return 1;
-    }
-    if (!strcmp(name, "KITCHEN_UNIT_R")) {
-        return 2;
-    }
-    if (!strcmp(name, "KITCHEN_UNIT_SINKS")) {
-        return 3;
-    }
-    if (!strcmp(name, "KITCHEN_UNIT_FRIDGES")) {
-        return 4;
-    }
-    if (!strcmp(name, "KITCHEN_UNIT_OVENS")) {
-        return 5;
-    }
-    if (!strcmp(name, "KITCHEN_UNIT_WASHERS")) {
-        return 6;
-    }
-    if (!strcmp(name, "KITCHEN_UNIT_CORNERS")) {
-        return 7;
-    }
-    if (!strcmp(name, "KITCHEN_MICROWAVES")) {
-        return 8;
-    }
-    if (!strcmp(name, "KITCHEN_TOASTERS")) {
-        return 9;
-    }
-    if (!strcmp(name, "KITCHEN_TVS")) {
-        return 10;
-    }
-    if (!strcmp(name, "MISC_PLANTS")) {
-        return 0;
-    }
-    if (!strcmp(name, "MISC_LIGHTS")) {
-        return 1;
-    }
-    if (!strcmp(name, "MISC_RUGS")) {
-        return 2;
-    }
-    if (!strcmp(name, "MISC_PLATES")) {
-        return 3;
-    }
-    if (!strcmp(name, "MISC_FOOD")) {
-        return 4;
-    }
-    if (!strcmp(name, "MISC_MAGAZINES")) {
-        return 5;
-    }
-    return strcmp(name, "MISC_CLOTHES") != 0 ? -1 : 6;
 }
 
 // 0x5911E0
 Furniture_c* FurnitureManager_c::GetFurniture(int32 furnitureGroupId, int32 furnitureSubgroupId, int16 id, uint8 wealth) {
-    auto last = reinterpret_cast<FurnitureSubGroup_c*>(m_groups[furnitureGroupId].m_subGroupsList.GetHead());
+    auto last = m_groups[furnitureGroupId].m_subGroupsList.GetHead();
     if (!last)
         return nullptr;
 
@@ -278,7 +182,7 @@ Furniture_c* FurnitureManager_c::GetFurniture(int32 furnitureGroupId, int32 furn
 
 // 0x591220
 int32 FurnitureManager_c::GetRandomId(int32 groupId, int32 subGroupId, uint8 wealth) {
-    auto head = reinterpret_cast<FurnitureSubGroup_c*>(m_groups[subGroupId].m_subGroupsList.GetHead());
+    auto head = m_groups[subGroupId].m_subGroupsList.GetHead();
     if (!head)
         return -1;
 
