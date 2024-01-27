@@ -1,8 +1,11 @@
 #pragma once
 
-#include <Enums/eTaskType.h>
+#include "EventEditableResponse.h"
 
+#include <Enums/eTaskType.h>
 #include "./EventEditableResponse.h"
+#include "IKChainManager_c.h"
+
 
 class CEventSexyPed : public CEventEditableResponse {
 public:

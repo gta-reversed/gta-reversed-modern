@@ -1,6 +1,6 @@
 #include "StdInc.h"
-
 #include "EventHitByWaterCannon.h"
+
 
 void CEventHitByWaterCannon::InjectHooks()
 {
@@ -18,6 +18,7 @@ CEventHitByWaterCannon::CEventHitByWaterCannon(const CVector& point, const CVect
     m_moveSpeed = moveSpeed;
 }
 
+// 0x4B1290
 CEventHitByWaterCannon* CEventHitByWaterCannon::Constructor(const CVector& point, const CVector& moveSpeed)
 {
     this->CEventHitByWaterCannon::CEventHitByWaterCannon(point, moveSpeed);
@@ -39,3 +40,4 @@ bool CEventHitByWaterCannon::AffectsPed_Reversed(CPed* ped)
     }
     return false;
 }
+

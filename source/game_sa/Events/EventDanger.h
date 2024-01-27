@@ -1,4 +1,8 @@
-#pragma
+#pragma once
+
+#include "EventEditableResponse.h"
+
+class CEntity;
 
 class CEventDanger : public CEventEditableResponse {
 public:

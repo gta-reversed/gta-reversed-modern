@@ -2,6 +2,8 @@
 
 #include "Event.h"
 
+#include "Event.h"
+
 class CEventCarUpsideDown : public CEvent {
 public:
     CVehicle* m_vehicle;

@@ -1,6 +1,6 @@
 #include "StdInc.h"
-
 #include "EventGunShotWhizzedBy.h"
+
 
 void CEventGunShotWhizzedBy::InjectHooks()
 {
@@ -17,6 +17,7 @@ CEventGunShotWhizzedBy::CEventGunShotWhizzedBy(CEntity* entity, const CVector& s
 {
 }
 
+// 0x4B1FD0
 CEventGunShotWhizzedBy* CEventGunShotWhizzedBy::Constructor(CEntity* entity, const CVector& startPoint, const CVector& endPoint, bool bHasNoSound)
 {
     this->CEventGunShotWhizzedBy::CEventGunShotWhizzedBy(entity, startPoint, endPoint, bHasNoSound);

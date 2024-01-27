@@ -6,6 +6,7 @@
 */
 #pragma once
 
+#include "FileMgr.h"
 #include "GxtChar.h"
 #include "Data.h"
 #include "KeyArray.h"

@@ -2,6 +2,9 @@
 
 #include "EventEditableResponse.h"
 
+#include "EventEditableResponse.h"
+
+
 class CEventLowAngerAtPlayer : public CEventEditableResponse {
     CEventLowAngerAtPlayer() = default;
     ~CEventLowAngerAtPlayer() override = default;
@@ -12,3 +15,4 @@ class CEventLowAngerAtPlayer : public CEventEditableResponse {
     bool AffectsPed(CPed* ped) override { return ped->IsAlive(); }
     CEventEditableResponse* CloneEditable() override { return new CEventLowAngerAtPlayer(); }
 };
+VALIDATE_SIZE(CEventLowAngerAtPlayer, 0x14);
