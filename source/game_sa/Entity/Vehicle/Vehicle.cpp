@@ -2504,7 +2504,7 @@ void CVehicle::UpdateWinch() {
     CRopes::RegisterRope(
         ropeID,
         m_ropeType,
-        MultiplyMatrixWithVector(*m_matrix, CVector{ 0.f, 0.f, pointZ }),
+        m_matrix->TransformPoint(CVector{ 0.f, 0.f, pointZ }),
         false,
         segCount,
         1u,
@@ -2891,7 +2891,7 @@ void CVehicle::FirePlaneGuns() {
 
           auto planeGunPosMS  = GetPlaneGunsPosition(m_nGunsCycleIndex); // MS = Model Space
     const auto velocityOffset = m_vecMoveSpeed * CTimer::GetTimeStep();
-          auto gunShellPos    = velocityOffset +  MultiplyMatrixWithVector(*m_matrix, planeGunPosMS);
+          auto gunShellPos    = velocityOffset +  m_matrix->TransformPoint(planeGunPosMS);
 
     const auto FireGun = [&](const auto gunId) {
         DoPlaneGunFireFX(
@@ -2957,7 +2957,7 @@ void CVehicle::FireUnguidedMissile(eOrdnanceType type, bool bCheckTime) {
     CWeapon weapon{ WEAPON_RLAUNCHER, 5000 };
 
     for (auto i = 0; i < 2; i++) {
-        const auto ordnancePos = MultiplyMatrixWithVector(*m_matrix, GetPlaneOrdnancePosition(type));
+        const auto ordnancePos = m_matrix->TransformPoint(GetPlaneOrdnancePosition(type));
         // This places a point somewhere in front of us, depending on our velocity's direction
         auto origin = ordnancePos + m_matrix->GetForward() * (std::max(0.f, DotProduct(m_matrix->GetForward(), m_vecMoveSpeed)) * CTimer::GetTimeStep());
         weapon.FireProjectile(this, &origin);
@@ -3406,7 +3406,7 @@ bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
 
     const auto [rotorUp, rotorSizeMS] = GetRotorDirUpAndThickness();
     const auto rotorSize              = matrix.TransformVector(rotorSizeMS);
-    const auto colModelCenter         = MultiplyMatrixWithVector(matrix, colModel.GetBoundCenter());
+    const auto colModelCenter         = matrix->TransformPoint(colModel.GetBoundCenter());
     const auto& thisPosn              = GetPosition();
 
     for (CPtrNode* it = ptrList.GetNode(), *next{}; it; it = next) {
@@ -3959,7 +3959,7 @@ void CVehicle::DoBoatSplashes(float fWaterDamping) {
     auto baseVel = CVector{ -GetForward().x, -GetRight().y, -GetRight().z };
 
     CVector p0 = { colMin.x * X_MULT, colMax.y / 2.0f, colMin.z * Z_MULT };
-    p0 = MultiplyMatrixWithVector(*m_matrix, &p0);
+    p0 = m_matrix->TransformPoint(&p0);
     auto vel0 = baseVel * CGeneral::GetRandomNumberInRange(0.8f, 1.2f);
     vel0 -= GetRight() * CGeneral::GetRandomNumberInRange(0.3f, 0.7f); // minus
     vel0 += GetUp() * CGeneral::GetRandomNumberInRange(0.8f, 1.2f);
@@ -3967,7 +3967,7 @@ void CVehicle::DoBoatSplashes(float fWaterDamping) {
     g_fx.m_BoatSplash->AddParticle(&p0, &vel0, 0.0f, &particleData, -1.0f, 1.2f, 0.6f, false);
 
     CVector p1 = { colMax.x * X_MULT, colMax.y / 2.0f, colMin.z * Z_MULT };
-    p1 = MultiplyMatrixWithVector(*m_matrix, &p1);
+    p1 = m_matrix->TransformPoint(&p1);
     auto vel1 = baseVel * CGeneral::GetRandomNumberInRange(0.8f, 1.2f);
     vel1 += GetRight() * CGeneral::GetRandomNumberInRange(0.3f, 0.7f);  // plus
     vel1 += GetUp() * CGeneral::GetRandomNumberInRange(0.8f, 1.2f);
@@ -3999,7 +3999,7 @@ void CVehicle::AddWaterSplashParticles() {
         // Get and transform triangle vertices to world space
         auto vertices = cd.GetTriVertices(tri);
         for (auto& v : vertices) {
-            v = MultiplyMatrixWithVector(*m_matrix, v);
+            v = m_matrix->TransformPoint(v);
         }
 
         const auto v0v1 = vertices[1] - vertices[0];

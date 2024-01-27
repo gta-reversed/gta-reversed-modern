@@ -1376,7 +1376,7 @@ void CPed::GetTransformedBonePosition(RwV3d& inOffsetOutPosn, ePedBones bone, bo
             bCalledPreRender = true;
         }
     } else if (!bCalledPreRender) { // Return static local bone position instead
-        inOffsetOutPosn = MultiplyMatrixWithVector(*m_matrix, GetPedBoneStdPosition(bone));
+        inOffsetOutPosn = m_matrix->TransformPoint(GetPedBoneStdPosition(bone));
         return;
     }
 
@@ -2045,7 +2045,7 @@ void CPed::GetBonePosition(RwV3d& outPosition, ePedBones bone, bool updateSkinBo
             bCalledPreRender = true;
         }
     } else if (!bCalledPreRender) { // Return static local bone position instead
-        outPosition = MultiplyMatrixWithVector(*m_matrix, GetPedBoneStdPosition(bone));
+        outPosition = m_matrix->TransformPoint(GetPedBoneStdPosition(bone));
         return;
     }
     RwV3dAssign(&outPosition, RwMatrixGetPos(&GetBoneMatrix(bone)));

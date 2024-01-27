@@ -1720,8 +1720,8 @@ bool CCollision::ProcessLineOfSight(const CColLine& lnws, const CMatrix& transfo
 
     // Transform lime into object space
     const CColLine line_OS = {
-        MultiplyMatrixWithVector(invertedTransform, lnws.m_vecStart),
-        MultiplyMatrixWithVector(invertedTransform, lnws.m_vecEnd),
+        invertedTransform.TransformPoint(lnws.m_vecStart),
+        invertedTransform.TransformPoint(lnws.m_vecEnd),
     };
 
     if (!TestLineBox_DW(line_OS, colModel.GetBoundingBox()))
@@ -1756,7 +1756,7 @@ bool CCollision::ProcessLineOfSight(const CColLine& lnws, const CMatrix& transfo
     }
 
     if (localMinTouchDist < maxTouchDistance) {
-        colPoint.m_vecPoint = MultiplyMatrixWithVector(transform, colPoint.m_vecPoint);
+        colPoint.m_vecPoint = transform.TransformPoint(colPoint.m_vecPoint);
         colPoint.m_vecNormal = transform.TransformVector(colPoint.m_vecNormal);
         maxTouchDistance = localMinTouchDist;
         return true;
@@ -1935,7 +1935,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
     const auto transformAtoB = Invert(transformB) * transformA;
 
     // A's bounding bb in B's space
-    const CColSphere colABoundSphereSpaceB{MultiplyMatrixWithVector(transformAtoB, cmA.m_boundSphere.m_vecCenter), cmA.m_boundSphere.m_fRadius};
+    const CColSphere colABoundSphereSpaceB{transformAtoB.TransformPoint(cmA.m_boundSphere.m_vecCenter), cmA.m_boundSphere.m_fRadius};
 
     if (!TestSphereBox(colABoundSphereSpaceB, cmB.m_boundBox)) {
         return 0;
@@ -1956,7 +1956,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
     const auto TransformSpheres = []<size_t n>(auto&& spheres, const CMatrix& transform, CColSphere(&outSpheres)[n]) {
         std::ranges::transform(spheres, outSpheres, [&](const auto& sp) {
             CColSphere transformed = sp;                                                   // Copy sphere
-            transformed.m_vecCenter = MultiplyMatrixWithVector(transform, sp.m_vecCenter); // Set copy's center as the transformed point
+            transformed.m_vecCenter = transform.TransformPoint(sp.m_vecCenter); // Set copy's center as the transformed point
             return transformed;
         });
     };
@@ -2138,7 +2138,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
         // 0x41996E
         // Transform all colpoints into world space (Originally not here)
         for (auto&& cp : std::span{sphereCPs, nNumSphereCPs}) {
-            cp.m_vecPoint = MultiplyMatrixWithVector(transformB, cp.m_vecPoint);
+            cp.m_vecPoint = transformB.TransformPoint(cp.m_vecPoint);
             cp.m_vecNormal = Multiply3x3(transformB, cp.m_vecNormal);
         }
     }
@@ -2164,8 +2164,8 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
         for (auto lineIdx = 0u; lineIdx < cdA.m_nNumLines; lineIdx++) {
             const CColLine lineA{
                 // A's line in B's space
-                MultiplyMatrixWithVector(transformAtoB, cdA.m_pLines[lineIdx].m_vecStart),
-                MultiplyMatrixWithVector(transformAtoB, cdA.m_pLines[lineIdx].m_vecEnd),
+                transformAtoB.TransformPoint(cdA.m_pLines[lineIdx].m_vecStart),
+                transformAtoB.TransformPoint(cdA.m_pLines[lineIdx].m_vecEnd),
             };
 
             // if (!TestLineSphere(line, CColSphere{ cmB.m_boundSphere })) { // NOTSA: Quick check to (possibly) speed things up
@@ -2198,7 +2198,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
             // 0x4198DA
             // Now, transform colpoint if it the line collided into world space
             if (hasCollided) {
-                thisLineCP.m_vecPoint = MultiplyMatrixWithVector(transformB, thisLineCP.m_vecPoint);
+                thisLineCP.m_vecPoint = transformB.TransformPoint(thisLineCP.m_vecPoint);
                 thisLineCP.m_vecNormal = Multiply3x3(transformB, thisLineCP.m_vecNormal);
             }
         }
@@ -2211,7 +2211,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
     // Find all A's triangles and boxes colliding with B's b.sphere
     // Then process them all against B's colliding spheres
     if (numCollSphB && (cdA.m_nNumTriangles || cdA.m_nNumBoxes)) {
-        const CColSphere colBSphereInASpace{MultiplyMatrixWithVector(transformBtoA, cmB.m_boundSphere.m_vecCenter), cmB.m_boundSphere.m_fRadius};
+        const CColSphere colBSphereInASpace{transformBtoA.TransformPoint(cmB.m_boundSphere.m_vecCenter), cmB.m_boundSphere.m_fRadius};
 
         const auto numCPsPrev{nNumSphereCPs};
 
@@ -2294,7 +2294,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
         // Transform added colpoints into world space
         if (numCPsPrev != nNumSphereCPs) {                                                   // If we've processed any items..
             for (auto& cp : std::span{sphereCPs + numCPsPrev, nNumSphereCPs - numCPsPrev}) { // Transform all newly added colpoints
-                cp.m_vecPoint = MultiplyMatrixWithVector(transformA, cp.m_vecPoint);
+                cp.m_vecPoint = transformA.TransformPoint(cp.m_vecPoint);
                 cp.m_vecNormal = Multiply3x3(transformA, cp.m_vecNormal);
 
                 // Weird stuff, idk why they do this
