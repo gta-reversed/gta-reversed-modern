@@ -4,7 +4,7 @@
 
 class CEntity;
 
-class CEventDanger : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventDanger : public CEventEditableResponse {
 public:
     CEntity* m_dangerFrom;
     float m_dangerRadius;
@@ -25,8 +25,5 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
     CEventDanger* Constructor(CEntity* dangerFrom, float dangerRadius);
-    bool AffectsPed_Reversed(CPed* ped);
-    bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
-    CEntity* GetSourceEntity_Reversed() const;
 };
 VALIDATE_SIZE(CEventDanger, 0x1C);

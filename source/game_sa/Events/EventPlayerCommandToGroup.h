@@ -8,7 +8,7 @@ enum ePlayerGroupCommand : int32
     PLAYER_GROUP_COMMAND_GATHER = 2,
 };
 
-class CEventPlayerCommandToGroup : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventPlayerCommandToGroup : public CEventEditableResponse {
 public:
     ePlayerGroupCommand m_command;
     CPed*               m_target;
@@ -30,6 +30,5 @@ public:
 
 private:
     CEventPlayerCommandToGroup* Constructor(ePlayerGroupCommand command, CPed* target);
-    bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
 };
 VALIDATE_SIZE(CEventPlayerCommandToGroup, 0x1C);

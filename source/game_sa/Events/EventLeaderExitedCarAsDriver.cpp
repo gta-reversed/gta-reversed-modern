@@ -4,11 +4,11 @@
 
 void CEventLeaderExitedCarAsDriver::InjectHooks()
 {
-    RH_ScopedClass(CEventLeaderExitedCarAsDriver);
+    RH_ScopedVirtualClass(CEventLeaderExitedCarAsDriver, 0x85B898, 17);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B8300);
-    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B0F80);
+    RH_ScopedVMTInstall(AffectsPedGroup, 0x4B0F80);
 }
 
 // 0x4B8300
@@ -19,12 +19,7 @@ CEventLeaderExitedCarAsDriver* CEventLeaderExitedCarAsDriver::Constructor()
 }
 
 // 0x4B0F80
-bool CEventLeaderExitedCarAsDriver::AffectsPedGroup(CPedGroup* pedGroup)
-{
-    return CEventLeaderExitedCarAsDriver::AffectsPedGroup_Reversed(pedGroup);
-}
-
-bool CEventLeaderExitedCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pg) {
+bool CEventLeaderExitedCarAsDriver::AffectsPedGroup(CPedGroup* pg) {
     const auto leader = pg->GetMembership().GetLeader();
     for (auto& m : pg->GetMembership().GetFollowers()) {
         if (m.m_pVehicle && m.bInVehicle && m.m_pVehicle == leader->m_pVehicle) {
@@ -36,4 +31,3 @@ bool CEventLeaderExitedCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pg) {
     }
     return false;
 }
-

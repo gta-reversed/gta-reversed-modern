@@ -21,7 +21,7 @@ enum eClimbHeights : int8 {
     CLIMB_FINISHED_V
 };
 
-class CTaskSimpleClimb : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleClimb : public CTaskSimple {
 public:
     bool                   m_bIsFinished;
     bool                   m_bChangeAnimation;
@@ -92,7 +92,5 @@ public:
 
     static void InjectHooks();
     CTaskSimpleClimb* Constructor(CEntity* pClimbEnt, const CVector& vecTarget, float fHeading, uint8 nSurfaceType, eClimbHeights nHeight, bool bForceClimb);
-    bool ProcessPed_Reversed(CPed* ped);
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
 };
 VALIDATE_SIZE(CTaskSimpleClimb, 0x30);

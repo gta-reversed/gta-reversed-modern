@@ -17,7 +17,7 @@
 #include "TaskComplexKillPedOnFoot.h"
 
 
-class CEventPotentialWalkIntoVehicle : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventPotentialWalkIntoVehicle : public CEventEditableResponse {
 public:
     CVehicle* m_vehicle;
     int32     m_moveState;
@@ -39,6 +39,5 @@ private:
 
     CEventPotentialWalkIntoVehicle* Constructor(CVehicle* vehicle, int32 moveState);
 
-    bool AffectsPed_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CEventPotentialWalkIntoVehicle, 0x1C);

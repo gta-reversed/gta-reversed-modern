@@ -4,11 +4,11 @@
 
 void CEventInAir::InjectHooks()
 {
-    RH_ScopedClass(CEventInAir);
+    RH_ScopedVirtualClass(CEventInAir, 0x85B3C0, 16);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B0CB0);
-    RH_ScopedVirtualInstall(AffectsPed, 0x4B0C00);
+    RH_ScopedVMTInstall(AffectsPed, 0x4B0C00);
 }
 
 // 0x4B0CB0
@@ -20,11 +20,6 @@ CEventInAir* CEventInAir::Constructor()
 
 // 0x4B0C00
 bool CEventInAir::AffectsPed(CPed* ped)
-{
-    return CEventInAir::AffectsPed_Reversed(ped);
-}
-
-bool CEventInAir::AffectsPed_Reversed(CPed* ped)
 {
     CTask* activeTask = ped->GetTaskManager().GetActiveTask();
     if (activeTask
@@ -46,4 +41,3 @@ bool CEventInAir::AffectsPed_Reversed(CPed* ped)
     }
     return ped->IsAlive();
 }
-

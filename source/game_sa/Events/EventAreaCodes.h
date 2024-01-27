@@ -7,7 +7,7 @@
 #include "TaskComplexKillPedOnFoot.h"
 #include "TaskComplexArrestPed.h"
 
-class CEventAreaCodes : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventAreaCodes : public CEvent {
 public:
     CPed* m_ped;
 
@@ -25,7 +25,5 @@ public:
 
 private:
     CEventAreaCodes* Constructor(CPed* ped);
-    bool AffectsPed_Reversed(CPed* ped);
-    bool TakesPriorityOver_Reversed(const CEvent& refEvent);
 };
 VALIDATE_SIZE(CEventAreaCodes, 0x10);

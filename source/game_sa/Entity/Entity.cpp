@@ -25,29 +25,29 @@
 
 void CEntity::InjectHooks()
 {
-    RH_ScopedClass(CEntity);
+    RH_ScopedVirtualClass(CEntity, 0x863928, 22);
     RH_ScopedCategory("Entity");
 
     // clang moment: RH_ScopedVirtualOverloadedInstall(Add, "void", 0x533020, void(CEntity::*)());
     // clang moment: RH_ScopedVirtualOverloadedInstall(Add, "rect", 0x5347D0, void(CEntity::*)(const CRect&));
-    RH_ScopedVirtualInstall(Remove, 0x534AE0);
-    RH_ScopedVirtualInstall(SetIsStatic, 0x403E20);
-    RH_ScopedVirtualInstall(SetModelIndexNoCreate, 0x533700);
-    RH_ScopedVirtualInstall(CreateRwObject, 0x533D30);
-    RH_ScopedVirtualInstall(DeleteRwObject, 0x534030);
-    RH_ScopedVirtualInstall(GetBoundRect, 0x534120);
-    RH_ScopedVirtualInstall(ProcessControl, 0x403E40);
-    RH_ScopedVirtualInstall(ProcessCollision, 0x403E50);
-    RH_ScopedVirtualInstall(ProcessShift, 0x403E60);
-    RH_ScopedVirtualInstall(TestCollision, 0x403E70);
-    RH_ScopedVirtualInstall(Teleport, 0x403E80);
-    RH_ScopedVirtualInstall(SpecialEntityPreCollisionStuff, 0x403E90);
-    RH_ScopedVirtualInstall(SpecialEntityCalcCollisionSteps, 0x403EA0);
-    RH_ScopedVirtualInstall(PreRender, 0x535FA0);
-    RH_ScopedVirtualInstall(Render, 0x534310);
-    RH_ScopedVirtualInstall(SetupLighting, 0x553DC0);
-    RH_ScopedVirtualInstall(RemoveLighting, 0x553370);
-    RH_ScopedVirtualInstall(FlagToDestroyWhenNextProcessed, 0x403EB0);
+    RH_ScopedVMTInstall(Remove, 0x534AE0);
+    RH_ScopedVMTInstall(SetIsStatic, 0x403E20);
+    RH_ScopedVMTInstall(SetModelIndexNoCreate, 0x533700);
+    RH_ScopedVMTInstall(CreateRwObject, 0x533D30);
+    RH_ScopedVMTInstall(DeleteRwObject, 0x534030);
+    RH_ScopedVMTInstall(GetBoundRect, 0x534120);
+    RH_ScopedVMTInstall(ProcessControl, 0x403E40);
+    RH_ScopedVMTInstall(ProcessCollision, 0x403E50);
+    RH_ScopedVMTInstall(ProcessShift, 0x403E60);
+    RH_ScopedVMTInstall(TestCollision, 0x403E70);
+    RH_ScopedVMTInstall(Teleport, 0x403E80);
+    RH_ScopedVMTInstall(SpecialEntityPreCollisionStuff, 0x403E90);
+    RH_ScopedVMTInstall(SpecialEntityCalcCollisionSteps, 0x403EA0);
+    RH_ScopedVMTInstall(PreRender, 0x535FA0);
+    RH_ScopedVMTInstall(Render, 0x534310);
+    RH_ScopedVMTInstall(SetupLighting, 0x553DC0);
+    RH_ScopedVMTInstall(RemoveLighting, 0x553370);
+    RH_ScopedVMTInstall(FlagToDestroyWhenNextProcessed, 0x403EB0);
     RH_ScopedInstall(UpdateRwFrame, 0x532B00);
     RH_ScopedInstall(UpdateRpHAnim, 0x532B20);
     RH_ScopedInstall(HasPreRenderEffects, 0x532B70);
@@ -207,11 +207,8 @@ void CEntity::Add_Reversed(const CRect& rect)
     }
 }
 
+// 0x534AE0
 void CEntity::Remove()
-{
-    CEntity::Remove_Reversed();
-}
-void CEntity::Remove_Reversed()
 {
     auto usedRect = CRect();
     GetBoundRect(&usedRect);
@@ -278,30 +275,21 @@ void CEntity::Remove_Reversed()
     }
 }
 
+// 0x403E20
 void CEntity::SetIsStatic(bool isStatic)
-{
-    return CEntity::SetIsStatic_Reversed(isStatic);
-}
-void CEntity::SetIsStatic_Reversed(bool isStatic)
 {
     m_bIsStatic = isStatic;
 }
 
+// 0x0
 void CEntity::SetModelIndex(uint32 index)
-{
-    return CEntity::SetModelIndex_Reversed(index);
-}
-void CEntity::SetModelIndex_Reversed(uint32 index)
 {
     CEntity::SetModelIndexNoCreate(index);
     CEntity::CreateRwObject();
 }
 
+// 0x533700
 void CEntity::SetModelIndexNoCreate(uint32 index)
-{
-    return CEntity::SetModelIndexNoCreate_Reversed(index);
-}
-void CEntity::SetModelIndexNoCreate_Reversed(uint32 index)
 {
     auto mi = CModelInfo::GetModelInfo(index);
     m_nModelIndex = index;
@@ -318,11 +306,8 @@ void CEntity::SetModelIndexNoCreate_Reversed(uint32 index)
         CTagManager::AddTag(this);
 }
 
+// 0x533D30
 void CEntity::CreateRwObject()
-{
-    return CEntity::CreateRwObject_Reversed();
-}
-void CEntity::CreateRwObject_Reversed()
 {
     if (!m_bIsVisible)
         return;
@@ -390,11 +375,8 @@ void CEntity::CreateRwObject_Reversed()
         m_bLightObject = true;
 }
 
+// 0x534030
 void CEntity::DeleteRwObject()
-{
-    CEntity::DeleteRwObject_Reversed();
-}
-void CEntity::DeleteRwObject_Reversed()
 {
     if (!m_pRwObject)
         return;
@@ -435,9 +417,7 @@ void CEntity::DeleteRwObject_Reversed()
 
     CEntity::DestroyEffects();
     CEntity::RemoveEscalatorsForEntity();
-}
-
-CRect* CEntity::GetBoundRect(CRect* pRect)
+}CRect* CEntity::GetBoundRect(CRect* pRect)
 {
     return CEntity::GetBoundRect_Reversed(pRect);
 }
@@ -463,47 +443,32 @@ CRect* CEntity::GetBoundRect_Reversed(CRect* outRect)
     return outRect;
 }
 
+// 0x403E40
 void CEntity::ProcessControl()
 {
-    CEntity::ProcessControl_Reversed();
-}
-void CEntity::ProcessControl_Reversed()
-{
     // NOP
 }
 
+// 0x403E50
 void CEntity::ProcessCollision()
 {
-    CEntity::ProcessCollision_Reversed();
-}
-void CEntity::ProcessCollision_Reversed()
-{
     // NOP
 }
 
+// 0x403E60
 void CEntity::ProcessShift()
 {
-    CEntity::ProcessShift_Reversed();
-}
-void CEntity::ProcessShift_Reversed()
-{
     // NOP
 }
 
+// 0x403E70
 bool CEntity::TestCollision(bool bApplySpeed)
-{
-    return CEntity::TestCollision_Reversed(bApplySpeed);
-}
-bool CEntity::TestCollision_Reversed(bool bApplySpeed)
 {
     return false;
 }
 
+// 0x403E80
 void CEntity::Teleport(CVector destination, bool resetRotation)
-{
-    CEntity::Teleport_Reversed(destination, resetRotation);
-}
-void CEntity::Teleport_Reversed(CVector destination, bool resetRotation)
 {
     // NOP
 }
@@ -511,28 +476,17 @@ void CEntity::Teleport_Reversed(CVector destination, bool resetRotation)
 // 0x403E90
 void CEntity::SpecialEntityPreCollisionStuff(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck)
 {
-    CEntity::SpecialEntityPreCollisionStuff_Reversed(colPhysical, bIgnoreStuckCheck, bCollisionDisabled, bCollidedEntityCollisionIgnored, bCollidedEntityUnableToMove, bThisOrCollidedEntityStuck);
-}
-void CEntity::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck)
-{
     // NOP
 }
 
+// 0x403EA0
 uint8 CEntity::SpecialEntityCalcCollisionSteps(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2)
-{
-    return CEntity::SpecialEntityCalcCollisionSteps_Reversed(bProcessCollisionBeforeSettingTimeStep, unk2);
-}
-uint8 CEntity::SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2)
 {
     return 1;
 }
 
 // 0x535FA0
 void CEntity::PreRender()
-{
-    CEntity::PreRender_Reversed();
-}
-void CEntity::PreRender_Reversed()
 {
     auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
     auto ami = mi->AsAtomicModelInfoPtr();
@@ -844,11 +798,8 @@ void CEntity::PreRender_Reversed()
     }
 }
 
+// 0x534310
 void CEntity::Render()
-{
-    CEntity::Render_Reversed();
-}
-void CEntity::Render_Reversed()
 {
     if (!m_pRwObject)
         return;
@@ -881,11 +832,8 @@ void CEntity::Render_Reversed()
     }
 }
 
+// 0x553DC0
 bool CEntity::SetupLighting()
-{
-    return CEntity::SetupLighting_Reversed();
-}
-bool CEntity::SetupLighting_Reversed()
 {
     if (!m_bLightObject)
         return false;
@@ -898,11 +846,8 @@ bool CEntity::SetupLighting_Reversed()
     return true;
 }
 
+// 0x553370
 void CEntity::RemoveLighting(bool bRemove)
-{
-    CEntity::RemoveLighting_Reversed(bRemove);
-}
-void CEntity::RemoveLighting_Reversed(bool bRemove)
 {
     if (!bRemove)
         return;
@@ -912,12 +857,8 @@ void CEntity::RemoveLighting_Reversed(bool bRemove)
     CPointLights::RemoveLightsAffectingObject();
 }
 
+// 0x403EB0
 void CEntity::FlagToDestroyWhenNextProcessed()
-{
-    CEntity::FlagToDestroyWhenNextProcessed_Reversed();
-}
-
-void CEntity::FlagToDestroyWhenNextProcessed_Reversed()
 {
     // NOP
 }

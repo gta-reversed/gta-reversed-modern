@@ -4,7 +4,7 @@
 
 struct EmissionInfo_t;
 
-class FxEmitter_c : public FxPrim_c {
+class NOTSA_EXPORT_VTABLE FxEmitter_c : public FxPrim_c {
 public:
     float m_fEmissionIntensity;
 
@@ -21,9 +21,6 @@ public:
     FxEmitterPrt_c* CreateParticle(EmissionInfo_t* emissionInfo, RwMatrix* wldMat, CVector* velOverride, float timeSince, FxPrtMult_c* fxMults, float brightness, bool createLocal);
 
     static void InjectHooks();
-    bool Init_Reversed(FxPrimBP_c* primBP, FxSystem_c* system);
-    void Update_Reversed(float currentTime, float deltaTime);
-    void Reset_Reversed();
     void AddParticle_Reversed(RwMatrix* mat, CVector* vel, float timeSince, FxPrtMult_c* fxMults, float rotZ, float brightness, bool createLocal);
     void AddParticle_Reversed(CVector* pos, CVector* vel, float timeSince, FxPrtMult_c* fxMults, float rotZ, float brightness, bool createLocal);
 };

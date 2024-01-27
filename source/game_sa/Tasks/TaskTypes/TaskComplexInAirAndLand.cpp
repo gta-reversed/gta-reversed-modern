@@ -10,13 +10,13 @@
 #include "PedClothesDesc.h"
 
 void CTaskComplexInAirAndLand::InjectHooks() {
-    RH_ScopedClass(CTaskComplexInAirAndLand);
+    RH_ScopedVirtualClass(CTaskComplexInAirAndLand, 0x8704AC, 11);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x678C80);
-    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x67CC30);
-    RH_ScopedVirtualInstall(CreateNextSubTask, 0x67CCB0);
-    RH_ScopedVirtualInstall(ControlSubTask, 0x67D230);
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x67CC30);
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x67CCB0);
+    RH_ScopedVMTInstall(ControlSubTask, 0x67D230);
 }
 
 CTaskComplexInAirAndLand* CTaskComplexInAirAndLand::Constructor(bool bUsingJumpGlide, bool bUsingFallGlide) {
@@ -33,24 +33,11 @@ CTaskComplexInAirAndLand::CTaskComplexInAirAndLand(bool bUsingJumpGlide, bool bU
 
 // 0x67CC30
 CTask* CTaskComplexInAirAndLand::CreateFirstSubTask(CPed* ped) {
-    return CreateFirstSubTask_Reversed(ped);
+    return new CTaskSimpleInAir(m_bUsingJumpGlide, m_bUsingFallGlide, false);
 }
 
 // 0x67CCB0
 CTask* CTaskComplexInAirAndLand::CreateNextSubTask(CPed* ped) {
-    return CreateNextSubTask_Reversed(ped);
-}
-
-// 0x67D230
-CTask* CTaskComplexInAirAndLand::ControlSubTask(CPed* ped) {
-    return ControlSubTask_Reversed(ped);
-}
-
-CTask* CTaskComplexInAirAndLand::CreateFirstSubTask_Reversed(CPed* ped) {
-    return new CTaskSimpleInAir(m_bUsingJumpGlide, m_bUsingFallGlide, false);
-}
-
-CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped) {
     switch (m_pSubTask->GetTaskType()) {
     case TASK_SIMPLE_GET_UP:
     case TASK_SIMPLE_LAND:
@@ -120,7 +107,8 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped) {
     }
 }
 
-CTask* CTaskComplexInAirAndLand::ControlSubTask_Reversed(CPed* ped) {
+// 0x67D230
+CTask* CTaskComplexInAirAndLand::ControlSubTask(CPed* ped) {
     if (!m_bUsingFallGlide && m_pSubTask && m_pSubTask->GetTaskType() == TASK_SIMPLE_IN_AIR) {
         auto subTask = reinterpret_cast<CTaskSimpleInAir*>(m_pSubTask);
 

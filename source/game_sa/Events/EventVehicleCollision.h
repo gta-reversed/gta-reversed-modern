@@ -38,7 +38,5 @@ public:
 
 private:
     CEventVehicleCollision* Constructor(int16 pieceType, float damageIntensity, CVehicle* vehicle, const CVector& collisionImpactVelocity, const CVector& collisionPosition, int8 moveState, int16 evadeType);
-    CEvent* Clone_Reversed();
-    bool AffectsPed_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CEventVehicleCollision, 0x34);

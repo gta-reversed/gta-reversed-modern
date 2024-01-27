@@ -4,11 +4,11 @@
 
 void CEventPotentialWalkIntoVehicle::InjectHooks()
 {
-    RH_ScopedClass(CEventPotentialWalkIntoVehicle);
+    RH_ScopedVirtualClass(CEventPotentialWalkIntoVehicle, 0x85AED0, 17);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AE320);
-    RH_ScopedVirtualInstall(AffectsPed, 0x4AE420);
+    RH_ScopedVMTInstall(AffectsPed, 0x4AE420);
 }
 
 // 0x4AE320
@@ -30,10 +30,6 @@ CEventPotentialWalkIntoVehicle* CEventPotentialWalkIntoVehicle::Constructor(CVeh
 
 // 0x4AE420
 bool CEventPotentialWalkIntoVehicle::AffectsPed(CPed* ped) {
-    return CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(ped);
-}
-
-bool CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(CPed* ped) {
     auto taskEnterCarAsDriver = ped->GetTaskManager().Find<CTaskComplexEnterCarAsDriver>();
     auto goToTask = reinterpret_cast<CTaskSimpleGoTo*>(ped->GetTaskManager().GetSimplestActiveTask());
     if (ped->IsPlayer() && !taskEnterCarAsDriver && !CTask::IsGoToTask(goToTask))
@@ -79,4 +75,3 @@ bool CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(CPed* ped) {
     }
     return false;
 }
-

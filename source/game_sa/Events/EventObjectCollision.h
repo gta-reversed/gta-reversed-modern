@@ -11,7 +11,7 @@
 #include "EventKnockOffBike.h"
 
 
-class CEventObjectCollision : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventObjectCollision : public CEvent {
 public:
     int16    m_pieceType;
     int16    m_moveState;
@@ -35,6 +35,5 @@ public:
 
 private:
     CEventObjectCollision* Constructor(int16 pieceType, float damageIntensity, CObject* object, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState);
-    bool AffectsPed_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CEventObjectCollision, 0x30);

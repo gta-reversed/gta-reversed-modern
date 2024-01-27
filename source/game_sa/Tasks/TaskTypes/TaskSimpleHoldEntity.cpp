@@ -6,15 +6,15 @@
 #include "TaskSimplePutDownEntity.h"
 
 void CTaskSimpleHoldEntity::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleHoldEntity);
+    RH_ScopedVirtualClass(CTaskSimpleHoldEntity, 0x870B2C, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedOverloadedInstall(Constructor, "1", 0x6913A0, CTaskSimpleHoldEntity*(CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, AnimationId, AssocGroupId, bool));
     RH_ScopedOverloadedInstall(Constructor, "2", 0x691470, CTaskSimpleHoldEntity * (CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, const char*, const char*, eAnimationFlags));
     RH_ScopedOverloadedInstall(Constructor, "3", 0x691550, CTaskSimpleHoldEntity * (CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, CAnimBlock*, CAnimBlendHierarchy*, eAnimationFlags));
-    RH_ScopedVirtualInstall(Clone, 0x6929B0);
-    RH_ScopedVirtualInstall(MakeAbortable, 0x693BD0);
-    RH_ScopedVirtualInstall(ProcessPed, 0x693C40);
-    RH_ScopedVirtualInstall(SetPedPosition, 0x6940A0);
+    RH_ScopedVMTInstall(Clone, 0x6929B0);
+    RH_ScopedVMTInstall(MakeAbortable, 0x693BD0);
+    RH_ScopedVMTInstall(ProcessPed, 0x693C40);
+    RH_ScopedVMTInstall(SetPedPosition, 0x6940A0);
     RH_ScopedInstall(ReleaseEntity, 0x6916E0);
     RH_ScopedInstall(CanThrowEntity, 0x691700);
     RH_ScopedInstall(PlayAnim, 0x691720);
@@ -26,10 +26,6 @@ void CTaskSimpleHoldEntity::InjectHooks() {
 CTaskSimpleHoldEntity* CTaskSimpleHoldEntity::Constructor(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, AnimationId animId, AssocGroupId groupId, bool bDisAllowDroppingOnAnimEnd) { this->CTaskSimpleHoldEntity::CTaskSimpleHoldEntity(entityToHold, posn, boneFrameId, boneFlags, animId, groupId, bDisAllowDroppingOnAnimEnd); return this; }
 CTaskSimpleHoldEntity* CTaskSimpleHoldEntity::Constructor(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, const char* animName, const char* animBlockName, eAnimationFlags animFlags) { this->CTaskSimpleHoldEntity::CTaskSimpleHoldEntity(entityToHold, posn, boneFrameId, boneFlags, animName, animBlockName, animFlags); return this; }
 CTaskSimpleHoldEntity* CTaskSimpleHoldEntity::Constructor(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* animBlock, CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags) { this->CTaskSimpleHoldEntity::CTaskSimpleHoldEntity(entityToHold, posn, boneFrameId, boneFlags, animBlock, animHierarchy, animFlags); return this; }
-CTask* CTaskSimpleHoldEntity::Clone() const { return  CTaskSimpleHoldEntity::Clone_Reversed(); }
-bool CTaskSimpleHoldEntity::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return CTaskSimpleHoldEntity::MakeAbortable_Reversed(ped, priority, event); }
-bool CTaskSimpleHoldEntity::ProcessPed(CPed* ped) { return ProcessPed_Reversed(ped); }
-bool CTaskSimpleHoldEntity::SetPedPosition(CPed* ped) { return CTaskSimpleHoldEntity::SetPedPosition_Reversed(ped); }
 
 // 0x6913A0
 CTaskSimpleHoldEntity::CTaskSimpleHoldEntity(
@@ -158,7 +154,7 @@ CTaskSimpleHoldEntity::~CTaskSimpleHoldEntity() {
 }
 
 // 0x6929B0
-CTask* CTaskSimpleHoldEntity::Clone_Reversed() const {
+CTask* CTaskSimpleHoldEntity::Clone() const {
     if (m_pAnimBlendHierarchy)
         return new CTaskSimpleHoldEntity(m_pEntityToHold, &m_vecPosition, m_nBoneFrameId, m_bBoneFlags, m_pAnimBlock, m_pAnimBlendHierarchy, static_cast<eAnimationFlags>(m_animFlags));
     else
@@ -166,7 +162,7 @@ CTask* CTaskSimpleHoldEntity::Clone_Reversed() const {
 }
 
 // 0x693BD0
-bool CTaskSimpleHoldEntity::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
+bool CTaskSimpleHoldEntity::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (priority == ABORT_PRIORITY_URGENT || priority == ABORT_PRIORITY_IMMEDIATE) {
         if (m_pAnimBlendAssociation) {
             m_pAnimBlendAssociation->m_BlendDelta = -4.0f;
@@ -185,7 +181,7 @@ bool CTaskSimpleHoldEntity::MakeAbortable_Reversed(CPed* ped, eAbortPriority pri
 }
 
 // 0x693C40
-bool CTaskSimpleHoldEntity::ProcessPed_Reversed(CPed* ped) {
+bool CTaskSimpleHoldEntity::ProcessPed(CPed* ped) {
     CTaskManager* taskManager = &ped->GetTaskManager();
     if (m_bEntityRequiresProcessing) {
         m_bEntityRequiresProcessing = false;
@@ -281,7 +277,7 @@ bool CTaskSimpleHoldEntity::ProcessPed_Reversed(CPed* ped) {
 }
 
 // 0x6940A0
-bool CTaskSimpleHoldEntity::SetPedPosition_Reversed(CPed* ped) {
+bool CTaskSimpleHoldEntity::SetPedPosition(CPed* ped) {
     bool bUpdateEntityToHoldPosition = false;
     if (GetTaskType() == TASK_SIMPLE_PICKUP_ENTITY)
     {

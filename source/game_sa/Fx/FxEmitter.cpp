@@ -8,7 +8,7 @@
 #include "FxEmitterPrt.h"
 
 void FxEmitter_c::InjectHooks() {
-    RH_ScopedClass(FxEmitter_c);
+    RH_ScopedVirtualClass(FxEmitter_c, 0x85A7A4, 6);
     RH_ScopedCategory("Fx");
 
     // RH_ScopedInstall(Init_Reversed, 0x4A2550);
@@ -18,16 +18,13 @@ void FxEmitter_c::InjectHooks() {
     // RH_ScopedOverloadedInstall(AddParticle_Reversed, "", 0x4A4050, void(FxEmitter_c::*)(CVector*, CVector*, float, FxPrtMult_c*, float, float, bool));
     // RH_ScopedInstall(CreateParticles, 0x4A41E0);
     // RH_ScopedInstall(CreateParticle, 0x4A2580);
-}
-
-bool FxEmitter_c::Init(FxPrimBP_c* primBP, FxSystem_c* system) { return Init_Reversed(primBP, system); }
-void FxEmitter_c::Update(float currentTime, float deltaTime) { Update_Reversed(currentTime, deltaTime); }
-void FxEmitter_c::Reset() { Reset_Reversed(); }
-void FxEmitter_c::AddParticle(RwMatrix* mat, CVector* vel, float timeSince, FxPrtMult_c* fxMults, float rotZ, float brightness, bool createLocal) { AddParticle_Reversed(mat, vel, timeSince, fxMults, rotZ, brightness, createLocal); }
+}void FxEmitter_c::AddParticle(RwMatrix* mat, CVector* vel, float timeSince, FxPrtMult_c* fxMults, float rotZ, float brightness, bool createLocal) { AddParticle_Reversed(mat, vel, timeSince, fxMults, rotZ, brightness, createLocal); }
 void FxEmitter_c::AddParticle(CVector* pos, CVector* vel, float timeSince, FxPrtMult_c* fxMults, float rotZ, float brightness, bool createLocal) { AddParticle_Reversed(pos, vel, timeSince, fxMults, rotZ, brightness, createLocal); }
 
 // 0x4A2550
-bool FxEmitter_c::Init_Reversed(FxPrimBP_c* primBP, FxSystem_c* system) {
+
+
+bool FxEmitter_c::Init(FxPrimBP_c* primBP, FxSystem_c* system) {
     m_PrimBP             = primBP;
     m_System             = system;
     m_fEmissionIntensity = 0.0f;
@@ -35,14 +32,18 @@ bool FxEmitter_c::Init_Reversed(FxPrimBP_c* primBP, FxSystem_c* system) {
 }
 
 // 0x4A4460
-void FxEmitter_c::Update_Reversed(float currentTime, float deltaTime) {
+
+
+void FxEmitter_c::Update(float currentTime, float deltaTime) {
     if (m_bEnabled && !m_System->m_stopParticleCreation) {
         CreateParticles(currentTime, deltaTime);
     }
 }
 
 // 0x4A2570
-void FxEmitter_c::Reset_Reversed() {
+
+// 0x0
+void FxEmitter_c::Reset() {
     m_fEmissionIntensity = 0.0f;
 }
 

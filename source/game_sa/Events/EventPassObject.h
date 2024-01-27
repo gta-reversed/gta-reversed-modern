@@ -4,7 +4,7 @@
 
 #include "Event.h"
 
-class CEventPassObject : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventPassObject : public CEvent {
 public:
     CPed* m_giver;
     bool  m_dontPassObject;
@@ -27,6 +27,5 @@ private:
     CEventPassObject* Constructor(CPed* giver, bool dontPassObject);
     CEventPassObject* Destructor();
 
-    bool IsValid_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CEventPassObject, 0x14);

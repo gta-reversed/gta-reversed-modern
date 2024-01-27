@@ -4,13 +4,13 @@
 
 void CEventAcquaintancePed::InjectHooks()
 {
-    RH_ScopedClass(CEventAcquaintancePed);
+    RH_ScopedVirtualClass(CEventAcquaintancePed, 0x85B250, 17);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AF820);
-    RH_ScopedVirtualInstall(AffectsPed, 0x4AFA30);
-    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4AF970);
-    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4AF8F0);
+    RH_ScopedVMTInstall(AffectsPed, 0x4AFA30);
+    RH_ScopedVMTInstall(AffectsPedGroup, 0x4AF970);
+    RH_ScopedVMTInstall(TakesPriorityOver, 0x4AF8F0);
 }
 
 // 0x4AF820
@@ -36,29 +36,13 @@ CEventAcquaintancePed* CEventAcquaintancePed::Constructor(CPed* ped)
 // 0x4AFA30
 bool CEventAcquaintancePed::AffectsPed(CPed* ped)
 {
-    return CEventAcquaintancePed::AffectsPed_Reversed(ped);
-}
-
-// 0x4AF970
-bool CEventAcquaintancePed::AffectsPedGroup(CPedGroup* pedGroup)
-{
-    return CEventAcquaintancePed::AffectsPedGroup_Reversed(pedGroup);
-}
-
-// 0x4AF8F0
-bool CEventAcquaintancePed::TakesPriorityOver(const CEvent& refEvent)
-{
-    return CEventAcquaintancePed::TakesPriorityOver_Reversed(refEvent);
-}
-
-bool CEventAcquaintancePed::AffectsPed_Reversed(CPed* ped)
-{
     if (m_AcquaintancePed && !ped->m_pFire && ped->IsAlive() && m_AcquaintancePed->IsAlive())
         return !CPedGroups::AreInSameGroup(ped, m_AcquaintancePed);
     return false;
 }
 
-bool CEventAcquaintancePed::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
+// 0x4AF970
+bool CEventAcquaintancePed::AffectsPedGroup(CPedGroup* pedGroup)
 {
     if (m_AcquaintancePed) {
         CPedGroupMembership& membership = pedGroup->GetMembership();
@@ -76,7 +60,8 @@ bool CEventAcquaintancePed::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
     return false;
 }
 
-bool CEventAcquaintancePed::TakesPriorityOver_Reversed(const CEvent& refEvent)
+// 0x4AF8F0
+bool CEventAcquaintancePed::TakesPriorityOver(const CEvent& refEvent)
 {
     if (refEvent.GetEventType() == GetEventType()) {
         const auto theRefEvent = static_cast<const CEventAcquaintancePed*>(&refEvent);
@@ -86,4 +71,3 @@ bool CEventAcquaintancePed::TakesPriorityOver_Reversed(const CEvent& refEvent)
     }
     return CEvent::TakesPriorityOver(refEvent);
 }
-

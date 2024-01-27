@@ -29,6 +29,4 @@ private:
 
     CEventSoundQuiet* Constructor(CEntity* entity, float fLocalSoundLevel, uint32 startTime, const CVector& position);
 
-    bool AffectsPed_Reversed(CPed* ped);
-    CEventEditableResponse* CloneEditable_Reversed();
 };

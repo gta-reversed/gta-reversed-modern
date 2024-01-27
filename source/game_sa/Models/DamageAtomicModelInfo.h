@@ -23,9 +23,6 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CDamageAtomicModelInfo* AsDamageAtomicModelInfoPtr_Reversed();
-    void Init_Reversed();
-    void DeleteRwObject_Reversed();
     struct RwObject* CreateInstance_Reversed();
     struct RwObject* CreateInstance_Reversed(RwMatrix* matrix);
 };

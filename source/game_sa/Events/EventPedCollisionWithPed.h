@@ -5,7 +5,7 @@
 #include "Vector.h"
 #include <extensions/WEnum.hpp>
 
-class CEventPedCollisionWithPed : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventPedCollisionWithPed : public CEvent {
 public:
     int16                       m_pieceType;
     char                        field_E[2];
@@ -34,7 +34,5 @@ private:
     static void InjectHooks();
     CEventPedCollisionWithPed* Constructor(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, eMoveState moveState, eMoveState victimMoveState);
 
-    bool TakesPriorityOver_Reversed(const CEvent& refEvent);
-    bool AffectsPed_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CEventPedCollisionWithPed, 0x34);

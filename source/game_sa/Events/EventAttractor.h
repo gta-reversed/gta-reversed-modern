@@ -25,8 +25,6 @@ public:
 
 private:
     CEventAttractor* Constructor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor);
-    bool AffectsPed_Reversed(CPed* ped);
-    CEventEditableResponse* CloneEditable_Reversed();
     static bool IsEffectActive(CEntity* entity, const C2dEffect* effect);
 };
 VALIDATE_SIZE(CEventAttractor, 0x20);

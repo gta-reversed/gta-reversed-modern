@@ -9,24 +9,24 @@
 #include "TaskSimpleUseGun.h"
 
 void CEventDamage::InjectHooks() {
-    RH_ScopedClass(CEventDamage);
+    RH_ScopedVirtualClass(CEventDamage, 0x85AD78, 17);
     RH_ScopedCategory("Events");
 
     RH_ScopedOverloadedInstall(Constructor, "", 0x4B33B0, CEventDamage*(CEventDamage::*)(const CEventDamage&));
     RH_ScopedOverloadedInstall(Constructor, "1", 0x4AD830, CEventDamage * (CEventDamage::*)(CEntity*, uint32, eWeaponType, ePedPieceTypes, uint8, bool, bool));
-    RH_ScopedVirtualInstall(GetEventType, 0x4AD910);
-    RH_ScopedVirtualInstall(GetEventPriority, 0x4AD950);
-    RH_ScopedVirtualInstall(GetLifeTime, 0x4AD920);
-    RH_ScopedVirtualInstall(AffectsPed, 0x4B35A0);
-    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B38D0);
-    RH_ScopedVirtualInstall(IsCriminalEvent, 0x4ADA90);
-    RH_ScopedVirtualInstall(ReportCriminalEvent, 0x4B3440);
-    RH_ScopedVirtualInstall(GetSourceEntity, 0x4ADA70);
-    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4ADB00);
-    RH_ScopedVirtualInstall(GetLocalSoundLevel, 0x4AD930);
-    RH_ScopedVirtualInstall(DoInformVehicleOccupants, 0x4ADAE0);
-    RH_ScopedVirtualInstall(CanBeInterruptedBySameEvent, 0x4AD940);
-    RH_ScopedVirtualInstall(CloneEditable, 0x4B5D40);
+    RH_ScopedVMTInstall(GetEventType, 0x4AD910);
+    RH_ScopedVMTInstall(GetEventPriority, 0x4AD950);
+    RH_ScopedVMTInstall(GetLifeTime, 0x4AD920);
+    RH_ScopedVMTInstall(AffectsPed, 0x4B35A0);
+    RH_ScopedVMTInstall(AffectsPedGroup, 0x4B38D0);
+    RH_ScopedVMTInstall(IsCriminalEvent, 0x4ADA90);
+    RH_ScopedVMTInstall(ReportCriminalEvent, 0x4B3440);
+    RH_ScopedVMTInstall(GetSourceEntity, 0x4ADA70);
+    RH_ScopedVMTInstall(TakesPriorityOver, 0x4ADB00);
+    RH_ScopedVMTInstall(GetLocalSoundLevel, 0x4AD930);
+    RH_ScopedVMTInstall(DoInformVehicleOccupants, 0x4ADAE0);
+    RH_ScopedVMTInstall(CanBeInterruptedBySameEvent, 0x4AD940);
+    RH_ScopedVMTInstall(CloneEditable, 0x4B5D40);
     RH_ScopedInstall(From, 0x4AD9C0);
     RH_ScopedInstall(ProcessDamage, 0x4B3A20);
     RH_ScopedInstall(ComputeBodyPartToRemove, 0x4ADC10);
@@ -71,72 +71,29 @@ CEventDamage* CEventDamage::Constructor(CEntity* source, uint32 startTime, eWeap
     return this;
 }
 
-// 0x4AD910
+
 eEventType CEventDamage::GetEventType() const {
     return CEventDamage::GetEventType_Reversed();
 }
 
-// 0x4AD950
+
 int32 CEventDamage::GetEventPriority() const {
     return CEventDamage::GetEventPriority_Reversed();
 }
 
-// 0x4AD920
+
 int32 CEventDamage::GetLifeTime() {
     return CEventDamage::GetLifeTime_Reversed();
 }
-
-// 0x4B35A0
-bool CEventDamage::AffectsPed(CPed* ped) {
-    return CEventDamage::AffectsPed_Reversed(ped);
-}
-
-// 0x4B38D0
-bool CEventDamage::AffectsPedGroup(CPedGroup* pedGroup) {
-    return CEventDamage::AffectsPedGroup_Reversed(pedGroup);
-}
-
-// 0x4ADA90
-bool CEventDamage::IsCriminalEvent() {
-    return CEventDamage::IsCriminalEvent_Reversed();
-}
-
-// 0x4B3440
-void CEventDamage::ReportCriminalEvent(CPed* ped) {
-    return CEventDamage::ReportCriminalEvent_Reversed(ped);
-}
-
-// 0x4ADA70
-CEntity* CEventDamage::GetSourceEntity() const {
-    return CEventDamage::GetSourceEntity_Reversed();
-}
-
-// 0x4ADB00
-bool CEventDamage::TakesPriorityOver(const CEvent& refEvent) {
-    return CEventDamage::TakesPriorityOver_Reversed(refEvent);
-}
-
-// 0x4AD930
 float CEventDamage::GetLocalSoundLevel() {
     return CEventDamage::GetLocalSoundLevel_Reversed();
 }
-
-// 0x4ADAE0
-bool CEventDamage::DoInformVehicleOccupants(CPed* ped) {
-    return CEventDamage::DoInformVehicleOccupants_Reversed(ped);
-}
-
-// 0x4AD940
 bool CEventDamage::CanBeInterruptedBySameEvent() {
     return CEventDamage::CanBeInterruptedBySameEvent_Reversed();
 }
 
-// 0x4B5D40
-CEventEditableResponse* CEventDamage::CloneEditable() {
-    return CEventDamage::CloneEditable_Reversed();
-}
-
-bool CEventDamage::AffectsPed_Reversed(CPed* ped) {
+// 0x4B35A0
+bool CEventDamage::AffectsPed(CPed* ped) {
     auto* pedSourceEntity = GetSourceEntity()->AsPed();
     if (m_damageResponse.m_bDamageCalculated && !m_damageResponse.m_bCheckIfAffectsPed)
         return true;
@@ -222,7 +179,8 @@ bool CEventDamage::AffectsPed_Reversed(CPed* ped) {
 
 }
 
-bool CEventDamage::AffectsPedGroup_Reversed(CPedGroup* pedGroup) {
+// 0x4B38D0
+bool CEventDamage::AffectsPedGroup(CPedGroup* pedGroup) {
     if (m_weaponType == WEAPON_PISTOL_SILENCED)
         return false;
 
@@ -254,7 +212,8 @@ bool CEventDamage::AffectsPedGroup_Reversed(CPedGroup* pedGroup) {
     return false;
 }
 
-bool CEventDamage::IsCriminalEvent_Reversed() {
+// 0x4ADA90
+bool CEventDamage::IsCriminalEvent() {
     if (m_pSourceEntity) {
         auto* vehicle = m_pSourceEntity->AsVehicle();
         auto* ped     = m_pSourceEntity->AsPed();
@@ -268,7 +227,8 @@ bool CEventDamage::IsCriminalEvent_Reversed() {
     return false;
 }
 
-void CEventDamage::ReportCriminalEvent_Reversed(CPed* ped) {
+// 0x4B3440
+void CEventDamage::ReportCriminalEvent(CPed* ped) {
     if (IsCriminalEvent() && m_pSourceEntity) {
         bool bPoliceCareAboutCrime = CPedType::PoliceDontCareAboutCrimesAgainstPedType(ped->m_nPedType);
         if (m_weaponType <= WEAPON_CHAINSAW) {
@@ -291,7 +251,8 @@ void CEventDamage::ReportCriminalEvent_Reversed(CPed* ped) {
     }
 }
 
-CEntity* CEventDamage::GetSourceEntity_Reversed() const {
+// 0x4ADA70
+CEntity* CEventDamage::GetSourceEntity() const {
     if (m_pSourceEntity && m_pSourceEntity->IsVehicle()) {
         auto* vehicle = m_pSourceEntity->AsVehicle();
         if (vehicle->m_pDriver)
@@ -300,7 +261,8 @@ CEntity* CEventDamage::GetSourceEntity_Reversed() const {
     return m_pSourceEntity;
 }
 
-bool CEventDamage::TakesPriorityOver_Reversed(const CEvent& refEvent) {
+// 0x4ADB00
+bool CEventDamage::TakesPriorityOver(const CEvent& refEvent) {
     if (refEvent.GetEventType() == EVENT_IN_WATER && m_damageResponse.m_bHealthZero && m_bAddToEventGroup
         || refEvent.GetEventType() == EVENT_ON_FIRE && m_damageResponse.m_bHealthZero && m_bAddToEventGroup
         || refEvent.GetEventType() == EVENT_KNOCK_OFF_BIKE && m_damageResponse.m_bHealthZero && m_bAddToEventGroup) {
@@ -321,13 +283,15 @@ bool CEventDamage::TakesPriorityOver_Reversed(const CEvent& refEvent) {
     return CEvent::TakesPriorityOver(refEvent);
 }
 
-bool CEventDamage::DoInformVehicleOccupants_Reversed(CPed* ped) {
+// 0x4ADAE0
+bool CEventDamage::DoInformVehicleOccupants(CPed* ped) {
     if (GetSourceEntity())
         return m_weaponType != WEAPON_DROWNING;
     return false;
 }
 
-CEventEditableResponse* CEventDamage::CloneEditable_Reversed() {
+// 0x4B5D40
+CEventEditableResponse* CEventDamage::CloneEditable() {
     auto* clonedEvent      = new CEventDamage(*this);
     clonedEvent->m_nAnimID = m_nAnimID;
     clonedEvent->m_bStealthMode     = m_bStealthMode;

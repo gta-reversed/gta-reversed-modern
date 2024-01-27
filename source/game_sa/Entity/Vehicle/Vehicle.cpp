@@ -436,9 +436,6 @@ void CVehicle::operator delete(void* data, int32 poolRef) {
 
 // 0x6D6A40
 void CVehicle::SetModelIndex(uint32 index) {
-    return CVehicle::SetModelIndex_Reversed(index);
-}
-void CVehicle::SetModelIndex_Reversed(uint32 index) {
     CEntity::SetModelIndex(index);
     auto mi = CModelInfo::GetModelInfo(index)->AsVehicleModelInfoPtr();
     CustomCarPlate_TextureCreate(mi);
@@ -478,9 +475,6 @@ void CVehicle::SetModelIndex_Reversed(uint32 index) {
 
 // 0x6D6410
 void CVehicle::DeleteRwObject() {
-    CVehicle::DeleteRwObject_Reversed();
-}
-void CVehicle::DeleteRwObject_Reversed() {
     SetRemapTexDictionary(-1);
     RemoveAllUpgrades();
     CEntity::DeleteRwObject();
@@ -488,10 +482,6 @@ void CVehicle::DeleteRwObject_Reversed() {
 
 // 0x6D6640
 void CVehicle::SpecialEntityPreCollisionStuff(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled,
-    bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck) {
-    CVehicle::SpecialEntityPreCollisionStuff_Reversed(colPhysical, bIgnoreStuckCheck, bCollisionDisabled, bCollidedEntityCollisionIgnored, bCollidedEntityUnableToMove, bThisOrCollidedEntityStuck);
-}
-void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled,
     bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck) {
     if (colPhysical->IsPed()
         && colPhysical->AsPed()->bKnockedOffBike
@@ -632,9 +622,6 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, b
 
 // 0x6D0E90
 uint8 CVehicle::SpecialEntityCalcCollisionSteps(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2) {
-    return CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bProcessCollisionBeforeSettingTimeStep, unk2);
-}
-uint8 CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2) {
     if (physicalFlags.bDisableCollisionForce)
         return 1;
 
@@ -673,9 +660,6 @@ uint8 CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollision
 
 // 0x6D6480
 void CVehicle::PreRender() {
-    return CVehicle::PreRender_Reversed();
-}
-void CVehicle::PreRender_Reversed() {
     if (!IsTrain())
         CalculateLightingFromCollision();
 
@@ -692,10 +676,8 @@ void CVehicle::PreRender_Reversed() {
     GetVehicleModelInfo()->SetEnvMapCoeff(fCoeff);
 }
 
+// 0x6D0E60
 void CVehicle::Render() {
-    return CVehicle::Render_Reversed();
-}
-void CVehicle::Render_Reversed() {
     auto* mi = GetVehicleModelInfo();
     const auto iDirtLevel = static_cast<int32>(m_fDirtLevel) & 0xF;
     CVehicleModelInfo::SetDirtTextures(mi, iDirtLevel);
@@ -703,18 +685,14 @@ void CVehicle::Render_Reversed() {
     CEntity::Render();
 }
 
+// 0x553F20
 bool CVehicle::SetupLighting() {
-    return CVehicle::SetupLighting_Reversed();
-}
-bool CVehicle::SetupLighting_Reversed() {
     ActivateDirectional();
     return CRenderer::SetupLightingForEntity(this);
 }
 
+// 0x5533D0
 void CVehicle::RemoveLighting(bool bRemove) {
-    CVehicle::RemoveLighting_Reversed(bRemove);
-}
-void CVehicle::RemoveLighting_Reversed(bool bRemove) {
     if (!physicalFlags.bDestroyed)
         CPointLights::RemoveLightsAffectingObject();
 
@@ -722,11 +700,8 @@ void CVehicle::RemoveLighting_Reversed(bool bRemove) {
     DeActivateDirectional();
 }
 
-// 0x871EF0
-void CVehicle::ProcessOpenDoor(CPed* ped, uint32 doorComponentId, uint32 animGroup, uint32 animId, float fTime) {
-    CVehicle::ProcessOpenDoor_Reversed(ped, doorComponentId, animGroup, animId, fTime);
-}
-void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId_, uint32 animGroup, uint32 animId, float fTime) {
+// 0x871EF0// 0x6D56C0
+void CVehicle::ProcessOpenDoor(CPed* ped, uint32 doorComponentId_, uint32 animGroup, uint32 animId, float fTime) {
     auto doorComponentId = (int32)doorComponentId_; // silence warns, todo: OpenDoor receives int32, why?
     eDoors iCheckedDoor = [&] {
         switch (doorComponentId) {
@@ -936,9 +911,6 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId_, uint
 
 // 0x6DF4A0
 void CVehicle::ProcessDrivingAnims(CPed* driver, bool blend) {
-    CVehicle::ProcessDrivingAnims_Reversed(driver, blend);
-}
-void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, bool blend) {
     if (m_bOffscreen || !driver->IsPlayer())
         return;
 
@@ -1054,19 +1026,13 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, bool blend) {
     }
 }
 
-// 0x871F54
+// 0x871F54// 0x6D63F0
 float CVehicle::GetHeightAboveRoad() {
-    return CVehicle::GetHeightAboveRoad_Reversed();
-}
-float CVehicle::GetHeightAboveRoad_Reversed() {
     return CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox().m_vecMin.z * -1.0F;
 }
 
 // 0x6D1F30
 bool CVehicle::CanPedStepOutCar(bool bIgnoreSpeedUpright) const {
-    return CVehicle::CanPedStepOutCar_Reversed(bIgnoreSpeedUpright);
-}
-bool CVehicle::CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright) const {
     auto const fUpZ = m_matrix->GetUp().z;
     if (std::fabs(fUpZ) <= 0.1F) {
         if (std::fabs(m_vecMoveSpeed.z) > 0.05F || m_vecMoveSpeed.Magnitude2D() > 0.01F || m_vecTurnSpeed.SquaredMagnitude() > 0.0004F) { // 0.02F / 50.0f
@@ -1088,9 +1054,6 @@ bool CVehicle::CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright) const {
 
 // 0x6D2030
 bool CVehicle::CanPedJumpOutCar(CPed* ped) {
-    return CVehicle::CanPedJumpOutCar_Reversed(ped);
-}
-bool CVehicle::CanPedJumpOutCar_Reversed(CPed* ped) {
     if (IsBike())
     {
         if (!m_apPassengers[0] || ped == m_apPassengers[0])
@@ -1127,11 +1090,8 @@ bool CVehicle::CanPedJumpOutCar_Reversed(CPed* ped) {
     return false;
 }
 
-// 0x871F6C
+// 0x871F6C// 0x6DFB70
 bool CVehicle::GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) {
-    return CVehicle::GetTowHitchPos_Reversed(outPos, bCheckModelInfo, vehicle);
-}
-bool CVehicle::GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) {
     if (!bCheckModelInfo)
         return false;
 
@@ -1141,11 +1101,8 @@ bool CVehicle::GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CV
     return true;
 }
 
-// 0x871F70
+// 0x871F70// 0x6DFBE0
 bool CVehicle::GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) {
-    return CVehicle::GetTowBarPos_Reversed(outPos, bCheckModelInfo, vehicle);
-}
-bool CVehicle::GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) {
     if (!bCheckModelInfo)
         return false;
 
@@ -1155,11 +1112,8 @@ bool CVehicle::GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVeh
     return true;
 }
 
-// 0x871F80
+// 0x871F80// 0x5D4760
 bool CVehicle::Save() {
-    return CVehicle::Save_Reversed();
-}
-bool CVehicle::Save_Reversed() {
     uint32 size = sizeof(CVehicleSaveStructure);
     CVehicleSaveStructure data;
     data.Construct(this);
@@ -1168,11 +1122,8 @@ bool CVehicle::Save_Reversed() {
     return true;
 }
 
-// 0x871F84
+// 0x871F84// 0x5D2900
 bool CVehicle::Load() {
-    return CVehicle::Load_Reversed();
-}
-bool CVehicle::Load_Reversed() {
     uint32 size;
     CVehicleSaveStructure data;
     CGenericGameStorage::LoadDataFromWorkBuffer(&size, sizeof(uint32));

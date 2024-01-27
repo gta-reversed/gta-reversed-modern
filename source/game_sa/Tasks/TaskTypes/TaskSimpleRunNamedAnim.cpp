@@ -3,7 +3,7 @@
 #include "TaskSimpleRunNamedAnim.h"
 
 void CTaskSimpleRunNamedAnim::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleRunNamedAnim);
+    RH_ScopedVirtualClass(CTaskSimpleRunNamedAnim, 0x86D54C, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedOverloadedInstall(Constructor, "Default", 0x6674B0, CTaskSimpleRunNamedAnim*(CTaskSimpleRunNamedAnim::*)());
@@ -52,6 +52,8 @@ CTaskSimpleRunNamedAnim::CTaskSimpleRunNamedAnim(
 }
 
 // 0x61BF20
+
+// 0x0
 bool CTaskSimpleRunNamedAnim::ProcessPed(CPed* ped) {
     return plugin::CallMethodAndReturn<bool, 0x61BF20>(this, ped);
 }

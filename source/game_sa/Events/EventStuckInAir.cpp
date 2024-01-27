@@ -4,13 +4,13 @@
 
 void CEventStuckInAir::InjectHooks()
 {
-    RH_ScopedClass(CEventStuckInAir);
+    RH_ScopedVirtualClass(CEventStuckInAir, 0x85B508, 16);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B1490);
-    RH_ScopedVirtualInstall2(GetEventPriority, 0x4B1600);
-    RH_ScopedVirtualInstall(AffectsPed, 0x4B1580);
-    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4B15B0);
+    RH_ScopedVMTInstall(GetEventPriority, 0x4B1600);
+    RH_ScopedVMTInstall(AffectsPed, 0x4B1580);
+    RH_ScopedVMTInstall(TakesPriorityOver, 0x4B15B0);
 }
 
 // 0x4B1490
@@ -42,28 +42,17 @@ CEventStuckInAir* CEventStuckInAir::Constructor(CPed* ped)
 // 0x4B1580
 bool CEventStuckInAir::AffectsPed(CPed* ped)
 {
-    return CEventStuckInAir::AffectsPed_Reversed(ped);
-}
-
-// 0x4B15B0
-bool CEventStuckInAir::TakesPriorityOver(const CEvent& refEvent)
-{
-    return CEventStuckInAir::TakesPriorityOver_Reversed(refEvent);
-}
-
-bool CEventStuckInAir::AffectsPed_Reversed(CPed* ped)
-{
     if (ped->bIsStanding)
         return false;
 
     return ped->GetStuckChecker().m_state != PED_STUCK_STATE_NONE;
 }
 
-bool CEventStuckInAir::TakesPriorityOver_Reversed(const CEvent& refEvent)
+// 0x4B15B0
+bool CEventStuckInAir::TakesPriorityOver(const CEvent& refEvent)
 {
     if (refEvent.GetEventPriority() < 74 && refEvent.GetEventType() != EVENT_STUCK_IN_AIR)
         return true;
 
     return CEvent::TakesPriorityOver(refEvent);
 }
-
