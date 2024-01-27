@@ -416,11 +416,8 @@ void CEntity::DeleteRwObject()
     CEntity::RemoveEscalatorsForEntity();
 }
 
+// 0x534120
 CRect CEntity::GetBoundRect()
-{
-    return CEntity::GetBoundRect_Reversed();
-}
-CRect CEntity::GetBoundRect_Reversed()
 {
     CColModel* colModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
     CVector vecMin = colModel->m_boundBox.m_vecMin;

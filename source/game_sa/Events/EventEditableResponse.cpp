@@ -35,9 +35,6 @@ CEventEditableResponse* CEventEditableResponse::Constructor() {
     this->CEventEditableResponse::CEventEditableResponse();
     return this;
 }
-bool CEventEditableResponse::HasEditableResponse() const {
-    return CEventEditableResponse::HasEditableResponse_Reversed();
-}
 
 // 0x420ED0
 CEvent* CEventEditableResponse::Clone() {

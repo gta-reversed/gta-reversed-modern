@@ -4,11 +4,11 @@
 
 void CEventAcquaintancePedHateBadlyLit::InjectHooks()
 {
-    RH_ScopedClass(CEventAcquaintancePedHateBadlyLit);
+    RH_ScopedVirtualClass(CEventAcquaintancePedHateBadlyLit, 17, 0x86CB10);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x5FF250);
-    RH_ScopedInstall(AffectsPed_Reversed1, 0x4AFA90);
+    RH_ScopedVMTInstall(AffectsPed, 0x4AFA90);
 }
 
 // 0x5FF250
@@ -29,13 +29,8 @@ CEventAcquaintancePedHateBadlyLit* CEventAcquaintancePedHateBadlyLit::Constructo
     return this;
 }
 
-bool CEventAcquaintancePedHateBadlyLit::AffectsPed(CPed* ped)
-{
-    return CEventAcquaintancePedHateBadlyLit::AffectsPed_Reversed(ped);
-}
-
 // 0x4AFA90
-bool CEventAcquaintancePedHateBadlyLit::AffectsPed_Reversed1(CPed* ped)
+bool CEventAcquaintancePedHateBadlyLit::AffectsPed(CPed* ped)
 {
     if (CEventAcquaintancePed::AffectsPed(ped)) {
         CEvent* currentEvent = ped->GetEventHandlerHistory().GetCurrentEvent();

@@ -3406,7 +3406,7 @@ bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
 
     const auto [rotorUp, rotorSizeMS] = GetRotorDirUpAndThickness();
     const auto rotorSize              = matrix.TransformVector(rotorSizeMS);
-    const auto colModelCenter         = matrix->TransformPoint(colModel.GetBoundCenter());
+    const auto colModelCenter         = matrix.TransformPoint(colModel.GetBoundCenter());
     const auto& thisPosn              = GetPosition();
 
     for (CPtrNode* it = ptrList.GetNode(), *next{}; it; it = next) {

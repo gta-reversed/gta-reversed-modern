@@ -71,27 +71,6 @@ CEventDamage* CEventDamage::Constructor(CEntity* source, uint32 startTime, eWeap
     return this;
 }
 
-
-eEventType CEventDamage::GetEventType() const {
-    return CEventDamage::GetEventType_Reversed();
-}
-
-
-int32 CEventDamage::GetEventPriority() const {
-    return CEventDamage::GetEventPriority_Reversed();
-}
-
-
-int32 CEventDamage::GetLifeTime() {
-    return CEventDamage::GetLifeTime_Reversed();
-}
-float CEventDamage::GetLocalSoundLevel() {
-    return CEventDamage::GetLocalSoundLevel_Reversed();
-}
-bool CEventDamage::CanBeInterruptedBySameEvent() {
-    return CEventDamage::CanBeInterruptedBySameEvent_Reversed();
-}
-
 // 0x4B35A0
 bool CEventDamage::AffectsPed(CPed* ped) {
     auto* pedSourceEntity = GetSourceEntity()->AsPed();

@@ -45,7 +45,7 @@ CTaskComplexUseSequence* CTaskComplexUseSequence::Constructor(int32 sequenceInde
     return this;
 }
 
-// 0x639730// 0x6354A0// 0x6354D0// 0x635530bool CTaskComplexUseSequence::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
+bool CTaskComplexUseSequence::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     bool bMakeAbortable = m_pSubTask->MakeAbortable(ped, priority, event);
     if (bMakeAbortable && event && event->GetEventType() == EVENT_DAMAGE) {
         auto* eventDamage = (CEventDamage*)event;
@@ -62,7 +62,6 @@ CTaskComplexUseSequence* CTaskComplexUseSequence::Constructor(int32 sequenceInde
     }
     return bMakeAbortable;
 }
-
 
 CTask* CTaskComplexUseSequence::CreateNextSubTask(CPed* ped) {
     if (m_nSequenceIndex == -1) {

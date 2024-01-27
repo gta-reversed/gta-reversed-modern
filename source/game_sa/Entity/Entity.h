@@ -304,7 +304,6 @@ private:
 
     void Add_Reversed();
     void Add_Reversed(const CRect& rect);
-    CRect GetBoundRect_Reversed();
 };
 
 VALIDATE_SIZE(CEntity, 0x38);
