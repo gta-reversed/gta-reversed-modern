@@ -22,9 +22,6 @@ public:
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
-
-    struct RwObject* CreateInstance_Reversed();
-    struct RwObject* CreateInstance_Reversed(RwMatrix* matrix);
 };
 
 VALIDATE_SIZE(CDamageAtomicModelInfo, 0x24);

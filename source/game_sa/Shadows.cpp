@@ -354,7 +354,7 @@ uint16 CalculateShadowStrength(float currDist, float maxDist, uint16 maxStrength
 // 0x707B40
 void CShadows::StoreShadowForPedObject(CPed* ped, float displacementX, float displacementY, float frontX, float frontY, float sideX, float sideY) {
     // Okay, so.
-    // This function is called from `CCutsceneObject::PreRender_Reversed`
+    // This function is called from `CCutsceneObject::PreRender`
     // And you might ask "what the fuck, an object is not a ped!!"
     // well, in R* world it is.
     // it has bones (as anything can have bones actually, that's a known fact)

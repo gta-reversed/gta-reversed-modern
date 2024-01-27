@@ -28,5 +28,5 @@ void CTaskComplexStuckInAir::InjectHooks() {
     RH_ScopedVMTInstall(ControlSubTask, 0x67BE50, { .reversed = false });
     RH_ScopedVMTInstall(CreateFirstSubTask, 0x67BE20, { .reversed = false });
     RH_ScopedVMTInstall(CreateNextSubTask, 0x67BD10, { .reversed = false });
-    RH_ScopedVMTInstall(CreateSubTask, 0x67BA80, { .reversed = false });
+    RH_ScopedInstall(CreateSubTask, 0x67BA80, { .reversed = false });
 }

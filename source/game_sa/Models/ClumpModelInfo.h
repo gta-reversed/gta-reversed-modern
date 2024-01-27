@@ -55,10 +55,6 @@ public:
     virtual CBox* GetBoundingBox();
     virtual void SetClump(RpClump* clump);
 
-    // Reversed vtable methods
-    RwObject* CreateInstance_Reversed();
-    RwObject* CreateInstance_Reversed(RwMatrix* matrix);
-
     // Class functions
     void SetFrameIds(RwObjectNameIdAssocation* data);
 

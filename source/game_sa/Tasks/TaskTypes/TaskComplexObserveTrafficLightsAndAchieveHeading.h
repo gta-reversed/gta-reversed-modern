@@ -2,7 +2,7 @@
 
 #include "TaskComplex.h"
 
-class CTaskComplexObserveTrafficLightsAndAchieveHeading : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexObserveTrafficLightsAndAchieveHeading : public CTaskComplex {
 public:
     int32 m_nDurationInMs;
     float m_fTargetHeading;

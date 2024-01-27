@@ -32,10 +32,6 @@ public:
     // vtable added methods
     virtual void SetAtomic(RpAtomic* atomic);
 
-    // vtable implementations;
-    RwObject* CreateInstance_Reversed();
-    RwObject* CreateInstance_Reversed(RwMatrix* matrix);
-
     // class methods
     struct RpAtomic* GetAtomicFromDistance(float distance);
     void SetupVehicleUpgradeFlags(const char* name);

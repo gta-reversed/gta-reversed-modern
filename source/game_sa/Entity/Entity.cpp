@@ -127,20 +127,11 @@ CEntity::~CEntity()
     CEntity::ResolveReferences();
 }
 
-void CEntity::Add()
-{
-    CEntity::Add_Reversed();
-}
-void CEntity::Add_Reversed()
-{
+void CEntity::Add() {
     Add(GetBoundRect());
 }
 
 void CEntity::Add(const CRect& rect)
-{
-    CEntity::Add_Reversed(rect);
-}
-void CEntity::Add_Reversed(const CRect& rect)
 {
     CRect usedRect = rect;
     if (usedRect.left < -3000.0F)

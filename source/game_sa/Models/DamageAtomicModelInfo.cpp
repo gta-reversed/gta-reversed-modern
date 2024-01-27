@@ -44,11 +44,9 @@ void CDamageAtomicModelInfo::DeleteRwObject()
     }
 
     CAtomicModelInfo::DeleteRwObject();
-}RwObject* CDamageAtomicModelInfo::CreateInstance()
-{
-    return CDamageAtomicModelInfo::CreateInstance_Reversed();
 }
-RwObject* CDamageAtomicModelInfo::CreateInstance_Reversed()
+
+RwObject* CDamageAtomicModelInfo::CreateInstance()
 {
     if (!CDamageAtomicModelInfo::ms_bCreateDamagedVersion)
         return CAtomicModelInfo::CreateInstance();
@@ -63,10 +61,6 @@ RwObject* CDamageAtomicModelInfo::CreateInstance_Reversed()
 }
 
 RwObject* CDamageAtomicModelInfo::CreateInstance(RwMatrix* matrix)
-{
-    return CDamageAtomicModelInfo::CreateInstance_Reversed(matrix);
-}
-RwObject* CDamageAtomicModelInfo::CreateInstance_Reversed(RwMatrix* matrix)
 {
     if (!CDamageAtomicModelInfo::ms_bCreateDamagedVersion)
         return CAtomicModelInfo::CreateInstance(matrix);

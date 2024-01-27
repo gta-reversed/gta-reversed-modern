@@ -301,9 +301,6 @@ public:
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
-
-    void Add_Reversed();
-    void Add_Reversed(const CRect& rect);
 };
 
 VALIDATE_SIZE(CEntity, 0x38);

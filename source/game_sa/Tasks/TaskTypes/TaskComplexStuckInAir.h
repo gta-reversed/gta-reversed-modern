@@ -19,5 +19,4 @@ public:
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
-
 };

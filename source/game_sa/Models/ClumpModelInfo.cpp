@@ -88,11 +88,9 @@ void CClumpModelInfo::DeleteRwObject()
 uint32 CClumpModelInfo::GetRwModelType()
 {
     return rpCLUMP;
-}RwObject* CClumpModelInfo::CreateInstance()
-{
-    return CClumpModelInfo::CreateInstance_Reversed();
 }
-RwObject* CClumpModelInfo::CreateInstance_Reversed()
+
+RwObject* CClumpModelInfo::CreateInstance()
 {
     if (!m_pRwObject)
         return nullptr;
@@ -121,10 +119,6 @@ RwObject* CClumpModelInfo::CreateInstance_Reversed()
 }
 
 RwObject* CClumpModelInfo::CreateInstance(RwMatrix* matrix)
-{
-    return CClumpModelInfo::CreateInstance_Reversed(matrix);
-}
-RwObject* CClumpModelInfo::CreateInstance_Reversed(RwMatrix* matrix)
 {
     if (!m_pRwObject)
         return nullptr;

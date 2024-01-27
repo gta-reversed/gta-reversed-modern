@@ -18,12 +18,10 @@ void FxEmitter_c::InjectHooks() {
     // RH_ScopedOverloadedInstall(AddParticle_Reversed, "", 0x4A4050, void(FxEmitter_c::*)(CVector*, CVector*, float, FxPrtMult_c*, float, float, bool));
     // RH_ScopedInstall(CreateParticles, 0x4A41E0);
     // RH_ScopedInstall(CreateParticle, 0x4A2580);
-}void FxEmitter_c::AddParticle(RwMatrix* mat, CVector* vel, float timeSince, FxPrtMult_c* fxMults, float rotZ, float brightness, bool createLocal) { AddParticle_Reversed(mat, vel, timeSince, fxMults, rotZ, brightness, createLocal); }
-void FxEmitter_c::AddParticle(CVector* pos, CVector* vel, float timeSince, FxPrtMult_c* fxMults, float rotZ, float brightness, bool createLocal) { AddParticle_Reversed(pos, vel, timeSince, fxMults, rotZ, brightness, createLocal); }
+}
+
 
 // 0x4A2550
-
-
 bool FxEmitter_c::Init(FxPrimBP_c* primBP, FxSystem_c* system) {
     m_PrimBP             = primBP;
     m_System             = system;
@@ -32,8 +30,6 @@ bool FxEmitter_c::Init(FxPrimBP_c* primBP, FxSystem_c* system) {
 }
 
 // 0x4A4460
-
-
 void FxEmitter_c::Update(float currentTime, float deltaTime) {
     if (m_bEnabled && !m_System->m_stopParticleCreation) {
         CreateParticles(currentTime, deltaTime);
@@ -41,14 +37,12 @@ void FxEmitter_c::Update(float currentTime, float deltaTime) {
 }
 
 // 0x4A2570
-
-// 0x0
 void FxEmitter_c::Reset() {
     m_fEmissionIntensity = 0.0f;
 }
 
 // 0x4A3EA0
-void FxEmitter_c::AddParticle_Reversed(CVector* pos, CVector* vel, float timeSince, FxPrtMult_c* fxMults, float rotZ, float brightness, bool createLocal) {
+void FxEmitter_c::AddParticle(CVector* pos, CVector* vel, float timeSince, FxPrtMult_c* fxMults, float rotZ, float brightness, bool createLocal) {
     return plugin::CallMethod<0x4A3EA0, FxEmitter_c*, CVector*, CVector*, float, FxPrtMult_c*, float, float, bool>(this, pos, vel, timeSince, fxMults, rotZ, brightness,
                                                                                                                    createLocal);
 
@@ -88,7 +82,7 @@ void FxEmitter_c::AddParticle_Reversed(CVector* pos, CVector* vel, float timeSin
 }
 
 // 0x4A4050
-void FxEmitter_c::AddParticle_Reversed(RwMatrix* mat, CVector* vel, float timeSince, FxPrtMult_c* fxMults, float rotZ, float brightness, bool createLocal) {
+void FxEmitter_c::AddParticle(RwMatrix* mat, CVector* vel, float timeSince, FxPrtMult_c* fxMults, float rotZ, float brightness, bool createLocal) {
     return plugin::CallMethod<0x4A4050, FxEmitter_c*, RwMatrix*, CVector*, float, FxPrtMult_c*, float, float, bool>(this, mat, vel, timeSince, fxMults, rotZ, brightness,
                                                                                                                     createLocal);
 

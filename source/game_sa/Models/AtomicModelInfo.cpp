@@ -73,11 +73,9 @@ void CAtomicModelInfo::DeleteRwObject()
 uint32 CAtomicModelInfo::GetRwModelType()
 {
     return rpATOMIC;
-}RwObject* CAtomicModelInfo::CreateInstance()
-{
-    return CAtomicModelInfo::CreateInstance_Reversed();
 }
-RwObject* CAtomicModelInfo::CreateInstance_Reversed()
+
+RwObject* CAtomicModelInfo::CreateInstance()
 {
     if (!m_pRwObject)
         return nullptr;
@@ -92,10 +90,6 @@ RwObject* CAtomicModelInfo::CreateInstance_Reversed()
 }
 
 RwObject* CAtomicModelInfo::CreateInstance(RwMatrix* matrix)
-{
-    return CAtomicModelInfo::CreateInstance_Reversed(matrix);
-}
-RwObject* CAtomicModelInfo::CreateInstance_Reversed(RwMatrix* matrix)
 {
     if (!m_pRwObject)
         return nullptr;
