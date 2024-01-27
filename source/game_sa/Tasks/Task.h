@@ -23,7 +23,7 @@ class CTask;
 template<typename T>
 concept Task = std::is_base_of_v<CTask, T>;
 
-class CTask {
+class NOTSA_EXPORT_VTABLE CTask {
     friend class CTaskComplex;
 
 public:

@@ -4,7 +4,7 @@
 
 void CEventScriptedAttractor::InjectHooks()
 {
-    RH_ScopedClass(CEventScriptedAttractor);
+    RH_ScopedVirtualClass(CEventScriptedAttractor, 0x86C9F0, 17);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x5FEF40);

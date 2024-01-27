@@ -3,7 +3,7 @@
 #include "TaskSimpleTired.h"
 
 void CTaskSimpleTired::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleTired);
+    RH_ScopedVirtualClass(CTaskSimpleTired, 0x86DED0, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x630F20);

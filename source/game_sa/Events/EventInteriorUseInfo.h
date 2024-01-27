@@ -7,7 +7,7 @@
 #include "InteriorInfo_t.h"
 
 
-class CEventInteriorUseInfo : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventInteriorUseInfo : public CEvent {
 public:
     InteriorInfo_t* m_InteriorInfo;
     Interior_c*     m_Interior;

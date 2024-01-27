@@ -4,7 +4,7 @@
 
 void CEventNewGangMember::InjectHooks()
 {
-    RH_ScopedClass(CEventNewGangMember);
+    RH_ScopedVirtualClass(CEventNewGangMember, 0x86D0A0, 16);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x608F70);

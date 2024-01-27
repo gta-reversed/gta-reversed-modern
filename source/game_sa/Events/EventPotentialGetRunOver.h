@@ -4,7 +4,7 @@
 
 #include "EventEditableResponse.h"
 
-class CEventPotentialGetRunOver : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventPotentialGetRunOver : public CEventEditableResponse {
 public:
     CVehicle* m_Vehicle;
 

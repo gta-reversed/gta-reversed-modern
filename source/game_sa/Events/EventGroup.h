@@ -12,7 +12,7 @@ class CPed;
 
 const int32 TOTAL_EVENTS_PER_EVENTGROUP = 16;
 
-class CEventGroup {
+class NOTSA_EXPORT_VTABLE CEventGroup {
 public:
     CPed*   m_pPed;
     int32   m_count;

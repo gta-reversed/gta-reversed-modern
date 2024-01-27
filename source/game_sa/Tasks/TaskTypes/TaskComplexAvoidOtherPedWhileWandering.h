@@ -6,7 +6,7 @@
 
 class CColSphere;
 
-class CTaskComplexAvoidOtherPedWhileWandering : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexAvoidOtherPedWhileWandering : public CTaskComplex {
 public:
     CPed*      m_OtherPed{};
     CVector    m_StartPoint{};

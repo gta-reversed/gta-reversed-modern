@@ -4,7 +4,7 @@
 
 void CEventPlayerCollisionWithPed::InjectHooks()
 {
-    RH_ScopedClass(CEventPlayerCollisionWithPed);
+    RH_ScopedVirtualClass(CEventPlayerCollisionWithPed, 0x86C9B0, 16);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x5FEE40);

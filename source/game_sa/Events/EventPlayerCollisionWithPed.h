@@ -11,7 +11,7 @@
 #include "EventKnockOffBike.h"
 
 
-class CEventPlayerCollisionWithPed : public CEventPedCollisionWithPed {
+class NOTSA_EXPORT_VTABLE CEventPlayerCollisionWithPed : public CEventPedCollisionWithPed {
 public:
     CEventPlayerCollisionWithPed(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, eMoveState moveState, eMoveState victimMoveState);
     ~CEventPlayerCollisionWithPed() override = default;

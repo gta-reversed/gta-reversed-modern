@@ -4,7 +4,7 @@
 
 void CEventAcquaintancePedHate::InjectHooks()
 {
-    RH_ScopedClass(CEventAcquaintancePedHate);
+    RH_ScopedVirtualClass(CEventAcquaintancePedHate, 0x858E68, 17);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor2, 0x420E70);
