@@ -71,6 +71,17 @@ constexpr inline auto find_value_or(auto&& mapping, auto&& needle, auto&& defval
         : defval;
 }
 
+/*!
+* @brief Helper function to get kv-mapping value from a key.
+* @brief Unlike `.find()`, this returns the value directly, or asserts if the key is not found.
+*/
+constexpr inline auto find_value(auto&& mapping, auto&& needle, auto&& defval) {
+    const auto it = mapping.find(needle);
+    if (it != mapping.end()) {
+        return it->second;
+    }
+    NOTSA_UNREACHABLE("Needle not in the mapping!");
+}
 
 template<rng::input_range R>
 ptrdiff_t indexof(R&& r, const rng::range_value_t<R>& v, ptrdiff_t defaultIdx = -1) {
