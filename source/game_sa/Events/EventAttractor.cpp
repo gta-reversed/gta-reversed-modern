@@ -6,12 +6,12 @@
 
 void CEventAttractor::InjectHooks()
 {
-    RH_ScopedClass(CEventAttractor);
+    RH_ScopedVirtualClass(CEventAttractor, 0x85B1B8, 17);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AF350);
-    RH_ScopedVirtualInstall(AffectsPed, 0x4AF4B0);
-    RH_ScopedVirtualInstall(CloneEditable, 0x4B7440);
+    RH_ScopedVMTInstall(AffectsPed, 0x4AF4B0);
+    RH_ScopedVMTInstall(CloneEditable, 0x4B7440);
     RH_ScopedInstall(IsEffectActive, 0x4AF460);
 }
 
@@ -38,17 +38,6 @@ CEventAttractor* CEventAttractor::Constructor(C2dEffect* effect, CEntity* entity
 
 // 0x4AF4B0
 bool CEventAttractor::AffectsPed(CPed* ped)
-{
-    return CEventAttractor::AffectsPed_Reversed(ped);
-}
-
-// 0x4B7440
-CEventEditableResponse* CEventAttractor::CloneEditable()
-{
-    return CEventAttractor::CloneEditable_Reversed();
-}
-
-bool CEventAttractor::AffectsPed_Reversed(CPed* ped)
 {
     if (ped->IsAlive()
         && (GetEventType() != EVENT_ATTRACTOR || m_entity)
@@ -86,7 +75,8 @@ bool CEventAttractor::AffectsPed_Reversed(CPed* ped)
     return false;
 }
 
-CEventEditableResponse* CEventAttractor::CloneEditable_Reversed()
+// 0x4B7440
+CEventEditableResponse* CEventAttractor::CloneEditable()
 {
     return new CEventAttractor(m_2dEffect, m_entity, m_bAvoidLookingAtAttractor);
 }

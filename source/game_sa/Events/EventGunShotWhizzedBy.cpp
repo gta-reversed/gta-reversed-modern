@@ -4,11 +4,11 @@
 
 void CEventGunShotWhizzedBy::InjectHooks()
 {
-    RH_ScopedClass(CEventGunShotWhizzedBy);
+    RH_ScopedVirtualClass(CEventGunShotWhizzedBy, 0x85B730, 17);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B1FD0);
-    RH_ScopedVirtualInstall(AffectsPed, 0x4B5120);
+    RH_ScopedVMTInstall(AffectsPed, 0x4B5120);
 }
 
 // 0x4B1FD0
@@ -27,11 +27,6 @@ CEventGunShotWhizzedBy* CEventGunShotWhizzedBy::Constructor(CEntity* entity, con
 // 0x4B5120
 bool CEventGunShotWhizzedBy::AffectsPed(CPed* ped)
 {
-    return CEventGunShotWhizzedBy::AffectsPed_Reversed(ped);
-}
-
-bool CEventGunShotWhizzedBy::AffectsPed_Reversed(CPed* ped)
-{
     if (!ped->IsPlayer() && ped->IsAlive()) {
         CVector direction = m_endPoint - m_startPoint;
         direction.Normalise();
@@ -44,4 +39,3 @@ bool CEventGunShotWhizzedBy::AffectsPed_Reversed(CPed* ped)
     }
     return false;
 }
-

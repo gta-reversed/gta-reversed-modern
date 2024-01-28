@@ -1,13 +1,13 @@
 #include "StdInc.h"
 
 void CBmx::InjectHooks() {
-    RH_ScopedClass(CBmx);
+    RH_ScopedVirtualClass(CBmx, 0x871528, 67);
     RH_ScopedCategory("Vehicle");
 
     RH_ScopedInstall(Constructor, 0x6BF820);
-    RH_ScopedVirtualInstall(SetUpWheelColModel, 0x6BF9B0);
-    RH_ScopedVirtualInstall(BurstTyre, 0x6BF9C0);
-    RH_ScopedVirtualInstall(FindWheelWidth, 0x6C0550);
+    RH_ScopedVMTInstall(SetUpWheelColModel, 0x6BF9B0);
+    RH_ScopedVMTInstall(BurstTyre, 0x6BF9C0);
+    RH_ScopedVMTInstall(FindWheelWidth, 0x6C0550);
 }
 
 // 0x6BF820

@@ -17,7 +17,7 @@
 #include "TaskComplexKillPedOnFoot.h"
 
 
-class CEventPotentialWalkIntoFire : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventPotentialWalkIntoFire : public CEventEditableResponse {
 public:
     CVector m_firePos;
     float m_fireSize;
@@ -40,6 +40,5 @@ private:
 
     CEventPotentialWalkIntoFire* Constructor(const CVector& firePos, float fireSize, eMoveState moveState);
 
-    bool AffectsPed_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CEventPotentialWalkIntoFire, 0x2C);

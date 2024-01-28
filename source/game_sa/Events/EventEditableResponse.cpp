@@ -6,12 +6,12 @@
 #include "IKChainManager_c.h"
 
 void CEventEditableResponse::InjectHooks() {
-    RH_ScopedClass(CEventEditableResponse);
+    RH_ScopedVirtualClass(CEventEditableResponse, 0x85AB80, 17);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AC450);
-    RH_ScopedVirtualInstall(Clone, 0x420ED0);
-    RH_ScopedVirtualInstall(HasEditableResponse, 0x420EF0);
+    RH_ScopedVMTInstall(Clone, 0x420ED0);
+    RH_ScopedVMTInstall(HasEditableResponse, 0x420EF0);
     RH_ScopedInstall(WillRespond, 0x4AC490);
     RH_ScopedInstall(InformVehicleOccupants, 0x4AC4A0);
     RH_ScopedInstall(InformRespectedFriends, 0x4B2B00);
@@ -38,15 +38,6 @@ CEventEditableResponse* CEventEditableResponse::Constructor() {
 
 // 0x420ED0
 CEvent* CEventEditableResponse::Clone() {
-    return CEventEditableResponse::Clone_Reversed();
-}
-
-// 0x420EF0
-bool CEventEditableResponse::HasEditableResponse() const {
-    return CEventEditableResponse::HasEditableResponse_Reversed();
-}
-
-CEvent* CEventEditableResponse::Clone_Reversed() {
     CEventEditableResponse* clonedEvent = CloneEditable();
     clonedEvent->m_taskId = m_taskId;
     clonedEvent->m_FacialExpressionType = m_FacialExpressionType;

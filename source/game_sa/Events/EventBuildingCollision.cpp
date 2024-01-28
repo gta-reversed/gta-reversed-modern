@@ -4,11 +4,11 @@
 
 void CEventBuildingCollision::InjectHooks()
 {
-    RH_ScopedClass(CEventBuildingCollision);
+    RH_ScopedVirtualClass(CEventBuildingCollision, 0x85ACE8, 16);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4ACF00);
-    RH_ScopedVirtualInstall(AffectsPed, 0x4AD070);
+    RH_ScopedVMTInstall(AffectsPed, 0x4AD070);
     RH_ScopedInstall(IsHeadOnCollision, 0x4AD1E0);
     RH_ScopedInstall(CanTreatBuildingAsObject, 0x4B3120);
 }
@@ -39,11 +39,6 @@ CEventBuildingCollision* CEventBuildingCollision::Constructor(int16 pieceType, f
 
 // 0x4AD070
 bool CEventBuildingCollision::AffectsPed(CPed* ped)
-{
-    return CEventBuildingCollision::AffectsPed_Reversed(ped);
-}
-
-bool CEventBuildingCollision::AffectsPed_Reversed(CPed* ped)
 {
     if (!ped->IsPlayer()
         && ped->IsAlive()

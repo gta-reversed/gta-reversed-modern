@@ -21,6 +21,5 @@ private:
 
     CEventInAir* Constructor();
 
-    bool AffectsPed_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CEventInAir, 0xC);

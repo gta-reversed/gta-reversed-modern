@@ -15,7 +15,7 @@ public:
     ~CEventEditableResponse() override = default; // 0x4AC480
 
     CEvent* Clone() override;
-    bool HasEditableResponse() const override;
+    bool HasEditableResponse() const override { return true; } // 0x420EF0;
     virtual CEventEditableResponse* CloneEditable() = 0;
 
     bool WillRespond() const;
@@ -34,7 +34,5 @@ private:
     static void InjectHooks();
 
     CEventEditableResponse* Constructor();
-    CEvent* Clone_Reversed();
-    bool HasEditableResponse_Reversed() const { return true; }
-};
+    };
 VALIDATE_SIZE(CEventEditableResponse, 0x14);

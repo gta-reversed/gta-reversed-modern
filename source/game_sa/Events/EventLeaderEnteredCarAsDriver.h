@@ -8,7 +8,7 @@
 #include "TaskComplexArrestPed.h"
 
 
-class CEventLeaderEnteredCarAsDriver : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventLeaderEnteredCarAsDriver : public CEventEditableResponse {
 public:
     CVehicle* m_vehicle;
 
@@ -29,7 +29,6 @@ public:
 
 private:
     CEventLeaderEnteredCarAsDriver* Constructor(CVehicle* vehicle);
-    bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
 
 };
 VALIDATE_SIZE(CEventLeaderEnteredCarAsDriver, 0x18);

@@ -4,7 +4,7 @@
 
 #include "EventEditableResponse.h"
 
-class CEventDontJoinPlayerGroup : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventDontJoinPlayerGroup : public CEvent {
 public:
     CPed* m_player;
 

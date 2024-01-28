@@ -6,14 +6,14 @@ uint32 &CTaskSimpleFall::m_nMaxPlayerDownTime = *reinterpret_cast<uint32*>(0x8D2
 
 void CTaskSimpleFall::InjectHooks()
 {
-    RH_ScopedClass(CTaskSimpleFall);
+    RH_ScopedVirtualClass(CTaskSimpleFall, 0x870430, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x6782C0);
     RH_ScopedInstall(StartAnim, 0x67CA40);
     RH_ScopedInstall(ProcessFall, 0x6784C0);
     RH_ScopedInstall(FinishFallAnimCB, 0x6786B0);
-    RH_ScopedVirtualInstall(ProcessPed, 0x67FAF0);
-    RH_ScopedVirtualInstall(MakeAbortable, 0x678370);
+    RH_ScopedVMTInstall(ProcessPed, 0x67FAF0);
+    RH_ScopedVMTInstall(MakeAbortable, 0x678370);
 }
 
 CTaskSimpleFall* CTaskSimpleFall::Constructor(AnimationId nAnimId, AssocGroupId nAnimGroup, int32 nDownTime)
@@ -43,17 +43,6 @@ CTaskSimpleFall::~CTaskSimpleFall()
 
 // 0x67FAF0
 bool CTaskSimpleFall::ProcessPed(CPed* ped)
-{
-    return ProcessPed_Reversed(ped);
-}
-
-// 0x678370
-bool CTaskSimpleFall::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
-{
-    return MakeAbortable_Reversed(ped, priority, event);
-}
-
-bool CTaskSimpleFall::ProcessPed_Reversed(CPed* ped)
 {
     ped->m_pedIK.bSlopePitch = true;
     ped->bFallenDown = true;
@@ -92,7 +81,8 @@ bool CTaskSimpleFall::ProcessPed_Reversed(CPed* ped)
     return false;
 }
 
-bool CTaskSimpleFall::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
+// 0x678370
+bool CTaskSimpleFall::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
     auto pFallAnim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_FALL_FRONT);
     if (!pFallAnim)

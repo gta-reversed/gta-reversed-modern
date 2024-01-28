@@ -8,7 +8,7 @@
 #include "TaskComplexArrestPed.h"
 
 
-class CEventLeaderEntryExit : public CEventAreaCodes {
+class NOTSA_EXPORT_VTABLE CEventLeaderEntryExit : public CEventAreaCodes {
 public:
     static void InjectHooks();
     CEventLeaderEntryExit* Constructor(CPed* ped);

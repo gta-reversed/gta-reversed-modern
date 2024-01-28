@@ -26,6 +26,5 @@ private:
 
     CEventHitByWaterCannon* Constructor(const CVector& point, const CVector& moveSpeed);
 
-    bool AffectsPed_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CEventHitByWaterCannon, 0x24);

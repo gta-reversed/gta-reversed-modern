@@ -22,6 +22,5 @@ public:
 
 private:
     CEventGunShotWhizzedBy* Constructor(CEntity* entity, const CVector& startPoint, const CVector& endPoint, bool bHasNoSound);
-    bool AffectsPed_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CEventGunShotWhizzedBy, 0x34);

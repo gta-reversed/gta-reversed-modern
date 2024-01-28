@@ -5,7 +5,7 @@
 #include "Event.h"
 
 
-class CEventLeanOnVehicle : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventLeanOnVehicle : public CEvent {
 public:
     CVehicle* m_vehicle;
     int32 m_leanAnimDurationInMs;
@@ -27,6 +27,5 @@ private:
 
     CEventLeanOnVehicle* Constructor(CVehicle* vehicle, int32 leanAnimDurationInMs);
 
-    bool IsValid_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CEventLeanOnVehicle, 0x14);

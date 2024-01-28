@@ -4,11 +4,11 @@
 
 void CEventPlayerCommandToGroup::InjectHooks()
 {
-    RH_ScopedClass(CEventPlayerCommandToGroup);
+    RH_ScopedVirtualClass(CEventPlayerCommandToGroup, 0x85B800, 17);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B23D0);
-    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B24D0);
+    RH_ScopedVMTInstall(AffectsPedGroup, 0x4B24D0);
 }
 
 // 0x4B23D0
@@ -34,11 +34,6 @@ CEventPlayerCommandToGroup* CEventPlayerCommandToGroup::Constructor(ePlayerGroup
 // 0x4B24D0
 bool CEventPlayerCommandToGroup::AffectsPedGroup(CPedGroup* pedGroup)
 {
-    return CEventPlayerCommandToGroup::AffectsPedGroup_Reversed(pedGroup);
-}
-
-bool CEventPlayerCommandToGroup::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
-{
     CPed* leader = pedGroup->GetMembership().GetLeader();
     if (leader && leader->IsPlayer()) {
         for (int32 i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
@@ -49,4 +44,3 @@ bool CEventPlayerCommandToGroup::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
     }
     return true;
 }
-

@@ -49,9 +49,6 @@ public:
     void DeleteRwObject() override;
     void SetClump(RpClump* clump) override;
 
-    ModelInfoType GetModelType_Reversed();
-    void DeleteRwObject_Reversed();
-    void SetClump_Reversed(RpClump* clump);
 
     void AddXtraAtomics(RpClump* clump);
     void SetFaceTexture(RwTexture* texture);

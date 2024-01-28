@@ -4,7 +4,7 @@
 
 void CEventLeaderEntryExit::InjectHooks()
 {
-    RH_ScopedClass(CEventLeaderEntryExit);
+    RH_ScopedVirtualClass(CEventLeaderEntryExit, 0x859540, 16);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x43E1C0);

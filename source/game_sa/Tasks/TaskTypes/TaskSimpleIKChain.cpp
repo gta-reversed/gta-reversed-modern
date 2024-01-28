@@ -3,7 +3,7 @@
 #include "IKChainManager_c.h"
 
 void CTaskSimpleIKChain::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleIKChain);
+    RH_ScopedVirtualClass(CTaskSimpleIKChain, 0x86DB48, 10);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x6339C0);
@@ -11,11 +11,11 @@ void CTaskSimpleIKChain::InjectHooks() {
 
     RH_ScopedInstall(BlendOut, 0x633C40);
     RH_ScopedInstall(GetIKChain, 0x633C70);
-    RH_ScopedInstall(Clone_Reversed, 0x633B00);
-    RH_ScopedInstall(GetTaskType_Reversed, 0x62EC30);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x639450);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x633C80);
-    RH_ScopedInstall(CreateIKChain_Reversed, 0x633BD0);
+    RH_ScopedVMTInstall(Clone, 0x633B00);
+    RH_ScopedVMTInstall(GetTaskType, 0x62EC30);
+    RH_ScopedVMTInstall(MakeAbortable, 0x639450);
+    RH_ScopedVMTInstall(ProcessPed, 0x633C80);
+    RH_ScopedVMTInstall(CreateIKChain, 0x633BD0);
 }
 
 // 0x6339C0
@@ -45,6 +45,8 @@ CTaskSimpleIKChain::~CTaskSimpleIKChain() {
 }
 
 // 0x633B00
+
+
 CTask* CTaskSimpleIKChain::Clone() const {
     auto* task = new CTaskSimpleIKChain("", m_nEffectorBoneTag, m_vecEffectorVec, m_nPivotBoneTag, m_pEntity, m_nOffsetBoneTag, m_vecOffsetPos, m_fSpeed, m_nTime, m_nBlendTime);
     if (m_pIKChain) {
@@ -73,6 +75,8 @@ IKChain_c* CTaskSimpleIKChain::GetIKChain() {
 }
 
 // 0x639450
+
+
 bool CTaskSimpleIKChain::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
     if (priority == eAbortPriority::ABORT_PRIORITY_IMMEDIATE) {
         return true;
@@ -82,6 +86,8 @@ bool CTaskSimpleIKChain::MakeAbortable(CPed* ped, eAbortPriority priority, CEven
 }
 
 // 0x633C80
+
+
 bool CTaskSimpleIKChain::ProcessPed(CPed* ped) {
     // If IK chain doesn't exist, try creating and early out
     if (!m_pIKChain) {
@@ -137,7 +143,10 @@ bool CTaskSimpleIKChain::ProcessPed(CPed* ped) {
 }
 
 // 0x633BD0
+
+// 0x0
 bool CTaskSimpleIKChain::CreateIKChain(CPed* ped) {
     m_pIKChain = g_ikChainMan.AddIKChain("", 3, ped, m_nEffectorBoneTag, m_vecEffectorVec, m_nPivotBoneTag, m_pEntity, m_nOffsetBoneTag, m_vecOffsetPos, m_fSpeed, 3);
     return m_pIKChain != nullptr;
 }
+

@@ -6,7 +6,7 @@
 class CPed;
 class CEntity;
 
-class CEvent {
+class NOTSA_EXPORT_VTABLE CEvent {
 public:
     int32 m_nTimeActive;
     bool  m_bValid;

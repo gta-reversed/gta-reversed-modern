@@ -4,7 +4,7 @@
 
 #include "Event.h"
 
-class CEventChatPartner : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventChatPartner : public CEvent {
 public:
     bool  m_leadSpeaker;
     CPed* m_partner;

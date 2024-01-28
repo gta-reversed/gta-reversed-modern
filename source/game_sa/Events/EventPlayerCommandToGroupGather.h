@@ -4,7 +4,7 @@
 
 #include "EventEditableResponse.h"
 
-class CEventPlayerCommandToGroupGather : public CEventPlayerCommandToGroup {
+class NOTSA_EXPORT_VTABLE CEventPlayerCommandToGroupGather : public CEventPlayerCommandToGroup {
 public:
     static void InjectHooks();
 

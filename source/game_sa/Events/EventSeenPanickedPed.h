@@ -3,7 +3,7 @@
 #include "EventEditableResponse.h"
 
 
-class CEventSeenPanickedPed : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventSeenPanickedPed : public CEventEditableResponse {
 public:
     CPed* m_ped;
 
@@ -22,6 +22,5 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
     CEventSeenPanickedPed* Constructor(CPed* ped);
-    bool AffectsPed_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CEventSeenPanickedPed, 0x18);

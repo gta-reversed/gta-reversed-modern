@@ -3,11 +3,10 @@
 #include "TaskSimpleAnim.h"
 
 void CTaskSimpleAnim::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleAnim);
+    RH_ScopedVirtualClass(CTaskSimpleAnim, 0x86D504, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x61A790);
+    RH_ScopedVMTInstall(MakeAbortable, 0x61A790);
 }
-bool CTaskSimpleAnim::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return CTaskSimpleAnim::MakeAbortable_Reversed(ped, priority, event); }
 
 // 0x61A6C0
 CTaskSimpleAnim::CTaskSimpleAnim(bool bHoldLastFrame) : CTaskSimple() {
@@ -34,7 +33,9 @@ CTaskSimpleAnim::~CTaskSimpleAnim() {
 }
 
 // 0x61A790
-bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
+
+// 0x0
+bool CTaskSimpleAnim::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     bool bSkipBlend = false;
     auto fBlend = -4.0F;
     if (priority == eAbortPriority::ABORT_PRIORITY_IMMEDIATE) {

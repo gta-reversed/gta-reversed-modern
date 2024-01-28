@@ -3,7 +3,7 @@
 #include "EventGroup.h"
 
 void CEventGroup::InjectHooks() {
-    RH_ScopedClass(CEventGroup);
+    RH_ScopedVirtualClass(CEventGroup, 0x85AAB0, 1);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AB340);

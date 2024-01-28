@@ -2,7 +2,7 @@
 
 #include "TaskSimple.h"
 
-class CTaskSimpleAchieveHeading : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleAchieveHeading : public CTaskSimple {
 public:
     float m_fAngle;
     float m_fChangeRateMult;

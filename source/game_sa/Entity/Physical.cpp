@@ -26,7 +26,7 @@ CVector& CPhysical::fxDirection = *(CVector*)0xB73720;
 
 void CPhysical::InjectHooks()
 {
-    RH_ScopedClass(CPhysical);
+    RH_ScopedVirtualClass(CPhysical, 0x863BA0, 23);
     RH_ScopedCategory("Entity");
 
     RH_ScopedInstall(Constructor, 0x542260);
@@ -41,14 +41,14 @@ void CPhysical::InjectHooks()
     RH_ScopedInstall(SetDamagedPieceRecord, 0x5428C0);
     RH_ScopedInstall(RemoveFromMovingList, 0x542860);
     RH_ScopedInstall(AddToMovingList, 0x542800);
-    RH_ScopedVirtualInstall(Add, 0x544A30);
-    RH_ScopedVirtualInstall(Remove, 0x5424C0);
-    RH_ScopedVirtualInstall(GetBoundRect, 0x5449B0);
-    RH_ScopedVirtualInstall(ProcessControl, 0x5485E0);
-    RH_ScopedVirtualInstall(ProcessCollision, 0x54DFB0);
-    RH_ScopedVirtualInstall(ProcessShift, 0x54DB10);
-    RH_ScopedVirtualInstall(TestCollision, 0x54DEC0);
-    RH_ScopedVirtualInstall(ProcessEntityCollision, 0x546D00);
+    RH_ScopedVMTInstall(Add, 0x544A30);
+    RH_ScopedVMTInstall(Remove, 0x5424C0);
+    RH_ScopedVMTInstall(GetBoundRect, 0x5449B0);
+    RH_ScopedVMTInstall(ProcessControl, 0x5485E0);
+    RH_ScopedVMTInstall(ProcessCollision, 0x54DFB0);
+    RH_ScopedVMTInstall(ProcessShift, 0x54DB10);
+    RH_ScopedVMTInstall(TestCollision, 0x54DEC0);
+    RH_ScopedVMTInstall(ProcessEntityCollision, 0x546D00);
     RH_ScopedInstall(ApplyGravity, 0x542FE0);
     RH_ScopedInstall(ApplyFrictionMoveForce, 0x5430A0);
     RH_ScopedInstall(ApplyFrictionForce, 0x543220);
@@ -157,8 +157,7 @@ void CPhysical::Add()
         return;
     }
 
-    CRect boundRect;
-    GetBoundRect(&boundRect);
+    const auto boundRect = GetBoundRect();
     int32 startSectorX = CWorld::GetSectorX(boundRect.left);
     int32 startSectorY = CWorld::GetSectorY(boundRect.bottom);
     int32 endSectorX = CWorld::GetSectorX(boundRect.right);
@@ -210,13 +209,17 @@ void CPhysical::Remove()
 }
 
 // 0x5449B0
-CRect* CPhysical::GetBoundRect(CRect* rect)
+CRect CPhysical::GetBoundRect()
 {
     CVector boundCentre;
     CEntity::GetBoundCentre(&boundCentre);
-    float fRadius = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundRadius();
-    *rect = CRect(boundCentre.x - fRadius, boundCentre.y - fRadius, boundCentre.x + fRadius, boundCentre.y + fRadius);
-    return rect;
+    const float fRadius = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundRadius();
+    return CRect(
+        boundCentre.x - fRadius, 
+        boundCentre.y - fRadius, 
+        boundCentre.x + fRadius, 
+        boundCentre.y + fRadius
+    );
 }
 
 // 0x5485E0
@@ -466,8 +469,7 @@ void CPhysical::ProcessCollision() {
 void CPhysical::ProcessShift() {
     ZoneScoped;
 
-    CRect boundingBox;
-    GetBoundRect(&boundingBox);
+    CRect boundingBox = GetBoundRect();
     m_fMovingSpeed = 0.0f;
 
     bool bPhysicalFlagsSet = m_nPhysicalFlags & (PHYSICAL_DISABLE_MOVE_FORCE | PHYSICAL_INFINITE_MASS | PHYSICAL_DISABLE_Z);
@@ -612,8 +614,7 @@ void CPhysical::RemoveAndAdd()
     }
 
     CEntryInfoNode* entryInfoNode = m_pCollisionList.m_node;
-    CRect boundRect;
-    GetBoundRect(&boundRect);
+    CRect boundRect = GetBoundRect();
     int32 startSectorX = CWorld::GetSectorX(boundRect.left);
     int32 startSectorY = CWorld::GetSectorY(boundRect.bottom);
     int32 endSectorX = CWorld::GetSectorX(boundRect.right);
@@ -2249,7 +2250,7 @@ void CPhysical::PositionAttachedEntity()
             attachedEntityMatrix = attachedToEntityMatrix;
             attachedEntityMatrix *= attachedEntityRotationMatrix;
         }
-        attachedEntityMatrix.GetPosition() = MultiplyMatrixWithVector(attachedToEntityMatrix, m_vecAttachOffset);
+        attachedEntityMatrix.GetPosition() = attachedToEntityMatrix.TransformPoint(m_vecAttachOffset);
     }
     SetMatrix(attachedEntityMatrix);
 
@@ -4846,8 +4847,7 @@ bool CPhysical::CheckCollision()
 
     CWorld::IncrementCurrentScanCode();
 
-    CRect boundRect;
-    GetBoundRect(&boundRect);
+    CRect boundRect = GetBoundRect();
     int32 startSectorX = CWorld::GetSectorX(boundRect.left);
     int32 startSectorY = CWorld::GetSectorY(boundRect.bottom);
     int32 endSectorX = CWorld::GetSectorX(boundRect.right);

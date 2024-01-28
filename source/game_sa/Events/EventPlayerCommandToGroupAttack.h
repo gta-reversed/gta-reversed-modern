@@ -3,7 +3,7 @@
 #include "EventPlayerCommandToGroup.h"
 #include "EventEditableResponse.h"
 
-class CEventPlayerCommandToGroupAttack : public CEventPlayerCommandToGroup {
+class NOTSA_EXPORT_VTABLE CEventPlayerCommandToGroupAttack : public CEventPlayerCommandToGroup {
 public:
     static void InjectHooks();
 
@@ -17,6 +17,5 @@ public:
 
 private:
     CEventPlayerCommandToGroupAttack* Constructor(CPed* target);
-    bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
 };
 VALIDATE_SIZE(CEventPlayerCommandToGroupAttack, 0x1C);

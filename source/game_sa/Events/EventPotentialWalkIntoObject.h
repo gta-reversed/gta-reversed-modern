@@ -17,7 +17,7 @@
 #include "TaskComplexKillPedOnFoot.h"
 
 
-class CEventPotentialWalkIntoObject : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventPotentialWalkIntoObject : public CEventEditableResponse {
 public:
     CObject* m_object;
     int32 m_moveState;
@@ -39,6 +39,5 @@ private:
 
     CEventPotentialWalkIntoObject* Constructor(CObject* object, int32 moveState);
 
-    bool AffectsPed_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CEventPotentialWalkIntoObject, 0x1C);
