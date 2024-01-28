@@ -25,13 +25,14 @@ public:
     FurnitureManager_c() = default;  // 0x591260
     ~FurnitureManager_c() = default; // 0x5912E0
 
+    static int32 GetGroupId(const char* name);
+    static int32 GetSubGroupId(const char* name);
+
     bool Init();
     void Exit();
     void LoadFurniture();
     Furniture_c* GetFurniture(int32 furnitureGroupId, int32 furnitureSubgroupId, int16 id, uint8 wealth);
     int32 GetRandomId(int32 groupId, int32 a3, uint8 a4);
-    static int32 GetGroupId(const char* name);
-    static int32 GetSubGroupId(const char* name);
 };
 VALIDATE_SIZE(FurnitureManager_c, 0x2078);
 

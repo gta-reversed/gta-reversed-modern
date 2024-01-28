@@ -27,45 +27,46 @@ void FurnitureGroup_c::Exit() {
 
 // 0x5910E0
 bool FurnitureGroup_c::AddSubGroup(int32 subGroupId, int32 minWidth, int32 minDepth, int32 maxWidth, int32 maxDepth, uint8 canPlaceInFrontOfWindow, bool isTall, bool canSteal) {
-    if (FurnitureManager_c::g_currSubGroupId >= std::size(FurnitureManager_c::g_subGroupStore))
+    if (FurnitureManager_c::g_currSubGroupId >= std::size(FurnitureManager_c::g_subGroupStore)) {
         return false;
+    }
 
     auto& sg = FurnitureManager_c::g_subGroupStore[FurnitureManager_c::g_currSubGroupId++];
     sg.m_nSubgroupId = subGroupId;
     sg.m_bCanPlaceInFrontOfWindow = canPlaceInFrontOfWindow;
     sg.m_bIsTall = isTall;
     sg.m_bCanSteal = canSteal;
+
     m_subGroupsList.AddItem(&sg);
+
     return true;
 }
 
 // 0x591130
-Furniture_c* FurnitureGroup_c::GetFurniture(int32 subGroupId, int16 furnitureId, uint8 rating) {
-    auto subGroup = GetSubGroup(subGroupId);
-    if (!subGroup)
-        return nullptr;
-
-    return subGroup->GetFurniture(furnitureId, rating);
+Furniture_c* FurnitureGroup_c::GetFurniture(int32 subGroupId, int16 furnitureId, uint8 wealth) {
+    if (const auto sg = GetSubGroup(subGroupId)) {
+        return sg->GetFurniture(furnitureId, wealth);
+    }
+    return nullptr;
 }
 
 // 0x591170
 int32 FurnitureGroup_c::GetRandomId(int32 subGroupId, uint8 rating) {
-    auto subGroup = GetSubGroup(subGroupId);
-    if (!subGroup)
-        return -1;
-
-    return subGroup->GetRandomId(rating);
+    if (const auto sg = GetSubGroup(subGroupId)) {
+        return sg->GetRandomId(rating);
+    }
+    return -1;
 }
 
 // 0x5C0230
 bool FurnitureGroup_c::AddFurniture(int32 subGroupId, uint16 modelId, int16 id, uint8 wealthMin, uint8 wealthMax, uint8 maxAng) {
-    auto subGroup = GetSubGroup(subGroupId);
-    if (!subGroup)
-        return false;
-
-    return subGroup->AddFurniture(modelId, id, wealthMin, wealthMax, maxAng);
+    if (const auto sg = GetSubGroup(subGroupId)) {
+        return sg->AddFurniture(modelId, id, wealthMin, wealthMax, maxAng);
+    }
+    return false;
 }
 
+// notsa
 FurnitureSubGroup_c* FurnitureGroup_c::GetSubGroup(int32 subGroupId) {
     for (auto& sg : m_subGroupsList) {
         if (sg.m_nSubgroupId == subGroupId) {
