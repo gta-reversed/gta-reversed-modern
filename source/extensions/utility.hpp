@@ -60,6 +60,17 @@ auto make_mapping(std::pair<const K, const V> (&&m)[N]) {
     }
 }
 
+/*!
+* @brief Helper function to get kv-mapping value from a key.
+* @brief Unlike `.find()`, this returns the value directly
+*/
+constexpr inline auto find_value_or(auto&& mapping, auto&& needle, auto&& defval) {
+    const auto it = mapping.find(needle);
+    return it != mapping.end()
+        ? it->second
+        : defval;
+}
+
 
 template<rng::input_range R>
 ptrdiff_t indexof(R&& r, const rng::range_value_t<R>& v, ptrdiff_t defaultIdx = -1) {
