@@ -12,7 +12,7 @@
 #include "EventHandler.h"
 #include "EventGroup.h"
 #include "TaskTimer.h"
-#include "EventScanner.h"
+#include "Events/Scanners/EventScanner.h"
 #include "PedStuckChecker.h"
 #include "VehicleScanner.h"
 #include "PedScanner.h"
