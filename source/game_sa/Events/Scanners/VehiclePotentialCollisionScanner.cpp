@@ -40,6 +40,9 @@ void CVehiclePotentialCollisionScanner::ScanForVehiclePotentialCollisionEvents(c
 
     // Quickly check if the ped is within the BB on the Z axis
     {
+        // Originally the BB positions were transformed into world-space,
+        // but for simplicity I'm transforming the ped's position into object space instead.
+
         const auto& vehBB  = closestVeh->GetBoundingBox();
         const auto& vehMat = closestVeh->GetMatrix();
     

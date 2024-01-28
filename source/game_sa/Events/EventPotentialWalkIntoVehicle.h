@@ -16,14 +16,13 @@
 #include "TaskComplexFollowPedFootsteps.h"
 #include "TaskComplexKillPedOnFoot.h"
 
-
 class NOTSA_EXPORT_VTABLE CEventPotentialWalkIntoVehicle : public CEventEditableResponse {
 public:
-    CVehicle* m_vehicle;
-    int32     m_moveState;
+    CVehicle*  m_vehicle;
+    eMoveState m_moveState;
 
 public:
-    CEventPotentialWalkIntoVehicle(CVehicle* vehicle, int32 moveState);
+    CEventPotentialWalkIntoVehicle(CVehicle* vehicle, eMoveState moveState);
     ~CEventPotentialWalkIntoVehicle() override;
 
     eEventType GetEventType() const override { return EVENT_POTENTIAL_WALK_INTO_VEHICLE; }
@@ -37,7 +36,7 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CEventPotentialWalkIntoVehicle* Constructor(CVehicle* vehicle, int32 moveState);
+    CEventPotentialWalkIntoVehicle* Constructor(CVehicle* vehicle, eMoveState moveState);
 
 };
 VALIDATE_SIZE(CEventPotentialWalkIntoVehicle, 0x1C);

@@ -5,6 +5,7 @@
 #include "EventOnFire.h"
 #include "EventEscalator.h"
 #include "EventPedEnteredMyVehicle.h"
+#include "Events/EventAreaCodes.h"
 
 #include "EventScanner.h"
 #include "PedPotentialCollisionScanner.h"
@@ -23,7 +24,7 @@ void CEventScanner::InjectHooks() {
 CEventScanner::CEventScanner() :
     m_NextScanTime{CTimer::GetTimeInMS() + CGeneral::GetRandomNumberInRange<uint32>(3000)}   
 {
-    m_AttractorScanner.Clear();
+    Clear();
 }
 
 void CEventScanner::Clear() {
