@@ -995,11 +995,7 @@ float CPedIntelligence::GetPedFOVRange() const {
 
 // 0x421050
 void CPedIntelligence::IncrementAngerAtPlayer(uint8 anger) {
-    if (!m_mentalState.m_AngerTimer.IsOutOfTime()) {
-        return;
-    }
-    m_mentalState.m_AngerTimer.Start(3000);
-    m_mentalState.m_AngerAtPlayer += anger;
+    m_mentalState.IncrementAngerAtPlayer(anger);
 }
 
 // 0x6074A0
@@ -1014,8 +1010,8 @@ void CPedIntelligence::operator delete(void* object) {
 
 // NOTSA
 CVehicle* CPedIntelligence::GetEnteringVehicle() {
-    for (const auto taskt : { TASK_COMPLEX_ENTER_CAR_AS_DRIVER, TASK_COMPLEX_ENTER_CAR_AS_PASSENGER }) {
-        if (const auto task = FindTaskByType(taskt)) {
+    for (const auto tt : { TASK_COMPLEX_ENTER_CAR_AS_DRIVER, TASK_COMPLEX_ENTER_CAR_AS_PASSENGER }) {
+        if (const auto task = FindTaskByType(tt)) {
             return static_cast<CTaskComplexEnterCar*>(task)->GetTargetCar();
         }
     }
