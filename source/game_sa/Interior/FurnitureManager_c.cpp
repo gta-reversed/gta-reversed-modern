@@ -1,10 +1,6 @@
 #include "StdInc.h"
 #include "FurnitureManager_c.h"
 
-uint32& FurnitureManager_c::g_currSubGroupId  = StaticRef<uint32, 0xBAB37C>();
-uint32& FurnitureManager_c::g_currFurnitureId = StaticRef<uint32, 0xBAB378>();
-FurnitureSubGroup_c (&FurnitureManager_c::g_subGroupStore)[128] = *(FurnitureSubGroup_c(*)[128])0xBAD3F8;
-
 void FurnitureManager_c::InjectHooks() {
     RH_ScopedClass(FurnitureManager_c);
     RH_ScopedCategory("Interior");
@@ -23,11 +19,11 @@ bool FurnitureManager_c::Init() {
     g_currSubGroupId = 0;
     g_currFurnitureId = 0;
 
-    for (auto& i : m_furnitureItem) {
-        m_furnitureList.AddItem(&i);
+    for (auto& i : m_FurnitureItem) {
+        m_FurnitureList.AddItem(&i);
     }
     
-    rng::for_each(m_groups, &FurnitureGroup_c::Init);
+    rng::for_each(m_Groups, &FurnitureGroup_c::Init);
 
     LoadFurniture();
 
@@ -36,8 +32,15 @@ bool FurnitureManager_c::Init() {
 
 // 0x5911A0
 void FurnitureManager_c::Exit() {
-    m_furnitureList.RemoveAll();
-    rng::for_each(m_groups, &FurnitureGroup_c::Exit);
+    m_FurnitureList.RemoveAll();
+    rng::for_each(m_Groups, &FurnitureGroup_c::Exit);
+}
+
+// notsa
+FurnitureSubGroup_c* FurnitureManager_c::NewSubGroup() {
+    return g_currSubGroupId < std::size(g_subGroupStore)
+        ? &g_subGroupStore[g_currSubGroupId++]
+        : nullptr;
 }
 
 // 0x5C0280
@@ -70,7 +73,7 @@ void FurnitureManager_c::LoadFurniture() {
             char groupName[128];
             VERIFY(sscanf(l, "%s %s", tag, groupName) == 2);
             VERIFY((grpId = FurnitureManager_c::GetGroupId(groupName)) != -1);
-            grp = &m_groups[grpId];
+            grp = &m_Groups[grpId];
         } else if (!strcmp(tag, "SUBGROUP:")) {
             char  subGroupName[128];
             int32 subGrpId;
@@ -177,10 +180,10 @@ int32 FurnitureManager_c::GetSubGroupId(const char* name) {
 
 // 0x5911E0
 Furniture_c* FurnitureManager_c::GetFurniture(int32 groupId, int32 subGroupId, int16 id, uint8 wealth) {
-    return m_groups[groupId].GetFurniture(subGroupId, id, wealth);
+    return m_Groups[groupId].GetFurniture(subGroupId, id, wealth);
 }
 
 // 0x591220
 int32 FurnitureManager_c::GetRandomId(int32 groupId, int32 subGroupId, uint8 wealth) {
-    return m_groups[groupId].GetRandomId(subGroupId, wealth);
+    return m_Groups[groupId].GetRandomId(subGroupId, wealth);
 }

@@ -9,9 +9,6 @@ class FurnitureSubGroup_c;
 
 class FurnitureGroup_c {
 public:
-    TList_c<FurnitureSubGroup_c> m_subGroupsList;
-
-public:
     static void InjectHooks();
 
     FurnitureGroup_c() = default;  // 0x590DE0
@@ -24,5 +21,8 @@ public:
     int32 GetRandomId(int32 subGroupId, uint8 rating);
     bool AddFurniture(int32 subGroupId, uint16 modelId, int16 id, uint8 wealthMin, uint8 wealthMax, uint8 maxAng);
     FurnitureSubGroup_c* GetSubGroup(int32 subGroupId);
+
+private:
+    TList_c<FurnitureSubGroup_c> m_subGroupsList;
 };
 VALIDATE_SIZE(FurnitureGroup_c, 0xC);

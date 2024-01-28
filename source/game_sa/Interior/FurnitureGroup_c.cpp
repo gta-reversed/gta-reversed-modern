@@ -27,17 +27,17 @@ void FurnitureGroup_c::Exit() {
 
 // 0x5910E0
 bool FurnitureGroup_c::AddSubGroup(int32 subGroupId, int32 minWidth, int32 minDepth, int32 maxWidth, int32 maxDepth, uint8 canPlaceInFrontOfWindow, bool isTall, bool canSteal) {
-    if (FurnitureManager_c::g_currSubGroupId >= std::size(FurnitureManager_c::g_subGroupStore)) {
+    const auto sg = FurnitureManager_c::NewSubGroup();
+    if (!sg) {
         return false;
     }
 
-    auto& sg = FurnitureManager_c::g_subGroupStore[FurnitureManager_c::g_currSubGroupId++];
-    sg.m_nSubgroupId = subGroupId;
-    sg.m_bCanPlaceInFrontOfWindow = canPlaceInFrontOfWindow;
-    sg.m_bIsTall = isTall;
-    sg.m_bCanSteal = canSteal;
+    sg->m_nSubgroupId = subGroupId;
+    sg->m_bCanPlaceInFrontOfWindow = canPlaceInFrontOfWindow;
+    sg->m_bIsTall = isTall;
+    sg->m_bCanSteal = canSteal;
 
-    m_subGroupsList.AddItem(&sg);
+    m_subGroupsList.AddItem(sg);
 
     return true;
 }
