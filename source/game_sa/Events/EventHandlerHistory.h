@@ -1,8 +1,11 @@
 #pragma once
 
 #include "TaskTimer.h"
+#include "Enums/eEventType.h"
 
 class CEvent;
+class CTask;
+
 class CEventHandlerHistory {
 public:
     static void InjectHooks();

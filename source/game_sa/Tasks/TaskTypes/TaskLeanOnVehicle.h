@@ -2,7 +2,7 @@
 
 #include "TaskSimple.h"
 
-class CTaskLeanOnVehicle : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskLeanOnVehicle : public CTaskSimple {
 public:
     CVehicle*  m_Vehicle;
     int32      m_LeanAnimDurationInMs;

@@ -3,6 +3,9 @@
 #include <concepts>
 
 #include "TaskComplex.h"
+#include "World.h"
+#include "Ped.h"
+#include "General.h"
 #include "TaskTimer.h"
 #include "eMoveState.h"
 #include "extensions/utility.hpp"
@@ -356,7 +359,7 @@ public:
     
         ped->AttachPedToEntity(
             commonBoat,
-            Multiply3x3(Invert(commonBoat->GetMatrix()), newPedPos - boatPos),
+            Invert(commonBoat->GetMatrix()).TransformVector(newPedPos - boatPos),
             (int16)CGeneral::LimitRadianAngle(CGeneral::GetRadianAngleBetweenPoints(pedToBoatDir, {})),
             0.2f,
             ped->GetActiveWeapon().m_Type

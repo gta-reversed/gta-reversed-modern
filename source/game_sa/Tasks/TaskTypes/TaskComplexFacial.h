@@ -5,7 +5,7 @@
 
 class CPed;
 
-class CTaskComplexFacial : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexFacial : public CTaskComplex {
 public:
     bool              m_bNotPlayer;
     bool              m_bStarted;
@@ -24,7 +24,7 @@ public:
     ~CTaskComplexFacial() override = default; // 0x690D90
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask* Clone() const override { return new CTaskComplexFacial(); }; // 0x6928B0
+    CTask* Clone() const override { return new CTaskComplexFacial(); }
     bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
@@ -39,11 +39,5 @@ private:
 
     CTaskComplexFacial* Constructor() { this->CTaskComplexFacial::CTaskComplexFacial(); return this; }
 
-    CTask* Clone_Reversed() { return CTaskComplexFacial::Clone(); }
-    int32  GetTaskType_Reversed() { return CTaskComplexFacial::GetTaskType(); }
-    bool   MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent const* event) { return CTaskComplexFacial::MakeAbortable(ped, priority, event); }
-    CTask* CreateNextSubTask_Reversed(CPed* ped) { return CTaskComplexFacial::CreateNextSubTask(ped); }
-    CTask* CreateFirstSubTask_Reversed(CPed* ped) { return CTaskComplexFacial::CreateFirstSubTask(ped); }
-    CTask* ControlSubTask_Reversed(CPed* ped) { return CTaskComplexFacial::ControlSubTask(ped); }
 };
 VALIDATE_SIZE(CTaskComplexFacial, 0x20);

@@ -2,7 +2,9 @@
 
 #include "EventEditableResponse.h"
 
-class CEventPedEnteredMyVehicle : public CEventEditableResponse {
+#include "EventEditableResponse.h"
+
+class NOTSA_EXPORT_VTABLE CEventPedEnteredMyVehicle : public CEventEditableResponse {
 public:
     CEventPedEnteredMyVehicle(/*const*/ CPed* ped, /*const*/ CVehicle* vehicle, eTargetDoor targetDoor); // todo: make const as OG
     ~CEventPedEnteredMyVehicle() override;

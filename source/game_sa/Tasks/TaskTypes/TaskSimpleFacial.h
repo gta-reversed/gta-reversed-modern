@@ -21,7 +21,7 @@ enum class eFacialExpression {
     GUM     =  8,
 };
 
-class CTaskSimpleFacial : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleFacial : public CTaskSimple {
 public:
     CTaskTimer        m_Timer;
     eFacialExpression m_nFacialExpression;

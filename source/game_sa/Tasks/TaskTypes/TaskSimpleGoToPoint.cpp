@@ -164,3 +164,7 @@ void CTaskSimpleGoToPoint::UpdatePoint(const CVector& targetPosition, float fRad
         gotoFlags.m_bTargetPointUpdated = true;
     }
 }
+
+bool CTaskSimpleGoToPoint::WasTaskSuccessful(CPed* ped) const {
+    return gotoPointFlags.m_b03 && std::abs(m_vecTargetPoint.z - ped->GetPosition().z) < 3.f;
+}

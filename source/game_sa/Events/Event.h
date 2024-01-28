@@ -1,13 +1,12 @@
 #pragma once
 
+
 #include "eEventType.h"
 
 class CPed;
-class CPedGroup;
 class CEntity;
-enum eEventType;
 
-class CEvent {
+class NOTSA_EXPORT_VTABLE CEvent {
 public:
     int32 m_nTimeActive;
     bool  m_bValid;

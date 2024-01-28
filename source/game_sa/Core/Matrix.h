@@ -153,6 +153,7 @@ public:
     /*!
      * @notsa
      * @brief Transform a point (position) - will take into account translation part of the Matrix.
+     * @brief Use instead of `MultiplyMatrixWithVector` (0x59C890)
      * @param pt The position (point) to transform
     */
     CVector TransformPoint(CVector pt) const {
@@ -165,12 +166,17 @@ public:
      * @param pt The vector (direction) to transform
      */
     CVector TransformVector(CVector v) const {
+        // Inlined:
+        // > m_right.x * v.x + m_forward.x * v.y + m_up.x * v.z,
+        // > m_right.y * v.x + m_forward.y * v.y + m_up.y * v.z,
+        // > m_right.z * v.x + m_forward.z * v.y + m_up.z * v.z,
         return v.x * m_right + v.y * m_forward + v.z * m_up;
     }
 
     /*!
      * @notsa
      * @brief Transform a point (position) using the inverse of the matrix - Will take into account translation part of the matrix.
+     * @brief Use this instead of `Multiply3x3(_VM)` (0x59C810)
      * @param pt The position (point) to transform
      */
     CVector InverseTransformPoint(CVector pt) const {
@@ -180,6 +186,7 @@ public:
     /*!
      * @notsa
      * @brief Transform the vector using the inverse of this Matrix
+     * @brief Use this instead of `Multiply3x3(_MV)` (0x59C790)
      * @param pt The vector (direction) to transform
      */
     CVector InverseTransformVector(CVector v) const {
@@ -239,18 +246,13 @@ private:
     friend class CVector; // So Vector methods have access to private fields of matrix whitout accessor methods, for more readable code
     friend class CVector2D;
     friend CMatrix operator*(const CMatrix& a, const CMatrix& b);
-    // static CMatrix* impl_operatorMul(CMatrix* out, const CMatrix& a, const CMatrix& b);
-
     friend CVector operator*(const CMatrix& a, const CVector& b);
-    // static CVector* impl_operatorMul(CVector* out, const CMatrix& a, const CVector& b);
-
     friend CMatrix operator+(const CMatrix& a, const CMatrix& b);
-    // static CMatrix* impl_operatorAdd(CMatrix* out, const CMatrix& a, const CMatrix& b);
 };
 VALIDATE_SIZE(CMatrix, 0x48);
 
 CMatrix operator*(const CMatrix& a, const CMatrix& b);
-CVector operator*(const CMatrix& a, const CVector& b);
+[[deprecated]] CVector operator*(const CMatrix& a, const CVector& b);
 CMatrix operator+(const CMatrix& a, const CMatrix& b);
 
 CMatrix& Invert(CMatrix& in, CMatrix& out);

@@ -4,12 +4,12 @@
 #include "TaskSimpleDuck.h"
 
 void CTaskSimpleGoToPointFine::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleGoToPointFine);
+    RH_ScopedVirtualClass(CTaskSimpleGoToPointFine, 0x86F964, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x65EEB0);
-    RH_ScopedVirtualInstall(Clone, 0x662040);
-    RH_ScopedVirtualInstall(MakeAbortable, 0x663500);
-    RH_ScopedVirtualInstall(ProcessPed, 0x663540);
+    RH_ScopedVMTInstall(Clone, 0x662040);
+    RH_ScopedVMTInstall(MakeAbortable, 0x663500);
+    RH_ScopedVMTInstall(ProcessPed, 0x663540);
     RH_ScopedInstall(SetBlendedMoveAnim, 0x65EF80);
     RH_ScopedInstall(Finish, 0x65EF00);
     RH_ScopedInstall(SetTargetPos, 0x65F330);
@@ -29,24 +29,11 @@ CTaskSimpleGoToPointFine* CTaskSimpleGoToPointFine::Constructor(float moveRatio,
 
 // 0x662040
 CTask* CTaskSimpleGoToPointFine::Clone() const {
-    return CTaskSimpleGoToPointFine::Clone_Reversed();
+    return new CTaskSimpleGoToPointFine(m_fMoveRatio, m_vecTargetPoint, m_fRadius, nullptr);
 }
 
 // 0x663500
 bool CTaskSimpleGoToPointFine::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return CTaskSimpleGoToPointFine::MakeAbortable_Reversed(ped, priority, event);
-}
-
-// 0x663540
-bool CTaskSimpleGoToPointFine::ProcessPed(CPed* ped) {
-    return CTaskSimpleGoToPointFine::ProcessPed_Reversed(ped);
-}
-
-CTask* CTaskSimpleGoToPointFine::Clone_Reversed() const {
-    return new CTaskSimpleGoToPointFine(m_fMoveRatio, m_vecTargetPoint, m_fRadius, nullptr);
-}
-
-bool CTaskSimpleGoToPointFine::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     QuitIK(ped);
     Finish(ped);
     return true;
@@ -60,7 +47,8 @@ void CTaskSimpleGoToPointFine::Finish(CPed* ped) {
     ped->SetMoveAnim();
 }
 
-bool CTaskSimpleGoToPointFine::ProcessPed_Reversed(CPed* ped) {
+// 0x663540
+bool CTaskSimpleGoToPointFine::ProcessPed(CPed* ped) {
     CVector2D vecDistance = m_vecTargetPoint - ped->GetPosition();
     if (m_fRadius * m_fRadius >= vecDistance.SquaredMagnitude() || HasCircledTarget(ped)) {
         QuitIK(ped);

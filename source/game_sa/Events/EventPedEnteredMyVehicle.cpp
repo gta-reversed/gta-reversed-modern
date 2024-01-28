@@ -1,8 +1,7 @@
 #include "StdInc.h"
-
 #include "EventPedEnteredMyVehicle.h"
 
-// 0x4AEAC0
+
 CEventPedEnteredMyVehicle::CEventPedEnteredMyVehicle(CPed* pedThatEntered, CVehicle* vehicle, eTargetDoor targetDoor) :
     m_Vehicle{vehicle},
     m_PedThatEntered{pedThatEntered},
@@ -12,13 +11,11 @@ CEventPedEnteredMyVehicle::CEventPedEnteredMyVehicle(CPed* pedThatEntered, CVehi
     CEntity::SafeRegisterRef(m_Vehicle);
 }
 
-// 0x4AEB90
 CEventPedEnteredMyVehicle::~CEventPedEnteredMyVehicle() {
     CEntity::SafeCleanUpRef(m_PedThatEntered);
     CEntity::SafeCleanUpRef(m_Vehicle);
 }
 
-// 0x4AEC00
 bool CEventPedEnteredMyVehicle::AffectsPed(CPed* ped) {
     return ped->IsAlive()
         && ped->m_pVehicle
@@ -26,3 +23,4 @@ bool CEventPedEnteredMyVehicle::AffectsPed(CPed* ped) {
         && ped->m_pVehicle == m_Vehicle
         && m_PedThatEntered;
 }
+

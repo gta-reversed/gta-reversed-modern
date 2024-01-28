@@ -3,7 +3,7 @@
 #include "TaskSimple.h"
 #include "Vehicle.h"
 
-class CTaskSimpleEvasiveDive final : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleEvasiveDive final : public CTaskSimple {
 public:
     static constexpr auto Type = TASK_SIMPLE_EVASIVE_DIVE;
 

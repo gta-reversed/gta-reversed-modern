@@ -4,7 +4,7 @@
 
 class CPed;
 
-class CTaskComplexGangJoinRespond : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexGangJoinRespond : public CTaskComplex {
 public:
     bool  m_response{};
     bool  m_animsReferenced{};

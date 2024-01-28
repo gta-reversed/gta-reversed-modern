@@ -57,9 +57,6 @@ private:
     static void InjectHooks();
 
     CTaskComplexDie* Constructor(eWeaponType nWeaponType, AssocGroupId animGroup, AnimationId animID, float fBlendDelta, float fAnimSpeed, bool bBeingKilledByStealth, bool bFallingToDeath, eDirection nFallToDeathDir, bool bFallToDeathOverRailing);
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
-    CTask* CreateNextSubTask_Reversed(CPed* ped);
-    CTask* CreateFirstSubTask_Reversed(CPed* ped);
 };
 
 VALIDATE_SIZE(CTaskComplexDie, 0x28);

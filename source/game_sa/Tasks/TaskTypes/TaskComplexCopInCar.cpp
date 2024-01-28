@@ -13,18 +13,18 @@
 #include "eCarDrivingStyle.h"
 
 void CTaskComplexCopInCar::InjectHooks() {
-    RH_ScopedClass(CTaskComplexCopInCar);
+    RH_ScopedVirtualClass(CTaskComplexCopInCar, 0x870A2C, 11);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x68C7F0);
     RH_ScopedInstall(Destructor, 0x68C8C0);
     RH_ScopedInstall(CreateSubTask, 0x68C9E0);
-    RH_ScopedInstall(Clone_Reversed, 0x68CEC0);
-    RH_ScopedInstall(GetTaskType_Reversed, 0x68C8B0);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x68C940);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x68FA50);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x68FA10);
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x68FD50);
+    RH_ScopedVMTInstall(Clone, 0x68CEC0);
+    RH_ScopedVMTInstall(GetTaskType, 0x68C8B0);
+    RH_ScopedVMTInstall(MakeAbortable, 0x68C940);
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x68FA50);
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x68FA10);
+    RH_ScopedVMTInstall(ControlSubTask, 0x68FD50);
 }
 
 // 0x68C7F0
@@ -109,6 +109,8 @@ CTask* CTaskComplexCopInCar::CreateSubTask(eTaskType taskType, CPed* copPed) {
 }
 
 // 0x68C940
+
+
 bool CTaskComplexCopInCar::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
     if (!m_pSubTask) {
         return true;
@@ -140,6 +142,8 @@ bool CTaskComplexCopInCar::MakeAbortable(CPed* ped, eAbortPriority priority, CEv
 }
 
 // 0x68FA50
+
+
 CTask* CTaskComplexCopInCar::CreateNextSubTask(CPed* ped) {
     // Ped is a CopPed*
 
@@ -205,6 +209,8 @@ CTask* CTaskComplexCopInCar::CreateNextSubTask(CPed* ped) {
 }
 
 // 0x68FA10
+
+
 CTask* CTaskComplexCopInCar::CreateFirstSubTask(CPed* ped) {
     ped->GetIntelligence()->SetPedDecisionMakerType(DM_EVENT_SHOT_FIRED);
     if (!m_Cop) {
@@ -214,6 +220,8 @@ CTask* CTaskComplexCopInCar::CreateFirstSubTask(CPed* ped) {
 }
 
 // 0x68FD50
+
+// 0x0
 CTask* CTaskComplexCopInCar::ControlSubTask(CPed* ped) {
     if (!m_Suspect || m_Suspect->IsStateDead()) { // Inverted
         return m_pSubTask->MakeAbortable(ped) ? CreateSubTask(TASK_FINISHED, ped) : m_pSubTask; // Inverted
@@ -332,3 +340,4 @@ CTask* CTaskComplexCopInCar::ControlSubTask(CPed* ped) {
     }
     return m_pSubTask;
 }
+

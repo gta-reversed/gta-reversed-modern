@@ -55,7 +55,7 @@ void CMatrix::InjectHooks()
     RH_ScopedInstall(operator+=, 0x59ADF0);
     RH_ScopedInstall(operator*=, 0x411A80);
     RH_ScopedGlobalOverloadedInstall(operator*, "Mat", 0x59BE30, CMatrix(*)(const CMatrix&, const CMatrix&));
-    RH_ScopedGlobalOverloadedInstall(operator*, "Vec", 0x59C890, CVector(*)(const CMatrix&, const CVector&));
+    //RH_ScopedGlobalOverloadedInstall(operator*, "Vec", 0x59C890, CVector(*)(const CMatrix&, const CVector&));
     RH_ScopedGlobalOverloadedInstall(operator+, "", 0x59BFA0, CMatrix(*)(const CMatrix&, const CMatrix&));
     RH_ScopedGlobalOverloadedInstall(Invert, "1", 0x59B920, CMatrix&(*)(CMatrix&, CMatrix&));
     RH_ScopedGlobalOverloadedInstall(Invert, "2", 0x59BDD0, CMatrix(*)(const CMatrix&));
@@ -244,30 +244,30 @@ void CMatrix::RotateX(float angle)
 {
     auto rotMat = CMatrix();
     rotMat.SetRotateX(angle);
-    m_right =   rotMat * m_right;
-    m_forward = rotMat * m_forward;
-    m_up =      rotMat * m_up;
-    m_pos =     rotMat * m_pos;
+    m_right =   rotMat.TransformVector(m_right);
+    m_forward = rotMat.TransformVector(m_forward);
+    m_up =      rotMat.TransformVector(m_up);
+    m_pos =     rotMat.TransformVector(m_pos);
 }
 
 void CMatrix::RotateY(float angle)
 {
     auto rotMat = CMatrix();
     rotMat.SetRotateY(angle);
-    m_right =   rotMat * m_right;
-    m_forward = rotMat * m_forward;
-    m_up =      rotMat * m_up;
-    m_pos =     rotMat * m_pos;
+    m_right =   rotMat.TransformVector(m_right);
+    m_forward = rotMat.TransformVector(m_forward);
+    m_up =      rotMat.TransformVector(m_up);
+    m_pos =     rotMat.TransformVector(m_pos);
 }
 
 void CMatrix::RotateZ(float angle)
 {
     auto rotMat = CMatrix();
     rotMat.SetRotateZ(angle);
-    m_right =   rotMat * m_right;
-    m_forward = rotMat * m_forward;
-    m_up =      rotMat * m_up;
-    m_pos =     rotMat * m_pos;
+    m_right =   rotMat.TransformVector(m_right);
+    m_forward = rotMat.TransformVector(m_forward);
+    m_up =      rotMat.TransformVector(m_up);
+    m_pos =     rotMat.TransformVector(m_pos);
 }
 
 // rotate on 3 axes
@@ -275,10 +275,10 @@ void CMatrix::Rotate(CVector rotation)
 {
     auto rotMat = CMatrix();
     rotMat.SetRotate(rotation.x, rotation.y, rotation.z);
-    m_right =   rotMat * m_right;
-    m_forward = rotMat * m_forward;
-    m_up =      rotMat * m_up;
-    m_pos =     rotMat * m_pos;
+    m_right =   rotMat.TransformVector(m_right);
+    m_forward = rotMat.TransformVector(m_forward);
+    m_up =      rotMat.TransformVector(m_up);
+    m_pos =     rotMat.TransformVector(m_pos);
 }
 
 void CMatrix::Reorthogonalise()
@@ -528,14 +528,10 @@ CMatrix operator*(const CMatrix& a, const CMatrix& b)
     return result;
 }
 
-CVector operator*(const CMatrix& a, const CVector& b)
-{
-    CVector result;
-    result.x = a.m_pos.x + a.m_right.x * b.x + a.m_forward.x * b.y + a.m_up.x * b.z;
-    result.y = a.m_pos.y + a.m_right.y * b.x + a.m_forward.y * b.y + a.m_up.y * b.z;
-    result.z = a.m_pos.z + a.m_right.z * b.x + a.m_forward.z * b.y + a.m_up.z * b.z;
-    return result;
+CVector operator*(const CMatrix& a, const CVector& b) {
+    return a.TransformPoint(b);
 }
+
 CMatrix operator+(const CMatrix& a, const CMatrix& b)
 {
     CMatrix result;

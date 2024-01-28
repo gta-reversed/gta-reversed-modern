@@ -16,6 +16,7 @@
 #include "TaskSimpleLand.h"
 #include "AEAudioUtility.h"
 #include "PedClothesDesc.h"
+#include "EventAcquaintancePedHate.h"
 #include "TaskSimpleHoldEntity.h"
 #include "TaskComplexGoPickUpEntity.h"
 #include "Radar.h"
@@ -28,7 +29,7 @@
 #include "WeaponInfo.h"
 
 void CPed::InjectHooks() {
-    RH_ScopedClass(CPed);
+    RH_ScopedVirtualClass(CPed, 0x86C358, 26);
     RH_ScopedCategory("Entity/Ped");
 
     RH_ScopedInstall(Constructor, 0x5E8030);
@@ -166,21 +167,21 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(PositionAttachedPed, 0x5DFDF0, { .reversed = false });
     RH_ScopedInstall(ResetGunFlashAlpha, 0x5DF4E0);
 
-    RH_ScopedVirtualInstall(SetModelIndex, 0x5E4880);
-    RH_ScopedVirtualInstall(DeleteRwObject, 0x5DEBF0);
+    RH_ScopedVMTInstall(SetModelIndex, 0x5E4880);
+    RH_ScopedVMTInstall(DeleteRwObject, 0x5DEBF0);
     //RH_ScopedVirtualInstall(ProcessControl, 0x5E8CD0, { .reversed = false });
-    RH_ScopedVirtualInstall(Teleport, 0x5E4110);
+    RH_ScopedVMTInstall(Teleport, 0x5E4110);
     //RH_ScopedVirtualInstall(SpecialEntityPreCollisionStuff, 0x5E3C30, { .reversed = false });
     //RH_ScopedVirtualInstall(SpecialEntityCalcCollisionSteps, 0x5E3E90, { .reversed = false });
-    RH_ScopedVirtualInstall(PreRender, 0x5E8A20);
-    RH_ScopedVirtualInstall(Render, 0x5E7680);
-    RH_ScopedVirtualInstall(SetupLighting, 0x553F00);
-    RH_ScopedVirtualInstall(RemoveLighting, 0x5533B0);
-    RH_ScopedVirtualInstall(FlagToDestroyWhenNextProcessed, 0x5E7B70);
+    RH_ScopedVMTInstall(PreRender, 0x5E8A20);
+    RH_ScopedVMTInstall(Render, 0x5E7680);
+    RH_ScopedVMTInstall(SetupLighting, 0x553F00);
+    RH_ScopedVMTInstall(RemoveLighting, 0x5533B0);
+    RH_ScopedVMTInstall(FlagToDestroyWhenNextProcessed, 0x5E7B70);
     //RH_ScopedVirtualInstall(ProcessEntityCollision, 0x5E2530, { .reversed = false });
-    RH_ScopedVirtualInstall(SetMoveAnim, 0x5E4A00);
-    RH_ScopedVirtualInstall(Save, 0x5D5730);
-    RH_ScopedVirtualInstall(Load, 0x5D4640);
+    RH_ScopedVMTInstall(SetMoveAnim, 0x5E4A00);
+    RH_ScopedVMTInstall(Save, 0x5D5730);
+    RH_ScopedVMTInstall(Load, 0x5D4640);
 
     RH_ScopedGlobalInstall(SetPedAtomicVisibilityCB, 0x5F0060);
 }
@@ -304,9 +305,7 @@ CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
     if (CCheat::IsActive(CHEAT_HAVE_ABOUNTY_ON_YOUR_HEAD)) {
         if (!IsPlayer()) {
             GetAcquaintance().SetAsAcquaintance(ACQUAINTANCE_HATE, CPedType::GetPedFlag(ePedType::PED_TYPE_PLAYER1));
-
-            CEventAcquaintancePedHate event(FindPlayerPed());
-            GetEventGroup().Add(&event);
+            GetEventGroup().Add(CEventAcquaintancePedHate{FindPlayerPed()});
         }
     }
 }
@@ -1377,7 +1376,7 @@ void CPed::GetTransformedBonePosition(RwV3d& inOffsetOutPosn, ePedBones bone, bo
             bCalledPreRender = true;
         }
     } else if (!bCalledPreRender) { // Return static local bone position instead
-        inOffsetOutPosn = MultiplyMatrixWithVector(*m_matrix, GetPedBoneStdPosition(bone));
+        inOffsetOutPosn = m_matrix->TransformPoint(GetPedBoneStdPosition(bone));
         return;
     }
 
@@ -2046,7 +2045,7 @@ void CPed::GetBonePosition(RwV3d& outPosition, ePedBones bone, bool updateSkinBo
             bCalledPreRender = true;
         }
     } else if (!bCalledPreRender) { // Return static local bone position instead
-        outPosition = MultiplyMatrixWithVector(*m_matrix, GetPedBoneStdPosition(bone));
+        outPosition = m_matrix->TransformPoint(GetPedBoneStdPosition(bone));
         return;
     }
     RwV3dAssign(&outPosition, RwMatrixGetPos(&GetBoneMatrix(bone)));

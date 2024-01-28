@@ -12,7 +12,7 @@ class CPed;
 
 const int32 TOTAL_EVENTS_PER_EVENTGROUP = 16;
 
-class CEventGroup {
+class NOTSA_EXPORT_VTABLE CEventGroup {
 public:
     CPed*   m_pPed;
     int32   m_count;
@@ -41,6 +41,8 @@ public:
 
     auto GetEvents()       { return std::span{ m_events, (size_t)m_count }; }
     auto GetEvents() const { return std::span{ m_events, (size_t)m_count }; }
+
+    auto GetNumEventsInQueue() const { return m_count; }
 
     //! Helper so events can be directly passed in without having to put them into a variable
     template<std::derived_from<CEvent> T>

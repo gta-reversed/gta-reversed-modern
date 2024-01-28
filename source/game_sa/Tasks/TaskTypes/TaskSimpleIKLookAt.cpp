@@ -3,7 +3,7 @@
 #include "TaskSimpleIKLookAt.h"
 
 void CTaskSimpleIKLookAt::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleIKLookAt);
+    RH_ScopedVirtualClass(CTaskSimpleIKLookAt, 0x86E37C, 10);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x633E00);
@@ -12,9 +12,9 @@ void CTaskSimpleIKLookAt::InjectHooks() {
     RH_ScopedInstall(UpdateLookAtInfo, 0x634050);
     RH_ScopedInstall(GetLookAtEntity, 0x634120);
     RH_ScopedInstall(GetLookAtOffset, 0x634130);
-    RH_ScopedInstall(Clone_Reversed, 0x633F00);
-    RH_ScopedInstall(GetTaskType_Reversed, 0x633EE0);
-    RH_ScopedInstall(CreateIKChain_Reversed, 0x633FC0);
+    RH_ScopedVMTInstall(Clone, 0x633F00);
+    RH_ScopedVMTInstall(GetTaskType, 0x633EE0);
+    RH_ScopedVMTInstall(CreateIKChain, 0x633FC0);
 }
 
 // 0x633E00
@@ -28,6 +28,8 @@ CTaskSimpleIKLookAt::CTaskSimpleIKLookAt(Const char* name, CEntity* lookAtEntity
 }
 
 // 0x633F00
+
+
 CTaskSimpleIKLookAt* CTaskSimpleIKLookAt::Clone() const {
     auto* task = new CTaskSimpleIKLookAt("", m_pEntity, m_nTime, m_nOffsetBoneTag, m_vecOffsetPos, m_bUseTorso, m_fSpeed, m_nBlendTime, m_nPriority);
     if (m_pIKChain) {
@@ -76,6 +78,8 @@ CVector CTaskSimpleIKLookAt::GetLookAtOffset() { // We return a vector here.. Ho
 }
 
 // 0x633FC0
+
+// 0x0
 bool CTaskSimpleIKLookAt::CreateIKChain(CPed* ped) {
     m_nPivotBoneTag = BONE_NECK;
     m_pIKChain = g_ikChainMan.AddIKChain("", BONE_NORMAL, ped, m_nEffectorBoneTag, m_vecEffectorVec, BONE_NECK, m_pEntity, m_nOffsetBoneTag, m_vecOffsetPos, m_fSpeed, m_nPriority);
@@ -85,3 +89,4 @@ bool CTaskSimpleIKLookAt::CreateIKChain(CPed* ped) {
     }
     return false;
 }
+

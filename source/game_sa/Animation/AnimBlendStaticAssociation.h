@@ -13,7 +13,7 @@ class CAnimBlendSequence;
 class CAnimBlendHierarchy;
 
 //! Stores static animation data loaded from an animation clump.
-class CAnimBlendStaticAssociation {
+class NOTSA_EXPORT_VTABLE CAnimBlendStaticAssociation {
 public:
     static void InjectHooks();
 

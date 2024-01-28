@@ -7,22 +7,18 @@
 #include "TaskSimpleDead.h"
 
 void CTaskComplexFallToDeath::InjectHooks() {
-    RH_ScopedClass(CTaskComplexFallToDeath);
+    RH_ScopedVirtualClass(CTaskComplexFallToDeath, 0x870520, 11);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x679040);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x6790C0);
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x679510);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x679120);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x679270);
+    RH_ScopedVMTInstall(MakeAbortable, 0x6790C0);
+    RH_ScopedVMTInstall(ControlSubTask, 0x679510);
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x679120);
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x679270);
     RH_ScopedInstall(CalcFall, 0x6796C0);
 }
 
 CTaskComplexFallToDeath* CTaskComplexFallToDeath::Constructor(int32 direction, const CVector& posn, bool a4, bool a5) { this->CTaskComplexFallToDeath::CTaskComplexFallToDeath(direction, posn, a4, a5); return this; }
-bool CTaskComplexFallToDeath::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable_Reversed(ped, priority, event); }
-CTask* CTaskComplexFallToDeath::ControlSubTask(CPed* ped) { return ControlSubTask_Reversed(ped); }
-CTask* CTaskComplexFallToDeath::CreateFirstSubTask(CPed* ped) { return CreateFirstSubTask_Reversed(ped); }
-CTask* CTaskComplexFallToDeath::CreateNextSubTask(CPed* ped) { return CreateNextSubTask_Reversed(ped); }
 
 // 0x679040
 CTaskComplexFallToDeath::CTaskComplexFallToDeath(int32 direction, const CVector& posn, bool bFallToDeathOverRailing, bool a5) : CTaskComplex() {
@@ -44,7 +40,9 @@ void CTaskComplexFallToDeath::UpdateAnims(CPed* ped) {
 }
 
 // 0x6790C0
-bool CTaskComplexFallToDeath::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
+
+
+bool CTaskComplexFallToDeath::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (priority != ABORT_PRIORITY_IMMEDIATE) {
         return false;
     }
@@ -53,7 +51,9 @@ bool CTaskComplexFallToDeath::MakeAbortable_Reversed(CPed* ped, eAbortPriority p
 }
 
 // 0x679510
-CTask* CTaskComplexFallToDeath::ControlSubTask_Reversed(CPed* ped) {
+
+
+CTask* CTaskComplexFallToDeath::ControlSubTask(CPed* ped) {
     // return plugin::CallMethodAndReturn<CTask*, 0x679510, CTaskComplexFallToDeath*, CPed*>(this, ped);
 
     if (ped->physicalFlags.bSubmergedInWater) {
@@ -82,7 +82,9 @@ CTask* CTaskComplexFallToDeath::ControlSubTask_Reversed(CPed* ped) {
 }
 
 // 0x679120
-CTask* CTaskComplexFallToDeath::CreateFirstSubTask_Reversed(CPed* ped) {
+
+
+CTask* CTaskComplexFallToDeath::CreateFirstSubTask(CPed* ped) {
     ped->bIsStanding = false;
     ped->ApplyMoveForce({
         ms_LateralForceMagnitude * m_Posn.x,
@@ -110,7 +112,9 @@ CTask* CTaskComplexFallToDeath::CreateFirstSubTask_Reversed(CPed* ped) {
 }
 
 // 0x679270
-CTask* CTaskComplexFallToDeath::CreateNextSubTask_Reversed(CPed* ped) {
+
+// 0x0
+CTask* CTaskComplexFallToDeath::CreateNextSubTask(CPed* ped) {
     // return plugin::CallMethodAndReturn<CTask*, 0x679270, CTaskComplexFallToDeath*, CPed*>(this, ped);
 
     const auto& z = ped->GetMoveSpeed().z;

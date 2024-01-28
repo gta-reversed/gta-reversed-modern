@@ -12,6 +12,8 @@
 #include "DamageManager.h"
 #include "ColPoint.h"
 
+#include "SurfaceInfo_c.h"
+#include "SurfaceInfos_c.h"
 #include "eSurfaceType.h"
 #include "eCarWheel.h"
 #include "eCarNodes.h"
@@ -393,47 +395,6 @@ private:
         this->CAutomobile::~CAutomobile();
         return this;
     }
-
-    bool ProcessAI_Reversed(uint32& extraHandlingFlags) { return CAutomobile::ProcessAI(extraHandlingFlags); }
-    void ResetSuspension_Reversed() { return CAutomobile::ResetSuspension(); }
-    void ProcessFlyingCarStuff_Reversed() { return CAutomobile::ProcessFlyingCarStuff(); }
-    void DoHoverSuspensionRatios_Reversed() { return CAutomobile::DoHoverSuspensionRatios(); }
-    void ProcessSuspension_Reversed() { return CAutomobile::ProcessSuspension(); }
-
-    void Teleport_Reversed(CVector destination, bool resetRotation) { CAutomobile::Teleport(destination, resetRotation); };
-    void ProcessControl_Reversed() { CAutomobile::ProcessControl(); }
-
-    // CVehicle
-    void ProcessControlCollisionCheck_Reversed(bool applySpeed) { CAutomobile::ProcessControlCollisionCheck(applySpeed); }
-    void ProcessControlInputs_Reversed(uint8 playerNum) { CAutomobile::ProcessControlInputs(playerNum); }
-    void GetComponentWorldPosition_Reversed(int32 componentId, CVector& outPos) { CAutomobile::GetComponentWorldPosition(componentId, outPos); }
-    bool IsComponentPresent_Reversed(int32 componentId) { return CAutomobile::IsComponentPresent(componentId); }
-    void OpenDoor_Reversed(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) { CAutomobile::OpenDoor(ped, componentId, door, doorOpenRatio, playSound); }
-    float GetDooorAngleOpenRatio_Reversed(eDoors door) { return CAutomobile::GetDooorAngleOpenRatio(door); }
-    float GetDooorAngleOpenRatio_Reversed(uint32 door) { return CAutomobile::GetDooorAngleOpenRatioU32(door); }
-    bool IsOpenTopCar_Reversed() { return CAutomobile::IsOpenTopCar(); }
-    void RemoveRefsToVehicle_Reversed(CEntity* entity) { CAutomobile::RemoveRefsToVehicle(entity); }
-    void BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion) { CAutomobile::BlowUpCar(damager, bHideExplosion); }
-    void BlowUpCarCutSceneNoExtras_Reversed(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound) { CAutomobile::BlowUpCarCutSceneNoExtras(bNoCamShake, bNoSpawnFlyingComps, bDetachWheels, bExplosionSound); }
-    bool SetUpWheelColModel_Reversed(CColModel* wheelCol) { return CAutomobile::SetUpWheelColModel(wheelCol); }
-    bool BurstTyre_Reversed(uint8 tyreComponentId, bool bPhysicalEffect) { return CAutomobile::BurstTyre(tyreComponentId, bPhysicalEffect); }
-    bool IsRoomForPedToLeaveCar_Reversed(uint32 arg0, CVector* arg1) { return CAutomobile::IsRoomForPedToLeaveCar(arg0, arg1); }
-    void SetupSuspensionLines_Reversed() { CAutomobile::SetupSuspensionLines(); }
-    CVector AddMovingCollisionSpeed_Reversed(CVector& point) { return CAutomobile::AddMovingCollisionSpeed(point); }
-    void Fix_Reversed() { CAutomobile::Fix(); }
-    void SetupDamageAfterLoad_Reversed() { CAutomobile::SetupDamageAfterLoad(); }
-    void DoBurstAndSoftGroundRatios_Reversed() { CAutomobile::DoBurstAndSoftGroundRatios(); }
-    float GetHeightAboveRoad_Reversed() { return CAutomobile::GetHeightAboveRoad(); }
-    void PlayCarHorn_Reversed() { CAutomobile::PlayCarHorn(); }
-    int32 GetNumContactWheels_Reversed() { return CAutomobile::GetNumContactWheels(); }
-    void VehicleDamage_Reversed(float damageIntensity, eVehicleCollisionComponent collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { CAutomobile::VehicleDamage(damageIntensity, collisionComponent, damager, vecCollisionCoors, vecCollisionDirection, weapon); }
-    bool GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh) { return CAutomobile::GetTowHitchPos(outPos, bCheckModelInfo, veh); }
-    bool GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh) { return CAutomobile::GetTowBarPos(outPos, bCheckModelInfo, veh); }
-    bool SetTowLink_Reversed(CVehicle* tractor, bool arg1) { return CAutomobile::SetTowLink(tractor, arg1); }
-    bool BreakTowLink_Reversed() { return CAutomobile::BreakTowLink(); }
-    float FindWheelWidth_Reversed(bool bRear) { return CAutomobile::FindWheelWidth(bRear); }
-    bool Save_Reversed() { return CAutomobile::Save(); }
-    bool Load_Reversed() { return CAutomobile::Load(); }
 };
 
 VALIDATE_SIZE(CAutomobile, 0x988);

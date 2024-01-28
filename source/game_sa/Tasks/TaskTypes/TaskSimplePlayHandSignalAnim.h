@@ -25,6 +25,5 @@ public:
     void StartAnim(CPed* ped);
 
     static void InjectHooks();
-    bool ProcessPed_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CTaskSimplePlayHandSignalAnim, 0x24);
