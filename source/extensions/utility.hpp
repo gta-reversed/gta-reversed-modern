@@ -3,6 +3,7 @@
 #include <charconv>
 #include <initializer_list>
 #include <Vector.h>
+#include <unordered_map>
 #include "Base.h"
 
 namespace notsa {
