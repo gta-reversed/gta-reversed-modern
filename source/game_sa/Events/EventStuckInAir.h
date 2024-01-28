@@ -28,7 +28,5 @@ private:
 
     CEventStuckInAir* Constructor(CPed* ped);
 
-    bool AffectsPed_Reversed(CPed* ped);
-    bool TakesPriorityOver_Reversed(const CEvent& refEvent);
 };
 VALIDATE_SIZE(CEventStuckInAir, 0x10);

@@ -7,7 +7,7 @@
 class CEntity;
 class CPed;
 
-class CTaskSimpleIKPointArm : public CTaskSimpleIKChain {
+class NOTSA_EXPORT_VTABLE CTaskSimpleIKPointArm : public CTaskSimpleIKChain {
 public:
     int32 m_Hand;
 
@@ -17,7 +17,11 @@ public:
     CTaskSimpleIKPointArm(const char* purpose, int32 hand, CEntity* targetEntity, ePedBones bone, CVector offsetPos, float speed, int32 blendTime);
     ~CTaskSimpleIKPointArm() override = default; // 0x634240
 
-    eTaskType GetTaskType() const override { return Type; } // Weird.. L_ARM never used?
+
+
+eTaskType GetTaskType() const override { return Type; }
+
+ // Weird.. L_ARM never used?
     CTask* Clone() const override;
 
     bool CreateIKChain(CPed* ped) override;
@@ -29,8 +33,5 @@ private:
 
     CTaskSimpleIKPointArm* Constructor(const char* purpose, int32 hand, CEntity* targetEntity, ePedBones bone, RwV3d offsetPosn, float speed, int32 blendTime) { this->CTaskSimpleIKPointArm::CTaskSimpleIKPointArm(purpose, hand, targetEntity, bone, offsetPosn, speed, blendTime); return this; }
     CTaskSimpleIKPointArm* Destructor() { this->CTaskSimpleIKPointArm::~CTaskSimpleIKPointArm(); return this; }
-    CTask* Clone_Reversed() { return CTaskSimpleIKPointArm::Clone(); }
-    eTaskType GetTaskType_Reversed() { return CTaskSimpleIKPointArm::GetTaskType(); }
-    bool CreateIKChain_Reversed(CPed* ped) { return CTaskSimpleIKPointArm::CreateIKChain(ped); }
-};
+            };
 VALIDATE_SIZE(CTaskSimpleIKPointArm, 0x5C);

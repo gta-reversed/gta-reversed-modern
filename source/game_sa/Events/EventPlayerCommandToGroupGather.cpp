@@ -4,7 +4,7 @@
 
 void CEventPlayerCommandToGroupGather::InjectHooks()
 {
-    RH_ScopedClass(CEventPlayerCommandToGroupGather);
+    RH_ScopedVirtualClass(CEventPlayerCommandToGroupGather, 0x86D120, 17);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x609250);

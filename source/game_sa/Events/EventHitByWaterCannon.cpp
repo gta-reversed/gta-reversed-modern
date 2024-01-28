@@ -4,11 +4,11 @@
 
 void CEventHitByWaterCannon::InjectHooks()
 {
-    RH_ScopedClass(CEventHitByWaterCannon);
+    RH_ScopedVirtualClass(CEventHitByWaterCannon, 0x85B488, 16);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B1290);
-    RH_ScopedVirtualInstall(AffectsPed, 0x4B1330);
+    RH_ScopedVMTInstall(AffectsPed, 0x4B1330);
 }
 
 // 0x4B1290
@@ -28,11 +28,6 @@ CEventHitByWaterCannon* CEventHitByWaterCannon::Constructor(const CVector& point
 // 0x4B1330
 bool CEventHitByWaterCannon::AffectsPed(CPed* ped)
 {
-    return CEventHitByWaterCannon::AffectsPed_Reversed(ped);
-}
-
-bool CEventHitByWaterCannon::AffectsPed_Reversed(CPed* ped)
-{
     if (ped->IsAlive()) {
         CTask* task = ped->GetTaskManager().GetActiveTask();
         if (!task || task->GetTaskType() != TASK_COMPLEX_FALL_AND_GET_UP)
@@ -40,4 +35,3 @@ bool CEventHitByWaterCannon::AffectsPed_Reversed(CPed* ped)
     }
     return false;
 }
-

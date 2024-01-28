@@ -4,12 +4,12 @@
 
 void CEventAreaCodes::InjectHooks()
 {
-    RH_ScopedClass(CEventAreaCodes);
+    RH_ScopedVirtualClass(CEventAreaCodes, 0x85B7C0, 16);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B2190);
-    RH_ScopedVirtualInstall(AffectsPed, 0x4B2270);
-    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4B2350);
+    RH_ScopedVMTInstall(AffectsPed, 0x4B2270);
+    RH_ScopedVMTInstall(TakesPriorityOver, 0x4B2350);
 }
 
 // 0x4B2190
@@ -33,17 +33,6 @@ CEventAreaCodes* CEventAreaCodes::Constructor(CPed* ped)
 
 // 0x4B2270
 bool CEventAreaCodes::AffectsPed(CPed* ped)
-{
-    return CEventAreaCodes::AffectsPed_Reversed(ped);
-}
-
-// 0x4B2350
-bool CEventAreaCodes::TakesPriorityOver(const CEvent& refEvent)
-{
-    return CEventAreaCodes::TakesPriorityOver_Reversed(refEvent);
-}
-
-bool CEventAreaCodes::AffectsPed_Reversed(CPed* ped)
 {
     if (!m_ped)
         return false;
@@ -76,10 +65,10 @@ bool CEventAreaCodes::AffectsPed_Reversed(CPed* ped)
     return false;
 }
 
-bool CEventAreaCodes::TakesPriorityOver_Reversed(const CEvent& refEvent)
+// 0x4B2350
+bool CEventAreaCodes::TakesPriorityOver(const CEvent& refEvent)
 {
     if (CEventHandler::IsTemporaryEvent(refEvent))
         return true;
     return CEvent::TakesPriorityOver(refEvent);
 }
-

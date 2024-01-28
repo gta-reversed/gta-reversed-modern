@@ -4,11 +4,11 @@
 
 void CEventPotentialWalkIntoObject::InjectHooks()
 {
-    RH_ScopedClass(CEventPotentialWalkIntoObject);
+    RH_ScopedVirtualClass(CEventPotentialWalkIntoObject, 0x85AF18, 17);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AE5D0);
-    RH_ScopedVirtualInstall(AffectsPed, 0x4B4950);
+    RH_ScopedVMTInstall(AffectsPed, 0x4B4950);
 }
 
 // 0x4AE5D0
@@ -30,10 +30,6 @@ CEventPotentialWalkIntoObject* CEventPotentialWalkIntoObject::Constructor(CObjec
 
 // 0x4B4950
 bool CEventPotentialWalkIntoObject::AffectsPed(CPed* ped) {
-    return CEventPotentialWalkIntoObject::AffectsPed_Reversed(ped);
-}
-
-bool CEventPotentialWalkIntoObject::AffectsPed_Reversed(CPed* ped) {
     if (ped->IsPlayer() || !ped->IsAlive() || !m_object)
         return false;
 
@@ -61,4 +57,3 @@ bool CEventPotentialWalkIntoObject::AffectsPed_Reversed(CPed* ped) {
 
     return false;
 }
-

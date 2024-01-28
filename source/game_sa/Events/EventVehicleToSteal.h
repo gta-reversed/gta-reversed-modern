@@ -27,6 +27,5 @@ private:
 
     CEventVehicleToSteal* Constructor(CVehicle* vehicle);
 
-    bool AffectsPed_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CEventVehicleToSteal, 0x10);

@@ -6,7 +6,7 @@
 
 class CPed;
 
-class CEventPotentialWalkIntoPed : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventPotentialWalkIntoPed : public CEventEditableResponse {
 public:
     CVector    m_targetPoint;
     CPed*      m_ped;
@@ -33,7 +33,5 @@ private:
         return this;
     }
 
-    bool AffectsPed_Reversed(CPed* ped);
-    bool TakesPriorityOver_Reversed(const CEvent& refEvent);
 };
 VALIDATE_SIZE(CEventPotentialWalkIntoPed, 0x28);

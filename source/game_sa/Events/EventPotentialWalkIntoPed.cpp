@@ -5,12 +5,12 @@
 
 void CEventPotentialWalkIntoPed::InjectHooks()
 {
-    RH_ScopedClass(CEventPotentialWalkIntoPed);
+    RH_ScopedVirtualClass(CEventPotentialWalkIntoPed, 0x85AF60, 17);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AE6E0);
-    RH_ScopedVirtualInstall(AffectsPed, 0x4AE800);
-    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4AE950);
+    RH_ScopedVMTInstall(AffectsPed, 0x4AE800);
+    RH_ScopedVMTInstall(TakesPriorityOver, 0x4AE950);
 }
 
 // 0x4AE6E0
@@ -28,15 +28,6 @@ CEventPotentialWalkIntoPed::~CEventPotentialWalkIntoPed() {
 
 // 0x4AE800
 bool CEventPotentialWalkIntoPed::AffectsPed(CPed* ped) {
-    return CEventPotentialWalkIntoPed::AffectsPed_Reversed(ped);
-}
-
-// 0x4AE950
-bool CEventPotentialWalkIntoPed::TakesPriorityOver(const CEvent& refEvent) {
-    return CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed(refEvent);
-}
-
-bool CEventPotentialWalkIntoPed::AffectsPed_Reversed(CPed* ped) {
     if (!ped->IsAlive() || !m_ped || m_moveState == PEDMOVE_STILL) {
         return false;
     }
@@ -66,7 +57,7 @@ bool CEventPotentialWalkIntoPed::AffectsPed_Reversed(CPed* ped) {
     return false;
 }
 
-bool CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed(const CEvent& refEvent) {
+// 0x4AE950
+bool CEventPotentialWalkIntoPed::TakesPriorityOver(const CEvent& refEvent) {
     return CEventHandler::IsTemporaryEvent(refEvent) ? true : CEvent::TakesPriorityOver(refEvent);
 }
-

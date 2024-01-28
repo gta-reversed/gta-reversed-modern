@@ -5,7 +5,7 @@
 #include "Shadows.h"
 
 void CTaskSimpleJump::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleJump);
+    RH_ScopedVirtualClass(CTaskSimpleJump, 0x87054C, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x679AA0);
     RH_ScopedInstall(CheckIfJumpBlocked, 0x67D590);
@@ -13,9 +13,9 @@ void CTaskSimpleJump::InjectHooks() {
     RH_ScopedInstall(StartLaunchAnim, 0x67D7A0);
     RH_ScopedInstall(JumpAnimFinishCB, 0x67A020);
     // VTABLE
-    RH_ScopedVirtualInstall(Clone, 0x67C510);
-    RH_ScopedVirtualInstall(MakeAbortable, 0x679B60);
-    RH_ScopedVirtualInstall(ProcessPed, 0x680C60);
+    RH_ScopedVMTInstall(Clone, 0x67C510);
+    RH_ScopedVMTInstall(MakeAbortable, 0x679B60);
+    RH_ScopedVMTInstall(ProcessPed, 0x680C60);
 }
 
 CTaskSimpleJump* CTaskSimpleJump::Constructor(bool bCanClimb) {
@@ -41,30 +41,15 @@ CTaskSimpleJump::~CTaskSimpleJump() {
         m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
 
     CEntity::SafeCleanUpRef(m_pClimbEntity);
-}
-
-// 0x67C510
+};// 0x67C510
 CTask* CTaskSimpleJump::Clone() const {
-    return Clone_Reversed();
-}
-
-// 0x679B60
-bool CTaskSimpleJump::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return MakeAbortable_Reversed(ped, priority, event);
-}
-
-// 0x680C60;
-bool CTaskSimpleJump::ProcessPed(CPed* ped) {
-    return ProcessPed_Reversed(ped);
-}
-
-CTask* CTaskSimpleJump::Clone_Reversed() const {
     auto newTask = new CTaskSimpleJump(m_bCanClimb);
     newTask->m_bHighJump = this->m_bHighJump;
     return newTask;
 }
 
-bool CTaskSimpleJump::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
+// 0x679B60
+bool CTaskSimpleJump::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (m_pAnim) {
         m_pAnim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
         m_pAnim->m_BlendDelta = -4.0F;
@@ -73,7 +58,8 @@ bool CTaskSimpleJump::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
     return priority == ABORT_PRIORITY_IMMEDIATE;
 }
 
-bool CTaskSimpleJump::ProcessPed_Reversed(CPed* ped) {
+// 0x680C60
+bool CTaskSimpleJump::ProcessPed(CPed* ped) {
     if (!m_bIsFinished) {
         if (!m_pAnim) {
             if (!StartLaunchAnim(ped)) {

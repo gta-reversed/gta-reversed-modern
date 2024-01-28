@@ -3,7 +3,7 @@
 #include "AnimBlendStaticAssociation.h"
 
 void CAnimBlendStaticAssociation::InjectHooks() {
-    RH_ScopedClass(CAnimBlendStaticAssociation);
+    RH_ScopedVirtualClass(CAnimBlendStaticAssociation, 0x85C6CC, 1);
     RH_ScopedCategory("Animation");
 
     RH_ScopedInstall(Destructor, 0x4CDF50);

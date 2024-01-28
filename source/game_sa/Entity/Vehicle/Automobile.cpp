@@ -1503,6 +1503,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags) {
     return false;
 }
 
+// 0x6A2AE0
 void CAutomobile::ResetSuspension()
 {
     for (int32 i = 0; i < 4; i++) {
@@ -1560,6 +1561,7 @@ void CAutomobile::DoHoverSuspensionRatios()
     }
 }
 
+// 0x6AFB10
 void CAutomobile::ProcessSuspension() {
     float springLength[4]{};
     float wheelSpringForceDampingLimits[4]{};
@@ -3284,7 +3286,7 @@ bool CAutomobile::GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle
     outPos.x = 0.0f;
     outPos.y = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->m_boundBox.m_vecMax.y - 0.5f;
     outPos.z = 0.5f - m_fFrontHeightAboveRoad;
-    outPos = MultiplyMatrixWithVector(*m_matrix, outPos);
+    outPos = m_matrix->TransformPoint(outPos);
     return true;
 }
 
@@ -3306,7 +3308,7 @@ bool CAutomobile::GetTowBarPos(CVector& outPos, bool ignoreModelType, CVehicle* 
         outPos.x = 0.0f;
         outPos.y = baseY + CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->m_boundBox.m_vecMin.y;
         outPos.z = ((1.0f - (float)m_wMiscComponentAngle / (float)TOWTRUCK_HOIST_DOWN_LIMIT) / 2.0f + 0.5f) - m_fFrontHeightAboveRoad;
-        outPos = MultiplyMatrixWithVector(*m_matrix, outPos);
+        outPos = m_matrix->TransformPoint(outPos);
         return true;
     }
     default: { // TODO: Move out to after switch (deindentate)
@@ -6225,7 +6227,7 @@ void CAutomobile::SetDoorDamage(eDoors doorIdx, bool withoutVisualEffect)
             switch (m_damageManager.GetDoorStatus(doorIdx)) { // 0x6B1659
             case eDoorStatus::DAMSTATE_OPENED_DAMAGED:
             case eDoorStatus::DAMSTATE_NOTPRESENT: {
-                // 0x0x6B1667
+                // 0x6B1667
                 door.Open(0.f);
                 m_damageManager.SetDoorStatus(doorIdx, eDoorStatus::DAMSTATE_DAMAGED);
                 return;
@@ -6485,6 +6487,7 @@ void CAutomobile::PreRender() {
     plugin::CallMethod<0x6AAB50, CAutomobile*>(this);
 }
 
+// 0x6A9CA0
 void CAutomobile::Teleport(CVector destination, bool resetRotation) {
     CWorld::Remove(this);
     GetPosition() = destination;

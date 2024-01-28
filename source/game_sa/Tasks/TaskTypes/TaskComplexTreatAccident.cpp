@@ -9,15 +9,15 @@
 
 void CTaskComplexTreatAccident::InjectHooks()
 {
-    RH_ScopedClass(CTaskComplexTreatAccident);
+    RH_ScopedVirtualClass(CTaskComplexTreatAccident, 0x86F4EC, 11);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x658AB0);
     RH_ScopedInstall(CreateSubTask, 0x659E90);
     RH_ScopedInstall(ComputeHeading, 0x658AF0);
-    RH_ScopedVirtualInstall(Clone, 0x659A90);
-    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x65A8F0);
-    RH_ScopedVirtualInstall(CreateNextSubTask, 0x65A830);
-    RH_ScopedVirtualInstall(ControlSubTask, 0x658B90);
+    RH_ScopedVMTInstall(Clone, 0x659A90);
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x65A8F0);
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x65A830);
+    RH_ScopedVMTInstall(ControlSubTask, 0x658B90);
 }
 
 // 0x658AB0
@@ -35,28 +35,6 @@ CTaskComplexTreatAccident::CTaskComplexTreatAccident(CAccident* accident)
 
 // 0x65A830
 CTask* CTaskComplexTreatAccident::CreateNextSubTask(CPed* ped)
-{
-    return CreateNextSubTask_Reversed(ped);
-}
-
-// 0x65A8F0
-CTask* CTaskComplexTreatAccident::CreateFirstSubTask(CPed* ped)
-{
-    return CreateFirstSubTask_Reversed(ped);
-}
-
-// 0x658B90
-CTask* CTaskComplexTreatAccident::ControlSubTask(CPed* ped)
-{
-    return ControlSubTask_Reversed(ped);
-}
-
-// 0x659A90
-CTask* CTaskComplexTreatAccident::Clone() const {
-    return Clone_Reversed();
-}
-
-CTask* CTaskComplexTreatAccident::CreateNextSubTask_Reversed(CPed* ped)
 {
     eTaskType subTaskId = m_pSubTask->GetTaskType();
 
@@ -82,7 +60,8 @@ CTask* CTaskComplexTreatAccident::CreateNextSubTask_Reversed(CPed* ped)
     return nullptr;
 }
 
-CTask* CTaskComplexTreatAccident::CreateFirstSubTask_Reversed(CPed* ped)
+// 0x65A8F0
+CTask* CTaskComplexTreatAccident::CreateFirstSubTask(CPed* ped)
 {
     CPed* targetPed = m_pAccident->m_pPed;
 
@@ -97,12 +76,14 @@ CTask* CTaskComplexTreatAccident::CreateFirstSubTask_Reversed(CPed* ped)
         return CreateSubTask(TASK_NONE, ped);
 }
 
-CTask* CTaskComplexTreatAccident::ControlSubTask_Reversed(CPed* ped)
+// 0x658B90
+CTask* CTaskComplexTreatAccident::ControlSubTask(CPed* ped)
 {
     return m_pSubTask;
 }
 
-CTask* CTaskComplexTreatAccident::Clone_Reversed() const {
+// 0x659A90
+CTask* CTaskComplexTreatAccident::Clone() const {
     return new CTaskComplexTreatAccident(m_pAccident);
 }
 

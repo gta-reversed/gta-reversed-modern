@@ -4,11 +4,11 @@
 
 void CEventLeaderEnteredCarAsDriver::InjectHooks()
 {
-    RH_ScopedClass(CEventLeaderEnteredCarAsDriver);
+    RH_ScopedVirtualClass(CEventLeaderEnteredCarAsDriver, 0x85A198, 17);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x48E1C0);
-    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B0EF0);
+    RH_ScopedVMTInstall(AffectsPedGroup, 0x4B0EF0);
 }
 
 // 0x48E1C0
@@ -33,11 +33,6 @@ CEventLeaderEnteredCarAsDriver* CEventLeaderEnteredCarAsDriver::Constructor(CVeh
 // 0x4B0EF0
 bool CEventLeaderEnteredCarAsDriver::AffectsPedGroup(CPedGroup* pedGroup)
 {
-    return CEventLeaderEnteredCarAsDriver::AffectsPedGroup_Reversed(pedGroup);
-}
-
-bool CEventLeaderEnteredCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
-{
     if (m_vehicle && pedGroup->m_bMembersEnterLeadersVehicle) {
         for (int32 i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
             CPed* member = pedGroup->GetMembership().GetMember(i);
@@ -54,4 +49,3 @@ bool CEventLeaderEnteredCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGrou
     }
     return false;
 }
-

@@ -49,7 +49,7 @@ class CWeaponModelInfo;
 struct RwObject;
 
 // originally an abstract class
-class CBaseModelInfo {
+class NOTSA_EXPORT_VTABLE CBaseModelInfo {
 public:
     uint32 m_nKey;
     uint16 m_nRefCount;
@@ -191,15 +191,6 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CAtomicModelInfo* AsAtomicModelInfoPtr_Reversed();
-    CDamageAtomicModelInfo* AsDamageAtomicModelInfoPtr_Reversed();
-    CLodAtomicModelInfo* AsLodAtomicModelInfoPtr_Reversed();
-    CTimeInfo* GetTimeInfo_Reversed();
-    void Init_Reversed();
-    void Shutdown_Reversed();
-    void SetAnimFile_Reversed(const char* filename);
-    void ConvertAnimFileIndex_Reversed();
-    int32 GetAnimFileIndex_Reversed();
 };
 VALIDATE_SIZE(CBaseModelInfo, 0x20);
 

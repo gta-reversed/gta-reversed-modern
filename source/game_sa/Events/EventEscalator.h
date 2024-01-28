@@ -5,7 +5,7 @@
 #include "Event.h"
 
 
-class CEventEscalator : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventEscalator : public CEvent {
 public:
     CEventEscalator() = default;
     ~CEventEscalator() override = default;
@@ -21,6 +21,5 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    bool AffectsPed_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CEventEscalator, 0xC);

@@ -8,7 +8,7 @@
 #include "TaskComplexKillPedOnFoot.h"
 #include "EventKnockOffBike.h"
 
-class CEventPedCollisionWithPlayer : public CEventPedCollisionWithPed {
+class NOTSA_EXPORT_VTABLE CEventPedCollisionWithPlayer : public CEventPedCollisionWithPed {
 public:
     CEventPedCollisionWithPlayer(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, eMoveState moveState, eMoveState victimMoveState);
     ~CEventPedCollisionWithPlayer() override = default;

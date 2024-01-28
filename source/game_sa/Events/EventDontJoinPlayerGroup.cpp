@@ -4,7 +4,7 @@
 
 void CEventDontJoinPlayerGroup::InjectHooks()
 {
-    RH_ScopedClass(CEventDontJoinPlayerGroup);
+    RH_ScopedVirtualClass(CEventDontJoinPlayerGroup, 0x86D0E0, 16);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x6090E0);

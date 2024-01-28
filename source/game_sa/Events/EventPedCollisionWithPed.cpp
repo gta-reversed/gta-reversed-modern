@@ -5,12 +5,12 @@
 
 void CEventPedCollisionWithPed::InjectHooks()
 {
-    RH_ScopedClass(CEventPedCollisionWithPed);
+    RH_ScopedVirtualClass(CEventPedCollisionWithPed, 0x85AC68, 16);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AC990);
-    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4ACAD0);
-    RH_ScopedVirtualInstall(AffectsPed, 0x4ACB10);
+    RH_ScopedVMTInstall(TakesPriorityOver, 0x4ACAD0);
+    RH_ScopedVMTInstall(AffectsPed, 0x4ACB10);
 }
 
 // 0x4AC990
@@ -41,23 +41,13 @@ CEventPedCollisionWithPed* CEventPedCollisionWithPed::Constructor(int16 pieceTyp
 // 0x4ACAD0
 bool CEventPedCollisionWithPed::TakesPriorityOver(const CEvent& refEvent)
 {
-    return CEventPedCollisionWithPed::TakesPriorityOver_Reversed(refEvent);
-}
-
-// 0x4ACB10
-bool CEventPedCollisionWithPed::AffectsPed(CPed* ped)
-{
-    return CEventPedCollisionWithPed::AffectsPed_Reversed(ped);
-}
-
-bool CEventPedCollisionWithPed::TakesPriorityOver_Reversed(const CEvent& refEvent)
-{
     if (CEventHandler::IsTemporaryEvent(refEvent))
         return true;
     return CEvent::TakesPriorityOver(refEvent);
 }
 
-bool CEventPedCollisionWithPed::AffectsPed_Reversed(CPed* ped) {
+// 0x4ACB10
+bool CEventPedCollisionWithPed::AffectsPed(CPed* ped) {
     if (!ped->IsAlive() || ped->m_pAttachedTo || ped->bInVehicle) {
         return false;
     }
@@ -104,4 +94,3 @@ bool CEventPedCollisionWithPed::AffectsPed_Reversed(CPed* ped) {
 
     return true;
 }
-

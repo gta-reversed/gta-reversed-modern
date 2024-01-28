@@ -509,7 +509,7 @@ void CWorld::CallOffChaseForAreaSectorListPeds(CPtrList& ptrList, float x1, floa
             for (auto i = 0; i < colData->m_nNumSpheres; i++) {
                 const auto& sphere    = colData->m_pSpheres[i];
                 const auto  radius    = sphere.m_fRadius;
-                const auto  spherePos = MultiplyMatrixWithVector(mat, sphere.m_vecCenter);
+                const auto  spherePos = mat.TransformPoint(sphere.m_vecCenter);
                 if (   (spherePos.x + radius > x1 && spherePos.x - radius < x2)
                     && (spherePos.y + radius > y1 && spherePos.y - radius < y2)
                 ) {

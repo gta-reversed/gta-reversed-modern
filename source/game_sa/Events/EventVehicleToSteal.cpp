@@ -4,11 +4,11 @@
 
 void CEventVehicleToSteal::InjectHooks()
 {
-    RH_ScopedClass(CEventVehicleToSteal);
+    RH_ScopedVirtualClass(CEventVehicleToSteal, 0x85B210, 16);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AF670);
-    RH_ScopedVirtualInstall(AffectsPed, 0x4AF760);
+    RH_ScopedVMTInstall(AffectsPed, 0x4AF760);
 }
 
 // 0x4AF670
@@ -33,11 +33,6 @@ CEventVehicleToSteal* CEventVehicleToSteal::Constructor(CVehicle* vehicle)
 // 0x4AF760
 bool CEventVehicleToSteal::AffectsPed(CPed* ped)
 {
-    return CEventVehicleToSteal::AffectsPed_Reversed(ped);
-}
-
-bool CEventVehicleToSteal::AffectsPed_Reversed(CPed* ped)
-{
     if (ped->IsAlive() && m_vehicle) {
         auto enterCarAsDriverTask = reinterpret_cast<CTaskComplexEnterCar*>(FindPlayerPed()->GetTaskManager().FindTaskByType(
             TASK_PRIMARY_PRIMARY, TASK_COMPLEX_ENTER_CAR_AS_DRIVER));
@@ -53,4 +48,3 @@ bool CEventVehicleToSteal::AffectsPed_Reversed(CPed* ped)
     }
     return false;
 }
-

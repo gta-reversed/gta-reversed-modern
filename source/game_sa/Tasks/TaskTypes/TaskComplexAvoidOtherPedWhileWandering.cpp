@@ -3,7 +3,7 @@
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 
 void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
-    RH_ScopedClass(CTaskComplexAvoidOtherPedWhileWandering);
+    RH_ScopedVirtualClass(CTaskComplexAvoidOtherPedWhileWandering, 0x86FEC4, 11);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x66A100);
 }

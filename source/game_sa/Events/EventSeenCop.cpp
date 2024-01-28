@@ -4,7 +4,7 @@
 
 void CEventSeenCop::InjectHooks()
 {
-    RH_ScopedClass(CEventSeenCop);
+    RH_ScopedVirtualClass(CEventSeenCop, 0x86CB58, 17);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor1, 0x5FF380);

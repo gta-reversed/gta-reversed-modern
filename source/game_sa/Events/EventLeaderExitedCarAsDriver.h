@@ -6,7 +6,7 @@
 #include "TaskComplexKillPedOnFoot.h"
 #include "TaskComplexArrestPed.h"
 
-class CEventLeaderExitedCarAsDriver : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventLeaderExitedCarAsDriver : public CEventEditableResponse {
 public:
     static void InjectHooks();
 
@@ -23,6 +23,5 @@ public:
 
 private:
     CEventLeaderExitedCarAsDriver* Constructor();
-    bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
 };
 VALIDATE_SIZE(CEventLeaderExitedCarAsDriver, 0x14);

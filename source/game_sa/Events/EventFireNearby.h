@@ -3,7 +3,7 @@
 #include "EventEditableResponse.h"
 
 
-class CEventFireNearby : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventFireNearby : public CEventEditableResponse {
 public:
     CVector m_position;
 

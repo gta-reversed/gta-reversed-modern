@@ -7,7 +7,7 @@ class CTaskComplexEnterCarAsPassengerTimed;
 class CTaskComplexEnterCarAsPassengerWait;
 class CVehicle;
 
-class CTaskComplexEnterCarAsPassengerWait : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexEnterCarAsPassengerWait : public CTaskComplex {
 public:
     static constexpr auto Type = eTaskType::TASK_COMPLEX_ENTER_CAR_AS_PASSENGER_WAIT;
 

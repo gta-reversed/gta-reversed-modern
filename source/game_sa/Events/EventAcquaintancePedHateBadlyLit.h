@@ -27,6 +27,5 @@ public:
     static void InjectHooks();
 
     CEventAcquaintancePedHateBadlyLit* Constructor(CPed* ped, int32 startTimeInMs, const CVector& point);
-    bool AffectsPed_Reversed1(CPed* ped);
 };
 VALIDATE_SIZE(CEventAcquaintancePedHateBadlyLit, 0x28);

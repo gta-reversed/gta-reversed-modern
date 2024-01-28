@@ -5,7 +5,7 @@
 #include "Event.h"
 
 
-class CEventRevived : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventRevived : public CEvent {
 public:
     CEventRevived() = default;
     ~CEventRevived() override = default;

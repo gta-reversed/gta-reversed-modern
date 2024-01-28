@@ -4,7 +4,7 @@
 
 #include "Event.h"
 
-class CEventCarUpsideDown : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventCarUpsideDown : public CEvent {
 public:
     CVehicle* m_vehicle;
 
@@ -25,6 +25,5 @@ private:
     CEventCarUpsideDown* Constructor(CVehicle* vehicle);
     CEventCarUpsideDown* Destructor();
 
-    bool AffectsPed_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CEventCarUpsideDown, 0x10);

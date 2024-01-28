@@ -4,11 +4,11 @@
 
 void CEventPotentialWalkIntoFire::InjectHooks()
 {
-    RH_ScopedClass(CEventPotentialWalkIntoFire);
+    RH_ScopedVirtualClass(CEventPotentialWalkIntoFire, 0x85B6A0, 17);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B1E20);
-    RH_ScopedVirtualInstall(AffectsPed, 0x4B6890);
+    RH_ScopedVMTInstall(AffectsPed, 0x4B6890);
 }
 
 // 0x4B1E20
@@ -35,10 +35,6 @@ CEventPotentialWalkIntoFire* CEventPotentialWalkIntoFire::Constructor(const CVec
 
 // 0x4B6890
 bool CEventPotentialWalkIntoFire::AffectsPed(CPed* ped) {
-    return CEventPotentialWalkIntoFire::AffectsPed_Reversed(ped);
-}
-
-bool CEventPotentialWalkIntoFire::AffectsPed_Reversed(CPed* ped) {
     if (ped->IsAlive() && m_moveState != PEDMOVE_STILL) {
         auto goToTask = static_cast<CTaskSimpleGoTo*>(ped->GetTaskManager().GetSimplestActiveTask());
         if (goToTask && CTask::IsGoToTask(goToTask)) {
@@ -51,4 +47,3 @@ bool CEventPotentialWalkIntoFire::AffectsPed_Reversed(CPed* ped) {
     }
     return false;
 }
-

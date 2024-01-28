@@ -4,11 +4,11 @@
 
 void CEventObjectCollision::InjectHooks()
 {
-    RH_ScopedClass(CEventObjectCollision);
+    RH_ScopedVirtualClass(CEventObjectCollision, 0x85ACA8, 16);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4ACCF0);
-    RH_ScopedVirtualInstall(AffectsPed, 0x4ACE30);
+    RH_ScopedVMTInstall(AffectsPed, 0x4ACE30);
 }
 
 // 0x4ACCF0
@@ -38,11 +38,6 @@ CEventObjectCollision* CEventObjectCollision::Constructor(int16 pieceType, float
 // 0x4ACE30
 bool CEventObjectCollision::AffectsPed(CPed* ped)
 {
-    return CEventObjectCollision::AffectsPed_Reversed(ped);
-}
-
-bool CEventObjectCollision::AffectsPed_Reversed(CPed* ped)
-{
     if (!ped->m_pAttachedTo) {
         if (m_object && !m_object->physicalFlags.bDisableMoveForce) {
             if (!ped->IsPlayer() && ped->IsAlive()) 
@@ -51,4 +46,3 @@ bool CEventObjectCollision::AffectsPed_Reversed(CPed* ped)
     }
     return false;
 }
-

@@ -8,12 +8,12 @@
 
 void CEventVehicleCollision::InjectHooks()
 {
-    RH_ScopedClass(CEventVehicleCollision);
+    RH_ScopedVirtualClass(CEventVehicleCollision, 0x85AC28, 16);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AC840);
-    RH_ScopedVirtualInstall(Clone, 0x4B6BC0);
-    RH_ScopedVirtualInstall(AffectsPed, 0x4B2EE0);
+    RH_ScopedVMTInstall(Clone, 0x4B6BC0);
+    RH_ScopedVMTInstall(AffectsPed, 0x4B2EE0);
 }
 
 CEventVehicleCollision::CEventVehicleCollision(int16 pieceType, float damageIntensity, CVehicle* vehicle, const CVector& collisionImpactVelocity, const CVector& collisionPosition, int8 moveState, int16 evadeType)
@@ -44,21 +44,11 @@ CEventVehicleCollision* CEventVehicleCollision::Constructor(int16 pieceType, flo
 // 0x4B6BC0
 CEvent* CEventVehicleCollision::Clone()
 {
-    return CEventVehicleCollision::Clone_Reversed();
+    return new CEventVehicleCollision(m_pieceType, m_fDamageIntensity, m_vehicle, m_impactNormal, m_impactPos, m_moveState, VEHICLE_EVADE_NONE);
 }
 
 // 0x4B2EE0
 bool CEventVehicleCollision::AffectsPed(CPed* ped)
-{
-    return CEventVehicleCollision::AffectsPed_Reversed(ped);
-}
-
-CEvent* CEventVehicleCollision::Clone_Reversed()
-{
-    return new CEventVehicleCollision(m_pieceType, m_fDamageIntensity, m_vehicle, m_impactNormal, m_impactPos, m_moveState, VEHICLE_EVADE_NONE);
-}
-
-bool CEventVehicleCollision::AffectsPed_Reversed(CPed* ped)
 {
     if (!ped->IsAlive())
         return false;

@@ -3,16 +3,14 @@
 
 
 void CEventEscalator::InjectHooks() {
-    RH_ScopedClass(CEventEscalator);
+    RH_ScopedVirtualClass(CEventEscalator, 0x86CD00, 16);
     RH_ScopedCategory("Events");
 
-    RH_ScopedVirtualInstall(AffectsPed, 0x4B2580);
+    RH_ScopedVMTInstall(AffectsPed, 0x4B2580);
 }
 
 // 0x4B2580
-bool CEventEscalator::AffectsPed(CPed* ped) { return CEventEscalator::AffectsPed_Reversed(ped); }
-
-bool CEventEscalator::AffectsPed_Reversed(CPed* ped) {
+bool CEventEscalator::AffectsPed(CPed* ped) {
     if (ped->IsAlive() && !ped->IsPlayer() && ped->m_pContactEntity) {
         auto modelId = ped->m_pContactEntity->m_nModelIndex;
         if (modelId == ModelIndices::MI_ESCALATORSTEP || modelId == ModelIndices::MI_ESCALATORSTEP8)
@@ -20,4 +18,3 @@ bool CEventEscalator::AffectsPed_Reversed(CPed* ped) {
     }
     return false;
 }
-

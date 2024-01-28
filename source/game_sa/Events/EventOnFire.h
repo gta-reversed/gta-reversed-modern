@@ -4,7 +4,7 @@
 
 #include "Event.h"
 
-class CEventOnFire : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventOnFire : public CEvent {
 public:
     CEventOnFire() = default;
     ~CEventOnFire() override = default;
@@ -19,6 +19,5 @@ public:
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
-    bool AffectsPed_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CEventOnFire, 0xC);

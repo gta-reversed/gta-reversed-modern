@@ -4,7 +4,7 @@
 
 #include "EventEditableResponse.h"
 
-class CEventNewGangMember : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventNewGangMember : public CEvent {
 public:
     CPed* m_member;
 

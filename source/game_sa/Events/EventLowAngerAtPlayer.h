@@ -5,7 +5,7 @@
 #include "EventEditableResponse.h"
 
 
-class CEventLowAngerAtPlayer : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventLowAngerAtPlayer : public CEventEditableResponse {
     CEventLowAngerAtPlayer() = default;
     ~CEventLowAngerAtPlayer() override = default;
 

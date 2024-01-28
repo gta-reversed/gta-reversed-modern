@@ -26,8 +26,5 @@ public:
 
     CEventAcquaintancePed* Constructor(CPed* ped);
 
-    bool AffectsPed_Reversed(CPed* ped);
-    bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
-    bool TakesPriorityOver_Reversed(const CEvent& refEvent);
 };
 VALIDATE_SIZE(CEventAcquaintancePed, 0x18);

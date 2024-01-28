@@ -8,7 +8,7 @@
 #include "TaskComplexArrestPed.h"
 
 
-class CEventLeaderQuitEnteringCarAsDriver : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventLeaderQuitEnteringCarAsDriver : public CEvent {
 public:
     static void InjectHooks();
 
@@ -25,6 +25,5 @@ public:
 
 private:
     CEventLeaderQuitEnteringCarAsDriver* Constructor();
-    bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
 };
 VALIDATE_SIZE(CEventLeaderQuitEnteringCarAsDriver, 0xC);

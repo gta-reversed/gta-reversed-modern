@@ -178,14 +178,6 @@ public:
 private:
     CAEPedSpeechAudioEntity* Constructor();
 
-    void UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos);
-    void AddScriptSayEvent_Reversed(int32, int32, uint8, uint8, uint8);
-    void Terminate_Reversed();
-    void PlayLoadedSound_Reversed();
-    int16 GetAllocatedVoice_Reversed();
-    bool WillPedChatAboutTopic_Reversed(int16 topic);
-    int16 GetPedType_Reversed();
-    bool IsPedFemaleForAudio_Reversed();
 
     // NOTSA
     tSpeechSlot& GetCurrentPedSpeech() {

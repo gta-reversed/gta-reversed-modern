@@ -5,10 +5,10 @@
 #include "IKChainManager_c.h"
 
 void CTaskSimplePlayHandSignalAnim::InjectHooks() {
-    RH_ScopedClass(CTaskSimplePlayHandSignalAnim);
+    RH_ScopedVirtualClass(CTaskSimplePlayHandSignalAnim, 0x86D5B8, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    RH_ScopedInstall(ProcessPed_Reversed, 0x61BDA0);
+    RH_ScopedVMTInstall(ProcessPed, 0x61BDA0);
     RH_ScopedInstall(StartAnim, 0x61AF60);
 }
 
@@ -35,10 +35,8 @@ CTaskSimplePlayHandSignalAnim::~CTaskSimplePlayHandSignalAnim() {
     }
 }
 
+// 0x0
 bool CTaskSimplePlayHandSignalAnim::ProcessPed(CPed* ped) {
-    return CTaskSimplePlayHandSignalAnim::ProcessPed_Reversed(ped);
-}
-bool CTaskSimplePlayHandSignalAnim::ProcessPed_Reversed(CPed* ped) {
     if (g_ikChainMan.IsArmPointing(1, ped) || m_bIsFinished)
         return true;
 
@@ -50,9 +48,7 @@ bool CTaskSimplePlayHandSignalAnim::ProcessPed_Reversed(CPed* ped) {
     }
 
     return m_bIsFinished;
-}
-
-void CTaskSimplePlayHandSignalAnim::StartAnim(CPed* ped) {
+}void CTaskSimplePlayHandSignalAnim::StartAnim(CPed* ped) {
     const AnimationId animId = static_cast<const AnimationId>(CGeneral::GetRandomNumberInRange((int32)ANIM_ID_GSIGN1, (int32)ANIM_ID_GSIGN5 + 1));
 
     // Pointing / weapon logic
