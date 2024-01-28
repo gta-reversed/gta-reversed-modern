@@ -2,6 +2,8 @@
 
 #include "Event.h"
 
+#include "Event.h"
+
 class CEventOnFire : public CEvent {
 public:
     CEventOnFire() = default;

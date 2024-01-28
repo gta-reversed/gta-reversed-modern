@@ -1,6 +1,6 @@
 #include "StdInc.h"
-
 #include "EventSeenPanickedPed.h"
+
 
 void CEventSeenPanickedPed::InjectHooks() {
     RH_ScopedClass(CEventSeenPanickedPed);
@@ -10,7 +10,10 @@ void CEventSeenPanickedPed::InjectHooks() {
     RH_ScopedVirtualInstall(AffectsPed, 0x4B53C0);
 }
 
+// 0x4B2080
 CEventSeenPanickedPed* CEventSeenPanickedPed::Constructor(CPed* ped) { this->CEventSeenPanickedPed::CEventSeenPanickedPed(ped); return this; }
+
+// 0x4B53C0
 bool CEventSeenPanickedPed::AffectsPed(CPed* ped) { return CEventSeenPanickedPed::AffectsPed_Reversed(ped); }
 
 // 0x4B2080
@@ -19,12 +22,10 @@ CEventSeenPanickedPed::CEventSeenPanickedPed(CPed* ped) : CEventEditableResponse
     CEntity::SafeRegisterRef(m_ped);
 }
 
-// 0x4B2130
 CEventSeenPanickedPed::~CEventSeenPanickedPed() {
     CEntity::SafeCleanUpRef(m_ped);
 }
 
-// 0x4B53C0
 bool CEventSeenPanickedPed::AffectsPed_Reversed(CPed* ped) {
     if (!ped->IsPlayer() && m_ped && m_ped != ped) {
         CEvent* currentEvent = m_ped->GetEventHandlerHistory().GetCurrentEvent();
@@ -35,3 +36,4 @@ bool CEventSeenPanickedPed::AffectsPed_Reversed(CPed* ped) {
     }
     return false;
 }
+

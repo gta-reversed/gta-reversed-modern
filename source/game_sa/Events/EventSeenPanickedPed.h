@@ -1,5 +1,8 @@
 #pragma once
 
+#include "EventEditableResponse.h"
+
+
 class CEventSeenPanickedPed : public CEventEditableResponse {
 public:
     CPed* m_ped;

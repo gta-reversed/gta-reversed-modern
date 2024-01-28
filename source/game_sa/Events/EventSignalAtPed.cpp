@@ -1,6 +1,6 @@
 #include "StdInc.h"
-
 #include "EventSignalAtPed.h"
+
 
 CEventSignalAtPed::CEventSignalAtPed(CPed* signalAt, int32 initialPause, bool bPlayAnimAtEnd) :
     m_SignalAt{signalAt},
@@ -24,3 +24,4 @@ bool CEventSignalAtPed::IsValid(CPed* ped) {
     else
         return CEvent::IsValid(nullptr);
 }
+

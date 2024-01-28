@@ -136,7 +136,7 @@ public:
     void     ResetDoorAngle();
     void     LockDoor();
     void     Init();
-    void     DoBurnEffect();
+    void     DoBurnEffect() const;
     void     GetLightingFromCollisionBelow();
     void     ProcessSamSiteBehaviour();
     void     ProcessTrainCrossingBehaviour();

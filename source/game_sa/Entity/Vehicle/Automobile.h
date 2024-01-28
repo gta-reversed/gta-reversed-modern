@@ -12,6 +12,8 @@
 #include "DamageManager.h"
 #include "ColPoint.h"
 
+#include "SurfaceInfo_c.h"
+#include "SurfaceInfos_c.h"
 #include "eSurfaceType.h"
 #include "eCarWheel.h"
 #include "eCarNodes.h"

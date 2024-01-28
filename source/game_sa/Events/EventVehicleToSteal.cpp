@@ -1,9 +1,6 @@
 #include "StdInc.h"
-
 #include "EventVehicleToSteal.h"
 
-#include "TaskComplexEnterCar.h"
-#include "TheScripts.h"
 
 void CEventVehicleToSteal::InjectHooks()
 {
@@ -14,6 +11,7 @@ void CEventVehicleToSteal::InjectHooks()
     RH_ScopedVirtualInstall(AffectsPed, 0x4AF760);
 }
 
+// 0x4AF670
 CEventVehicleToSteal::CEventVehicleToSteal(CVehicle* vehicle)
 {
     m_vehicle = vehicle;
@@ -55,3 +53,4 @@ bool CEventVehicleToSteal::AffectsPed_Reversed(CPed* ped)
     }
     return false;
 }
+

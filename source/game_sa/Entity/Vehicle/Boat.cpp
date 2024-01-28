@@ -687,7 +687,7 @@ void CBoat::PreRender_Reversed() {
             auto tempMat = CMatrix();
             tempMat.Attach(RwFrameGetMatrix(pFlap), false);
             CVector& posCopy = tempMat.GetPosition();
-            auto vecTransformed = Multiply3x3(GetMatrix(), posCopy);
+            auto vecTransformed = GetMatrix().TransformVector(posCopy);
 
             m_boatFlap.Process(this, m_vecBoatMoveForce, m_vecBoatTurnForce, vecTransformed);
             CVector vecAxis;

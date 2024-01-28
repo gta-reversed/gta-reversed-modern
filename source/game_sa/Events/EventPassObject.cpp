@@ -1,6 +1,6 @@
 #include "StdInc.h"
-
 #include "EventPassObject.h"
+
 
 void CEventPassObject::InjectHooks() {
     RH_ScopedClass(CEventPassObject);
@@ -10,7 +10,10 @@ void CEventPassObject::InjectHooks() {
     RH_ScopedVirtualInstall(IsValid, 0x4B1700);
 }
 
+// 0x65DC70
 CEventPassObject* CEventPassObject::Constructor(CPed* giver, bool dontPassObject) { this->CEventPassObject::CEventPassObject(giver, dontPassObject); return this; }
+
+// 0x4B1700
 bool CEventPassObject::IsValid(CPed* ped) { return CEventPassObject::IsValid_Reversed(ped); }
 
 // 0x65DC70
@@ -21,12 +24,10 @@ CEventPassObject::CEventPassObject(CPed* giver, bool dontPassObject) :
     CEntity::SafeRegisterRef(m_giver);
 }
 
-// 0x65DCF0
 CEventPassObject::~CEventPassObject() {
     CEntity::SafeCleanUpRef(m_giver);
 }
 
-// 0x4B1700
 bool CEventPassObject::IsValid_Reversed(CPed* ped) {
     if (ped)
         return ped->IsAlive();
@@ -36,3 +37,4 @@ bool CEventPassObject::IsValid_Reversed(CPed* ped) {
 
     return false;
 }
+

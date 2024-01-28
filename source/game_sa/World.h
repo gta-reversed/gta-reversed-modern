@@ -14,6 +14,8 @@ class CRepeatSector;
 class CPtrListSingleLink;
 class CPed;
 class CVehicle;
+class CPlayerPed;
+class CWanted;
 
 constexpr int32 MAX_PLAYERS = 2;
 constexpr int32 MAX_WORLD_UNITS = 6000;

@@ -2,7 +2,7 @@
 
 #include "Event.h"
 
-class CVehicle;
+#include "Event.h"
 
 class CEventSexyVehicle : public CEvent {
 public:

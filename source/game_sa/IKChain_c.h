@@ -10,6 +10,7 @@
 
 class CEntity;
 class CPed;
+class AnimBlendFrameData;
 
 class IKChain_c : public ListItem_c<IKChain_c> {
 public:

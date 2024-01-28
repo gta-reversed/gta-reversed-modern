@@ -1,6 +1,6 @@
 #include "StdInc.h"
-
 #include "EventCopCarBeingStolen.h"
+
 
 void CEventCopCarBeingStolen::InjectHooks() {
     RH_ScopedClass(CEventCopCarBeingStolen);
@@ -10,7 +10,10 @@ void CEventCopCarBeingStolen::InjectHooks() {
     RH_ScopedVirtualInstall(AffectsPed, 0x4B1860);
 }
 
+// 0x4B1740
 CEventCopCarBeingStolen* CEventCopCarBeingStolen::Constructor(CPed* hijacker, CVehicle* vehicle) { this->CEventCopCarBeingStolen::CEventCopCarBeingStolen(hijacker, vehicle); return this; }
+
+// 0x4B1860
 bool CEventCopCarBeingStolen::AffectsPed(CPed* ped) { return CEventCopCarBeingStolen::AffectsPed_Reversed(ped); }
 
 // 0x4B1740
@@ -21,13 +24,11 @@ CEventCopCarBeingStolen::CEventCopCarBeingStolen(CPed* hijacker, CVehicle* vehic
     CEntity::SafeRegisterRef(m_vehicle);
 }
 
-// 0x4B17F0
 CEventCopCarBeingStolen::~CEventCopCarBeingStolen() {
     CEntity::SafeCleanUpRef(m_hijacker);
     CEntity::SafeCleanUpRef(m_vehicle);
 }
 
-// 0x4B1860
 bool CEventCopCarBeingStolen::AffectsPed_Reversed(CPed* ped) {
     if (m_hijacker && m_vehicle && m_hijacker->IsAlive() && ped->IsAlive() && ped->m_nPedType == PED_TYPE_COP) {
         if (m_vehicle == ped->m_pVehicle && ped->bInVehicle)
@@ -35,3 +36,4 @@ bool CEventCopCarBeingStolen::AffectsPed_Reversed(CPed* ped) {
     }
     return false;
 }
+

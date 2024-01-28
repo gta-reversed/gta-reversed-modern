@@ -31,6 +31,9 @@
 #include "TaskSimpleStandStill.h"
 
 #include "EventCopCarBeingStolen.h"
+#include "EventLeaderQuitEnteringCarAsDriver.h"
+#include "EventLeaderExitedCarAsDriver.h"
+#include "EventLeaderEnteredCarAsDriver.h"
 
 void CTaskComplexEnterCar::InjectHooks() {
     RH_ScopedVirtualClass(CTaskComplexEnterCar, 0x86e6f0, 12);

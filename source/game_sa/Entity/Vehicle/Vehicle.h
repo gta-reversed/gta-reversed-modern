@@ -577,11 +577,11 @@ public:
     void InitWinch(int32 arg0);
     void UpdateWinch();
     void RemoveWinch();
-    void ReleasePickedUpEntityWithWinch();
-    void PickUpEntityWithWinch(CEntity* entity);
-    CEntity* QueryPickedUpEntityWithWinch();
-    float GetRopeHeightForHeli();
-    void SetRopeHeightForHeli(float height);
+    void ReleasePickedUpEntityWithWinch() const;
+    void PickUpEntityWithWinch(CEntity* entity) const;
+    CEntity* QueryPickedUpEntityWithWinch() const;
+    float GetRopeHeightForHeli() const;
+    void SetRopeHeightForHeli(float height) const;
     void RenderDriverAndPassengers();
     void PreRenderDriverAndPassengers();
     float GetPlaneGunsAutoAimAngle();

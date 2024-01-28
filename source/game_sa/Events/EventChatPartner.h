@@ -2,6 +2,8 @@
 
 #include "Event.h"
 
+#include "Event.h"
+
 class CEventChatPartner : public CEvent {
 public:
     bool  m_leadSpeaker;

@@ -257,7 +257,7 @@ bool CTaskSimpleHoldEntity::ProcessPed_Reversed(CPed* ped) {
                 if ((!animAssoc || taskPickUpEntity->m_fMovePedUntilAnimProgress > animAssoc->m_CurrentTime)
                     && (taskPickUpEntity->m_vecPickuposn.x != 0.0f || taskPickUpEntity->m_vecPickuposn.y != 0.0f))
                 {
-                    CVector outPoint = entityToHold->GetMatrix() * taskPickUpEntity->m_vecPickuposn;
+                    CVector outPoint = entityToHold->GetMatrix().TransformPoint(taskPickUpEntity->m_vecPickuposn);
                     outPoint -= ped->GetPosition();
                     ped->m_vecAnimMovingShiftLocal.x += DotProduct(&outPoint, &ped->GetRight()) / CTimer::GetTimeStep() * 0.1f;
                     ped->m_vecAnimMovingShiftLocal.y += DotProduct(&outPoint, &ped->GetForward()) / CTimer::GetTimeStep() * 0.1f ;
@@ -314,7 +314,7 @@ bool CTaskSimpleHoldEntity::SetPedPosition_Reversed(CPed* ped) {
                     m_pEntityToHold->SetPosn(entityToHoldPos);
                 }
                 else {
-                    CVector entityToHoldPos = Multiply3x3(ped->GetMatrix(), m_vecPosition);
+                    CVector entityToHoldPos = ped->GetMatrix().TransformVector(m_vecPosition);
                     RpHAnimHierarchy* pHAnimHierarchy = GetAnimHierarchyFromSkinClump(ped->m_pRwClump);
                     int32 animIndex = RpHAnimIDGetIndex(pHAnimHierarchy, ped->m_apBones[m_nBoneFrameId]->m_nNodeId);
                     RwMatrix* pBoneMatrix = RpHAnimHierarchyGetMatrixArray(pHAnimHierarchy);

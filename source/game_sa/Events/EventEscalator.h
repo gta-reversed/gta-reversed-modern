@@ -2,6 +2,9 @@
 
 #include "Event.h"
 
+#include "Event.h"
+
+
 class CEventEscalator : public CEvent {
 public:
     CEventEscalator() = default;

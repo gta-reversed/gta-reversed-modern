@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Enums/eMoveState.h"
+
 class CPed;
 class CTaskComplexEnterCarAsPassengerTimed;
 class CTaskComplexEnterCarAsPassengerWait;

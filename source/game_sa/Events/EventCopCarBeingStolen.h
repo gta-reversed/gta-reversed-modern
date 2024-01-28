@@ -2,6 +2,9 @@
 
 #include "Event.h"
 
+#include "Event.h"
+
+
 class CEventCopCarBeingStolen : public CEvent {
 public:
     CPed* m_hijacker;

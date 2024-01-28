@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TaskSimple.h"
+#include "Enums/eMoveState.h"
 #include "Vector.h"
 
 class NOTSA_EXPORT_VTABLE CTaskSimpleGoTo : public CTaskSimple {
@@ -45,5 +46,4 @@ private:
         return this;
     }
 };
-
 VALIDATE_SIZE(CTaskSimpleGoTo, 0x20);

@@ -2,6 +2,8 @@
 
 #include "Event.h"
 
+#include "Event.h"
+
 class CEventPassObject : public CEvent {
 public:
     CPed* m_giver;
@@ -27,5 +29,4 @@ private:
 
     bool IsValid_Reversed(CPed* ped);
 };
-
 VALIDATE_SIZE(CEventPassObject, 0x14);

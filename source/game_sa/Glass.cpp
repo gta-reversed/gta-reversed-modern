@@ -105,7 +105,7 @@ void CGlass::CarWindscreenShatters(CVehicle* vehicle) {
     auto& vehMat = (CMatrix&)vehicle->GetMatrix();
 
     // Grab normal and transform it to world space
-    const auto normal = Multiply3x3(
+    const auto normal = Multiply3x3_MV(
         vehMat,
         colModel->m_pColData->m_pTrianglePlanes[glassTriIdx].GetNormal()
     );
@@ -561,7 +561,7 @@ void CGlass::BreakGlassPhysically(CVector point, float radius) {
         // Test if point touches any of the model's triangles
         {
             const CColSphere sphere{
-                Multiply3x3(object->GetMatrix(), point - objPos),
+                object->GetMatrix().TransformVector(point - objPos),
                 radius
             };
             CCollision::CalculateTrianglePlanes(colModel);

@@ -413,7 +413,7 @@ void CObject::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bo
                         auto tempMat = CMatrix();
                         auto* cm = CEntity::GetColModel();
                         auto vecSize = cm->GetBoundingBox().GetSize();
-                        auto vecTransformed = *m_matrix * vecSize;
+                        auto vecTransformed = m_matrix->TransformPoint(vecSize);
 
                         auto& vecCollidedPos = colPhysical->GetPosition();
                         if (vecTransformed.z < vecCollidedPos.z)
@@ -424,7 +424,7 @@ void CObject::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bo
                         else
                         {
                             Invert(colPhysical->GetMatrix(), tempMat);
-                            if ((tempMat * vecTransformed).z < 0.0F)
+                            if ((tempMat.TransformPoint(vecTransformed)).z < 0.0F)
                             {
                                 bCollidedEntityCollisionIgnored = true;
                                 m_pEntityIgnoredCollision = colPhysical;
@@ -475,7 +475,7 @@ uint8 CObject::SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionB
     if (!physicalFlags.bDisableMoveForce) {
         if (physicalFlags.bInfiniteMass) {
             auto cm = CEntity::GetColModel();
-            auto vecMin = Multiply3x3(GetMatrix(), cm->GetBoundingBox().m_vecMin);
+            auto vecMin = GetMatrix().TransformVector(cm->GetBoundingBox().m_vecMin);
             auto vecSpeed = CPhysical::GetSpeed(vecMin);
             const auto fMove = vecSpeed.SquaredMagnitude() * sq(CTimer::GetTimeStep());
             if (fMove >= 0.0225F) // std::pow(0.15F, 2.0F)
@@ -491,11 +491,11 @@ uint8 CObject::SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionB
             auto* cm = GetModelInfo()->GetColModel();
 
             auto vecMin = CVector(0.0F, 0.0F, cm->GetBoundingBox().m_vecMin.z);
-            vecMin = Multiply3x3(GetMatrix(), vecMin);
+            vecMin = GetMatrix().TransformVector(vecMin);
             vecMin = CPhysical::GetSpeed(vecMin);
 
             auto vecMax = CVector(0.0F, 0.0F, cm->GetBoundingBox().m_vecMax.z);
-            vecMax = Multiply3x3(GetMatrix(), vecMax);
+            vecMax = GetMatrix().TransformVector(vecMax);
             vecMax = CPhysical::GetSpeed(vecMax);
 
             auto& vecUsed = vecMin.SquaredMagnitude() >= vecMax.SquaredMagnitude() ? vecMin : vecMax;
@@ -880,7 +880,7 @@ void CObject::Init() {
 }
 
 // 0x59FB50
-void CObject::DoBurnEffect() {
+void CObject::DoBurnEffect() const {
     const auto& box = GetModelInfo()->GetColModel()->GetBoundingBox();
     const auto& vecSize = box.GetSize();
     const auto nUsedSize = static_cast<int32>(vecSize.x * vecSize.y * vecSize.z * m_fBurnDamage / 20.0F);
@@ -891,7 +891,7 @@ void CObject::DoBurnEffect() {
         const auto fRandX = CGeneral::GetRandomNumberInRange(box.m_vecMin.x, box.m_vecMax.x);
         const auto fRandY = CGeneral::GetRandomNumberInRange(box.m_vecMin.y, box.m_vecMax.y);
         const auto fRandZ = CGeneral::GetRandomNumberInRange(box.m_vecMin.z, box.m_vecMax.z);
-        auto vecParticlePos = *m_matrix * CVector(fRandX, fRandY, fRandZ);
+        auto vecParticlePos = m_matrix->TransformPoint(CVector(fRandX, fRandY, fRandZ));
 
         // auto smokePart = FxPrtMult_c() Originally overwritten right after
         auto smokePart = FxPrtMult_c(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.4F);
@@ -968,7 +968,7 @@ void CObject::ProcessSamSiteBehaviour() {
                 return;
 
             auto vecRocketDir = m_matrix->GetForward() + m_matrix->GetUp();
-            const auto vecSrcPos = *m_matrix * CVector(0.0F, 2.0F, 4.0F);
+            const auto vecSrcPos = m_matrix->TransformPoint(CVector(0.0F, 2.0F, 4.0F));
             CProjectileInfo::AddProjectile(this, eWeaponType::WEAPON_ROCKET_HS, vecSrcPos, 0.0F, &vecRocketDir, targetEntity);
             return;
         }
@@ -1166,7 +1166,7 @@ void CObject::ObjectDamage(float damage, const CVector* fxOrigin, const CVector*
         return;
     }
 
-    auto vecPoint = *m_matrix * m_pObjectInfo->m_vFxOffset;
+    auto vecPoint = m_matrix->TransformPoint(m_pObjectInfo->m_vFxOffset);
     vecPoint += GetPosition();
     auto* fxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, vecPoint, nullptr, false);
     if (fxSystem)
@@ -1195,7 +1195,7 @@ void CObject::Explode() {
     }
 
     if (m_pObjectInfo->m_nFxType == eObjectFxType::PLAY_ON_DESTROYED) {
-        auto vecPoint = *m_matrix * m_pObjectInfo->m_vFxOffset;
+        auto vecPoint = m_matrix->TransformPoint(m_pObjectInfo->m_vFxOffset);
         vecPoint += GetPosition();
         auto* fxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, &vecPoint, nullptr, false);
         if (fxSystem)
@@ -1313,7 +1313,7 @@ void CObject::GrabObjectToCarryWithRope(CPhysical* attachTo) {
 
     auto vecRopePoint = CVector();
     vecRopePoint.z = CRopes::FindPickupHeight(attachTo);
-    vecRopePoint *= *attachTo->m_matrix * vecRopePoint;
+    vecRopePoint *= attachTo->m_matrix->TransformPoint(vecRopePoint);
 
     rope.m_pRopeAttachObject->SetPosn(vecRopePoint);
     rope.m_pRopeAttachObject->m_bUsesCollision = false;
@@ -1402,16 +1402,16 @@ void CObject::ProcessControlLogic() {
         }
 
         if (m_nModelIndex == ModelIndices::MI_MAGNOCRANE) {
-            auto vecRopePoint = *m_matrix * CVector(0.0F, 36.64F, -1.69F);
+            auto vecRopePoint = m_matrix->TransformPoint(CVector(0.0F, 36.64F, -1.69F));
             vecRopePoint.z += fRopeLengthChange;
             CRopes::RegisterRope((uint32)this, static_cast<uint32>(eRopeType::CRANE_MAGNO), vecRopePoint, false, nSegments, 1u, this, 20'000u);
         } else if (m_nModelIndex == ModelIndices::MI_CRANETROLLEY) {
             const auto nRopeType = static_cast<const uint32>(GetPosition().x >= 0 ? eRopeType::CRANE_TROLLEY : eRopeType::WRECKING_BALL);
-            auto vecRopePoint = *m_matrix * CVector(0.0F, 0.0F, 0.0F);
+            auto vecRopePoint = m_matrix->TransformPoint(CVector(0.0F, 0.0F, 0.0F));
             vecRopePoint.z += fRopeLengthChange;
             CRopes::RegisterRope((uint32)this, nRopeType, vecRopePoint, false, nSegments, 1u, this, 20'000u);
         } else {
-            auto vecRopePoint = *m_matrix * CVector(0.0F, 0.0F, 59.0F);
+            auto vecRopePoint = m_matrix->TransformPoint(CVector(0.0F, 0.0F, 59.0F));
             vecRopePoint.z += fRopeLengthChange;
             CRopes::RegisterRope((uint32)this, static_cast<uint32>(eRopeType::QUARRY_CRANE_ARM), vecRopePoint, false, nSegments, 1u, this, 20'000u);
         }
