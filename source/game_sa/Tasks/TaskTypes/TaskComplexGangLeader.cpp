@@ -219,9 +219,9 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
     }
 
     // If we're wandering and the wander time is out of time...
-    if (const auto wander = CTask::DynCast<CTaskComplexWander>(m_pSubTask)) { // 0x66241F
+    if (const auto tWander = CTask::DynCast<CTaskComplexWander>(m_pSubTask)) { // 0x66241F
         if (m_wanderTimer.IsOutOfTime()) {
-            if (wander->GetDistSqOfClosestPathNodeToPed(ped) <= 2.f) {
+            if (tWander->GetDistSqOfClosestPathNodeToPed(ped) <= 2.f) {
                 m_gang->GetIntelligence().SetDefaultTaskAllocatorType(ePedGroupDefaultTaskAllocatorType::RANDOM);
                 // Above call causes this task to be flushed (deleted), and changes our vfptr to `CTaskComplex`'s.
                 // If we return non-null here, `CTaskManager::ParentsControlChildren` will be called, and calls our
