@@ -288,4 +288,19 @@ concept is_any_of_type_v = (std::same_as<T, Ts> || ...);
 template<typename T>
 inline constexpr bool is_standard_integer = std::is_integral_v<T> && !is_any_of_type_v<T, bool, char, wchar_t, char8_t, char16_t, char32_t>;
 
+// Find value in a range then return a pointer of it.
+template<rng::input_range R, class T, class Proj = std::identity>
+constexpr T* find_or_nullptr(R&& r, const T& value, Proj proj = {}) {
+    const auto fnd = rng::find(r, value, proj);
+    return fnd != r.end() ? &(*fnd) : nullptr;
+}
+
+
+// Find with a predicate in a range then return a pointer of it.
+template<typename T, rng::input_range R, class Proj = std::identity,
+    std::indirect_unary_predicate<std::projected<rng::iterator_t<R>, Proj>> Pred>
+constexpr T* find_if_or_nullptr(R&& r, Pred pred, Proj proj = {}) {
+    const auto fnd = rng::find_if(r, pred, proj);
+    return fnd != r.end() ? (T*)&(*fnd) : nullptr;
+}
 };

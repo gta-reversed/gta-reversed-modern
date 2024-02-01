@@ -485,6 +485,11 @@
 #include "app/app.h"
 #include <RealTimeShadowManager.h>
 
+#include "Conversations.h"
+#include "ConversationForPed.h"
+#include "ConversationNode.h"
+#include "PedToPlayerConversations.h"
+
 #include "extensions/utility.hpp"
 #include "extensions/CommandLine.h"
 #include <RenderBuffer.hpp>
@@ -1344,6 +1349,13 @@ void InjectHooksMain() {
         CAnimManager::InjectHooks();
     };
 
+    const auto Conversations = []() {
+        CConversations::InjectHooks();
+        CConversationForPed::InjectHooks();
+        CConversationNode::InjectHooks();
+        CPedToPlayerConversations::InjectHooks();
+    };
+
     Animation();
     App();
     Audio();
@@ -1353,6 +1365,7 @@ void InjectHooksMain() {
     Vehicle();
     Interior();
     Scripts();
+    Conversations();
 
     if (CommandLine::unhookAll)
         ReversibleHooks::GetRootCategory().SetAllItemsEnabled(false);

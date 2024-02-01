@@ -41,6 +41,11 @@ enum ePedType : uint32 {
     PED_TYPE_COUNT // 32
 };
 
+// 0x43A6A0
+inline constexpr bool IsPedTypeFemale(ePedType ptype) {
+    return ptype == PED_TYPE_CIVFEMALE || ptype == PED_TYPE_PROSTITUTE;
+}
+
 static constexpr auto s_GangPedTypes = std::to_array({ // TODO: Get rid of this (Use `GetAllGangPedTypes()`)
     PED_TYPE_GANG1,
     PED_TYPE_GANG2,
@@ -56,15 +61,6 @@ static constexpr auto s_GangPedTypes = std::to_array({ // TODO: Get rid of this 
 
 static constexpr bool IsPedTypeGang(ePedType ptype) {
     return std::ranges::find(s_GangPedTypes, ptype) != s_GangPedTypes.end();
-}
-
-inline bool IsPedTypeFemale(ePedType type) {
-    switch (type) {
-    case PED_TYPE_PROSTITUTE:
-    case PED_TYPE_CIVFEMALE:
-        return true;
-    }
-    return false;
 }
 
 static constexpr auto GetAllGangPedTypes() {

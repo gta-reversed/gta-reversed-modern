@@ -27,6 +27,7 @@
 #include "TaskSimpleStandStill.h"
 #include "TaskComplexFacial.h"
 #include "WeaponInfo.h"
+#include "PedToPlayerConversations.h"
 
 void CPed::InjectHooks() {
     RH_ScopedVirtualClass(CPed, 0x86C358, 26);
@@ -263,7 +264,7 @@ CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
     m_nWeaponAccuracy = 60;
     m_nLastWeaponDamage = -1;
     m_pLastEntityDamage = nullptr;
-    field_768 = 0;
+    m_nLastDamageTime = 0;
     m_pAttachedTo = nullptr;
     m_nTurretAmmo = 0;
     m_roadRageWith = nullptr;

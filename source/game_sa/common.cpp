@@ -23,7 +23,7 @@ void InjectCommonHooks() {
     RH_ScopedNamespaceName("Common");
     RH_ScopedCategory("Common");
 
-    RH_ScopedGlobalInstall(MakeUpperCase, 0x7186E0);
+    RH_ScopedGlobalOverloadedInstall(MakeUpperCase, "OG", 0x7186E0, char* (*)(char*, const char*));
     RH_ScopedGlobalInstall(AsciiToGxtChar, 0x718600);
     RH_ScopedGlobalInstall(WriteRaster, 0x005A4150);
     RH_ScopedGlobalOverloadedInstall(CalcScreenCoors, "VVff", 0x71DA00, bool(*)(const CVector&, CVector*, float*, float*), { .reversed = false });
@@ -57,6 +57,13 @@ char* MakeUpperCase(char* dest, const char* src) {
         *dest = std::toupper(*src);
     *dest = '\0';
     return dest;
+}
+
+// NOTSA
+char* MakeUpperCase(char* str) {
+    for (; *str; str++)
+        *str = std::toupper(*str);
+    return str;
 }
 
 // NOTSA

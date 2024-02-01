@@ -88,6 +88,11 @@ namespace CGeneral { // More like `Math` (Or `Meth`, given how bad the code is, 
     bool RandomBool(float chanceOfTrue);
 
     /*!
+     * @returns True `chanceOfTrue` % of the time, false othertimes. Valid value are [0, 100)
+     */
+    bool RandomBool(uint32 chanceOfTrue);
+
+    /*!
      * @returns True 50% of the time
      */
     bool DoCoinFlip();

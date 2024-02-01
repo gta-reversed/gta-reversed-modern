@@ -170,6 +170,10 @@ bool CGeneral::RandomBool(float chanceOfTrue) {
     return CGeneral::GetRandomNumberInRange(0.f, 100.f) <= chanceOfTrue;
 }
 
+bool CGeneral::RandomBool(uint32 chanceOfTrue) {
+    return CGeneral::RandomBool((float)chanceOfTrue);
+}
+
 /*!
 * @return true/false with 50/50 change
 * @addr notsa

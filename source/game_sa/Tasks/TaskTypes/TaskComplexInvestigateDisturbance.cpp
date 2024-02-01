@@ -86,11 +86,11 @@ CTask* CTaskComplexInvestigateDisturbance::CreateFirstSubTask(CPed* ped) {
     if (const auto event = ped->GetIntelligence()->GetEventHandler().GetHistory().GetCurrentEvent()) {
         switch (event->GetEventType()) {
         case EVENT_SOUND_QUIET: {
-            ped->Say(CGeneral::RandomBool(20) ? 204 : 202);
+            ped->Say(CGeneral::RandomBool(20.0f) ? 204 : 202);
             break;
         }
         case EVENT_ACQUAINTANCE_PED_HATE_BADLY_LIT: {
-            ped->Say(CGeneral::RandomBool(20) ? 204 : 203);
+            ped->Say(CGeneral::RandomBool(20.0f) ? 204 : 203);
             break;
         }
         }

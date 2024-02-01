@@ -240,7 +240,8 @@ inline constexpr uint32 MakeFourCC(const char fourcc[4]) {
            fourcc[3] << 24;
 }
 
-char* MakeUpperCase(char *dest, const char *src);
+char* MakeUpperCase(char* dest, const char* src);
+char* MakeUpperCase(char* str);
 bool EndsWith(const char* str, const char* with, bool caseSensitive = true);
 
 RpAtomic* RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data);

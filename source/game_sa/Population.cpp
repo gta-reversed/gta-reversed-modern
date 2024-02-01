@@ -879,7 +879,7 @@ CPed* CPopulation::AddPed(ePedType pedType, eModelID modelIndex, const CVector& 
 
             if (CCheat::IsActive(CHEAT_NINJA_THEME) && pedType == PED_TYPE_GANG7) {
                 GiveAndSetPedWeapon(ped, WEAPON_KATANA);
-            } else if (CGeneral::RandomBool(33)) { // Give random weapon
+            } else if (CGeneral::RandomBool(33.0f)) { // Give random weapon (possibly P(1/3)?)
                 if (const auto wtype = CGangs::Gang[GetGangOfPedType(pedType)].GetRandomWeapon(); wtype != WEAPON_UNARMED) {
                     GiveAndSetPedWeapon(ped, wtype);
                 }
@@ -1685,7 +1685,7 @@ int32 CPopulation::GeneratePedsAtAttractors(
                 continue;
             }
 
-            const auto usePoliceModel = bInPoliceStation && CGeneral::RandomBool(70) && PedMICanBeCreatedAtThisAttractor(CStreaming::GetDefaultCopModel(), attractor->m_szScriptName);
+            const auto usePoliceModel = bInPoliceStation && CGeneral::RandomBool(70.0f) && PedMICanBeCreatedAtThisAttractor(CStreaming::GetDefaultCopModel(), attractor->m_szScriptName);
 
             const auto model = usePoliceModel
                 ? CStreaming::GetDefaultCopModel()
