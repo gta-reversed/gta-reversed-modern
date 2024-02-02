@@ -42,7 +42,9 @@ CEvent* CEventGroup::Add(CEvent* event, bool bValid) {
             const auto bInformGroup            = eventResp->ComputeResponseTaskOfType(m_pPed, TASK_SIMPLE_INFORM_GROUP);
             const auto bInformRespectedFriends = eventResp->ComputeResponseTaskOfType(m_pPed, TASK_SIMPLE_INFORM_RESPECTED_FRIENDS);
             const auto bTriggerLookAt          = eventResp->ComputeResponseTaskOfType(m_pPed, TASK_SIMPLE_LOOK_AT_ENTITY_OR_COORD);
+
             eventResp->ComputeResponseTaskType(m_pPed, false);
+
             const auto bAddToEventGroup        = eventResp->WillRespond() || (bIsEventDamage && eventResp->m_bAddToEventGroup);
 
             if (!event->AffectsPed(m_pPed)) {
@@ -128,9 +130,7 @@ void CEventGroup::TickEvents() {
 
 // 0x4AB6A0
 bool CEventGroup::HasEvent(CEvent* needle) {
-    return rng::any_of(GetEvents(), [needle](CEvent* e){
-        return e == needle;
-    });
+    return notsa::contains(GetEvents(), needle);
 }
 
 // 0x4AB5A0
@@ -163,7 +163,7 @@ void CEventGroup::Reorganise() {
     m_count = 0;
     for (size_t i = 0; i < cnt; i++) { // Make array contiguous and re-count number of events
         if (const auto e = old[i]) {
-            m_events[m_count++] = old[i];
+            m_events[m_count++] = e;
         }
     }
 }

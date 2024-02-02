@@ -158,7 +158,7 @@ void CEventEditableResponse::ComputeResponseTaskType(CPed* ped, bool bDecisionMa
         TASK_SIMPLE_INFORM_RESPECTED_FRIENDS,
         TASK_SIMPLE_INFORM_GROUP,
         TASK_SIMPLE_LOOK_AT_ENTITY_OR_COORD,
-        -1,
+        TASK_INVALID,
         bDecisionMakerTypeInGroup,
         m_taskId,
         m_FacialExpressionType
@@ -191,7 +191,7 @@ void CEventEditableResponse::ComputeResponseTaskType(CPedGroup* pedGroup) {
             TASK_SIMPLE_INFORM_GROUP,
             TASK_SIMPLE_INFORM_RESPECTED_FRIENDS,
             TASK_SIMPLE_LOOK_AT_ENTITY_OR_COORD,
-            -1
+            TASK_INVALID
         );
     } else {
         m_taskId = TASK_NONE;
@@ -207,7 +207,7 @@ void CEventEditableResponse::ComputeResponseTaskType(CPedGroup* pedGroup) {
                 TASK_SIMPLE_INFORM_GROUP,
                 TASK_SIMPLE_INFORM_RESPECTED_FRIENDS,
                 TASK_SIMPLE_LOOK_AT_ENTITY_OR_COORD,
-                -1
+                TASK_INVALID
             );
         }
     }
@@ -215,8 +215,8 @@ void CEventEditableResponse::ComputeResponseTaskType(CPedGroup* pedGroup) {
 
 // 0x4B5730
 bool CEventEditableResponse::ComputeResponseTaskOfType(CPed* ped, int32 taskId) {
-    int16 outTaskId = -1;
-    int16 facialTaskType = -1;
+    int16 outTaskId = TASK_INVALID;
+    int16 facialTaskType = TASK_INVALID;
     int32 eventSourceType = CEventSource::ComputeEventSourceType(*this, *ped);
     CDecisionMakerTypes::GetInstance()->MakeDecision(
         ped,
