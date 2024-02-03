@@ -27,8 +27,8 @@ public:
     CVector GetLookAtOffset(CPed* ped);
     void AbortLookAt(CPed* ped, uint32 blendOutTime = 250u);
     bool CanAcceptLookAt(CPed* ped);
-    void LookAt(Const char* purpose, CPed* ped, CEntity* targetEntity, int32 time, ePedBones pedBoneId, CVector* posn, bool useTorso, float fSpeed, int32 blendTime, int32 priority, bool bForceLooking);
-    void PointArm(Const char* purpose, int32 arm, CPed* ped, CEntity* target, ePedBones pedBoneId, CVector* posn, float speed, int32 blendTime, float dist);
+    void LookAt(Const char* purpose, CPed* ped, CEntity* targetEntity, int32 time, ePedBones pedBoneId, const CVector* posn, bool useTorso, float fSpeed, int32 blendTime, int32 priority, bool bForceLooking);
+    void PointArm(Const char* purpose, int32 arm, CPed* ped, CEntity* target, ePedBones pedBoneId, const CVector* posn, float speed, int32 blendTime, float dist);
     static bool __stdcall IsArmPointing(int32 slot, CPed* ped);
     static void __stdcall AbortPointArm(int32 slot, CPed* ped, int32 a3);
     bool IsFacingTarget(CPed* ped, int32) const;

@@ -204,7 +204,7 @@ bool IKChainManager_c::CanAcceptLookAt(CPed* ped) {
 }
 
 // 0x618970
-void IKChainManager_c::LookAt(Const char* purpose, CPed* ped, CEntity* targetEntity, int32 time, ePedBones pedBoneId, CVector* posn, bool useTorso, float fSpeed, int32 blendTime,
+void IKChainManager_c::LookAt(Const char* purpose, CPed* ped, CEntity* targetEntity, int32 time, ePedBones pedBoneId, const CVector* posn, bool useTorso, float fSpeed, int32 blendTime,
                               int32 priority, bool bForceLooking) {
     if (!bForceLooking && !CanAcceptLookAt(ped)) { // byte_C1542C
         return;
@@ -255,7 +255,7 @@ bool IKChainManager_c::IsFacingTarget(CPed* ped, int32 slot) const {
 }
 
 // 0x618B60
-void IKChainManager_c::PointArm(Const char* purpose, int32 arm, CPed* ped, CEntity* target, ePedBones pedBoneId, CVector* posn, float speed, int32 blendTime, float dist) {
+void IKChainManager_c::PointArm(Const char* purpose, int32 arm, CPed* ped, CEntity* target, ePedBones pedBoneId, const CVector* posn, float speed, int32 blendTime, float dist) {
     assert(arm <= 1); // I have a theory: that is, that `arm` is a bool, like `bool isLeftArm`. Let's test it!
 
     if (!CanAccept(ped, dist)) {
