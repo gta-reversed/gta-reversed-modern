@@ -3,6 +3,7 @@
 #include <charconv>
 #include <initializer_list>
 #include <Vector.h>
+#include <unordered_map>
 #include "Base.h"
 
 namespace notsa {
@@ -17,6 +18,71 @@ namespace notsa {
 //    TChar m_chars[N]{};
 //};
 namespace rng = std::ranges;
+
+namespace detail {
+template<typename K, typename V, size_t N>
+struct Mapping {
+    using value_type     = std::pair<const K, const V>;
+    using storage_type   = std::array<value_type, N>;
+    using iterator       = storage_type::iterator;
+    using const_iterator = storage_type::const_iterator;
+
+    constexpr Mapping(value_type (&&m)[N]) : 
+        m_mapping{std::to_array(m)} 
+    {
+    }
+
+    constexpr const_iterator find(auto&& needle) const { // Using auto&& instead of K&& to allow transparent lookup
+        for (auto it = begin(); it != end(); it++) {
+            if (it->first == needle) {
+                return it;
+            }
+        }
+        return end();
+    }
+        
+    constexpr auto begin() const { return m_mapping.begin(); }
+    constexpr auto end() const { return m_mapping.end(); }
+
+protected:
+    storage_type m_mapping;
+};
+};
+
+/*!
+* @brief Create a mapping of k-v pairs. Dynamically chooses between an unordered_map and a custom fixed-size mapping.
+*/
+template<typename K, typename V, size_t N>
+auto make_mapping(std::pair<const K, const V> (&&m)[N]) {
+    if constexpr (N > 10) { // After 10 or so elements unordered_map becomes faster
+        return std::unordered_map<K, V>{std::begin(m), std::end(m)};
+    } else { // Otherwise the stack allocated one is faster
+        return detail::Mapping<K, V, N>{std::move(m)};
+    }
+}
+
+/*!
+* @brief Helper function to get kv-mapping value from a key.
+* @brief Unlike `.find()`, this returns the value directly
+*/
+constexpr inline auto find_value_or(auto&& mapping, auto&& needle, auto&& defval) {
+    const auto it = mapping.find(needle);
+    return it != mapping.end()
+        ? it->second
+        : defval;
+}
+
+/*!
+* @brief Helper function to get kv-mapping value from a key.
+* @brief Unlike `.find()`, this returns the value directly, or asserts if the key is not found.
+*/
+constexpr inline auto find_value(auto&& mapping, auto&& needle, auto&& defval) {
+    const auto it = mapping.find(needle);
+    if (it != mapping.end()) {
+        return it->second;
+    }
+    NOTSA_UNREACHABLE("Needle not in the mapping!");
+}
 
 template<rng::input_range R>
 ptrdiff_t indexof(R&& r, const rng::range_value_t<R>& v, ptrdiff_t defaultIdx = -1) {
