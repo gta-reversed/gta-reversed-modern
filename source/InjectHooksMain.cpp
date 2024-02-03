@@ -268,6 +268,7 @@
 #include "TaskSimpleSwim.h"
 #include "TaskComplexWalkRoundObject.h"
 #include "TaskSimplePause.h"
+#include "TaskSimpleHurtPedWithCar.h"
 #include "TaskComplexPassObject.h"
 #include "TaskComplexEnterCarAsPassenger.h"
 #include "TaskComplexEnterCarAsDriver.h"
@@ -1037,7 +1038,7 @@ void InjectHooksMain() {
         CTaskSimpleHitFromLeft::InjectHooks();
         CTaskSimpleHitFromRight::InjectHooks();
         CTaskSimpleHitWall::InjectHooks();
-        // CTaskSimpleHurtPedWithCar::InjectHooks();
+        CTaskSimpleHurtPedWithCar::InjectHooks();
         // CTaskSimpleKillPedWithCar::InjectHooks();
         CTaskSimpleLookAbout::InjectHooks();
         // CTaskSimpleOnEscalator::InjectHooks();
