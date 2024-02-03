@@ -13,7 +13,7 @@ CEventSexyPed::CEventSexyPed(CPed* ped) : CEventEditableResponse() {
 CEventSexyPed::CEventSexyPed(CPed* sexyPed, eTaskType taskType) :
     CEventSexyPed{sexyPed}
 {
-    m_taskId = (int16)taskType;
+    m_TaskId = taskType;
 }
 
 // 0x4AEEA0

@@ -549,9 +549,9 @@ void CEventHandler::ComputeAttractorResponse(CEventAttractor* e, CTask* tactive,
     if (e->GetEventType() == EVENT_ATTRACTOR && !e->m_entity) {
         return;
     }
-    if (e->m_taskId == TASK_NONE) {
+    if (e->m_TaskId == TASK_NONE) {
         m_EventResponseTask = nullptr;
-    } else if (e->m_taskId == TASK_COMPLEX_USE_EFFECT) {
+    } else if (e->m_TaskId == TASK_COMPLEX_USE_EFFECT) {
         if (GetPedAttractorManager()->HasEmptySlot(e->m_2dEffect, e->m_entity)) { // inverted
             m_EventResponseTask = new CTaskComplexUseEffect{e->m_2dEffect, e->m_entity};
         }
@@ -1112,7 +1112,7 @@ void CEventHandler::ComputeDangerResponse(CEventDanger* e, CTask* tactive, CTask
         if (!e->m_dangerFrom) {
             return nullptr;
         }
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_COMPLEX_CAR_DRIVE_MISSION_FLEE_SCENE: {
             if (m_Ped->bInVehicle) {
                 if (!m_Ped->m_pVehicle->IsDriver(m_Ped)) {
@@ -1175,7 +1175,7 @@ void CEventHandler::ComputeDeadPedResponse(CEventDeadPed* e, CTask* tactive, CTa
             );
             return nullptr;
         }
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_COMPLEX_SMART_FLEE_ENTITY:
             return new CTaskComplexSmartFleeEntity{e->GetDeadPed(), true, 100'000.f};
         case TASK_COMPLEX_INVESTIGATE_DEAD_PED:
@@ -1257,7 +1257,7 @@ void CEventHandler::ComputeDraggedOutCarResponse(CEventDraggedOutCar* e, CTask* 
 
             return CreateFinalSeq(s);
         };
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_NONE: // 0x4BCD68
             return CreateFinalSeq(nullptr); // Nothing to do
         case TASK_SIMPLE_HIT_HEAD: { // 0x4BCD74
@@ -1294,7 +1294,7 @@ void CEventHandler::ComputeDraggedOutCarResponse(CEventDraggedOutCar* e, CTask* 
 // 0x4BBFB0
 void CEventHandler::ComputeFireNearbyResponse(CEventFireNearby* e, CTask* tactive, CTask* tsimplest) {
     m_EventResponseTask = [&]() -> CTask* {
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_COMPLEX_EXTINGUISH_FIRES:
             return new CTaskComplexExtinguishFires{};
         }
@@ -1312,7 +1312,7 @@ void CEventHandler::ComputeGotKnockedOverByCarResponse(CEventGotKnockedOverByCar
         if (!drvr) {
             return nullptr;
         }
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_COMPLEX_KILL_PED_ON_FOOT: { // 0x4C346E
             if (IsKillTaskAppropriate(m_Ped, drvr, *e)) {
                 return new CTaskComplexKillPedOnFoot{drvr};
@@ -1350,11 +1350,11 @@ void CEventHandler::ComputeGunAimedAtResponse(CEventGunAimedAt* e, CTask* tactiv
 
         if (m_Ped->IsCreatedBy(PED_GAME) && !m_Ped->bInVehicle && !m_Ped->GetActiveWeapon().IsTypeMelee()) {
             if (e->m_AimedBy && e->m_AimedBy->IsPlayer() && !m_Ped->GetIntelligence()->IsFriendlyWith(*e->m_AimedBy)) {
-                e->m_taskId = TASK_COMPLEX_KILL_PED_ON_FOOT; // 0x4C296F
+                e->m_TaskId = TASK_COMPLEX_KILL_PED_ON_FOOT; // 0x4C296F
             }
         }
 
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR: // 0x4C2A7A
             return new CTaskComplexUseClosestFreeScriptedAttractor{};
         case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR_RUN:
@@ -1414,7 +1414,7 @@ void CEventHandler::ComputeGunAimedAtResponse(CEventGunAimedAt* e, CTask* tactiv
 // 0x4BAC10
 void CEventHandler::ComputeHighAngerAtPlayerResponse(CEventHighAngerAtPlayer* e, CTask* tactive, CTask* tsimplest) {
     m_EventResponseTask = [&]() -> CTask* {
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_COMPLEX_KILL_PED_ON_FOOT:
             return new CTaskComplexKillPedOnFoot{FindPlayerPed()};
         case TASK_COMPLEX_SMART_FLEE_ENTITY:
@@ -1447,7 +1447,7 @@ void CEventHandler::ComputeKnockOffBikeResponse(CEvent* e, CTask* tactive, CTask
 // 0x4BAAD0
 void CEventHandler::ComputeLowAngerAtPlayerResponse(CEventLowAngerAtPlayer* e, CTask* tactive, CTask* tsimplest) {
     m_EventResponseTask = [&]() -> CTask* { // Same code as `ComputeHighAngerAtPlayerResponse`
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_COMPLEX_KILL_PED_ON_FOOT:
             return new CTaskComplexKillPedOnFoot{FindPlayerPed()};
         case TASK_COMPLEX_SMART_FLEE_ENTITY:
@@ -1465,7 +1465,7 @@ void CEventHandler::ComputeLowAngerAtPlayerResponse(CEventLowAngerAtPlayer* e, C
 // 0x4BA990
 void CEventHandler::ComputeLowHealthResponse(CEventHealthLow* e, CTask* tactive, CTask* tsimplest) {
     m_EventResponseTask = [&]() -> CTask* {
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_COMPLEX_DIVE_FROM_ATTACHED_ENTITY_AND_GET_UP:
             return new CTaskComplexDiveFromAttachedEntityAndGetUp{};
         case TASK_NONE:
@@ -1562,7 +1562,7 @@ void CEventHandler::ComputePedEnteredVehicleResponse(CEventPedEnteredMyVehicle* 
                 CGeneral::GetRandomNumberInRange(300, 600)
             };
         };
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_COMPLEX_KILL_CRIMINAL: { // 0x4C17ED
             if (e->m_PedThatEntered->IsPlayer()) {
                 return nullptr;
@@ -1600,7 +1600,7 @@ void CEventHandler::ComputePedEnteredVehicleResponse(CEventPedEnteredMyVehicle* 
 // 0x4B9DD0
 void CEventHandler::ComputePedFriendResponse(CEventAcquaintancePed* e, CTask* tactive, CTask* tsimplest) {
     m_EventResponseTask = [&]() -> CTask* {
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR:
             return new CTaskComplexUseClosestFreeScriptedAttractor{};
         case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR_RUN:
@@ -1630,7 +1630,7 @@ void CEventHandler::ComputePedSoundQuietResponse(CEventSoundQuiet* e, CTask* tac
         if (!e->GetSourceEntity()) {
             return nullptr;
         }
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_NONE:
             return nullptr;
         case TASK_COMPLEX_INVESTIGATE_DISTURBANCE:
@@ -1647,7 +1647,7 @@ void CEventHandler::ComputePedThreatBadlyLitResponse(CEventAcquaintancePedHateBa
         if (!e->m_AcquaintancePed) {
             return nullptr;
         }
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_NONE:
             return nullptr;
         case TASK_COMPLEX_INVESTIGATE_DISTURBANCE:
@@ -1664,7 +1664,7 @@ void CEventHandler::ComputePedThreatResponse(CEventAcquaintancePedHate* e, CTask
         if (!e->m_AcquaintancePed) {
             return nullptr;
         }
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_COMPLEX_SEEK_ENTITY_AIMING: // 0x4C215A
             return new CTaskComplexSeekEntityAiming{e->m_AcquaintancePed, 10.f, 5.f};
         case TASK_SMART_FLEE_ENTITY_WALKING:
@@ -1674,7 +1674,7 @@ void CEventHandler::ComputePedThreatResponse(CEventAcquaintancePedHate* e, CTask
             if (IsKillTaskAppropriate(m_Ped, e->m_AcquaintancePed, *e)) {
                 return new CTaskComplexKillPedOnFoot{
                     e->m_AcquaintancePed,
-                    e->m_taskId == TASK_COMPLEX_KILL_PED_ON_FOOT ? -1 : 10'000
+                    e->m_TaskId == TASK_COMPLEX_KILL_PED_ON_FOOT ? -1 : 10'000
                 };
             }
             if (m_Ped->bWantedByPolice && e->m_AcquaintancePed->IsCop()) {
@@ -1831,7 +1831,7 @@ void CEventHandler::ComputePedToFleeResponse(CEventPedToFlee* e, CTask* tactive,
 // 0x4BF9B0
 void CEventHandler::ComputePersonalityResponseToDamage(CEventDamage* e, CPed* src) {
     m_EventResponseTask = [&]() -> CTask* {
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_COMPLEX_KILL_PED_ON_FOOT_STEALTH: // 0x4BFF02
             return new CTaskComplexKillPedOnFootStealth{src};
         case TASK_COMPLEX_KILL_CRIMINAL: { // 0x4BFF17
@@ -2003,7 +2003,7 @@ void CEventHandler::ComputePotentialPedCollideResponse(CEventPotentialWalkIntoPe
         const auto moveState = tsimplest && CTask::IsGoToTask(tsimplest)
             ? e->m_moveState
             : PEDMOVE_WALK;
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_NONE: // 0x4C281B
             return nullptr;
         case TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING: { // 0x4C2707
@@ -2059,7 +2059,7 @@ void CEventHandler::ComputePotentialWalkIntoFireResponse(CEventPotentialWalkInto
         if (!tsimplest || !CTask::IsGoToTask(tsimplest)) {
             return nullptr;
         }
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_COMPLEX_SMART_FLEE_POINT:
             return new CTaskComplexSmartFleePoint{e->m_firePos, false, 60.f, 1'000'000};
         case TASK_COMPLEX_WALK_ROUND_FIRE:
@@ -2082,7 +2082,7 @@ void CEventHandler::ComputePotentialWalkIntoFireResponse(CEventPotentialWalkInto
 // 0x4BAA30
 void CEventHandler::ComputeReallyLowHealthResponse(CEventHealthReallyLow* e, CTask* tactive, CTask* tsimplest) {
     m_EventResponseTask = [&]() -> CTask* {
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_COMPLEX_DIVE_FROM_ATTACHED_ENTITY_AND_GET_UP:
             return new CTaskComplexDiveFromAttachedEntityAndGetUp{0};
         case TASK_NONE:
@@ -2150,7 +2150,7 @@ void CEventHandler::ComputeSeenCopResponse(CEventSeenCop* e, CTask* tactive, CTa
         if (!e->m_AcquaintancePed) {
             return nullptr;
         }
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_FINISHED:
             return nullptr;
         case TASK_COMPLEX_SMART_FLEE_ENTITY:
@@ -2178,7 +2178,7 @@ void CEventHandler::ComputeSeenPanickedPedResponse(CEventSeenPanickedPed* e, CTa
         if (!currEvntSrc) {
             return nullptr;
         }
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_SIMPLE_DUCK_FOREVER:
             return new CTaskSimpleDuck{ DUCK_STANDALONE, 57599u, -1 };
         case TASK_COMPLEX_FLEE_ENTITY:
@@ -2197,7 +2197,7 @@ void CEventHandler::ComputeSexyPedResponse(CEventSexyPed* e, CTask* tactive, CTa
         if (!e->m_SexyPed) {
             return nullptr;
         }
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_NONE:
             return nullptr;
         case TASK_COMPLEX_GANG_HASSLE_PED:
@@ -2229,7 +2229,7 @@ void CEventHandler::ComputeShotFiredResponse(CEventGunShot* e, CTask* tactive, C
         const auto firedByPed = e->m_firedBy->IsPed()
             ? e->m_firedBy->AsPed()
             : nullptr;
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_COMPLEX_TURN_TO_FACE_ENTITY: // 0x4BCAE4
             return new CTaskComplexTurnToFaceEntityOrCoord{e->m_firedBy, 0.5f};
         case TASK_COMPLEX_KILL_PED_ON_FOOT: { // 0x4BC8F6
@@ -2292,7 +2292,7 @@ void CEventHandler::ComputeShotFiredWhizzedByResponse(CEventGunShotWhizzedBy* e,
         if (!esrc) {
             return nullptr;
         }
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_NONE:
             return nullptr; // 0x4BBE91
         case TASK_SIMPLE_DUCK_WHILE_SHOTS_WHIZZING: { // 0x4BBE68
@@ -2332,7 +2332,7 @@ void CEventHandler::ComputeSignalAtPedResponse(CEventSignalAtPed* e, CTask* tact
 // 0x4BB800
 void CEventHandler::ComputeSpecialResponse(CEventSpecial* e, CTask* tactive, CTask* tsimplest) {
     m_EventResponseTask = [&]() -> CTask* {
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_COMPLEX_KILL_PED_ON_FOOT:
             return new CTaskComplexKillPedOnFoot{ FindPlayerPed() }; // 0x4BBB0F
         case TASK_COMPLEX_SMART_FLEE_ENTITY:
@@ -2478,7 +2478,7 @@ void CEventHandler::ComputeVehicleDamageResponse(CEventVehicleDamage* e, CTask* 
         if (!m_Ped->m_pVehicle || m_Ped->m_pVehicle != e->m_vehicle) {
             return nullptr;
         }
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_COMPLEX_KILL_PED_ON_FOOT: { // 0x4C31C5
             if (!e->m_attacker) { 
                 return nullptr;
@@ -2608,7 +2608,7 @@ void CEventHandler::ComputeVehicleOnFireResponse(CEventVehicleOnFire* e, CTask* 
             }
             return new CTaskComplexDie{ WEAPON_EXPLOSION, ANIM_GROUP_DEFAULT, ANIM_ID_KO_SHOT_FRONT_0 };
         }
-        switch (e->m_taskId) {
+        switch (e->m_TaskId) {
         case TASK_COMPLEX_LEAVE_CAR: {
             return new CTaskComplexLeaveAnyCar{ 0, 0, false };
         case TASK_COMPLEX_LEAVE_CAR_AND_FLEE:
