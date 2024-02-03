@@ -217,9 +217,9 @@ void CEventEditableResponse::ComputeResponseTaskType(CPedGroup* pedGroup) {
 }
 
 // 0x4B5730
-bool CEventEditableResponse::ComputeResponseTaskOfType(CPed* ped, int32 taskId) {
-    int16 outTaskId = TASK_INVALID;
-    int16 facialTaskType = TASK_INVALID;
+bool CEventEditableResponse::ComputeResponseTaskOfType(CPed* ped, eTaskType taskId) {
+    int16 outTaskId       = TASK_INVALID;
+    int16 facialTaskType  = TASK_INVALID;
     int32 eventSourceType = CEventSource::ComputeEventSourceType(*this, *ped);
     CDecisionMakerTypes::GetInstance()->MakeDecision(
         ped,
