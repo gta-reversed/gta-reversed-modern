@@ -3,7 +3,7 @@
 #include "TaskLeanOnVehicle.h"
 
 void CTaskLeanOnVehicle::InjectHooks() {
-    RH_ScopedClass(CTaskLeanOnVehicle);
+    RH_ScopedVirtualClass(CTaskLeanOnVehicle, 0x86FAF4, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x660F90);
@@ -11,8 +11,8 @@ void CTaskLeanOnVehicle::InjectHooks() {
 
     RH_ScopedInstall(FinishAnimCB, 0x661160);
 
-    RH_ScopedVirtualInstall2(MakeAbortable, 0x661110, { .reversed = false });
-    RH_ScopedVirtualInstall2(ProcessPed, 0x6648C0, { .reversed = false });
+    RH_ScopedVMTInstall(MakeAbortable, 0x661110, { .reversed = false });
+    RH_ScopedVMTInstall(ProcessPed, 0x6648C0, { .reversed = false });
 
 }
 

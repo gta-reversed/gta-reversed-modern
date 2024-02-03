@@ -1,27 +1,22 @@
 #include "StdInc.h"
-
 #include "EventSexyPed.h"
-#include "IKChainManager_c.h"
 
-// 0x4AEDF0
+
 CEventSexyPed::CEventSexyPed(CPed* ped) : CEventEditableResponse() {
     m_SexyPed = ped;
     CEntity::SafeRegisterRef(m_SexyPed);
 }
 
-// NOTSA
 CEventSexyPed::CEventSexyPed(CPed* sexyPed, eTaskType taskType) :
     CEventSexyPed{sexyPed}
 {
     m_TaskId = taskType;
 }
 
-// 0x4AEEA0
 CEventSexyPed::~CEventSexyPed() {
     CEntity::SafeCleanUpRef(m_SexyPed);
 }
 
-// 0x4AEF00
 bool CEventSexyPed::AffectsPed(CPed* ped) {
     if (!ped->IsAlive())
         return false;
@@ -42,3 +37,4 @@ bool CEventSexyPed::AffectsPed(CPed* ped) {
 
     return true;
 }
+

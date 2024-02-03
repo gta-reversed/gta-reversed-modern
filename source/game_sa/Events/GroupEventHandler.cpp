@@ -35,13 +35,18 @@
 #include "Events/EventGunShot.h"
 #include "Events/EventSexyPed.h"
 #include "Events/EventAcquaintancePed.h"
-#include "Events/GroupEvents.h"
-#include "Events/LeaderEvents.h"
+#include "Events/EventPlayerCommandToGroup.h"
+#include "Events/EventPlayerCommandToGroupAttack.h"
+#include "Events/EventPlayerCommandToGroupGather.h"
 #include "Events/EventGunAimedAt.h"
 #include "Events/EventDraggedOutCar.h"
 #include "Events/EventDanger.h"
 #include "Events/EventDamage.h"
 #include "Events/EventLeanOnVehicle.h"
+#include "Events/EventSeenCop.h"
+#include "Events/EventNewGangMember.h"
+#include "Events/EventLeaderEntryExit.h"
+#include "Events/EventLeaderExitedCarAsDriver.h"
 
 void CGroupEventHandler::InjectHooks() {
     RH_ScopedClass(CGroupEventHandler);

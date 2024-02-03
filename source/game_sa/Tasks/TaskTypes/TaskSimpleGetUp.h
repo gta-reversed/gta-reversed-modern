@@ -2,7 +2,7 @@
 
 #include "TaskSimple.h"
 
-class CTaskSimpleGetUp : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleGetUp : public CTaskSimple {
 public:
     bool                   m_bHasPedGotUp;
     bool                   m_bIsFinished;
@@ -25,8 +25,6 @@ private:
 
     CTaskSimpleGetUp* Constructor();
 
-    bool ProcessPed_Reversed(class CPed* ped);
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool StartAnim(CPed* ped);
 
     static void FinishGetUpAnimCB(CAnimBlendAssociation* blendAssoc, void* data); //data is CTaskSimpleGetUp

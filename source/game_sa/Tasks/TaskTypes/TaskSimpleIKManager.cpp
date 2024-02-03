@@ -2,7 +2,7 @@
 #include "TaskSimpleIKManager.h"
 
 void CTaskSimpleIKManager::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleIKManager);
+    RH_ScopedVirtualClass(CTaskSimpleIKManager, 0x86E358, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x6337F0);
@@ -10,10 +10,10 @@ void CTaskSimpleIKManager::InjectHooks() {
 
     RH_ScopedInstall(AddIKChainTask, 0x633940);
     RH_ScopedInstall(GetTaskAtSlot, 0x6339B0);
-    RH_ScopedInstall(Clone_Reversed, 0x639350, { .reversed = false });
-    RH_ScopedInstall(GetTaskType_Reversed, 0x633820);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x6338A0);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x6338E0);
+    RH_ScopedVMTInstall(Clone, 0x639350, { .reversed = false });
+    RH_ScopedVMTInstall(GetTaskType, 0x633820);
+    RH_ScopedVMTInstall(MakeAbortable, 0x6338A0);
+    RH_ScopedVMTInstall(ProcessPed, 0x6338E0);
 }
 
 // 0x6337F0
@@ -47,11 +47,15 @@ void CTaskSimpleIKManager::AddIKChainTask(CTaskSimpleIKChain* task, int32 slot) 
 }
 
 // 0x639350
+
+
 CTask* CTaskSimpleIKManager::Clone() const {
     return plugin::CallMethodAndReturn<CTask*, 0x639350, const CTaskSimpleIKManager*>(this);
 }
 
 // 0x6338A0
+
+
 bool CTaskSimpleIKManager::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
     if (priority == eAbortPriority::ABORT_PRIORITY_IMMEDIATE) {
         for (auto&& task : m_pIKChainTasks) {
@@ -66,6 +70,8 @@ bool CTaskSimpleIKManager::MakeAbortable(CPed* ped, eAbortPriority priority, CEv
 }
 
 // 0x6338E0
+
+// 0x0
 bool CTaskSimpleIKManager::ProcessPed(CPed* ped) {
     if (m_bAborting) {
         return true;
@@ -85,3 +91,4 @@ bool CTaskSimpleIKManager::ProcessPed(CPed* ped) {
 
     return hasAllProcessedPed;
 }
+

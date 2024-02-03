@@ -32,7 +32,7 @@ float CTaskSimpleClimb::ms_fVaultOffsetVert   = +0.00f; // 0xC18F7C
 float CTaskSimpleClimb::ms_fMinForStretchGrab = +1.40f; // 0x8D2F34
 
 void CTaskSimpleClimb::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleClimb);
+    RH_ScopedVirtualClass(CTaskSimpleClimb, 0x87059C, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(ScanToGrabSectorList, 0x67DE10);
@@ -48,8 +48,8 @@ void CTaskSimpleClimb::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x67A110);
     RH_ScopedInstall(GetCameraStickModifier, 0x67A5D0);
     RH_ScopedInstall(GetCameraTargetPos, 0x67A390);
-    RH_ScopedVirtualInstall(ProcessPed, 0x680DC0, { .reversed = false });
-    RH_ScopedVirtualInstall(MakeAbortable, 0x67A280);
+    RH_ScopedVMTInstall(ProcessPed, 0x680DC0, { .reversed = false });
+    RH_ScopedVMTInstall(MakeAbortable, 0x67A280);
 }
 
 CTaskSimpleClimb* CTaskSimpleClimb::Constructor(CEntity* pClimbEnt, const CVector& vecTarget, float fHeading, uint8 nSurfaceType, eClimbHeights nHeight, bool bForceClimb) {
@@ -88,9 +88,6 @@ CTaskSimpleClimb::~CTaskSimpleClimb() {
 
 // 0x680DC0
 bool CTaskSimpleClimb::ProcessPed(CPed* ped) {
-    return CTaskSimpleClimb::ProcessPed_Reversed(ped);
-}
-bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped) {
     if (m_bIsFinished) {
         if (ped->m_pEntityIgnoredCollision == m_pClimbEnt)
             ped->m_pEntityIgnoredCollision = nullptr;
@@ -283,9 +280,6 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped) {
 
 // 0x67A280
 bool CTaskSimpleClimb::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return MakeAbortable_Reversed(ped, priority, event);
-}
-bool CTaskSimpleClimb::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (event && event->GetEventPriority() < 71 && ped->m_fHealth > 0.0F)
         return false;
 

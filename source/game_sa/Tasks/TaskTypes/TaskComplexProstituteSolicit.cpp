@@ -96,7 +96,7 @@ CTask* CTaskComplexProstituteSolicit::CreateSubTask(eTaskType taskType, CPed* pr
             v16 = &v24;
             v17 = &v28;
         }
-        v18 = MultiplyMatrixWithVector(v17, &out, v16);
+        v18 = v17->TransformPoint(&out, v16);
         x = v18->x;
         y = v18->y;
         z = v18->z;

@@ -25,19 +25,19 @@ bool& CObject::bArea51SamSiteDisabled = *(bool*)0xBB4A72;
 
 void CObject::InjectHooks()
 {
-    RH_ScopedClass(CObject);
+    RH_ScopedVirtualClass(CObject, 0x866F60, 23);
     RH_ScopedCategory("Entity/Object");
 
-    RH_ScopedVirtualInstall(SetIsStatic, 0x5A0760);
-    RH_ScopedVirtualInstall(CreateRwObject, 0x59F110);
-    RH_ScopedVirtualInstall(ProcessControl, 0x5A2130);
-    RH_ScopedVirtualInstall(Teleport, 0x5A17B0);
-    RH_ScopedVirtualInstall(PreRender, 0x59FD50);
-    RH_ScopedVirtualInstall(Render, 0x59F180);
-    RH_ScopedVirtualInstall(SetupLighting, 0x554FA0);
-    RH_ScopedVirtualInstall(RemoveLighting, 0x553E10);
-    RH_ScopedVirtualInstall(SpecialEntityPreCollisionStuff, 0x59FEE0);
-    RH_ScopedVirtualInstall(SpecialEntityCalcCollisionSteps, 0x5A02E0);
+    RH_ScopedVMTInstall(SetIsStatic, 0x5A0760);
+    RH_ScopedVMTInstall(CreateRwObject, 0x59F110);
+    RH_ScopedVMTInstall(ProcessControl, 0x5A2130);
+    RH_ScopedVMTInstall(Teleport, 0x5A17B0);
+    RH_ScopedVMTInstall(PreRender, 0x59FD50);
+    RH_ScopedVMTInstall(Render, 0x59F180);
+    RH_ScopedVMTInstall(SetupLighting, 0x554FA0);
+    RH_ScopedVMTInstall(RemoveLighting, 0x553E10);
+    RH_ScopedVMTInstall(SpecialEntityPreCollisionStuff, 0x59FEE0);
+    RH_ScopedVMTInstall(SpecialEntityCalcCollisionSteps, 0x5A02E0);
     RH_ScopedInstall(Init, 0x59F840);
     RH_ScopedInstall(ProcessGarageDoorBehaviour, 0x44A4D0);
     RH_ScopedInstall(CanBeDeleted, 0x59F120);
@@ -75,17 +75,6 @@ void CObject::InjectHooks()
     RH_ScopedGlobalInstall(IsObjectPointerValid_NotInWorld, 0x5A2B90);
     RH_ScopedGlobalInstall(IsObjectPointerValid, 0x5A2C20);
 }
-
-void CObject::SetIsStatic(bool isStatic) { return SetIsStatic_Reversed(isStatic); }
-void CObject::CreateRwObject() { CObject::CreateRwObject_Reversed(); }
-void CObject::ProcessControl() { CObject::ProcessControl_Reversed(); }
-void CObject::Teleport(CVector destination, bool resetRotation) { CObject::Teleport_Reversed(destination, resetRotation); }
-void CObject::SpecialEntityPreCollisionStuff(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck) { CObject::SpecialEntityPreCollisionStuff_Reversed(colPhysical, bIgnoreStuckCheck, bCollisionDisabled, bCollidedEntityCollisionIgnored, bCollidedEntityUnableToMove, bThisOrCollidedEntityStuck); }
-uint8 CObject::SpecialEntityCalcCollisionSteps(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2) { return CObject::SpecialEntityCalcCollisionSteps_Reversed(bProcessCollisionBeforeSettingTimeStep, unk2); }
-void CObject::PreRender() { CObject::PreRender_Reversed(); }
-void CObject::Render() { CObject::Render_Reversed(); }
-bool CObject::SetupLighting() { return CObject::SetupLighting_Reversed(); }
-void CObject::RemoveLighting(bool bRemove) { CObject::RemoveLighting_Reversed(bRemove); }
 
 // 0x5A1D10
 CObject::CObject() : CPhysical() {
@@ -188,7 +177,7 @@ void CObject::operator delete(void* obj, int32 poolRef) {
 }
 
 // 0x5A0760
-void CObject::SetIsStatic_Reversed(bool isStatic) {
+void CObject::SetIsStatic(bool isStatic) {
     m_bIsStatic = isStatic;
     physicalFlags.b31 = false;
     if (!isStatic && (physicalFlags.bDisableMoveForce && m_fDoorStartAngle < -1000.0F)) {
@@ -197,12 +186,12 @@ void CObject::SetIsStatic_Reversed(bool isStatic) {
 }
 
 // 0x59F110
-void CObject::CreateRwObject_Reversed() {
+void CObject::CreateRwObject() {
     CEntity::CreateRwObject();
 }
 
 // 0x5A2130
-void CObject::ProcessControl_Reversed() {
+void CObject::ProcessControl() {
     auto* mi = GetModelInfo();
     auto bIsAnimated = false;
     if (mi->GetRwModelType() == rpCLUMP && mi->bHasAnimBlend && m_pRwObject)
@@ -353,7 +342,7 @@ void CObject::ProcessControl_Reversed() {
 }
 
 // 0x5A17B0
-void CObject::Teleport_Reversed(CVector destination, bool resetRotation) {
+void CObject::Teleport(CVector destination, bool resetRotation) {
     CWorld::Remove(this);
     SetPosn(destination);
     CEntity::UpdateRW();
@@ -362,7 +351,7 @@ void CObject::Teleport_Reversed(CVector destination, bool resetRotation) {
 }
 
 // 0x59FEE0
-void CObject::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck) {
+void CObject::SpecialEntityPreCollisionStuff(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck) {
     if (m_pEntityIgnoredCollision == colPhysical || colPhysical->m_pEntityIgnoredCollision == this) {
         bCollidedEntityCollisionIgnored = true;
         return;
@@ -462,7 +451,7 @@ void CObject::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bo
 }
 
 // 0x5A02E0
-uint8 CObject::SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2) {
+uint8 CObject::SpecialEntityCalcCollisionSteps(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2) {
     if (physicalFlags.bDisableZ || m_pObjectInfo->m_nSpecialColResponseCase == COL_SPECIAL_RESPONSE_GRENADE) {
         auto* cm = GetModelInfo()->GetColModel();
         const auto fMove = m_vecMoveSpeed.SquaredMagnitude() * sq(CTimer::GetTimeStep());
@@ -535,7 +524,7 @@ uint8 CObject::SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionB
 }
 
 // 0x59FD50
-void CObject::PreRender_Reversed() {
+void CObject::PreRender() {
     if (objectFlags.bAffectedByColBrightness)
         GetLightingFromCollisionBelow();
 
@@ -570,7 +559,7 @@ void CObject::PreRender_Reversed() {
 }
 
 // 0x59F180
-void CObject::Render_Reversed() {
+void CObject::Render() {
     if (objectFlags.bDoNotRender)
         return;
 
@@ -585,7 +574,7 @@ void CObject::Render_Reversed() {
 }
 
 // 0x554FA0
-bool CObject::SetupLighting_Reversed() {
+bool CObject::SetupLighting() {
     if (physicalFlags.bDestroyed) {
         WorldReplaceNormalLightsWithScorched(Scene.m_pRpWorld, 0.18F);
         return true;
@@ -600,7 +589,7 @@ bool CObject::SetupLighting_Reversed() {
 }
 
 // 0x553E10
-void CObject::RemoveLighting_Reversed(bool bRemove) {
+void CObject::RemoveLighting(bool bRemove) {
     if (!bRemove)
         return;
 

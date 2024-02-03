@@ -57,7 +57,7 @@ VALIDATE_SIZE(tHeliLight, 0x4C);
 
 class FxSystem_c;
 
-class CHeli : public CAutomobile {
+class NOTSA_EXPORT_VTABLE CHeli : public CAutomobile {
 public:
     uint8        m_nHeliFlags;
     float        m_fLeftRightSkid;
@@ -143,16 +143,6 @@ private:
     static void InjectHooks();
 
     CHeli* Constructor(int32 modelIndex, eVehicleCreatedBy createdBy) { this->CHeli::CHeli(modelIndex, createdBy); return this;}
-    void BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion) { return CHeli::BlowUpCar(damager, bHideExplosion); }
-    void Fix_Reversed() { CHeli::Fix(); }
-    bool BurstTyre_Reversed(uint8 tyreComponentId, bool bPhysicalEffect) { return CHeli::BurstTyre(tyreComponentId, bPhysicalEffect); }
-    bool SetUpWheelColModel_Reversed(CColModel* wheelCol) { return CHeli::SetUpWheelColModel(wheelCol); }
-    void ProcessControlInputs_Reversed(uint8 playerNum) { return CHeli::ProcessControlInputs(playerNum); }
-    void Render_Reversed() { CHeli::Render(); }
-    void SetupDamageAfterLoad_Reversed() { CHeli::SetupDamageAfterLoad(); }
-    void ProcessFlyingCarStuff_Reversed() { CHeli::ProcessFlyingCarStuff(); }
-    void PreRender_Reversed() { CHeli::PreRender(); }
-    void ProcessControl_Reversed() { CHeli::ProcessControl(); }
 };
 
 VALIDATE_SIZE(CHeli, 0xA18);

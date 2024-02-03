@@ -439,10 +439,7 @@ bool CIplStore::LoadIplBoundingBox(int32 iplSlotIndex, char* data, int32 dataSiz
         obj->Add(); // Add it to the world
 
         IncludeEntity(iplSlotIndex, obj);
-
-        CRect rect;
-        obj->GetBoundRect(&rect);
-        def.bb.Restrict(rect);
+        def.bb.Restrict(obj->GetBoundRect());
     };
 
     if (strncmp((char*)data, "bnry", 4u) != 0) { // IPL in text format

@@ -35,8 +35,8 @@ void CPlayerPed::InjectHooks() {
     RH_ScopedInstall(SetWantedLevelNoDrop, 0x609F30);
     RH_ScopedInstall(CheatWantedLevel, 0x609F50);
     RH_ScopedInstall(DoStuffToGoOnFire, 0x60A020);
-    RH_ScopedVirtualInstall(Load, 0x5D46E0, { .reversed = false });
-    RH_ScopedVirtualInstall(Save, 0x5D57E0, { .reversed = false });
+    RH_ScopedVMTInstall(Load, 0x5D46E0, { .reversed = false });
+    RH_ScopedVMTInstall(Save, 0x5D57E0, { .reversed = false });
     RH_ScopedInstall(DeactivatePlayerPed, 0x609520);
     RH_ScopedInstall(ReactivatePlayerPed, 0x609540);
     RH_ScopedInstall(GetPadFromPlayer, 0x609560);
@@ -90,8 +90,9 @@ VALIDATE_SIZE(WorkBufferSaveData, 132u + 4u);
 
 // calls of LoadDataFromWorkBuffer are optimized
 // todo: fix
+
 // 0x5D46E0
-bool CPlayerPed::Load_Reversed() {
+bool CPlayerPed::Load() {
     return plugin::CallMethodAndReturn<bool, 0x5D46E0, CPlayerPed*>(this);
 
     CPed::Load();
@@ -111,8 +112,9 @@ bool CPlayerPed::Load_Reversed() {
 
 // calls of SaveDataToWorkBuffer are optimized
 // todo: fix
+
 // 0x5D57E0
-bool CPlayerPed::Save_Reversed() {
+bool CPlayerPed::Save() {
     return plugin::CallMethodAndReturn<bool, 0x5D57E0>(this);
 
     WorkBufferSaveData saveData{};
@@ -1259,12 +1261,4 @@ void CPlayerPed::ProcessControl() {
     }
     if (!bInVehicle && GetLightingTotal() <= 0.05f && !CEntryExitManager::WeAreInInteriorTransition())
         Say(338);
-}
-
-bool CPlayerPed::Load() {
-    return CPlayerPed::Load_Reversed();
-}
-
-bool CPlayerPed::Save() {
-    return CPlayerPed::Save_Reversed();
 }

@@ -76,7 +76,7 @@ void CFallingGlassPane::Render() {
             auto& vertex = aTempBufferVertices[CGlass::H1iLightPolyVerticesIdx + i];
 
             const auto pos2DOS = CGlass::PanePolyPositions[m_nPieceIndex][i] - CGlass::PanePolyCenterPositions[m_nPieceIndex];
-            vertices[i] = MultiplyMatrixWithVector(m_Matrix, { pos2DOS.x, 0.f, pos2DOS.y });
+            vertices[i] = m_Matrix.TransformPoint({ pos2DOS.x, 0.f, pos2DOS.y });
             RxObjSpace3DVertexSetPos(&vertex, &vertices[i]);
 
             RxObjSpace3DVertexSetU(&vertex, uv[i].u);
