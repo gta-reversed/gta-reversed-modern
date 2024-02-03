@@ -50,7 +50,7 @@ bool CTaskSimpleFight::ProcessPed(CPed* ped) {
 }
 
 void CTaskSimpleFight::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleFight);
+    RH_ScopedVirtualClass(CTaskSimpleFight, 0x86D684, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
 }

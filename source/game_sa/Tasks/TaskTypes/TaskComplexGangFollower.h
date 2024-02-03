@@ -5,7 +5,7 @@
 
 class CPedGroup;
 
-class CTaskComplexGangFollower : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexGangFollower : public CTaskComplex {
 public:
     CPedGroup* m_PedGroup;
     CPed*      m_Leader;

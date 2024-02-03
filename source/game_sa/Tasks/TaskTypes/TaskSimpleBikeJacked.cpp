@@ -3,7 +3,7 @@
 #include "TaskUtilityLineUpPedWithCar.h"
 
 void CTaskSimpleBikeJacked::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleBikeJacked);
+    RH_ScopedVirtualClass(CTaskSimpleBikeJacked, 0x86EFAC, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x648B90);
@@ -11,11 +11,11 @@ void CTaskSimpleBikeJacked::InjectHooks() {
 
     RH_ScopedGlobalInstall(FinishAnimBikeHitCB, 0x648D30);
 
-    RH_ScopedVirtualInstall2(Clone, 0x64A200);
-    RH_ScopedVirtualInstall2(GetTaskType, 0x648C30);
-    RH_ScopedVirtualInstall2(MakeAbortable, 0x648CE0);
-    RH_ScopedVirtualInstall2(ProcessPed, 0x64C970);
-    RH_ScopedVirtualInstall2(SetPedPosition, 0x648D00);
+    RH_ScopedVMTInstall(Clone, 0x64A200);
+    RH_ScopedVMTInstall(GetTaskType, 0x648C30);
+    RH_ScopedVMTInstall(MakeAbortable, 0x648CE0);
+    RH_ScopedVMTInstall(ProcessPed, 0x64C970);
+    RH_ScopedVMTInstall(SetPedPosition, 0x648D00);
 }
 
 // 0x648B90

@@ -1,12 +1,14 @@
 #pragma once
 
 #include "TaskComplex.h"
+#include "Enums/eMoveState.h"
 
 class C2dEffectBase;
 class CEntity;
 class CPedAttractor;
 class CEvent;
 class CPed;
+class C2dEffectBase;
 
 class NOTSA_EXPORT_VTABLE CTaskComplexUseEffect : public CTaskComplex {
 public:

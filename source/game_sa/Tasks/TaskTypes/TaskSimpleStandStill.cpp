@@ -4,12 +4,12 @@
 #include "TaskSimpleDuck.h"
 
 void CTaskSimpleStandStill::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleStandStill);
+    RH_ScopedVirtualClass(CTaskSimpleStandStill, 0x86DD2C, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x62F310);
-    RH_ScopedVirtualInstall(MakeAbortable, 0x4B8690);
-    RH_ScopedVirtualInstall(ProcessPed, 0x62F370);
+    RH_ScopedVMTInstall(MakeAbortable, 0x4B8690);
+    RH_ScopedVMTInstall(ProcessPed, 0x62F370);
 }
 
 // 0x62F310
@@ -22,15 +22,6 @@ CTaskSimpleStandStill::CTaskSimpleStandStill(int32 nTime, bool Looped, bool bUse
 
 // 0x4B8690
 bool CTaskSimpleStandStill::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return CTaskSimpleStandStill::MakeAbortable_Reversed(ped, priority, event);
-}
-
-// 0x62F370
-bool CTaskSimpleStandStill::ProcessPed(CPed* ped) {
-    return CTaskSimpleStandStill::ProcessPed_Reversed(ped);
-}
-
-bool CTaskSimpleStandStill::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (priority)
         return true;
     m_timer.m_nStartTime = CTimer::GetTimeInMS();
@@ -39,7 +30,8 @@ bool CTaskSimpleStandStill::MakeAbortable_Reversed(CPed* ped, eAbortPriority pri
     return true;
 }
 
-bool CTaskSimpleStandStill::ProcessPed_Reversed(CPed* ped) {
+// 0x62F370
+bool CTaskSimpleStandStill::ProcessPed(CPed* ped) {
     if (!m_timer.m_bStarted && m_timer.Start(m_nTime)) {
         if (!ped->bInVehicle) {
             ped->SetMoveState(PEDMOVE_STILL);

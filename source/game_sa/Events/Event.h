@@ -1,13 +1,12 @@
 #pragma once
 
+
 #include "eEventType.h"
 
 class CPed;
-class CPedGroup;
 class CEntity;
-enum eEventType;
 
-class CEvent {
+class NOTSA_EXPORT_VTABLE CEvent {
 public:
     int32 m_nTimeActive;
     bool  m_bValid;
@@ -44,6 +43,7 @@ public:
     static float CalcSoundLevelIncrement(float level1, float level2);
 
     void UnTick() { m_nTimeActive--; }
+    void Tick() { m_nTimeActive++; }
 
     /// Works like `dynamic_cast` => Checks if the event if ofthe required type, if so, returns it, otherwise nullptr
     template<std::derived_from<CEvent> T>

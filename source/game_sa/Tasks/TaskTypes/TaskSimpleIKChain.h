@@ -37,7 +37,11 @@ public:
                        float speed, int32 time, int32 blendTime);
     ~CTaskSimpleIKChain() override;
 
-    eTaskType GetTaskType() const override { return Type; } // 0x62EC30
+
+
+eTaskType GetTaskType() const override { return Type; }
+
+ // 0x62EC30
     CTask* Clone() const override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
@@ -53,10 +57,5 @@ private:
 
     CTaskSimpleIKChain* Constructor(char* name, ePedBones effectorBoneTag, RwV3d effectorVec, ePedBones pivotBoneTag, CEntity* a6, ePedBones offsetBoneTag, RwV3d offsetPos, float speed, int32 time, int32 blendTime) { this->CTaskSimpleIKChain::CTaskSimpleIKChain(name, effectorBoneTag, effectorVec, pivotBoneTag, a6, offsetBoneTag, offsetPos, speed, time, blendTime); return this; }
     CTaskSimpleIKChain* Destructor() { this->CTaskSimpleIKChain::~CTaskSimpleIKChain(); return this; }
-    CTask* Clone_Reversed() { return CTaskSimpleIKChain::Clone(); }
-    eTaskType GetTaskType_Reversed() { return CTaskSimpleIKChain::GetTaskType(); }
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent const* event) { return CTaskSimpleIKChain::MakeAbortable(ped, priority, event); }
-    bool ProcessPed_Reversed(CPed* ped) { return CTaskSimpleIKChain::ProcessPed(ped); }
-    bool CreateIKChain_Reversed(CPed* ped) { return CTaskSimpleIKChain::CreateIKChain(ped); }
-};
+                    };
 VALIDATE_SIZE(CTaskSimpleIKChain, 0x58);

@@ -509,7 +509,7 @@ void CWorld::CallOffChaseForAreaSectorListPeds(CPtrList& ptrList, float x1, floa
             for (auto i = 0; i < colData->m_nNumSpheres; i++) {
                 const auto& sphere    = colData->m_pSpheres[i];
                 const auto  radius    = sphere.m_fRadius;
-                const auto  spherePos = MultiplyMatrixWithVector(mat, sphere.m_vecCenter);
+                const auto  spherePos = mat.TransformPoint(sphere.m_vecCenter);
                 if (   (spherePos.x + radius > x1 && spherePos.x - radius < x2)
                     && (spherePos.y + radius > y1 && spherePos.y - radius < y2)
                 ) {
@@ -949,7 +949,7 @@ void CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& ptrLi
         entity->SetCurrentScanCode();
 
         CColSphere sphere{
-            Multiply3x3(entity->GetPosition() - point, transform),
+            transform.InverseTransformVector(entity->GetPosition() - point),
             entity->GetColModel()->GetBoundRadius()
         };
         if (CCollision::TestSphereBox(sphere, box)) {
@@ -1851,12 +1851,12 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
             CColPoint cp{};
             float maxTouchDist{ 100'000.f };
             if (CCollision::ProcessSphereBox(
-                CColSphere{ Multiply3x3(veh->GetMatrix(), -entityToPointDir), entityToPointDist },
+                CColSphere{ veh->GetMatrix().TransformVector(-entityToPointDir), entityToPointDist },
                 veh->GetColModel()->m_boundBox,
                 cp,
                 maxTouchDist)
             ) {
-                auto colNormal = Multiply3x3(veh->GetMatrix(), -cp.m_vecNormal);
+                auto colNormal = veh->GetMatrix().TransformVector(-cp.m_vecNormal);
                 if (auto& z = colNormal.z; z >= -0.f) { // TODO: Wat is dis?
                     if (z < 0.2f && z > 0.f)
                         z += 0.2f;
@@ -1864,7 +1864,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
                     z = -0.2f;
                 }
 
-                colPointPos  = Multiply3x3(veh->GetMatrix(), cp.m_vecPoint);
+                colPointPos  = veh->GetMatrix().TransformVector(cp.m_vecPoint);
                 const auto colPointToExploPointDist = ((colPointPos + veh->GetPosition()) - point).Magnitude();
 
                 // TODO: Document this a little better pls
@@ -2473,7 +2473,7 @@ void CWorld::RepositionOneObject(CEntity* object) {
     })) {
         if (const auto CD = colModel->m_pColData) {
             if (CD->m_nNumBoxes == 1) {
-                RecalcZPosAtPoint(Multiply3x3(object->GetMatrix(), CD->m_pBoxes[0].GetCenter()));
+                RecalcZPosAtPoint(object->GetMatrix().TransformVector(CD->m_pBoxes[0].GetCenter()));
             } else if (CD->m_nNumSpheres) {
                 auto point{ object->GetPosition() };
                 point.z = 1000.f;
@@ -2487,7 +2487,7 @@ void CWorld::RepositionOneObject(CEntity* object) {
                 if (point.z >= 1000.f)
                     RecalcZPosAtPoint(object->GetPosition());
                 else
-                    RecalcZPosAtPoint(Multiply3x3(object->GetMatrix(), point));
+                    RecalcZPosAtPoint(object->GetMatrix().TransformVector(point));
             }
         } else {
             RecalcZPosAtPoint(object->GetPosition());

@@ -10,8 +10,6 @@
 #include "Tasks/TaskTypes/TaskSimpleGoToPoint.h"
 #include "Tasks/TaskTypes/TaskSimpleStandStill.h"
 
-#include "Events/PotentialWalkIntoEvents.h"
-
 void CTaskComplexFollowNodeRoute::InjectHooks() {
     RH_ScopedVirtualClass(CTaskComplexFollowNodeRoute, 0x8700a8, 11);
     RH_ScopedCategory("Tasks/TaskTypes");

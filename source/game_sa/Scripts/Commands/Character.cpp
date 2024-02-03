@@ -778,15 +778,16 @@ auto ExplodeCharHead(CPed& ped) {
         false,
         (bool)(ped.bInVehicle)
     };
+    CPedDamageResponseCalculator dmgCalc{
+        nullptr,
+        1000.f,
+        WEAPON_SNIPERRIFLE,
+        PED_PIECE_HEAD,
+        false
+    };
     dmgEvent.ComputeDamageResponseIfAffectsPed(
         &ped,
-        CPedDamageResponseCalculator{
-            nullptr,
-            1000.f,
-            WEAPON_SNIPERRIFLE,
-            PED_PIECE_HEAD,
-            false
-        },
+        dmgCalc,
         true
     );
     ped.GetEventGroup().Add(dmgEvent);
@@ -1023,7 +1024,7 @@ auto GetCharWeaponInSlot(CPed& ped, eWeaponSlot slut) {
 
 // GET_OFFSET_FROM_CHAR_IN_WORLD_COORDS
 auto GetOffsetFromCharInWorldCoords(CPed& ped, CVector offset) {
-    return ped.GetMatrix() * offset;
+    return ped.GetMatrix().TransformPoint(offset);
 }
 
 // HAS_CHAR_BEEN_PHOTOGRAPHED

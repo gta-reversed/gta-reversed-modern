@@ -3,7 +3,7 @@
 #include "TaskComplexEnterCar.h"
 class CPed;
 
-class CTaskComplexDragPedFromCar : public CTaskComplexEnterCar {
+class NOTSA_EXPORT_VTABLE CTaskComplexDragPedFromCar : public CTaskComplexEnterCar {
 public:
     CPed* m_Ped;
 
@@ -19,8 +19,6 @@ public:
     CTask* ControlSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
 
-    CTask* ControlSubTask_Reversed(CPed* ped);
-    CTask* CreateFirstSubTask_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CTaskComplexDragPedFromCar, 0x54);
 extern void CTaskComplexDragPedFromCar__InjectHooks();

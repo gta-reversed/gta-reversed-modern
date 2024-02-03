@@ -18,9 +18,8 @@ public:
     constexpr CVector() = default;
     constexpr CVector(float X, float Y, float Z) : RwV3d{ X, Y, Z } {}
     constexpr CVector(RwV3d rwVec) { x = rwVec.x; y = rwVec.y; z = rwVec.z; }
-    constexpr CVector(const CVector* rhs) { x = rhs->x; y = rhs->y; z = rhs->z; }
+    constexpr CVector(const CVector* rhs) { x = rhs->x; y = rhs->y; z = rhs->z; } // TODO: Remove
     constexpr explicit CVector(float value) { x = y = z = value; }
-
     explicit CVector(const CVector2D& v2, float z = 0.f);
 
 public:
@@ -268,6 +267,6 @@ static CVector ProjectVector(const CVector& what, const CVector& onto) {
     return onto * (DotProduct(what, onto) / onto.SquaredMagnitude());
 }
 
-CVector Multiply3x3(const CMatrix& m, const CVector& v);
-CVector Multiply3x3(const CVector& v, const CMatrix& m);
-CVector MultiplyMatrixWithVector(const CMatrix& mat, const CVector& vec);
+[[deprecated]] inline CVector Multiply3x3_MV(const CMatrix& m, const CVector& v) { NOTSA_UNREACHABLE("Use `m.TransformVector(v)` instead"); }
+[[deprecated]] inline CVector Multiply3x3_VM(const CVector& v, const CMatrix& m) { NOTSA_UNREACHABLE("Use `m.InverseTransformVector(v)` m"); }
+[[deprecated]] inline CVector MultiplyMatrixWithVector(const CMatrix& mat, const CVector& vec) { NOTSA_UNREACHABLE("Use `m.TransformPoint(v)` instead"); }

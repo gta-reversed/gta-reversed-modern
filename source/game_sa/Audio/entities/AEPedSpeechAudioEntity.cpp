@@ -27,7 +27,7 @@ static inline auto& gGlobalSpeechContextNextPlayTime = *reinterpret_cast<std::ar
 static inline auto& gSpeechContextLookup = *reinterpret_cast<notsa::mdarray<int16, 8, 360>*>(0x8C6A68);
 
 void CAEPedSpeechAudioEntity::InjectHooks() {
-    RH_ScopedClass(CAEPedSpeechAudioEntity);
+    RH_ScopedVirtualClass(CAEPedSpeechAudioEntity, 0x85F310, 8);
     RH_ScopedCategory("Audio/Entities");
 
     RH_ScopedInstall(Constructor, 0x4E4F10);
@@ -80,14 +80,14 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(GetSexFromModel, 0x4E4200, { .reversed = false });
     RH_ScopedInstall(GetPedTalking, 0x4E3F50, { .reversed = false });
     RH_ScopedInstall(GetVoiceAndTypeForSpecialPed, 0x4E4170, { .reversed = false });
-    RH_ScopedVirtualInstall(UpdateParameters, 0x4E3520, { .reversed = false });
-    RH_ScopedVirtualInstall(AddScriptSayEvent, 0x4E4F70, { .reversed = false });
-    RH_ScopedVirtualInstall(Terminate, 0x4E5670, { .reversed = false });
-    RH_ScopedVirtualInstall(PlayLoadedSound, 0x4E5CD0, { .reversed = false });
-    RH_ScopedVirtualInstall(GetAllocatedVoice, 0x4E4120);
-    RH_ScopedVirtualInstall(WillPedChatAboutTopic, 0x4E5800);
-    RH_ScopedVirtualInstall(GetPedType, 0x4E4130);
-    RH_ScopedVirtualInstall(IsPedFemaleForAudio, 0x4E4150);
+    RH_ScopedVMTInstall(UpdateParameters, 0x4E3520, { .reversed = false });
+    RH_ScopedVMTInstall(AddScriptSayEvent, 0x4E4F70, { .reversed = false });
+    RH_ScopedVMTInstall(Terminate, 0x4E5670, { .reversed = false });
+    RH_ScopedVMTInstall(PlayLoadedSound, 0x4E5CD0, { .reversed = false });
+    RH_ScopedVMTInstall(GetAllocatedVoice, 0x4E4120);
+    RH_ScopedVMTInstall(WillPedChatAboutTopic, 0x4E5800);
+    RH_ScopedVMTInstall(GetPedType, 0x4E4130);
+    RH_ScopedVMTInstall(IsPedFemaleForAudio, 0x4E4150);
 }
 
 // 0x4E4F10
@@ -599,42 +599,4 @@ CAEPedSpeechAudioEntity* CAEPedSpeechAudioEntity::Constructor() {
     return this;
 }
 
-// 0x4E3520
-void CAEPedSpeechAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {
-    CAEPedSpeechAudioEntity::UpdateParameters(sound, curPlayPos);
-}
-
-// 0x4E4F70
-void CAEPedSpeechAudioEntity::AddScriptSayEvent_Reversed(int32 a1, int32 a2, uint8 a3, uint8 a4, uint8 a5) {
-    CAEPedSpeechAudioEntity::AddScriptSayEvent(a1, a2, a3, a4, a5);
-}
-
-// 0x4E5670
-void CAEPedSpeechAudioEntity::Terminate_Reversed() {
-    CAEPedSpeechAudioEntity::Terminate();
-}
-
-// 0x4E5CD0
-void CAEPedSpeechAudioEntity::PlayLoadedSound_Reversed() {
-    CAEPedSpeechAudioEntity::PlayLoadedSound();
-}
-
-// 0x4E4120
-int16 CAEPedSpeechAudioEntity::GetAllocatedVoice_Reversed() {
-    return CAEPedSpeechAudioEntity::GetAllocatedVoice();
-}
-
-// 0x4E5800
-bool CAEPedSpeechAudioEntity::WillPedChatAboutTopic_Reversed(int16 topic) {
-    return CAEPedSpeechAudioEntity::WillPedChatAboutTopic(topic);
-}
-
-// 0x4E4130
-int16 CAEPedSpeechAudioEntity::GetPedType_Reversed() {
-    return CAEPedSpeechAudioEntity::GetPedType();
-}
-
-// 0x4E4150
-bool CAEPedSpeechAudioEntity::IsPedFemaleForAudio_Reversed() {
-    return CAEPedSpeechAudioEntity::IsPedFemaleForAudio();
-}
+// 0x4E3520// 0x4E4F70// 0x4E5670// 0x4E5CD0// 0x4E4120// 0x4E5800// 0x4E4130// 0x4E4150

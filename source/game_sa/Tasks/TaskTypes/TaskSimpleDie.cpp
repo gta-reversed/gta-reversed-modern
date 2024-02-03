@@ -70,6 +70,8 @@ void CTaskSimpleDie::StartAnim(CPed* ped) {
 }
 
 // 0x635DA0
+
+// 0x0
 CTask* CTaskSimpleDie::Clone() const {
     if (m_animHierarchy) {
         return new CTaskSimpleDie(m_animHierarchy, m_animFlags, m_blendDelta, m_animSpeed);
@@ -136,7 +138,7 @@ void CTaskSimpleDie::FinishAnimDieCB(CAnimBlendAssociation* association, void* d
 }
 
 void CTaskSimpleDie__InjectHooks() {
-    RH_ScopedClass(CTaskSimpleDie);
+    RH_ScopedVirtualClass(CTaskSimpleDie, 0x86DDBC, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedOverloadedInstall(Constructor, "1", 0x62FA00, CTaskSimpleDie*(CTaskSimpleDie::*)(AssocGroupId, AnimationId, float, float));
     RH_ScopedOverloadedInstall(Constructor, "2", 0x62FA60, CTaskSimpleDie*(CTaskSimpleDie::*)(const char*, const char*, eAnimationFlags, float, float));
@@ -144,8 +146,8 @@ void CTaskSimpleDie__InjectHooks() {
     RH_ScopedInstall(FinishAnimDieCB, 0x62FC10);
     RH_ScopedInstall(StartAnim, 0x637520);
     // clang moment: RH_ScopedVirtualOverloadedInstall(Clone, "", 0x635DA0,  CTask *(CTaskSimpleDie::*)());
-    RH_ScopedVirtualInstall(MakeAbortable, 0x62FBA0);
-    RH_ScopedVirtualInstall(ProcessPed, 0x6397E0);
+    RH_ScopedVMTInstall(MakeAbortable, 0x62FBA0);
+    RH_ScopedVMTInstall(ProcessPed, 0x6397E0);
 }
 
 // 0x62FA00
@@ -165,12 +167,4 @@ CTaskSimpleDie* CTaskSimpleDie::Constructor(CAnimBlendHierarchy* animHierarchy, 
     return this;
 }
 
-// 0x62FBA0
-bool CTaskSimpleDie::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return CTaskSimpleDie::MakeAbortable(ped, priority, event);
-}
-
-// 0x6397E0
-bool CTaskSimpleDie::ProcessPed_Reversed(CPed* ped) {
-    return CTaskSimpleDie::ProcessPed(ped);
-}
+// 0x62FBA0// 0x6397E0

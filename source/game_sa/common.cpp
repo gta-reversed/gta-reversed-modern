@@ -92,7 +92,7 @@ bool CalcScreenCoors(const CVector& in, CVector* out, float* screenX, float* scr
     return plugin::CallAndReturn<bool, 0x71DA00, const CVector&, CVector*, float*, float*>(in, out, screenX, screenY);
 
     // TODO: Figure out how to get screen size..
-    CVector screen =  TheCamera.m_mViewMatrix * in;
+    CVector screen =  TheCamera.m_mViewMatrix.TransformPoint(in);
     if (screen.z <= 1.0f)
         return false;
 
@@ -118,7 +118,7 @@ bool CalcScreenCoors(const CVector& in, CVector* out, float* screenX, float* scr
 bool CalcScreenCoors(const CVector& in, CVector* out) {
     return plugin::CallAndReturn<bool, 0x71DAB0, const CVector&, CVector*>(in, out);
 
-    *out = TheCamera.GetViewMatrix() * in;
+    *out = TheCamera.GetViewMatrix().TransformPoint(in);
     if (out->z <= 1.0f)
         return false;
 

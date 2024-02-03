@@ -8,7 +8,7 @@
 class CEntity;
 class CPed;
 
-class CTaskSimpleIKLookAt : public CTaskSimpleIKChain {
+class NOTSA_EXPORT_VTABLE CTaskSimpleIKLookAt : public CTaskSimpleIKChain {
 public:
     bool m_bUseTorso;
     int8 m_nPriority;
@@ -19,7 +19,10 @@ public:
     CTaskSimpleIKLookAt(Const char* name, CEntity* lookAtEntity, int32 time, ePedBones pedBoneID, CVector lookAtOffset, bool useTorso, float speed, int32 blendTime, int8 priority);
     ~CTaskSimpleIKLookAt() override = default; // 0x633EF0
 
-    eTaskType GetTaskType() const override { return Type; }
+
+
+eTaskType GetTaskType() const override { return Type; }
+
     CTaskSimpleIKLookAt* Clone() const override;
     bool CreateIKChain(CPed* ped) override;
 
@@ -33,8 +36,5 @@ private:
 
     CTaskSimpleIKLookAt* Constructor(char* name, CEntity* lookAtEntity, int32 time, ePedBones pedBoneID, RwV3d lookAtOffset, uint8 useTorso, float fSpeed, int32 blendTime, int32 priority) { this->CTaskSimpleIKLookAt::CTaskSimpleIKLookAt(name, lookAtEntity, time, pedBoneID, lookAtOffset, useTorso, fSpeed, blendTime, priority); return this; }
     CTaskSimpleIKLookAt* Destructor() { this->CTaskSimpleIKLookAt::~CTaskSimpleIKLookAt(); return this; }
-    CTask* Clone_Reversed() { return CTaskSimpleIKLookAt::Clone(); }
-    eTaskType GetTaskType_Reversed() { return CTaskSimpleIKLookAt::GetTaskType(); }
-    bool CreateIKChain_Reversed(CPed* ped) { return CTaskSimpleIKLookAt::CreateIKChain(ped); }
-};
+            };
 VALIDATE_SIZE(CTaskSimpleIKLookAt, 0x5C);

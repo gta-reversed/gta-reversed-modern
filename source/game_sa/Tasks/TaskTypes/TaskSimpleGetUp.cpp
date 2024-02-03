@@ -4,13 +4,13 @@
 #include "PedPlacement.h"
 
 void CTaskSimpleGetUp::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleGetUp);
+    RH_ScopedVirtualClass(CTaskSimpleGetUp, 0x8703E0, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x677F50);
     RH_ScopedInstall(StartAnim, 0x67C770);
     RH_ScopedInstall(FinishGetUpAnimCB, 0x678110);
-    RH_ScopedVirtualInstall(ProcessPed, 0x67FA80);
-    RH_ScopedVirtualInstall(MakeAbortable, 0x677FE0);
+    RH_ScopedVMTInstall(ProcessPed, 0x67FA80);
+    RH_ScopedVMTInstall(MakeAbortable, 0x677FE0);
 }
 
 CTaskSimpleGetUp* CTaskSimpleGetUp::Constructor() {
@@ -32,15 +32,6 @@ CTaskSimpleGetUp::~CTaskSimpleGetUp() {
 
 // 0x67FA80
 bool CTaskSimpleGetUp::ProcessPed(CPed* ped) {
-    return ProcessPed_Reversed(ped);
-}
-
-// 0x677FE0
-bool CTaskSimpleGetUp::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return MakeAbortable_Reversed(ped, priority, event);
-}
-
-bool CTaskSimpleGetUp::ProcessPed_Reversed(CPed* ped) {
     ped->m_pedIK.bSlopePitch = true;
 
     if (m_bIsFinished)
@@ -58,7 +49,8 @@ bool CTaskSimpleGetUp::ProcessPed_Reversed(CPed* ped) {
     return false;
 }
 
-bool CTaskSimpleGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
+// 0x677FE0
+bool CTaskSimpleGetUp::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
 
     if (priority == ABORT_PRIORITY_URGENT) {
         bool bTooMuchTimePassed = false;

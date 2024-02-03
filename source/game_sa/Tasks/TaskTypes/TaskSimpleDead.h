@@ -2,7 +2,7 @@
 
 #include "TaskSimple.h"
 
-class CTaskSimpleDead : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleDead : public CTaskSimple {
 public:
     uint32 m_nDeathTimeMS{};
     bool   m_bFirstTime : 1{true};
