@@ -11,24 +11,24 @@ class IKChain_c;
 
 class NOTSA_EXPORT_VTABLE CTaskSimpleIKChain : public CTaskSimple {
 public:
-    int32     m_nTime;
-    int32     m_nBlendTime;
-    IKChain_c * m_pIKChain;
-    int16     m_nAlotId;
-    ePedBones m_nPivotBoneTag;
-    ePedBones m_nEffectorBoneTag;
-    CVector   m_vecEffectorVec;
-    CEntity*  m_pEntity;
-    ePedBones m_nOffsetBoneTag;
-    int16     pad; // Must be kept, because originally `m_OffsetBoneTag` was likely an int32 - This inits the high word to 0
-    CVector   m_vecOffsetPos;
-    float     m_fSpeed;
-    bool      m_bEntityExist;
-    float     m_fBlend;
-    int32     m_nEndTime;
-    float     m_fTargetBlend;
-    int32     m_nTargetTime;
-    int32     m_bIsBlendingOut;
+    int32      m_Duration{};
+    int32      m_BlendDuration{};
+    IKChain_c* m_IKChain{};
+    int16      m_SlotId{};
+    ePedBones  m_PivotBoneTag{};
+    ePedBones  m_EffectorBoneTag{};
+    CVector    m_EffectorVec{};
+    CEntity*   m_Entity{};
+    ePedBones  m_OffsetBoneTag{};
+    int16      pad{}; // Must be kept, because originally `m_OffsetBoneTag` was likely an int32 - This inits the high word to 0
+    CVector    m_OffsetPos{};
+    float      m_Speed{};
+    bool       m_EntityExisted{};
+    float      m_Blend{};
+    int32      m_EndTime{};
+    float      m_TargetBlend{};
+    int32      m_TargetTime{};
+    int32      m_IsBlendingOut{};
 
 public:
     static constexpr auto Type = TASK_SIMPLE_IK_CHAIN;
@@ -38,18 +38,15 @@ public:
     ~CTaskSimpleIKChain() override;
 
 
-
-eTaskType GetTaskType() const override { return Type; }
-
- // 0x62EC30
-    CTask* Clone() const override;
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override; // 0x62EC30
     bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
 
     virtual bool CreateIKChain(CPed* ped);
 
     void BlendOut(int32 blendOutTime = 250);
-    IKChain_c* GetIKChain();
+    IKChain_c* GetIKChain() const;
 
 private:
     friend void InjectHooksMain();
@@ -57,5 +54,5 @@ private:
 
     CTaskSimpleIKChain* Constructor(char* name, ePedBones effectorBoneTag, RwV3d effectorVec, ePedBones pivotBoneTag, CEntity* a6, ePedBones offsetBoneTag, RwV3d offsetPos, float speed, int32 time, int32 blendTime) { this->CTaskSimpleIKChain::CTaskSimpleIKChain(name, effectorBoneTag, effectorVec, pivotBoneTag, a6, offsetBoneTag, offsetPos, speed, time, blendTime); return this; }
     CTaskSimpleIKChain* Destructor() { this->CTaskSimpleIKChain::~CTaskSimpleIKChain(); return this; }
-                    };
+};
 VALIDATE_SIZE(CTaskSimpleIKChain, 0x58);

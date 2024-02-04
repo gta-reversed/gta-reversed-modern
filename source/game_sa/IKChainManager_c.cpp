@@ -60,40 +60,38 @@ void IKChainManager_c::Update(float timeStep) {
     for (auto i = 0u; i < 4u; i++) {
         CWorld::IncrementCurrentScanCode();
 
-        for (auto it = m_ActiveList.GetHead(); it; it = it = m_ActiveList.GetNext(it)) {
-            auto& chain = *(IKChain_c*)it;
-            if (chain.m_IndexInList == i) {
-                // Update RpHAnim of ped (if any) - TODO: Maybe move this code into `IKChain_c::Update` as well..
-                if (chain.m_Ped) {
-                    if (!chain.m_Ped->IsScanCodeCurrent()) {
-                        chain.m_Ped->UpdateRpHAnim();
-                        chain.m_Ped->SetCurrentScanCode();
-                    }
-                }
-
-                // Now update the IKChain itself
-                chain.Update(timeStep);
+        for (auto& chain : m_ActiveList) {
+            if (chain.m_IndexInList != i) {
+                continue;
             }
+
+            // Update RpHAnim of ped (if any) - TODO: Maybe move this code into `IKChain_c::Update` as well..
+            if (chain.m_Ped) {
+                if (!chain.m_Ped->IsScanCodeCurrent()) {
+                    chain.m_Ped->UpdateRpHAnim();
+                    chain.m_Ped->SetCurrentScanCode();
+                }
+            }
+
+            // Now update the IKChain itself
+            chain.Update(timeStep);
         }
     }
 }
 
-/*!
- * @addr 0x618750
- * @brief Tries initing a new chain from the free list.
- * @returns A new `IKChain_c` object, unless there are no more free chains or it's init failed.
- */
-IKChain_c* IKChainManager_c::AddIKChain(const char* name,
-                                        int32 IndexInList,
-                                        CPed* ped,
-                                        ePedBones bone1,
-                                        RwV3d bonePosn,
-                                        ePedBones bone2,
-                                        CEntity* entity,
-                                        int32 offsetBoneTag,
-                                        RwV3d posn,
-                                        float speed,
-                                        int32 priority
+// 0x618750
+IKChain_c* IKChainManager_c::AddIKChain(
+    const char* name,
+    int32 IndexInList,
+    CPed* ped,
+    ePedBones bone1,
+    RwV3d bonePosn,
+    ePedBones bone2,
+    CEntity* entity,
+    int32 offsetBoneTag,
+    RwV3d posn,
+    float speed,
+    int32 priority
 ) {
     if (auto chain = m_FreeList.RemoveHead()) {
         if (chain->Init(name, IndexInList, ped, bone1, bonePosn, bone2, entity, offsetBoneTag, posn, speed, priority)) {
@@ -155,7 +153,7 @@ CEntity* IKChainManager_c::GetLookAtEntity(CPed* ped) {
 }
 
 // 0x618210
-CVector IKChainManager_c::GetLookAtOffset(CPed* ped) { // TODO: It's possible this is incorrect, originally it took the vector as an arg (although that's probably a compiler optimization)
+CVector IKChainManager_c::GetLookAtOffset(CPed* ped) {
     if (const auto task = GetPedIKLookAtTask(ped)) {
         return task->GetLookAtOffset();
     }
@@ -175,7 +173,6 @@ bool IKChainManager_c::CanAcceptLookAt(CPed* ped) {
         return false;
     }
 
-    // If ped doesn't accept look at IK's abort it (if any) and return false
     if (!ped->bDontAcceptIKLookAts) {
         if (IsLooking(ped)) {
             AbortLookAt(ped);
@@ -183,24 +180,16 @@ bool IKChainManager_c::CanAcceptLookAt(CPed* ped) {
         return false;
     }
 
-    if (ped->m_pedIK.bUnk) {
+    if (ped->m_pedIK.bEverythingUsed) {
         return false;
     }
 
-    // Check if ped has any of the anims present - TODO: Make this into a CPed funtion perhaps?
-    if (rng::any_of(
-        std::array{
-            ANIM_ID_DRNKBR_PRTL,
-            ANIM_ID_SMKCIG_PRTL,
-            ANIM_ID_DRNKBR_PRTL_F
-        }, [ped](AnimationId anim) {
-            return RpAnimBlendClumpGetAssociation(ped->m_pRwClump, anim);
-        }
-    )) {
-        return false;
-    }
-
-    return !RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_SMKCIG_PRTL_F);
+    return !RpAnimBlendClumpGetAssociation(ped->m_pRwClump, {
+        ANIM_ID_DRNKBR_PRTL,
+        ANIM_ID_SMKCIG_PRTL,
+        ANIM_ID_DRNKBR_PRTL_F,
+        ANIM_ID_SMKCIG_PRTL_F
+    });
 }
 
 // 0x618970
@@ -215,12 +204,23 @@ void IKChainManager_c::LookAt(Const char* purpose, CPed* ped, CEntity* targetEnt
     const auto lookAtOffset = posn ? *posn : CVector{};
 
     // Now, either update existing task or create one
-    if (const auto lookAt = static_cast<CTaskSimpleIKLookAt*>(taskIKMgr.GetTaskAtSlot(0))) {
-        if (priority < lookAt->m_nPriority) {
+    if (const auto tLookAt = CTask::Cast<CTaskSimpleIKLookAt>(taskIKMgr.GetTaskAtSlot(0))) {
+        if (priority < tLookAt->m_nPriority) {
             return;
         }
-        if (useTorso || !lookAt->m_bUseTorso) {
-            lookAt->UpdateLookAtInfo(purpose, ped, targetEntity, time, pedBoneId, lookAtOffset, useTorso && lookAt->m_bUseTorso, fSpeed, blendTime, priority);
+        if (useTorso || !tLookAt->m_bUseTorso) {
+            tLookAt->UpdateLookAtInfo(
+                purpose,
+                ped,
+                targetEntity,
+                time,
+                pedBoneId,
+                lookAtOffset,
+                useTorso && tLookAt->m_bUseTorso,
+                fSpeed,
+                blendTime,
+                priority
+            );
         } else {
             AbortLookAt(ped);
         }

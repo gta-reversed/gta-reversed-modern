@@ -18,6 +18,11 @@ public:
     void Reset();
     void Update(float a1);
 
+    /*!
+    * @addr 0x618750
+    * @brief Tries initing a new chain from the free list.
+    * @returns A new `IKChain_c` object, unless there are no more free chains or it's init failed.
+    */
     IKChain_c* AddIKChain(const char* name, int32 IndexInList, CPed* ped, ePedBones bone1, RwV3d bonePosn, ePedBones bone2, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float a11, int32 priority);
     void RemoveIKChain(IKChain_c* chain);
 
