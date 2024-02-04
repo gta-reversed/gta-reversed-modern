@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "TaskSimpleUseGun.h"
+#include "TaskSimpleGetUp.h"
 
 void CTaskSimpleUseGun::InjectHooks() {
     RH_ScopedVirtualClass(CTaskSimpleUseGun, 0x86D724, 9);
@@ -68,7 +69,41 @@ bool CTaskSimpleUseGun::PlayerPassiveControlGun() {
 
 // 0x61E200
 bool CTaskSimpleUseGun::RequirePistolWhip(CPed* ped, CEntity* targetEntity) {
-    return plugin::CallAndReturn<bool, 0x61E200, CPed*, CEntity*>(ped, targetEntity);
+    if (const auto tUseGun = ped->GetIntelligence()->GetTaskUseGun()) {
+        if (tUseGun->GetLastGunCommand() == eGunCommand::PISTOLWHIP) {
+            return false;
+        }
+    }
+    const auto IsPistolWhipRequiredForPed = [
+        &,
+        &pedPos = ped->GetPosition()
+    ](CPed& otherPed) {
+        if (!otherPed.IsAlive()) { // Ped is dead :D
+            return false;
+        }
+        const auto forPedHeadPos = otherPed.GetBonePosition(BONE_HEAD);
+        if (pedPos.z >= forPedHeadPos.z || pedPos.z + 1.5f <= forPedHeadPos.z) { // Ped is below/above us
+            return false;
+        }
+        if (otherPed.bFallenDown && !CTask::DynCast<CTaskSimpleGetUp>(ped->GetTaskManager().GetSimplestActiveTask())) { // Fell, but hasn't got up yet?
+            return false;
+        }
+        const auto pedToOther = otherPed.GetPosition() - ped->GetPosition();
+        if (pedToOther.SquaredMagnitude2D() >= 1.f) {
+            return false;
+        }
+        const auto pedToOtherDot = ped->GetForward().Dot(pedToOther);
+        if (pedToOtherDot <= 0.f) { // Is behind?
+            return false;
+        }
+        if (std::abs(ped->GetRight().Dot(pedToOther)) / pedToOtherDot >= 1.f / SQRT_3) { // 1/sqrt3 = 0.57730001
+            return false;
+        }
+        return true;
+    };
+    return targetEntity && targetEntity->IsPed()
+        ? IsPistolWhipRequiredForPed(*targetEntity->AsPed())
+        : rng::any_of(ped->GetIntelligence()->GetPedScanner().GetEntities<CPed>(), IsPistolWhipRequiredForPed);
 }
 
 // 0x61E040
