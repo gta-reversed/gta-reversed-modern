@@ -37,13 +37,10 @@ CTaskSimpleIKChain::CTaskSimpleIKChain(
     m_EffectorVec{ effectorPos },
     m_OffsetPos{ offsetPos },
     m_PivotBoneTag{ pivotBoneTag },
-    m_IKChain{ nullptr },
     m_Entity{ entity },
     m_EntityExisted{ !!entity },
-    m_Speed{ speed },
-    m_IsBlendingOut{ false }
+    m_Speed{ speed }
 {
-    CEntity::SafeRegisterRef(m_Entity);
 }
 
 // 0x633A90
@@ -51,7 +48,6 @@ CTaskSimpleIKChain::~CTaskSimpleIKChain() {
     if (m_IKChain) {
         g_ikChainMan.RemoveIKChain(m_IKChain);
     }
-    CEntity::ClearReference(m_Entity);
 }
 
 // 0x633B00
