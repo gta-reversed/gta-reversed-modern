@@ -9,7 +9,8 @@ class CEntity;
 class CVector;
 class CEvent;
 
-enum class eGunCommand : uint8 {
+enum class eGunCommand : int8 {
+    UNKNOWN = -1,
     NONE,
     AIM,
     FIRE,

@@ -63,37 +63,37 @@ private:
     CTaskSimpleUseGun* Constructor(CEntity* targetEntity, CVector vecTarget, eGunCommand nCommand, uint16 nBurstLength = 1, bool bAimImmediate = false);
 
 public:
-    bool m_IsFinished;
-    bool m_IsInControl;
-    bool m_HasMoveControl;
-    bool m_HasFiredGun;
-    bool m_IsLOSBlocked;
+    bool m_IsFinished{};
+    bool m_IsInControl{true};
+    bool m_HasMoveControl{};
+    bool m_HasFiredGun{};
+    bool m_IsLOSBlocked{};
 
     union {
-        uint8 m_FireGunThisFrame;
+        uint8 m_FireGunThisFrame{};
         struct {
             uint8 bRightHand : 1;
             uint8 bLefttHand : 1;
         };
     };
 
-    bool m_SkipAim;
+    bool m_SkipAim{};
 
-    eGunCommand  m_NextCmd;
-    eGunCommand  m_LastCmd; // active command
-    CVector2D    m_MoveCmd;
-    CEntity::Ref m_TargetEntity;
-    CVector      m_TargetPos;
+    eGunCommand  m_NextCmd{};
+    eGunCommand  m_LastCmd{eGunCommand::UNKNOWN}; // active command
+    CVector2D    m_MoveCmd{0.f, 0.f};
+    CEntity::Ref m_TargetEntity{};
+    CVector      m_TargetPos{};
 
-    CAnimBlendAssociation* m_Anim;
+    CAnimBlendAssociation* m_Anim{};
 
-    CWeaponInfo* m_WeaponInfo;
-    uint16       m_BurstLength;
-    uint16       m_BurstShots;
+    CWeaponInfo* m_WeaponInfo{};
+    uint16       m_BurstLength{};
+    uint16       m_BurstShots{};
 
-    uint8 m_CountDownFrames;
-    bool  m_IsArmIKInUse;
-    bool  m_IsLookIKInUse;
-    bool  m_IsAimImmediate;
+    int8 m_CountDownFrames{ -1 };
+    bool m_IsArmIKInUse{};
+    bool m_IsLookIKInUse{};
+    bool m_IsAimImmediate{};
 };
 VALIDATE_SIZE(CTaskSimpleUseGun, 0x3C);

@@ -27,19 +27,30 @@ void CTaskSimpleUseGun::InjectHooks() {
 }
 
 // 0x61DE60
-CTaskSimpleUseGun::CTaskSimpleUseGun(CEntity* targetEntity, CVector vecTarget, eGunCommand nCommand, uint16 nBurstLength, bool bAimImmediate) : CTaskSimple() {
-    plugin::CallMethodAndReturn<CTaskSimpleUseGun*, 0x61DE60, CTaskSimpleUseGun*, CEntity*, CVector, eGunCommand, uint16, bool>(this, targetEntity, vecTarget, nCommand, nBurstLength, bAimImmediate);
+CTaskSimpleUseGun::CTaskSimpleUseGun(CEntity* targetEntity, CVector vecTarget, eGunCommand firstCmd, uint16 burstLength, bool isAimImmediate) :
+    m_NextCmd{firstCmd},
+    m_TargetPos{vecTarget},
+    m_TargetEntity{targetEntity},
+    m_BurstShots{burstLength},
+    m_IsAimImmediate{isAimImmediate}
+{
 }
 
 // 0x61DF30
 CTaskSimpleUseGun::~CTaskSimpleUseGun() {
-    if (m_Anim)
+    if (m_Anim) {
         m_Anim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
+    }
 }
 
 // 0x61E0C0
-bool CTaskSimpleUseGun::ControlGunMove(const CVector2D& moveSpeed) {
-    return plugin::CallMethodAndReturn<bool, 0x61E0C0, CTaskSimpleUseGun*>(this, &moveSpeed);
+bool CTaskSimpleUseGun::ControlGunMove(const CVector2D& moveDir) {
+    const auto maxDelta = CTimer::GetTimeStep() * 0.07f;
+    for (size_t i = 0; i < 2; i++) {
+        m_MoveCmd[i] = std::clamp(moveDir[i], m_MoveCmd[i] - maxDelta, m_MoveCmd[i] + maxDelta);
+    }
+    m_HasMoveControl = true;
+    return true;
 }
 
 // 0x61E0A0
