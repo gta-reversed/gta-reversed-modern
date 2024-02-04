@@ -7,15 +7,16 @@ class CPed;
 
 class NOTSA_EXPORT_VTABLE CTaskComplexFacial : public CTaskComplex {
 public:
-    bool              m_bNotPlayer;
-    bool              m_bStarted;
-    bool              m_bIsAborting;
+    bool              m_IsNotPlayer;
+    bool              m_HasStarted;
+    bool              m_IsAborting;
 
-    eFacialExpression m_nFacialExpression1;
-    int32             m_nDuration1;
 
-    eFacialExpression m_nFacialExpression2;
-    int32             m_nDuration2;
+    eFacialExpression m_RequestA;
+    int32             m_DurationA;
+
+    eFacialExpression m_RequestB;
+    int32             m_DurationB;
 
 public:
     static constexpr auto Type = TASK_COMPLEX_FACIAL;
