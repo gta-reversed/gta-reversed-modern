@@ -689,7 +689,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
     }
     else if (m_pedPieceType == PED_PIECE_TORSO) {
         bool bMultiplyForceWithPedStrength = false;
-        if (sourceEntityTaskUseGun && sourceEntityTaskUseGun->m_nLastCommand == eGunCommand::PISTOLWHIP) {
+        if (sourceEntityTaskUseGun && sourceEntityTaskUseGun->GetLastGunCommand() == eGunCommand::PISTOLWHIP) {
             if (m_ucDirection)
                 bMultiplyForceWithPedStrength = true;
             if (ped->IsPlayer())
@@ -737,7 +737,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                     m_bFallDown = true;
                 bPlayHitAnim = false;
             }
-            else if (sourceEntityTaskUseGun && sourceEntityTaskUseGun->m_nLastCommand == eGunCommand::PISTOLWHIP) {
+            else if (sourceEntityTaskUseGun && sourceEntityTaskUseGun->m_LastCmd == eGunCommand::PISTOLWHIP) {
                 m_nAnimGroup = CTaskSimpleFight::m_aComboData[0].m_nAnimGroup;
                 m_nAnimID = ANIM_ID_FIGHT_HIT_2;
                 m_fAnimBlend = 16.0f;

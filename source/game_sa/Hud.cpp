@@ -645,7 +645,7 @@ void CHud::DrawCrossHairs() {
     }
 
     CTaskSimpleUseGun* localTakUseGun = player->GetIntelligence()->GetTaskUseGun();
-    if (!player->m_pTargetedObject && !player->bIsRestoringLook && (!localTakUseGun || !localTakUseGun->m_bSkipAim)) {
+    if (!player->m_pTargetedObject && !player->bIsRestoringLook && (!localTakUseGun || !localTakUseGun->m_SkipAim)) {
         if (camMode == MODE_AIMWEAPON || camMode == MODE_AIMWEAPON_FROMCAR || camMode == MODE_AIMWEAPON_ATTACHED) {
             if (player->m_nPedState != ePedState::PEDSTATE_ENTER_CAR && player->m_nPedState != ePedState::PEDSTATE_CARJACK) {
                 if ((activeWeapon.m_Type >= eWeaponType::WEAPON_PISTOL &&
