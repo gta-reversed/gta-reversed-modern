@@ -17,8 +17,8 @@ enum class eGunCommand : int8 {
     FIREBURST,
     RELOAD,
     PISTOLWHIP,
-    END_LEISURE,
-    END_NOW,
+    END_LEISURE, //! End task when possible
+    END_NOW,     //! End task immidiately
 };
 
 class NOTSA_EXPORT_VTABLE CTaskSimpleGunControl : public CTaskSimple {

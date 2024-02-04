@@ -21,6 +21,7 @@ void CTaskSimpleUseGun::InjectHooks() {
     RH_ScopedInstall(ControlGun, 0x61E040);
     RH_ScopedInstall(SkipAim, 0x61DFA0);
     RH_ScopedInstall(ControlGunMove, 0x61E0C0);
+    RH_ScopedInstall(RemoveStanceAnims, 0x61E8E0);
     RH_ScopedVMTInstall(Clone, 0x622F20, { .reversed = false });
     RH_ScopedVMTInstall(GetTaskType, 0x61DF20, { .reversed = false });
     RH_ScopedVMTInstall(MakeAbortable, 0x624E30, { .reversed = false });
@@ -66,6 +67,11 @@ bool CTaskSimpleUseGun::PlayerPassiveControlGun() {
         return true;
     }
     return false;
+}
+
+// 0x61E8E0
+void CTaskSimpleUseGun::RemoveStanceAnims(CPed* ped, float x) {
+    plugin::CallMethod<0x61E8E0>(this, ped, x);
 }
 
 // 0x61E200
@@ -151,7 +157,27 @@ void CTaskSimpleUseGun::ClearAnim(CPed* ped) {
 
 // 0x624E30
 bool CTaskSimpleUseGun::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return plugin::CallMethodAndReturn<bool, 0x624E30, CTaskSimpleUseGun*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
+    if (priority == ABORT_PRIORITY_LEISURE) {
+        m_NextCmd = eGunCommand::END_LEISURE;
+        return false;
+    }
+    RemoveStanceAnims(ped, -4.f);
+    if (priority == ABORT_PRIORITY_IMMEDIATE) {
+        CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 1000.f);
+    }
+    if (m_Anim) {
+        if (priority == ABORT_PRIORITY_IMMEDIATE) {
+            m_Anim->SetBlendDelta(-1000.f);
+        }
+        m_Anim->SetDefaultDeleteCallback();
+        m_Anim = nullptr;
+    }
+    m_IsFinished = true;
+    SkipAim(ped);
+    if (const auto pd = ped->m_pPlayerData) {
+        pd->m_fAttackButtonCounter = 0.f;
+    }
+    return true;
 }
 
 // 0x62A380

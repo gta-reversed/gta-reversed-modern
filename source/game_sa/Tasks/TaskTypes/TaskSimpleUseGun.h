@@ -41,7 +41,7 @@ public:
 
     void FireGun(CPed* ped, bool);
     bool PlayerPassiveControlGun();
-    void RemoveStanceAnims(CPed* ped, float);
+    void RemoveStanceAnims(CPed* ped, float x);
     static bool RequirePistolWhip(CPed* ped, CEntity* entity);
     void Reset(CPed* ped, CEntity* entity, CVector posn, int8 unused, int16 burstAmmoCnt);
 
