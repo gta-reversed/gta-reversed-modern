@@ -31,8 +31,8 @@ public:
     void AbortIK(CPed* ped);
     void AimGun(CPed* ped);
 
-    int32 SkipAim(CPed* ped);
-    int32 ClearAnim(CPed* ped);
+    void SkipAim(CPed* ped);
+    void ClearAnim(CPed* ped);
 
     bool ControlGun(CPed* ped, CEntity* target, eGunCommand cmd);
     bool ControlGunMove(const CVector2D& moveSpeed);

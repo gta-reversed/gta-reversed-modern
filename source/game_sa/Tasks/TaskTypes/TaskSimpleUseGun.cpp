@@ -1,5 +1,6 @@
 #include "StdInc.h"
 
+#include "IKChainManager_c.h"
 #include "TaskSimpleUseGun.h"
 #include "TaskSimpleGetUp.h"
 
@@ -17,7 +18,7 @@ void CTaskSimpleUseGun::InjectHooks() {
     //RH_ScopedInstall(StartCountDown, 0x61E160, { .reversed = false });
     RH_ScopedInstall(ClearAnim, 0x61E190, { .reversed = false });
     RH_ScopedInstall(PlayerPassiveControlGun, 0x61E0A0);
-    RH_ScopedInstall(ControlGun, 0x61E040, { .reversed = false });
+    RH_ScopedInstall(ControlGun, 0x61E040);
     RH_ScopedInstall(SkipAim, 0x61DFA0, { .reversed = false });
     RH_ScopedInstall(ControlGunMove, 0x61E0C0);
     RH_ScopedVMTInstall(Clone, 0x622F20, { .reversed = false });
@@ -119,13 +120,23 @@ bool CTaskSimpleUseGun::ControlGun(CPed* ped, CEntity* target, eGunCommand cmd) 
 }
 
 // 0x61DFA0
-int32 CTaskSimpleUseGun::SkipAim(CPed* ped) {
-    return plugin::CallMethodAndReturn<int32, 0x61DFA0, CTaskSimpleUseGun*, CPed*>(this, ped);
+void CTaskSimpleUseGun::SkipAim(CPed* ped) {
+    if (m_IsArmIKInUse) {
+        for (int32 armN = 0; armN < 2; armN++) {
+            g_ikChainMan.AbortPointArm(armN, ped); // No need to call IsArmPointing, as AbortPointArm does checks too...
+        }
+        m_IsArmIKInUse = false;
+    }
+    if (m_IsLookIKInUse) {
+        g_ikChainMan.AbortLookAt(ped); // No need to check `IsLooking` here either
+        m_IsLookIKInUse = false;
+    }
+    ped->m_pedIK.bUnk = false;
 }
 
 // 0x61E190
-int32 CTaskSimpleUseGun::ClearAnim(CPed* ped) {
-    return plugin::CallMethodAndReturn<int32, 0x61E190, CTaskSimpleUseGun*, CPed*>(this, ped);
+void CTaskSimpleUseGun::ClearAnim(CPed* ped) {
+    return plugin::CallMethodAndReturn<void, 0x61E190, CTaskSimpleUseGun*, CPed*>(this, ped);
 }
 
 // 0x624E30

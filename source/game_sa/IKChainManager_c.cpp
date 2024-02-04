@@ -230,16 +230,16 @@ void IKChainManager_c::LookAt(Const char* purpose, CPed* ped, CEntity* targetEnt
 }
 
 // 0x6182B0
-bool __stdcall IKChainManager_c::IsArmPointing(int32 slot, CPed* ped) {
+bool __stdcall IKChainManager_c::IsArmPointing(int32 armId, CPed* ped) {
     const auto mgr = GetPedIKManagerTask(ped);
-    return mgr && mgr->GetTaskAtSlot(slot + 1);
+    return mgr && mgr->GetTaskAtSlot(armId ? 2 : 1);
 }
 
 // 0x6182F0
-void __stdcall IKChainManager_c::AbortPointArm(int32 slot, CPed* ped, int32 blendOutTime) {
+void __stdcall IKChainManager_c::AbortPointArm(int32 armId, CPed* ped, int32 blendOutTime) {
     const auto mgr = GetPedIKManagerTask(ped);
     assert(mgr);
-    if (const auto lookAt = static_cast<CTaskSimpleIKChain*>(mgr->GetTaskAtSlot(slot + 1))) {
+    if (const auto lookAt = static_cast<CTaskSimpleIKChain*>(mgr->GetTaskAtSlot(armId ? 2 : 1))) {
         lookAt->BlendOut(blendOutTime);
     }
 }
@@ -256,15 +256,13 @@ bool IKChainManager_c::IsFacingTarget(CPed* ped, int32 slot) const {
 
 // 0x618B60
 void IKChainManager_c::PointArm(Const char* purpose, int32 arm, CPed* ped, CEntity* target, ePedBones pedBoneId, CVector* posn, float speed, int32 blendTime, float dist) {
-    assert(arm <= 1); // I have a theory: that is, that `arm` is a bool, like `bool isLeftArm`. Let's test it!
-
     if (!CanAccept(ped, dist)) {
         return;
     }
 
     auto& taskIKMgr = *GetPedIKManagerTask(ped, true);
 
-    const auto slot = arm + 1;
+    const auto slot = arm ? 2 : 1;
 
     const auto offset = posn ? *posn : CVector{};
 

@@ -16,15 +16,13 @@ void CTaskSimpleIKPointArm::InjectHooks() {
 }
 
 // 0x634150
-CTaskSimpleIKPointArm::CTaskSimpleIKPointArm(const char* purpose, int32 hand, CEntity* targetEntity, ePedBones bone, CVector offsetPos, float speed, int32 blendTime)
-    : CTaskSimpleIKChain{purpose, hand ? BONE_L_HAND : BONE_R_HAND, CVector{ 0.f, 0.05f, 0.f }, BONE_NORMAL, targetEntity, bone, offsetPos, speed, 999'999, blendTime}
+CTaskSimpleIKPointArm::CTaskSimpleIKPointArm(const char* purpose, int32 arm, CEntity* targetEntity, ePedBones bone, CVector offsetPos, float speed, int32 blendTime)
+    : CTaskSimpleIKChain{purpose, arm ? BONE_L_HAND : BONE_R_HAND, CVector{ 0.f, 0.05f, 0.f }, BONE_NORMAL, targetEntity, bone, offsetPos, speed, 999'999, blendTime}
 {
-    m_Hand = hand;
+    m_Hand = arm;
 }
 
 // 0x634250
-
-
 CTask* CTaskSimpleIKPointArm::Clone() const {
     auto* task = new CTaskSimpleIKPointArm("", m_Hand, m_pEntity, m_nOffsetBoneTag, m_vecOffsetPos, m_fSpeed, m_nBlendTime);
     if (m_pIKChain) {
@@ -59,8 +57,6 @@ void CTaskSimpleIKPointArm::UpdatePointArmInfo(const char* purpose, CEntity* ent
 }
 
 // 0x6342F0
-
-// 0x0
 bool CTaskSimpleIKPointArm::CreateIKChain(CPed* ped) {
     m_pIKChain = g_ikChainMan.AddIKChain("", m_Hand ? BONE_SPINE : BONE_PELVIS, ped, m_nEffectorBoneTag, m_vecEffectorVec, BONE_NECK, m_pEntity, m_nOffsetBoneTag, m_vecOffsetPos, m_fSpeed, 3);
     return m_pIKChain != nullptr;
