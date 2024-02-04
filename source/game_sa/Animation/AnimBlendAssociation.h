@@ -142,8 +142,13 @@ public:
     void SetBlend(float blendAmount, float blendDelta);
     void SetBlendTo(float blendAmount, float blendDelta);
     void SetCurrentTime(float currentTime);
+
     void SetDeleteCallback(void(*callback)(CAnimBlendAssociation*, void*), void* data = nullptr);
+    void SetDefaultDeleteCallback() { SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr); }
+
     void SetFinishCallback(void(*callback)(CAnimBlendAssociation*, void*), void* data = nullptr);
+    void SetDefaultFinishCallback() { SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr); }
+
     void Start(float currentTime = 0.f);
     void SyncAnimation(CAnimBlendAssociation* syncWith);
     bool UpdateBlend(float mult);
@@ -169,7 +174,6 @@ public:
     }
 
     auto GetNodes() { return std::span{ &m_BlendNodes, m_NumBlendNodes }; }
-    void SetDefaultFinishCallback() { SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr); }
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

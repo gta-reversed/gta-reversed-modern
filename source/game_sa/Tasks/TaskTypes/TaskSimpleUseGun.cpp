@@ -16,10 +16,10 @@ void CTaskSimpleUseGun::InjectHooks() {
     //RH_ScopedInstall(AimGun, 0x61ED10, { .reversed = false });
     //RH_ScopedInstall(FireGun, 0x61EB10, { .reversed = false });
     //RH_ScopedInstall(StartCountDown, 0x61E160, { .reversed = false });
-    RH_ScopedInstall(ClearAnim, 0x61E190, { .reversed = false });
+    RH_ScopedInstall(ClearAnim, 0x61E190);
     RH_ScopedInstall(PlayerPassiveControlGun, 0x61E0A0);
     RH_ScopedInstall(ControlGun, 0x61E040);
-    RH_ScopedInstall(SkipAim, 0x61DFA0, { .reversed = false });
+    RH_ScopedInstall(SkipAim, 0x61DFA0);
     RH_ScopedInstall(ControlGunMove, 0x61E0C0);
     RH_ScopedVMTInstall(Clone, 0x622F20, { .reversed = false });
     RH_ScopedVMTInstall(GetTaskType, 0x61DF20, { .reversed = false });
@@ -136,7 +136,17 @@ void CTaskSimpleUseGun::SkipAim(CPed* ped) {
 
 // 0x61E190
 void CTaskSimpleUseGun::ClearAnim(CPed* ped) {
-    return plugin::CallMethodAndReturn<void, 0x61E190, CTaskSimpleUseGun*, CPed*>(this, ped);
+    if (m_Anim) {
+        if (m_Anim->GetBlendAmount() > 0.f && m_Anim->GetBlendDelta() >= 0.f) {
+            m_Anim->SetBlendDelta(-8.f);
+        }
+        m_Anim->SetDefaultDeleteCallback();
+        m_Anim = nullptr;
+    }
+    if (m_LastCmd != eGunCommand::END_NOW) {
+        m_LastCmd = eGunCommand::NONE;
+    }
+    SkipAim(ped);
 }
 
 // 0x624E30
