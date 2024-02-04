@@ -33,9 +33,9 @@ public:
      * @addr 0x691230
      * @brief Set requests for facial expression animations
      * @param       typeA First type to play
-     * @param       durA First type's duration
+     * @param       durA First type's duration [ms]
      * @param [opt] typeB Type to play after the first one has finished
-     * @param [opt] durB Second type's duration
+     * @param [opt] durB Second type's duration [ms]
     */
     void SetRequest(eFacialExpression typeA, int32 durA, eFacialExpression typeB = eFacialExpression::NONE, int32 durB = -1);
 
