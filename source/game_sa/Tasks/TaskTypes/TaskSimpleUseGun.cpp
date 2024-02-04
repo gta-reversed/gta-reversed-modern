@@ -15,10 +15,10 @@ void CTaskSimpleUseGun::InjectHooks() {
     RH_ScopedInstall(FireGun, 0x61EB10, { .reversed = false });
     RH_ScopedInstall(StartCountDown, 0x61E160, { .reversed = false });
     RH_ScopedInstall(ClearAnim, 0x61E190, { .reversed = false });
-    RH_ScopedInstall(PlayerPassiveControlGun, 0x61E0A0, { .reversed = false });
+    RH_ScopedInstall(PlayerPassiveControlGun, 0x61E0A0);
     RH_ScopedInstall(ControlGun, 0x61E040, { .reversed = false });
     RH_ScopedInstall(SkipAim, 0x61DFA0, { .reversed = false });
-    RH_ScopedInstall(ControlGunMove, 0x61E0C0, { .reversed = false });
+    RH_ScopedInstall(ControlGunMove, 0x61E0C0);
     RH_ScopedVMTInstall(Clone, 0x622F20, { .reversed = false });
     RH_ScopedVMTInstall(GetTaskType, 0x61DF20, { .reversed = false });
     RH_ScopedVMTInstall(MakeAbortable, 0x624E30, { .reversed = false });
@@ -55,7 +55,15 @@ bool CTaskSimpleUseGun::ControlGunMove(const CVector2D& moveDir) {
 
 // 0x61E0A0
 bool CTaskSimpleUseGun::PlayerPassiveControlGun() {
-    return plugin::CallMethodAndReturn<bool, 0x61E0A0, CTaskSimpleUseGun*>(this);
+    m_IsInControl = true;
+    const auto IsCommandPassive = [](eGunCommand c) {
+        return notsa::contains({ eGunCommand::UNKNOWN, eGunCommand::NONE, eGunCommand::AIM }, c);
+    };
+    if (IsCommandPassive(m_LastCmd) && IsCommandPassive(m_NextCmd)) {
+        m_NextCmd = eGunCommand::END_LEISURE;
+        return true;
+    }
+    return false;
 }
 
 // 0x61E200
