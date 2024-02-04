@@ -10,11 +10,11 @@ void CTaskSimpleUseGun::InjectHooks() {
     //RH_ScopedInstall(Constructor, 0x61DE60);
     //RH_ScopedInstall(Destructor, 0x61DF30);
 
-    RH_ScopedGlobalInstall(RequirePistolWhip, 0x61E200, { .reversed = false });
+    RH_ScopedGlobalInstall(RequirePistolWhip, 0x61E200);
     RH_ScopedInstall(Reset, 0x624DC0, { .reversed = false });
-    RH_ScopedInstall(AimGun, 0x61ED10, { .reversed = false });
-    RH_ScopedInstall(FireGun, 0x61EB10, { .reversed = false });
-    RH_ScopedInstall(StartCountDown, 0x61E160, { .reversed = false });
+    //RH_ScopedInstall(AimGun, 0x61ED10, { .reversed = false });
+    //RH_ScopedInstall(FireGun, 0x61EB10, { .reversed = false });
+    //RH_ScopedInstall(StartCountDown, 0x61E160, { .reversed = false });
     RH_ScopedInstall(ClearAnim, 0x61E190, { .reversed = false });
     RH_ScopedInstall(PlayerPassiveControlGun, 0x61E0A0);
     RH_ScopedInstall(ControlGun, 0x61E040, { .reversed = false });
@@ -108,7 +108,14 @@ bool CTaskSimpleUseGun::RequirePistolWhip(CPed* ped, CEntity* targetEntity) {
 
 // 0x61E040
 bool CTaskSimpleUseGun::ControlGun(CPed* ped, CEntity* target, eGunCommand cmd) {
-    return plugin::CallMethodAndReturn<bool, 0x61E040, CTaskSimpleUseGun*, CPed*, CEntity*, eGunCommand>(this, ped, target, cmd);
+    m_IsInControl = true;
+    if (target != m_TargetEntity) { // New target?
+        m_TargetEntity  = target;
+        m_IsArmIKInUse  = false;
+        m_IsLookIKInUse = false;
+    }
+    m_NextCmd = std::max(cmd, m_NextCmd);
+    return true;
 }
 
 // 0x61DFA0
