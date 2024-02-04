@@ -2,10 +2,22 @@
 
 #include "TaskSimpleFacial.h"
 
+void CTaskSimpleFacial::InjectHooks() {
+    RH_ScopedVirtualClass(CTaskSimpleFacial, 0x870ab8, 9);
+    RH_ScopedCategory("Tasks/TaskTypes");
+
+    RH_ScopedGlobalInstall(GetAnimId, 0x690CC0);
+    RH_ScopedVMTInstall(Clone, 0x692820);
+    RH_ScopedVMTInstall(GetTaskType, 0x690CA0);
+    RH_ScopedVMTInstall(MakeAbortable, 0x692E50);
+    RH_ScopedVMTInstall(ProcessPed, 0x692E80);
+}
+
 // 0x690C70
-CTaskSimpleFacial::CTaskSimpleFacial(eFacialExpression nFacialExpress, int32 nDuration) : CTaskSimple() {
-    m_Duration = nDuration;
-    m_Type = nFacialExpress;
+CTaskSimpleFacial::CTaskSimpleFacial(eFacialExpression type, int32 durMs) :
+    m_Duration{ durMs },
+    m_Type{ type }
+{
 }
 
 // See Android, looks like **map**
@@ -44,18 +56,18 @@ bool CTaskSimpleFacial::ProcessPed(CPed* ped) {
     if (RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_FACTALK)) {
         if (animId == ANIM_ID_FACTALK) {
             if (CGeneral::GetRandomNumberInRange(0, 100) < 40) {
-                anim->m_Speed = CGeneral::GetRandomNumberInRange(0.5f, 3.0f);
+                anim->SetSpeed(CGeneral::GetRandomNumberInRange(0.5f, 3.0f));
             }
             return false;
         }
         if (anim) {
             anim->SetFlag(ANIMATION_FREEZE_LAST_FRAME, true);
-            anim->m_BlendDelta = -4.0f;
+            anim->SetBlendDelta(-4.0f);
         }
         return true;
     }
 
-    if (!m_Timer.m_bStarted) {
+    if (!m_Timer.IsStarted()) {
         if (!anim) {
             CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, animId, 4.0f);
             m_Timer.Start(m_Duration);

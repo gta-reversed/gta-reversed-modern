@@ -27,12 +27,9 @@ enum class eFacialExpression {
 
 class NOTSA_EXPORT_VTABLE CTaskSimpleFacial : public CTaskSimple {
 public:
-    CTaskTimer        m_Timer;
-    eFacialExpression m_Type;
-    int32             m_Duration;
-
-public:
     static constexpr auto Type = TASK_SIMPLE_FACIAL;
+
+    static void InjectHooks();
 
     CTaskSimpleFacial(eFacialExpression nFacialExpress, int32 nDuration);
     ~CTaskSimpleFacial() override = default; // 0x690CB0
@@ -46,5 +43,10 @@ public:
     void StartTimer(int32 dur) { m_Timer.Start(dur); }
 
     static AnimationId GetAnimId(eFacialExpression expression);
+
+private:
+    CTaskTimer        m_Timer;
+    eFacialExpression m_Type;
+    int32             m_Duration;
 };
 VALIDATE_SIZE(CTaskSimpleFacial, 0x1C);

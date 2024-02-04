@@ -455,8 +455,8 @@ void CEventHandler::SetEventResponseTask(const CEvent& event) {
     }
 
     if (m_AttackTask) {
-        if (const auto tattack = tm->GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
-            tattack->MakeAbortable(m_Ped);
+        if (const auto tAttack = tm->GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
+            tAttack->MakeAbortable(m_Ped);
         }
         tm->SetTaskSecondary(m_AttackTask, TASK_SECONDARY_ATTACK);
     }
@@ -470,10 +470,10 @@ void CEventHandler::SetEventResponseTask(const CEvent& event) {
     }
 
     if (event.HasEditableResponse()) {
-        const auto eEditable = &static_cast<const CEventEditableResponse&>(event);
+        const auto eResponse = &static_cast<const CEventEditableResponse&>(event);
         if (const auto tfacial = tm->GetTaskSecondaryFacial()) {
-            if (eEditable->GetFacialExpressionType() != eFacialExpression::NONE) {
-                tfacial->SetRequest(eEditable->GetFacialExpressionType(), 10'000);
+            if (eResponse->GetFacialExpressionType() != eFacialExpression::NONE) {
+                tfacial->SetRequest(eResponse->GetFacialExpressionType(), 10'000);
             }
         }
     }
