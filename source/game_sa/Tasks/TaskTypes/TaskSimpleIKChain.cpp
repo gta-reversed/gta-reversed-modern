@@ -145,6 +145,5 @@ bool CTaskSimpleIKChain::ProcessPed(CPed* ped) {
 // 0x633BD0
 bool CTaskSimpleIKChain::CreateIKChain(CPed* ped) {
     m_IKChain = g_ikChainMan.AddIKChain("", 3, ped, m_EffectorBoneTag, m_EffectorVec, m_PivotBoneTag, m_Entity, m_OffsetBoneTag, m_OffsetPos, m_Speed, 3);
-    return m_IKChain != nullptr;
+    return !!m_IKChain;
 }
-

@@ -3,6 +3,7 @@
 #include "Base.h"
 #include <rwplcore.h>
 #include "TaskSimple.h"
+#include <extensions/WEnum.hpp>
 
 class CEntity;
 class CPed;
@@ -10,26 +11,6 @@ class CTaskSimpleIKChain;
 class IKChain_c;
 
 class NOTSA_EXPORT_VTABLE CTaskSimpleIKChain : public CTaskSimple {
-public:
-    int32      m_Duration{};
-    int32      m_BlendDuration{};
-    IKChain_c* m_IKChain{};
-    int16      m_SlotId{};
-    ePedBones  m_PivotBoneTag{};
-    ePedBones  m_EffectorBoneTag{};
-    CVector    m_EffectorVec{};
-    CEntity*   m_Entity{};
-    ePedBones  m_OffsetBoneTag{};
-    int16      pad{}; // Must be kept, because originally `m_OffsetBoneTag` was likely an int32 - This inits the high word to 0
-    CVector    m_OffsetPos{};
-    float      m_Speed{};
-    bool       m_EntityExisted{};
-    float      m_Blend{};
-    int32      m_EndTime{};
-    float      m_TargetBlend{};
-    int32      m_TargetTime{};
-    int32      m_IsBlendingOut{};
-
 public:
     static constexpr auto Type = TASK_SIMPLE_IK_CHAIN;
 
@@ -54,5 +35,24 @@ private:
 
     CTaskSimpleIKChain* Constructor(char* name, ePedBones effectorBoneTag, RwV3d effectorVec, ePedBones pivotBoneTag, CEntity* a6, ePedBones offsetBoneTag, RwV3d offsetPos, float speed, int32 time, int32 blendTime) { this->CTaskSimpleIKChain::CTaskSimpleIKChain(name, effectorBoneTag, effectorVec, pivotBoneTag, a6, offsetBoneTag, offsetPos, speed, time, blendTime); return this; }
     CTaskSimpleIKChain* Destructor() { this->CTaskSimpleIKChain::~CTaskSimpleIKChain(); return this; }
+
+public:
+    int32                      m_Duration{};
+    int32                      m_BlendDuration{};
+    IKChain_c*                 m_IKChain{};
+    int16                      m_SlotId{};
+    ePedBones                  m_PivotBoneTag{};
+    ePedBones                  m_EffectorBoneTag{};
+    CVector                    m_EffectorVec{};
+    CEntity::Ref               m_Entity{};
+    notsa::WEnumS32<ePedBones> m_OffsetBoneTag;
+    CVector                    m_OffsetPos{};
+    float                      m_Speed{};
+    bool                       m_EntityExisted{};
+    float                      m_Blend{};
+    int32                      m_EndTime{};
+    float                      m_TargetBlend{};
+    int32                      m_TargetTime{};
+    int32                      m_IsBlendingOut{};
 };
 VALIDATE_SIZE(CTaskSimpleIKChain, 0x58);

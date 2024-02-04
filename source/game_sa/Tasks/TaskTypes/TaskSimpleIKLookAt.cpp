@@ -46,7 +46,7 @@ CTaskSimpleIKLookAt* CTaskSimpleIKLookAt::Clone() const {
 void CTaskSimpleIKLookAt::UpdateLookAtInfo(const char* strPurpose, CPed* ped, CEntity* targetPed, int32 time, ePedBones pedBoneID, RwV3d lookAtOffset, bool useTorso, float fSpeed,
                                            int32 blendTime, int32 unused) {
     m_EntityExisted = !!targetPed;
-    CEntity::ChangeEntityReference(m_Entity, targetPed);
+    m_Entity = targetPed;
 
     m_OffsetBoneTag = pedBoneID;
     m_OffsetPos   = lookAtOffset;

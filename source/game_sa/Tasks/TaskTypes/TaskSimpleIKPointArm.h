@@ -17,11 +17,9 @@ public:
     CTaskSimpleIKPointArm(const char* purpose, int32 hand, CEntity* targetEntity, ePedBones bone, CVector offsetPos, float speed, int32 blendTime);
     ~CTaskSimpleIKPointArm() override = default; // 0x634240
 
+    eTaskType GetTaskType() const override { return Type; }
 
-
-eTaskType GetTaskType() const override { return Type; }
-
- // Weird.. L_ARM never used?
+    // Weird.. L_ARM never used?
     CTask* Clone() const override;
 
     bool CreateIKChain(CPed* ped) override;
