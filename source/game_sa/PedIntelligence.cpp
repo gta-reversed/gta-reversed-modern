@@ -541,13 +541,13 @@ void CPedIntelligence::FlushImmediately(bool bSetPrimaryDefaultTask) {
 }
 
 // 0x6018D0
-C2dEffect* CPedIntelligence::GetEffectInUse() const {
-    return m_eventScanner.m_attractorScanner.m_pEffectInUse;
+C2dEffectPedAttractor* CPedIntelligence::GetEffectInUse() const {
+    return m_eventScanner.GetAttractorScanner().GetPreviousEffect();
 }
 
 // 0x6018E0
-void CPedIntelligence::SetEffectInUse(C2dEffect* effect) {
-    m_eventScanner.m_attractorScanner.m_pEffectInUse = effect;
+void CPedIntelligence::SetEffectInUse(C2dEffectPedAttractor* effect) {
+    m_eventScanner.GetAttractorScanner().SetPreviousEffect(effect);
 }
 
 // 0x6018F0
@@ -700,7 +700,7 @@ void CPedIntelligence::FlushIntelligence() {
     m_eventGroup.Flush(false);
     m_vehicleScanner.Clear();
     m_pedScanner.Clear();
-    m_eventScanner.m_attractorScanner.Clear();
+    m_eventScanner.Clear();
 }
 
 // 0x601E00
@@ -995,11 +995,7 @@ float CPedIntelligence::GetPedFOVRange() const {
 
 // 0x421050
 void CPedIntelligence::IncrementAngerAtPlayer(uint8 anger) {
-    if (!m_mentalState.m_AngerTimer.IsOutOfTime()) {
-        return;
-    }
-    m_mentalState.m_AngerTimer.Start(3000);
-    m_mentalState.m_AngerAtPlayer += anger;
+    m_mentalState.IncrementAngerAtPlayer(anger);
 }
 
 // 0x6074A0
@@ -1014,8 +1010,8 @@ void CPedIntelligence::operator delete(void* object) {
 
 // NOTSA
 CVehicle* CPedIntelligence::GetEnteringVehicle() {
-    for (const auto taskt : { TASK_COMPLEX_ENTER_CAR_AS_DRIVER, TASK_COMPLEX_ENTER_CAR_AS_PASSENGER }) {
-        if (const auto task = FindTaskByType(taskt)) {
+    for (const auto tt : { TASK_COMPLEX_ENTER_CAR_AS_DRIVER, TASK_COMPLEX_ENTER_CAR_AS_PASSENGER }) {
+        if (const auto task = FindTaskByType(tt)) {
             return static_cast<CTaskComplexEnterCar*>(task)->GetTargetCar();
         }
     }

@@ -2800,7 +2800,7 @@ void CEventHandler::ComputeVehiclePotentialCollisionResponse(CEventPotentialGetR
 // 0x4B96D0
 void CEventHandler::ComputeVehiclePotentialPassiveCollisionResponse(CEventPotentialWalkIntoVehicle* e, CTask* tactive, CTask* tsimplest) {
     m_EventResponseTask = [&]() -> CTask* {
-        if (!e->m_vehicle || !m_Ped->bInVehicle || !CTask::IsGoToTask(tsimplest)) {
+        if (!e->m_vehicle || m_Ped->bInVehicle || !tsimplest || !CTask::IsGoToTask(tsimplest)) {
             return nullptr;
         }
         const auto tGoTo = static_cast<CTaskSimpleGoTo*>(tsimplest);

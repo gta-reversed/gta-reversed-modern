@@ -192,8 +192,6 @@ public:
     CVector InverseTransformVector(CVector v) const {
         // I got this by transposing the rotation matrix, and then applying a transform...
         // So I ended up with dot products (which make sense if you think about it)
-        // `Inverted().TransformPoint(v)`
-
         return { m_right.Dot(v), m_forward.Dot(v), m_up.Dot(v) }; 
     }
 

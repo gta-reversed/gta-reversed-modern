@@ -796,22 +796,23 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* s, const IFPSectionHeader
         const auto numSeq = RwStreamRead<uint32>(s);
 
         // In ANP3 a big chunk of memory is allocated for all frames
-        // instead of allocating lots of small chunks
-        char* frames = nullptr;
-
+        // instead of allocating lots of small chunks (Like in ANP2)
+        char *frames = nullptr, *framesEnd = nullptr;
         if (isANP3) {
             const auto size  = RwStreamRead<uint32>(s);
             const auto flags = RwStreamRead<uint32>(s);
 
             hier->m_bIsCompressed = flags & 1;
 
-            frames = (char*)CMemoryMgr::Malloc(size);
+            assert(size > 0);
+            frames    = (char*)CMemoryMgr::Malloc(size);
+            framesEnd = frames + size;
         }
 
         hier->m_nAnimBlockId    = ablockId;
         hier->m_bKeepCompressed = false;
 
-        // Allocate sequences - TODO: MSVC garbage
+        // Allocate sequences
         hier->m_nSeqCount  = numSeq;
         hier->m_pSequences = new CAnimBlendSequence[numSeq]; // Yes, they used `new`
 
@@ -828,28 +829,24 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* s, const IFPSectionHeader
             seq->SetName(seqName);
             seq->SetBoneTag(boneTag);
 
-            // Read frames
+            // Read sequence frames
             const auto ReadFrames = [&](size_t kfSize, bool hasTranslation, bool compressed) {
                 seq->SetNumFrames(numFrames, hasTranslation, compressed, frames);
 
-                const auto memSz = kfSize * numFrames;
-                RwStreamRead(s, seq->m_Frames, memSz);
+                const auto seqMemSz = kfSize * numFrames;
+                RwStreamRead(s, seq->m_Frames, seqMemSz);
                 if (isANP3) {
-                    frames += memSz;
+                    frames += seqMemSz;
+                    assert(framesEnd >= frames); // Reality check
                 }
             };
 
             switch (frameType) {
-            case 1:
-                ReadFrames(sizeof(KeyFrame), false, false); break;
-            case 2:
-                ReadFrames(sizeof(KeyFrameTrans), true, false); break;
-            case 3:
-                ReadFrames(sizeof(KeyFrameCompressed), false, true); break;
-            case 4:
-                ReadFrames(sizeof(KeyFrameTransCompressed), true, true); break;
-            default:
-                NOTSA_UNREACHABLE("Invalid FrameType ({})", frameType);
+            case 1:  ReadFrames(sizeof(KeyFrame), false, false); break;
+            case 2:  ReadFrames(sizeof(KeyFrameTrans), true, false); break;
+            case 3:  ReadFrames(sizeof(KeyFrameCompressed), false, true); break;
+            case 4:  ReadFrames(sizeof(KeyFrameTransCompressed), true, true); break;
+            default: NOTSA_UNREACHABLE("Invalid FrameType ({})", frameType);
             }
 
             if (isANP3) {
@@ -859,7 +856,7 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* s, const IFPSectionHeader
 
         if (!hier->m_bIsCompressed) {
             hier->RemoveQuaternionFlips();
-            hier->CalcTotalTime();
+            hier->CalcTotalTime(); // Could also use `CalcTotalTimeCompressed`, no?
         }
     }
 

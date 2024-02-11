@@ -35,6 +35,7 @@ public:
     auto GetTargetPtRadius()        const { return m_fRadius; }
     void SetTargetPtRadius(float r)       { m_fRadius = r;    }
 
+    auto GetMoveState() const { return m_moveState; }
 
 private:
     friend void InjectHooksMain();

@@ -12,7 +12,7 @@
 #include "EventHandler.h"
 #include "EventGroup.h"
 #include "TaskTimer.h"
-#include "EventScanner.h"
+#include "Events/Scanners/EventScanner.h"
 #include "PedStuckChecker.h"
 #include "VehicleScanner.h"
 #include "PedScanner.h"
@@ -103,13 +103,14 @@ public:
     CTaskSimpleInAir* GetTaskInAir();
     CTaskSimpleClimb* GetTaskClimb();
     CTaskSimpleDuck* GetTaskSecondaryDuck();
+    auto& GetTaskManager() { return m_TaskMgr; }
     bool GetUsingParachute();
     void SetTaskDuckSecondary(uint16 nLengthOfDuck);
     void ClearTaskDuckSecondary();
     void ClearTasks(bool bClearPrimaryTasks, bool bClearSecondaryTasks);
     void FlushImmediately(bool bSetPrimaryDefaultTask);
-    C2dEffect* GetEffectInUse() const;
-    void SetEffectInUse(C2dEffect* effect);
+    C2dEffectPedAttractor* GetEffectInUse() const;
+    void SetEffectInUse(C2dEffectPedAttractor* effect);
     void ProcessAfterProcCol();
     void ProcessAfterPreRender();
     void ProcessEventHandler();

@@ -23,7 +23,9 @@ CTaskSimpleSay::CTaskSimpleSay(uint32 sayId, int32 sayDuration) :
 
 // 0x48E440
 bool CTaskSimpleSay::ProcessPed(CPed* ped) {
-    m_timer.StartIfNotAlready(m_sayDuration);
+    if (!m_timer.IsStarted()) {
+        m_timer.Start(m_sayDuration);
+    }
     ped->Say(m_sayId);
     return m_timer.IsOutOfTime();
 }

@@ -17,7 +17,9 @@ void CTaskSimplePlayerOnFire::InjectHooks() {
 
 // 0x6335C0
 bool CTaskSimplePlayerOnFire::ProcessPed(CPed* ped) {
-    m_timer.StartIfNotAlready(5000);
+    if (!m_timer.IsStarted()) {
+        m_timer.Start(5'000);
+    }
 
     if (!ped->m_pFire) {
         return true;

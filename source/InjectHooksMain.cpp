@@ -459,6 +459,13 @@
 #include "EventEscalator.h"
 #include "EventCopCarBeingStolen.h"
 #include "EventDanger.h"
+#include "Events/Scanners/AttractorScanner.h"
+#include "Events/Scanners/ObjectPotentialCollisionScanner.h"
+#include "Events/Scanners/PedPotentialCollisionScanner.h"
+#include "Events/Scanners/NearbyFireScanner.h"
+#include "Events/Scanners/PedAcquaintanceScanner.h"
+#include "Events/Scanners/SexyPedScanner.h"
+#include "Events/Scanners/VehiclePotentialCollisionScanner.h"
 #include "EventSeenCop.h"
 #include "EventScriptedAttractor.h"
 #include "EventStuckInAir.h"
@@ -497,6 +504,7 @@ void InjectHooksMain() {
     HookInstall(0x541DD0, CPad::UpdatePads); // [ImGui] Changes logic of the function and shouldn't be toggled on/off
     HookInstall(0x459F70, CVehicleRecording::Render); // [ImGui] Debug stuff rendering
 
+    CMentalState::InjectHooks();
     CHandShaker::InjectHooks();
     CCutsceneMgr::InjectHooks();
     CFileMgr::InjectHooks();
@@ -710,7 +718,17 @@ void InjectHooksMain() {
     CHudColours::InjectHooks();
     CTxdStore::InjectHooks();
     CCarEnterExit::InjectHooks();
+
     CEntityScanner::InjectHooks();
+
+    CVehiclePotentialCollisionScanner::InjectHooks();
+    CAttractorScanner::InjectHooks();
+    CObjectPotentialCollisionScanner::InjectHooks();
+    CPedPotentialCollisionScanner::InjectHooks();
+    CNearbyFireScanner::InjectHooks();
+    CSexyPedScanner::InjectHooks();
+    CPedAcquaintanceScanner::InjectHooks();
+
     CPedType::InjectHooks();
     CAcquaintance::InjectHooks();
     CWeather::InjectHooks();

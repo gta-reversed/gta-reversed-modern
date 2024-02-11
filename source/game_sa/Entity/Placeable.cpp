@@ -191,7 +191,7 @@ void CPlaceable::SetMatrix(CMatrix& matrix) {
 }
 
 // NOTSA
-bool CPlaceable::IsPointInRange(const CVector& point, float range) {
+bool CPlaceable::IsPointInRange(const CVector& point, float range) const {
     return DistanceBetweenPointsSquared(point, GetPosition()) <= sq(range);
 }
 

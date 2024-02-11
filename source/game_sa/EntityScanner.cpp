@@ -13,10 +13,8 @@ void CEntityScanner::InjectHooks() {
 // 0x5FF990
 CEntityScanner::CEntityScanner() {
     field_4 = 0;
-    {
-        m_nCount = 0;
-        std::ranges::fill(m_apEntities, nullptr);
-    }
+    m_nCount = 0;
+    std::ranges::fill(m_apEntities, nullptr);
     m_pClosestEntityInRange = nullptr;
     m_nCount = 16;
 }

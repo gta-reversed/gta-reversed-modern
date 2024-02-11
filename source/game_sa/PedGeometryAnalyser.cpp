@@ -269,13 +269,13 @@ bool CPedGeometryAnalyser::ComputeRouteRoundSphere(const CPed& ped, const CColSp
 }
 
 // 0x5F5A30
-bool CPedGeometryAnalyser::GetIsLineOfSightClear(const CPed& ped, const CVector& a2, CEntity& entity, float& a4) {
-    return plugin::CallAndReturn<bool, 0x5F5A30, const CPed&, const CVector&, CEntity&, float&>(ped, a2, entity, a4);
+bool CPedGeometryAnalyser::GetIsLineOfSightClear(const CPed& ped, const CVector& targetPt, CEntity& entity, float& outIntersectionLength) {
+    return plugin::CallAndReturn<bool, 0x5F5A30, const CPed&, const CVector&, CEntity&, float&>(ped, targetPt, entity, outIntersectionLength);
 }
 
 // 0x5F2F00
-bool CPedGeometryAnalyser::GetIsLineOfSightClear(const CVector& a1, const CVector& a2, CEntity& a3) {
-    return plugin::CallAndReturn<bool, 0x5F2F00, const CVector&, const CVector&, CEntity&>(a1, a2, a3);
+bool CPedGeometryAnalyser::GetIsLineOfSightClear(const CVector& startPt, const CVector& targetPt, CEntity& entity) {
+    return plugin::CallAndReturn<bool, 0x5F2F00, const CVector&, const CVector&, CEntity&>(startPt, targetPt, entity);
 }
 
 // 0x5F3590

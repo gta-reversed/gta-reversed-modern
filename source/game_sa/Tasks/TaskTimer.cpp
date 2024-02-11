@@ -18,10 +18,7 @@ bool CTaskTimer::IsOutOfTime() {
     if (!m_bStarted)
         return false;
 
-    if (m_bStopped) {
-        m_nStartTime = CTimer::GetTimeInMS();
-        m_bStopped = false;
-    }
+    UnPause();
 
     return CTimer::GetTimeInMS() >= (m_nStartTime + m_nInterval);
 }

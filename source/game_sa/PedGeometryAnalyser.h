@@ -68,8 +68,8 @@ public:
 
     static bool ComputeRouteRoundSphere(const CPed& ped, const CColSphere& sphere, const CVector& a3, const CVector& a4, CVector& a5, CVector& a6);
 
-    static bool GetIsLineOfSightClear(const CPed& ped, const CVector& a2, CEntity& entity, float& a4);
-    static bool GetIsLineOfSightClear(const CVector& a1, const CVector& a2, CEntity& a3);
+    static bool GetIsLineOfSightClear(const CPed& ped, const CVector& targetPt, CEntity& entity, float& outIntersectionLength);
+    static bool GetIsLineOfSightClear(const CVector& startPt, const CVector& targetPt, CEntity& entity);
     static CPed* GetNearestPed(const CVector& point);
 
     static bool   IsEntityBlockingTarget(CEntity* entity, const CVector& point, float distance);
