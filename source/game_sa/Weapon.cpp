@@ -1178,7 +1178,7 @@ bool CWeapon::FireAreaEffect(CEntity* firingEntity, const CVector& origin, CEnti
         if (!targetEntity && !target) {
             if (firingEntity == FindPlayerPed() && TheCamera.m_aCams[0].Using3rdPersonMouseCam()) {
                 CVector camPos, camTargetPos;
-                TheCamera.Find3rdPersonCamTargetVector(wi->m_fWeaponRange, origin, &camPos, &camTargetPos);
+                TheCamera.Find3rdPersonCamTargetVector(wi->m_fWeaponRange, origin, camPos, camTargetPos);
                 return {
                     (camTargetPos - camPos) / wi->m_fWeaponRange, // Scale to a unit vector
                     camTargetPos

@@ -1120,21 +1120,24 @@ bool CPed::DoWeHaveWeaponAvailable(eWeaponType weaponType) {
 * @addr 0x5DF340
 * @brief Do gun flash by resetting it's alpha to max
 */
-void CPed::DoGunFlash(int32 lifetime, bool bRightHand) {
+bool CPed::DoGunFlash(int32 duration, bool isLeftHand) {
     if (!m_pGunflashObject || !m_pWeaponObject) {
-        return;
+        return false;
     }
 
     // Really elegant.. ;D
-    if (bRightHand) {
+    if (isLeftHand) {
         m_nWeaponGunflashAlphaMP2     = m_sGunFlashBlendStart;
-        m_nWeaponGunFlashAlphaProgMP2 = (uint16)m_sGunFlashBlendStart / lifetime;
+        m_nWeaponGunFlashAlphaProgMP2 = (uint16)m_sGunFlashBlendStart / duration;
     } else {
         m_nWeaponGunflashAlphaMP1     = m_sGunFlashBlendStart;
-        m_nWeaponGunFlashAlphaProgMP1 = (uint16)m_sGunFlashBlendStart / lifetime;
+        m_nWeaponGunFlashAlphaProgMP1 = (uint16)m_sGunFlashBlendStart / duration;
     }
+
     const auto angle = CGeneral::GetRandomNumberInRange(-360.0f, 360.0f);
     RwMatrixRotate(RwFrameGetMatrix(m_pGunflashObject), &CPedIK::XaxisIK, angle, rwCOMBINEPRECONCAT);
+
+    return true;
 }
 
 /*!

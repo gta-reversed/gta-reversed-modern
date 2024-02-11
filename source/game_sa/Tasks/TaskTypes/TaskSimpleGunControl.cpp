@@ -95,15 +95,15 @@ bool CTaskSimpleGunControl::ProcessPed(CPed* ped) {
         break;
 
     default: {
-        if (const auto attack = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
-            if (const auto useGun = CTask::DynCast<CTaskSimpleUseGun>(attack)) { // Inverted
+        if (const auto attackTask = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
+            if (const auto useGun = CTask::DynCast<CTaskSimpleUseGun>(attackTask)) { // Inverted
                 if (m_isFirstTime) {
                     m_nextAtkTimeMs = 0;
                     m_isFirstTime = false;
-                    useGun->Reset(ped, m_targetEntity, m_targetPos, true, m_burstAmmoCnt);
+                    useGun->Reset(ped, m_targetEntity, m_targetPos, eGunCommand::AIM, m_burstAmmoCnt);
                 }
             } else {
-                attack->MakeAbortable(ped);
+                attackTask->MakeAbortable(ped);
                 return false;
             }
         } else {

@@ -6,6 +6,14 @@
 class CPed;
 class CEntity;
 
+enum class eIKChainSlot {
+    UNK_0,
+    RIGHT_HAND,
+    LEFT_HAND,
+    UNK_3,
+    UNK_4,
+};
+
 class IKChainManager_c {
 public:
     static void InjectHooks();
@@ -31,7 +39,7 @@ public:
     void PointArm(Const char* purpose, int32 arm, CPed* ped, CEntity* target, ePedBones pedBoneId, CVector* posn, float speed, int32 blendTime, float dist);
     static bool __stdcall IsArmPointing(int32 armId, CPed* ped);
     static void __stdcall AbortPointArm(int32 armId, CPed* ped, int32 blendOutTime = 250);
-    bool IsFacingTarget(CPed* ped, int32) const;
+    bool IsFacingTarget(CPed* ped, int32 slot) const;
 
 public:
     IKChain_c          m_Chains[32];

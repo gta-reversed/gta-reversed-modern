@@ -507,7 +507,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                 }
                 if (player->m_pTargetedObject || playerData->m_bFreeAiming) {
                     CTaskSimpleUseGun* taskUseGun = intelligence->GetTaskUseGun();
-                    taskUseGun->SkipAim(player);
+                    taskUseGun->AbortIK(player);
                 }
             }
             if (player->m_pTargetedObject) {

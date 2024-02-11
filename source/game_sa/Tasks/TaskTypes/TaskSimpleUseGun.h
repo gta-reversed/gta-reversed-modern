@@ -31,7 +31,6 @@ public:
     void AbortIK(CPed* ped);
     void AimGun(CPed* ped);
 
-    void SkipAim(CPed* ped);
     void ClearAnim(CPed* ped);
 
     bool ControlGun(CPed* ped, CEntity* target, eGunCommand cmd);
@@ -39,11 +38,11 @@ public:
 
     void FinishGunAnimCB(CAnimBlendAssociation* anim, void* data);
 
-    void FireGun(CPed* ped, bool);
+    void FireGun(CPed* ped, bool); // Originally returned a bool, but since the return value isn't used anywhere, we're going to make it void...
     bool PlayerPassiveControlGun();
     void RemoveStanceAnims(CPed* ped, float x);
     static bool RequirePistolWhip(CPed* ped, CEntity* entity);
-    void Reset(CPed* ped, CEntity* entity, CVector posn, int8 unused, int16 burstAmmoCnt);
+    void Reset(CPed* ped, CEntity* targetEntity, CVector targetPos, eGunCommand, int16 burstLength);
 
     void SetMoveAnim(CPed* ped);
     void StartAnim(CPed* ped);
@@ -60,7 +59,12 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskSimpleUseGun* Constructor(CEntity* targetEntity, CVector vecTarget, eGunCommand nCommand, uint16 nBurstLength = 1, bool bAimImmediate = false);
+    CTaskSimpleUseGun* Constructor(CEntity* targetEntity, CVector vecTarget, eGunCommand nCommand, uint16 nBurstLength, bool bAimImmediate) {
+        this->CTaskSimpleUseGun::CTaskSimpleUseGun(targetEntity, vecTarget, nCommand, nBurstLength, bAimImmediate);
+        return this;
+    }
+
+    CVector GetAimTargetPosition(CPed* ped, bool& isTargetPedDead) const;
 
 public:
     bool m_IsFinished{};
@@ -72,8 +76,8 @@ public:
     union {
         uint8 m_FireGunThisFrame{};
         struct {
-            uint8 bRightHand : 1;
-            uint8 bLefttHand : 1;
+            uint8 m_IsFiringGunRightHandThisFrame : 1;
+            uint8 m_IsFiringGunLeftHandThisFrame : 1;
         };
     };
 

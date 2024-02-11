@@ -260,9 +260,9 @@ public:
     RpClump*            m_pGogglesObject;
     bool*               m_pGogglesState;           // Stores a pointer to either `CPostEffects::m_bInfraredVision` or `m_bNightVision`, see \r PutOnGoggles and \r AddGogglesModel
 
-    int16               m_nWeaponGunflashAlphaMP1; // AKA m_nWeaponGunflashStateLeftHand
+    int16               m_nWeaponGunflashAlphaMP1; // AKA m_nWeaponGunflashStateRightHand
     int16               m_nWeaponGunFlashAlphaProgMP1;
-    int16               m_nWeaponGunflashAlphaMP2; // AKA m_nWeaponGunflashStateRightHand
+    int16               m_nWeaponGunflashAlphaMP2; // AKA m_nWeaponGunflashStateLeftHand
     int16               m_nWeaponGunFlashAlphaProgMP2;
 
     CPedIK              m_pedIK;
@@ -401,7 +401,7 @@ public:
     void GrantAmmo(eWeaponType weaponType, uint32 ammo);
     void SetAmmo(eWeaponType weaponType, uint32 ammo);
     bool DoWeHaveWeaponAvailable(eWeaponType weaponType);
-    void DoGunFlash(int32 lifetime, bool bRightHand);
+    bool DoGunFlash(int32 lifetime, bool bRightHand);
     void SetGunFlashAlpha(bool rightHand);
     void ResetGunFlashAlpha();
     float GetBikeRidingSkill() const;

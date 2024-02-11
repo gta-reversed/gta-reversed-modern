@@ -17,6 +17,8 @@ enum class eGunCommand : int8 {
     FIREBURST,
     RELOAD,
     PISTOLWHIP,
+
+    // These 2 must stay in this order, after all other commands
     END_LEISURE, //! End task when possible
     END_NOW,     //! End task immidiately
 };
