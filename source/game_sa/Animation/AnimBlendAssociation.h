@@ -116,6 +116,7 @@ public:
     virtual ~CAnimBlendAssociation();
 
     float GetTimeProgress()                  const;
+    void  SetBlendAmount(float a)                  { m_BlendAmount = a; }
     float GetBlendAmount(float weight = 1.f) const { return IsPartial() ? m_BlendAmount : m_BlendAmount * weight; }
     float GetBlendDelta()                    const { return m_BlendDelta; }
 
@@ -169,9 +170,7 @@ public:
         return (CAnimBlendAssociation*)((byte*)link - offsetof(CAnimBlendAssociation, m_Link));
     }
 
-    void SetSpeed(float speed) {
-        m_Speed = speed;
-    }
+    void SetSpeed(float speed) { m_Speed = speed; }
 
     auto GetNodes() { return std::span{ &m_BlendNodes, m_NumBlendNodes }; }
 private:
