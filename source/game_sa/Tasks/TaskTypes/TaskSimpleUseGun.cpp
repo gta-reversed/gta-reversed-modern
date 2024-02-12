@@ -127,7 +127,67 @@ bool CTaskSimpleUseGun::PlayerPassiveControlGun() {
 
 // 0x61E8E0
 void CTaskSimpleUseGun::RemoveStanceAnims(CPed* ped, float x) {
-    
+    if (m_Anim && !(m_Anim->m_Flags & ANIMATION_STARTED) && m_Anim->GetTimeProgress() < 1.f) {
+        if (m_WeaponInfo && m_WeaponInfo->GetAnimLoopStart() == m_Anim->GetCurrentTime()) {
+            m_Anim->SetCurrentTime(m_WeaponInfo->GetAnimLoopEnd());
+        }
+        m_Anim->SetFlag(ANIMATION_STARTED);
+    }
+
+    // Freze anims associated with this task
+    bool anyAnimsFrozen = false;
+    for (const auto animId : {
+        ANIM_ID_GUN_STAND,
+        ANIM_ID_GUNMOVE_FWD,
+        ANIM_ID_GUNMOVE_L,
+        ANIM_ID_GUNMOVE_BWD,
+        ANIM_ID_GUNMOVE_R,
+    }) {
+        if (const auto a = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, animId)) {
+            a->SetFlag(ANIMATION_FREEZE_LAST_FRAME);
+            anyAnimsFrozen = true;
+        }
+    }
+
+    ped->SetMoveState(PEDMOVE_STILL);
+    ped->m_nSwimmingMoveState = PEDMOVE_STILL;
+
+    if (!anyAnimsFrozen) {
+        return;
+    }
+
+    const auto DoBlendAnimAndStart = [ped](AnimationId animId) {
+        const auto animWalk = CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, animId);
+        animWalk->SetFlag(ANIMATION_STARTED);
+    };
+
+    if (ped->IsPlayer()) {
+        if (const auto pad = ped->AsPlayer()->GetPadFromPlayer()) {
+            if (std::abs(pad->GetPedWalkUpDown()) > 50 || std::abs(pad->GetPedWalkLeftRight()) > 50) { // NOTSA: They didn't use abs ;)
+                DoBlendAnimAndStart(ANIM_ID_WALK);
+
+                ped->SetMoveState(PEDMOVE_WALK);
+                ped->m_nSwimmingMoveState = PEDMOVE_WALK;
+
+                if (const auto pd = ped->m_pPlayerData) {
+                    pd->m_fMoveBlendRatio = 1.f;
+                }
+            }
+        }
+    }
+
+    DoBlendAnimAndStart(ANIM_ID_IDLE);
+
+    if (m_NextCmd == eGunCommand::END_LEISURE) {
+        switch (ped->m_nAnimGroup) {
+        case ANIM_GROUP_PLAYERROCKET:
+        case ANIM_GROUP_PLAYERROCKETF:
+        case ANIM_GROUP_PLAYERROCKETM:
+            break;
+        default:
+            CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_GUN_2_IDLE, 8.f);
+        }
+    }
 }
 
 // 0x61E200
