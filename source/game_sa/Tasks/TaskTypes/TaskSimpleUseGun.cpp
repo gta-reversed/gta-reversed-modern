@@ -13,7 +13,7 @@ void CTaskSimpleUseGun::InjectHooks() {
 
     RH_ScopedGlobalInstall(RequirePistolWhip, 0x61E200);
     RH_ScopedInstall(Reset, 0x624DC0);
-    //RH_ScopedInstall(AimGun, 0x61ED10, { .reversed = false });
+    RH_ScopedInstall(AimGun, 0x61ED10);
     RH_ScopedInstall(FireGun, 0x61EB10);
     //RH_ScopedInstall(StartCountDown, 0x61E160, { .reversed = false });
     RH_ScopedInstall(ClearAnim, 0x61E190);
@@ -171,6 +171,131 @@ void CTaskSimpleUseGun::AbortIK(CPed* ped) {
     ped->m_pedIK.bUnk = false;
 }
 
+// 0x61ED10
+void CTaskSimpleUseGun::AimGun(CPed* ped) {
+    const auto ikBlendTime = m_IsAimImmediate ? 0 : 250;
+    const auto ikSpeed     = m_IsAimImmediate ? 1.f : 0.5f;
+
+
+    const auto isAimingWithArm = ped->bIsDucking || !m_WeaponInfo->flags.bAimWithArm;
+    if (isAimingWithArm) {
+        if (!ped->m_pedIK.bUnk) {
+            AbortIK(ped);
+        }
+    }
+    ped->m_pedIK.bUseArm = !isAimingWithArm;
+    ped->m_pedIK.bUnk    = isAimingWithArm;
+
+    const auto DoLookAt = [this, ped](ePedBones lookAtBone, CEntity* lookAtEntity, CVector* lookAtPos) {
+        g_ikChainMan.LookAt(
+            "TaskUseGun",
+            ped,
+            lookAtEntity,
+            9'999'999,
+            lookAtBone,
+            lookAtPos,
+            true,
+            0.25f,
+            250,
+            3,
+            false
+        );
+        m_IsLookIKInUse = true;
+    };
+
+    const auto DoPointArm = [&, this, ped](int32 arm, ePedBones armBone = BONE_UNKNOWN, CEntity* lookAtEntity = nullptr, CVector* lookAtPos = nullptr) {
+        g_ikChainMan.PointArm(
+            "CTaskSimpleUseGun",
+            arm,
+            ped,
+            lookAtEntity,
+            armBone,
+            lookAtPos,
+            ikSpeed,
+            ikBlendTime,
+            100.f
+        );
+    };
+
+    if (m_TargetEntity) { // If there's a target entity, aim at them
+        const auto [lookAtPos, lookAtBone] = GetAimLookAtInfo(); // 0x61EDB8
+
+        if (!ped->IsPlayer()) {
+            ped->Say(220);
+        }
+
+        if (ped->m_pedIK.bUseArm) { // Removed redudant `if` check from here
+            if (!m_IsLookIKInUse) {
+                if (m_Anim->GetBlendAmount() > 0.98f) {
+                    DoLookAt(lookAtBone, m_TargetEntity, nullptr); // 0x61EF0B
+                }
+            }
+             
+            if (!m_IsArmIKInUse) { // 0x61EF0B
+                DoPointArm(0, lookAtBone, m_TargetEntity, nullptr);
+                if (m_WeaponInfo->flags.bTwinPistol && !ped->bLeftArmBlocked) {
+                    DoPointArm(1, lookAtBone, m_TargetEntity, nullptr);
+                } 
+            }
+
+            ped->m_pedIK.RotateTorsoForArm(m_TargetEntity->GetPosition());
+        } else {
+            ped->m_pedIK.PointGunAtPosition(lookAtPos, m_Anim->GetBlendAmount());
+        }
+    } else if (ped->m_pedIK.bUseArm) { // 0x61EFB4 - Process player free-aiming
+        const auto pd = ped->m_pPlayerData;
+        if (pd && pd->m_bFreeAiming && CVector2D{ m_TargetPos }.IsZero() && notsa::contains({ MODE_AIMWEAPON, MODE_AIMWEAPON_ATTACHED }, TheCamera.m_aCams[0].m_nMode)) { // Aim to in front of us
+            CVector origin, target;
+            TheCamera.Find3rdPersonCamTargetVector(20.f, ped->GetPosition() + CVector{0.f, 0.f, 0.7f}, origin, target);
+
+            if (m_Anim->GetBlendAmount() > 0.98f) {
+                DoLookAt(BONE_UNKNOWN, nullptr, &target);
+            }
+
+            DoPointArm(0, BONE_UNKNOWN, nullptr, &target);
+            if (m_WeaponInfo->flags.bTwinPistol && !ped->bLeftArmBlocked) {
+                DoPointArm(1, BONE_UNKNOWN, nullptr, &target);
+            }
+            ped->m_pedIK.RotateTorsoForArm(target);
+        } else if (!m_IsArmIKInUse || !m_IsLookIKInUse) { // 0x61F144 - Neither pointing with arm, or looking at anything -> Just look somewhere...
+            if (m_TargetPos.x == 0.f || m_TargetPos.y == 0.f) { // TODO/NOTE: Bug? Perhaps they meant &&?
+                CVector target{0.f, 2.f, 0.f};
+
+                if (m_Anim->GetBlendAmount() > 0.98f) {
+                    DoLookAt(BONE_UNKNOWN, nullptr, &target);
+                }
+
+                DoPointArm(0, BONE_R_UPPER_ARM, ped, &target);
+                if (m_WeaponInfo->flags.bTwinPistol && !ped->bLeftArmBlocked) {
+                    DoPointArm(1, BONE_L_UPPER_ARM, ped, &target);
+                }
+            } else { // 0x61F172 - Either arm/look IK is in use, meaning there's a target
+                if (m_Anim->GetBlendAmount() > 0.98f) {
+                    DoLookAt(BONE_UNKNOWN, nullptr, &m_TargetPos);
+                }
+
+                DoPointArm(0, BONE_UNKNOWN, nullptr, &m_TargetPos);
+                if (m_WeaponInfo->flags.bTwinPistol && !ped->bLeftArmBlocked) {
+                    DoPointArm(1, BONE_UNKNOWN, nullptr, &m_TargetPos);
+                }
+            }
+        }
+    } else if (m_TargetPos.x == 0.f || m_TargetPos.y == 0.f) { // 0x61F30E
+        ped->m_pedIK.PointGunInDirection(
+            ped->m_fCurrentRotation,
+            ped->IsPlayer() ? ped->m_pPlayerData->m_fLookPitch : 0.f,
+            false,
+            m_Anim->GetBlendAmount()
+        );
+    } else { // 0x61F305
+        ped->m_pedIK.PointGunAtPosition(m_TargetPos, m_Anim->GetBlendAmount());
+    }
+
+    if (m_WeaponInfo->flags.bTwinPistol && ped->bLeftArmBlocked) { // No need for the `IsArmPointing` check here
+        g_ikChainMan.AbortPointArm(1, ped);
+    }
+}
+
 // 0x61E190
 void CTaskSimpleUseGun::ClearAnim(CPed* ped) {
     if (m_Anim) {
@@ -305,13 +430,13 @@ bool CTaskSimpleUseGun::ProcessPed(CPed* ped) {
                 }
                 m_SkipAim = false;
                 if (ped->m_pedIK.bUseArm) { // 0x62ACB7
-                    bool isAimTargetPedDead;
+                    const auto isAimTargetPedDead = 
                     const auto aimTargetPos = GetAimTargetPosition(ped, isAimTargetPedDead);
                     if (aimTargetPos.x != 0.f || aimTargetPos.y != 0.f) {
                         const auto aimDir = (aimTargetPos - ped->GetPosition()).Normalized(); // 0x62ADF0
                         const auto targetAngleToUs = CGeneral::LimitRadianAngle(aimDir.Heading() - ped->m_fCurrentRotation);
                         m_SkipAim = [&, this]{
-                            if (isAimTargetPedDead) {
+                            if (m_TargetEntity && m_TargetEntity->IsPed() && m_TargetEntity->AsPed()->m_fHealth <= 0.f) {
                                 if (RWDEG2RAD(115.f - 40.f) < targetAngleToUs || targetAngleToUs < -RWDEG2RAD(130.f - 40.f)) {
                                     return true;
                                 }
@@ -350,10 +475,9 @@ bool CTaskSimpleUseGun::SetPedPosition(CPed* ped) {
 }
 
 // notsa
-CVector CTaskSimpleUseGun::GetAimTargetPosition(CPed* ped, bool& outIsTargetPedDead) const {
+CVector CTaskSimpleUseGun::GetAimTargetPosition(CPed* ped) const {
     if (m_TargetEntity) {
         if (m_TargetEntity->IsPed()) {
-            outIsTargetPedDead = m_TargetEntity->AsPed()->m_fHealth <= 0.f;
             return m_TargetEntity->AsPed()->GetBonePosition(BONE_SPINE1);
         }
         return m_TargetEntity->GetPosition();
@@ -364,6 +488,18 @@ CVector CTaskSimpleUseGun::GetAimTargetPosition(CPed* ped, bool& outIsTargetPedD
         return target;
     }
     return m_TargetPos;
+}
+
+std::pair<CVector, ePedBones> CTaskSimpleUseGun::GetAimLookAtInfo() const {
+    if (m_TargetEntity->IsPed()) {
+        const auto targetPed = m_TargetEntity->AsPed();
+        if (const auto pd = targetPed->m_pPlayerData) {
+            CVector ret = pd->m_vecTargetBoneOffset;
+            targetPed->GetTransformedBonePosition(ret, (ePedBones)pd->m_nTargetBone);
+            return {ret, (ePedBones)pd->m_nTargetBone};
+        }
+    }
+    return {m_TargetEntity->GetPosition(), BONE_SPINE1};
 }
 
 // 0x624DC0

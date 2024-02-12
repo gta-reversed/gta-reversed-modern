@@ -64,7 +64,8 @@ private:
         return this;
     }
 
-    CVector GetAimTargetPosition(CPed* ped, bool& isTargetPedDead) const;
+    CVector GetAimTargetPosition(CPed* ped) const;
+    std::pair<CVector, ePedBones> GetAimLookAtInfo() const;
 
 public:
     bool m_IsFinished{};
