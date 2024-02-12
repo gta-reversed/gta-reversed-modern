@@ -36,7 +36,7 @@ public:
     bool ControlGun(CPed* ped, CEntity* target, eGunCommand cmd);
     bool ControlGunMove(const CVector2D& moveSpeed);
 
-    void FinishGunAnimCB(CAnimBlendAssociation* anim, void* data);
+    static void FinishGunAnimCB(CAnimBlendAssociation* anim, void* data);
 
     void FireGun(CPed* ped, bool); // Originally returned a bool, but since the return value isn't used anywhere, we're going to make it void...
     bool PlayerPassiveControlGun();

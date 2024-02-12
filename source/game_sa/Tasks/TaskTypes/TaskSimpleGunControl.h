@@ -10,17 +10,17 @@ class CVector;
 class CEvent;
 
 enum class eGunCommand : int8 {
-    UNKNOWN = -1,
-    NONE,
-    AIM,
-    FIRE,
-    FIREBURST,
-    RELOAD,
-    PISTOLWHIP,
+    UNKNOWN    = -1,
+    NONE       = 0,
+    AIM        = 1,
+    FIRE       = 2,
+    FIREBURST  = 3,
+    RELOAD     = 4,
+    PISTOLWHIP = 5,
 
     // These 2 must stay in this order, after all other commands
-    END_LEISURE, //! End task when possible
-    END_NOW,     //! End task immidiately
+    END_LEISURE = 6, //! End task when possible
+    END_NOW     = 7, //! End task immidiately
 };
 
 class NOTSA_EXPORT_VTABLE CTaskSimpleGunControl : public CTaskSimple {
