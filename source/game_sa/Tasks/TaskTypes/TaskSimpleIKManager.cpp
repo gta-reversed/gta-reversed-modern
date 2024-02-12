@@ -71,7 +71,7 @@ bool CTaskSimpleIKManager::ProcessPed(CPed* ped) {
     }
 
     bool hasAllProcessedPed{true};
-    for (auto&& task : m_IKChainTasks) {
+    for (auto& task : m_IKChainTasks) {
         if (task) {
             if (task->ProcessPed(ped)) {
                 delete std::exchange(task, nullptr);
