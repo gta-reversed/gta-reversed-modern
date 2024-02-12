@@ -46,7 +46,7 @@ public:
 
     void SetMoveAnim(CPed* ped);
     void StartAnim(CPed* ped);
-    void StartCountDown(uint8, bool);
+    void StartCountDown(uint8 numIdleFrames, char isMax);
 
     auto GetLastGunCommand() const { return m_LastCmd; }
 
@@ -96,7 +96,7 @@ public:
     uint16       m_BurstLength{};
     uint16       m_BurstShots{};
 
-    int8 m_CountDownFrames{ -1 };
+    uint8 m_CountDownFrames{ 0xFF };
     bool m_IsArmIKInUse{};
     bool m_IsLookIKInUse{};
     bool m_IsAimImmediate{};

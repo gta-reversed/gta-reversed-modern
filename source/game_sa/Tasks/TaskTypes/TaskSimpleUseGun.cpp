@@ -15,7 +15,7 @@ void CTaskSimpleUseGun::InjectHooks() {
     RH_ScopedInstall(Reset, 0x624DC0);
     RH_ScopedInstall(AimGun, 0x61ED10);
     RH_ScopedInstall(FireGun, 0x61EB10);
-    //RH_ScopedInstall(StartCountDown, 0x61E160, { .reversed = false });
+    RH_ScopedInstall(StartCountDown, 0x61E160);
     RH_ScopedInstall(ClearAnim, 0x61E190);
     RH_ScopedInstall(PlayerPassiveControlGun, 0x61E0A0);
     RH_ScopedInstall(ControlGun, 0x61E040);
@@ -514,4 +514,10 @@ void CTaskSimpleUseGun::Reset(CPed* ped, CEntity* targetEntity, CVector targetPo
     m_IsArmIKInUse    = false;
     m_IsLookIKInUse   = false;
     m_TargetEntity    = targetEntity;
+}
+
+// 0x0x61E160
+void CTaskSimpleUseGun::StartCountDown(uint8 numIdleFrames, char isMax) {
+    m_CountDownFrames = isMax ? std::min(numIdleFrames, m_CountDownFrames) : numIdleFrames;
+    m_HasFiredGun     = false;
 }
