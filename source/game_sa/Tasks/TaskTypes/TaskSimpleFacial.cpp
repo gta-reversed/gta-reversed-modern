@@ -10,7 +10,7 @@ CTaskSimpleFacial::CTaskSimpleFacial(eFacialExpression nFacialExpress, int32 nDu
 
 // See Android, looks like **map**
 // 0x690CC0
-AnimationId CTaskSimpleFacial::GetAnimId(eFacialExpression expression) {
+AnimationId CTaskSimpleFacial::GetAnimIndex(eFacialExpression expression) {
     switch (expression) {
     case eFacialExpression::SURP:      return ANIM_ID_FACSURP;
     case eFacialExpression::SURPM:     return ANIM_ID_FACSURPM;
@@ -29,7 +29,7 @@ AnimationId CTaskSimpleFacial::GetAnimId(eFacialExpression expression) {
 
 // 0x692E50
 bool CTaskSimpleFacial::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    auto assoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, GetAnimId(m_nFacialExpression));
+    auto assoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, GetAnimIndex(m_nFacialExpression));
     if (assoc) {
         assoc->m_BlendDelta = -4.0f;
     }
@@ -38,7 +38,7 @@ bool CTaskSimpleFacial::MakeAbortable(CPed* ped, eAbortPriority priority, const 
 
 // 0x692E80
 bool CTaskSimpleFacial::ProcessPed(CPed* ped) {
-    auto animId = CTaskSimpleFacial::GetAnimId(m_nFacialExpression);
+    auto animId = CTaskSimpleFacial::GetAnimIndex(m_nFacialExpression);
     auto assoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, animId);
 
     if (RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_FACTALK)) {

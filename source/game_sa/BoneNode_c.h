@@ -2,7 +2,7 @@
 
 #include "Base.h"
 
-#include "Enums/ePedBones.h"
+#include "Enums/eBoneTag.h"
 #include "Vector.h"
 #include "Matrix.h"
 #include "Quaternion.h"
@@ -15,9 +15,9 @@
 
 class BoneNode_c : public ListItem_c<BoneNode_c> {
 public:
-    ePedBones                m_BoneTag;
+    eBoneTag                m_BoneTag;
     RpHAnimBlendInterpFrame* m_InterpFrame;
-    CQuaternion              m_Orientation; // * RpHAnimBlendInterpFrame ?
+    CQuaternion              m_Orientation; // TODO: Use RtQuat
     CVector                  m_Pos;         // * * *
     BoneNode_c*              m_Parent;
     TList_c<BoneNode_c>      m_Childs;
@@ -38,7 +38,7 @@ public:
     // Originally these 2 took in the return value as a pointer, lets see if this is ABI compatible..
     static void EulerToQuat(const CVector& angles, CQuaternion& quat);
     static void QuatToEuler(const CQuaternion& quat, CVector& angles);
-    static int32  GetIdFromBoneTag(ePedBones bone);
+    static int32  GetIdFromBoneTag(eBoneTag32 bone);
 
     void ClampLimitsCurrent(bool LimitX, bool LimitY, bool LimitZ);
     void ClampLimitsDefault(bool LimitX, bool LimitY, bool LimitZ);
@@ -51,7 +51,7 @@ public:
     void SetSpeed(float);
 
     void SetLimits(eRotationAxis axis, float min, float max);
-    void GetLimits(eRotationAxis axis, float& min, float& max);
+    void GetLimits(eRotationAxis axis, float& min, float& max) const;
 
     void AddChild(BoneNode_c * children);
     void CalcWldMat(const RwMatrix* boneMatrix);

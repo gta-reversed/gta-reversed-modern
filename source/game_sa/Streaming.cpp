@@ -498,7 +498,7 @@ bool CStreaming::ConvertBufferToObject(uint8* fileBuffer, int32 modelId) {
         const TxdDef* txdDef = CTxdStore::ms_pTxdPool->GetAt(nTXDIdx);
         // todo:: add FIX_BUGS
         if ((txdDef && !txdDef->m_pRwDictionary) || /*check TXD (if any)*/
-            animFileIndex != -1 && !CAnimManager::ms_aAnimBlocks[animFileIndex].IsLoaded /*check anim (if any)*/
+            animFileIndex != -1 && !CAnimManager::GetAnimBlocks()[animFileIndex].IsLoaded /*check anim (if any)*/
         ) {
             // TXD or IFP not loaded, re-request model. (I don't think this is supposed to happen at all)
             RemoveModel(modelId);

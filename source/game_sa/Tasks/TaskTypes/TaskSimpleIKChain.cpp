@@ -21,24 +21,24 @@ void CTaskSimpleIKChain::InjectHooks() {
 // 0x6339C0
 CTaskSimpleIKChain::CTaskSimpleIKChain(
     const char* name,
-    ePedBones effectorBoneTag,
+    eBoneTag32 effectorBone,
     CVector effectorPos,
-    ePedBones pivotBoneTag,
+    eBoneTag32 pivotBone,
     CEntity* entity,
-    ePedBones offsetBoneTag,
+    eBoneTag32 offsetBone,
     CVector offsetPos,
     float speed,
     int32 time,
     int32 blendTime
 ) :
-    m_EffectorBoneTag{ effectorBoneTag },
+    m_EffectorBone{ effectorBone },
     m_Duration{ time },
     m_BlendDuration{ blendTime },
-    m_EffectorVec{ effectorPos },
+    m_EffectorOffset{ effectorPos },
     m_OffsetPos{ offsetPos },
-    m_PivotBoneTag{ pivotBoneTag },
-    m_Entity{ entity },
-    m_EntityExisted{ !!entity },
+    m_PivotBone{ pivotBone },
+    m_TargetEntity{ entity },
+    m_TargetEntityExisted{ !!entity },
     m_Speed{ speed }
 {
 }
@@ -52,7 +52,7 @@ CTaskSimpleIKChain::~CTaskSimpleIKChain() {
 
 // 0x633B00
 CTask* CTaskSimpleIKChain::Clone() const {
-    auto* task = new CTaskSimpleIKChain("", m_EffectorBoneTag, m_EffectorVec, m_PivotBoneTag, m_Entity, m_OffsetBoneTag, m_OffsetPos, m_Speed, m_Duration, m_BlendDuration);
+    auto* task = new CTaskSimpleIKChain("", m_EffectorBone, m_EffectorOffset, m_PivotBone, m_TargetEntity, m_OffsetBone, m_OffsetPos, m_Speed, m_Duration, m_BlendDuration);
     if (m_IKChain) {
         task->m_Blend       = m_Blend;
         task->m_EndTime     = m_EndTime;
@@ -64,13 +64,14 @@ CTask* CTaskSimpleIKChain::Clone() const {
 
 // 0x633C40
 void CTaskSimpleIKChain::BlendOut(int32 blendOutTime) {
-    if (!m_IsBlendingOut) {
-        if (m_Duration == -1) {
-            m_Duration = 0;
-        }
-        m_EndTime = CTimer::GetTimeInMS() + blendOutTime;
-        m_IsBlendingOut = true;
+    if (m_IsBlendingOut) {
+        return;
     }
+    if (m_Duration == -1) {
+        m_Duration = 0;
+    }
+    m_EndTime       = CTimer::GetTimeInMS() + blendOutTime;
+    m_IsBlendingOut = true;
 }
 
 // 0x633C70
@@ -89,22 +90,22 @@ bool CTaskSimpleIKChain::MakeAbortable(CPed* ped, eAbortPriority priority, CEven
 
 // 0x633C80
 bool CTaskSimpleIKChain::ProcessPed(CPed* ped) {
-    // If IK chain doesn't exist, try creating and early out
     if (!m_IKChain) {
-        if (!m_EntityExisted || m_Entity) {
-            if (CreateIKChain(ped)) {
-                if (m_Duration == -1) {
-                    m_EndTime = -1;
-                } else {
-                    m_EndTime = CTimer::GetTimeInMS() + m_Duration;
-                }
-                m_TargetTime = CTimer::GetTimeInMS() + m_BlendDuration;
-                m_TargetBlend = 1.f;
-                m_IKChain->SetBlend(m_Blend);
-                return false;
-            }
+        if (m_TargetEntityExisted && !m_TargetEntity) {
+            return true;
         }
-        return true;
+        if (!CreateIKChain(ped)) {
+            return true;
+        }
+        if (m_Duration == -1) {
+            m_EndTime = -1;
+        } else {
+            m_EndTime = CTimer::GetTimeInMS() + m_Duration;
+        }
+        m_TargetTime = CTimer::GetTimeInMS() + m_BlendDuration;
+        m_TargetBlend = 1.f;
+        m_IKChain->SetBlend(m_Blend);
+        return false;
     }
 
     // 0x633D2B
@@ -114,11 +115,13 @@ bool CTaskSimpleIKChain::ProcessPed(CPed* ped) {
         return true;
     }
 
+    //
     // Deal with blending
+    //
 
     // 0x633D50
-    if (m_EntityExisted && !m_Entity) {
-        m_EntityExisted = false;
+    if (m_TargetEntityExisted && !m_TargetEntity) {
+        m_TargetEntityExisted = false;
         m_IKChain->UpdateTarget(false);
         BlendOut();
     }
@@ -132,7 +135,7 @@ bool CTaskSimpleIKChain::ProcessPed(CPed* ped) {
     }
 
     // 0x633D98
-    if ((int32)CTimer::GetTimeInMS() <= m_TargetTime) {
+    if ((int32)CTimer::GetTimeInMS() <= m_TargetTime) { // BUG: This is literally the how not to guide for lerp. There should be a separate "m_BlendFrom" variable, so we can do a proper `lerp(m_BlendFrom, m_BlendTarget, t)`
         m_Blend += (m_TargetBlend - m_Blend) * std::min(1.0f, CTimer::GetTimeStepInMS() / (float)(m_TargetTime - CTimer::GetTimeStepInMS() - CTimer::GetTimeInMS()));
     } else {
         m_Blend = m_TargetBlend;
@@ -144,6 +147,6 @@ bool CTaskSimpleIKChain::ProcessPed(CPed* ped) {
 
 // 0x633BD0
 bool CTaskSimpleIKChain::CreateIKChain(CPed* ped) {
-    m_IKChain = g_ikChainMan.AddIKChain("", 3, ped, m_EffectorBoneTag, m_EffectorVec, m_PivotBoneTag, m_Entity, m_OffsetBoneTag, m_OffsetPos, m_Speed, 3);
+    m_IKChain = g_ikChainMan.AddIKChain("", eIKChainSlot::CUSTOM, ped, m_EffectorBone, m_EffectorOffset, m_PivotBone, m_TargetEntity, m_OffsetBone, m_OffsetPos, m_Speed);
     return !!m_IKChain;
 }

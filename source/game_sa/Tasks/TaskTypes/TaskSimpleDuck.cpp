@@ -323,7 +323,7 @@ bool CTaskSimpleDuck::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent c
 
     if (m_MoveAnim) {
         if (m_MoveAnim->m_BlendAmount > 0.f && m_MoveAnim->m_BlendDelta >= 0.f) {
-            if (priority == ABORT_PRIORITY_URGENT || notsa::contains({ ANIM_ID_GUNCROUCHFWD, ANIM_ID_GUNCROUCHBWD }, m_MoveAnim->GetAnimId())) {
+            if (priority == ABORT_PRIORITY_URGENT || notsa::contains({ ANIM_ID_GUNCROUCHFWD, ANIM_ID_GUNCROUCHBWD }, m_MoveAnim->GetAnimIndex())) {
                 m_MoveAnim->m_BlendDelta = blendDelta;
                 m_MoveAnim->SetFlag(ANIMATION_STARTED, false);
             }                

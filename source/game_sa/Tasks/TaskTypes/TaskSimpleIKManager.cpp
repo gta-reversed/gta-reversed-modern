@@ -16,18 +16,12 @@ void CTaskSimpleIKManager::InjectHooks() {
     RH_ScopedVMTInstall(ProcessPed, 0x6338E0);
 }
 
-// 0x6337F0
-CTaskSimpleIKManager::CTaskSimpleIKManager() {
-    rng::fill(m_IKChainTasks, nullptr);
-    m_IsAborting = false;
-}
-
 // For 0x639350
 CTaskSimpleIKManager::CTaskSimpleIKManager(const CTaskSimpleIKManager& o) :
     CTaskSimpleIKManager{}
 {
     for (auto&& [slot, t] : notsa::enumerate(o.m_IKChainTasks)) {
-        AddIKChainTask(CTask::Cast<CTaskSimpleIKChain>(t->Clone()), slot);
+        m_IKChainTasks[slot] = CTask::Cast<CTaskSimpleIKChain>(t->Clone());
     }
 }
 
@@ -39,15 +33,15 @@ CTaskSimpleIKManager::~CTaskSimpleIKManager() {
 }
 
 // 0x633940
-void CTaskSimpleIKManager::AddIKChainTask(CTaskSimpleIKChain* task, int32 slot) {
-    if (slot < 0) { // Find free slot, and store `task` there.
+void CTaskSimpleIKManager::AddIKChainTask(CTaskSimpleIKChain* task, eIKChainSlot slot) {
+    if (slot == eIKChainSlot::UNKNOWN) { // Find free slot, and store `task` there.
         const auto it = rng::find(m_IKChainTasks, nullptr);
         if (it != m_IKChainTasks.end()) {
             *it = task;
         }
     } else { // Store `task` in the given `slot`
-        assert(!m_IKChainTasks[slot]); // Otherwise memory leak
-        m_IKChainTasks[slot] = task;
+        assert(!m_IKChainTasks[(size_t)slot]); // Otherwise memory leak
+        m_IKChainTasks[(size_t)slot] = task;
     }
 }
 

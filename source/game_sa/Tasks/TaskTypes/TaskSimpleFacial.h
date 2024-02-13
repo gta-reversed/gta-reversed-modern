@@ -37,6 +37,6 @@ public:
     CTask* Clone() const override { return new CTaskSimpleFacial(m_nFacialExpression, m_nDuration); } // 0x692820
     bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
-    static AnimationId GetAnimId(eFacialExpression expression);
+    static AnimationId GetAnimIndex(eFacialExpression expression);
 };
 VALIDATE_SIZE(CTaskSimpleFacial, 0x1C);

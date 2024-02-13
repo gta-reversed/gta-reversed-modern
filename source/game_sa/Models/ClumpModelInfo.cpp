@@ -108,9 +108,8 @@ RwObject* CClumpModelInfo::CreateInstance()
 
     if (bHasAnimBlend) {
         RpAnimBlendClumpInit(clonedClump);
-        auto animBlend = CAnimManager::GetAnimation(m_nKey, &CAnimManager::ms_aAnimBlocks[m_nAnimFileIndex]);
-        if (animBlend) {
-            CAnimManager::BlendAnimation(clonedClump, animBlend, ANIMATION_LOOPED, 1.0F);
+        if (const auto anim = CAnimManager::GetAnimation(m_nKey, &CAnimManager::GetAnimBlocks()[m_nAnimFileIndex])) {
+            CAnimManager::BlendAnimation(clonedClump, anim, ANIMATION_LOOPED, 1.0F);
         }
     }
 

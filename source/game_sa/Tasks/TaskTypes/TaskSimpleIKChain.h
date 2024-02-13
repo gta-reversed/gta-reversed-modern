@@ -4,6 +4,7 @@
 #include <rwplcore.h>
 #include "TaskSimple.h"
 #include <extensions/WEnum.hpp>
+#include "Enums/eBoneTag.h"
 
 class CEntity;
 class CPed;
@@ -14,7 +15,7 @@ class NOTSA_EXPORT_VTABLE CTaskSimpleIKChain : public CTaskSimple {
 public:
     static constexpr auto Type = TASK_SIMPLE_IK_CHAIN;
 
-    CTaskSimpleIKChain(const char* name, ePedBones effectorBoneTag, CVector effectorPos, ePedBones pivotBoneTag, CEntity* entity, ePedBones offsetBoneTag, CVector offsetPos,
+    CTaskSimpleIKChain(const char* name, eBoneTag32 effectorBoneTag, CVector effectorPos, eBoneTag32 pivotBoneTag, CEntity* entity, eBoneTag32 offsetBoneTag, CVector offsetPos,
                        float speed, int32 time, int32 blendTime);
     ~CTaskSimpleIKChain() override;
 
@@ -33,26 +34,26 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskSimpleIKChain* Constructor(char* name, ePedBones effectorBoneTag, RwV3d effectorVec, ePedBones pivotBoneTag, CEntity* a6, ePedBones offsetBoneTag, RwV3d offsetPos, float speed, int32 time, int32 blendTime) { this->CTaskSimpleIKChain::CTaskSimpleIKChain(name, effectorBoneTag, effectorVec, pivotBoneTag, a6, offsetBoneTag, offsetPos, speed, time, blendTime); return this; }
+    CTaskSimpleIKChain* Constructor(char* name, eBoneTag32 effectorBoneTag, RwV3d effectorVec, eBoneTag32 pivotBoneTag, CEntity* a6, eBoneTag32 offsetBoneTag, RwV3d offsetPos, float speed, int32 time, int32 blendTime) { this->CTaskSimpleIKChain::CTaskSimpleIKChain(name, effectorBoneTag, effectorVec, pivotBoneTag, a6, offsetBoneTag, offsetPos, speed, time, blendTime); return this; }
     CTaskSimpleIKChain* Destructor() { this->CTaskSimpleIKChain::~CTaskSimpleIKChain(); return this; }
 
 public:
-    int32                      m_Duration{};
-    int32                      m_BlendDuration{};
-    IKChain_c*                 m_IKChain{};
-    int16                      m_SlotId{};
-    ePedBones                  m_PivotBoneTag{};
-    ePedBones                  m_EffectorBoneTag{};
-    CVector                    m_EffectorVec{};
-    CEntity::Ref               m_Entity{};
-    notsa::WEnumS32<ePedBones> m_OffsetBoneTag;
-    CVector                    m_OffsetPos{};
-    float                      m_Speed{};
-    bool                       m_EntityExisted{};
-    float                      m_Blend{};
-    int32                      m_EndTime{};
-    float                      m_TargetBlend{};
-    int32                      m_TargetTime{};
-    int32                      m_IsBlendingOut{};
+    int32        m_Duration{};
+    int32        m_BlendDuration{};
+    IKChain_c*   m_IKChain{};
+    int16        m_SlotId{};
+    eBoneTag16   m_PivotBone{}; //! Bone we're moving bones up to
+    eBoneTag16   m_EffectorBone{}; //! Bone we're moving
+    CVector      m_EffectorOffset{};
+    CEntity::Ref m_TargetEntity{};
+    eBoneTag16   m_OffsetBone{};
+    CVector      m_OffsetPos{};
+    float        m_Speed{};
+    bool         m_TargetEntityExisted{};
+    float        m_Blend{};
+    int32        m_EndTime{};
+    float        m_TargetBlend{};
+    int32        m_TargetTime{};
+    int32        m_IsBlendingOut{};
 };
 VALIDATE_SIZE(CTaskSimpleIKChain, 0x58);
