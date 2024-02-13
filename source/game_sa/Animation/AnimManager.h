@@ -20,7 +20,7 @@ constexpr auto NUM_ANIM_ASSOC_GROUPS = 118;
 constexpr auto NUM_ANIM_BLOCKS = 180;
 
 class CAnimManager {
-public:
+private:
     static std::array<AnimAssocDefinition, NUM_ANIM_ASSOC_GROUPS> ms_aAnimAssocDefinitionsX; // replacement
     static inline AnimAssocDefinition (&ms_aAnimAssocDefinitions)[NUM_ANIM_ASSOC_GROUPS] = *(AnimAssocDefinition(*)[NUM_ANIM_ASSOC_GROUPS])0x8AA5A8; // std::array - see SurfaceInfos_c
     static inline uint32& ms_numAnimAssocDefinitions = *(uint32*)0xB4EA28;
@@ -82,6 +82,10 @@ public:
     static void UncompressAnimation(CAnimBlendHierarchy* hier);
     static CAnimBlendAssociation* BlendAnimation(RpClump* clump, CAnimBlendHierarchy* animBlendHier, int32 flags, float clumpAssocBlendData = 8.f);
     static CAnimBlendAssociation* BlendAnimation(RpClump* clump, AssocGroupId groupId, AnimationId animId, float clumpAssocBlendData = 8.f);
+
+    static uint32 GetAnimIndex(const CAnimBlendHierarchy* h);
+    static bool IsAnimInBlock(const CAnimBlendHierarchy* h, const CAnimBlock* b);
+
 
     /// NOTSA. Get random gangtalk anim
     static AnimationId GetRandomGangTalkAnim();

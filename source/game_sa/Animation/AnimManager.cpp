@@ -110,7 +110,7 @@ void CAnimManager::Shutdown() {
 }
 
 CAnimBlock* CAnimManager::GetAnimationBlock(AssocGroupId animGroup) {
-    return ms_aAnimAssocGroups[animGroup].m_AnimBlock;
+    return GetAssocGroups()[animGroup].m_AnimBlock;
 }
 
 // 0x4D3940
@@ -153,7 +153,7 @@ AssocGroupId CAnimManager::GetFirstAssocGroup(const char* name) {
 
 // 0x4D39F0
 CAnimBlendHierarchy* CAnimManager::GetAnimation(uint32 hash, const CAnimBlock* animBlock) {
-    auto h = &ms_aAnimations[animBlock->FirstAnimId];
+    auto h = &ms_aAnimations[animBlock->FirstAnimIdx];
     for (auto i = animBlock->NumAnims; i-- > 0; h++) {
         if (h->m_hashKey == hash) {
             return h;
@@ -194,17 +194,17 @@ AssocGroupId CAnimManager::GetAnimationGroupIdByName(notsa::ci_string_view name)
 
 // 0x4D3A40
 CAnimBlendAssociation* CAnimManager::CreateAnimAssociation(AssocGroupId groupId, AnimationId animId) {
-    return ms_aAnimAssocGroups[groupId].CopyAnimation(animId);
+    return GetAssocGroups()[groupId].CopyAnimation(animId);
 }
 
 // 0x4D3A60
 CAnimBlendStaticAssociation* CAnimManager::GetAnimAssociation(AssocGroupId groupId, AnimationId animId) {
-    return ms_aAnimAssocGroups[groupId].GetAnimation(animId);
+    return GetAssocGroups()[groupId].GetAnimation(animId);
 }
 
 // 0x4D3A80
 CAnimBlendStaticAssociation* CAnimManager::GetAnimAssociation(AssocGroupId groupId, const char* animName) {
-    return ms_aAnimAssocGroups[groupId].GetAnimation(animName);
+    return GetAssocGroups()[groupId].GetAnimation(animName);
 }
 
 CAnimBlendAssociation* CAnimManager::AddAnimationToClump(RpClump* clump, CAnimBlendAssociation* anim) {
@@ -248,16 +248,15 @@ CAnimBlendAssociation* CAnimManager::AddAnimation(RpClump* clump, CAnimBlendHier
 }
 
 // 0x4D3B30
-CAnimBlendAssociation* CAnimManager::AddAnimationAndSync(RpClump* clump, CAnimBlendAssociation* animBlendAssoc, AssocGroupId groupId, AnimationId animId) {
-    const auto a          = CreateAnimAssociation(groupId, animId);
-    const auto clumpAnims = RpClumpGetAnimBlendClumpData(clump);
-    if (a->IsMoving() && animBlendAssoc) {
-        a->SyncAnimation(animBlendAssoc);
+CAnimBlendAssociation* CAnimManager::AddAnimationAndSync(RpClump* clump, CAnimBlendAssociation* syncWith, AssocGroupId groupId, AnimationId animId) {
+    const auto a = CreateAnimAssociation(groupId, animId);
+    if (a->IsMoving() && syncWith) {
+        a->SyncAnimation(syncWith);
         a->m_Flags |= ANIMATION_STARTED;
     } else {
         a->Start(0.0f);
     }
-    clumpAnims->m_Anims.Prepend(&a->m_Link);
+    RpClumpGetAnimBlendClumpData(clump)->m_Anims.Prepend(&a->m_Link);
     return a;
 
 }
@@ -272,7 +271,7 @@ AnimAssocDefinition* CAnimManager::AddAnimAssocDefinition(const char* groupName,
     def->NumAnims   = animsCount;
     def->AnimDescr  = descriptor;
 
-    def->AnimNames   = new const char*[animsCount];
+    def->AnimNames   = new const char*[animsCount]; // This is so incredibly retarded there are no words for it....
     const auto bufsz = AnimAssocDefinition::ANIM_NAME_BUF_SZ * animsCount;
     const auto buf   = new char[bufsz];
     memset(buf, 0, bufsz);
@@ -343,9 +342,9 @@ int32 CAnimManager::RegisterAnimBlock(const char* name) {
 // 0x4D3ED0
 void CAnimManager::RemoveLastAnimFile() {
     const auto ab = &GetAnimBlocks()[--ms_numAnimBlocks];
-    ms_numAnimations = ab->FirstAnimId;
+    ms_numAnimations = ab->FirstAnimIdx;
     for (auto i = 0u; i < ab->NumAnims; i++) { // Remove related animations too
-        ms_aAnimations[ab->FirstAnimId + i].Shutdown();
+        ms_aAnimations[ab->FirstAnimIdx + i].Shutdown();
     }
     ab->IsLoaded = false;
 }
@@ -361,7 +360,7 @@ void CAnimManager::RemoveAnimBlock(int32 index) {
     }
 
     for (auto i = 0u; i < ab->NumAnims; i++) { // Remove related animations too
-        ms_aAnimations[ab->FirstAnimId + i].Shutdown();
+        ms_aAnimations[ab->FirstAnimIdx + i].Shutdown();
     }
 
     ab->IsLoaded = false;
@@ -429,7 +428,7 @@ void CAnimManager::RemoveFromUncompressedCache(CAnimBlendHierarchy* h) {
 CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, CAnimBlendHierarchy* toBlendHier, int32 toBlendFlags, float blendDelta) {
     const auto clumpAnimData = RpClumpGetAnimBlendClumpData(clump); // Get running anim data
 
-    CAnimBlendAssociation* running{};
+    CAnimBlendAssociation* running{}; // Running instance of this anim
     bool                   bFadeThisOut = false;
     for (auto l = clumpAnimData->m_Anims.next; l; l = l->next) {
         const auto a = CAnimBlendAssociation::FromLink(l);
@@ -447,17 +446,17 @@ CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, CAnimBlendHi
         }
     }
 
-    // If already running just re-adjust blend delta (and start it if it has finished)
+    // If already running just re-adjust blend delta (and re-start it if it has finished)
     if (running) {
         running->SetBlendDelta((1.f - running->GetBlendAmount()) * blendDelta);
         if (running->HasFinished()) {
             running->Start();
         }
-        UncompressAnimation(running->m_BlendHier);
+        UncompressAnimation(running->m_BlendHier); // Not sure if this is really necessary?
         return running;
     }
 
-    // Otherwise start 
+    // Otherwise create new instance
     const auto a = new CAnimBlendAssociation{clump, toBlendHier};    
     a->m_Flags = toBlendFlags;
     a->ReferenceAnimBlock();
@@ -482,7 +481,7 @@ CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, AssocGroupId
     const bool toBlendIsPartial        = toBlendAnim->m_Flags & ANIMATION_PARTIAL;
     const bool toBlendIsIndestructible = toBlendAnim->m_Flags & ANIMATION_INDESTRUCTIBLE;
 
-    CAnimBlendAssociation *running{}, *movingAnim{};
+    CAnimBlendAssociation *running{}, *movingAnim{}; // Running instance of this anim, and the last moving anim in the chain
     bool                   bFadeThisOut = false;
     for (auto l = clumpAnimData->m_Anims.next; l; l = l->next) {
         const auto a = CAnimBlendAssociation::FromLink(l);
@@ -522,7 +521,21 @@ CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, AssocGroupId
     } else {
         anim->m_BlendAmount = 1.f;
     }
+
     return anim;
+}
+
+//! @notsa
+uint32 CAnimManager::GetAnimIndex(const CAnimBlendHierarchy* h) {
+    const auto idx = h - ms_aAnimations.data();
+    assert(idx >= 0 && idx <= ms_numAnimations);
+    return (uint32)idx;
+}
+
+//! @notsa
+bool CAnimManager::IsAnimInBlock(const CAnimBlendHierarchy* h, const CAnimBlock* b) {
+    const auto animIdx = (int32)h->GetIndex();
+    return animIdx >= b->FirstAnimIdx && animIdx <= b->FirstAnimIdx + (int32)b->NumAnims;
 }
 
 //! @notsa
@@ -533,12 +546,12 @@ void CAnimManager::StreamAnimBlock(const char* blck, bool shouldBeLoaded, bool& 
         RemoveAnimBlockRef(GetAnimationBlockIndex(blck));
         isLoaded = false;
     } else if (!shouldBeLoaded && isLoaded) {
-        const auto idx = GetAnimationBlockIndex(blck);
-        if (GetAnimBlocks()[idx].IsLoaded) {
-            AddAnimBlockRef(idx);
+        const auto blkIdx = GetAnimationBlockIndex(blck);
+        if (GetAnimBlocks()[blkIdx].IsLoaded) {
+            AddAnimBlockRef(blkIdx);
             isLoaded = true;
         } else {
-            CStreaming::RequestModel(IFPToModelId(idx), STREAMING_KEEP_IN_MEMORY);
+            CStreaming::RequestModel(IFPToModelId(blkIdx), STREAMING_KEEP_IN_MEMORY);
         }
     }
 }
@@ -568,7 +581,7 @@ auto CAnimManager::GetOrCreateAnimBlock(const char* name, uint32 numAnims) {
     if (ablock = GetAnimationBlock(name)) { // Block already exists
         if (!ablock->NumAnims) {
             ablock->NumAnims = numAnims;
-            ablock->FirstAnimId = ms_numAnimations;
+            ablock->FirstAnimIdx = ms_numAnimations;
         }
     } else { // Create block
         const auto id = ms_numAnimations++;
@@ -577,7 +590,7 @@ auto CAnimManager::GetOrCreateAnimBlock(const char* name, uint32 numAnims) {
 
         VERIFY(strncpy_s(ablock->Name, name, MAX_ANIM_BLOCK_NAME) == 0);
         ablock->NumAnims = numAnims;
-        ablock->FirstAnimId = ms_numAnimations;
+        ablock->FirstAnimIdx = ms_numAnimations;
         ablock->GroupId = GetFirstAssocGroup(ablock->Name);
     }
     ablock->IsLoaded = true;
@@ -646,7 +659,7 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* s, const IFPSectionHeader&
 
     // Read TAnimation's for this block
     for (size_t animN = 0; animN < blockInfo.Num; animN++) {
-        const auto hier = &ms_aAnimations[ablock->FirstAnimId + animN];
+        const auto hier = &ms_aAnimations[ablock->FirstAnimIdx + animN];
 
         // Read and set name
         {
@@ -696,7 +709,7 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* s, const IFPSectionHeader&
                 uint32 NumFrames;   // 28 - Number of (key)frames
                 uint32 Next;        // 32 - Next sibling
                 uint32 Prev;        // 36 - Previous sibling
-                uint32 BoneTag;     // 40 - Only present if `Header.Size == 44`
+                uint32 eBoneTag32;     // 40 - Only present if `Header.Size == 44`
             };
             const auto [anim, hAnim] = ReadSection<Anim>(s);
             assert(hAnim.ID == MakeFourCC("ANIM"));
@@ -706,7 +719,7 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* s, const IFPSectionHeader&
 
             // Set bone tag if available
             if (hAnim.Size == sizeof(Anim)) {
-                seq->SetBoneTag(anim.BoneTag);
+                seq->SetBoneTag(anim.eBoneTag32);
             }
 
             //
@@ -770,7 +783,7 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* s, const IFPSectionHeader&
             }
         }
     }
-    ms_numAnimations = std::max<int32>(ablock->FirstAnimId + blockInfo.Num, ms_numAnimations);
+    ms_numAnimations = std::max<int32>(ablock->FirstAnimIdx + blockInfo.Num, ms_numAnimations);
 }
 
 // NOTE:
@@ -785,7 +798,7 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* s, const IFPSectionHeader
     NOTSA_LOG_DEBUG("Reading block ({})", blockName);
 
     for (size_t animN = 0; animN < numAnims; animN++) {
-        const auto hier = &ms_aAnimations[ablock->FirstAnimId + animN];
+        const auto hier = &ms_aAnimations[ablock->FirstAnimIdx + animN];
 
         // Animation name
         char aname[24];
@@ -863,7 +876,7 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* s, const IFPSectionHeader
         }
     }
 
-    ms_numAnimations = std::max<int32>(ablock->FirstAnimId + numAnims, ms_numAnimations);
+    ms_numAnimations = std::max<int32>(ablock->FirstAnimIdx + numAnims, ms_numAnimations);
 }
 
 AnimationId CAnimManager::GetRandomGangTalkAnim() {

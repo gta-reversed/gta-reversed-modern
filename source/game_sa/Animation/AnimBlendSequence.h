@@ -14,7 +14,7 @@ public:
     //! The bone/frame this sequence is associated with
     //! Thanks to jte for some info
     union {
-        ePedBones m_BoneID;         // IF m_bUsingBones == TRUE
+        eBoneTag m_BoneID;         // IF m_bUsingBones == TRUE
         uint32    m_FrameHashKey;   // IF m_bUsingBones == FALSE
     };
     union {

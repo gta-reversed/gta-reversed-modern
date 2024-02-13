@@ -176,3 +176,7 @@ void CAnimBlendHierarchy::Print() {
         sequence.Print();
     }
 }
+
+uint32 CAnimBlendHierarchy::GetIndex() const {
+    return CAnimManager::GetAnimIndex(this);
+}

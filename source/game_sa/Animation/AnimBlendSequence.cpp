@@ -112,7 +112,7 @@ void CAnimBlendSequence::SetName(const char* name) {
 void CAnimBlendSequence::SetBoneTag(int32 boneId) {
     if (boneId != BONE_UNKNOWN) {
         m_bUsingBones = true;
-        m_BoneID = static_cast<ePedBones>(boneId);
+        m_BoneID = static_cast<eBoneTag>(boneId);
     }
 }
 

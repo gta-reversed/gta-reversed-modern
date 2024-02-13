@@ -229,8 +229,7 @@ void CAnimBlendAssociation::SetFinishCallback(void (*callback)(CAnimBlendAssocia
 
 // 0x4CEB40
 void CAnimBlendAssociation::SyncAnimation(CAnimBlendAssociation* syncWith) {
-    const auto progress = syncWith->m_CurrentTime / syncWith->m_BlendHier->m_fTotalTime * m_BlendHier->m_fTotalTime;
-    SetCurrentTime(progress);
+    SetCurrentTime(syncWith->GetTimeProgress() * m_BlendHier->GetTotalTime());
 }
 
 // 0x4D1490
