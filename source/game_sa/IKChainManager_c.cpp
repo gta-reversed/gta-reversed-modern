@@ -59,15 +59,15 @@ void IKChainManager_c::Update(float timeStep) {
         CWorld::IncrementCurrentScanCode();
 
         for (auto& chain : m_ActiveList) {
-            if (chain.m_IKSlot != (eIKChainSlot)s) {
+            if (chain.GetIKSlot() != (eIKChainSlot)s) {
                 continue;
             }
 
             // Update RpHAnim of ped (if any) - TODO: Maybe move this code into `IKChain_c::Update` as well..
-            if (chain.m_Ped) {
-                if (!chain.m_Ped->IsScanCodeCurrent()) {
-                    chain.m_Ped->UpdateRpHAnim();
-                    chain.m_Ped->SetCurrentScanCode();
+            if (const auto p = chain.GetPed()) {
+                if (!p->IsScanCodeCurrent()) {
+                    p->UpdateRpHAnim();
+                    p->SetCurrentScanCode();
                 }
             }
 

@@ -15,18 +15,6 @@
 
 class BoneNode_c : public ListItem_c<BoneNode_c> {
 public:
-    eBoneTag                m_BoneTag;
-    RpHAnimBlendInterpFrame* m_InterpFrame;
-    CQuaternion              m_Orientation; // TODO: Use RtQuat
-    CVector                  m_Pos;         // * * *
-    BoneNode_c*              m_Parent;
-    TList_c<BoneNode_c>      m_Childs;
-    RwMatrix                 m_WorldMat;
-    CVector                  m_LimitMin;
-    CVector                  m_LimitMax;
-    float                    m_Speed;
-
-public:
     static void InjectHooks();
 
     BoneNode_c() = default;  // 0x616B30
@@ -35,7 +23,6 @@ public:
     bool Init(int32 boneTag, RpHAnimBlendInterpFrame* interpFrame);
     void InitLimits();
 
-    // Originally these 2 took in the return value as a pointer, lets see if this is ABI compatible..
     static void EulerToQuat(const CVector& angles, CQuaternion& quat);
     static void QuatToEuler(const CQuaternion& quat, CVector& angles);
     static int32  GetIdFromBoneTag(eBoneTag32 bone);
@@ -58,9 +45,23 @@ public:
 
     const auto& GetPosition() const { return *RwMatrixGetPos(&m_WorldMat); }
     const auto& GetMatrix() const { return m_WorldMat;  }
-
+    auto GetBoneTag() const { return m_BoneTag; }
+    auto GetParent() const { return m_Parent; }
+    auto& GetOrientation() { return m_Orientation; }
 private:
     BoneNode_c* Constructor() { this->BoneNode_c::BoneNode_c(); return this; }
     BoneNode_c* Destructor() { this->BoneNode_c::~BoneNode_c(); return this; }
+
+private:
+    eBoneTag                 m_BoneTag;
+    RpHAnimBlendInterpFrame* m_InterpFrame;
+    CQuaternion              m_Orientation; // TODO: Use RtQuat
+    CVector                  m_Pos;         // * * *
+    BoneNode_c*              m_Parent;
+    TList_c<BoneNode_c>      m_Childs;
+    RwMatrix                 m_WorldMat;
+    CVector                  m_LimitMin;
+    CVector                  m_LimitMax;
+    float                    m_Speed;
 };
 VALIDATE_SIZE(BoneNode_c, 0x98);

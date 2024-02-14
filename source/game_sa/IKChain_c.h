@@ -40,24 +40,32 @@ public:
     void SetupBones(eBoneTag32 boneTag, CVector posn, eBoneTag32 bone, AnimBlendFrameData* frames);
     void GetLimits(eBoneTag32 boneTag, eRotationAxis axis, float& outMin, float& outMax);
 
-    auto GetBones() { return std::span{ m_Bones, (size_t)m_BonesCount }; }
+    auto GetBones() const { return std::span{ m_Bones, (size_t)m_BonesCount }; }
+    auto GetBones()       { return std::span{ m_Bones, (size_t)m_BonesCount }; }
 
-public:
-    CPed::Ref                    m_Ped;
-    int32                        m_BonesCount;
-    BoneNode_c**                 m_Bones; //!< Array, size of `m_BonesCount`. Use `GetBones()`.
-    RwMatrix*                    m_PivotBoneMatrix;
-    float                        m_Blend;
-    eBoneTag16                   m_EffectorBone;
-    RwV3d                        m_BonePosn;
-    eBoneTag16                   m_PivotBone;
-    CEntity::Ref                 m_TargetEntity;
-    eBoneTag32                   m_OffsetBone; //!< The bone tag. This is usually `eBoneTag`, but in theory these IK chains could be used for objects too, in which case the bones would be a different enum.
-    CVector                      m_OffsetPos;     //!< If `m_TargetEntity` is set, this is an object-space value, otherwise it's a world-space value.
-    float                        m_Speed;         //!< IK animation speed
-    CVector                      m_OffsetPosWS;   //!< World-space offset (If `m_TargetEntity` is set, this value is the transformed version of `m_OffsetPosOS`, otherwise it's an exact copy of it)
-    bool                         m_UpdateTarget;  //!< Whenever the target was updated, and we need to re-calculate stuff related to them
-    notsa::WEnumS8<eIKChainSlot> m_IKSlot;        //!< The IK slot we're in
-    int8                         m_Priority;
+    auto GetIKSlot() const { return m_IKSlot; }
+    auto GetPed() const { return m_Ped; }
+
+private:
+    CPed::Ref                    m_Ped{};
+    int32                        m_BonesCount{};
+    BoneNode_c**                 m_Bones{}; //!< Array, size of `m_BonesCount`. Use `GetBones()`.
+    RwMatrix*                    m_PivotBoneMatrix{};
+    float                        m_Blend{};
+    eBoneTag16                   m_EffectorBone{};
+    RwV3d                        m_EffectorPos{};
+    eBoneTag16                   m_PivotBone{};
+    CEntity::Ref                 m_TargetEntity{};
+    eBoneTag32                   m_OffsetBone{};   //!< Offset bone
+    CVector                      m_OffsetPos{};    //!< - If `m_TargetEntity` is set:
+                                                   //!<   - And `m_OffsetBone` is set too: This is a position relative to that bone
+                                                   //!<   - Otherwise this is an object-space value, otherwise it's a world-space value.
+                                                   //!< - Otherwise:
+                                                   //!    - It's a word-space offset
+    float                        m_Speed{};        //!< IK animation speed
+    CVector                      m_OffsetPosWS{};  //!< World-space offset (Calculated from `m_OffsetPos`, see `MoveBonesToTarget`)
+    bool                         m_UpdateTarget{}; //!< Whenever the target was updated, and we need to re-calculate stuff related to them
+    notsa::WEnumS8<eIKChainSlot> m_IKSlot{};       //!< The IK slot we're in
+    int8                         m_Priority{};
 };
 VALIDATE_SIZE(IKChain_c, 0x58);
