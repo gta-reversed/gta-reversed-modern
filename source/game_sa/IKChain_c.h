@@ -4,7 +4,7 @@
 #include <rwplcore.h>
 #include <span>
 
-#include <WEnum.hpp>
+#include <extensions/WEnum.hpp>
 #include "ListItem_c.h"
 #include "BoneNode_c.h"
 #include "Vector.h"
