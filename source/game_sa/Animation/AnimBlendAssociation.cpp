@@ -117,7 +117,7 @@ void CAnimBlendAssociation::Init(RpClump* clump, CAnimBlendHierarchy* animHierar
             frame = RpAnimBlendClumpFindFrameFromHashKey(clump, sequence.m_FrameHashKey);
         }
         if (frame && sequence.m_FramesNum > 0) {
-            m_BlendNodes[frame - animClumpData->m_Frames].m_BlendSeq = &sequence;
+            m_BlendNodes[frame - animClumpData->m_Frames].m_Seq = &sequence;
         }
     }
 }
@@ -145,7 +145,7 @@ void CAnimBlendAssociation::Init(CAnimBlendStaticAssociation& assoc) {
     m_AnimGroupId    = assoc.m_AnimGroupId;
     AllocateAnimBlendNodeArray(m_NumBlendNodes);
     for (auto i = 0; i < m_NumBlendNodes; i++) {
-        m_BlendNodes[i].m_BlendSeq = assoc.m_BlendSeqs[i];
+        m_BlendNodes[i].m_Seq = assoc.m_BlendSeqs[i];
         m_BlendNodes[i].m_BlendAssoc = this;
     }
 }
@@ -200,13 +200,13 @@ void CAnimBlendAssociation::SetCurrentTime(float currentTime) {
     // ANIM_COMPRESSION strangely PC has this but android doesn't
     if (m_BlendHier->m_bKeepCompressed) {
         for (auto i = 0; i < m_NumBlendNodes; i++) {
-            if (m_BlendNodes[i].m_BlendSeq) {
+            if (m_BlendNodes[i].m_Seq) {
                 m_BlendNodes[i].SetupKeyFrameCompressed();
             }
         }
     } else {
         for (auto i = 0; i < m_NumBlendNodes; i++) {
-            if (m_BlendNodes[i].m_BlendSeq) {
+            if (m_BlendNodes[i].m_Seq) {
                 m_BlendNodes[i].FindKeyFrame(m_CurrentTime);
             }
         }
