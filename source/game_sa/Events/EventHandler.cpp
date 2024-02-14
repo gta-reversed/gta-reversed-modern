@@ -1067,9 +1067,9 @@ void CEventHandler::ComputeDamageResponse(CEventDamage* e, CTask* tactive, CTask
                             a->SetCurrentTime(0.f);
                             e->m_bAnimAdded = true;
                         } else {
-                            auto a = RpAnimBlendClumpGetAssociation(m_Ped->m_pRwClump, e->GetAnimIndex()); // 0x4C04DE
+                            auto a = RpAnimBlendClumpGetAssociation(m_Ped->m_pRwClump, e->GetAnimId()); // 0x4C04DE
                             if (!a) {
-                                a = CAnimManager::BlendAnimation(m_Ped->m_pRwClump, e->GetAnimGroup(), e->GetAnimIndex());
+                                a = CAnimManager::BlendAnimation(m_Ped->m_pRwClump, e->GetAnimGroup(), e->GetAnimId());
                             }
                             a->SetBlend(0.f, e->m_fAnimBlend);
                             a->SetSpeed(e->m_fAnimSpeed);
@@ -1085,13 +1085,13 @@ void CEventHandler::ComputeDamageResponse(CEventDamage* e, CTask* tactive, CTask
                     };
                     m_PhysicalResponseTask = tBeHit;
 
-                    tBeHit->m_nAnimId    = e->GetAnimIndex();
+                    tBeHit->m_nAnimId    = e->GetAnimId();
                     tBeHit->m_nAnimGroup = e->GetAnimGroup();
                     tBeHit->m_bAnimAdded = e->GetAnimAdded();
                 }
             } else {
                 m_PhysicalResponseTask = new CTaskComplexFallAndGetUp{
-                    e->GetAnimIndex(),
+                    e->GetAnimId(),
                     e->GetAnimGroup(),
                     (int32)(1000.f / ((float)m_Ped->m_nWeaponShootingRate / 40.f))
                 };
@@ -1104,7 +1104,7 @@ void CEventHandler::ComputeDamageResponse(CEventDamage* e, CTask* tactive, CTask
             if (!notsa::contains({ ANIM_ID_NO_ANIMATION_SET, ANIM_ID_DOOR_LHINGE_O }, e->m_nAnimID)) {
                 if (notsa::contains({ WEAPON_RAMMEDBYCAR, WEAPON_RUNOVERBYCAR, WEAPON_FALL }, e->m_weaponType)) {
                     m_PhysicalResponseTask = new CTaskComplexFallAndGetUp{ // 0x4C0748
-                        e->GetAnimIndex(),
+                        e->GetAnimId(),
                         e->GetAnimGroup(),
                         m_Ped->IsPlayer() ? 500 : 1000
                     };

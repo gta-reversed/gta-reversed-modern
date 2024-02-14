@@ -22,7 +22,7 @@ CTaskSimpleFacial::CTaskSimpleFacial(eFacialExpression type, int32 durMs) :
 
 // See Android, looks like **map**
 // 0x690CC0
-AnimationId CTaskSimpleFacial::GetAnimIndex(eFacialExpression expression) {
+AnimationId CTaskSimpleFacial::GetAnimId(eFacialExpression expression) {
     switch (expression) {
     case eFacialExpression::SURPRISEPANIC: return ANIM_ID_FACSURP;
     case eFacialExpression::SURPRISEMILD: return ANIM_ID_FACSURPM;

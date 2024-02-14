@@ -398,7 +398,7 @@ void CPed::SetMoveAnim() {
         case PEDMOVE_JOG:
         case PEDMOVE_RUN:
         case PEDMOVE_SPRINT: {
-            const auto GetAnimIndex = [this] {
+            const auto GetAnimId = [this] {
                 switch (m_nMoveState) {
                 case PEDMOVE_RUN:
                     return ANIM_ID_RUN;
@@ -408,7 +408,7 @@ void CPed::SetMoveAnim() {
                 return ANIM_ID_WALK;
             };
 
-            if (const auto assoc = RpAnimBlendClumpGetAssociation(m_pRwClump, GetAnimIndex())) {
+            if (const auto assoc = RpAnimBlendClumpGetAssociation(m_pRwClump, GetAnimId())) {
                 DoUpdateMoveAnim(assoc);
             }
 

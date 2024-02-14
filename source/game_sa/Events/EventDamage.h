@@ -70,7 +70,7 @@ public:
     bool WasHeadShot() const; // Actually SA. Originally called `ComputeHeadShot` [which also took a `bool&` instead returning the result directly]
 
     bool GetAnimAdded() const { return m_bAnimAdded; }
-    auto GetAnimIndex() const { return m_nAnimID; }
+    auto GetAnimId() const { return m_nAnimID; }
     auto GetAnimGroup() const { return m_nAnimGroup; }
 
     auto& GetDamageResponse() const { return m_damageResponse; }
