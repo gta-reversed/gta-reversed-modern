@@ -111,7 +111,7 @@ void CAnimBlendAssociation::Init(RpClump* clump, CAnimBlendHierarchy* animHierar
     m_BlendHier = animHierarchy;
     for (auto& sequence : m_BlendHier->GetSequences()) {
         AnimBlendFrameData* frame = nullptr;
-        if (sequence.m_bUsingBones) {
+        if (sequence.m_IsUsingBoneTag) {
             frame = RpAnimBlendClumpFindBone(clump, sequence.m_BoneID);
         } else {
             frame = RpAnimBlendClumpFindFrameFromHashKey(clump, sequence.m_FrameHashKey);

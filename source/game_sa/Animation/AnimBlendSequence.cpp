@@ -22,14 +22,6 @@ void CAnimBlendSequence::InjectHooks() {
     RH_ScopedInstall(GetCKeyFrame, 0x4CF220);
 }
 
-// 0x4D0C10
-CAnimBlendSequence::CAnimBlendSequence() {
-    m_nFlags = 0;
-    m_FramesNum = 0;
-    m_Frames = nullptr;
-    m_BoneID = BONE_UNKNOWN;
-}
-
 // 0x4D0C30
 CAnimBlendSequence::~CAnimBlendSequence() {
     // If we allocated memory, clean it
@@ -105,14 +97,17 @@ void CAnimBlendSequence::RemoveQuaternionFlips() const {
 
 // 0x4D0C50
 void CAnimBlendSequence::SetName(const char* name) {
-    m_FrameHashKey = CKeyGen::GetUppercaseKey(name);
+    if (notsa::IsFixBugs()) {
+        m_IsUsingBoneTag = false;
+    }
+    m_FrameHashKey   = CKeyGen::GetUppercaseKey(name);
 }
 
 // 0x4D0C70
-void CAnimBlendSequence::SetBoneTag(int32 boneId) {
+void CAnimBlendSequence::SetBoneTag(eBoneTag32 boneId) {
     if (boneId != BONE_UNKNOWN) {
-        m_bUsingBones = true;
-        m_BoneID = static_cast<eBoneTag>(boneId);
+        m_IsUsingBoneTag = true;
+        m_BoneID         = boneId;
     }
 }
 
@@ -132,10 +127,10 @@ void CAnimBlendSequence::Uncompress(uint8* frameData) {
         return;
     }
 
-    void* frames = (frameData ? frameData : CMemoryMgr::Malloc(GetDataSize(false)));
+    void* newFrames = (frameData ? frameData : CMemoryMgr::Malloc(GetDataSize(false)));
     if (m_bHasTranslation) {
         auto* kfc = (KeyFrameTransCompressed*)m_Frames; // kfc = Kentucky Fried Chkicken
-        auto* kf = (KeyFrameTrans*)frames;
+        auto* kf = (KeyFrameTrans*)newFrames;
         for (auto i = 0u; i < m_FramesNum; i++, kf++, kfc++) {
             kf->Rot = kfc->Rot;
             kf->DeltaTime = kfc->DeltaTime;
@@ -143,7 +138,7 @@ void CAnimBlendSequence::Uncompress(uint8* frameData) {
         }
     } else {
         auto* kfc = (KeyFrameCompressed*)m_Frames;
-        auto* kf = (KeyFrame*)frames;
+        auto* kf = (KeyFrame*)newFrames;
         for (auto i = 0u; i < m_FramesNum; i++, kf++, kfc++) {
             kf->Rot = kfc->Rot;
             kf->DeltaTime = kfc->DeltaTime;
@@ -153,25 +148,19 @@ void CAnimBlendSequence::Uncompress(uint8* frameData) {
     if (!m_bUsingExternalMemory) {
         CMemoryMgr::Free(m_Frames);
     }
-    m_Frames = frames;
+    m_Frames               = newFrames;
     m_bUsingExternalMemory = frameData != nullptr;
-    m_bIsCompressed = false;
+    m_bIsCompressed        = false;
 }
 
 // 0x4D1150
 bool CAnimBlendSequence::MoveMemory() {
-    if (m_bUsingExternalMemory)
+    if (m_bUsingExternalMemory || !m_Frames) {
         return false;
+    }
 
-    if (!m_Frames)
-        return false;
-
-    auto frames = (CAnimBlendSequence*)CMemoryMgr::MoveMemory(m_Frames);
-    if (frames == m_Frames)
-        return false;
-
-    m_Frames = frames;
-    return true;
+    const auto prevPtr = std::exchange(m_Frames, (CAnimBlendSequence*)CMemoryMgr::MoveMemory(m_Frames));
+    return prevPtr != m_Frames; // Return true if the memory was moved
 }
 
 // 0x4D1180

@@ -705,11 +705,11 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* s, const IFPSectionHeader&
 
             // Read the anim data
             struct Anim {
-                char   Name[28];    // 00 - Name of this sequence
-                uint32 NumFrames;   // 28 - Number of (key)frames
-                uint32 Next;        // 32 - Next sibling
-                uint32 Prev;        // 36 - Previous sibling
-                uint32 eBoneTag32;     // 40 - Only present if `Header.Size == 44`
+                char       Name[28];    // 00 - Name of this sequence
+                uint32     NumFrames;   // 28 - Number of (key)frames
+                uint32     Next;        // 32 - Next sibling
+                uint32     Prev;        // 36 - Previous sibling
+                eBoneTag32 BoneTag;     // 40 - Only present if `Header.Size == 44`
             };
             const auto [anim, hAnim] = ReadSection<Anim>(s);
             assert(hAnim.ID == MakeFourCC("ANIM"));
@@ -719,7 +719,7 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* s, const IFPSectionHeader&
 
             // Set bone tag if available
             if (hAnim.Size == sizeof(Anim)) {
-                seq->SetBoneTag(anim.eBoneTag32);
+                seq->SetBoneTag(anim.BoneTag);
             }
 
             //
@@ -811,7 +811,6 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* s, const IFPSectionHeader
         // In ANP3 a big chunk of memory is allocated for all frames
         // instead of allocating lots of small chunks
         char* frames = nullptr;
-
         if (isANP3) {
             const auto size  = RwStreamRead<uint32>(s);
             const auto flags = RwStreamRead<uint32>(s);
@@ -836,8 +835,9 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* s, const IFPSectionHeader
             RwStreamRead(s, seqName, sizeof(seqName));
             const auto frameType = RwStreamRead<uint32>(s);
             const auto numFrames = RwStreamRead<uint32>(s);
-            const auto boneTag   = RwStreamRead<uint32>(s);
+            const auto boneTag   = RwStreamRead<eBoneTag32>(s);
 
+            // Only 1 of these will be valid
             seq->SetName(seqName);
             seq->SetBoneTag(boneTag);
 
