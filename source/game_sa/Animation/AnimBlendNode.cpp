@@ -40,7 +40,6 @@ bool CAnimBlendNode::FindKeyFrame(float time) {
 
     if (m_Seq->m_FramesNum == 1) {
         m_KFRemainingTime = 0.0f;
-        assert(m_Seq->GetUKeyFrame(m_KFCurr)->DeltaTime <= time);
     } else {
         // Find kf that spans over the specified `time`
         for (auto kf = m_Seq->GetUKeyFrame(m_KFCurr); time > kf->DeltaTime; m_KFPrev = m_KFCurr++) {
