@@ -42,7 +42,7 @@ private:
     CTaskSimpleIKManager* Destructor() { this->CTaskSimpleIKManager::~CTaskSimpleIKManager(); return this; }
 
 private:
-    std::array<CTaskSimpleIKChain*, 4> m_IKChainTasks{}; //! See `eIKChainSlot`
-    bool                               m_IsAborting{};
+    std::array<CTaskSimpleIKChain*, (size_t)eIKChainSlot::COUNT> m_IKChainTasks{}; //! See `eIKChainSlot`
+    bool                                                         m_IsAborting{};
 };
 VALIDATE_SIZE(CTaskSimpleIKManager, 0x1C);

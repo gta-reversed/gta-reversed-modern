@@ -19,7 +19,7 @@ void CTaskSimpleIKPointArm::InjectHooks() {
 CTaskSimpleIKPointArm::CTaskSimpleIKPointArm(const char* purpose, eIKArm arm, CEntity* targetEntity, eBoneTag offsetBoneTag, CVector offsetPos, float speed, int32 blendTime) :
     CTaskSimpleIKChain{
         purpose,
-        IKArmToPedBoneTag(arm),
+        IKArmToBoneTag(arm),
         CVector{ 0.f, 0.05f, 0.f },
         BONE_NORMAL,
         targetEntity,
