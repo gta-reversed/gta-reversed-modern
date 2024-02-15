@@ -109,16 +109,17 @@ void CAnimBlendAssociation::Init(RpClump* clump, CAnimBlendHierarchy* animHierar
     }
 
     m_BlendHier = animHierarchy;
-    for (auto& sequence : m_BlendHier->GetSequences()) {
-        AnimBlendFrameData* frame = nullptr;
-        if (sequence.m_IsUsingBoneTag) {
-            frame = RpAnimBlendClumpFindBone(clump, sequence.m_BoneID);
-        } else {
-            frame = RpAnimBlendClumpFindFrameFromHashKey(clump, sequence.m_FrameHashKey);
+    for (auto& seq : m_BlendHier->GetSequences()) {
+        if (!seq.m_FramesNum) {
+            continue;
         }
-        if (frame && sequence.m_FramesNum > 0) {
-            m_BlendNodes[frame - animClumpData->m_Frames].m_Seq = &sequence;
+        const auto frame = seq.IsUsingBoneTag()
+            ? RpAnimBlendClumpFindBone(clump, seq.GetBoneTag())
+            : RpAnimBlendClumpFindFrameFromHashKey(clump, seq.GetNameHashKey());
+        if (!frame) {
+            continue;
         }
+        m_BlendNodes[frame - animClumpData->m_Frames].m_Seq = &seq;
     }
 }
  

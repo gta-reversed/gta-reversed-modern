@@ -80,8 +80,7 @@ CAnimBlendSequence* CAnimBlendHierarchy::FindSequence(const char* name) const {
 
     const auto hash = CKeyGen::GetUppercaseKey(name);
     for (auto& seq : GetSequences()) {
-        assert(!seq.m_IsUsingBoneTag);
-        if (seq.m_FrameHashKey == hash) {
+        if (seq.GetNameHashKey() == hash) {
             return &seq;
         }
     }

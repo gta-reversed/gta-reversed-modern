@@ -100,14 +100,14 @@ void CAnimBlendSequence::SetName(const char* name) {
     if (notsa::IsFixBugs()) {
         m_IsUsingBoneTag = false;
     }
-    m_FrameHashKey   = CKeyGen::GetUppercaseKey(name);
+    m_NameHashKey   = CKeyGen::GetUppercaseKey(name);
 }
 
 // 0x4D0C70
 void CAnimBlendSequence::SetBoneTag(eBoneTag32 boneId) {
     if (boneId != BONE_UNKNOWN) {
         m_IsUsingBoneTag = true;
-        m_BoneID         = boneId;
+        m_BoneTag         = boneId;
     }
 }
 
