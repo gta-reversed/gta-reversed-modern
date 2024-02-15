@@ -16,7 +16,7 @@ inline auto IKArmToIKSlot(eIKArm arm) {
     }
 }
 
-inline auto IKArmToPedBoneTag(eIKArm arm) {
+inline auto IKArmToBoneTag(eIKArm arm) {
     switch (arm) {
     case eIKArm::IK_ARM_RIGHT: return BONE_R_HAND;
     case eIKArm::IK_ARM_LEFT: return BONE_L_HAND;

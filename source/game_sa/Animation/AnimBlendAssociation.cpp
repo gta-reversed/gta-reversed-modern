@@ -121,7 +121,7 @@ void CAnimBlendAssociation::Init(RpClump* clump, CAnimBlendHierarchy* animHierar
         }
     }
 }
-
+ 
 // 0x4CEE40
 void CAnimBlendAssociation::Init(CAnimBlendAssociation& assoc) {
     m_BlendHier     = assoc.m_BlendHier;
