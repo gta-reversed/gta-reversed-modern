@@ -109,19 +109,20 @@ void CAnimBlendAssociation::Init(RpClump* clump, CAnimBlendHierarchy* animHierar
     }
 
     m_BlendHier = animHierarchy;
-    for (auto& sequence : m_BlendHier->GetSequences()) {
-        AnimBlendFrameData* frame = nullptr;
-        if (sequence.m_bUsingBones) {
-            frame = RpAnimBlendClumpFindBone(clump, sequence.m_BoneID);
-        } else {
-            frame = RpAnimBlendClumpFindFrameFromHashKey(clump, sequence.m_FrameHashKey);
+    for (auto& seq : m_BlendHier->GetSequences()) {
+        if (!seq.m_FramesNum) {
+            continue;
         }
-        if (frame && sequence.m_FramesNum > 0) {
-            m_BlendNodes[frame - animClumpData->m_Frames].m_BlendSeq = &sequence;
+        const auto frame = seq.IsUsingBoneTag()
+            ? RpAnimBlendClumpFindBone(clump, seq.GetBoneTag())
+            : RpAnimBlendClumpFindFrameFromHashKey(clump, seq.GetNameHashKey());
+        if (!frame) {
+            continue;
         }
+        m_BlendNodes[frame - animClumpData->m_Frames].m_Seq = &seq;
     }
 }
-
+ 
 // 0x4CEE40
 void CAnimBlendAssociation::Init(CAnimBlendAssociation& assoc) {
     m_BlendHier     = assoc.m_BlendHier;
@@ -145,7 +146,7 @@ void CAnimBlendAssociation::Init(CAnimBlendStaticAssociation& assoc) {
     m_AnimGroupId    = assoc.m_AnimGroupId;
     AllocateAnimBlendNodeArray(m_NumBlendNodes);
     for (auto i = 0; i < m_NumBlendNodes; i++) {
-        m_BlendNodes[i].m_BlendSeq = assoc.m_BlendSeqs[i];
+        m_BlendNodes[i].m_Seq = assoc.m_BlendSeqs[i];
         m_BlendNodes[i].m_BlendAssoc = this;
     }
 }
@@ -200,13 +201,13 @@ void CAnimBlendAssociation::SetCurrentTime(float currentTime) {
     // ANIM_COMPRESSION strangely PC has this but android doesn't
     if (m_BlendHier->m_bKeepCompressed) {
         for (auto i = 0; i < m_NumBlendNodes; i++) {
-            if (m_BlendNodes[i].m_BlendSeq) {
+            if (m_BlendNodes[i].m_Seq) {
                 m_BlendNodes[i].SetupKeyFrameCompressed();
             }
         }
     } else {
         for (auto i = 0; i < m_NumBlendNodes; i++) {
-            if (m_BlendNodes[i].m_BlendSeq) {
+            if (m_BlendNodes[i].m_Seq) {
                 m_BlendNodes[i].FindKeyFrame(m_CurrentTime);
             }
         }
@@ -229,8 +230,7 @@ void CAnimBlendAssociation::SetFinishCallback(void (*callback)(CAnimBlendAssocia
 
 // 0x4CEB40
 void CAnimBlendAssociation::SyncAnimation(CAnimBlendAssociation* syncWith) {
-    const auto progress = syncWith->m_CurrentTime / syncWith->m_BlendHier->m_fTotalTime * m_BlendHier->m_fTotalTime;
-    SetCurrentTime(progress);
+    SetCurrentTime(syncWith->GetTimeProgress() * m_BlendHier->GetTotalTime());
 }
 
 // 0x4D1490

@@ -766,7 +766,7 @@ void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
 bool LOSBlockedBetweenPeds(CEntity* entity1, CEntity* entity2) {
     CVector origin{};
     if (entity1->IsPed()) {
-        entity1->AsPed()->GetBonePosition(origin, ePedBones::BONE_NECK, false);
+        entity1->AsPed()->GetBonePosition(origin, eBoneTag::BONE_NECK, false);
         if (entity1->AsPed()->bIsDucking)
             origin.z += 0.35f;
     } else {
@@ -775,7 +775,7 @@ bool LOSBlockedBetweenPeds(CEntity* entity1, CEntity* entity2) {
 
     CVector target{};
     if (entity2->IsPed())
-        entity1->AsPed()->GetBonePosition(target, ePedBones::BONE_NECK, false);
+        entity1->AsPed()->GetBonePosition(target, eBoneTag::BONE_NECK, false);
     else
         target = entity1->GetPosition();
 
@@ -1080,7 +1080,7 @@ void CPlayerPed::ProcessControl() {
                     m_pPlayerData->m_vecTargetBoneOffset.x = 0.2f;
                 }
                 effectPos = m_pPlayerData->m_vecTargetBoneOffset;
-                targetPed->GetTransformedBonePosition(effectPos, static_cast<ePedBones>(m_pPlayerData->m_nTargetBone), false);
+                targetPed->GetTransformedBonePosition(effectPos, static_cast<eBoneTag>(m_pPlayerData->m_nTargetBone), false);
                 bool targetIsInVehicle = false;
                 if (markColor > 0.0f) {
                     if (!targetPed->bInVehicle && targetPed->m_nMoveState != PEDMOVE_STILL) {

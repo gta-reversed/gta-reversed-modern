@@ -79,9 +79,9 @@ CAnimBlendSequence* CAnimBlendHierarchy::FindSequence(const char* name) const {
     }
 
     const auto hash = CKeyGen::GetUppercaseKey(name);
-    for (auto& sequence : GetSequences()) {
-        if (sequence.m_FrameHashKey == hash) {
-            return &sequence;
+    for (auto& seq : GetSequences()) {
+        if (seq.GetNameHashKey() == hash) {
+            return &seq;
         }
     }
 
@@ -175,4 +175,8 @@ void CAnimBlendHierarchy::Print() {
     for (auto& sequence : GetSequences()) {
         sequence.Print();
     }
+}
+
+uint32 CAnimBlendHierarchy::GetIndex() const {
+    return CAnimManager::GetAnimIndex(this);
 }
