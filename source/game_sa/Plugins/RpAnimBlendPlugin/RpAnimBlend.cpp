@@ -310,7 +310,70 @@ CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump, uint3
 
 // 0x4D6910
 CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation(RpClump* clump, CAnimBlendAssociation** pp2ndAnim, float* pBlendVal2nd) {
-    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6910, RpClump*, CAnimBlendAssociation**, float*>(clump, pp2ndAnim, pBlendVal2nd);
+    const auto bd = RpClumpGetAnimBlendClumpData(clump);
+
+    CAnimBlendAssociation *aA{}, *aB{};
+    float                  bA{}, bB{};
+    for (auto l = bd->m_AnimList.next; l;) {
+        const auto a = CAnimBlendAssociation::FromLink(l);
+        if (!a->IsPartial()) {
+            const auto blend = a->GetBlendAmount();
+            if (blend > bA) { // Found a new main?
+                aB = std::exchange(aA, a);
+                bB = std::exchange(bA, blend);
+            } else if (blend > bB) { // Found a new secondary?
+                aB = a;
+                bB = blend;
+            }
+        }
+        l = a->GetLink().next;
+    }
+
+
+    if (pp2ndAnim) {
+        *pp2ndAnim = aB;
+    }
+    if (pBlendVal2nd) {
+        *pBlendVal2nd = bB;
+    }
+
+    return aA;
+
+    /*
+    * Code works, but i think it I overcomplicated it....
+    // Array sorted descending by blend amount
+    struct {
+        CAnimBlendAssociation* anim{};
+        float                  blendAmnt{};
+    } sorted[2];
+
+    // Fill array
+    for (auto l = bd->m_AnimList.next; l;) {
+        const auto a = CAnimBlendAssociation::FromLink(l);
+        if (!a->IsPartial()) {
+            const auto it = rng::upper_bound(
+                sorted,
+                a->GetBlendAmount(),
+                [](float l, float r) { return l > r; }, // Descending
+                [](auto& v) { return v.blendAmnt; }     // By blend amount
+            );
+            if (it != std::end(sorted)) {
+                std::shift_right(it, std::end(sorted), 1); // Make space for insert
+                *it = { a, a->GetBlendAmount() };
+            }
+        }
+        l = a->GetLink().next;
+    }
+
+    if (pp2ndAnim) {
+        *pp2ndAnim = sorted[1].anim;
+    }
+    if (pBlendVal2nd) {
+        *pBlendVal2nd = sorted[1].blendAmnt;
+    }
+
+    return sorted[0].anim;
+    */
 }
 
 // 0x4D6A30
@@ -436,7 +499,7 @@ void RpAnimBlendPlugin::InjectHooks() {
     RH_ScopedGlobalOverloadedInstall(RpAnimBlendClumpGetAssociation, "AnimId", 0x4D68B0, CAnimBlendAssociation*(*)(RpClump*, uint32));
     RH_ScopedGlobalOverloadedInstall(RpAnimBlendClumpGetFirstAssociation, "", 0x4D15E0, CAnimBlendAssociation*(*)(RpClump*));
     RH_ScopedGlobalOverloadedInstall(RpAnimBlendClumpGetFirstAssociation, "Flags", 0x4D6A70, CAnimBlendAssociation*(*)(RpClump*, uint32));
-    RH_ScopedGlobalInstall(RpAnimBlendClumpGetMainAssociation, 0x4D6910, { .reversed = false });
+    RH_ScopedGlobalInstall(RpAnimBlendClumpGetMainAssociation, 0x4D6910);
     RH_ScopedGlobalInstall(RpAnimBlendClumpGetMainAssociation_N, 0x4D6A30, { .reversed = false });
     RH_ScopedGlobalInstall(RpAnimBlendClumpGetMainPartialAssociation, 0x4D69A0, { .reversed = false });
     RH_ScopedGlobalInstall(RpAnimBlendClumpGetMainPartialAssociation_N, 0x4D69F0, { .reversed = false });
