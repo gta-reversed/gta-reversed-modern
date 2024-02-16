@@ -172,7 +172,7 @@ struct RtAnimInterpolatorInfo
             /**< The ID of the interpolation scheme. */
     RwInt32                             interpKeyFrameSize;
             /**< Size, in bytes, of the interpolated keyframe structure. */
-    //RwInt32                             animKeyFrameSize;
+    RwInt32                             animKeyFrameSize;
             /**< Size, in bytes, of the animation keyframe structure. */
     RtAnimKeyFrameApplyCallBack         keyFrameApplyCB;
             /**< Pointer to a function that converts a keyframe to the needed

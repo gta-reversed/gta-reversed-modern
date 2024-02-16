@@ -26,7 +26,7 @@ void CPedIK::InjectHooks() {
 
 // 0x5FDDB0
 void CPedIK::RotateTorso(AnimBlendFrameData* bone, LimbOrientation& orientation, bool changeRoll) {
-    const auto quat = bone->m_pIFrame->orientation.AsRtQuat();
+    const auto quat = bone->KeyFrame->q.AsRtQuat();
     RtQuatRotate(quat, &XaxisIK, RadiansToDegrees(orientation.m_fYaw), rwCOMBINEREPLACE);
     RtQuatRotate(quat, &ZaxisIK, RadiansToDegrees(orientation.m_fPitch), rwCOMBINEPRECONCAT);
     m_pPed->bDontAcceptIKLookAts = true;
@@ -62,9 +62,9 @@ void CPedIK::RotateTorsoForArm(const CVector& direction) {
     if (resultAngle != DegreesToRadians(0.0f)) {
         const auto degreesHalf = RadiansToDegrees(resultAngle / 2.0f);
         if (bRotateWithNeck) { // android doesn't have this check
-            RtQuatRotate(m_pPed->m_apBones[PED_NODE_NECK]->m_pIFrame->orientation.AsRtQuat(), &XaxisIK, degreesHalf, rwCOMBINEPOSTCONCAT);
+            RtQuatRotate(m_pPed->m_apBones[PED_NODE_NECK]->KeyFrame->q.AsRtQuat(), &XaxisIK, degreesHalf, rwCOMBINEPOSTCONCAT);
         }
-        RtQuatRotate(m_pPed->m_apBones[PED_NODE_UPPER_TORSO]->m_pIFrame->orientation.AsRtQuat(), &XaxisIK, degreesHalf, rwCOMBINEPOSTCONCAT);
+        RtQuatRotate(m_pPed->m_apBones[PED_NODE_UPPER_TORSO]->KeyFrame->q.AsRtQuat(), &XaxisIK, degreesHalf, rwCOMBINEPOSTCONCAT);
     }
 }
 
@@ -75,7 +75,7 @@ bool CPedIK::PointGunInDirection(float zAngle, float distance, bool flag, float 
 
     const auto angle = CGeneral::LimitRadianAngle(zAngle - m_pPed->m_fCurrentRotation);
     const auto hier  = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
-    const auto index = RpHAnimIDGetIndex(hier, m_pPed->m_apBones[PED_NODE_RIGHT_CLAVICLE]->m_nNodeId);
+    const auto index = RpHAnimIDGetIndex(hier, m_pPed->m_apBones[PED_NODE_RIGHT_CLAVICLE]->BoneTag);
 
     // unused code
     // auto* boneMatrix = RwMatrixCreate();
@@ -109,9 +109,9 @@ bool CPedIK::PointGunInDirection(float zAngle, float distance, bool flag, float 
         flag ? std::sin(headAngle) :  std::cos(headAngle)
     };
 
-    auto Torsoframe = m_pPed->m_apBones[PED_NODE_UPPER_TORSO];
-    RtQuatRotate(Torsoframe->GetFrameOrientation().AsRtQuat(), &axis, RadiansToDegrees(m_TorsoOrient.m_fPitch), rwCOMBINEPOSTCONCAT);
-    RtQuatRotate(Torsoframe->GetFrameOrientation().AsRtQuat(), &XaxisIK, RadiansToDegrees(m_TorsoOrient.m_fYaw), rwCOMBINEPOSTCONCAT);
+    auto torsoQ = m_pPed->m_apBones[PED_NODE_UPPER_TORSO]->KeyFrame->q.AsRtQuat();
+    RtQuatRotate(torsoQ, &axis, RadiansToDegrees(m_TorsoOrient.m_fPitch), rwCOMBINEPOSTCONCAT);
+    RtQuatRotate(torsoQ, &XaxisIK, RadiansToDegrees(m_TorsoOrient.m_fYaw), rwCOMBINEPOSTCONCAT);
     m_pPed->bUpdateMatricesRequired = true;
 
     return canReach;
@@ -172,7 +172,7 @@ void CPedIK::PitchForSlope() {
         };
 
         const auto RotateBone = [clumpData, &hier](ePedBones bone, float angle, const CVector& axis = ZaxisIK) {
-            RtQuatRotate(clumpData->m_Frames[RpHAnimIDGetIndex(hier, bone)].GetFrameOrientation().AsRtQuat(), &axis, angle, rwCOMBINEPRECONCAT);
+            RtQuatRotate(clumpData->m_Frames[RpHAnimIDGetIndex(hier, bone)].KeyFrame->q.AsRtQuat(), &axis, angle, rwCOMBINEPRECONCAT);
         };
 
         if (std::abs(m_fSlopePitch) > 0.01f) {

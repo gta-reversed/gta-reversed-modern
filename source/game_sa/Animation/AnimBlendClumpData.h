@@ -12,7 +12,7 @@
 
 class CAnimBlendClumpData {
 public:
-    CAnimBlendLink      m_Anims;        //< List of `CAnimBlendAssociation`
+    CAnimBlendLink      m_AnimList;        //!< List of `CAnimBlendAssociation` - List of anims that are being played on this clump
     uint32              m_NumFrames;
     CVector*            m_PedPosition;
     AnimBlendFrameData* m_Frames;
@@ -26,6 +26,19 @@ public:
     CAnimBlendClumpData* Destructor()  { this->CAnimBlendClumpData::~CAnimBlendClumpData(); return this; }
 
     void ForAllFrames(void (*callback)(AnimBlendFrameData*, void*), void* data);
+
+    /*!
+     * @notsa
+     * @brief Iterate all frames (Using a functor, usually a lambda) 
+     * @param Fn The functor to be called
+    */
+    template<typename Functor>
+    void ForAllFramesF(Functor&& Fn) {
+        for (auto& frame : std::span{ m_Frames, m_NumFrames }) {
+            std::invoke(Fn, &frame);
+        }
+    }
+
     void ForAllFramesInSPR(void (*callback)(AnimBlendFrameData*, void*), void* data, uint32 a3);
     void LoadFramesIntoSPR();
     void SetNumberOfBones(int32 numBones);

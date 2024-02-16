@@ -170,6 +170,9 @@ public:
 
     auto GetNodes() { return std::span{ &m_BlendNodes, m_NumBlendNodes }; }
     void SetDefaultFinishCallback() { SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr); }
+
+    auto& GetLink() { return m_Link; }
+    auto  GetHier() const { return m_BlendHier; }
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

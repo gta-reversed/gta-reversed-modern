@@ -50,7 +50,7 @@ void CCutsceneMgr::AttachObjectToBone(CCutsceneObject* attachment, CCutsceneObje
 // 0x5B0480
 void CCutsceneMgr::AttachObjectToFrame(CCutsceneObject* attachment, CEntity* object, const char* frameName) {
     attachment->m_pAttachmentObject = nullptr;
-    attachment->m_pAttachToFrame    = RpAnimBlendClumpFindFrame(object->m_pRwClump, frameName)->m_pFrame;
+    attachment->m_pAttachToFrame    = RpAnimBlendClumpFindFrame(object->m_pRwClump, frameName)->Frame;
 }
 
 // 0x5B04B0
@@ -878,10 +878,10 @@ void CCutsceneMgr::SetCutsceneAnim(const char* animName, CObject* object) {
     cpyOfTheAnim->Start(0.f);
 
     const auto blendData = RpClumpGetAnimBlendClumpData(object->m_pRwClump);
-    blendData->m_Anims.Prepend(&cpyOfTheAnim->m_Link);
+    blendData->m_AnimList.Prepend(&cpyOfTheAnim->m_Link);
 
     if (cpyOfTheAnim->m_BlendHier->m_bKeepCompressed) {
-        blendData->m_Frames->m_bIsCompressed = true;
+        blendData->m_Frames[0].IsCompressed = true;
     }
 }
 

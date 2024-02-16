@@ -208,7 +208,7 @@ CAnimBlendStaticAssociation* CAnimManager::GetAnimAssociation(AssocGroupId group
 }
 
 CAnimBlendAssociation* CAnimManager::AddAnimationToClump(RpClump* clump, CAnimBlendAssociation* anim) {
-    const auto clumpAnims = &RpClumpGetAnimBlendClumpData(clump)->m_Anims;
+    const auto clumpAnims = &RpClumpGetAnimBlendClumpData(clump)->m_AnimList;
 
     CAnimBlendAssociation* syncWith{};
     if (anim->IsMoving()) {
@@ -257,7 +257,7 @@ CAnimBlendAssociation* CAnimManager::AddAnimationAndSync(RpClump* clump, CAnimBl
     } else {
         a->Start(0.0f);
     }
-    clumpAnims->m_Anims.Prepend(&a->m_Link);
+    clumpAnims->m_AnimList.Prepend(&a->m_Link);
     return a;
 
 }
@@ -431,7 +431,7 @@ CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, CAnimBlendHi
 
     CAnimBlendAssociation* running{};
     bool                   bFadeThisOut = false;
-    for (auto l = clumpAnimData->m_Anims.next; l; l = l->next) {
+    for (auto l = clumpAnimData->m_AnimList.next; l; l = l->next) {
         const auto a = CAnimBlendAssociation::FromLink(l);
         assert(a->m_BlendHier);
         if (a->m_BlendHier && a->m_BlendHier == toBlendHier) { // Found an instance of this anim running
@@ -462,7 +462,7 @@ CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, CAnimBlendHi
     a->m_Flags = toBlendFlags;
     a->ReferenceAnimBlock();
     UncompressAnimation(a->m_BlendHier);
-    clumpAnimData->m_Anims.Prepend(&a->m_Link);
+    clumpAnimData->m_AnimList.Prepend(&a->m_Link);
     a->Start();
     if (bFadeThisOut || (toBlendFlags & ANIMATION_PARTIAL)) {
         a->SetBlend(0.f, blendDelta);
@@ -484,7 +484,7 @@ CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, AssocGroupId
 
     CAnimBlendAssociation *running{}, *movingAnim{};
     bool                   bFadeThisOut = false;
-    for (auto l = clumpAnimData->m_Anims.next; l; l = l->next) {
+    for (auto l = clumpAnimData->m_AnimList.next; l; l = l->next) {
         const auto a = CAnimBlendAssociation::FromLink(l);
 
         if (toBlendIsMoving && a->IsMoving()) {

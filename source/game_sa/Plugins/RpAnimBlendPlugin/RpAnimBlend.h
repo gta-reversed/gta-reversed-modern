@@ -1,12 +1,25 @@
 #pragma once
 
-static inline uint32& ClumpOffset = *(uint32*)0xB5F878;
+class CAnimBlendClumpData;
+class AnimBlendFrameData;
+class CAnimBlendAssociation;
+struct RtAnimAnimation;
 
-#define RpClumpGetAnimBlendClumpData(clump) (*(CAnimBlendClumpData **)(((uint32)(clump) + ClumpOffset)))
+/**
+* RpAnimBlend plugin unique rwID
+*/
+#define rwID_RPANIMBLENDPLUGIN MAKECHUNKID(rwVENDORID_DEVELOPER, 0xFB)
 
+//#define RpClumpGetAnimBlendClumpData(clump) (*(CAnimBlendClumpData **)(((uint32)(clump) + ClumpOffset)))
+
+CAnimBlendClumpData*& RpClumpGetAnimBlendClumpData(RpClump* clump);
+
+namespace RpAnimBlendPlugin {
+    void InjectHooks();
+};
 bool RpAnimBlendPluginAttach();
 
-CAnimBlendClumpData* RpAnimBlendAllocateData(RpClump* clump);
+void RpAnimBlendAllocateData(RpClump* clump);
 CAnimBlendAssociation* RpAnimBlendClumpAddAssociation(RpClump* clump, CAnimBlendAssociation* association, uint32 flags, float startTime, float blendAmount);
 CAnimBlendAssociation* RpAnimBlendClumpExtractAssociations(RpClump* clump);
 void RpAnimBlendClumpFillFrameArray(RpClump* clump, AnimBlendFrameData** frameData);
@@ -15,7 +28,7 @@ AnimBlendFrameData* RpAnimBlendClumpFindBone(RpClump* clump, uint32 id);
 AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, const char* name);
 AnimBlendFrameData* RpAnimBlendClumpFindFrameFromHashKey(RpClump* clump, uint32 key);
 
-CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, bool bStopFunctionConfusion, CAnimBlendHierarchy* hierarchy);
+CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, bool, CAnimBlendHierarchy* hierarchy);
 CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, const char* name);
 CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, uint32 animId);
 
@@ -47,4 +60,11 @@ void RpAnimBlendFrameSetName(RwFrame* frame, char* name);
 CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* association);
 CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* association, uint32 flags);
 void RpAnimBlendKeyFrameInterpolate(void* voidOut, void* voidIn1, void* voidIn2, float time, void* customData);
-void* RtAnimBlendKeyFrameApply(void* result, void* frame);
+
+/*!
+* @addr 0x4D5FA0
+* @brief Converts a standard keyframe to a matrix
+* @param pMatrix A pointer to the output matrix
+* @param pVoidIFrame A pointer to the input frame
+*/
+void RtAnimBlendKeyFrameApply(void* result, void* frame);

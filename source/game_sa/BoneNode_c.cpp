@@ -32,8 +32,8 @@ void BoneNode_c::InjectHooks() {
 bool BoneNode_c::Init(int32 boneTag, RpHAnimBlendInterpFrame* interpFrame) {
     m_BoneTag     = static_cast<ePedBones>(boneTag);
     m_InterpFrame = interpFrame;
-    m_Orientation = interpFrame->orientation;
-    m_Pos         = interpFrame->translation;
+    m_Orientation = interpFrame->q;
+    m_Pos         = interpFrame->t;
     m_Parent      = nullptr;
 
     m_Childs.RemoveAll();
@@ -179,11 +179,11 @@ void BoneNode_c::Limit(float blend) {
 
 // 0x616E30
 void BoneNode_c::BlendKeyframe(float blend) {
-    auto src = m_InterpFrame->orientation;
+    auto src = m_InterpFrame->q;
     auto dst = m_Orientation;
     RtQuatSlerpCache cache;
     RtQuatSetupSlerpCache(src.AsRtQuat(), dst.AsRtQuat(), &cache);
-    RtQuatSlerp(m_InterpFrame->orientation.AsRtQuat(), src.AsRtQuat(), dst.AsRtQuat(), blend, &cache);
+    RtQuatSlerp(m_InterpFrame->q.AsRtQuat(), src.AsRtQuat(), dst.AsRtQuat(), blend, &cache);
 }
 
 // 0x616CB0

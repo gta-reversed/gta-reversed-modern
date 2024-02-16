@@ -10,7 +10,7 @@
 
 // Fuck Rw Types
 struct RpHAnimBlendInterpFrame {
-    CQuaternion orientation;
-    CVector     translation;
+    CQuaternion q;
+    CVector     t;
 };
 VALIDATE_SIZE(RpHAnimBlendInterpFrame, 0x1C);

@@ -79,3 +79,53 @@ RtQuat* RtQuatRotate(RtQuat* quat, const RwV3d* axis, RwReal angle, RwOpCombineT
 const RtQuat* RtQuatQueryRotate(const RtQuat* quat, RwV3d* unitAxis, RwReal* angle); // 0x7EBA80
 RwV3d* RtQuatTransformVectors(RwV3d* vectorsOut, const RwV3d* vectorsIn, const RwInt32 numPoints, const RtQuat* quat); // 0x7EBBB0
 RwReal RtQuatModulus(RtQuat* q); // 0x7EBD10
+
+#define RtQuatUnitConvertToMatrixMacro(qpQuat, mpMatrix)                   \
+MACRO_START                                                                \
+{                                                                          \
+    const RwReal        x = (qpQuat)->imag.x;                              \
+    const RwReal        y = (qpQuat)->imag.y;                              \
+    const RwReal        z = (qpQuat)->imag.z;                              \
+    const RwReal        w = (qpQuat)->real;                                \
+    RwV3d               square;                                            \
+    RwV3d               cross;                                             \
+    RwV3d               wimag;                                             \
+                                                                           \
+    square.x = x * x;                                                      \
+    square.y = y * y;                                                      \
+    square.z = z * z;                                                      \
+                                                                           \
+    cross.x = y * z;                                                       \
+    cross.y = z * x;                                                       \
+    cross.z = x * y;                                                       \
+                                                                           \
+    wimag.x = w * x;                                                       \
+    wimag.y = w * y;                                                       \
+    wimag.z = w * z;                                                       \
+                                                                           \
+    (mpMatrix)->right.x = 1 - 2 * (square.y + square.z);                   \
+    (mpMatrix)->right.y = 2 * (cross.z + wimag.z);                         \
+    (mpMatrix)->right.z = 2 * (cross.y - wimag.y);                         \
+                                                                           \
+    (mpMatrix)->up.x = 2 * (cross.z - wimag.z);                            \
+    (mpMatrix)->up.y = 1 - 2 * (square.x + square.z);                      \
+    (mpMatrix)->up.z = 2 * (cross.x + wimag.x);                            \
+                                                                           \
+    (mpMatrix)->at.x = 2 * (cross.y + wimag.y);                            \
+    (mpMatrix)->at.y = 2 * (cross.x - wimag.x);                            \
+    (mpMatrix)->at.z = (1 - 2 * (square.x + square.y));                    \
+                                                                           \
+    /* Set position */                                                     \
+    (mpMatrix)->pos.x = ((RwReal) 0);                                      \
+    (mpMatrix)->pos.y = ((RwReal) 0);                                      \
+    (mpMatrix)->pos.z = ((RwReal) 0);                                      \
+                                                                           \
+    /* Matrix is orthonormal */                                            \
+    rwMatrixSetFlags((mpMatrix),                                           \
+                      (rwMATRIXTYPEORTHONORMAL  &                          \
+                       ~rwMATRIXINTERNALIDENTITY) );                       \
+}                                                                          \
+MACRO_STOP
+
+#define RtQuatUnitConvertToMatrix(qpQuat, mpMatrix)                        \
+    RtQuatUnitConvertToMatrixMacro(qpQuat, mpMatrix)    

@@ -431,10 +431,10 @@ void CTaskSimpleJetPack::ApplyRollAndPitch(CPed* ped) {
     if (ped->bIsStanding || ped->bWasStanding) {
         return;
     }
-    for (const auto nodeId : { PED_NODE_LEFT_LEG, PED_NODE_RIGHT_LEG }) {
-        const auto orientation = ped->m_apBones[nodeId]->GetFrameOrientation().AsRtQuat();
-        RtQuatRotate(orientation, &CPedIK::ZaxisIK, RWRAD2DEG(m_LegSwingFwd), rwCOMBINEPOSTCONCAT);
-        RtQuatRotate(orientation, &CPedIK::YaxisIK, RWRAD2DEG(m_LegSwingSide), rwCOMBINEPOSTCONCAT);
+    for (const auto nodeId : { PED_NODE_LEFT_LEG, PED_NODE_RIGHT_LEG }) { // Rotate legs according to current swing values
+        const auto boneQ = ped->m_apBones[nodeId]->KeyFrame->q.AsRtQuat();
+        RtQuatRotate(boneQ, &CPedIK::ZaxisIK, RWRAD2DEG(m_LegSwingFwd), rwCOMBINEPOSTCONCAT);
+        RtQuatRotate(boneQ, &CPedIK::YaxisIK, RWRAD2DEG(m_LegSwingSide), rwCOMBINEPOSTCONCAT);
     }
     ped->bUpdateMatricesRequired = true;
 }

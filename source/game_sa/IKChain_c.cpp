@@ -46,7 +46,7 @@ bool IKChain_c::Init(const char* name,
 
     const auto frames = m_Ped->GetAnimBlendData().m_Frames;
 
-    if (frames[0].m_bCheckBlendNodeClumpKeyFrames || !frames[0].m_bUpdatingFrame) {
+    if (frames[0].bCheckBlendNodeClumpKeyFrames || !frames[0].IsUpdatingFrame) {
         return false;
     }
 
@@ -57,8 +57,8 @@ bool IKChain_c::Init(const char* name,
     // Check if frame of this bone has non-zero translation
     {
         const auto index = RpHAnimIDGetIndex(&m_Ped->GetAnimHierarchy(), (RwInt32)bone);
-        const auto& boneFrame = frames[index].m_pIFrame;
-        if (boneFrame->translation.IsZero()) {
+        const auto& boneFrame = frames[index].KeyFrame;
+        if (boneFrame->t.IsZero()) {
             return false;
         }
     }
@@ -270,7 +270,7 @@ void IKChain_c::SetupBones(ePedBones boneTag, CVector posn, ePedBones bone, Anim
     for (auto boneIt = boneTag; boneIt != bone; boneIt = BoneNodeManager_c::ms_boneInfos[BoneNode_c::GetIdFromBoneTag(boneIt)].m_prev) {
         auto* node = g_boneNodeMan.GetBoneNode();
         const auto index = RpHAnimIDGetIndex(&hier, (RwInt32)boneIt);
-        node->Init(boneIt, frames[index].m_pIFrame);
+        node->Init(boneIt, frames[index].KeyFrame);
         bones[m_Count++] = node;
     }
 
