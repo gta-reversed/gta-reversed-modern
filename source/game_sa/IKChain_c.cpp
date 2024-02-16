@@ -44,9 +44,9 @@ bool IKChain_c::Init(const char* name,
 ) {
     m_Ped = ped;
 
-    const auto frames = m_Ped->GetAnimBlendData().m_Frames;
+    const auto frames = m_Ped->GetAnimBlendData().m_FrameDatas;
 
-    if (frames[0].bCheckBlendNodeClumpKeyFrames || !frames[0].IsUpdatingFrame) {
+    if (frames[0].NeedsKeyFrameUpdate || !frames[0].IsUpdatingFrame) {
         return false;
     }
 

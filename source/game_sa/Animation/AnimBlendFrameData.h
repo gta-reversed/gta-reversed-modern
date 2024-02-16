@@ -18,7 +18,7 @@ public:
             bool IsIFrameTranslationToAffectedByNodes : 1;   // KeyFrame translation will be affected
             bool IsInitialized : 1;
             bool bUpdateSkinnedWith3dVelocityExtraction : 1;
-            bool bCheckBlendNodeClumpKeyFrames : 1;          // key frames of CAnimBlendNode bones will be checked
+            bool NeedsKeyFrameUpdate : 1;
             bool IsCompressed : 1;
             bool IsUpdatingFrame : 1;                        // doesn't seem to be used
         };

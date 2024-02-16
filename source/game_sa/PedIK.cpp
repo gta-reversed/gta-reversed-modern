@@ -172,7 +172,7 @@ void CPedIK::PitchForSlope() {
         };
 
         const auto RotateBone = [clumpData, &hier](ePedBones bone, float angle, const CVector& axis = ZaxisIK) {
-            RtQuatRotate(clumpData->m_Frames[RpHAnimIDGetIndex(hier, bone)].KeyFrame->q.AsRtQuat(), &axis, angle, rwCOMBINEPRECONCAT);
+            RtQuatRotate(clumpData->m_FrameDatas[RpHAnimIDGetIndex(hier, bone)].KeyFrame->q.AsRtQuat(), &axis, angle, rwCOMBINEPRECONCAT);
         };
 
         if (std::abs(m_fSlopePitch) > 0.01f) {

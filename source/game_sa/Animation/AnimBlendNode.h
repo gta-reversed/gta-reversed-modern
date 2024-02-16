@@ -8,6 +8,8 @@
 #pragma once
 
 #include "Quaternion.h"
+#include "AnimBlendSequence.h"
+#include "AnimBlendAssociation.h"
 
 //! Animation of a single node (bone)
 class CAnimBlendNode {

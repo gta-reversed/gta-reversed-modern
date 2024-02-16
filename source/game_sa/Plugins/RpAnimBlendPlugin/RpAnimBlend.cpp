@@ -121,7 +121,7 @@ void RpAnimBlendClumpInit(RpClump* clump) {
 
         // Now, fill in the frame blend data from the positions we've just calculated
         for (size_t i = 0; i < nBones; i++) {
-            const auto fd = &bd->m_Frames[i]; // Frame blend data
+            const auto fd = &bd->m_FrameDatas[i]; // Frame blend data
             
             fd->KeyFrame = (RpHAnimBlendInterpFrame*)rtANIMGETINTERPFRAME(rpHAHier->currentAnim, i);
             fd->BoneTag  = rpHAHier->pNodeInfo[i].nodeID;
@@ -153,7 +153,7 @@ void RpAnimBlendClumpInit(RpClump* clump) {
             fd->BoneTag  = BONE_UNKNOWN;
         });
     }
-    bd->m_Frames[0].IsInitialized = true;
+    bd->m_FrameDatas[0].IsInitialized = true;
 }
 
 // 0x4D5FA0
@@ -279,7 +279,7 @@ void RpAnimBlendClumpFillFrameArray(RpClump* clump, AnimBlendFrameData** ppFrame
     if (IsClumpSkinned(clump)) { // 0x4D6450 (FillFrameArrayIndiciesSkinned)
         const auto ah = GetAnimHierarchyFromClump(clump);
         for (size_t i = PED_NODE_UPPER_TORSO; i < TOTAL_PED_NODES; i++) {
-            ppFrameArray[i] = &bd->m_Frames[RpHAnimIDGetIndex(ah, ConvertPedNode2BoneTag((ePedNode)i))];
+            ppFrameArray[i] = &bd->m_FrameDatas[RpHAnimIDGetIndex(ah, ConvertPedNode2BoneTag((ePedNode)i))];
         }
     } else {
         bd->ForAllFrames([](AnimBlendFrameData* f, void* data) { // 0x4D6430 (FillFrameArrayCBnonskin)
@@ -539,7 +539,7 @@ uint32 RpAnimBlendClumpGetNumPartialAssociations(RpClump* clump) {
 // 0x4D6760
 bool RpAnimBlendClumpIsInitialized(RpClump* clump) {
     const auto bd = RpAnimBlendClumpGetData(clump);
-    return bd && bd->m_NumFrames;
+    return bd && bd->m_NumFrameData;
 }
 
 // 0x4D6B00
@@ -582,24 +582,72 @@ void RpAnimBlendClumpSetBlendDeltas(RpClump* clump, uint32 flags, float delta) {
     });
 }
 
+struct AnimBlendUpdateData { // OG name
+    bool            IncludePartial; // Has non-moving anim (Eg.: Anim with MOVEMENT flag NOT set)
+    CAnimBlendNode* BlendNodes[12]; // null terminated array
+};
+
+static auto& gpAnimBlendClump = StaticRef<CAnimBlendClumpData*>(0xB4EA0C);
+
+// 0x4D2E40
+void FrameUpdateCallBackCompressedSkinned(AnimBlendFrameData* f, void* data) {
+    const auto c = static_cast<AnimBlendUpdateData*>(data);
+
+    plugin::Call<0x4D2E40>(f, data);
+}
+// 0x4D32D0
+void FrameUpdateCallBackCompressedNonSkinned(AnimBlendFrameData* f, void* data) {
+    const auto c = static_cast<AnimBlendUpdateData*>(data);
+
+    plugin::Call<0x4D32D0>(f, data);
+}
+
+// 0x4D2B90
+void FrameUpdateCallBackSkinned(AnimBlendFrameData* f, void* data) {
+    const auto c = static_cast<AnimBlendUpdateData*>(data);
+
+    plugin::Call<0x4D2B90>(f, data);
+}
+
+// 0x4D30A0
+void FrameUpdateCallBackNonSkinned(AnimBlendFrameData* f, void* data) {
+    const auto c = static_cast<AnimBlendUpdateData*>(data);
+
+    plugin::Call<0x4D30A0>(f, data);
+}
+
+// 0x4D2E10
+void FrameUpdateCallBackOffscreen(AnimBlendFrameData* f, void* data) {
+    const auto c = static_cast<AnimBlendUpdateData*>(data);
+
+    plugin::Call<0x4D2E10>(f, data);
+}
+
+// 0x4D1570
+void RpAnimBlendNodeUpdateKeyFrames(AnimBlendUpdateData* c, AnimBlendFrameData* frames, uint32 nFrames) {
+    for (auto n = c->BlendNodes; *n; n++) {
+
+    }
+}
+
 // 0x4D34F0
-void RpAnimBlendClumpUpdateAnimations(RpClump* clump, float step, bool onScreen) {
+void RpAnimBlendClumpUpdateAnimations(RpClump* clump, float timeStep, bool isOnScreen) {
     const auto bd = RpAnimBlendClumpGetData(clump);
 
     if (bd->m_AnimList.IsEmpty()) {
         return;
     }
 
-    CAnimBlendNode* nodeStk[11];
-    size_t          nodeStkSz{};
+    gpAnimBlendClump = bd;
 
-    // Total time and blend amount of movement animations
-    float movingSumTime{}, movingSumBlendAmnt{};
+    AnimBlendUpdateData ctx;
+    size_t              nodesCnt{};
 
-    bool hasStaticAnim{};
+    float totalTime{}, totalBlendAmnt{};
 
+    // 0x4D351F
     for (auto& a : bd->m_AnimList) {
-        if (!a.UpdateBlend(step)) {
+        if (!a.UpdateBlend(timeStep)) {
             continue;
         }
         const auto ah = a.GetHier();
@@ -607,16 +655,62 @@ void RpAnimBlendClumpUpdateAnimations(RpClump* clump, float step, bool onScreen)
             continue;
         }
         CAnimManager::UncompressAnimation(a.GetHier());
-        if (nodeStkSz < 11) { // TODO: Magic number???
-            nodeStk[nodeStkSz++] = a.GetNode(0);
+        if (nodesCnt + 1 <= std::size(ctx.BlendNodes) - 1) { // -1 for null terminator
+            ctx.BlendNodes[nodesCnt++] = a.GetNode(0);
         }
         if (a.IsMoving()) {
-            movingSumTime      += ah->GetTotalTime() / a.GetSpeed() * a.GetBlendAmount();
-            movingSumBlendAmnt += a.GetBlendAmount();
+            totalTime      += ah->GetTotalTime() / a.GetSpeed() * a.GetBlendAmount();
+            totalBlendAmnt += a.GetBlendAmount();
         } else {
-            hasStaticAnim = true;        
+            ctx.IncludePartial = true;        
         }
     }
+    ctx.BlendNodes[nodesCnt] = nullptr; // Null terminator
+
+    // 0x4D35A2 - Update animation's timesteps
+    const auto animTimeMult = totalTime == 0.f
+        ? 1.f
+        : 1.f / totalTime * totalBlendAmnt;
+    for (auto& a : bd->m_AnimList) {
+        a.UpdateTimeStep(timeStep, animTimeMult);
+    }
+
+    // 0x4D360E - Update all animations's frames
+    const auto rootFD = &bd->GetRootFrameData();
+    rootFD->IsUpdatingFrame = true;
+
+    if (rootFD->IsCompressed) {
+        bd->ForAllFrames(
+            IsClumpSkinned(clump)
+                ? FrameUpdateCallBackCompressedSkinned
+                : FrameUpdateCallBackCompressedNonSkinned,
+            &ctx
+        );
+    } else if (isOnScreen) {
+        if (rootFD->NeedsKeyFrameUpdate) {
+            RpAnimBlendNodeUpdateKeyFrames(&ctx, bd->m_FrameDatas, bd->m_NumFrameData);
+        }
+
+        bd->ForAllFrames(
+            IsClumpSkinned(clump)
+                ? FrameUpdateCallBackSkinned
+                : FrameUpdateCallBackNonSkinned,
+            &ctx
+        );
+
+        rootFD->NeedsKeyFrameUpdate = false;
+    } else {
+        bd->ForAllFrames(FrameUpdateCallBackOffscreen, &ctx);
+        rootFD->NeedsKeyFrameUpdate = true;
+    }
+
+    // 0x4D3715 - Update all animation's times
+    for (auto& a : bd->m_AnimList) {
+        a.UpdateTime(timeStep, animTimeMult);
+    }
+
+    // 0x4D3764
+    RwFrameUpdateObjects(RpClumpGetFrame(clump));
 }
 
 // 0x4D60E0
@@ -703,11 +797,17 @@ void RpAnimBlendPlugin::InjectHooks() {
     RH_ScopedGlobalInstall(RpAnimBlendClumpRemoveAllAssociations, 0x4D6C00);
     RH_ScopedGlobalInstall(RpAnimBlendClumpRemoveAssociations, 0x4D6820);
     RH_ScopedGlobalInstall(RpAnimBlendClumpSetBlendDeltas, 0x4D67E0);
-    RH_ScopedGlobalInstall(RpAnimBlendClumpUpdateAnimations, 0x4D34F0, {.reversed=false});
     RH_ScopedGlobalInstall(RpAnimBlendCreateAnimationForHierarchy, 0x4D60E0);
     RH_ScopedGlobalInstall(RpAnimBlendFrameGetName, 0x4D5EF0);
     RH_ScopedGlobalInstall(RpAnimBlendFrameSetName, 0x4D5F00);
     RH_ScopedGlobalOverloadedInstall(RpAnimBlendGetNextAssociation, "Any", 0x4D6AB0, CAnimBlendAssociation * (*)(CAnimBlendAssociation * association));
     RH_ScopedGlobalOverloadedInstall(RpAnimBlendGetNextAssociation, "Flags", 0x4D6AD0, CAnimBlendAssociation * (*)(CAnimBlendAssociation * association, uint32 flags));
+
+    RH_ScopedGlobalInstall(FrameUpdateCallBackCompressedSkinned, 0x4D2E40, {.reversed=false});
+    RH_ScopedGlobalInstall(FrameUpdateCallBackCompressedNonSkinned, 0x4D32D0, {.reversed=false});
+    RH_ScopedGlobalInstall(FrameUpdateCallBackSkinned, 0x4D2B90, {.reversed=false});
+    RH_ScopedGlobalInstall(FrameUpdateCallBackNonSkinned, 0x4D30A0, {.reversed=false});
+    RH_ScopedGlobalInstall(FrameUpdateCallBackOffscreen, 0x4D2E10, {.reversed=false});
+    RH_ScopedGlobalInstall(RpAnimBlendClumpUpdateAnimations, 0x4D34F0);
 }
 

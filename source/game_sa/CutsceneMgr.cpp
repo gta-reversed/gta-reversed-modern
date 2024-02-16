@@ -881,7 +881,7 @@ void CCutsceneMgr::SetCutsceneAnim(const char* animName, CObject* object) {
     blendData->m_AnimList.Prepend(&cpyOfTheAnim->m_Link);
 
     if (cpyOfTheAnim->m_BlendHier->m_bKeepCompressed) {
-        blendData->m_Frames[0].IsCompressed = true;
+        blendData->m_FrameDatas[0].IsCompressed = true;
     }
 }
 

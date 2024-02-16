@@ -9,6 +9,7 @@
 #include "AnimAssociationData.h"
 #include "eAnimBlendCallbackType.h"
 #include "RenderWare.h"
+#include "AnimBlendNode.h"
 
 #include <extensions/WEnum.hpp>
 
@@ -165,7 +166,6 @@ public:
 
     void AllocateAnimBlendNodeArray(int32 count);
     void FreeAnimBlendNodeArray();
-    CAnimBlendNode* GetNode(int32 nodeIndex);
 
     void Init(RpClump* clump, CAnimBlendHierarchy* hierarchy);
     void Init(CAnimBlendAssociation& source);
@@ -201,7 +201,9 @@ public:
     auto GetSpeed() const      { return m_Speed; }
     void SetSpeed(float speed) { m_Speed = speed; }
 
-    auto GetNodes() { return std::span{ &m_BlendNodes, m_NumBlendNodes }; }
+    auto            GetNodes() { return std::span{ m_BlendNodes, m_NumBlendNodes }; }
+    CAnimBlendNode* GetNode(int32 nodeIndex) { return &GetNodes()[nodeIndex]; } // 0x4CEB60
+
     void SetDefaultFinishCallback() { SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr); }
 
     auto& GetLink() { return m_Link; }
