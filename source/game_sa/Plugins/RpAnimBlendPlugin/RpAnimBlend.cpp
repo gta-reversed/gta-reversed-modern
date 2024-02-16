@@ -377,8 +377,19 @@ CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation(RpClump* clump, CAnimB
 }
 
 // 0x4D6A30
-CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation_N(RpClump* clump, int32 n) {
-    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6A30, RpClump*, int32>(clump, n);
+CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation_N(RpClump* clump, uint32 n) {
+    const auto bd = RpClumpGetAnimBlendClumpData(clump);
+
+    for (auto l = bd->m_AnimList.next; l;) {
+        const auto a = CAnimBlendAssociation::FromLink(l);
+        if (a->IsPartial()) {
+            if (n-- == 0) {
+                return a;
+            }
+        }
+        l = a->GetLink().next;
+    }
+    return nullptr;
 }
 
 // 0x4D69A0
@@ -500,7 +511,7 @@ void RpAnimBlendPlugin::InjectHooks() {
     RH_ScopedGlobalOverloadedInstall(RpAnimBlendClumpGetFirstAssociation, "", 0x4D15E0, CAnimBlendAssociation*(*)(RpClump*));
     RH_ScopedGlobalOverloadedInstall(RpAnimBlendClumpGetFirstAssociation, "Flags", 0x4D6A70, CAnimBlendAssociation*(*)(RpClump*, uint32));
     RH_ScopedGlobalInstall(RpAnimBlendClumpGetMainAssociation, 0x4D6910);
-    RH_ScopedGlobalInstall(RpAnimBlendClumpGetMainAssociation_N, 0x4D6A30, { .reversed = false });
+    RH_ScopedGlobalInstall(RpAnimBlendClumpGetMainAssociation_N, 0x4D6A30);
     RH_ScopedGlobalInstall(RpAnimBlendClumpGetMainPartialAssociation, 0x4D69A0, { .reversed = false });
     RH_ScopedGlobalInstall(RpAnimBlendClumpGetMainPartialAssociation_N, 0x4D69F0, { .reversed = false });
     RH_ScopedGlobalInstall(RpAnimBlendClumpGetNumAssociations, 0x4D6B60, { .reversed = false });
