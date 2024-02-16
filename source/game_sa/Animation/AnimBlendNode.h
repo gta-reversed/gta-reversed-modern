@@ -60,7 +60,8 @@ public:
     bool UpdateTime(); // Unused
     bool SetupKeyFrameCompressed();
     bool FindKeyFrame(float time);
-
+    auto GetAnimAssoc() const { return m_BlendAssoc; }
+    bool IsValid() const { return !!m_Seq; }
 
 private: // Generic implementations
     //! @notsa

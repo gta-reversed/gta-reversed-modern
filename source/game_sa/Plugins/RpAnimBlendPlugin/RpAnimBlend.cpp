@@ -624,9 +624,26 @@ void FrameUpdateCallBackOffscreen(AnimBlendFrameData* f, void* data) {
 }
 
 // 0x4D1570
+// Can't make this function hookable because it doesn't use a proper calling convention
 void RpAnimBlendNodeUpdateKeyFrames(AnimBlendUpdateData* c, AnimBlendFrameData* frames, uint32 nFrames) {
-    for (auto n = c->BlendNodes; *n; n++) {
+    for (auto pNodeArray = c->BlendNodes; *pNodeArray; pNodeArray++) {
+        const auto nodes = *pNodeArray;
 
+        const auto assoc = nodes[0].GetAnimAssoc();
+        for (size_t frameN = 0; frameN < nFrames; frameN++) {
+            const auto fd = &frames[frameN];
+
+            if (fd->IsInitialized && gpAnimBlendClump->m_PedPosition) {
+                continue;
+            }
+
+            const auto node = &nodes[frameN];
+            if (!node->IsValid()) {
+                continue;
+            }
+
+            node->FindKeyFrame(assoc->GetCurrentTime());
+        }
     }
 }
 
