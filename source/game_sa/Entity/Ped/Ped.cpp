@@ -3197,7 +3197,7 @@ uint8 CPed::DoesLOSBulletHitPed(CColPoint& colPoint) {
     RwV3d headPos{};
 
     // TODO: Doesn't this just return the position of the matrix? Eg.: `BoneMatrix.pos` ?
-    RwV3dTransformPoint(&headPos, &zero, &GetBoneMatrix((ePedBones)m_apBones[ePedNode::PED_NODE_HEAD]->BoneTag));
+    RwV3dTransformPoint(&headPos, &zero, &GetBoneMatrix((eBoneTag)m_apBones[ePedNode::PED_NODE_HEAD]->BoneTag));
 
     if (m_nPedState == PEDSTATE_FALL || colPoint.m_vecPoint.z < headPos.z) { // Ped falling, adjust
         return 1;
@@ -3242,7 +3242,7 @@ bool CPed::IsPedHeadAbovePos(float zPos) {
     RwV3d headPos{};
 
     // TODO: Doesn't this just return the position of the matrix? Eg.: `BoneMatrix.pos` ?
-    RwV3dTransformPoint(&headPos, &zero, &GetBoneMatrix((ePedBones)m_apBones[ePedNode::PED_NODE_HEAD]->BoneTag));
+    RwV3dTransformPoint(&headPos, &zero, &GetBoneMatrix((eBoneTag)m_apBones[ePedNode::PED_NODE_HEAD]->BoneTag));
 
     return zPos + GetPosition().z < headPos.z;
 }

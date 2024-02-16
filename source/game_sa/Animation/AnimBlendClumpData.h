@@ -46,8 +46,7 @@ public:
     void LoadFramesIntoSPR();
 
     AnimBlendFrameData& GetRootFrameData() const { assert(m_NumFrameData >= 1); return m_FrameDatas[0]; }
-    void SetNumberOfBones(int32 numBones);
+    void SetNumberOfBones(uint32 numBones);
     auto GetFrames() const { return m_FrameDatas; }
 };
-
 VALIDATE_SIZE(CAnimBlendClumpData, 0x14);

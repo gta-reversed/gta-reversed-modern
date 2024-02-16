@@ -722,7 +722,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
     if (!(player->bIsLooking && player->bIsRestoringLook) && touchTimeDelta - gLastTouchTimeDelta > 20000) {
         // Check if the player already has any anims from the idle anim block playing already
         bool anyIdleAnims = false;
-        RpAnimBlendClumpIterateAssociations(player->m_pRwClump, [&](CAnimBlendAssociation* a) {
+        RpAnimBlendClumpForEachAssociation(player->m_pRwClump, [&](CAnimBlendAssociation* a) {
             if (CAnimManager::IsAnimInBlock(a->GetHier(), playerIdlesAnimBlock)) {
                 anyIdleAnims = true;
                 return false;

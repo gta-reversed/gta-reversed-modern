@@ -119,7 +119,7 @@ void CAnimBlendAssociation::Init(RpClump* clump, CAnimBlendHierarchy* animHierar
         if (!frame) {
             continue;
         }
-        m_BlendNodes[frame - animClumpData->m_Frames].m_Seq = &seq;
+        m_BlendNodes[frame - animClumpData->m_FrameDatas].m_Seq = &seq;
     }
 }
  
@@ -317,4 +317,8 @@ void CAnimBlendAssociation::ReferenceAnimBlock() {
     }
     CAnimManager::AddAnimBlockRef(m_BlendHier->m_nAnimBlockId);
     SetFlag(ANIMATION_FREEZE_TRANSLATION, true);
+}
+
+std::span<CAnimBlendNode> CAnimBlendAssociation::GetNodes() {
+    return std::span{ m_BlendNodes, m_NumBlendNodes };
 }

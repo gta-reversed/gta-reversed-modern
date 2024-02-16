@@ -248,7 +248,7 @@ CAnimBlendAssociation* CAnimManager::AddAnimation(RpClump* clump, CAnimBlendHier
 }
 
 // 0x4D3B30
-CAnimBlendAssociation* CAnimManager::AddAnimationAndSync(RpClump* clump, CAnimBlendAssociation* animBlendAssoc, AssocGroupId groupId, AnimationId animId) {
+CAnimBlendAssociation* CAnimManager::AddAnimationAndSync(RpClump* clump, CAnimBlendAssociation* syncWith, AssocGroupId groupId, AnimationId animId) {
     const auto a = CreateAnimAssociation(groupId, animId);
     if (a->IsMoving() && syncWith) {
         a->SyncAnimation(syncWith);
@@ -257,7 +257,7 @@ CAnimBlendAssociation* CAnimManager::AddAnimationAndSync(RpClump* clump, CAnimBl
         a->Start(0.0f);
     }
 
-    RpClumpGetAnimBlendClumpData(clump)->m_AnimList.Prepend(&a->m_Link);
+    RpAnimBlendClumpGetData(clump)->m_AnimList.Prepend(&a->m_Link);
 
     return a;
 }

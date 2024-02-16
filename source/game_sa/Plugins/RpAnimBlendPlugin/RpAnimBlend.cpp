@@ -214,7 +214,7 @@ RwUInt32 ConvertPedNode2BoneTag(ePedNode pedNode) {
 }
 
 // 0x4D56F0
-const char* ConvertBoneTag2BoneName(ePedBones boneTag) { // todo: use eBoneTag32
+const char* ConvertBoneTag2BoneName(eBoneTag boneTag) { // todo: use eBoneTag32
     switch (boneTag) {
     case BONE_R_BREAST:    return "R Breast";
     case BONE_L_BREAST:    return "L Breast";
@@ -311,7 +311,7 @@ AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, const char* needle
     AnimBlendFrameData* ret{};
     if (IsClumpSkinned(clump)) {
         bd->ForAllFramesF([&](AnimBlendFrameData* f) { // 0x4D6240
-            const auto boneName = ConvertBoneTag2BoneName((ePedBones)f->BoneTag);
+            const auto boneName = ConvertBoneTag2BoneName((eBoneTag)f->BoneTag);
             if (boneName && needlesv == boneName) {
                 ret = f;
             }
@@ -333,7 +333,7 @@ AnimBlendFrameData* RpAnimBlendClumpFindFrameFromHashKey(RpClump* clump, uint32 
     AnimBlendFrameData* ret{};
     if (IsClumpSkinned(clump)) {
         bd->ForAllFramesF([&](AnimBlendFrameData* f) { // 0x4D6310
-            const auto boneName = ConvertBoneTag2BoneName((ePedBones)f->BoneTag);
+            const auto boneName = ConvertBoneTag2BoneName((eBoneTag)f->BoneTag);
             if (boneName && needle == CKeyGen::GetUppercaseKey(boneName)) {
                 ret = f;
             }
@@ -583,8 +583,8 @@ void RpAnimBlendClumpSetBlendDeltas(RpClump* clump, uint32 flags, float delta) {
 }
 
 struct AnimBlendUpdateData { // OG name
-    bool            IncludePartial; // Has non-moving anim (Eg.: Anim with MOVEMENT flag NOT set)
-    CAnimBlendNode* BlendNodes[12]; // null terminated array
+    bool            IncludePartial{}; // Has non-moving anim (Eg.: Anim with MOVEMENT flag NOT set)
+    CAnimBlendNode* BlendNodes[12]{}; // null terminated array
 };
 
 static auto& gpAnimBlendClump = StaticRef<CAnimBlendClumpData*>(0xB4EA0C);
@@ -640,40 +640,40 @@ void RpAnimBlendClumpUpdateAnimations(RpClump* clump, float timeStep, bool isOnS
 
     gpAnimBlendClump = bd;
 
-    AnimBlendUpdateData ctx;
+    AnimBlendUpdateData ctx{};
     size_t              nodesCnt{};
 
     float totalTime{}, totalBlendAmnt{};
 
     // 0x4D351F
-    for (auto& a : bd->m_AnimList) {
-        if (!a.UpdateBlend(timeStep)) {
-            continue;
+    RpAnimBlendClumpForEachAssociation(clump, [&](CAnimBlendAssociation* a) {
+        if (!a->UpdateBlend(timeStep)) {
+            return;
         }
-        const auto ah = a.GetHier();
-        if (!ah->GetSequences().empty()) {
-            continue;
+        const auto ah = a->GetHier();
+        if (ah->GetSequences().empty()) {
+            return;
         }
-        CAnimManager::UncompressAnimation(a.GetHier());
+        CAnimManager::UncompressAnimation(a->GetHier());
         if (nodesCnt + 1 <= std::size(ctx.BlendNodes) - 1) { // -1 for null terminator
-            ctx.BlendNodes[nodesCnt++] = a.GetNode(0);
+            ctx.BlendNodes[nodesCnt++] = a->GetNode(0);
         }
-        if (a.IsMoving()) {
-            totalTime      += ah->GetTotalTime() / a.GetSpeed() * a.GetBlendAmount();
-            totalBlendAmnt += a.GetBlendAmount();
+        if (a->IsMoving()) {
+            totalTime      += ah->GetTotalTime() / a->GetSpeed() * a->GetBlendAmount();
+            totalBlendAmnt += a->GetBlendAmount();
         } else {
             ctx.IncludePartial = true;        
         }
-    }
+    });
     ctx.BlendNodes[nodesCnt] = nullptr; // Null terminator
 
     // 0x4D35A2 - Update animation's timesteps
     const auto animTimeMult = totalTime == 0.f
         ? 1.f
         : 1.f / totalTime * totalBlendAmnt;
-    for (auto& a : bd->m_AnimList) {
-        a.UpdateTimeStep(timeStep, animTimeMult);
-    }
+    RpAnimBlendClumpForEachAssociation(clump, [&](CAnimBlendAssociation* a) {
+        a->UpdateTimeStep(timeStep, animTimeMult);
+    });
 
     // 0x4D360E - Update all animations's frames
     const auto rootFD = &bd->GetRootFrameData();
@@ -705,10 +705,10 @@ void RpAnimBlendClumpUpdateAnimations(RpClump* clump, float timeStep, bool isOnS
     }
 
     // 0x4D3715 - Update all animation's times
-    for (auto& a : bd->m_AnimList) {
-        a.UpdateTime(timeStep, animTimeMult);
-    }
-
+    RpAnimBlendClumpForEachAssociation(clump, [&](CAnimBlendAssociation* a) {
+        a->UpdateTime(timeStep, animTimeMult);
+    });
+    
     // 0x4D3764
     RwFrameUpdateObjects(RpClumpGetFrame(clump));
 }

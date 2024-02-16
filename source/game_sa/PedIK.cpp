@@ -171,7 +171,7 @@ void CPedIK::PitchForSlope() {
             return &RpHAnimHierarchyGetMatrixArray(hier)[RpHAnimIDGetIndex(hier, bone)];
         };
 
-        const auto RotateBone = [clumpData, &hier](ePedBones bone, float angle, const CVector& axis = ZaxisIK) {
+        const auto RotateBone = [clumpData, &hier](eBoneTag bone, float angle, const CVector& axis = ZaxisIK) {
             RtQuatRotate(clumpData->m_FrameDatas[RpHAnimIDGetIndex(hier, bone)].KeyFrame->q.AsRtQuat(), &axis, angle, rwCOMBINEPRECONCAT);
         };
 

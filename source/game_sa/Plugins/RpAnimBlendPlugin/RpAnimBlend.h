@@ -193,15 +193,3 @@ CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* asso
 void RtAnimBlendKeyFrameApply(void* result, void* frame);
 
 void RpAnimBlendKeyFrameInterpolate(void* voidOut, void* voidIn1, void* voidIn2, float time, void* customData);
-
-/*!
-* @notsa
-* @brief Iterate over all the anims associated with the clump
-*/
-void RpAnimBlendClumpIterateAssociations(RpClump* clump, auto&& IterFn) {
-    for (auto a = RpAnimBlendClumpGetFirstAssociation(clump); a; a = RpAnimBlendGetNextAssociation(a)) {
-        if (!IterFn(a)) {
-            break;
-        }
-    }
-}

@@ -56,8 +56,6 @@ public:
     auto GetHashKey() const { return m_hashKey; }
     auto GetTotalTime() const { return m_fTotalTime; }
 
-    auto GetTotalTime() const { return m_fTotalTime; }
-
     uint32 GetIndex() const;
 
 private: // Function implementations

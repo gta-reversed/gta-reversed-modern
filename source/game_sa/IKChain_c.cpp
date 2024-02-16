@@ -55,8 +55,8 @@ bool IKChain_c::Init(
 
     // Check if frame of this bone has non-zero translation
     {
-        const auto& boneFrame = frames[RpHAnimIDGetIndex(&m_Ped->GetAnimHierarchy(), (RwInt32)effectorBone)].m_pIFrame;
-        if (boneFrame->translation.IsZero()) {
+        const auto& boneFrame = frames[RpHAnimIDGetIndex(&m_Ped->GetAnimHierarchy(), (RwInt32)effectorBone)].KeyFrame;
+        if (boneFrame->t.IsZero()) {
             return false;
         }
     }
