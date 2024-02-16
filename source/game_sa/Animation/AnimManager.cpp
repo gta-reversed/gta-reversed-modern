@@ -208,7 +208,7 @@ CAnimBlendStaticAssociation* CAnimManager::GetAnimAssociation(AssocGroupId group
 }
 
 CAnimBlendAssociation* CAnimManager::AddAnimationToClump(RpClump* clump, CAnimBlendAssociation* anim) {
-    const auto clumpAnims = &RpClumpGetAnimBlendClumpData(clump)->m_AnimList;
+    const auto clumpAnims = &RpAnimBlendClumpGetData(clump)->m_AnimList;
 
     CAnimBlendAssociation* syncWith{};
     if (anim->IsMoving()) {
@@ -250,7 +250,7 @@ CAnimBlendAssociation* CAnimManager::AddAnimation(RpClump* clump, CAnimBlendHier
 // 0x4D3B30
 CAnimBlendAssociation* CAnimManager::AddAnimationAndSync(RpClump* clump, CAnimBlendAssociation* animBlendAssoc, AssocGroupId groupId, AnimationId animId) {
     const auto a          = CreateAnimAssociation(groupId, animId);
-    const auto clumpAnims = RpClumpGetAnimBlendClumpData(clump);
+    const auto clumpAnims = RpAnimBlendClumpGetData(clump);
     if (a->IsMoving() && animBlendAssoc) {
         a->SyncAnimation(animBlendAssoc);
         a->m_Flags |= ANIMATION_STARTED;
@@ -427,7 +427,7 @@ void CAnimManager::RemoveFromUncompressedCache(CAnimBlendHierarchy* h) {
 
 // 0x4D4410
 CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, CAnimBlendHierarchy* toBlendHier, int32 toBlendFlags, float blendDelta) {
-    const auto clumpAnimData = RpClumpGetAnimBlendClumpData(clump); // Get running anim data
+    const auto clumpAnimData = RpAnimBlendClumpGetData(clump); // Get running anim data
 
     CAnimBlendAssociation* running{};
     bool                   bFadeThisOut = false;
@@ -475,7 +475,7 @@ CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, CAnimBlendHi
 
 // 0x4D4610
 CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, AssocGroupId groupId, AnimationId animId, float blendDelta) {
-    const auto clumpAnimData = RpClumpGetAnimBlendClumpData(clump); // Get running anim data
+    const auto clumpAnimData = RpAnimBlendClumpGetData(clump); // Get running anim data
 
     const auto toBlendAnim             = GetAssocGroups()[groupId].GetAnimation(animId);
     const bool toBlendIsMoving         = toBlendAnim->m_Flags & ANIMATION_MOVEMENT;

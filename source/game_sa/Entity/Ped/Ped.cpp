@@ -618,7 +618,7 @@ RpHAnimHierarchy& CPed::GetAnimHierarchy() const {
 }
 
 CAnimBlendClumpData& CPed::GetAnimBlendData() const {
-    return *RpClumpGetAnimBlendClumpData(m_pRwClump);
+    return *RpAnimBlendClumpGetData(m_pRwClump);
 }
 
 /*!
@@ -3360,7 +3360,7 @@ void CPed::SetModelIndex(uint32 modelIndex) {
     }
 
     // Deal with animation stuff once again
-    RpClumpGetAnimBlendClumpData(m_pRwClump)->m_PedPosition = (CVector*)&m_vecAnimMovingShiftLocal;
+    RpAnimBlendClumpGetData(m_pRwClump)->m_PedPosition = (CVector*)&m_vecAnimMovingShiftLocal;
 
     // Create hit col model
     if (!mi->m_pHitColModel) {

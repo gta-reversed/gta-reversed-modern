@@ -45,6 +45,35 @@ public:
 
 class CAnimBlendLink {
 public:
+    template<typename Y>
+    struct BaseIterator {
+    public:
+        using iterator_category = std::forward_iterator_tag; // Actually it's bidirectional, but there are quirks, so let's pretend like its not
+        using difference_type   = std::ptrdiff_t;
+        using value_type        = Y;
+        using pointer           = Y*;
+        using reference         = Y&;
+
+        BaseIterator() = default;
+        BaseIterator(CAnimBlendLink* link) : m_Link{ link } {}
+
+        reference operator*() const { return *DeRefLink(); }
+        pointer operator->() { return DeRefLink(); }
+
+        auto& operator++() { assert(m_Link); m_Link = DeRefLink()->GetLink().next; return *this; }
+        auto  operator++(int) { const auto tmp{ *this }; ++(*this); return tmp; }
+
+        friend bool operator==(const BaseIterator<Y>& lhs, const BaseIterator<Y>& rhs) { return lhs.m_Link == rhs.m_Link; }
+        friend bool operator!=(const BaseIterator<Y>& lhs, const BaseIterator<Y>& rhs) { return !(lhs == rhs); }
+    private:
+        auto DeRefLink() const { return CAnimBlendAssociation::FromLink(m_Link); }
+    private:
+        CAnimBlendLink* m_Link;
+    };
+
+    using iterator       = BaseIterator<CAnimBlendAssociation>;
+    using const_iterator = BaseIterator<const CAnimBlendAssociation>;
+
     CAnimBlendLink* next{};
     CAnimBlendLink* prev{};
 
@@ -73,6 +102,11 @@ public:
         }
         Init();
     }
+
+    bool IsEmpty() const { return !next; }
+
+    auto begin() { return iterator{this}; }
+    auto end() { return iterator{nullptr}; }
 };
 
 /*!
@@ -164,9 +198,8 @@ public:
         return (CAnimBlendAssociation*)((byte*)link - offsetof(CAnimBlendAssociation, m_Link));
     }
 
-    void SetSpeed(float speed) {
-        m_Speed = speed;
-    }
+    auto GetSpeed() const      { return m_Speed; }
+    void SetSpeed(float speed) { m_Speed = speed; }
 
     auto GetNodes() { return std::span{ &m_BlendNodes, m_NumBlendNodes }; }
     void SetDefaultFinishCallback() { SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr); }

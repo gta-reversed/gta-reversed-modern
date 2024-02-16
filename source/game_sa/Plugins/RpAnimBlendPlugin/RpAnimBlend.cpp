@@ -4,15 +4,15 @@
 
 static uint32& ClumpOffset = *(uint32*)0xB5F878;
 
-CAnimBlendClumpData*& RpClumpGetAnimBlendClumpData(RpClump* clump) {
-    return (*(CAnimBlendClumpData **)(((uint32)(clump) + ClumpOffset)));
+CAnimBlendClumpData*& RpAnimBlendClumpGetData(RpClump* clump) {
+    return *RWPLUGINOFFSET(CAnimBlendClumpData*, clump, ClumpOffset);
 }
 
 // 0x4D5F40
 void* ClumpAnimConstruct(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
     const auto clump = static_cast<RpClump*>(object);
 
-    RpClumpGetAnimBlendClumpData(clump) = nullptr;
+    RpAnimBlendClumpGetData(clump) = nullptr;
 
     return object;
 }
@@ -21,7 +21,7 @@ void* ClumpAnimConstruct(void* object, RwInt32 offsetInObject, RwInt32 sizeInObj
 void* ClumpAnimDestruct(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
     const auto clump = static_cast<RpClump*>(object);
 
-    if (auto& bd = RpClumpGetAnimBlendClumpData(clump)) {
+    if (auto& bd = RpAnimBlendClumpGetData(clump)) {
         RpAnimBlendClumpRemoveAllAssociations(clump);
         delete std::exchange(bd, nullptr);
     }
@@ -71,26 +71,121 @@ bool RpAnimBlendPluginAttach() {
 
 // 0x4D6720
 void RpAnimBlendClumpInit(RpClump* clump) {
-    plugin::Call<0x4D6720, RpClump*>(clump);
+    RpAnimBlendAllocateData(clump);
+
+    const auto bd = RpAnimBlendClumpGetData(clump);
+
+    constexpr size_t MAX_NUM_BONES = 64;
+
+    if (IsClumpSkinned(clump)) { // 0x4D6510 (SkinnedClumpInitAnim)
+        const auto skinGeo  = RpAtomicGetGeometry(GetFirstAtomic(clump));
+        const auto skin     = RpSkinGeometryGetSkin(skinGeo);
+        const auto nBones   = RpSkinGetNumBones(skin);
+        const auto rpHAHier = GetAnimHierarchyFromSkinClump(clump);
+
+        bd->SetNumberOfBones(nBones);
+
+        // Get bone positions
+        CVector bonePositions[MAX_NUM_BONES];
+        { // 0x735360 (SkinGetBonePositionsToTable)
+            assert(MAX_NUM_BONES >= nBones);
+
+            bonePositions[0] = CVector{0.f, 0.f, 0.f};
+
+            uint32  nodeStk[MAX_NUM_BONES]{};
+            uint32* nodeStkPtr{nodeStk};
+            uint32  currNodeIdx{};
+
+            for (uint32 i = 1; i < nBones; i++) { // Intentionally starting at 1
+                // Calculate inverse matrix of this bone
+                RwMatrix invBoneMat;
+                RwMatrixInvert(&invBoneMat, &RpSkinGetSkinToBoneMatrices(skin)[i]); // Originally they did a copy here, not sure why
+
+                // Calculate position of this bone
+                RwV3dTransformPoint(
+                    &bonePositions[i],
+                    RwMatrixGetPos(&invBoneMat),
+                    &RpSkinGetSkinToBoneMatrices(skin)[currNodeIdx]
+                );
+
+                // Handle node stack now
+                const auto nodeFlags = rpHAHier->pNodeInfo[i].flags;
+                if (nodeFlags & rpHANIMPUSHPARENTMATRIX) {
+                    *++nodeStkPtr = currNodeIdx;
+                }
+                currNodeIdx = nodeFlags & rpHANIMPOPPARENTMATRIX
+                    ? *nodeStkPtr--
+                    : i;
+            }
+        }
+
+        // Now, fill in the frame blend data from the positions we've just calculated
+        for (size_t i = 0; i < nBones; i++) {
+            const auto fd = &bd->m_Frames[i]; // Frame blend data
+            
+            fd->KeyFrame = (RpHAnimBlendInterpFrame*)rtANIMGETINTERPFRAME(rpHAHier->currentAnim, i);
+            fd->BoneTag  = rpHAHier->pNodeInfo[i].nodeID;
+            fd->BonePos  = bonePositions[i];
+        }
+
+        // Initialize all frames now
+        bd->ForAllFramesF([](AnimBlendFrameData* fd) { // 0x4D6500 (FrameInitCBskin)
+            fd->Flags = 0;
+        });
+    } else { // 0x4D66A0 (RpClumpInitFrameAnim)
+        // Recursively count number of frames (bones in this case) in this clump
+        uint32 numFrames{};
+        struct F {
+            static RwFrame* CountFramesCB(RwFrame* f, void* data) {
+                auto& numFrames = *static_cast<uint32*>(data);
+                numFrames++;
+                RwFrameForAllChildren(f, CountFramesCB, &numFrames);
+                return f;
+            }
+        };
+        RwFrameForAllChildren(RpClumpGetFrame(clump), F::CountFramesCB, &numFrames);
+        bd->SetNumberOfBones(numFrames);
+
+        // Initialize all frames now
+        bd->ForAllFramesF([](AnimBlendFrameData* fd) { // 0x4D6640 (FrameInitCBnonskin)
+            fd->Flags    = 0;
+            fd->FramePos = *RwMatrixGetPos(RwFrameGetMatrix(fd->Frame));
+            fd->BoneTag  = BONE_UNKNOWN;
+        });
+    }
+    bd->m_Frames[0].IsInitialized = true;
 }
 
 // 0x4D5FA0
-void RtAnimBlendKeyFrameApply(void* vMat, void* vFrame) {
-    const auto mat   = static_cast<RwMatrix*>(vMat);
-    const auto frame = static_cast<RpHAnimBlendInterpFrame*>(vFrame);
+void RtAnimBlendKeyFrameApply(void* voidMat, void* voidFrame) { // Semantically same as the original `RpHAnimBlendKeyFrameApply`
+    const auto mat   = static_cast<RwMatrix*>(voidMat);
+    const auto frame = static_cast<RpHAnimBlendInterpFrame*>(voidFrame);
 
     RtQuatUnitConvertToMatrix(&frame->q, mat);
     RwV3dAssign(RwMatrixGetPos(mat), &frame->t);
 }
 
+// 0x4D60C0
+void RpAnimBlendKeyFrameInterpolate(void* voidOut, void* voidIn1, void* voidIn2, float time, void* customData) {
+    const auto out = static_cast<RpHAnimBlendInterpFrame*>(voidOut);
+    *out = {};
+}
+
 // 0x4D5F50
 void RpAnimBlendAllocateData(RpClump* clump) {
-    RpClumpGetAnimBlendClumpData(clump) = new CAnimBlendClumpData;
+    RpAnimBlendClumpGetData(clump) = new CAnimBlendClumpData;
 }
 
 // 0x4D6790
 CAnimBlendAssociation* RpAnimBlendClumpAddAssociation(RpClump* clump, CAnimBlendAssociation* association, uint32 playFlags, float startTime, float blendAmount) {
-    NOTSA_UNREACHABLE();
+    NOTSA_UNREACHABLE("Unused function");
+}
+
+//! @notsa
+CAnimBlendLink& RpAnimBlendClumpGetAssociations(RpClump* clump) {
+    const auto bd = RpAnimBlendClumpGetData(clump);
+
+    return bd->m_AnimList;
 }
 
 // 0x4D58A0
@@ -159,15 +254,27 @@ const char* ConvertBoneTag2BoneName(ePedBones boneTag) { // todo: use eBoneTag32
 
 // 0x4D6BE0
 CAnimBlendAssociation* RpAnimBlendClumpExtractAssociations(RpClump* clump) {
-    const auto bd = RpClumpGetAnimBlendClumpData(clump);
+    const auto bd = RpAnimBlendClumpGetData(clump);
 
     const auto next = std::exchange(bd->m_AnimList.next, nullptr);
     return CAnimBlendAssociation::FromLink(next);
 }
 
+// 0x4D6C30
+void RpAnimBlendClumpGiveAssociations(RpClump* clump, CAnimBlendAssociation* associations) {
+    const auto bd = RpAnimBlendClumpGetData(clump);
+
+    // Delete all anims of this clump
+    RpAnimBlendClumpRemoveAllAssociations(clump);
+    
+    // Use new list of associations
+    bd->m_AnimList.next = &associations->GetLink();
+    associations->GetLink().prev = &bd->m_AnimList;
+}
+
 // 0x4D64A0
 void RpAnimBlendClumpFillFrameArray(RpClump* clump, AnimBlendFrameData** ppFrameArray) {
-    const auto bd = RpClumpGetAnimBlendClumpData(clump);
+    const auto bd = RpAnimBlendClumpGetData(clump);
 
     if (IsClumpSkinned(clump)) { // 0x4D6450 (FillFrameArrayIndiciesSkinned)
         const auto ah = GetAnimHierarchyFromClump(clump);
@@ -185,7 +292,7 @@ void RpAnimBlendClumpFillFrameArray(RpClump* clump, AnimBlendFrameData** ppFrame
 
 // 0x4D6400
 AnimBlendFrameData* RpAnimBlendClumpFindBone(RpClump* clump, uint32 id) {
-    const auto bd = RpClumpGetAnimBlendClumpData(clump);
+    const auto bd = RpAnimBlendClumpGetData(clump);
 
     AnimBlendFrameData* ret{};
     bd->ForAllFramesF([&](AnimBlendFrameData* f) {
@@ -198,7 +305,7 @@ AnimBlendFrameData* RpAnimBlendClumpFindBone(RpClump* clump, uint32 id) {
 
 // 0x4D62A0
 AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, const char* needle) {
-    const auto bd = RpClumpGetAnimBlendClumpData(clump);
+    const auto bd = RpAnimBlendClumpGetData(clump);
 
     const auto          needlesv = notsa::ci_string_view{ needle };
     AnimBlendFrameData* ret{};
@@ -221,7 +328,7 @@ AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, const char* needle
 
 // 0x4D6370
 AnimBlendFrameData* RpAnimBlendClumpFindFrameFromHashKey(RpClump* clump, uint32 needle) {
-    const auto bd = RpClumpGetAnimBlendClumpData(clump);
+    const auto bd = RpAnimBlendClumpGetData(clump);
 
     AnimBlendFrameData* ret{};
     if (IsClumpSkinned(clump)) {
@@ -241,53 +348,48 @@ AnimBlendFrameData* RpAnimBlendClumpFindFrameFromHashKey(RpClump* clump, uint32 
     return ret;
 }
 
-// 0x4D68E0
-CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, bool, CAnimBlendHierarchy* hier) {
-    const auto bd = RpClumpGetAnimBlendClumpData(clump);
+// notsa
+template<typename Fn>
+CAnimBlendAssociation* RpAnimBlendClumpFindAssociationIf_N(RpClump* clump, Fn&& Pred, size_t n) {
+    const auto bd = RpAnimBlendClumpGetData(clump);
 
     for (auto l = bd->m_AnimList.next; l;) {
         const auto a = CAnimBlendAssociation::FromLink(l);
-        if (a->GetHier()  == hier) {
-            return a;
+        if (Pred(a)) {
+            if (n-- == 0) {
+                return a;
+            }
         }
         l = a->GetLink().next;
     }
-    return nullptr;
+    return nullptr;   
+}
+
+// 0x4D68E0
+CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, bool, CAnimBlendHierarchy* h) {
+    return RpAnimBlendClumpFindAssociationIf_N(clump, [h](CAnimBlendAssociation* a) {
+        return a->GetHier() == h;
+    }, 0);
 }
 
 // 0x4D6870
 CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, const char* name) {
-    const auto bd = RpClumpGetAnimBlendClumpData(clump);
-
-    const auto needle = CKeyGen::GetUppercaseKey(name);
-    for (auto l = bd->m_AnimList.next; l;) {
-        const auto a = CAnimBlendAssociation::FromLink(l);
-        if (a->GetHashKey() == needle) {
-            return a;
-        }
-        l = a->GetLink().next;
-    }
-    return nullptr;
+    return RpAnimBlendClumpFindAssociationIf_N(clump, [nameKey = CKeyGen::GetUppercaseKey(name)](CAnimBlendAssociation* a){
+        return a->GetHashKey() == nameKey;
+    }, 0);
 }
 
 // AnimationId animId
 // 0x4D68B0
 CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, uint32 animId) {
-    const auto bd = RpClumpGetAnimBlendClumpData(clump);
-
-    for (auto l = bd->m_AnimList.next; l;) {
-        const auto a = CAnimBlendAssociation::FromLink(l);
-        if (a->GetAnimId() == animId) {
-            return a;
-        }
-        l = a->GetLink().next;
-    }
-    return nullptr;
+    return RpAnimBlendClumpFindAssociationIf_N(clump, [animId](CAnimBlendAssociation* a){
+        return a->GetAnimId() == animId;
+    }, 0);
 }
 
 // 0x4D15E0
 CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump) {
-    const auto bd = RpClumpGetAnimBlendClumpData(clump);
+    const auto bd = RpAnimBlendClumpGetData(clump);
 
     return RpAnimBlendClumpIsInitialized(clump) && bd->m_AnimList.next
         ? CAnimBlendAssociation::FromLink(bd->m_AnimList.next)
@@ -296,39 +398,30 @@ CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump) {
 
 // 0x4D6A70
 CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump, uint32 flags) {
-    const auto bd = RpClumpGetAnimBlendClumpData(clump);
-
-    for (auto l = bd->m_AnimList.next; l;) {
-        const auto a = CAnimBlendAssociation::FromLink(l);
-        if (a->m_Flags & flags) {
-            return a;
-        }
-        l = a->GetLink().next;
-    }
-    return nullptr;
+    return RpAnimBlendClumpFindAssociationIf_N(clump, [flags](CAnimBlendAssociation* a) {
+        return a->m_Flags & flags;
+    }, 0);
 }
 
 // 0x4D6910
 CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation(RpClump* clump, CAnimBlendAssociation** pp2ndAnim, float* pBlendVal2nd) {
-    const auto bd = RpClumpGetAnimBlendClumpData(clump);
+    const auto bd = RpAnimBlendClumpGetData(clump);
 
     CAnimBlendAssociation *aA{}, *aB{};
     float                  bA{}, bB{};
-    for (auto l = bd->m_AnimList.next; l;) {
-        const auto a = CAnimBlendAssociation::FromLink(l);
-        if (!a->IsPartial()) {
-            const auto blend = a->GetBlendAmount();
-            if (blend > bA) { // Found a new main?
-                aB = std::exchange(aA, a);
-                bB = std::exchange(bA, blend);
-            } else if (blend > bB) { // Found a new secondary?
-                aB = a;
-                bB = blend;
-            }
+    RpAnimBlendClumpForEachAssociation(clump, [&](CAnimBlendAssociation* a) {
+        if (a->IsPartial()) {
+            return;
         }
-        l = a->GetLink().next;
-    }
-
+        const auto blend = a->GetBlendAmount();
+        if (blend > bA) { // Found a new main?
+            aB = std::exchange(aA, a);
+            bB = std::exchange(bA, blend);
+        } else if (blend > bB) { // Found a new secondary?
+            aB = a;
+            bB = blend;
+        }
+    });
 
     if (pp2ndAnim) {
         *pp2ndAnim = aB;
@@ -378,114 +471,199 @@ CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation(RpClump* clump, CAnimB
 
 // 0x4D6A30
 CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation_N(RpClump* clump, uint32 n) {
-    const auto bd = RpClumpGetAnimBlendClumpData(clump);
-
-    for (auto l = bd->m_AnimList.next; l;) {
-        const auto a = CAnimBlendAssociation::FromLink(l);
-        if (a->IsPartial()) {
-            if (n-- == 0) {
-                return a;
-            }
-        }
-        l = a->GetLink().next;
-    }
-    return nullptr;
+    return RpAnimBlendClumpFindAssociationIf_N(clump, [](CAnimBlendAssociation* a){
+        return !a->IsPartial();
+    }, n);
 }
 
 // 0x4D69A0
 CAnimBlendAssociation* RpAnimBlendClumpGetMainPartialAssociation(RpClump* clump) {
-    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D69A0, RpClump*>(clump);
+    const auto bd = RpAnimBlendClumpGetData(clump);
+
+    CAnimBlendAssociation *mA{};
+    float                  mB{};
+    RpAnimBlendClumpForEachAssociation(clump, [&](CAnimBlendAssociation* a) {
+        if (!a->IsPartial()) {
+            return;
+        }
+        if (a->GetBlendAmount() > mB) {
+            mA = a;
+            mB = a->GetBlendAmount();
+        }
+    });
+    return mA;
 }
 
 // 0x4D69F0
 CAnimBlendAssociation* RpAnimBlendClumpGetMainPartialAssociation_N(RpClump* clump, int32 n) {
-    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D69F0, RpClump*, int32>(clump, n);
+    return RpAnimBlendClumpFindAssociationIf_N(clump, [](CAnimBlendAssociation* a){
+        return a->IsPartial();
+    }, n);
+}
+
+// notsa
+template<typename Fn>
+uint32 RpAnimBlendClumpCountAssociationsIf(RpClump* clump, Fn&& Pred) {
+    const auto bd = RpAnimBlendClumpGetData(clump);
+
+    uint32 n{};
+    RpAnimBlendClumpForEachAssociation(clump, [&](CAnimBlendAssociation* a) {
+        if (Pred(a)) {
+            n++;
+        }
+    });
+    return n;
 }
 
 // 0x4D6B60
 uint32 RpAnimBlendClumpGetNumAssociations(RpClump* clump) {
-    return plugin::CallAndReturn<uint32, 0x4D6B60, RpClump*>(clump);
+    return RpAnimBlendClumpCountAssociationsIf(clump, [](CAnimBlendAssociation* a){
+        return true; // Count all
+    });
 }
 
 // 0x4D6BB0
 uint32 RpAnimBlendClumpGetNumNonPartialAssociations(RpClump* clump) {
-    return plugin::CallAndReturn<uint32, 0x4D6BB0, RpClump*>(clump);
+    return RpAnimBlendClumpCountAssociationsIf(clump, [](CAnimBlendAssociation* a){
+        return !a->IsPartial();
+    });
 }
 
 // 0x4D6B80
 uint32 RpAnimBlendClumpGetNumPartialAssociations(RpClump* clump) {
-    return plugin::CallAndReturn<uint32, 0x4D6B80, RpClump*>(clump);
-}
-
-// 0x4D6C30
-void RpAnimBlendClumpGiveAssociations(RpClump* clump, CAnimBlendAssociation* association) {
-    plugin::Call<0x4D6C30, RpClump*, CAnimBlendAssociation*>(clump, association);
+    return RpAnimBlendClumpCountAssociationsIf(clump, [](CAnimBlendAssociation* a){
+        return a->IsPartial();
+    });
 }
 
 // 0x4D6760
 bool RpAnimBlendClumpIsInitialized(RpClump* clump) {
-    const auto bd = RpClumpGetAnimBlendClumpData(clump);
+    const auto bd = RpAnimBlendClumpGetData(clump);
     return bd && bd->m_NumFrames;
 }
 
 // 0x4D6B00
 void RpAnimBlendClumpPauseAllAnimations(RpClump* clump) {
-    plugin::Call<0x4D6B00, RpClump*>(clump);
-}
-
-// 0x4D6C00
-void RpAnimBlendClumpRemoveAllAssociations(RpClump* clump) {
-    plugin::Call<0x4D6C00, RpClump*>(clump);
-}
-
-// 0x4D6820
-void RpAnimBlendClumpRemoveAssociations(RpClump* clump, uint32 flags) {
-    plugin::Call<0x4D6820, RpClump*, uint32>(clump, flags);
-}
-
-// 0x4D67E0
-void RpAnimBlendClumpSetBlendDeltas(RpClump* clump, uint32 flags, float delta) {
-    plugin::Call<0x4D67E0, RpClump*, uint32, float>(clump, flags, delta);
+    RpAnimBlendClumpForEachAssociation(clump, [](CAnimBlendAssociation* a) {
+        a->SetFlag(ANIMATION_STARTED, false);
+    });
 }
 
 // 0x4D6B30
 void RpAnimBlendClumpUnPauseAllAnimations(RpClump* clump) {
-    plugin::Call<0x4D6B30, RpClump*>(clump);
+    RpAnimBlendClumpForEachAssociation(clump, [](CAnimBlendAssociation* a) {
+        a->SetFlag(ANIMATION_STARTED, true);
+    });
+}
+
+
+// 0x4D6C00
+void RpAnimBlendClumpRemoveAllAssociations(RpClump* clump) {
+    RpAnimBlendClumpForEachAssociation(clump, [](CAnimBlendAssociation* a) {
+        delete a;
+    });
+}
+
+// 0x4D6820
+void RpAnimBlendClumpRemoveAssociations(RpClump* clump, uint32 flags) {
+    RpAnimBlendClumpForEachAssociation(clump, [=](CAnimBlendAssociation* a) {
+        if (!flags || (a->m_Flags & flags)) {
+            delete a;
+        }
+    });
+}
+
+// 0x4D67E0
+void RpAnimBlendClumpSetBlendDeltas(RpClump* clump, uint32 flags, float delta) {
+    RpAnimBlendClumpForEachAssociation(clump, [=](CAnimBlendAssociation* a) {
+        if (!flags || (a->m_Flags & flags)) {
+            a->SetBlendDelta(delta);
+        }
+    });
 }
 
 // 0x4D34F0
 void RpAnimBlendClumpUpdateAnimations(RpClump* clump, float step, bool onScreen) {
-    plugin::Call<0x4D34F0, RpClump*, float, bool>(clump, step, onScreen);
+    const auto bd = RpAnimBlendClumpGetData(clump);
+
+    if (bd->m_AnimList.IsEmpty()) {
+        return;
+    }
+
+    CAnimBlendNode* nodeStk[11];
+    size_t          nodeStkSz{};
+
+    // Total time and blend amount of movement animations
+    float movingSumTime{}, movingSumBlendAmnt{};
+
+    bool hasStaticAnim{};
+
+    for (auto& a : bd->m_AnimList) {
+        if (!a.UpdateBlend(step)) {
+            continue;
+        }
+        const auto ah = a.GetHier();
+        if (!ah->GetSequences().empty()) {
+            continue;
+        }
+        CAnimManager::UncompressAnimation(a.GetHier());
+        if (nodeStkSz < 11) { // TODO: Magic number???
+            nodeStk[nodeStkSz++] = a.GetNode(0);
+        }
+        if (a.IsMoving()) {
+            movingSumTime      += ah->GetTotalTime() / a.GetSpeed() * a.GetBlendAmount();
+            movingSumBlendAmnt += a.GetBlendAmount();
+        } else {
+            hasStaticAnim = true;        
+        }
+    }
 }
 
 // 0x4D60E0
 RtAnimAnimation* RpAnimBlendCreateAnimationForHierarchy(RpHAnimHierarchy* hierarchy) {
-    return plugin::CallAndReturn<RtAnimAnimation*, 0x4D60E0, RpHAnimHierarchy*>(hierarchy);
+    if (!hierarchy) {
+        return nullptr;
+    }
+    const auto rtA = RtAnimAnimationCreate(
+        rwID_RPANIMBLENDPLUGIN,
+        0,
+        0,
+        0.f
+    );
+    if (rtA) {
+        rtA->numFrames = 2 * hierarchy->numNodes;
+    }
+    return rtA;
 }
 
 // 0x4D5EF0
-char* RpAnimBlendFrameGetName(RwFrame* frame) {
-    return plugin::CallAndReturn<char*, 0x4D5EF0, RwFrame*>(frame);
+const char* RpAnimBlendFrameGetName(RwFrame* frame) {
+    return GetFrameNodeName(frame);
 }
 
 // 0x4D5F00
-void RpAnimBlendFrameSetName(RwFrame* frame, char* name) {
-    plugin::Call<0x4D5F00, RwFrame*, char*>(frame, name);
+void RpAnimBlendFrameSetName(RwFrame* frame, const char* name) {
+    SetFrameNodeName(frame, name);
 }
 
 // 0x4D6AB0
 CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* association) {
-    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6AB0, CAnimBlendAssociation*>(association);
+    const auto next = association->GetLink().next;
+    return next
+        ? CAnimBlendAssociation::FromLink(next)
+        : nullptr;
 }
 
 // 0x4D6AD0
 CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* association, uint32 flags) {
-    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6AD0, CAnimBlendAssociation*, uint32>(association, flags);
-}
-
-// 0x4D60C0
-void RpAnimBlendKeyFrameInterpolate(void* voidOut, void* voidIn1, void* voidIn2, float time, void* customData) {
-    plugin::Call<0x4D60C0, void*, void*, void*, float, void*>(voidOut, voidIn1, voidIn2, time, customData);
+    for (auto l = association->GetLink().next; l;) {
+        const auto a = CAnimBlendAssociation::FromLink(l);
+        l            = a->GetLink().next;
+        if (a->m_Flags & flags) {
+            return a;
+        }
+    }
+    return nullptr;
 }
 
 void RpAnimBlendPlugin::InjectHooks() {
@@ -493,14 +671,16 @@ void RpAnimBlendPlugin::InjectHooks() {
     RH_ScopedCategory("Plugins");
 
     RH_ScopedGlobalInstall(RpAnimBlendPluginAttach, 0x4D6150);
-    RH_ScopedGlobalInstall(RpAnimBlendClumpInit, 0x4D6720, { .reversed = false });
+    RH_ScopedGlobalInstall(RpAnimBlendClumpInit, 0x4D6720);
     RH_ScopedGlobalInstall(ClumpAnimConstruct, 0x4D5F40);
     RH_ScopedGlobalInstall(ClumpAnimDestruct, 0x4D6110);
     RH_ScopedGlobalInstall(ClumpAnimCopy, 0x4D5F90);
     RH_ScopedGlobalInstall(RpAnimBlendAllocateData, 0x4D5F50);
     RH_ScopedGlobalInstall(RtAnimBlendKeyFrameApply, 0x4D5FA0);
+    RH_ScopedGlobalInstall(RpAnimBlendKeyFrameInterpolate, 0x4D60C0);
     RH_ScopedGlobalInstall(RpAnimBlendClumpAddAssociation, 0x4D6790);
     RH_ScopedGlobalInstall(RpAnimBlendClumpExtractAssociations, 0x4D6BE0);
+    RH_ScopedGlobalInstall(RpAnimBlendClumpGiveAssociations, 0x4D6C30);
     RH_ScopedGlobalInstall(RpAnimBlendClumpFillFrameArray, 0x4D64A0);
     RH_ScopedGlobalInstall(RpAnimBlendClumpFindBone, 0x4D6400);
     RH_ScopedGlobalInstall(RpAnimBlendClumpFindFrame, 0x4D62A0);
@@ -512,24 +692,22 @@ void RpAnimBlendPlugin::InjectHooks() {
     RH_ScopedGlobalOverloadedInstall(RpAnimBlendClumpGetFirstAssociation, "Flags", 0x4D6A70, CAnimBlendAssociation*(*)(RpClump*, uint32));
     RH_ScopedGlobalInstall(RpAnimBlendClumpGetMainAssociation, 0x4D6910);
     RH_ScopedGlobalInstall(RpAnimBlendClumpGetMainAssociation_N, 0x4D6A30);
-    RH_ScopedGlobalInstall(RpAnimBlendClumpGetMainPartialAssociation, 0x4D69A0, { .reversed = false });
-    RH_ScopedGlobalInstall(RpAnimBlendClumpGetMainPartialAssociation_N, 0x4D69F0, { .reversed = false });
-    RH_ScopedGlobalInstall(RpAnimBlendClumpGetNumAssociations, 0x4D6B60, { .reversed = false });
-    RH_ScopedGlobalInstall(RpAnimBlendClumpGetNumNonPartialAssociations, 0x4D6BB0, { .reversed = false });
-    RH_ScopedGlobalInstall(RpAnimBlendClumpGetNumPartialAssociations, 0x4D6B80, { .reversed = false });
-    RH_ScopedGlobalInstall(RpAnimBlendClumpGiveAssociations, 0x4D6C30, { .reversed = false });
+    RH_ScopedGlobalInstall(RpAnimBlendClumpGetMainPartialAssociation, 0x4D69A0);
+    RH_ScopedGlobalInstall(RpAnimBlendClumpGetMainPartialAssociation_N, 0x4D69F0);
+    RH_ScopedGlobalInstall(RpAnimBlendClumpGetNumAssociations, 0x4D6B60);
+    RH_ScopedGlobalInstall(RpAnimBlendClumpGetNumNonPartialAssociations, 0x4D6BB0);
+    RH_ScopedGlobalInstall(RpAnimBlendClumpGetNumPartialAssociations, 0x4D6B80);
     RH_ScopedGlobalInstall(RpAnimBlendClumpIsInitialized, 0x4D6760);
-    RH_ScopedGlobalInstall(RpAnimBlendClumpPauseAllAnimations, 0x4D6B00, { .reversed = false });
-    RH_ScopedGlobalInstall(RpAnimBlendClumpRemoveAllAssociations, 0x4D6C00, { .reversed = false });
-    RH_ScopedGlobalInstall(RpAnimBlendClumpRemoveAssociations, 0x4D6820, { .reversed = false });
-    RH_ScopedGlobalInstall(RpAnimBlendClumpSetBlendDeltas, 0x4D67E0, { .reversed = false });
-    RH_ScopedGlobalInstall(RpAnimBlendClumpUnPauseAllAnimations, 0x4D6B30, { .reversed = false });
-    RH_ScopedGlobalInstall(RpAnimBlendClumpUpdateAnimations, 0x4D34F0, { .reversed = false });
-    RH_ScopedGlobalInstall(RpAnimBlendCreateAnimationForHierarchy, 0x4D60E0, { .reversed = false });
-    RH_ScopedGlobalInstall(RpAnimBlendFrameGetName, 0x4D5EF0, { .reversed = false });
-    RH_ScopedGlobalInstall(RpAnimBlendFrameSetName, 0x4D5F00, { .reversed = false });
-    //RH_ScopedGlobalInstall(RpAnimBlendGetNextAssociation, 0x4D6AB0);
-    //RH_ScopedGlobalInstall(RpAnimBlendGetNextAssociation, 0x4D6AD0);
-    RH_ScopedGlobalInstall(RpAnimBlendKeyFrameInterpolate, 0x4D60C0, { .reversed = false });
+    RH_ScopedGlobalInstall(RpAnimBlendClumpPauseAllAnimations, 0x4D6B00);
+    RH_ScopedGlobalInstall(RpAnimBlendClumpUnPauseAllAnimations, 0x4D6B30);
+    RH_ScopedGlobalInstall(RpAnimBlendClumpRemoveAllAssociations, 0x4D6C00);
+    RH_ScopedGlobalInstall(RpAnimBlendClumpRemoveAssociations, 0x4D6820);
+    RH_ScopedGlobalInstall(RpAnimBlendClumpSetBlendDeltas, 0x4D67E0);
+    RH_ScopedGlobalInstall(RpAnimBlendClumpUpdateAnimations, 0x4D34F0, {.reversed=false});
+    RH_ScopedGlobalInstall(RpAnimBlendCreateAnimationForHierarchy, 0x4D60E0);
+    RH_ScopedGlobalInstall(RpAnimBlendFrameGetName, 0x4D5EF0);
+    RH_ScopedGlobalInstall(RpAnimBlendFrameSetName, 0x4D5F00);
+    RH_ScopedGlobalOverloadedInstall(RpAnimBlendGetNextAssociation, "Any", 0x4D6AB0, CAnimBlendAssociation * (*)(CAnimBlendAssociation * association));
+    RH_ScopedGlobalOverloadedInstall(RpAnimBlendGetNextAssociation, "Flags", 0x4D6AD0, CAnimBlendAssociation * (*)(CAnimBlendAssociation * association, uint32 flags));
 }
 

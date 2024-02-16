@@ -30,12 +30,12 @@ CAnimBlendClumpData::~CAnimBlendClumpData() {
 }
 
 // 0x4CF140
-void CAnimBlendClumpData::SetNumberOfBones(int32 numBones) {
+void CAnimBlendClumpData::SetNumberOfBones(uint32 numBones) {
     if (m_Frames) {
         CMemoryMgr::FreeAlign(&m_Frames);
     }
     m_NumFrames = numBones;
-    m_Frames = reinterpret_cast<AnimBlendFrameData*>(CMemoryMgr::MallocAlign(sizeof(AnimBlendFrameData) * numBones, 64));
+    m_Frames = static_cast<AnimBlendFrameData*>(CMemoryMgr::MallocAlign(sizeof(AnimBlendFrameData) * numBones, 64));
 }
 
 // 0x4CF190

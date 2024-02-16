@@ -42,7 +42,7 @@ void CCutsceneObject::SetModelIndex(unsigned index) {
     CEntity::SetModelIndex(index);
     if (RwObjectGetType(m_pRwObject) == rpCLUMP) {
         RpAnimBlendClumpInit(m_pRwClump);
-        auto* animData = RpClumpGetAnimBlendClumpData(m_pRwClump);
+        auto* animData = RpAnimBlendClumpGetData(m_pRwClump);
         animData->m_PedPosition = &m_vecMoveSpeed;
         animData->m_Frames[0].bUpdateSkinnedWith3dVelocityExtraction = true;
         CCutsceneObject::SetupCarPipeAtomicsForClump(index, m_pRwClump);
@@ -102,7 +102,7 @@ void CCutsceneObject::PreRender() {
             const auto* firstAtomic = GetFirstAtomic(m_pRwClump);
             if (firstAtomic) {
                 if (RpSkinGeometryGetSkin(RpAtomicGetGeometry(firstAtomic))) {
-                    auto* animData = RpClumpGetAnimBlendClumpData(m_pRwClump);
+                    auto* animData = RpAnimBlendClumpGetData(m_pRwClump);
                     auto* morphTarget = RpGeometryGetMorphTarget(RpAtomicGetGeometry(firstAtomic), 0);
                     auto* sphere = RpMorphTargetGetBoundingSphere(morphTarget);
                     sphere->center = animData->m_Frames[0].BonePos;

@@ -877,7 +877,7 @@ void CCutsceneMgr::SetCutsceneAnim(const char* animName, CObject* object) {
     cpyOfTheAnim->SetFlag(ANIMATION_TRANSLATE_Y, true);
     cpyOfTheAnim->Start(0.f);
 
-    const auto blendData = RpClumpGetAnimBlendClumpData(object->m_pRwClump);
+    const auto blendData = RpAnimBlendClumpGetData(object->m_pRwClump);
     blendData->m_AnimList.Prepend(&cpyOfTheAnim->m_Link);
 
     if (cpyOfTheAnim->m_BlendHier->m_bKeepCompressed) {

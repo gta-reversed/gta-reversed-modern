@@ -426,10 +426,6 @@ extern RwBool
 RpHAnimKeyFrameStreamWrite(const RtAnimAnimation *animation,
                               RwStream *stream);
 
-/* 2006. 2. 7. Nonstopdj */
-extern void
-RpHAnimConvertKeyFrameRate(RtAnimAnimation * pAnimationm, const RwInt32 rate);
-
 extern RwInt32
 RpHAnimKeyFrameStreamGetSize(const RtAnimAnimation *animation);
 

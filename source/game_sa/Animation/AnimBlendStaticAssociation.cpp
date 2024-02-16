@@ -31,7 +31,7 @@ void CAnimBlendStaticAssociation::Init(RpClump* clump, CAnimBlendHierarchy* h) {
         return;
     }
 
-    const auto clumpAnimData = RpClumpGetAnimBlendClumpData(clump);
+    const auto clumpAnimData = RpAnimBlendClumpGetData(clump);
     assert(clumpAnimData);
 
     m_NumBlendNodes = clumpAnimData->m_NumFrames;

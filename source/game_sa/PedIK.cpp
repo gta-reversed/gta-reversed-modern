@@ -146,7 +146,7 @@ void CPedIK::PointGunAtPosition(const CVector& posn, float normalize) {
 
 // 0x5FE0E0
 void CPedIK::PitchForSlope() {
-    const auto clumpData = RpClumpGetAnimBlendClumpData(m_pPed->m_pRwClump);
+    const auto clumpData = RpAnimBlendClumpGetData(m_pPed->m_pRwClump);
     const auto hier = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
 
     if (std::abs(m_fBodyRoll) > 0.01f) {

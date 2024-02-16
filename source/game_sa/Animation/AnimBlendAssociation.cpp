@@ -101,7 +101,7 @@ float CAnimBlendAssociation::GetTimeProgress() const {
 
 // 0x4CED50
 void CAnimBlendAssociation::Init(RpClump* clump, CAnimBlendHierarchy* animHierarchy) {
-    CAnimBlendClumpData* animClumpData = RpClumpGetAnimBlendClumpData(clump);
+    CAnimBlendClumpData* animClumpData = RpAnimBlendClumpGetData(clump);
     m_NumBlendNodes = animClumpData->m_NumFrames;
     AllocateAnimBlendNodeArray(m_NumBlendNodes);
     for (auto i = 0; i < m_NumBlendNodes; i++) {

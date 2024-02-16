@@ -41,7 +41,7 @@ public:
 
     void ForAllFramesInSPR(void (*callback)(AnimBlendFrameData*, void*), void* data, uint32 a3);
     void LoadFramesIntoSPR();
-    void SetNumberOfBones(int32 numBones);
+    void SetNumberOfBones(uint32 numBones);
 };
 
 VALIDATE_SIZE(CAnimBlendClumpData, 0x14);
