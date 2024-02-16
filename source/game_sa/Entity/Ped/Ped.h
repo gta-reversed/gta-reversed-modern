@@ -419,7 +419,7 @@ public:
     bool IsAlive() const;
     void UpdateStatEnteringVehicle();
     void UpdateStatLeavingVehicle();
-    void GetTransformedBonePosition(RwV3d& inOffsetOutPosn, ePedBones boneId, bool updateSkinBones = false);
+    void GetTransformedBonePosition(RwV3d& inOffsetOutPosn, eBoneTag boneId, bool updateSkinBones = false);
     void ReleaseCoverPoint();
     CTaskSimpleHoldEntity* GetHoldingTask();
     CEntity* GetEntityThatThisPedIsHolding();
@@ -448,7 +448,7 @@ public:
     void ClearLook();
     bool TurnBody();
     bool IsPointerValid();
-    void GetBonePosition(RwV3d& outPosition, ePedBones boneId, bool updateSkinBones = false);
+    void GetBonePosition(RwV3d& outPosition, eBoneTag boneId, bool updateSkinBones = false);
     void GiveObjectToPedToHold(int32 modelIndex, uint8 replace);
     void SetPedState(ePedState pedState);
     //1 = default, 2 = scm/mission script
@@ -556,13 +556,13 @@ public:
     CPlayerPed*    AsPlayer()    { return reinterpret_cast<CPlayerPed*>(this); }
 
     bool IsFollowerOfGroup(const CPedGroup& group) const;
-    RwMatrix& GetBoneMatrix(ePedBones bone) const;
+    RwMatrix& GetBoneMatrix(eBoneTag bone) const;
     void CreateDeadPedPickupCoors(CVector& pickupPos);
     RpHAnimHierarchy& GetAnimHierarchy() const;
     CAnimBlendClumpData& GetAnimBlendData() const;
     bool IsInVehicle() const { return bInVehicle && m_pVehicle; }
     bool IsInVehicle(const CVehicle* veh) const { return bInVehicle && m_pVehicle == veh; }
-    CVector GetBonePosition(ePedBones boneId, bool updateSkinBones = false);
+    CVector GetBonePosition(eBoneTag boneId, bool updateSkinBones = false);
     int32 GetPadNumber() const;
     bool IsCurrentlyUnarmed() { return GetActiveWeapon().m_Type == WEAPON_UNARMED; }
 

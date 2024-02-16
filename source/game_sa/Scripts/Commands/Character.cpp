@@ -25,7 +25,7 @@
 #include <World.h>
 #include <EntryExitManager.h>
 #include <TimeCycle.h>
-#include <ePedBones.h>
+#include <eBoneTag.h>
 #include <SearchLight.h>
 
 using namespace notsa::script;
@@ -158,7 +158,7 @@ auto SetCharAreaVisible(CPed& ped, eAreaCodes area) {
     CTimeCycle::StopExtraColour(0);
 }
 
-auto AttachFxSystemToCharBone(tScriptEffectSystem& fx, CPed& ped, ePedBones bone) {
+auto AttachFxSystemToCharBone(tScriptEffectSystem& fx, CPed& ped, eBoneTag bone) {
     fx.m_pFxSystem->AttachToBone(&ped, bone);
 }
 

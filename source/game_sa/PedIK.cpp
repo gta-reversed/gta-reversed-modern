@@ -167,7 +167,7 @@ void CPedIK::PitchForSlope() {
             m_fSlopeRoll = std::clamp(m_fSlopeRoll, DegreesToRadians(-45.0f), DegreesToRadians(45.0f));
         }
 
-        const auto GetAnimHierarchyMatrix = [&hier](ePedBones bone) {
+        const auto GetAnimHierarchyMatrix = [&hier](eBoneTag bone) {
             return &RpHAnimHierarchyGetMatrixArray(hier)[RpHAnimIDGetIndex(hier, bone)];
         };
 
@@ -206,7 +206,7 @@ void CPedIK::PitchForSlope() {
         }
 
         if (std::abs(m_fSlopeRoll) > 0.01f) {
-            const auto RotateFoot = [&](ePedBones bone) {
+            const auto RotateFoot = [&](eBoneTag bone) {
                 const auto hierMatrix = GetAnimHierarchyMatrix(bone);
                 const auto angle = CGeneral::LimitRadianAngle(atan2(hierMatrix->at.y, hierMatrix->at.x) - m_pPed->m_fCurrentRotation);
 

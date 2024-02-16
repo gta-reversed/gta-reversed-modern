@@ -6,7 +6,7 @@
 
 void BoneNode_c::InjectHooks() {
     RH_ScopedClass(BoneNode_c);
-    RH_ScopedCategoryGlobal(); // TODO: Change this to the appropriate category! Animation?
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Constructor, 0x616B30);
     RH_ScopedInstall(Destructor, 0x616B80);
@@ -30,7 +30,7 @@ void BoneNode_c::InjectHooks() {
 
 // 0x6177B0
 bool BoneNode_c::Init(int32 boneTag, RpHAnimBlendInterpFrame* interpFrame) {
-    m_BoneTag     = static_cast<ePedBones>(boneTag);
+    m_BoneTag     = static_cast<eBoneTag>(boneTag);
     m_InterpFrame = interpFrame;
     m_Orientation = interpFrame->q;
     m_Pos         = interpFrame->t;
@@ -61,18 +61,18 @@ void BoneNode_c::InitLimits() {
 
 // 0x6171F0
 void BoneNode_c::EulerToQuat(const CVector& angles, CQuaternion& quat) {
-    CVector radAngles = {
-        DegreesToRadians(angles.x),
-        DegreesToRadians(angles.y),
-        DegreesToRadians(angles.z)
+    const CVector halfRadAngles = {
+        DegreesToRadians(angles.x) / 2.f,
+        DegreesToRadians(angles.y) / 2.f,
+        DegreesToRadians(angles.z) / 2.f
     };
 
-    float cr = std::cos(radAngles.x / 2.0f);
-    float sr = std::sin(radAngles.x / 2.0f);
-    float cp = std::cos(radAngles.y / 2.0f);
-    float sp = std::sin(radAngles.y / 2.0f);
-    float cy = std::cos(radAngles.z / 2.0f);
-    float sy = std::sin(radAngles.z / 2.0f);
+    float cr = std::cos(halfRadAngles.x);
+    float sr = std::sin(halfRadAngles.x);
+    float cp = std::cos(halfRadAngles.y);
+    float sp = std::sin(halfRadAngles.y);
+    float cy = std::cos(halfRadAngles.z);
+    float sy = std::sin(halfRadAngles.z);
 
     quat.w = cr * cp * cy + sr * sp * sy;
     quat.x = sr * cp * cy - cr * sp * sy;
@@ -97,7 +97,7 @@ void BoneNode_c::QuatToEuler(const CQuaternion& quat, CVector& angles) {
 }
 
 // 0x617050
-int32 BoneNode_c::GetIdFromBoneTag(ePedBones bone) {
+int32 BoneNode_c::GetIdFromBoneTag(eBoneTag32 bone) {
     for (auto i = 0u; i < BoneNodeManager_c::ms_boneInfos.size(); i++) {
         if (BoneNodeManager_c::ms_boneInfos[i].m_current == bone) {
             return i;
@@ -164,8 +164,8 @@ void BoneNode_c::Limit(float blend) {
     float clampZMin = m_LimitMin.z;
     float clampZMax = m_LimitMax.z;
 
-    if (m_BoneTag == ePedBones::BONE_HEAD) {
-        float maxHeadZ = BoneNodeManager_c::ms_boneInfos[GetIdFromBoneTag(ePedBones::BONE_HEAD)].m_Max.z;
+    if (m_BoneTag == eBoneTag::BONE_HEAD) {
+        float maxHeadZ = BoneNodeManager_c::ms_boneInfos[GetIdFromBoneTag(eBoneTag::BONE_HEAD)].m_Max.z;
         float multy = std::max(std::abs(eulerOrientation.x) / -45.0f + 1.0f, 0.0f);
 
         clampZMin = maxHeadZ + (m_LimitMin.z - maxHeadZ) * multy;
@@ -198,42 +198,14 @@ void BoneNode_c::SetSpeed(float speed) {
 
 // 0x616C50
 void BoneNode_c::SetLimits(eRotationAxis axis, float min, float max) {
-    switch (axis) {
-    case AXIS_X:
-        m_LimitMin.x = min;
-        m_LimitMax.x = max;
-        break;
-    case AXIS_Y: {
-        m_LimitMin.y = min;
-        m_LimitMax.y = max;
-        break;
-    }
-    case AXIS_Z: {
-        m_LimitMin.z = min;
-        m_LimitMax.z = max;
-        break;
-    }
-    }
+     m_LimitMin[axis] = min;
+     m_LimitMax[axis] = max;
 }
 
 // 0x616BF0
-void BoneNode_c::GetLimits(eRotationAxis axis, float& min, float& max) {
-    switch (axis) {
-    case AXIS_X:
-        min = m_LimitMin.x;
-        max = m_LimitMax.x;
-        break;
-    case AXIS_Y: {
-        min = m_LimitMin.y;
-        max = m_LimitMax.y;
-        break;
-    }
-    case AXIS_Z: {
-        min = m_LimitMin.z;
-        max = m_LimitMax.z;
-        break;
-    }
-    }
+void BoneNode_c::GetLimits(eRotationAxis axis, float& outMin, float& outMax) const {
+    outMin = m_LimitMin[axis];
+    outMax = m_LimitMax[axis];
 }
 
 // 0x616BD0

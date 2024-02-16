@@ -79,7 +79,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(ClearLook, 0x5E3FF0);
     RH_ScopedInstall(TurnBody, 0x5E4000);
     RH_ScopedInstall(IsPointerValid, 0x5E4220);
-    RH_ScopedOverloadedInstall(GetBonePosition, "", 0x5E4280, void(CPed::*)(RwV3d&, ePedBones, bool));
+    RH_ScopedOverloadedInstall(GetBonePosition, "", 0x5E4280, void(CPed::*)(RwV3d&, eBoneTag, bool));
     RH_ScopedInstall(PutOnGoggles, 0x5E3AE0);
     RH_ScopedInstall(ReplaceWeaponWhenExitingVehicle, 0x5E6490);
     RH_ScopedInstall(KillPedWithCar, 0x5F0360, { .reversed = false });
@@ -1199,13 +1199,13 @@ float CPed::GetBikeRidingSkill() const {
 void CPed::ShoulderBoneRotation(RpClump* clump) {
     // Note: Didn't use `GetBoneMatrix` here, because it would be slower
     // (Because it would call `GetAnimHierarchyFromClump` multiple times)
-    auto GetMatrixOf = [hier = GetAnimHierarchyFromClump(clump)](ePedBones bone) mutable -> RwMatrix& {
+    auto GetMatrixOf = [hier = GetAnimHierarchyFromClump(clump)](eBoneTag bone) mutable -> RwMatrix& {
         return (RpHAnimHierarchyGetMatrixArray(hier))[RpHAnimIDGetIndex(hier, (size_t)bone)];
     };
 
-    constexpr struct { ePedBones breast, upperArm, clavicle; } bones[]{
-        {ePedBones::BONE_L_BREAST, ePedBones::BONE_L_UPPER_ARM, ePedBones::BONE_L_CLAVICLE},
-        {ePedBones::BONE_R_BREAST, ePedBones::BONE_R_UPPER_ARM, ePedBones::BONE_R_CLAVICLE},
+    constexpr struct { eBoneTag breast, upperArm, clavicle; } bones[]{
+        {eBoneTag::BONE_L_BREAST, eBoneTag::BONE_L_UPPER_ARM, eBoneTag::BONE_L_CLAVICLE},
+        {eBoneTag::BONE_R_BREAST, eBoneTag::BONE_R_UPPER_ARM, eBoneTag::BONE_R_CLAVICLE},
     };
 
     // Update left, and right sides
@@ -1368,7 +1368,7 @@ void CPed::UpdateStatLeavingVehicle()
 * @param [in,out] inOffsetOutPosn The position to be transformed in-place.
 * @param          updateSkinBones If `UpdateRpHAnim` should be called
 */
-void CPed::GetTransformedBonePosition(RwV3d& inOffsetOutPosn, ePedBones bone, bool updateSkinBones) {
+void CPed::GetTransformedBonePosition(RwV3d& inOffsetOutPosn, eBoneTag bone, bool updateSkinBones) {
     // Pretty much the same as GetBonePosition..
     if (updateSkinBones) {
         if (!bCalledPreRender) {
@@ -1424,7 +1424,7 @@ CEntity* CPed::GetEntityThatThisPedIsHolding()
 }
 
 /*!
-* @addr   0x5E0360
+* @addr  0x5E0360
 * @brief Drop held entity, possibly deleting it.
 */
 void CPed::DropEntityThatThisPedIsHolding(bool bDeleteHeldEntity) {
@@ -1795,7 +1795,7 @@ void CPed::ProcessBuoyancy()
 
     if (m_pPlayerData) {
         CVector vecHeadPos(0.0F, 0.0F, 0.1F);
-        GetTransformedBonePosition(vecHeadPos, ePedBones::BONE_HEAD, false);
+        GetTransformedBonePosition(vecHeadPos, eBoneTag::BONE_HEAD, false);
         if (vecHeadPos.z < mod_Buoyancy.m_fWaterLevel) {
             AsPlayer()->HandlePlayerBreath(true, 1.0F);
         }
@@ -2038,7 +2038,7 @@ bool CPed::IsPointerValid() {
 * @brief Retrieve object-space position of the given \a bone.
 * @param updateSkinBones if not already called `UpdateRpHAnim` will be called. If this param is not set, and the latter function wasn't yet called a default position will be returned.
 */
-void CPed::GetBonePosition(RwV3d& outPosition, ePedBones bone, bool updateSkinBones) {
+void CPed::GetBonePosition(RwV3d& outPosition, eBoneTag bone, bool updateSkinBones) {
     if (updateSkinBones) {
         if (!bCalledPreRender) {
             UpdateRpHAnim();
@@ -2425,7 +2425,7 @@ void CPed::AddWeaponModel(int32 modelIndex) {
            && !activeWep.m_FxSystem
         ) {
            CVector pos{ 0.f, 0.f, 0.f };
-           activeWep.m_FxSystem = g_fxMan.CreateFxSystem("molotov_flame", &pos, &GetBoneMatrix(ePedBones::BONE_R_HAND), false);
+           activeWep.m_FxSystem = g_fxMan.CreateFxSystem("molotov_flame", &pos, &GetBoneMatrix(eBoneTag::BONE_R_HAND), false);
            if (const auto fx = activeWep.m_FxSystem) {
                fx->SetLocalParticles(true);
                fx->CopyParentMatrix();
@@ -3314,9 +3314,9 @@ bool CPed::IsFollowerOfGroup(const CPedGroup& group) const {
 * @notsa
 * @returns Bone transformation matrix in object space. To transform to world space ped's matrix must be used as well.
 */
-RwMatrix& CPed::GetBoneMatrix(ePedBones bone) const {
-    const auto hierarchy = GetAnimHierarchyFromClump(m_pRwClump);
-    return RpHAnimHierarchyGetMatrixArray(hierarchy)[RpHAnimIDGetIndex(hierarchy, (size_t)bone)];
+RwMatrix& CPed::GetBoneMatrix(eBoneTag bone) const {
+    const auto h = GetAnimHierarchyFromClump(m_pRwClump);
+    return RpHAnimHierarchyGetMatrixArray(h)[RpHAnimIDGetIndex(h, (size_t)bone)];
 }
 
 /*!
@@ -3515,7 +3515,7 @@ void CPed::Render() {
     // 0x5E787C
     // Render goggles object
     if (m_pGogglesObject) {
-        auto& headMat = GetBoneMatrix(ePedBones::BONE_HEAD);
+        auto& headMat = GetBoneMatrix(eBoneTag::BONE_HEAD);
 
         // Update goggle's matrix with head's
         *RwFrameGetMatrix(RpClumpGetFrame(m_pGogglesObject)) = headMat; // TODO: Is there a better way to do this?
@@ -3649,7 +3649,7 @@ bool CPed::IsInVehicleAsPassenger() const noexcept {
     return bInVehicle && m_pVehicle && m_pVehicle->m_pDriver != this;
 }
 
-CVector CPed::GetBonePosition(ePedBones boneId, bool updateSkinBones) {
+CVector CPed::GetBonePosition(eBoneTag boneId, bool updateSkinBones) {
     CVector pos;
     GetBonePosition(pos, boneId, updateSkinBones);
     return pos;
