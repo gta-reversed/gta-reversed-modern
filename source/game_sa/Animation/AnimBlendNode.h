@@ -62,6 +62,8 @@ public:
     bool FindKeyFrame(float time);
     auto GetAnimAssoc() const { return m_BlendAssoc; }
     bool IsValid() const { return !!m_Seq; }
+    auto GetSeq() const { return m_Seq; }
+    auto GetRootKF() const { return &m_Seq[0]; }
 
 private: // Generic implementations
     //! @notsa

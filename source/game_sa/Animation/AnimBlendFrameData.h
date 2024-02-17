@@ -14,10 +14,10 @@ public:
     union {
         struct {
             bool bf1 : 1;                                    // doesn't seem to be used
-            bool IsIFrameOrientationToAffectedByNodes : 1;   // KeyFrame orientation will be affected
-            bool IsIFrameTranslationToAffectedByNodes : 1;   // KeyFrame translation will be affected
-            bool IsInitialized : 1;
-            bool bUpdateSkinnedWith3dVelocityExtraction : 1;
+            bool NodesDontAffectKeyFrameOrientation : 1;   // KeyFrame orientation will be affected
+            bool NodesDontAffectKeyFrameTranslation : 1;   // KeyFrame translation will be affected
+            bool HasVelocity : 1;
+            bool HasZVelocity : 1;
             bool NeedsKeyFrameUpdate : 1;
             bool IsCompressed : 1;
             bool IsUpdatingFrame : 1;                        // doesn't seem to be used

@@ -867,7 +867,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
                     return;
                 }
                 auto pNewAnimation = CAnimManager::BlendAnimation(player->m_pRwClump, player->m_nAnimGroup, ANIM_ID_RUN, gDuckAnimBlendData);
-                pNewAnimation->m_Flags |= ANIMATION_STARTED;
+                pNewAnimation->m_Flags |= ANIMATION_IS_PLAYING;
                 player->m_pPlayerData->m_fMoveBlendRatio = 1.5f;
                 pedMoveState = PEDMOVE_RUN;
             } else {
@@ -875,7 +875,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
                     return;
                 }
                 auto pNewAnimation = CAnimManager::BlendAnimation(player->m_pRwClump, player->m_nAnimGroup, ANIM_ID_WALK, gDuckAnimBlendData);
-                pNewAnimation->m_Flags |= ANIMATION_STARTED;
+                pNewAnimation->m_Flags |= ANIMATION_IS_PLAYING;
                 player->m_pPlayerData->m_fMoveBlendRatio = 1.5f;
                 pedMoveState = PEDMOVE_WALK;
             }
@@ -883,7 +883,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
             player->m_nSwimmingMoveState = pedMoveState;
         } else if (pedMoveBlendRatio > 0.5f) {
             auto pNewAnimation = CAnimManager::BlendAnimation(player->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_GUNMOVE_FWD, gDuckAnimBlendData);
-            pNewAnimation->m_Flags |= ANIMATION_STARTED;
+            pNewAnimation->m_Flags |= ANIMATION_IS_PLAYING;
             player->m_pPlayerData->m_fMoveBlendRatio = 1.0f;
             moveSpeed.x = 1.0f;
             moveSpeed.y = 0.0f;

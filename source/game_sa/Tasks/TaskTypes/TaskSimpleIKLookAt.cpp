@@ -21,7 +21,7 @@ void CTaskSimpleIKLookAt::InjectHooks() {
 CTaskSimpleIKLookAt::CTaskSimpleIKLookAt(Const char* name, CEntity* lookAtEntity, int32 time, eBoneTag pedBoneID, CVector lookAtOffset, bool useTorso, float speed,
                                          int32 blendTime, int8 priority
 )
-    : CTaskSimpleIKChain{name, BONE_HEAD, { 0.f, 0.05f, 0.f }, BONE_NORMAL, lookAtEntity, pedBoneID, lookAtOffset, speed, time, blendTime}
+    : CTaskSimpleIKChain{name, BONE_HEAD, { 0.f, 0.05f, 0.f }, BONE_ROOT, lookAtEntity, pedBoneID, lookAtOffset, speed, time, blendTime}
 {
     m_nPriority = priority;
     m_bUseTorso = useTorso;

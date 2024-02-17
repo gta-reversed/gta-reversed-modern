@@ -1210,7 +1210,7 @@ auto IsCharPlayingAnim(CPed& ped, const char* animName) {
 // SET_CHAR_ANIM_PLAYING_FLAG
 auto SetCharAnimPlayingFlag(CPed& ped, const char* animName, bool started) {
     if (const auto anim = RpAnimBlendClumpGetAssociation(ped.m_pRwClump, animName)) {
-        anim->SetFlag(ANIMATION_STARTED, started);
+        anim->SetFlag(ANIMATION_IS_PLAYING, started);
     }
 }
 

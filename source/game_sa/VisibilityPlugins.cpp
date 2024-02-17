@@ -1007,7 +1007,7 @@ void CVisibilityPlugins::RenderWeaponPedsForPC() {
             int32 animIDIndex = RpHAnimIDGetIndex(pRpAnimHierarchy, boneID);
             RwMatrix* pRightHandMatrix = &RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy)[animIDIndex];
             { // todo: NOTSA
-            if (boneID == BONE_NORMAL) {
+            if (boneID == BONE_ROOT) {
                 pRightHandMatrix = ped->GetModellingMatrix();
             }
             }

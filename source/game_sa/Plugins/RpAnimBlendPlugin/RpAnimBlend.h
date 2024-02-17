@@ -170,6 +170,11 @@ uint32 RpAnimBlendClumpGetNumNonPartialAssociations(RpClump* clump);
 */
 uint32 RpAnimBlendClumpGetNumPartialAssociations(RpClump* clump);
 
+/*!
+ * @addr 0x4D6720
+ * @brief Initialize clump data for RpAnimBlend
+ * @param clump The clump
+*/
 void RpAnimBlendClumpInit(RpClump* clump);
 bool RpAnimBlendClumpIsInitialized(RpClump* clump);
 void RpAnimBlendClumpPauseAllAnimations(RpClump* clump);

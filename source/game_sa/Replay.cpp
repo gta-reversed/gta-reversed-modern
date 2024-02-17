@@ -228,7 +228,7 @@ void CReplay::RetrievePedAnimation(CPed* ped, const CStoredAnimationState& state
         }
     }
 
-    RpAnimBlendClumpRemoveAssociations(ped->m_pRwClump, ANIMATION_PARTIAL);
+    RpAnimBlendClumpRemoveAssociations(ped->m_pRwClump, ANIMATION_IS_PARTIAL);
     if (auto third = state[2]; third.m_nGroupId1 && third.m_nAnimId) {
         if (/*third.m_nGroupId1 >= 0 &&*/ third.m_nAnimId != 3u) {
             if (auto animBlock = CAnimManager::GetAssocGroups()[third.m_nGroupId2].m_AnimBlock; animBlock && animBlock->IsLoaded) {

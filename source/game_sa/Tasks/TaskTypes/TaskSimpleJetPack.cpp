@@ -432,9 +432,9 @@ void CTaskSimpleJetPack::ApplyRollAndPitch(CPed* ped) {
         return;
     }
     for (const auto nodeId : { PED_NODE_LEFT_LEG, PED_NODE_RIGHT_LEG }) { // Rotate legs according to current swing values
-        const auto boneQ = ped->m_apBones[nodeId]->KeyFrame->q.AsRtQuat();
-        RtQuatRotate(boneQ, &CPedIK::ZaxisIK, RWRAD2DEG(m_LegSwingFwd), rwCOMBINEPOSTCONCAT);
-        RtQuatRotate(boneQ, &CPedIK::YaxisIK, RWRAD2DEG(m_LegSwingSide), rwCOMBINEPOSTCONCAT);
+        const auto q = &ped->m_apBones[nodeId]->KeyFrame->q;
+        RtQuatRotate(q, &CPedIK::ZaxisIK, RWRAD2DEG(m_LegSwingFwd), rwCOMBINEPOSTCONCAT);
+        RtQuatRotate(q, &CPedIK::YaxisIK, RWRAD2DEG(m_LegSwingSide), rwCOMBINEPOSTCONCAT);
     }
     ped->bUpdateMatricesRequired = true;
 }

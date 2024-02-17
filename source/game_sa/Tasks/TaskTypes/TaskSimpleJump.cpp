@@ -51,7 +51,7 @@ CTask* CTaskSimpleJump::Clone() const {
 // 0x679B60
 bool CTaskSimpleJump::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (m_pAnim) {
-        m_pAnim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
+        m_pAnim->m_Flags |= ANIMATION_IS_BLEND_AUTO_REMOVE;
         m_pAnim->m_BlendDelta = -4.0F;
     }
 
@@ -161,7 +161,7 @@ void CTaskSimpleJump::Launch(CPed* ped) {
     if (!m_pClimbEntity) {
         if (m_bClimbJump) {
             auto anim = CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_CLIMB_JUMP, 8.0F);
-            anim->m_Flags |= ANIMATION_UNLOCK_LAST_FRAME;
+            anim->m_Flags |= ANIMATION_IS_FINISH_AUTO_REMOVE;
         } else
             CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_JUMP_GLIDE, 8.0F);
     }

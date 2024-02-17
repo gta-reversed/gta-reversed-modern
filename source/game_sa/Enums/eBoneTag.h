@@ -11,7 +11,7 @@
 enum eBoneTag : int16 {
     BONE_UNKNOWN     = -1,
 
-    BONE_NORMAL      = 0, // Normal or Root, both are same
+    BONE_ROOT      = 0, // Normal or Root, both are same
     BONE_PELVIS      = 1,
     BONE_SPINE       = 2,
     BONE_SPINE1      = 3,

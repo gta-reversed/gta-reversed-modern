@@ -62,9 +62,9 @@ CAnimBlendAssociation::CAnimBlendAssociation(CAnimBlendAssociation& assoc) {
     m_TimeStep = 0.0f;
     m_nCallbackType = ANIM_BLEND_CALLBACK_NONE;
     Init(assoc);
-    if ((m_Flags & ANIMATION_BLOCK_REFERENCED) == 0) {
+    if ((m_Flags & ANIMATION_REFERENCE_BLOCK) == 0) {
         CAnimManager::AddAnimBlockRef(m_BlendHier->m_nAnimBlockId);
-        m_Flags |= ANIMATION_BLOCK_REFERENCED;
+        m_Flags |= ANIMATION_REFERENCE_BLOCK;
     }
 }
 
@@ -78,9 +78,9 @@ CAnimBlendAssociation::CAnimBlendAssociation(CAnimBlendStaticAssociation& assoc)
     m_TimeStep = 0.0f;
     m_nCallbackType = ANIM_BLEND_CALLBACK_NONE;
     Init(assoc);
-    if ((m_Flags & ANIMATION_BLOCK_REFERENCED) == 0) {
+    if ((m_Flags & ANIMATION_REFERENCE_BLOCK) == 0) {
         CAnimManager::AddAnimBlockRef(m_BlendHier->m_nAnimBlockId);
-        m_Flags |= ANIMATION_BLOCK_REFERENCED;
+        m_Flags |= ANIMATION_REFERENCE_BLOCK;
     }
 }
 
@@ -90,7 +90,7 @@ CAnimBlendAssociation::~CAnimBlendAssociation() {
         CMemoryMgr::FreeAlign(m_BlendNodes);
     }
     m_Link.Remove();
-    if (m_Flags & ANIMATION_BLOCK_REFERENCED) {
+    if (m_Flags & ANIMATION_REFERENCE_BLOCK) {
         CAnimManager::RemoveAnimBlockRef(m_BlendHier->m_nAnimBlockId);
     }
 }
@@ -153,7 +153,7 @@ void CAnimBlendAssociation::Init(CAnimBlendStaticAssociation& assoc) {
 
 // 0x4CEB70
 void CAnimBlendAssociation::Start(float currentTime) {
-    m_Flags |= ANIMATION_STARTED;
+    m_Flags |= ANIMATION_IS_PLAYING;
     SetCurrentTime(currentTime);
 }
 
@@ -240,7 +240,7 @@ bool CAnimBlendAssociation::UpdateBlend(float mult) {
         // We're faded out and are not fading in
         m_BlendAmount = 0.0f;
         m_BlendDelta = std::max(0.0f, m_BlendDelta);
-        if (m_Flags & ANIMATION_FREEZE_LAST_FRAME) {
+        if (m_Flags & ANIMATION_IS_BLEND_AUTO_REMOVE) {
             if (m_nCallbackType == ANIM_BLEND_CALLBACK_DELETE || m_nCallbackType == ANIM_BLEND_CALLBACK_FINISH) { // condition simplified
                 m_pCallbackFunc(this, m_pCallbackData);
                 SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
@@ -268,7 +268,7 @@ bool CAnimBlendAssociation::UpdateTime(float a1, float a2) {
         return true;
 
     if (m_CurrentTime >= (double)m_BlendHier->m_fTotalTime) {
-        SetFlag(ANIMATION_STARTED, true);
+        SetFlag(ANIMATION_IS_PLAYING, true);
         return true;
     }
 
@@ -283,8 +283,8 @@ bool CAnimBlendAssociation::UpdateTime(float a1, float a2) {
     }
 
     m_CurrentTime = m_BlendHier->m_fTotalTime;
-    if (m_Flags & ANIMATION_UNLOCK_LAST_FRAME) {
-        SetFlag(ANIMATION_FREEZE_LAST_FRAME, true);
+    if (m_Flags & ANIMATION_IS_FINISH_AUTO_REMOVE) {
+        SetFlag(ANIMATION_IS_BLEND_AUTO_REMOVE, true);
         m_BlendDelta = -4.0f;
     }
 
@@ -312,11 +312,11 @@ bool CAnimBlendAssociation::HasFinished() const {
 
 // 0x4CEA50
 void CAnimBlendAssociation::ReferenceAnimBlock() {
-    if (m_Flags & ANIMATION_BLOCK_REFERENCED) {
+    if (m_Flags & ANIMATION_REFERENCE_BLOCK) {
         return;
     }
     CAnimManager::AddAnimBlockRef(m_BlendHier->m_nAnimBlockId);
-    SetFlag(ANIMATION_FREEZE_TRANSLATION, true);
+    SetFlag(ANIMATION_IGNORE_ROOT_TRANSLATION, true);
 }
 
 std::span<CAnimBlendNode> CAnimBlendAssociation::GetNodes() {

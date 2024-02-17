@@ -60,7 +60,7 @@ void BoneNode_c::InitLimits() {
 }
 
 // 0x6171F0
-void BoneNode_c::EulerToQuat(const CVector& angles, CQuaternion& quat) {
+void BoneNode_c::EulerToQuat(const CVector& angles, RtQuat& quat) {
     const CVector halfRadAngles = {
         DegreesToRadians(angles.x) / 2.f,
         DegreesToRadians(angles.y) / 2.f,
@@ -74,25 +74,25 @@ void BoneNode_c::EulerToQuat(const CVector& angles, CQuaternion& quat) {
     float cy = std::cos(halfRadAngles.z);
     float sy = std::sin(halfRadAngles.z);
 
-    quat.w = cr * cp * cy + sr * sp * sy;
-    quat.x = sr * cp * cy - cr * sp * sy;
-    quat.y = cr * sp * cy + sr * cp * sy;
-    quat.z = cr * cp * sy - sr * sp * cy;
+    quat.real = cr * cp * cy + sr * sp * sy;
+    quat.imag.x = sr * cp * cy - cr * sp * sy;
+    quat.imag.y = cr * sp * cy + sr * cp * sy;
+    quat.imag.z = cr * cp * sy - sr * sp * cy;
 }
 
 // 0x617080
-void BoneNode_c::QuatToEuler(const CQuaternion& quat, CVector& angles) {
+void BoneNode_c::QuatToEuler(const RtQuat& quat, CVector& angles) {
     // refactor this fuck
-    const auto v9 = 2.0f * (quat.x * quat.z - quat.y * quat.w);
+    const auto v9 = 2.0f * (quat.imag.x * quat.imag.z - quat.imag.y * quat.real);
     const auto v10 = std::sqrt(1.0f - sq(v9));
 
-    angles.y = RadiansToDegrees(std::atan2(2.0f * (quat.y * quat.w - quat.x * quat.z), v10));
+    angles.y = RadiansToDegrees(std::atan2(2.0f * (quat.imag.y * quat.real - quat.imag.x * quat.imag.z), v10));
     if (std::abs(v9) == 1.0f) {
-        angles.x = RadiansToDegrees(std::atan2(-2.0f * (quat.y * quat.z - quat.x * quat.w), 1.0f - 2.0f * (sq(quat.x) + sq(quat.z))));
+        angles.x = RadiansToDegrees(std::atan2(-2.0f * (quat.imag.y * quat.imag.z - quat.imag.x * quat.real), 1.0f - 2.0f * (sq(quat.imag.x) + sq(quat.imag.z))));
         angles.z = RadiansToDegrees(0.0f);
     } else {
-        angles.x = RadiansToDegrees(std::atan2(2.0f * (quat.x * quat.w + quat.y * quat.z) / v10, (1.0f - 2.0f * (sq(quat.x) + sq(quat.y))) / v10));
-        angles.z = RadiansToDegrees(std::atan2(2.0f * (quat.z * quat.w + quat.x * quat.y) / v10, (1.0f - 2.0f * (sq(quat.y) + sq(quat.z))) / v10));
+        angles.x = RadiansToDegrees(std::atan2(2.0f * (quat.imag.x * quat.real + quat.imag.y * quat.imag.z) / v10, (1.0f - 2.0f * (sq(quat.imag.x) + sq(quat.imag.y))) / v10));
+        angles.z = RadiansToDegrees(std::atan2(2.0f * (quat.imag.z * quat.real + quat.imag.x * quat.imag.y) / v10, (1.0f - 2.0f * (sq(quat.imag.y) + sq(quat.imag.z))) / v10));
     }
 }
 
@@ -182,8 +182,8 @@ void BoneNode_c::BlendKeyframe(float blend) {
     auto src = m_InterpFrame->q;
     auto dst = m_Orientation;
     RtQuatSlerpCache cache;
-    RtQuatSetupSlerpCache(src.AsRtQuat(), dst.AsRtQuat(), &cache);
-    RtQuatSlerp(m_InterpFrame->q.AsRtQuat(), src.AsRtQuat(), dst.AsRtQuat(), blend, &cache);
+    RtQuatSetupSlerpCache(&src, &dst, &cache);
+    RtQuatSlerp(&m_InterpFrame->q, &src, &dst, blend, &cache);
 }
 
 // 0x616CB0
@@ -218,7 +218,7 @@ void BoneNode_c::AddChild(BoneNode_c* children) {
 void BoneNode_c::CalcWldMat(const RwMatrix* boneMatrix) {
     RwMatrix rotMatrix = [this] {
         CMatrix mat{};
-        mat.SetRotate(m_Orientation);
+        mat.SetRotate(CQuaternion{m_Orientation});
         mat.GetPosition() = m_Pos;
         return mat.ToRwMatrix();
     }();

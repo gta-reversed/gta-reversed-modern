@@ -17,7 +17,7 @@
 class CAnimBlendHierarchy {
 public:
     uint32              m_hashKey;
-    CAnimBlendSequence* m_pSequences;
+    CAnimBlendSequence* m_pSequences; //!< Per-node animations - NOTE: Order of these depends on the order of nodes in Clump this was built from
     uint16              m_nSeqCount;
     bool                m_bIsCompressed;
     bool                m_bKeepCompressed;

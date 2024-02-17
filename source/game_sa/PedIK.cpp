@@ -26,9 +26,9 @@ void CPedIK::InjectHooks() {
 
 // 0x5FDDB0
 void CPedIK::RotateTorso(AnimBlendFrameData* bone, LimbOrientation& orientation, bool changeRoll) {
-    const auto quat = bone->KeyFrame->q.AsRtQuat();
-    RtQuatRotate(quat, &XaxisIK, RadiansToDegrees(orientation.m_fYaw), rwCOMBINEREPLACE);
-    RtQuatRotate(quat, &ZaxisIK, RadiansToDegrees(orientation.m_fPitch), rwCOMBINEPRECONCAT);
+    const auto q = &bone->KeyFrame->q;
+    RtQuatRotate(q, &XaxisIK, RadiansToDegrees(orientation.m_fYaw), rwCOMBINEREPLACE);
+    RtQuatRotate(q, &ZaxisIK, RadiansToDegrees(orientation.m_fPitch), rwCOMBINEPRECONCAT);
     m_pPed->bDontAcceptIKLookAts = true;
 }
 
@@ -62,9 +62,9 @@ void CPedIK::RotateTorsoForArm(const CVector& direction) {
     if (resultAngle != DegreesToRadians(0.0f)) {
         const auto degreesHalf = RadiansToDegrees(resultAngle / 2.0f);
         if (bRotateWithNeck) { // android doesn't have this check
-            RtQuatRotate(m_pPed->m_apBones[PED_NODE_NECK]->KeyFrame->q.AsRtQuat(), &XaxisIK, degreesHalf, rwCOMBINEPOSTCONCAT);
+            RtQuatRotate(&m_pPed->m_apBones[PED_NODE_NECK]->KeyFrame->q, &XaxisIK, degreesHalf, rwCOMBINEPOSTCONCAT);
         }
-        RtQuatRotate(m_pPed->m_apBones[PED_NODE_UPPER_TORSO]->KeyFrame->q.AsRtQuat(), &XaxisIK, degreesHalf, rwCOMBINEPOSTCONCAT);
+        RtQuatRotate(&m_pPed->m_apBones[PED_NODE_UPPER_TORSO]->KeyFrame->q, &XaxisIK, degreesHalf, rwCOMBINEPOSTCONCAT);
     }
 }
 
@@ -109,7 +109,7 @@ bool CPedIK::PointGunInDirection(float zAngle, float distance, bool flag, float 
         flag ? std::sin(headAngle) :  std::cos(headAngle)
     };
 
-    auto torsoQ = m_pPed->m_apBones[PED_NODE_UPPER_TORSO]->KeyFrame->q.AsRtQuat();
+    const auto torsoQ = &m_pPed->m_apBones[PED_NODE_UPPER_TORSO]->KeyFrame->q;
     RtQuatRotate(torsoQ, &axis, RadiansToDegrees(m_TorsoOrient.m_fPitch), rwCOMBINEPOSTCONCAT);
     RtQuatRotate(torsoQ, &XaxisIK, RadiansToDegrees(m_TorsoOrient.m_fYaw), rwCOMBINEPOSTCONCAT);
     m_pPed->bUpdateMatricesRequired = true;
@@ -172,7 +172,7 @@ void CPedIK::PitchForSlope() {
         };
 
         const auto RotateBone = [clumpData, &hier](eBoneTag bone, float angle, const CVector& axis = ZaxisIK) {
-            RtQuatRotate(clumpData->m_FrameDatas[RpHAnimIDGetIndex(hier, bone)].KeyFrame->q.AsRtQuat(), &axis, angle, rwCOMBINEPRECONCAT);
+            RtQuatRotate(&clumpData->m_FrameDatas[RpHAnimIDGetIndex(hier, bone)].KeyFrame->q, &axis, angle, rwCOMBINEPRECONCAT);
         };
 
         if (std::abs(m_fSlopePitch) > 0.01f) {
