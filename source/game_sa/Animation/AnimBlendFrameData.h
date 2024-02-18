@@ -13,14 +13,14 @@ class AnimBlendFrameData {
 public:
     union {
         struct {
-            bool bf1 : 1;                                    // doesn't seem to be used
-            bool NodesDontAffectKeyFrameOrientation : 1;   // KeyFrame orientation will be affected
-            bool NodesDontAffectKeyFrameTranslation : 1;   // KeyFrame translation will be affected
-            bool HasVelocity : 1;
-            bool HasZVelocity : 1;
-            bool NeedsKeyFrameUpdate : 1;
-            bool IsCompressed : 1;
-            bool IsUpdatingFrame : 1;                        // doesn't seem to be used
+            bool bf1 : 1;                                //!< doesn't seem to be used
+            bool KeyFramesIgnoreNodeOrientation : 1; //!< Whenever orientation 
+            bool KeyFramesIgnoreNodeTranslation : 1; //!< Whenever translation 
+            bool HasVelocity : 1;                        //!< If true the translation is used to move the ped
+            bool HasZVelocity : 1;                       //!< If true 3D velocity extraction is used, otherwise 2D
+            bool NeedsKeyFrameUpdate : 1;                //!< If `RpAnimBlendNodeUpdateKeyFrames` needs to be called on update
+            bool IsCompressed : 1;                       //!< Is the anim data for this frame compressed
+            bool IsUpdatingFrame : 1;                    //!< Doesn't seem to be used
         };
         uint8 Flags;
     };

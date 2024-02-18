@@ -842,6 +842,9 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* s, const IFPSectionHeader
             // Only 1 of these will be valid
             seq->SetName(seqName);
             seq->SetBoneTag(boneTag);
+            //if (boneTag == -1) {
+            //    DebugBreak();
+            //}
 
             // Read frames
             const auto ReadFrames = [&](size_t kfSize, bool hasTranslation, bool compressed) {

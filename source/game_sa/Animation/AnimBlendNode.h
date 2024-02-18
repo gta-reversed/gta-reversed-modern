@@ -65,7 +65,6 @@ public:
     auto GetSeq() const { return m_Seq; }
     auto GetRootKF() const { return &m_Seq[0]; }
 
-private: // Generic implementations
     //! @notsa
     //! @brief Inverse progress of current frame (Eg.: How much is left of this frame)
     template<bool IsCompressed>
