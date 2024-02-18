@@ -738,6 +738,7 @@ void InjectHooksMain() {
     RpAnimBlendPlugin::InjectHooks();
     CCollisionPlugin::InjectHooks();
     BreakablePlugin::InjectHooks();
+    RtAnim::InjectHooks();
 
     CIplStore::InjectHooks();
     cHandlingDataMgr::InjectHooks();
