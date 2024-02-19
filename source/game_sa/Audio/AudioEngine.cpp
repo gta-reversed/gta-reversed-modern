@@ -789,7 +789,7 @@ bool CAudioEngine::IsRadioRetuneInProgress() {
 }
 
 // 0x507000
-const char* CAudioEngine::GetRadioStationName(eRadioID id) {
+const GxtChar* CAudioEngine::GetRadioStationName(eRadioID id) {
     return AERadioTrackManager.GetRadioStationName(id);
 }
 
