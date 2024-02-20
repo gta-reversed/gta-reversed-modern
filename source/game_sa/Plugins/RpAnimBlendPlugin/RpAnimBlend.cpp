@@ -69,91 +69,104 @@ bool RpAnimBlendPluginAttach() {
     return true;
 }
 
-// 0x4D6720
-void RpAnimBlendClumpInit(RpClump* clump) {
-    RpAnimBlendAllocateData(clump);
-
+// 0x4D6510
+void RpAnimBlendClumpInitSkinned(RpClump* clump) { // Can't hook, `clump` passed in eax
     const auto bd = RpAnimBlendClumpGetData(clump);
 
     constexpr size_t MAX_NUM_BONES = 64;
 
-    if (IsClumpSkinned(clump)) { // 0x4D6510 (SkinnedClumpInitAnim)
-        const auto skinGeo  = RpAtomicGetGeometry(GetFirstAtomic(clump));
-        const auto skin     = RpSkinGeometryGetSkin(skinGeo);
-        const auto nBones   = RpSkinGetNumBones(skin);
-        const auto rpHAHier = GetAnimHierarchyFromSkinClump(clump);
+    const auto skinGeo  = RpAtomicGetGeometry(GetFirstAtomic(clump));
+    const auto skin     = RpSkinGeometryGetSkin(skinGeo);
+    const auto nBones   = RpSkinGetNumBones(skin);
+    const auto rpHAHier = GetAnimHierarchyFromSkinClump(clump);
 
-        bd->SetNumberOfBones(nBones);
+    bd->SetNumberOfBones(nBones);
 
-        // Get bone positions
-        CVector bonePositions[MAX_NUM_BONES];
-        { // 0x735360 (SkinGetBonePositionsToTable)
-            assert(MAX_NUM_BONES >= nBones);
+    // Get bone positions
+    CVector bonePositions[MAX_NUM_BONES];
+    { // 0x735360 (SkinGetBonePositionsToTable)
+        assert(MAX_NUM_BONES >= nBones);
 
-            bonePositions[0] = CVector{0.f, 0.f, 0.f};
+        bonePositions[0] = CVector{0.f, 0.f, 0.f};
 
-            uint32  nodeStk[MAX_NUM_BONES]{};
-            uint32* nodeStkPtr{nodeStk};
-            uint32  currNodeIdx{};
+        uint32  nodeStk[MAX_NUM_BONES]{};
+        uint32* nodeStkPtr{nodeStk};
+        uint32  currNodeIdx{};
 
-            for (uint32 i = 1; i < nBones; i++) { // Intentionally starting at 1
-                // Calculate inverse matrix of this bone
-                RwMatrix invBoneMat;
-                RwMatrixInvert(&invBoneMat, &RpSkinGetSkinToBoneMatrices(skin)[i]); // Originally they did a copy here, not sure why
+        for (uint32 i = 1; i < nBones; i++) { // Intentionally starting at 1
+            // Calculate inverse matrix of this bone
+            RwMatrix invBoneMat;
+            RwMatrixInvert(&invBoneMat, &RpSkinGetSkinToBoneMatrices(skin)[i]); // Originally they did a copy here, not sure why
 
-                // Calculate position of this bone
-                RwV3dTransformPoint(
-                    &bonePositions[i],
-                    RwMatrixGetPos(&invBoneMat),
-                    &RpSkinGetSkinToBoneMatrices(skin)[currNodeIdx]
-                );
+            // Calculate position of this bone
+            RwV3dTransformPoint(
+                &bonePositions[i],
+                RwMatrixGetPos(&invBoneMat),
+                &RpSkinGetSkinToBoneMatrices(skin)[currNodeIdx]
+            );
 
-                // Handle node stack now
-                const auto nodeFlags = rpHAHier->pNodeInfo[i].flags;
-                if (nodeFlags & rpHANIMPUSHPARENTMATRIX) {
-                    *++nodeStkPtr = currNodeIdx;
-                }
-                currNodeIdx = nodeFlags & rpHANIMPOPPARENTMATRIX
-                    ? *nodeStkPtr--
-                    : i;
+            // Handle node stack now
+            const auto nodeFlags = rpHAHier->pNodeInfo[i].flags;
+            if (nodeFlags & rpHANIMPUSHPARENTMATRIX) {
+                *++nodeStkPtr = currNodeIdx;
             }
+            currNodeIdx = nodeFlags & rpHANIMPOPPARENTMATRIX
+                ? *nodeStkPtr--
+                : i;
         }
-
-        // Now, fill in the frame blend data from the positions we've just calculated
-        for (size_t i = 0; i < nBones; i++) {
-            const auto fd = &bd->m_FrameDatas[i]; // Frame blend data
-            
-            fd->KeyFrame = (RpHAnimBlendInterpFrame*)rtANIMGETINTERPFRAME(rpHAHier->currentAnim, i);
-            fd->BoneTag  = rpHAHier->pNodeInfo[i].nodeID;
-            fd->BonePos  = bonePositions[i];
-        }
-
-        // Initialize all frames now
-        bd->ForAllFramesF([](AnimBlendFrameData* fd) { // 0x4D6500 (FrameInitCBskin)
-            fd->Flags = 0;
-        });
-    } else { // 0x4D66A0 (RpClumpInitFrameAnim)
-        // Recursively count number of frames (bones in this case) in this clump
-        uint32 numFrames{};
-        struct F {
-            static RwFrame* CountFramesCB(RwFrame* f, void* data) {
-                auto& numFrames = *static_cast<uint32*>(data);
-                numFrames++;
-                RwFrameForAllChildren(f, CountFramesCB, &numFrames);
-                return f;
-            }
-        };
-        RwFrameForAllChildren(RpClumpGetFrame(clump), F::CountFramesCB, &numFrames);
-        bd->SetNumberOfBones(numFrames);
-
-        // Initialize all frames now
-        bd->ForAllFramesF([](AnimBlendFrameData* fd) { // 0x4D6640 (FrameInitCBnonskin)
-            fd->Flags    = 0;
-            fd->FramePos = *RwMatrixGetPos(RwFrameGetMatrix(fd->Frame));
-            fd->BoneTag  = BONE_UNKNOWN;
-        });
     }
-    bd->m_FrameDatas[0].HasVelocity = true;
+
+    // Now, fill in the frame blend data from the positions we've just calculated
+    for (size_t i = 0; i < nBones; i++) {
+        const auto fd = &bd->m_FrameDatas[i]; // Frame blend data
+            
+        fd->KeyFrame = (RpHAnimBlendInterpFrame*)rtANIMGETINTERPFRAME(rpHAHier->currentAnim, i);
+        fd->BoneTag  = rpHAHier->pNodeInfo[i].nodeID;
+        fd->BonePos  = bonePositions[i];
+    }
+
+    // Initialize all frames now
+    bd->ForAllFramesF([](AnimBlendFrameData* fd) { // 0x4D6500 (FrameInitCBskin)
+        fd->Flags = 0;
+    });
+}
+
+RwFrame* SetFrameDataFrameCB(RwFrame* f, void* data) {
+    const auto fd = static_cast<AnimBlendFrameData**>(data);
+    (*fd)->Frame = f;
+    (*fd)++;
+    RwFrameForAllChildren(f, SetFrameDataFrameCB, fd);
+    return f;
+}
+
+// 0x
+void RpAnimBlendClumpInitNonSkinned(RpClump* clump) {
+    const auto bd = RpAnimBlendClumpGetData(clump);
+
+    // Number of bones is the count number of child frames (excluding root)
+    bd->SetNumberOfBones(RwFrameCount(RpClumpGetFrame(clump)) - 1); // They didn't use RwFrameCount, but I will
+
+    // Assign frames to our frame data
+    auto fd = bd->m_FrameDatas;
+    RwFrameForAllChildren(RpClumpGetFrame(clump), SetFrameDataFrameCB, &fd);
+    
+    // Initialize all frames now (Could've done this in the above step too, oh well)
+    bd->ForAllFramesF([](AnimBlendFrameData* fd) { // 0x4D6640 (FrameInitCBnonskin)
+        fd->Flags    = 0;
+        fd->FramePos = *RwMatrixGetPos(RwFrameGetMatrix(fd->Frame));
+        fd->BoneTag  = BONE_UNKNOWN;
+    });
+}
+
+// 0x4D6720
+void RpAnimBlendClumpInit(RpClump* clump) {
+    RpAnimBlendAllocateData(clump); // Moved this common piece out of the 2 functions
+    if (IsClumpSkinned(clump)) {
+        RpAnimBlendClumpInitSkinned(clump);
+    } else {
+        RpAnimBlendClumpInitNonSkinned(clump);
+    }
+    RpAnimBlendClumpGetData(clump)->GetRootFrameData().HasVelocity = true;
 }
 
 // 0x4D5FA0
