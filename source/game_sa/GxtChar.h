@@ -1,8 +1,6 @@
 #pragma once
 
-using GxtChar = char8_t;    // 8-bit GXT character.
-using PGxtStr = GxtChar*;
-using PCGxtStr = GxtChar const*;
+using GxtChar = uint8_t; // 8-bit GXT character.
 
 /**
  * Convert ANSI string to GXT-supported null-terminated string
