@@ -74,7 +74,8 @@ void TextCopy(GxtChar* dst, const GxtChar* src);
  */
 GxtChar* GxtCharStrcpy(GxtChar* dst, const GxtChar* src);
 
-/* Use this function to convert ASCII text to GxtChar* easily.
+/**
+ * Use this function to convert ASCII text to GxtChar* easily.
  * NOTE: Use this function only when you're sure that the whole text
  * contains ASCII chars only.
  * 
@@ -86,7 +87,8 @@ inline const GxtChar* GxtCharFromAscii(const char* asciiText) {
     return (const GxtChar*)asciiText;
 }
 
-/* Use this function to convert GxtChar* to ASCII easily.
+/**
+ * Use this function to convert GxtChar* to ASCII easily.
  * NOTE: Use this function only when you're sure that the whole text
  * contains ASCII chars only, or when you make comparison or copying.
  *
