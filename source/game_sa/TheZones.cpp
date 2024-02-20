@@ -434,5 +434,5 @@ const GxtChar* CTheZones::GetZoneName(const CVector& point) {
     if (zone)
         return zone->GetTranslatedName();
 
-    return GxtCharFromAscii("Unknown zone");
+    return "Unknown zone"_gxt;
 }

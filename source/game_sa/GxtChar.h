@@ -1,7 +1,3 @@
-/**
- * nick7 @ 2014/12/16 18:10
- */
-
 #pragma once
 
 using GxtChar = char8_t;    // 8-bit GXT character.
@@ -100,4 +96,8 @@ inline const GxtChar* GxtCharFromAscii(const char* asciiText) {
  */
 inline const char* AsciiFromGxtChar(const GxtChar* gxtAsciiText) {
     return (const char*)gxtAsciiText;
+}
+
+inline const GxtChar* operator""_gxt(const char* text, size_t) {
+    return GxtCharFromAscii(text);
 }
