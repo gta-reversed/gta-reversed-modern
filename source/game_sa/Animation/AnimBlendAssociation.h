@@ -191,8 +191,8 @@ public:
      * @brief Sync the play time of this animation with another
     */
     void SyncAnimation(CAnimBlendAssociation* syncWith);
-    bool UpdateBlend(float mult);
-    bool UpdateTime(float a1, float a2);
+    bool UpdateBlend(float timeStep);
+    bool UpdateTime(float timeStep, float timeMult);
     void UpdateTimeStep(float speedMult, float timeMult);
     bool HasFinished() const;
     [[nodiscard]] uint32 GetHashKey() const noexcept;

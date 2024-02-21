@@ -234,12 +234,13 @@ void CAnimBlendAssociation::SyncAnimation(CAnimBlendAssociation* syncWith) {
 }
 
 // 0x4D1490
-bool CAnimBlendAssociation::UpdateBlend(float mult) {
-    m_BlendAmount += mult * m_BlendDelta;
-    if (m_BlendAmount <= 0.0f && m_BlendDelta < 0.0f) {
-        // We're faded out and are not fading in
+bool CAnimBlendAssociation::UpdateBlend(float timeStep) {
+    m_BlendAmount += m_BlendDelta * timeStep;
+
+    if (m_BlendAmount <= 0.0f && m_BlendDelta < 0.0f) { // We're faded out and are not fading in
         m_BlendAmount = 0.0f;
-        m_BlendDelta = std::max(0.0f, m_BlendDelta);
+        m_BlendDelta  = std::max(0.0f, m_BlendDelta);
+
         if (m_Flags & ANIMATION_IS_BLEND_AUTO_REMOVE) {
             if (m_nCallbackType == ANIM_BLEND_CALLBACK_DELETE || m_nCallbackType == ANIM_BLEND_CALLBACK_FINISH) { // condition simplified
                 m_pCallbackFunc(this, m_pCallbackData);
@@ -250,10 +251,9 @@ bool CAnimBlendAssociation::UpdateBlend(float mult) {
         }
     }
 
-    if (m_BlendAmount > 1.0f) {
-        // Maximally faded in, clamp values
+    if (m_BlendAmount > 1.0f) { // Maximally faded in, clamp values
         m_BlendAmount = 1.0f;
-        m_BlendDelta = std::min(0.0f, m_BlendDelta);
+        m_BlendDelta  = std::min(0.0f, m_BlendDelta);
     }
 
     return true;
