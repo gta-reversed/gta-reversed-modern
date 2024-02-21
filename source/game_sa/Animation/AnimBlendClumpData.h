@@ -42,8 +42,12 @@ public:
         }
     }
 
+    auto& GetAnims() { return m_AnimList; }
+
+private:
     void ForAllFramesInSPR(void (*callback)(AnimBlendFrameData*, void*), void* data, uint32 a3);
     void LoadFramesIntoSPR();
+public:
 
     AnimBlendFrameData& GetRootFrameData() const { assert(m_NumFrameData >= 1); return m_FrameDatas[0]; }
     void SetNumberOfBones(uint32 numBones);

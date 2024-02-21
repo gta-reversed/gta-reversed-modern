@@ -5,28 +5,38 @@ class AnimBlendFrameData;
 class CAnimBlendAssociation;
 struct RtAnimAnimation;
 
-/**
-* RpAnimBlend plugin unique rwID
+/*!
+* @brief RpAnimBlend plugin unique rwID
 */
 #define rwID_RPANIMBLENDPLUGIN MAKECHUNKID(rwVENDORID_DEVELOPER, 0xFB)
 
-//#define RpAnimBlendClumpGetData(clump) (*(CAnimBlendClumpData **)(((uint32)(clump) + ClumpOffset)))
-
+/*!
+ * @brief Get RpAnimBlend data associated with this clump
+ * @param clump 
+ * @return 
+*/
 CAnimBlendClumpData*& RpAnimBlendClumpGetData(RpClump* clump);
 
 namespace RpAnimBlendPlugin {
     void InjectHooks();
 };
+
+/*!
+ * @brief Attach this plugin to RW
+ * @return If the plugin was successfully attached
+*/
 bool RpAnimBlendPluginAttach();
 
-void RpAnimBlendAllocateData(RpClump* clump);
+/*!
+ * @unused
+ */
 CAnimBlendAssociation* RpAnimBlendClumpAddAssociation(RpClump* clump, CAnimBlendAssociation* association, uint32 flags, float startTime, float blendAmount);
 
 /*!
  * @notsa
- * @brief 
- * @param clump 
- * @return 
+ * @brief Get the head link for all animations associated with this clump
+ * @param clump The clump
+ * @return The linked list head for all animations
 */
 CAnimBlendLink& RpAnimBlendClumpGetAssociations(RpClump* clump);
 
@@ -66,11 +76,40 @@ CAnimBlendAssociation* RpAnimBlendClumpExtractAssociations(RpClump* clump);
 */
 void RpAnimBlendClumpGiveAssociations(RpClump* clump, CAnimBlendAssociation* associations);
 
-void RpAnimBlendClumpFillFrameArray(RpClump* clump, AnimBlendFrameData** frameData);
-AnimBlendFrameData* RpAnimBlendClumpFindBone(RpClump* clump, uint32 id);
+/*!
+ * @addr 0x4D64A0
+ * @brief Fill frame array
+ * @param clump The clump with the frames
+ * @param outFrameData Array to be filled
+*/
+void RpAnimBlendClumpFillFrameArray(RpClump* clump, AnimBlendFrameData** outFrameData);
 
+/*!
+ * @addr 0x4D6400
+ * @brief Find FrameData of a bone
+ * @param clump The clump the bone is part of
+ * @param boneTag The BoneTag of the bone
+ * @return FrameData of the specified bone
+*/
+AnimBlendFrameData* RpAnimBlendClumpFindBone(RpClump* clump, eBoneTag32 boneTag);
+
+/*!
+ * @addr 0x4D62A0
+ * @brief Find FrameData of a bone
+ * @param clump The clump the bone is part of
+ * @param name The name of the bone. For skinned clumps this is the name of the bone tag, for non-skinned ones it's the frame node name.
+ * @return FrameData of the specified bone
+ */
 AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, const char* name);
-AnimBlendFrameData* RpAnimBlendClumpFindFrameFromHashKey(RpClump* clump, uint32 key);
+
+/*!
+ * @addr 0x4D6370
+ * @brief Find FrameData of a bone
+ * @param clump The clump the bone is part of
+ * @param boneNameKey The hash (key) of the bone's name. For skinned clumps this is the name of the bone tag, for non-skinned ones it's the frame node name.
+ * @return FrameData of the specified bone
+ */
+AnimBlendFrameData* RpAnimBlendClumpFindFrameFromHashKey(RpClump* clump, uint32 boneNameKey);
 
 /*!
  * @addr 0x4D68E0
@@ -100,6 +139,7 @@ CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, const char
 CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, uint32 animId);
 
 /*!
+ * @addr 0x4D15E0
  * @brief Get the first animation associated with the clump
  * @param clump The clump containing the associations
  * @return The first animation associated with the clump, or null
@@ -110,7 +150,7 @@ CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump);
  * @addr 0x4D6A70
  * @param clump The clump containing the associations
  * @param flags The flags of which at least one is expected to be set
- * @return The first anim with any of the flags set, or null if no anims are present on the clump/no anims have the specified flags set.
+ * @return The first anim with any of the flags set, or null if no animations are present on the clump/no animations have the specified flags set.
 */
 CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump, uint32 flags);
 
@@ -152,21 +192,21 @@ CAnimBlendAssociation* RpAnimBlendClumpGetMainPartialAssociation_N(RpClump* clum
 /*!
  * @brief 0x4D6B60
  * @param clump The clump containing the associations
- * @return The number of associations (anims) this clump has
+ * @return The number of associations (animations) this clump has
 */
 uint32 RpAnimBlendClumpGetNumAssociations(RpClump* clump);
 
 /*!
 * @brief 0x4D6BB0
 * @param clump The clump containing the associations
-* @return The number of non-partial associations (anims) this clump has
+* @return The number of non-partial associations (animations) this clump has
 */
 uint32 RpAnimBlendClumpGetNumNonPartialAssociations(RpClump* clump);
 
 /*!
 * @brief 0x4D6B80
 * @param clump The clump containing the associations
-* @return The number of partial associations (anims) this clump has
+* @return The number of partial associations (animations) this clump has
 */
 uint32 RpAnimBlendClumpGetNumPartialAssociations(RpClump* clump);
 
@@ -176,25 +216,104 @@ uint32 RpAnimBlendClumpGetNumPartialAssociations(RpClump* clump);
  * @param clump The clump
 */
 void RpAnimBlendClumpInit(RpClump* clump);
-bool RpAnimBlendClumpIsInitialized(RpClump* clump);
-void RpAnimBlendClumpPauseAllAnimations(RpClump* clump);
-void RpAnimBlendClumpUnPauseAllAnimations(RpClump* clump);
-void RpAnimBlendClumpRemoveAllAssociations(RpClump* clump);
-void RpAnimBlendClumpRemoveAssociations(RpClump* clump, uint32 flags);
-void RpAnimBlendClumpSetBlendDeltas(RpClump* clump, uint32 flags, float delta);
-void RpAnimBlendClumpUpdateAnimations(RpClump* clump, float step, bool onScreen);
-RtAnimAnimation* RpAnimBlendCreateAnimationForHierarchy(RpHAnimHierarchy* hierarchy);
-const char* RpAnimBlendFrameGetName(RwFrame* frame);
-void RpAnimBlendFrameSetName(RwFrame* frame, const char* name);
-CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* association);
-CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* association, uint32 flags);
 
 /*!
-* @addr 0x4D5FA0
-* @brief Converts a standard keyframe to a matrix
-* @param pMatrix A pointer to the output matrix
-* @param pVoidIFrame A pointer to the input frame
+ * @addr 0x4D6760
+ * @brief Check if the RpAnimBlend data of the clump is initialized
+ * @param clump The clump to check
+ * @return Whenever the RpAnimBlend data of the clump is initialized
 */
-void RtAnimBlendKeyFrameApply(void* result, void* frame);
+bool RpAnimBlendClumpIsInitialized(RpClump* clump);
 
-void RpAnimBlendKeyFrameInterpolate(void* voidOut, void* voidIn1, void* voidIn2, float time, void* customData);
+/*!
+ * @addr 0x4D6B00
+ * @brief Pause all animations of a clump
+ * @param clump The clump to pause the animations of
+*/
+void RpAnimBlendClumpPauseAllAnimations(RpClump* clump);
+
+/*!
+ * @addr 0x4D6B30
+ * @brief Un-pause all animations of a clump
+ * @param clump The clump to un-pause the animations of
+ */
+void RpAnimBlendClumpUnPauseAllAnimations(RpClump* clump);
+
+/*!
+ * @addr 0x4D6C00
+ * @brief Remove all animations of a clump
+ * @param clump The clump to remove all animations of
+ */
+void RpAnimBlendClumpRemoveAllAssociations(RpClump* clump);
+
+/*!
+ * @addr 0x4D6820
+ * @brief Remove all animations of a clump
+ * @param flags Flags to check for. If any of these flags is the animation will be removed. Ignored if `0`.
+ * @param clump The clump to remove all animations of
+ */
+void RpAnimBlendClumpRemoveAssociations(RpClump* clump, uint32 flags = 0);
+
+/*!
+ * @addr 0x4D67E0
+ * @brief Set the blend delta to the specified value for all animations of the clump
+ * @param clump The clump to which the animations belong to
+ * @param flags Flags to check for. If any of these flags is set, the anim is processed. Ignored if `0`.
+ * @param delta The blend delta to set
+*/
+void RpAnimBlendClumpSetBlendDeltas(RpClump* clump, uint32 flags, float blendDelta);
+
+/*!
+ * @addr 0x4D34F0
+ * @brief Update all animations associated with the clump
+ * @param clump The clump
+ * @param step Time step
+ * @param onScreen If the clump is visible on the screen
+*/
+void RpAnimBlendClumpUpdateAnimations(RpClump* clump, float step, bool onScreen);
+
+/*!
+ * @addr 0x4D60E0
+ * @brief R* hacking
+ * @detail In III and VC R* wrote their own interpolated animation data into a dummy
+ * @detail RtAnimAnimation and practically didn't use the RtAnimInterpolator.
+ * @detail In SA they went a step further and now write into the interpolation frames of
+ * @detail the RtAnimInterpolator instead, almost completely avoid RtAnimAnimation.
+ * @detail Credit: https://gtaforums.com/topic/669045-silentpatch/page/154/#comment-1068971599
+ * @param hierarchy The animation hierarchy
+ * @return The animation
+*/
+RtAnimAnimation* RpAnimBlendCreateAnimationForHierarchy(RpHAnimHierarchy* hierarchy);
+
+/*!
+ * @addr 0x4D5EF0
+ * @brief Get the name of a (bone?) frame
+ * @param frame The frame to get the name of
+ * @return Name of the frame
+*/
+const char* RpAnimBlendFrameGetName(RwFrame* frame);
+
+/*!
+ * @addr 0x4D5F00
+ * @brief Set the name of a (bone?) frame
+ * @param frame The frame to set the name of
+ * @param name The new name
+*/
+void RpAnimBlendFrameSetName(RwFrame* frame, const char* name);
+
+/*!
+ * @addr 0x4D6AB0
+ * @brief Get the next animation in the linked list
+ * @param association The animation to get the next animation of
+ * @return The animation after `association`
+*/
+CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* association);
+
+/*!
+ * @addr 0x4D6AD0
+ * @brief Get the next animation in the linked list
+ * @param association The animation to get the next animation of
+ * @param flags The flags that need to be set (Any of them being set is enough)
+ * @return The animation after `association`
+ */
+CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* association, uint32 flags);

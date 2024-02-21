@@ -205,7 +205,7 @@ public:
             m_Flags &= ~(int)flag;
     }
 
-    bool HasFlag(eAnimationFlags flag) { return m_Flags & flag; }
+    bool HasFlag(eAnimationFlags flag) const { return m_Flags & flag; }
 
     static CAnimBlendAssociation* FromLink(CAnimBlendLink* link) {
         return (CAnimBlendAssociation*)((byte*)link - offsetof(CAnimBlendAssociation, m_Link));
