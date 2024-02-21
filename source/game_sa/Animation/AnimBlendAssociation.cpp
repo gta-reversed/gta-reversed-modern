@@ -260,39 +260,51 @@ bool CAnimBlendAssociation::UpdateBlend(float mult) {
 }
 
 // 0x4D13D0
-bool CAnimBlendAssociation::UpdateTime(float a1, float a2) {
-    UNUSED(a1);
-    UNUSED(a2);
+bool CAnimBlendAssociation::UpdateTime(float timeStep, float timeMult) {
+    UNUSED(timeStep);
+    UNUSED(timeMult);
 
-    if (!IsRunning())
-        return true;
-
-    if (m_CurrentTime >= (double)m_BlendHier->m_fTotalTime) {
-        SetFlag(ANIMATION_IS_PLAYING, true);
+    if (!IsRunning()) {
         return true;
     }
 
+    // Finished yet?
+    if (m_CurrentTime >= (double)m_BlendHier->GetTotalTime()) {
+        SetFlag(ANIMATION_IS_PLAYING, false);
+        return true;
+    }
+
+    // Okay, so advance...
     m_CurrentTime += m_TimeStep;
-    if (m_CurrentTime < m_BlendHier->m_fTotalTime) {
+
+    // Is it finished now?
+    if (m_CurrentTime < m_BlendHier->GetTotalTime()) {
         return true;
     }
 
+    // Should it be repeating? If so, jump to beginning
     if (IsRepeating()) {
-        m_CurrentTime -= m_BlendHier->m_fTotalTime;
+        m_CurrentTime -= m_BlendHier->GetTotalTime();
         return true;
     }
 
-    m_CurrentTime = m_BlendHier->m_fTotalTime;
+    // Anim has finished
+    m_CurrentTime = m_BlendHier->GetTotalTime();
+
+    // Maybe auto-remove
     if (m_Flags & ANIMATION_IS_FINISH_AUTO_REMOVE) {
         SetFlag(ANIMATION_IS_BLEND_AUTO_REMOVE, true);
         m_BlendDelta = -4.0f;
     }
 
+    // Call finish callback (if any)
     if (m_nCallbackType == ANIM_BLEND_CALLBACK_FINISH) {
         m_nCallbackType = ANIM_BLEND_CALLBACK_NONE;
         m_pCallbackFunc(this, m_pCallbackData);
         SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
     }
+
+    // And we're done
     return true;
 }
 
