@@ -56,7 +56,7 @@ void CAnimManager::Initialise() {
     ms_numAnimations = 0;
     ms_numAnimBlocks = 0;
     ms_numAnimAssocDefinitions = 118; // ANIM_TOTAL_GROUPS aka NUM_ANIM_ASSOC_GROUPS
-    ms_animCache.Init(50);
+    ms_AnimCache.Init(50);
     ReadAnimAssociationDefinitions();
     RegisterAnimBlock("ped");
 }
@@ -105,7 +105,7 @@ void CAnimManager::Shutdown() {
         ms_aAnimations[i].Shutdown();
     }
 
-    ms_animCache.Shutdown();
+    ms_AnimCache.Shutdown();
     delete[] ms_aAnimAssocGroups;
 }
 
@@ -396,33 +396,39 @@ int32 CAnimManager::GetNumRefsToAnimBlock(int32 index) {
 
 // 0x4D41C0
 void CAnimManager::UncompressAnimation(CAnimBlendHierarchy* h) {
-    if (h->m_bKeepCompressed) {
-        if (h->m_fTotalTime == 0.f) {
+    if (h->IsRunningCompressed()) { // Keep as compressed?
+        if (h->GetTotalTime() == 0.f) {
             h->CalcTotalTimeCompressed();
         }
-    } else if (h->m_bIsCompressed) {
-        auto l = ms_animCache.Insert(h);
-        if (!l) { // Not more free links?
-            // Remove least recently added item
-            const auto llr = ms_animCache.GetTail();
+    } else if (!h->IsUncompressed()) { // Need to uncompress?
+        assert(!h->m_Link); // Sanity check
+        auto l = ms_AnimCache.Insert(h);
+        if (!l) { // No more free links? (This is totally normal as animations aren't compressed back unless the cache is full)
+            // Remove least recently used item
+            const auto llr = ms_AnimCache.GetTail();
             llr->data->RemoveUncompressedData();
+
+            // TODO: If the anim is still in use this will corrupt the animation data, and (hopefully) hit the assert in `GetKeyFrame`!
+            //       There's currently no way for us to tell if the animation is in use, so there's no better solution for now.
             RemoveFromUncompressedCache(llr->data);
 
             // Now try again, this time it should succeed
-            VERIFY(l = ms_animCache.Insert(h));
+            VERIFY(l = ms_AnimCache.Insert(h));
         }
         h->m_Link = l;
         h->Uncompress();
-    } else if (h->m_Link) { // Already uncompressed, add to cache
-        h->m_Link->Insert(ms_animCache.GetHead());
+    } else if (h->m_Link) { // Already uncompressed, mark as recently-used in cache
+        h->m_Link->Remove(); // Remove from current position
+        h->m_Link->Insert(ms_AnimCache.GetHead()); // Now re-insert at head
     }
 }
 
 // 0x4D42A0
 void CAnimManager::RemoveFromUncompressedCache(CAnimBlendHierarchy* h) {
     if (const auto l = h->m_Link) {
-        l->data->m_Link = nullptr;
-        ms_animCache.Remove(l);
+        assert(l->data == h);
+        ms_AnimCache.Remove(l);
+        h->m_Link = nullptr;
     }
 }
 
@@ -454,7 +460,7 @@ CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, CAnimBlendHi
         if (running->HasFinished()) {
             running->Start();
         }
-        UncompressAnimation(running->m_BlendHier); // Not sure if this is really necessary?
+        UncompressAnimation(running->m_BlendHier); // Make sure anim doesn't get removed
         return running;
     }
 
@@ -467,7 +473,7 @@ CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, CAnimBlendHi
     a->Start();
     if (bFadeThisOut || (toBlendFlags & ANIMATION_IS_PARTIAL)) {
         a->SetBlend(0.f, blendDelta);
-        UncompressAnimation(toBlendHier); // Why call this again?
+        UncompressAnimation(toBlendHier); // No need to call this again here, but doesn't hurt....
     } else {
         a->m_BlendAmount = 1.f;
     }

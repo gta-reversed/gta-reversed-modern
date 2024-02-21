@@ -40,7 +40,7 @@ public:
     */
     template<bool AsCompressed>
     auto GetKeyFrame(size_t n) const {
-        assert(IsCompressed() == AsCompressed);
+        assert(IsCompressed() == AsCompressed); // NOTE: If this is ever hit see the note in `UncompressAnimation`
         if constexpr (AsCompressed) {
             return GetCKeyFrame(n);
         } else {
@@ -57,7 +57,7 @@ public:
     */
     KeyFrameTrans* GetUKeyFrame(size_t n) const { // `U` = Uncompressed
         assert(n < m_FramesNum);
-        assert(!m_bIsCompressed);
+        assert(!m_bIsCompressed); // NOTE: If this is ever hit see the note in `UncompressAnimation`
         return static_cast<KeyFrameTrans*>(m_bHasTranslation ? // Lie a little by always up-casting to `KeyFrameTrans*` to make our lifes easier
             &((KeyFrameTrans*)m_Frames)[n] :
             &((KeyFrame*)m_Frames)[n]
@@ -73,7 +73,7 @@ public:
     */
     KeyFrameTransCompressed* GetCKeyFrame(size_t n) const { // `C` = Compressed
         assert(n < m_FramesNum);
-        assert(m_bIsCompressed);
+        assert(m_bIsCompressed); // NOTE: If this is ever hit see the note in `UncompressAnimation`
         return static_cast<KeyFrameTransCompressed*>(m_bHasTranslation ? // Lie a little by always up-casting to `KeyFrameTransCompressed*` to make our lifes easier
             &((KeyFrameTransCompressed*)m_Frames)[n] :
             &((KeyFrameCompressed*)m_Frames)[n]

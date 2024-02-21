@@ -31,13 +31,12 @@ public:
         freeListTail.prev = &freeListHead;
         links = new CLink<T>[count];
         for (int32 i = count - 1; i >= 0; i--) {
-            freeListHead.Insert(&links[i]);
+            links[i].Insert(&freeListHead);
         }
     }
 
     void Shutdown() {
-        delete[] links;
-        links = nullptr;
+        delete[] std::exchange(links, nullptr);
     }
 
     CLink<T>* Insert(T const& data) {
@@ -46,7 +45,7 @@ public:
             return nullptr;
         link->data = data;
         link->Remove();
-        usedListHead.Insert(link);
+        link->Insert(&usedListHead);
         return link;
     }
 
@@ -61,7 +60,8 @@ public:
             return nullptr;
         link->data = data;
         link->Remove();
-        i->prev->Insert(link);
+        link->Insert(i->prev);
+        //i->prev->Insert(link);
         return link;
     }
 
@@ -71,13 +71,24 @@ public:
         }
     }
 
-    void Remove(CLink<T>* link) {
-        link->Remove();
-        freeListHead.Insert(link);
+    auto Remove(CLink<T>* l) {
+        l->Remove();
+        l->Insert(&freeListHead);
+        return l;
     }
 
     auto GetTail() { return usedListTail.prev; }
     auto GetHead() { return usedListHead.next; }
+
+    //void SetHead(CLink<T>* l) {
+    //    auto& h = usedListHead;
+    //
+    //    l->next = h.next;
+    //    h.next->prev = l;
+    //
+    //    l->prev = reinterpret_cast<CLink<T>*>(this);
+    //    h.next = l;
+    //}
 };
 
 VALIDATE_SIZE(CLinkList<void*>, 0x34);

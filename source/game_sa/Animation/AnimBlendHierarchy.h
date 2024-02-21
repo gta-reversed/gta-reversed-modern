@@ -55,6 +55,8 @@ public:
     auto GetSequences() const { return std::span{ m_pSequences, (size_t)m_nSeqCount }; }
     auto GetHashKey() const { return m_hashKey; }
     auto GetTotalTime() const { return m_fTotalTime; }
+    bool IsRunningCompressed() const { return m_bKeepCompressed; }
+    bool IsUncompressed() const { return !m_bIsCompressed; }
 
     uint32 GetIndex() const;
 

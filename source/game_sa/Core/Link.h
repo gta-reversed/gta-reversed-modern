@@ -18,12 +18,14 @@ public:
         prev->next = next;
     }
 
-    void Insert(CLink<T>* link) {
-        link->next = next;
-        next->prev = link;
-        link->prev = this;
-        next = link;
+    void Insert(CLink<T>* after) {
+        assert(after);
+
+        next = after->next;
+        after->next->prev = this;
+
+        prev = after;
+        after->next = this;
     }
 };
-
 VALIDATE_SIZE(CLink<void*>, 0xC);
