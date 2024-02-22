@@ -87,11 +87,12 @@ void CCollision::CalculateTrianglePlanes(CCollisionData* colData) {
 void CCollision::RemoveTrianglePlanes(CCollisionData* colData) {
     ZoneScoped;
 
-    if (!colData->m_pTrianglePlanes)
+    if (!colData->m_pTrianglePlanes) {
         return;
+    }
 
-    auto* link = colData->GetLinkPtr();
-    ms_colModelCache.Remove(link);
+    const auto l = colData->GetLinkPtr();
+    ms_colModelCache.Remove(l);
     colData->RemoveTrianglePlanes();
 }
 
