@@ -419,7 +419,7 @@ void CAnimManager::UncompressAnimation(CAnimBlendHierarchy* h) {
         h->Uncompress();
     } else if (h->m_Link) { // Already uncompressed, mark as recently-used in cache
         h->m_Link->Remove(); // Remove from current position
-        h->m_Link->Insert(ms_AnimCache.GetHead()); // Now re-insert at head
+        ms_AnimCache.Insert(*h->m_Link); // Now re-insert at head
     }
 }
 

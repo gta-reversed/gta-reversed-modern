@@ -3532,7 +3532,6 @@ void CVehicle::SetComponentRotation(RwFrame* component, eRotationAxis axis, floa
     }
 
     CMatrix mat{ RwFrameGetMatrix(component) };
-    const CVector originalPos = mat.GetPosition();
 
     switch (axis) {
     case AXIS_X: bSetRotate ? mat.SetRotateXOnly(angle) : mat.RotateX(angle, true); break;

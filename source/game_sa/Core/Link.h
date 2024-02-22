@@ -18,14 +18,19 @@ public:
         prev->next = next;
     }
 
+    /*!
+     * @brief Insert `this` into a list.
+     * @brief If `this` is already in another list, `Remove()` must first be called! (Not doing so will result in the list (`this` is in) getting corrupted)
+     * @param after The link to insert `this` after.
+     */
     void Insert(CLink<T>* after) {
         assert(after);
 
         next = after->next;
-        after->next->prev = this;
+        next->prev = this;
 
         prev = after;
-        after->next = this;
+        prev->next = this;
     }
 };
 VALIDATE_SIZE(CLink<void*>, 0xC);
