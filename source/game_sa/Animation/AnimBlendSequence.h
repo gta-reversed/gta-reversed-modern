@@ -87,7 +87,7 @@ private:
     //! The bone/frame this sequence is associated with
     //! Thanks to jte for some info
     union {
-        eBoneTag32 m_BoneTag{BONE_UNKNOWN};  // IF m_IsUsingBoneTag == TRUE
+        eBoneTag16 m_BoneTag{BONE_UNKNOWN};  // IF m_IsUsingBoneTag == TRUE
         uint32     m_NameHashKey;          // IF m_IsUsingBoneTag == FALSE
     };
 
