@@ -84,6 +84,16 @@ public:
     CAnimBlendSequence* Destructor() { this->CAnimBlendSequence::~CAnimBlendSequence(); return this; }
 
 private:
+    /*!
+     * @brief Implementation for compression/uncompression of key-frames
+     * @tparam From Key-Frame type to convert from
+     * @tparam To Key-Frame type to convert to
+     * @param [opt] frameData Pre-allocated frame data buffer
+    */
+    template<typename From, typename To>
+    bool ConvertKeyFrames(byte* pDataBlock);
+
+private:
     //! The bone/frame this sequence is associated with
     //! Thanks to jte for some info
     union {
