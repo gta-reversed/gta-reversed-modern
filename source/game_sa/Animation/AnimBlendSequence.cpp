@@ -125,7 +125,7 @@ void CAnimBlendSequence::SetName(const char* name) {
     if (notsa::IsFixBugs()) {
         m_IsUsingBoneTag = false;
     }
-    m_NameHashKey   = CKeyGen::GetUppercaseKey(name);
+    m_NameHashKey = CKeyGen::GetUppercaseKey(name);
 }
 
 // 0x4D0C70
