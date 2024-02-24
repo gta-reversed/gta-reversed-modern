@@ -21,8 +21,8 @@ void CClumpModelInfo::InjectHooks()
     RH_ScopedVMTInstall(Shutdown, 0x4C4E60);
     RH_ScopedVMTInstall(DeleteRwObject, 0x4C4E70);
     RH_ScopedVMTInstall(GetRwModelType, 0x4C5730);
-    // clang moment: RH_ScopedVirtualOverloadedInstall(CreateInstance, "void", 0x4C5140, RwObject * (CClumpModelInfo::*)());
-    // clang moment: RH_ScopedVirtualOverloadedInstall(CreateInstance, "mat", 0x4C5110, RwObject * (CClumpModelInfo::*)(RwMatrix*));
+    RH_ScopedVMTOverloadedInstall(CreateInstance, "void", 0x4C5140, RwObject * (CClumpModelInfo::*)());
+    RH_ScopedVMTOverloadedInstall(CreateInstance, "mat", 0x4C5110, RwObject * (CClumpModelInfo::*)(RwMatrix*));
     RH_ScopedVMTInstall(SetAnimFile, 0x4C5200);
     RH_ScopedVMTInstall(ConvertAnimFileIndex, 0x4C5250);
     RH_ScopedVMTInstall(GetAnimFileIndex, 0x4C5740);
@@ -109,7 +109,7 @@ RwObject* CClumpModelInfo::CreateInstance()
     if (bHasAnimBlend) {
         RpAnimBlendClumpInit(clonedClump);
         if (const auto anim = CAnimManager::GetAnimation(m_nKey, &CAnimManager::GetAnimBlocks()[m_nAnimFileIndex])) {
-            CAnimManager::BlendAnimation(clonedClump, anim, ANIMATION_LOOPED, 1.0F);
+            CAnimManager::BlendAnimation(clonedClump, anim, ANIMATION_IS_LOOPED, 1.0F);
         }
     }
 

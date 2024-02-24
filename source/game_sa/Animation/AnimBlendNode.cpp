@@ -47,7 +47,7 @@ bool CAnimBlendNode::FindKeyFrame(float time) {
 
             if (m_KFCurr + 1 >= m_Seq->m_FramesNum) {
                 // reached end of animation
-                if (!m_BlendAssoc->IsRepeating()) {
+                if (!m_BlendAssoc->IsLooped()) {
                     CalcDeltas();
                     m_KFRemainingTime = 0.0f;
                     return false;
@@ -131,7 +131,7 @@ bool CAnimBlendNode::SetupKeyFrameCompressed() {
 
 // 0x4D0160 - Unused
 bool CAnimBlendNode::UpdateTime() {
-    if (m_BlendAssoc->IsRunning()) {
+    if (m_BlendAssoc->IsPlaying()) {
         m_KFRemainingTime -= m_BlendAssoc->m_TimeStep;
         if (m_KFRemainingTime <= 0.0f) {
             return NextKeyFrameNoCalc();

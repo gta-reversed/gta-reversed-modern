@@ -8,6 +8,8 @@
 #pragma once
 
 #include "Quaternion.h"
+#include "AnimBlendSequence.h"
+#include "AnimBlendAssociation.h"
 
 //! Animation of a single node (bone)
 class CAnimBlendNode {
@@ -58,9 +60,11 @@ public:
     bool UpdateTime(); // Unused
     bool SetupKeyFrameCompressed();
     bool FindKeyFrame(float time);
+    auto GetAnimAssoc() const { return m_BlendAssoc; }
+    bool IsValid() const { return !!m_Seq; }
+    auto GetSeq() const { return m_Seq; }
+    auto GetRootKF() const { return &m_Seq[0]; }
 
-
-private: // Generic implementations
     //! @notsa
     //! @brief Inverse progress of current frame (Eg.: How much is left of this frame)
     template<bool IsCompressed>
@@ -124,7 +128,7 @@ private: // Generic implementations
 
             if (m_KFCurr >= m_Seq->m_FramesNum) {
                 // reached end of animation
-                if (!m_BlendAssoc->IsRepeating()) {
+                if (!m_BlendAssoc->IsLooped()) {
                     m_KFCurr--;
                     m_KFRemainingTime = 0.0f;
                     return false;
@@ -156,7 +160,7 @@ private: // Generic implementations
         trans = CVector{0.0f, 0.0f, 0.0f};
         rot   = CQuaternion{0.0f, 0.0f, 0.0f, 0.0f};
 
-        if (m_BlendAssoc->IsRunning()) {
+        if (m_BlendAssoc->IsPlaying()) {
             m_KFRemainingTime -= m_BlendAssoc->m_TimeStep;
             if (m_KFRemainingTime <= 0.0f) {
                 looped = I_NextKeyFrame<IsCompressed>();

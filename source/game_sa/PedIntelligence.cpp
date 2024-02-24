@@ -355,7 +355,7 @@ bool CPedIntelligence::GetUsingParachute() {
         return false;
     }
 
-    auto animAssoc = RpAnimBlendClumpGetFirstAssociation(m_pPed->m_pRwClump, ANIMATION_PARTIAL);
+    auto animAssoc = RpAnimBlendClumpGetFirstAssociation(m_pPed->m_pRwClump, ANIMATION_IS_PARTIAL);
     if (!animAssoc) {
         return false;
     }

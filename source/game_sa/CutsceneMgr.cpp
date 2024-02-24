@@ -50,7 +50,7 @@ void CCutsceneMgr::AttachObjectToBone(CCutsceneObject* attachment, CCutsceneObje
 // 0x5B0480
 void CCutsceneMgr::AttachObjectToFrame(CCutsceneObject* attachment, CEntity* object, const char* frameName) {
     attachment->m_pAttachmentObject = nullptr;
-    attachment->m_pAttachToFrame    = RpAnimBlendClumpFindFrame(object->m_pRwClump, frameName)->m_pFrame;
+    attachment->m_pAttachToFrame    = RpAnimBlendClumpFindFrame(object->m_pRwClump, frameName)->Frame;
 }
 
 // 0x5B04B0
@@ -874,20 +874,20 @@ void CCutsceneMgr::SetCutsceneAnim(const char* animName, CObject* object) {
     const auto cpyOfTheAnim = ms_cutsceneAssociations.CopyAnimation(animName);
     CStreaming::IHaveUsedStreamingMemory();
 
-    cpyOfTheAnim->SetFlag(ANIMATION_TRANSLATE_Y, true);
+    cpyOfTheAnim->SetFlag(ANIMATION_CAN_EXTRACT_VELOCITY, true);
     cpyOfTheAnim->Start(0.f);
 
-    const auto blendData = RpClumpGetAnimBlendClumpData(object->m_pRwClump);
-    blendData->m_Anims.Prepend(&cpyOfTheAnim->m_Link);
+    const auto blendData = RpAnimBlendClumpGetData(object->m_pRwClump);
+    blendData->m_AnimList.Prepend(&cpyOfTheAnim->m_Link);
 
     if (cpyOfTheAnim->m_BlendHier->m_bKeepCompressed) {
-        blendData->m_Frames->m_bIsCompressed = true;
+        blendData->m_FrameDatas[0].IsCompressed = true;
     }
 }
 
 // 0x5B0420
 void CCutsceneMgr::SetCutsceneAnimToLoop(const char* animName) {
-    ms_cutsceneAssociations.GetAnimation(animName)->m_Flags |= ANIMATION_LOOPED;
+    ms_cutsceneAssociations.GetAnimation(animName)->m_Flags |= ANIMATION_IS_LOOPED;
 }
 
 // 0x5B0440
@@ -910,8 +910,8 @@ void CCutsceneMgr::SetupCutsceneToStart() {
 
         if (const auto anim = RpAnimBlendClumpGetFirstAssociation(csobj->m_pRwClump)) {
             if (csobj->m_pAttachToFrame) {
-                anim->SetFlag(ANIMATION_TRANSLATE_Y, false);
-                anim->SetFlag(ANIMATION_STARTED, true);
+                anim->SetFlag(ANIMATION_CAN_EXTRACT_VELOCITY, false);
+                anim->SetFlag(ANIMATION_IS_PLAYING, true);
             } else {
                 // Get anim translation and offset the object's position by it
                 const CVector animTrans = anim->m_BlendHier->m_bIsCompressed
@@ -920,7 +920,7 @@ void CCutsceneMgr::SetupCutsceneToStart() {
                 SetObjPos(ms_cutsceneOffset + animTrans);
 
                 // Start the anim
-                anim->SetFlag(ANIMATION_STARTED, true);
+                anim->SetFlag(ANIMATION_IS_PLAYING, true);
             }
         } else { // Object has no animation applied
             SetObjPos(ms_cutsceneOffset);

@@ -433,11 +433,11 @@ auto LocateCharAnyMeansObject2D(CRunningScript& S, CPed& ped, CObject& obj, CVec
     return LocateCharEntity2D(S, ped, obj, radius, highlightArea, false, false);
 }
 
-auto LocateCharOnFootObject2D(CRunningScript& S, CPed& ped, CVehicle& obj, CVector2D radius, bool highlightArea) {
+auto LocateCharOnFootObject2D(CRunningScript& S, CPed& ped, CObject& obj, CVector2D radius, bool highlightArea) {
     return LocateCharEntity2D(S, ped, obj, radius, highlightArea, false, true);
 }
 
-auto LocateCharInCarObject2D(CRunningScript& S, CPed& ped, CVehicle& obj, CVector2D radius, bool highlightArea) {
+auto LocateCharInCarObject2D(CRunningScript& S, CPed& ped, CObject& obj, CVector2D radius, bool highlightArea) {
     return LocateCharEntity2D(S, ped, obj, radius, highlightArea, true, false);
 }
 
@@ -1210,7 +1210,7 @@ auto IsCharPlayingAnim(CPed& ped, const char* animName) {
 // SET_CHAR_ANIM_PLAYING_FLAG
 auto SetCharAnimPlayingFlag(CPed& ped, const char* animName, bool started) {
     if (const auto anim = RpAnimBlendClumpGetAssociation(ped.m_pRwClump, animName)) {
-        anim->SetFlag(ANIMATION_STARTED, started);
+        anim->SetFlag(ANIMATION_IS_PLAYING, started);
     }
 }
 
