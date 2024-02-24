@@ -21,7 +21,7 @@ CTaskSimpleIKPointArm::CTaskSimpleIKPointArm(const char* purpose, eIKArm arm, CE
         purpose,
         IKArmToBoneTag(arm),
         CVector{ 0.f, 0.05f, 0.f },
-        BONE_NORMAL,
+        BONE_ROOT,
         targetEntity,
         offsetBoneTag,
         offsetPos,

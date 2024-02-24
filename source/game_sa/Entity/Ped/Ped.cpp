@@ -422,10 +422,10 @@ void CPed::SetMoveAnim() {
         case PEDMOVE_WALK:
         case PEDMOVE_RUN:
         case PEDMOVE_SPRINT: {
-            for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump, ANIMATION_PARTIAL); assoc; assoc = RpAnimBlendGetNextAssociation(assoc, ANIMATION_PARTIAL)) {
-                if ((assoc->m_Flags & ANIMATION_UNLOCK_LAST_FRAME) == 0 && (assoc->m_Flags & ANIMATION_ADD_TO_BLEND) == 0) {
+            for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump, ANIMATION_IS_PARTIAL); assoc; assoc = RpAnimBlendGetNextAssociation(assoc, ANIMATION_IS_PARTIAL)) {
+                if ((assoc->m_Flags & ANIMATION_IS_FINISH_AUTO_REMOVE) == 0 && (assoc->m_Flags & ANIMATION_DONT_ADD_TO_PARTIAL_BLEND) == 0) {
                     assoc->m_BlendDelta = -2.f;
-                    assoc->SetFlag(ANIMATION_FREEZE_LAST_FRAME, true);
+                    assoc->SetFlag(ANIMATION_IS_BLEND_AUTO_REMOVE, true);
                 }
             }
 
@@ -618,7 +618,7 @@ RpHAnimHierarchy& CPed::GetAnimHierarchy() const {
 }
 
 CAnimBlendClumpData& CPed::GetAnimBlendData() const {
-    return *RpClumpGetAnimBlendClumpData(m_pRwClump);
+    return *RpAnimBlendClumpGetData(m_pRwClump);
 }
 
 /*!
@@ -716,8 +716,8 @@ void CPed::SetMoveAnimSpeed(CAnimBlendAssociation* association) {
 */
 void CPed::StopNonPartialAnims() {
     for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
-        if ((assoc->m_Flags & ANIMATION_PARTIAL) == 0) {
-            assoc->SetFlag(ANIMATION_STARTED, false);
+        if ((assoc->m_Flags & ANIMATION_IS_PARTIAL) == 0) {
+            assoc->SetFlag(ANIMATION_IS_PLAYING, false);
         }
     }
 }
@@ -727,8 +727,8 @@ void CPed::StopNonPartialAnims() {
 */
 void CPed::RestartNonPartialAnims() {
     for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
-        if ((assoc->m_Flags & ANIMATION_PARTIAL) == 0) {
-            assoc->SetFlag(ANIMATION_STARTED, true);
+        if ((assoc->m_Flags & ANIMATION_IS_PARTIAL) == 0) {
+            assoc->SetFlag(ANIMATION_IS_PLAYING, true);
         }
     }
 }
@@ -2207,7 +2207,7 @@ void CPed::PlayFootSteps() {
         } else {
             if ((lastAssoc->m_nFlags & ANIMATION_ADD_TO_BLEND) == 0) {
                 if (lastAssoc->m_nAnimId != ANIM_ID_FIGHT_IDLE) {
-                    if (lastAssoc->m_nFlags & ANIMATION_PARTIAL || bIsDucking) {
+                    if (lastAssoc->m_nFlags & ANIMATION_IS_PARTIAL || bIsDucking) {
                         idleBlendTotal += lastAssoc->m_fBlendAmount;
                     }
                 }
@@ -3165,7 +3165,7 @@ RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data) {
 void CPed::RemoveBodyPart(ePedNode pedNode, char localDir) {
     UNUSED(localDir);
 
-    if (m_apBones[pedNode]->m_pIFrame) {
+    if (m_apBones[pedNode]->KeyFrame) {
         if (CLocalisation::ShootLimbs()) {
             bRemoveHead = true;
             m_nBodypartToRemove = pedNode;
@@ -3197,7 +3197,7 @@ uint8 CPed::DoesLOSBulletHitPed(CColPoint& colPoint) {
     RwV3d headPos{};
 
     // TODO: Doesn't this just return the position of the matrix? Eg.: `BoneMatrix.pos` ?
-    RwV3dTransformPoint(&headPos, &zero, &GetBoneMatrix((eBoneTag)m_apBones[ePedNode::PED_NODE_HEAD]->m_nNodeId));
+    RwV3dTransformPoint(&headPos, &zero, &GetBoneMatrix((eBoneTag)m_apBones[ePedNode::PED_NODE_HEAD]->BoneTag));
 
     if (m_nPedState == PEDSTATE_FALL || colPoint.m_vecPoint.z < headPos.z) { // Ped falling, adjust
         return 1;
@@ -3219,8 +3219,8 @@ void CPed::RemoveWeaponAnims(int32 likeUnused, float blendDelta) {
     bool bFoundNotPartialAnim{};
     for (auto i = 0; i < 34; i++) { // TODO: Magic number `34`
         if (const auto assoc = RpAnimBlendClumpGetAssociation(m_pRwClump, ANIM_ID_FIRE)) {
-            assoc->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
-            if ((assoc->m_Flags & ANIMATION_PARTIAL)) {
+            assoc->m_Flags |= ANIMATION_IS_BLEND_AUTO_REMOVE;
+            if ((assoc->m_Flags & ANIMATION_IS_PARTIAL)) {
                 assoc->m_BlendDelta = blendDelta;
             } else {
                 bFoundNotPartialAnim = true;
@@ -3242,7 +3242,7 @@ bool CPed::IsPedHeadAbovePos(float zPos) {
     RwV3d headPos{};
 
     // TODO: Doesn't this just return the position of the matrix? Eg.: `BoneMatrix.pos` ?
-    RwV3dTransformPoint(&headPos, &zero, &GetBoneMatrix((eBoneTag)m_apBones[ePedNode::PED_NODE_HEAD]->m_nNodeId));
+    RwV3dTransformPoint(&headPos, &zero, &GetBoneMatrix((eBoneTag)m_apBones[ePedNode::PED_NODE_HEAD]->BoneTag));
 
     return zPos + GetPosition().z < headPos.z;
 }
@@ -3360,7 +3360,7 @@ void CPed::SetModelIndex(uint32 modelIndex) {
     }
 
     // Deal with animation stuff once again
-    RpClumpGetAnimBlendClumpData(m_pRwClump)->m_PedPosition = (CVector*)&m_vecAnimMovingShiftLocal;
+    RpAnimBlendClumpGetData(m_pRwClump)->m_PedPosition = (CVector*)&m_vecAnimMovingShiftLocal;
 
     // Create hit col model
     if (!mi->m_pHitColModel) {

@@ -45,7 +45,7 @@ bool IKChain_c::Init(
 
     const auto frames = m_Ped->GetAnimBlendData().GetFrames();
 
-    if (frames[0].m_bCheckBlendNodeClumpKeyFrames || !frames[0].m_bUpdatingFrame) {
+    if (frames[0].NeedsKeyFrameUpdate || !frames[0].IsUpdatingFrame) {
         return false;
     }
 
@@ -55,8 +55,8 @@ bool IKChain_c::Init(
 
     // Check if frame of this bone has non-zero translation
     {
-        const auto& boneFrame = frames[RpHAnimIDGetIndex(&m_Ped->GetAnimHierarchy(), (RwInt32)effectorBone)].m_pIFrame;
-        if (boneFrame->translation.IsZero()) {
+        const auto& boneFrame = frames[RpHAnimIDGetIndex(&m_Ped->GetAnimHierarchy(), (RwInt32)effectorBone)].KeyFrame;
+        if (boneFrame->t.IsZero()) {
             return false;
         }
     }
@@ -270,7 +270,7 @@ void IKChain_c::SetupBones(eBoneTag32 effectorBone, CVector effectorPos, eBoneTa
     m_BonesCount = 0;
     for (auto boneIt = effectorBone; boneIt != pivotBone; boneIt = GetBoneLinkPrev(boneIt)) {
         const auto node = g_boneNodeMan.GetBoneNode();
-        node->Init(boneIt, frames[RpHAnimIDGetIndex(&m_Ped->GetAnimHierarchy(), (RwInt32)boneIt)].m_pIFrame);
+        node->Init(boneIt, frames[RpHAnimIDGetIndex(&m_Ped->GetAnimHierarchy(), (RwInt32)boneIt)].KeyFrame);
         bones[m_BonesCount++] = node;
     }
 

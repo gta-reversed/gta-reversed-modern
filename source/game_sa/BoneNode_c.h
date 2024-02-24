@@ -23,8 +23,8 @@ public:
     bool Init(int32 boneTag, RpHAnimBlendInterpFrame* interpFrame);
     void InitLimits();
 
-    static void EulerToQuat(const CVector& angles, CQuaternion& quat);
-    static void QuatToEuler(const CQuaternion& quat, CVector& angles);
+    static void EulerToQuat(const CVector& angles, RtQuat& quat);
+    static void QuatToEuler(const RtQuat& quat, CVector& angles);
     static int32  GetIdFromBoneTag(eBoneTag32 bone);
 
     void ClampLimitsCurrent(bool LimitX, bool LimitY, bool LimitZ);
@@ -55,8 +55,8 @@ private:
 private:
     eBoneTag                 m_BoneTag;
     RpHAnimBlendInterpFrame* m_InterpFrame;
-    CQuaternion              m_Orientation; // TODO: Use RtQuat
-    CVector                  m_Pos;         // * * *
+    RtQuat                   m_Orientation; 
+    CVector                  m_Pos;
     BoneNode_c*              m_Parent;
     TList_c<BoneNode_c>      m_Childs;
     RwMatrix                 m_WorldMat;

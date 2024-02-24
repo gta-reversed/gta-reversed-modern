@@ -390,16 +390,12 @@ void CEntity::DeleteRwObject()
     m_pRwObject = nullptr;
     auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
     mi->RemoveRef();
-    CStreaming::RemoveEntity(m_pStreamingLink);
-    m_pStreamingLink = nullptr;
+    CStreaming::RemoveEntity(std::exchange(m_pStreamingLink, nullptr));
 
     if (IsBuilding())
         --gBuildings;
 
-    if (mi->GetModelType() == MODEL_INFO_CLUMP
-        && mi->IsRoad()
-        && !IsObject()) {
-
+    if (mi->GetModelType() == MODEL_INFO_CLUMP && mi->IsRoad() && !IsObject()) {
         CWorld::ms_listMovingEntityPtrs.DeleteItem(this);
     }
 

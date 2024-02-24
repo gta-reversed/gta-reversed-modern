@@ -110,17 +110,22 @@ void* CAnimBlendHierarchy::GetSequenceBlock() const {
 // 0x4CF5F0
 void CAnimBlendHierarchy::Uncompress() {
     assert(m_nSeqCount > 0);
+    assert(m_bIsCompressed);
 
-    auto compressedSeq = GetSequenceBlock();
+    //NOTSA_LOG_TRACE("Uncompress(this={:#x})", LOG_PTR(this));
 
-    auto uncompressedSeq = AllocSequenceBlock(false);
+    const auto cSeqData = GetSequenceBlock();
+
+    // Now uncompress sequence data
+    auto uSeqData = AllocSequenceBlock(false);
     for (auto& s : GetSequences()) {
-        s.Uncompress(uncompressedSeq);
-        uncompressedSeq += s.GetDataSize(false);
+        s.Uncompress(uSeqData);
+        uSeqData += s.GetDataSize(false);
     }
 
-    if (compressedSeq) {
-        CMemoryMgr::Free(compressedSeq);
+    // Now we no longer need the old compressed data
+    if (cSeqData) {
+        CMemoryMgr::Free(cSeqData);
     }
 
     m_bIsCompressed = false;
@@ -132,34 +137,33 @@ void CAnimBlendHierarchy::Uncompress() {
 
 // 0x4CF6C0
 void CAnimBlendHierarchy::CompressKeyframes() const {
-    auto frameData = AllocSequenceBlock(true);
-    auto oldFrameData = GetSequenceBlock();
+    assert(!m_bIsCompressed);
 
+    //NOTSA_LOG_TRACE("CompressKeyframes(this={:#x})", LOG_PTR(this));
+
+    const auto uSeqData = GetSequenceBlock();
+
+    // Compress current data
+    auto cSeqData = AllocSequenceBlock(true);
     for (auto& sequence : GetSequences()) {
-        sequence.CompressKeyframes(frameData);
-        frameData += sequence.GetDataSize(true);
+        sequence.CompressKeyframes(cSeqData);
+        cSeqData += sequence.GetDataSize(true);
     }
 
-    if (oldFrameData) {
-        CMemoryMgr::Free(oldFrameData);
+    // Now we no longer need the old uncompressed data
+    if (uSeqData) {
+        CMemoryMgr::Free(uSeqData);
     }
 }
 
 // 0x4CF760
 void CAnimBlendHierarchy::RemoveUncompressedData() {
     assert(m_nSeqCount > 0);
+    assert(!m_bIsCompressed);
 
-    auto frameData = AllocSequenceBlock(true);
-    auto oldFrameData = GetSequenceBlock();
+    //NOTSA_LOG_TRACE("RemoveUncompressedData(this={:#x})", LOG_PTR(this));
 
-    for (auto& sequence : GetSequences()) {
-        sequence.RemoveUncompressedData(frameData);
-        frameData = (uint8*)((size_t)frameData + sequence.GetDataSize(true));
-    }
-
-    if (oldFrameData) {
-        CMemoryMgr::Free(oldFrameData);
-    }
+    CompressKeyframes();
 
     m_bIsCompressed = true;
 }
@@ -175,6 +179,12 @@ void CAnimBlendHierarchy::Print() {
     for (auto& sequence : GetSequences()) {
         sequence.Print();
     }
+}
+
+// notsa
+void CAnimBlendHierarchy::SetNumSequences(size_t n) {
+    m_nSeqCount  = (uint16)n;
+    m_pSequences = new CAnimBlendSequence[n]; // Yes, they used `new`
 }
 
 uint32 CAnimBlendHierarchy::GetIndex() const {

@@ -268,7 +268,7 @@ void CPlayerPed::ReApplyMoveAnims() {
                 addedAnim->m_BlendDelta = anim->m_BlendDelta;
                 addedAnim->m_BlendAmount = anim->m_BlendAmount;
 
-                anim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
+                anim->m_Flags |= ANIMATION_IS_BLEND_AUTO_REMOVE;
                 anim->m_BlendDelta = -1000.0f;
             }
         }
@@ -757,7 +757,7 @@ void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
 
 
     if (auto anim = RpAnimBlendClumpGetAssociation(m_pRwClump, ANIM_ID_FIRE))
-        anim->m_Flags |= ANIMATION_STARTED & ANIMATION_UNLOCK_LAST_FRAME;
+        anim->m_Flags |= ANIMATION_IS_PLAYING & ANIMATION_IS_FINISH_AUTO_REMOVE;
 
     TheCamera.ClearPlayerWeaponMode();
 }

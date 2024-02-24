@@ -40,6 +40,7 @@ class CAnimBlendClumpData;
 struct RpHAnimHierarchy;
 
 enum ePedNode : int32 {
+    PED_NODE_NULL            = 0,
     PED_NODE_UPPER_TORSO     = 1,
     PED_NODE_HEAD            = 2,
     PED_NODE_LEFT_ARM        = 3,
