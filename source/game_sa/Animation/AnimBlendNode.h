@@ -128,7 +128,7 @@ public:
 
             if (m_KFCurr >= m_Seq->m_FramesNum) {
                 // reached end of animation
-                if (!m_BlendAssoc->IsRepeating()) {
+                if (!m_BlendAssoc->IsLooped()) {
                     m_KFCurr--;
                     m_KFRemainingTime = 0.0f;
                     return false;
@@ -160,7 +160,7 @@ public:
         trans = CVector{0.0f, 0.0f, 0.0f};
         rot   = CQuaternion{0.0f, 0.0f, 0.0f, 0.0f};
 
-        if (m_BlendAssoc->IsRunning()) {
+        if (m_BlendAssoc->IsPlaying()) {
             m_KFRemainingTime -= m_BlendAssoc->m_TimeStep;
             if (m_KFRemainingTime <= 0.0f) {
                 looped = I_NextKeyFrame<IsCompressed>();

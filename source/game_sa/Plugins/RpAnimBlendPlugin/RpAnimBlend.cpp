@@ -1454,7 +1454,7 @@ void RpAnimBlendClumpUpdateAnimations(RpClump* clump, float timeStep, bool isOnS
         if (nodesCnt + 1 <= std::size(ctx.BlendNodeArrays) - 1) { // - 1 for null terminator
             ctx.BlendNodeArrays[nodesCnt++] = a->GetNodesPtr();
         }
-        if (a->IsMoving()) {
+        if (a->IsSyncronised()) {
             totalTime      += ah->GetTotalTime() / a->GetSpeed() * a->GetBlendAmount();
             totalBlendAmnt += a->GetBlendAmount();
         } else {

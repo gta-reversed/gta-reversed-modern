@@ -143,7 +143,7 @@ bool CTaskSimpleThrowProjectile::ProcessPed(CPed* ped) {
         const auto animFireTime = m_Anim->m_AnimId == ANIM_ID_GRENADE_WEAPON_THROW
             ? wi->m_fAnimLoop2Fire
             : wi->m_fAnimLoopFire;
-        if (animFireTime < m_Anim->m_CurrentTime && (m_Anim->m_CurrentTime - m_Anim->m_TimeStep) <= animFireTime && m_Anim->IsRunning()) {
+        if (animFireTime < m_Anim->m_CurrentTime && (m_Anim->m_CurrentTime - m_Anim->m_TimeStep) <= animFireTime && m_Anim->IsPlaying()) {
             if (ped->IsPlayer()) {
                 if (!m_bButtonReleased) {
                     m_ButtonCounter = CTimer::GetTimeInMS() - m_ButtonCounter;

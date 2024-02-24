@@ -190,7 +190,7 @@ void CAnimBlendAssociation::SetBlendTo(float blendAmount, float blendDelta) {
 // 0x4CEA80
 void CAnimBlendAssociation::SetCurrentTime(float currentTime) {
     for (m_CurrentTime = currentTime; m_CurrentTime >= m_BlendHier->m_fTotalTime; m_CurrentTime -= m_BlendHier->m_fTotalTime) {
-        if (!IsRepeating()) {
+        if (!IsLooped()) {
             m_CurrentTime = m_BlendHier->m_fTotalTime;
             break;
         }
@@ -264,7 +264,7 @@ bool CAnimBlendAssociation::UpdateTime(float timeStep, float timeMult) {
     UNUSED(timeStep);
     UNUSED(timeMult);
 
-    if (!IsRunning()) {
+    if (!IsPlaying()) {
         return true;
     }
 
@@ -283,7 +283,7 @@ bool CAnimBlendAssociation::UpdateTime(float timeStep, float timeMult) {
     }
 
     // Should it be repeating? If so, jump to beginning
-    if (IsRepeating()) {
+    if (IsLooped()) {
         m_CurrentTime -= m_BlendHier->GetTotalTime();
         return true;
     }
@@ -310,8 +310,8 @@ bool CAnimBlendAssociation::UpdateTime(float timeStep, float timeMult) {
 
 // 0x4D13A0
 void CAnimBlendAssociation::UpdateTimeStep(float timeStep, float totalTimeRecp) {
-    if (IsRunning()) {
-        m_TimeStep = IsMoving()
+    if (IsPlaying()) {
+        m_TimeStep = IsSyncronised()
             ? m_BlendHier->m_fTotalTime * totalTimeRecp
             : m_Speed;
         m_TimeStep *= timeStep;

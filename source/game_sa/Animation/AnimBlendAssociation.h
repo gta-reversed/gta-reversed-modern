@@ -162,13 +162,13 @@ public:
 
     AnimationId GetAnimId() const { return m_AnimId; }
 
-    [[nodiscard]] bool IsRunning()        const { return (m_Flags & ANIMATION_IS_PLAYING) != 0; }
-    [[nodiscard]] bool IsRepeating()      const { return (m_Flags & ANIMATION_IS_LOOPED) != 0; }
-    [[nodiscard]] bool IsPartial()        const { return (m_Flags & ANIMATION_IS_PARTIAL) != 0; }
-    [[nodiscard]] bool IsMoving()         const { return (m_Flags & ANIMATION_IS_SYNCRONISED) != 0; }
-    [[nodiscard]] bool HasYTranslation()  const { return (m_Flags & ANIMATION_CAN_EXTRACT_X_VELOCITY) != 0; }
-    [[nodiscard]] bool HasXTranslation()  const { return (m_Flags & ANIMATION_CAN_EXTRACT_VELOCITY) != 0; }
-    [[nodiscard]] bool IsIndestructible() const { return (m_Flags & ANIMATION_FACIAL) != 0; }
+    [[nodiscard]] bool IsPlaying() const { return (m_Flags & ANIMATION_IS_PLAYING) != 0; }
+    [[nodiscard]] bool IsLooped() const { return (m_Flags & ANIMATION_IS_LOOPED) != 0; }
+    [[nodiscard]] bool IsPartial() const { return (m_Flags & ANIMATION_IS_PARTIAL) != 0; }
+    [[nodiscard]] bool IsSyncronised() const { return (m_Flags & ANIMATION_IS_SYNCRONISED) != 0; }
+    [[nodiscard]] bool CanExtractXVelocity() const { return (m_Flags & ANIMATION_CAN_EXTRACT_X_VELOCITY) != 0; }
+    [[nodiscard]] bool CanExtractVelocity() const { return (m_Flags & ANIMATION_CAN_EXTRACT_VELOCITY) != 0; }
+    [[nodiscard]] bool IsFacial() const { return (m_Flags & ANIMATION_FACIAL) != 0; }
 
     void AllocateAnimBlendNodeArray(int32 count);
     void FreeAnimBlendNodeArray();

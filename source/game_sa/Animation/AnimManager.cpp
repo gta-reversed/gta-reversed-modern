@@ -211,10 +211,10 @@ CAnimBlendAssociation* CAnimManager::AddAnimationToClump(RpClump* clump, CAnimBl
     const auto clumpAnims = &RpAnimBlendClumpGetData(clump)->m_AnimList;
 
     CAnimBlendAssociation* syncWith{};
-    if (anim->IsMoving()) {
+    if (anim->IsSyncronised()) {
         for (auto l = clumpAnims->next; l; l = l->next) {
             const auto a = CAnimBlendAssociation::FromLink(l);
-            if (a->IsMoving()) {
+            if (a->IsSyncronised()) {
                 syncWith = a;
                 break;
             }
@@ -250,7 +250,7 @@ CAnimBlendAssociation* CAnimManager::AddAnimation(RpClump* clump, CAnimBlendHier
 // 0x4D3B30
 CAnimBlendAssociation* CAnimManager::AddAnimationAndSync(RpClump* clump, CAnimBlendAssociation* syncWith, AssocGroupId groupId, AnimationId animId) {
     const auto a = CreateAnimAssociation(groupId, animId);
-    if (a->IsMoving() && syncWith) {
+    if (a->IsSyncronised() && syncWith) {
         a->SyncAnimation(syncWith);
         a->m_Flags |= ANIMATION_IS_PLAYING;
     } else {
@@ -494,13 +494,13 @@ CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, AssocGroupId
     for (auto l = clumpAnimData->m_AnimList.next; l; l = l->next) {
         const auto a = CAnimBlendAssociation::FromLink(l);
 
-        if (toBlendIsMoving && a->IsMoving()) {
+        if (toBlendIsMoving && a->IsSyncronised()) {
             movingAnim = a;
         }
 
         if (a->m_AnimId == animId && a->m_AnimGroupId == groupId) {
             running = a;
-        } else if (toBlendIsPartial == a->IsPartial() && toBlendIsIndestructible == a->IsIndestructible()) {
+        } else if (toBlendIsPartial == a->IsPartial() && toBlendIsIndestructible == a->IsFacial()) {
             if (a->m_BlendAmount <= 0.f) {
                 a->m_BlendDelta = -1.f;
             } else if (const auto bd = a->GetBlendAmount() * -blendDelta; bd <= a->GetBlendDelta() || !toBlendIsPartial) {
