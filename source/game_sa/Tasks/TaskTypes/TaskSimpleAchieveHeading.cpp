@@ -96,7 +96,7 @@ void CTaskSimpleAchieveHeading::SetUpIK(CPed* ped) {
         return;
     }
 
-    const auto lookAt = ped->GetPosition() + CVector{ 2.f * std::sin(m_DesiredHeadingRad), 2.f * std::cos(m_DesiredHeadingRad), 0.61f };
+    CVector lookAt = ped->GetPosition() + CVector{ 2.f * std::sin(m_DesiredHeadingRad), 2.f * std::cos(m_DesiredHeadingRad), 0.61f };
     g_ikChainMan.LookAt("TaskAchvHeading", ped, nullptr, 5'000, BONE_UNKNOWN, &lookAt, false, 0.25f, 500, 3, false);
     m_IsDoingIK = true;
 }
