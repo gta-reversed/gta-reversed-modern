@@ -39,14 +39,18 @@ void CAnimBlendStaticAssociation::Init(RpClump* clump, CAnimBlendHierarchy* h) {
 
     // Initialize sequences from the data in the clump
     for (auto& seq : m_BlendHier->GetSequences()) {
-        const AnimBlendFrameData* frameData = seq.m_bUsingBones
-            ? RpAnimBlendClumpFindBone(clump, seq.m_BoneID)
-            : RpAnimBlendClumpFindFrameFromHashKey(clump, seq.m_FrameHashKey);
-        if (frameData && seq.m_FramesNum > 0) {
-            const auto nodeIdx = frameData - clumpAnimData->m_Frames;
-            assert(nodeIdx >= 0 && nodeIdx < m_NumBlendNodes);
-            m_BlendSeqs[nodeIdx] = &seq;
+        if (!seq.m_FramesNum) {
+            continue;
         }
+        const auto frame = seq.IsUsingBoneTag()
+            ? RpAnimBlendClumpFindBone(clump, seq.GetBoneTag())
+            : RpAnimBlendClumpFindFrameFromHashKey(clump, seq.GetNameHashKey());
+        if (!frame) {
+            continue;
+        }
+        const auto nodeIdx = frame - clumpAnimData->m_Frames;
+        assert(nodeIdx >= 0 && nodeIdx < m_NumBlendNodes);
+        m_BlendSeqs[nodeIdx] = &seq;
     }
 }
 

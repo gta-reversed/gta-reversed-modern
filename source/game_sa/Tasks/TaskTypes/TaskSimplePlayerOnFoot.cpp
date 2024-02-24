@@ -41,7 +41,7 @@ void CTaskSimplePlayerOnFoot::InjectHooks() {
 
 // 0x685750
 CTaskSimplePlayerOnFoot::CTaskSimplePlayerOnFoot() : CTaskSimple() {
-    m_nAnimationBlockIndex = CAnimManager::GetAnimationBlockIndex("playidles");
+    m_PlayerIdlesAnimBlockId = CAnimManager::GetAnimationBlockIndex("playidles");
     dword_14 = 0;
     m_nTimer = 0;
     m_pLookingAtEntity = nullptr;
@@ -684,8 +684,9 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
 
 // 0x6872C0
 void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
-    if (CGameLogic::IsCoopGameGoingOn())
+    if (CGameLogic::IsCoopGameGoingOn()) {
         return;
+    }
 
     CPad* pad = player->GetPadFromPlayer();
     AssocGroupId animGroupID = ANIM_GROUP_DEFAULT;
@@ -696,11 +697,11 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
         pad->SetTouched();
     }
 
-    CAnimBlock* animBlock = &CAnimManager::ms_aAnimBlocks[m_nAnimationBlockIndex];
+    CAnimBlock* playerIdlesAnimBlock = &CAnimManager::GetAnimBlocks()[m_PlayerIdlesAnimBlockId];
     uint32 touchTimeDelta = pad->GetTouchedTimeDelta();
     if (touchTimeDelta <= 10000) {
-        if (animBlock->IsLoaded) {
-            CStreaming::SetModelIsDeletable(IFPToModelId(m_nAnimationBlockIndex));
+        if (playerIdlesAnimBlock->IsLoaded) {
+            CStreaming::SetModelIsDeletable(IFPToModelId(m_PlayerIdlesAnimBlockId));
             CAnimBlendAssociation* animAssoc = nullptr;
             for (animAssoc = RpAnimBlendClumpGetFirstAssociation(player->m_pRwClump); animAssoc; animAssoc = RpAnimBlendGetNextAssociation(animAssoc)) {
                 if (animAssoc->m_Flags & ANIMATION_200) {
@@ -712,13 +713,25 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
         return;
     }
 
-    CStreaming::RequestModel(IFPToModelId(m_nAnimationBlockIndex), STREAMING_GAME_REQUIRED);
-    if (!animBlock->IsLoaded)
+    // Make sure block is loaded
+    CStreaming::RequestModel(IFPToModelId(m_PlayerIdlesAnimBlockId), STREAMING_GAME_REQUIRED);
+    if (!playerIdlesAnimBlock->IsLoaded) {
         return;
+    }
 
-    const auto PlayRandomIdleAnim = [&]() {
-        if (!(player->bIsLooking && player->bIsRestoringLook) && touchTimeDelta - gLastTouchTimeDelta > 20000) {
-            // Play random idle animation
+    if (!(player->bIsLooking && player->bIsRestoringLook) && touchTimeDelta - gLastTouchTimeDelta > 20000) {
+        // Check if the player already has any anims from the idle anim block playing already
+        bool anyIdleAnims = false;
+        RpAnimBlendClumpIterateAssociations(player->m_pRwClump, [&](CAnimBlendAssociation* a) {
+            if (CAnimManager::IsAnimInBlock(a->GetHier(), playerIdlesAnimBlock)) {
+                anyIdleAnims = true;
+                return false;
+            }
+            return true;
+        });
+
+        // If not, play one
+        if (!anyIdleAnims) {
             int32 randomNumber = 0;
             do {
                 randomNumber = CGeneral::GetRandomNumberInRange(0, 4);
@@ -742,26 +755,6 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
                 player->Say(336, 0, 0.2f, 0, 0, 0);
             }
         }
-    };
-
-    CAnimBlendAssociation* animAssoc1 = RpAnimBlendClumpGetFirstAssociation(player->m_pRwClump);
-    if (animAssoc1) {
-        while (true) {
-            uint32 animHierarchyIndex = (uint32)animAssoc1->m_BlendHier - (uint32)CAnimManager::ms_aAnimations.data();
-            animHierarchyIndex = animHierarchyIndex / 6 + ((animHierarchyIndex >> 31) >> 2);
-            animHierarchyIndex = animHierarchyIndex + (animHierarchyIndex >> 31);
-
-            uint32 animBlockFirstAnimIndex = static_cast<uint32>(animBlock->FirstAnimId);
-            if (animHierarchyIndex >= animBlockFirstAnimIndex && animHierarchyIndex < animBlockFirstAnimIndex + animBlock->NumAnims) {
-                break;
-            }
-            animAssoc1 = RpAnimBlendGetNextAssociation(animAssoc1);
-            if (!animAssoc1) {
-                return PlayRandomIdleAnim();
-            }
-        }
-    } else {
-        PlayRandomIdleAnim();
     }
 }
 
@@ -977,7 +970,7 @@ int32 CTaskSimplePlayerOnFoot::PlayerControlZelda(CPlayerPed* player, bool bAvoi
         if (!player->m_standingOnEntity || !player->m_standingOnEntity->m_bIsStatic || player->m_standingOnEntity->m_bHasContacted) {
             if (!player->GetIntelligence()->GetTaskHold(false) || !((CTaskSimpleHoldEntity*)player->GetIntelligence()->GetTaskHold(false))->m_pAnimBlendAssociation) {
                 CAnimBlendHierarchy* animHierarchy = nullptr;
-                CAnimBlendAssocGroup* animGroup = &CAnimManager::ms_aAnimAssocGroups[player->m_nAnimGroup];
+                CAnimBlendAssocGroup* animGroup = &CAnimManager::GetAssocGroups()[player->m_nAnimGroup];
 
                 if (player->m_pPlayerData->m_bPlayerSprintDisabled || g_surfaceInfos.CantSprintOn(player->m_nContactSurface) ||
                     (animHierarchy = animGroup->GetAnimation(ANIM_ID_RUN)->m_BlendHier, animHierarchy == animGroup->GetAnimation(ANIM_ID_SPRINT)->m_BlendHier)) {

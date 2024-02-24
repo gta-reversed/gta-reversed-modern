@@ -11,7 +11,7 @@
 
 struct tPedColNodeInfo {
     char    _pad[4];
-    int32   m_nBoneID; // see ePedBones
+    int32   m_nBoneID; // see eBoneTag
     int32   m_nFlags;
     CVector m_vecCenter;
     float   m_fRadius;

@@ -55,6 +55,10 @@ public:
     auto GetSequences() const { return std::span{ m_pSequences, (size_t)m_nSeqCount }; }
     auto GetHashKey() const { return m_hashKey; }
 
+    auto GetTotalTime() const { return m_fTotalTime; }
+
+    uint32 GetIndex() const;
+
 private: // Function implementations
     template<bool Compressed>
     void ICalcTotalTime() {

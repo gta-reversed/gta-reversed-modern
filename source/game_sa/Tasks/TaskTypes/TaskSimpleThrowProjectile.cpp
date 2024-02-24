@@ -157,7 +157,7 @@ bool CTaskSimpleThrowProjectile::ProcessPed(CPed* ped) {
             }
 
             CVector firePos;
-            RwV3dTransformPoint(&firePos, &wi->m_vecFireOffset, &ped->GetBoneMatrix((ePedBones)ped->m_apBones[PED_NODE_RIGHT_HAND]->m_nNodeId));
+            RwV3dTransformPoint(&firePos, &wi->m_vecFireOffset, &ped->GetBoneMatrix((eBoneTag)ped->m_apBones[PED_NODE_RIGHT_HAND]->m_nNodeId));
             ped->GetActiveWeapon().Fire(ped, &firePos, &firePos, nullptr, m_TargetPos.IsZero() ? nullptr : &m_TargetPos, nullptr);
         }
     }

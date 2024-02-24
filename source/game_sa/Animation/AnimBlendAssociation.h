@@ -115,6 +115,9 @@ public:
 
     virtual ~CAnimBlendAssociation();
 
+    #undef GetCurrentTime
+    float GetCurrentTime() const { return m_CurrentTime; }
+
     float GetTimeProgress()                  const;
     float GetBlendAmount(float weight = 1.f) const { return IsPartial() ? m_BlendAmount : m_BlendAmount * weight; }
     float GetBlendDelta()                    const { return m_BlendDelta; }
@@ -145,6 +148,11 @@ public:
     void SetDeleteCallback(void(*callback)(CAnimBlendAssociation*, void*), void* data = nullptr);
     void SetFinishCallback(void(*callback)(CAnimBlendAssociation*, void*), void* data = nullptr);
     void Start(float currentTime = 0.f);
+
+    /*!
+     * @addr 0x4CEB40
+     * @brief Sync the play time of this animation with another
+    */
     void SyncAnimation(CAnimBlendAssociation* syncWith);
     bool UpdateBlend(float mult);
     bool UpdateTime(float a1, float a2);
@@ -170,6 +178,7 @@ public:
 
     auto GetNodes() { return std::span{ &m_BlendNodes, m_NumBlendNodes }; }
     void SetDefaultFinishCallback() { SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr); }
+    auto GetHier() const { return m_BlendHier; }
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
