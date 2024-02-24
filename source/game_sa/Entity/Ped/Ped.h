@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <extensions/EntityRef.hpp>
+
 #include "Physical.h"
 #include "AEPedAudioEntity.h"
 #include "AEPedSpeechAudioEntity.h"
@@ -27,6 +29,7 @@
 #include "ePedState.h"
 #include "ePedStats.h"
 #include "ePedType.h"
+#include "eMoveState.h"
 
 class CPedGroup;
 class CCivilianPed;
@@ -37,6 +40,7 @@ class CAnimBlendClumpData;
 struct RpHAnimHierarchy;
 
 enum ePedNode : int32 {
+    PED_NODE_NULL            = 0,
     PED_NODE_UPPER_TORSO     = 1,
     PED_NODE_HEAD            = 2,
     PED_NODE_LEFT_ARM        = 3,
@@ -77,17 +81,6 @@ enum ePedCreatedBy : uint8 {
     PED_GAME_MISSION = 3, // used for the playbacked peds on replay
 };
 
-enum eMoveState : uint32 {
-    PEDMOVE_NONE = 0,
-    PEDMOVE_STILL,
-    PEDMOVE_TURN_L,
-    PEDMOVE_TURN_R,
-    PEDMOVE_WALK,
-    PEDMOVE_JOG,
-    PEDMOVE_RUN,
-    PEDMOVE_SPRINT
-};
-
 enum eFightingStyle : int8 {
     STYLE_STANDARD = 4,
     STYLE_BOXING,
@@ -105,13 +98,15 @@ class CPedStats;
 
 class NOTSA_EXPORT_VTABLE CPed : public CPhysical {
 public:
+    using Ref = notsa::EntityRef<CPed>;
+
     static inline int16 m_sGunFlashBlendStart = 10'000; // 0x8D1370
 
     CAEPedAudioEntity       m_pedAudio;
     CAEPedSpeechAudioEntity m_pedSpeech;
     CAEPedWeaponAudioEntity m_weaponAudio;
     char                    field_43C[36];
-    CPed*                   field_460;
+    CPed*                   m_roadRageWith;
     char                    field_464[4];
     int32                   field_468;
 
@@ -127,7 +122,7 @@ public:
         bool bCanPointGunAtTarget : 1 = false;   // can ped point gun at target
         bool bIsTalking : 1 = false;             // is ped talking(see Chat())
 
-        bool bInVehicle : 1 = false;             // is in a vehicle
+        bool bInVehicle : 1 = false;             // is in a vehicle [Sometimes accessed as `(ped->m_nPedFlags >> 8) & 1`]
         bool bIsInTheAir : 1 = false;            // is in the air
         bool bIsLanding : 1 = false;             // is landing after being in the air
         bool bHitSomethingLastFrame : 1 = false; // has been in a collision last frame
@@ -424,7 +419,7 @@ public:
     bool IsAlive() const;
     void UpdateStatEnteringVehicle();
     void UpdateStatLeavingVehicle();
-    void GetTransformedBonePosition(RwV3d& inOffsetOutPosn, ePedBones boneId, bool updateSkinBones = false);
+    void GetTransformedBonePosition(RwV3d& inOffsetOutPosn, eBoneTag boneId, bool updateSkinBones = false);
     void ReleaseCoverPoint();
     CTaskSimpleHoldEntity* GetHoldingTask();
     CEntity* GetEntityThatThisPedIsHolding();
@@ -453,7 +448,7 @@ public:
     void ClearLook();
     bool TurnBody();
     bool IsPointerValid();
-    void GetBonePosition(RwV3d& outPosition, ePedBones boneId, bool updateSkinBones = false);
+    void GetBonePosition(RwV3d& outPosition, eBoneTag boneId, bool updateSkinBones = false);
     void GiveObjectToPedToHold(int32 modelIndex, uint8 replace);
     void SetPedState(ePedState pedState);
     //1 = default, 2 = scm/mission script
@@ -519,14 +514,15 @@ public:
     void SetWeaponAccuracy(uint8 acc) { m_nWeaponAccuracy = acc; }
 
     CAcquaintance& GetAcquaintance() { return m_acquaintance; }
-    CVehicle* GetVehicleIfInOne() { return bInVehicle ? m_pVehicle : nullptr; }
+    CVehicle* GetVehicleIfInOne() const { return bInVehicle ? m_pVehicle : nullptr; }
 
-    uint8 GetCreatedBy() { return m_nCreatedBy; }
+    uint8 GetCreatedBy() const { return m_nCreatedBy; }
+    void SetCreatedBy(ePedCreatedBy v) { m_nCreatedBy = v; }
     bool IsCreatedBy(ePedCreatedBy v) const noexcept { return v == m_nCreatedBy; }
     bool IsCreatedByMission() const noexcept { return IsCreatedBy(ePedCreatedBy::PED_MISSION); }
 
-    int32 GetGroupId() { return m_pPlayerData->m_nPlayerGroup; }
     CPedGroup* GetGroup() const { return CPedGroups::GetPedsGroup(this); }
+    int32 GetGroupId();
     CPedClothesDesc* GetClothesDesc() { return m_pPlayerData->m_pPedClothesDesc; }
 
     CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
@@ -535,12 +531,13 @@ public:
     CTaskManager& GetTaskManager() const { return m_pIntelligence->m_TaskMgr; }
     CEventGroup& GetEventGroup() { return m_pIntelligence->m_eventGroup; }
     CEventHandler& GetEventHandler() { return m_pIntelligence->m_eventHandler; }
-    CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.m_history; }
+    CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.GetHistory(); }
     CPedStuckChecker& GetStuckChecker() { return m_pIntelligence->m_pedStuckChecker; }
 
     CWeapon& GetWeaponInSlot(size_t slot) noexcept { return m_aWeapons[slot]; }
     CWeapon& GetWeaponInSlot(eWeaponSlot slot) noexcept { return m_aWeapons[(size_t)slot]; }
     CWeapon& GetActiveWeapon() noexcept { return GetWeaponInSlot(m_nActiveWeaponSlot); }
+    CWeapon& GetWeapon(eWeaponType wt) noexcept { return GetWeaponInSlot(GetWeaponSlot(wt)); }
 
     void SetSavedWeapon(eWeaponType weapon) { m_nSavedWeapon = weapon; }
     bool IsStateDriving() const noexcept { return m_nPedState == PEDSTATE_DRIVING; }
@@ -559,15 +556,15 @@ public:
     CPlayerPed*    AsPlayer()    { return reinterpret_cast<CPlayerPed*>(this); }
 
     bool IsFollowerOfGroup(const CPedGroup& group) const;
-    RwMatrix& GetBoneMatrix(ePedBones bone) const;
+    RwMatrix& GetBoneMatrix(eBoneTag bone) const;
     void CreateDeadPedPickupCoors(CVector& pickupPos);
     RpHAnimHierarchy& GetAnimHierarchy() const;
     CAnimBlendClumpData& GetAnimBlendData() const;
     bool IsInVehicle() const { return bInVehicle && m_pVehicle; }
     bool IsInVehicle(const CVehicle* veh) const { return bInVehicle && m_pVehicle == veh; }
-    CVector GetBonePosition(ePedBones boneId, bool updateSkinBones = false);
+    CVector GetBonePosition(eBoneTag boneId, bool updateSkinBones = false);
     int32 GetPadNumber() const;
-    bool IsCurrentlyUnarmed() { return GetActiveWeapon().m_nType == WEAPON_UNARMED; }
+    bool IsCurrentlyUnarmed() { return GetActiveWeapon().m_Type == WEAPON_UNARMED; }
 
     /*!
      * @notsa
@@ -598,11 +595,11 @@ public:
      * @brief Give weapon according to given CWeapon struct.
      */
     eWeaponSlot GiveWeapon(const CWeapon& weapon, bool likeUnused) {
-        return GiveWeapon(weapon.m_nType, weapon.m_nTotalAmmo, likeUnused);
+        return GiveWeapon(weapon.m_Type, weapon.m_TotalAmmo, likeUnused);
     }
 
     auto GetPedModelInfo() const { return reinterpret_cast<CPedModelInfo*>(GetModelInfo()); }
-    
+
     /*!
      * @notsa
      * @brief Returns vehicle's position if ped is in one, ped's otherwise.
@@ -617,17 +614,6 @@ private:
     // Virtual method wrappers
     auto Constructor(ePedType pt) { this->CPed::CPed(pt); return this; }
     auto Destructor() { this->CPed::~CPed(); return this; }
-    void SetModelIndex_Reversed(uint32 model) { CPed::SetModelIndex(model); }
-    void DeleteRwObject_Reversed() { CPed::DeleteRwObject(); }
-    void Teleport_Reversed(CVector dest, bool resetRot) { CPed::Teleport(dest, resetRot); }
-    void PreRender_Reversed() { CPed::PreRender(); }
-    void Render_Reversed() { CPed::Render(); }
-    bool SetupLighting_Reversed() { return CPed::SetupLighting(); }
-    void RemoveLighting_Reversed(bool bRemove) { CPed::RemoveLighting(bRemove); }
-    void FlagToDestroyWhenNextProcessed_Reversed() { CPed::FlagToDestroyWhenNextProcessed(); }
-    void SetMoveAnim_Reversed() { CPed::SetMoveAnim(); }
-    void Save_Reversed() { CPed::Save(); }
-    void Load_Reversed() { CPed::Load(); }
 };
 VALIDATE_SIZE(CPed, 0x79C);
 

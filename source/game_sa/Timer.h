@@ -69,6 +69,8 @@ public:
     static void   UpdateVariables(float timeElapsed);
     static void   Update();
 
+    static float GetTimestepPerSecond() { return TIMESTEP_PER_SECOND; }
+
     // Inlined funcs
     // They could have used functions with a longer name, ex:
     // GetTimeInMillisecond, we have shorter GetTimeInMS

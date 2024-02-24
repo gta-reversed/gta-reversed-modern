@@ -7,6 +7,9 @@
 uint64& CAEAudioUtility::startTimeMs = *reinterpret_cast<uint64*>(0xb610f8);
 float (&CAEAudioUtility::m_sfLogLookup)[50][2] = *reinterpret_cast<float (*)[50][2]>(0xb61100);
 
+// NOTE: Not sure about the size.
+static inline auto& gScriptBanksLookup = *reinterpret_cast<std::array<int32, 628>*>(0x8ABC70);
+
 void CAEAudioUtility::InjectHooks() {
     RH_ScopedClass(CAEAudioUtility);
     RH_ScopedCategory("Audio");
@@ -18,10 +21,10 @@ void CAEAudioUtility::InjectHooks() {
     RH_ScopedInstall(AudioLog10, 0x4d9e50);
     RH_ScopedInstall(ConvertFromBytesToMS, 0x4d9ef0);
     RH_ScopedInstall(ConvertFromMSToBytes, 0x4d9f40);
-    RH_ScopedInstall(GetBankAndSoundFromScriptSlotAudioEvent, 0x4D9CC0, { .reversed = false });
+    RH_ScopedInstall(GetBankAndSoundFromScriptSlotAudioEvent, 0x4D9CC0);
     RH_ScopedInstall(FindVehicleOfPlayer, 0x4D9E10);
 
-    RH_ScopedInstall(GetCurrentTimeInMilliseconds, 0x4d9e80);
+    RH_ScopedInstall(GetCurrentTimeInMS, 0x4d9e80);
     RH_ScopedInstall(StaticInitialise, 0x5b97f0);
 }
 
@@ -39,7 +42,7 @@ float CAEAudioUtility::GetRandomNumberInRange(float a, float b) {
 
 // 0x4d9c80
 bool CAEAudioUtility::ResolveProbability(float p) {
-    return p >= 1.0f || ((float)CGeneral::GetRandomNumber() * RAND_MAX_FLOAT_RECIPROCAL) < p;
+    return p >= 1.0f || CGeneral::RandomBool(100.0f * p);
 }
 
 // 0x4d9d90
@@ -67,7 +70,7 @@ float CAEAudioUtility::AudioLog10(float p) {
 
 // REFACTORED
 // 0x4d9e80
-uint64 CAEAudioUtility::GetCurrentTimeInMilliseconds() {
+uint64 CAEAudioUtility::GetCurrentTimeInMS() {
     using namespace std::chrono;
     auto nowMs = time_point_cast<milliseconds>(high_resolution_clock::now());
     auto value = duration_cast<milliseconds>(nowMs.time_since_epoch());
@@ -75,8 +78,8 @@ uint64 CAEAudioUtility::GetCurrentTimeInMilliseconds() {
 }
 
 // 0x4d9ef0
-uint32 CAEAudioUtility::ConvertFromBytesToMS(uint32 a, uint32 frequency, uint16 frequencyMult) {
-    return static_cast<uint32>(std::floorf(a / (float(frequency * frequencyMult) / 500.0f)));
+uint32 CAEAudioUtility::ConvertFromBytesToMS(uint32 lengthInBytes, uint32 frequency, uint16 frequencyMult) {
+    return static_cast<uint32>(std::floorf(lengthInBytes / (float(frequency * frequencyMult) / 500.0f)));
 }
 
 // 0x4d9f40
@@ -100,12 +103,33 @@ void CAEAudioUtility::StaticInitialise() {
         m_sfLogLookup[1][1] = log10f(v);
     }
 
-    startTimeMs = GetCurrentTimeInMilliseconds();
+    startTimeMs = GetCurrentTimeInMS();
 }
 
 // 0x4D9CC0
-bool CAEAudioUtility::GetBankAndSoundFromScriptSlotAudioEvent(int32* a1, int32* a2, int32* a3, int32 a4) {
-    return plugin::CallAndReturn<bool, 0x4D9CC0, int32*, int32*, int32*, int32>(a1, a2, a3, a4);
+bool CAEAudioUtility::GetBankAndSoundFromScriptSlotAudioEvent(int32& slot, int32& outBank, int32& outSound, int32 a4) {
+    if (slot < 1800)
+        return false;
+
+    if (slot < 2000) {
+        outBank = gScriptBanksLookup[slot - 1800];
+        return true;
+    }
+
+    if (slot == 0xFFFF) { // (uint16)-1
+        outBank = 291;
+
+        if (a4 > 3)
+            outSound = 0;
+        else
+            outSound = 2 * (a4 % 2);
+
+        return true;
+    }
+
+    outBank = static_cast<int32>(std::floor(float(slot - 2000) / 200.0f)) + 147;
+    outSound = (slot - 2000) % 200;
+    return true;
 }
 
 // 0x4D9E10

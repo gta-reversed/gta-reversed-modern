@@ -136,11 +136,11 @@ public:
     void     ResetDoorAngle();
     void     LockDoor();
     void     Init();
-    void     DoBurnEffect();
+    void     DoBurnEffect() const;
     void     GetLightingFromCollisionBelow();
     void     ProcessSamSiteBehaviour();
     void     ProcessTrainCrossingBehaviour();
-    void     ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection, CEntity* damager, eWeaponType weaponType);
+    void     ObjectDamage(float damage, const CVector* fxOrigin, const CVector* fxDirection, CEntity* damager, eWeaponType weaponType);
     void     Explode();
     void     ObjectFireDamage(float damage, CEntity* damager);
 
@@ -174,16 +174,6 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    void  SetIsStatic_Reversed(bool isStatic);
-    void  CreateRwObject_Reversed();
-    void  ProcessControl_Reversed();
-    void  Teleport_Reversed(CVector destination, bool resetRotation);
-    void  SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck);
-    uint8 SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2);
-    void  PreRender_Reversed();
-    void  Render_Reversed();
-    bool  SetupLighting_Reversed();
-    void  RemoveLighting_Reversed(bool bRemove);
 };
 VALIDATE_SIZE(CObject, 0x17C);
 

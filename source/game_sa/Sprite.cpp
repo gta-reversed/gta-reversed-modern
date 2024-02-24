@@ -59,7 +59,7 @@ void CSprite::Draw3DSprite(float, float, float, float, float, float, float, floa
 
 // 0x70CE30
 bool CSprite::CalcScreenCoors(const RwV3d& posn, RwV3d* out, float* w, float* h, bool checkMaxVisible, bool checkMinVisible) {
-    *out = MultiplyMatrixWithVector(TheCamera.GetViewMatrix(), posn);
+    *out = TheCamera.GetViewMatrix().TransformPoint(posn);
 
     if (out->z <= CDraw::GetNearClipZ() + 1.0f && checkMinVisible)
         return false;
@@ -91,7 +91,7 @@ float CSprite::CalcHorizonCoors() {
     };
 
     CVector outPoint;
-    auto vecPos = MultiplyMatrixWithVector(&outPoint, &TheCamera.m_mViewMatrix, &point);
+    auto vecPos = &outPoint.TransformPoint(&TheCamera.m_mViewMatrix, &point);
     return 1.0f / vecPos->z * SCREEN_HEIGHT * vecPos->y;
     */
 }

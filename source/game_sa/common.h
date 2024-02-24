@@ -113,7 +113,8 @@ constexpr float TWO_PI         = 6.28318f;          // τ (TAU)
 
 constexpr float COS_45 = SQRT_2 / 2.f; // cos(45deg)
 
-constexpr float sq(float x) { return x * x; }
+template<typename T>
+constexpr T sq(T x) { return x * x; }
 
 struct SpriteFileName {
     const char* name;
@@ -147,15 +148,57 @@ constexpr float DegreesToRadians(float angleInDegrees) {
     return angleInDegrees * PI / 180.0F;
 }
 
+//! @notsa
+inline RwTexCoords operator*(RwTexCoords lhs, float rhs) {
+    return { lhs.u * rhs, lhs.v * rhs };
+}
+
+//! @notsa
+inline RwTexCoords operator+(RwTexCoords lhs, RwTexCoords rhs) {
+    return { lhs.u + rhs.u, lhs.v + rhs.v };
+}
+
+template<typename T, typename Y = float>
+struct WeightedValue {
+    using value_type = T;
+
+    T v;
+    Y w;
+};
+
+template<rng::input_range R> // Range of WeightedValue`s
+auto multiply_weighted(R&& r) {
+    using T = rng::range_value_t<R>::value_type;
+
+    T a{};
+    for (const auto& vw : r) {
+        a = a + (T)(vw.v * vw.w);
+    }
+    return a;
+}
+
+template<typename T, typename Y = float, size_t N>
+auto multiply_weighted(WeightedValue<T, Y> (&&values)[N]) {
+    return multiply_weighted(values);
+}
+
 // Converts radians to degrees
 // 57.295826
 constexpr float RadiansToDegrees(float angleInRadians) {
     return angleInRadians * 180.0F / PI;
 }
 
+//! Step towards a certain number
+template<typename T>
+T stepto(const T& from, const T& to, float step) {
+    return to <= from
+        ? std::min(from + step, to)
+        : std::max(from - step, to);
+}
+
 template<typename T>
 T lerp(const T& from, const T& to, float t) {
-    // Same as from + (to - from) * t
+    // Same as `from + (to - from) * t` (Or `from + t * (to - from)`
     return static_cast<T>(to * t + from * (1.f - t));
 }
 
@@ -190,7 +233,7 @@ extern constexpr bool make_fourcc4(const char* line, const char abcd[4]) {
 }
 
 // shit
-extern constexpr uint32 make_fourcc4(const char fourcc[4]) {
+inline constexpr uint32 MakeFourCC(const char fourcc[4]) {
     return fourcc[0] << 0 |
            fourcc[1] << 8 |
            fourcc[2] << 16 |

@@ -115,7 +115,7 @@ public:
 
     static void SetMessage(const char* message);
     static void SetBigMessage(char* message, eMessageStyle style);
-    static void SetHelpMessage(char const* text, bool quickMessage, bool permanent, bool addToBrief);
+    static void SetHelpMessage(char const* text, bool quickMessage = false, bool permanent = false, bool addToBrief = false);
     static void SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float diff, float max);
     static void SetHelpMessageWithNumber(char const* text, int32 number, bool quickMessage, bool permanent);
     static void SetVehicleName(const char* name);

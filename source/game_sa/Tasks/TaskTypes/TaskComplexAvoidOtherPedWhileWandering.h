@@ -24,7 +24,7 @@ public:
 public:
     static constexpr auto Type = TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING;
 
-    CTaskComplexAvoidOtherPedWhileWandering(CPed* ped, const CVector& targetPoint, eMoveState moveState);
+    CTaskComplexAvoidOtherPedWhileWandering(CPed* ped, const CVector& targetPoint, eMoveState moveState, /*NOTSA=>*/ bool bMovingTarget = false);
     CTaskComplexAvoidOtherPedWhileWandering(const CTaskComplexAvoidOtherPedWhileWandering&);
     ~CTaskComplexAvoidOtherPedWhileWandering() override;
 
@@ -43,6 +43,12 @@ public:
     void       ComputeAvoidSphere(CPed* ped, CColSphere& colSphere);
     bool       ComputeRouteRoundSphere(CPed* ped, CColSphere& spToAvoid);
     bool       ComputeDetourTarget(CPed* ped);
+
+private:
+    CTaskComplexAvoidOtherPedWhileWandering* Constructor(CPed* ped, const CVector& targetPoint, eMoveState moveState) {
+        this->CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering(ped, targetPoint, moveState);
+        return this;
+    }
 
 private:
     friend void InjectHooksMain();

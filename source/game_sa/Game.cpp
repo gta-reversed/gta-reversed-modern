@@ -165,7 +165,7 @@ void CGame::ShutdownRenderWare() {
 }
 
 // 0x53C4A0
-bool CGame::CanSeeOutSideFromCurrArea() {
+bool CGame::CanSeeOutSideFromCurrArea() { // pattern: !CGame::currArea 
     return currArea == AREA_CODE_NORMAL_WORLD;
 }
 
@@ -285,7 +285,6 @@ void CGame::ShutDownForRestart() {
     CReplay::EmptyReplayBuffer();
     CMovingThings::Shutdown();
     rng::for_each(CWorld::Players, [](auto& info) { info.Clear(); });
-    memset(CTheZones::ZonesVisited, 0, sizeof(CTheZones::ZonesVisited));
     CTheScripts::UndoBuildingSwaps();
     CTheScripts::UndoEntityInvisibilitySettings();
     g_interiorMan.Exit();

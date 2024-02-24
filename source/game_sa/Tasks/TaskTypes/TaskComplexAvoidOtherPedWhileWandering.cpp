@@ -8,8 +8,8 @@
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 
 void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
-    RH_ScopedVirtualClass(CTaskComplexAvoidOtherPedWhileWandering, 0x86fec4, 11);
-    RH_ScopedCategory("Tasks/TaskTypes"); // TODO: Change this to the appropriate category!
+    RH_ScopedVirtualClass(CTaskComplexAvoidOtherPedWhileWandering, 0x86FEC4, 11);
+    RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x66A100);
     RH_ScopedInstall(Destructor, 0x66A1D0);
@@ -34,19 +34,22 @@ void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
 CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering(
     CPed* pedToAvoid,
     const CVector& targetPoint,
-    eMoveState moveState
+    eMoveState moveState,
+
+    //VVV NOTSA ARGS VVV//
+    bool bMovingTarget
 ) :
     m_PedToAvoid{pedToAvoid},
     m_TargetPt{targetPoint},
-    m_DetourTargetPt{targetPoint}
+    m_DetourTargetPt{targetPoint},
+    m_bMovingTarget{bMovingTarget}
 {
     CEntity::SafeRegisterRef(m_PedToAvoid);
 }
 
 CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering(const CTaskComplexAvoidOtherPedWhileWandering& o) :
-    CTaskComplexAvoidOtherPedWhileWandering{m_PedToAvoid, m_TargetPt, m_MoveState}
+    CTaskComplexAvoidOtherPedWhileWandering{m_PedToAvoid, m_TargetPt, m_MoveState, o.m_bMovingTarget}
 {
-    m_bMovingTarget = o.m_bMovingTarget;
 }
 
 // 0x66A1D0

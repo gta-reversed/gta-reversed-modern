@@ -205,6 +205,11 @@ public:
 
     // Deallocates object
     void Delete(A* obj) {
+#ifdef FIX_BUGS // C++ says that `delete nullptr` is well defined, and should do nothing.
+        if (!obj) {
+            return;
+        }
+#endif
         int32 index = GetIndex(obj);
         m_byteMap[index].bEmpty = true;
         if (index < m_nFirstFree)
@@ -247,11 +252,8 @@ public:
     }
 
     // 0x5A1CD0
-    bool IsObjectValid(A *obj) {
-        auto slot = GetIndex(obj);
-        return slot >= 0 &&
-               slot < m_nSize &&
-               !IsFreeSlotAtIndex(slot);
+    bool IsObjectValid(const A *obj) {
+        return IsFromObjectArray(obj) && !IsFreeSlotAtIndex(GetIndex(obj));
     }
 
     // Helper so we don't write memcpy manually

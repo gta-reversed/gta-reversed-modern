@@ -7,7 +7,7 @@
 #include "StdInc.h"
 
 void CHeli::InjectHooks() {
-    RH_ScopedClass(CHeli);
+    RH_ScopedVirtualClass(CHeli, 0x871680, 71);
     RH_ScopedCategory("Vehicle");
 
     RH_ScopedInstall(InitHelis, 0x6C4560);
@@ -17,10 +17,10 @@ void CHeli::InjectHooks() {
     RH_ScopedInstall(SwitchPoliceHelis, 0x6C4800);
     RH_ScopedInstall(RenderAllHeliSearchLights, 0x6C7C50);
     RH_ScopedInstall(TestSniperCollision, 0x6C6890);
-    RH_ScopedVirtualInstall(Render, 0x6C4400);
-    RH_ScopedVirtualInstall(Fix, 0x6C4530);
-    RH_ScopedVirtualInstall(BurstTyre, 0x6C4330);
-    RH_ScopedVirtualInstall(SetUpWheelColModel, 0x6C4320);
+    RH_ScopedVMTInstall(Render, 0x6C4400);
+    RH_ScopedVMTInstall(Fix, 0x6C4530);
+    RH_ScopedVMTInstall(BurstTyre, 0x6C4330);
+    RH_ScopedVMTInstall(SetUpWheelColModel, 0x6C4320);
 }
 
 // 0x6C4190
@@ -211,7 +211,7 @@ void CHeli::TestSniperCollision(CVector* origin, CVector* target) {
             continue;
 
         const auto mat = (CMatrix*)heli->m_matrix;
-        auto out = MultiplyMatrixWithVector(*mat, { -0.43f, 1.49f, 1.5f });
+        auto out = mat->TransformPoint({ -0.43f, 1.49f, 1.5f });
         if (CCollision::DistToLine(origin, target, &out) < 0.8f) {
             heli->m_fRotationBalance = (float)(CGeneral::GetRandomNumber() < pow(2, 14) - 1) * 0.1f - 0.05f; // 2^14 - 1 = 16383 [-0.05, 0.05]
             heli->BlowUpCar(FindPlayerPed(), false);
