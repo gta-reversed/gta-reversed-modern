@@ -120,7 +120,7 @@ RtAnimInterpolatorSetCurrentAnim(RtAnimInterpolator *animI,
      * Now initialize the interpolated frame headers to point to the initial
      * keyframe pairs.
      */
-    if (!notsa::IsFixBugs()) {
+    if (!notsa::IsFixBugs() || anim->interpInfo->typeID != rwID_RPANIMBLENDPLUGIN) {
         /*
          * In RW there is an RtAnimAnimation, which holds the raw keyframes of an animation.
          * To play an animation, an RtAnimAnimation is given to an RtAnimInterpolator which
