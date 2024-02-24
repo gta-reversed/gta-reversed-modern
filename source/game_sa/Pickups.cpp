@@ -569,17 +569,17 @@ void CPickups::RemoveUnnecessaryPickups(const CVector& posn, float radius) {
 
 // 0x455000
 void CPickups::RenderPickUpText() {
+    GxtChar msgText[352]{};
     for (auto& message : std::span{ aMessages.data(), NumMessages }) {
         if (message.price == 0u) {
             if (!message.text)
                 continue;
 
             if (message.flags & 2) {
-                CMessages::InsertNumberInString(message.text, 0, 0, 0, 0, 0, 0, (GxtChar*)gString); // NOTE: Not nice but hey.
+                CMessages::InsertNumberInString(message.text, 0, 0, 0, 0, 0, 0, msgText);
             }
         } else {
-            sprintf_s(gString, "$%d", message.price);
-            AsciiToGxtChar(gString, gGxtString);
+            AsciiToGxtChar(std::format("${:d}", message.price).c_str(), msgText);
         }
 
         // TODO: scaled wrong in windowed mode, but it's fine in fullscreen.

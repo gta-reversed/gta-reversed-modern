@@ -448,7 +448,7 @@ void CMessages::InsertStringInString(GxtChar* target, const GxtChar* replacement
 // 0x69E160
 void CMessages::InsertPlayerControlKeysInString(GxtChar* string) {
     GxtChar haystack[MSG_BUF_SZ];
-    notsa::string_copy((char*)haystack, AsciiFromGxtChar(string), sizeof(haystack));
+    GxtCharStrcpy(haystack, string);
 
     // Based on https://stackoverflow.com/a/32413923
     auto        pDst = string;
