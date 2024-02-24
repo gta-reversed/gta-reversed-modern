@@ -1400,19 +1400,6 @@ void FrameUpdateCallBackNonSkinned(AnimBlendFrameData* fd, void* data) {
 
 #pragma endregion
 
-// 0x4D2E10
-void FrameUpdateCallBackOffscreen(AnimBlendFrameData* fd, void* data) {
-    const auto c = static_cast<AnimBlendUpdateData*>(data);
-
-    if (fd->HasVelocity && gpAnimBlendClump->m_PedPosition) {
-#if USE_COPY_PASTE_FRAME_UPDATE
-        FrameUpdateCallBackSkinnedWithVelocityExtraction(c, fd);
-#else
-        FrameUpdateCallBackT<false, true, true, false>(fd, c);
-#endif
-    }
-}
-
 template<bool IsCompressed, bool IsSkinned, bool ExtractVelocity, bool Extract3DVelocity>
 struct NeedsRemoveQuatFlips : std::false_type {};
 template<>
@@ -1646,6 +1633,19 @@ void FrameUpdateCallBackW(AnimBlendFrameData* fd, void* data) {
         FrameUpdateCallBackT<IsCompressed, IsSkinned, false, false>(fd, c);
     }
 #endif
+}
+
+// 0x4D2E10
+void FrameUpdateCallBackOffscreen(AnimBlendFrameData* fd, void* data) {
+    const auto c = static_cast<AnimBlendUpdateData*>(data);
+
+    if (fd->HasVelocity && gpAnimBlendClump->m_PedPosition) {
+#if USE_COPY_PASTE_FRAME_UPDATE
+        FrameUpdateCallBackSkinnedWithVelocityExtraction(c, fd);
+#else
+        FrameUpdateCallBackT<false, true, true, false>(fd, c);
+#endif
+    }
 }
 
 // 0x4D1570
