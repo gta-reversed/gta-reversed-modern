@@ -831,9 +831,8 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* s, const IFPSectionHeader
         hier->m_nAnimBlockId    = ablockId;
         hier->m_bKeepCompressed = false;
 
-        // Allocate sequences - TODO: MSVC garbage
-        hier->m_nSeqCount  = numSeq;
-        hier->m_pSequences = new CAnimBlendSequence[numSeq]; // Yes, they used `new`
+        // Allocate sequences now
+        hier->SetNumSequences(numSeq);
 
         // Read sequences
         for (size_t seqN = 0; seqN < numSeq; seqN++) {
@@ -845,12 +844,10 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* s, const IFPSectionHeader
             const auto numFrames = RwStreamRead<uint32>(s);
             const auto boneTag   = RwStreamRead<eBoneTag32>(s);
 
-            // Only 1 of these will be valid
+            // Only 1 of these will be valid in the end
+            // If BoneTag != -1 then it overwrites the name.
             seq->SetName(seqName);
             seq->SetBoneTag(boneTag);
-            //if (boneTag == -1) {
-            //    DebugBreak();
-            //}
 
             // Read frames
             const auto ReadFrames = [&](size_t kfSize, bool hasTranslation, bool compressed) {

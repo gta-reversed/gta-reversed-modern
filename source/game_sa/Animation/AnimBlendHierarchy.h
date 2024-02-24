@@ -57,6 +57,7 @@ public:
     auto GetTotalTime() const { return m_fTotalTime; }
     bool IsRunningCompressed() const { return m_bKeepCompressed; }
     bool IsUncompressed() const { return !m_bIsCompressed; }
+    void SetNumSequences(size_t n);
 
     uint32 GetIndex() const;
 

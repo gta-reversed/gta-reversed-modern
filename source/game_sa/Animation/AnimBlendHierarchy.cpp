@@ -181,6 +181,12 @@ void CAnimBlendHierarchy::Print() {
     }
 }
 
+// notsa
+void CAnimBlendHierarchy::SetNumSequences(size_t n) {
+    m_nSeqCount  = (uint16)n;
+    m_pSequences = new CAnimBlendSequence[n]; // Yes, they used `new`
+}
+
 uint32 CAnimBlendHierarchy::GetIndex() const {
     return CAnimManager::GetAnimIndex(this);
 }
