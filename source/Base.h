@@ -68,6 +68,9 @@ template<typename... Ts>
 
     spdlog::error(mbMsg);
     spdlog::dump_backtrace();
+    spdlog::apply_all([](std::shared_ptr<spdlog::logger> l) { // Flush all sinks immidiately
+        l->flush();
+    });
 
     const auto result = MessageBox(
         NULL,

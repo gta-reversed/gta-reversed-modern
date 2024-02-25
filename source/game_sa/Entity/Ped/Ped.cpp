@@ -79,7 +79,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(ClearLook, 0x5E3FF0);
     RH_ScopedInstall(TurnBody, 0x5E4000);
     RH_ScopedInstall(IsPointerValid, 0x5E4220);
-    RH_ScopedOverloadedInstall(GetBonePosition, "", 0x5E4280, void(CPed::*)(RwV3d&, ePedBones, bool));
+    RH_ScopedOverloadedInstall(GetBonePosition, "", 0x5E4280, void(CPed::*)(RwV3d&, eBoneTag, bool));
     RH_ScopedInstall(PutOnGoggles, 0x5E3AE0);
     RH_ScopedInstall(ReplaceWeaponWhenExitingVehicle, 0x5E6490);
     RH_ScopedInstall(KillPedWithCar, 0x5F0360, { .reversed = false });
@@ -422,10 +422,10 @@ void CPed::SetMoveAnim() {
         case PEDMOVE_WALK:
         case PEDMOVE_RUN:
         case PEDMOVE_SPRINT: {
-            for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump, ANIMATION_PARTIAL); assoc; assoc = RpAnimBlendGetNextAssociation(assoc, ANIMATION_PARTIAL)) {
-                if ((assoc->m_Flags & ANIMATION_UNLOCK_LAST_FRAME) == 0 && (assoc->m_Flags & ANIMATION_ADD_TO_BLEND) == 0) {
+            for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump, ANIMATION_IS_PARTIAL); assoc; assoc = RpAnimBlendGetNextAssociation(assoc, ANIMATION_IS_PARTIAL)) {
+                if ((assoc->m_Flags & ANIMATION_IS_FINISH_AUTO_REMOVE) == 0 && (assoc->m_Flags & ANIMATION_DONT_ADD_TO_PARTIAL_BLEND) == 0) {
                     assoc->m_BlendDelta = -2.f;
-                    assoc->SetFlag(ANIMATION_FREEZE_LAST_FRAME, true);
+                    assoc->SetFlag(ANIMATION_IS_BLEND_AUTO_REMOVE, true);
                 }
             }
 
@@ -618,7 +618,7 @@ RpHAnimHierarchy& CPed::GetAnimHierarchy() const {
 }
 
 CAnimBlendClumpData& CPed::GetAnimBlendData() const {
-    return *RpClumpGetAnimBlendClumpData(m_pRwClump);
+    return *RpAnimBlendClumpGetData(m_pRwClump);
 }
 
 /*!
@@ -716,8 +716,8 @@ void CPed::SetMoveAnimSpeed(CAnimBlendAssociation* association) {
 */
 void CPed::StopNonPartialAnims() {
     for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
-        if ((assoc->m_Flags & ANIMATION_PARTIAL) == 0) {
-            assoc->SetFlag(ANIMATION_STARTED, false);
+        if ((assoc->m_Flags & ANIMATION_IS_PARTIAL) == 0) {
+            assoc->SetFlag(ANIMATION_IS_PLAYING, false);
         }
     }
 }
@@ -727,8 +727,8 @@ void CPed::StopNonPartialAnims() {
 */
 void CPed::RestartNonPartialAnims() {
     for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
-        if ((assoc->m_Flags & ANIMATION_PARTIAL) == 0) {
-            assoc->SetFlag(ANIMATION_STARTED, true);
+        if ((assoc->m_Flags & ANIMATION_IS_PARTIAL) == 0) {
+            assoc->SetFlag(ANIMATION_IS_PLAYING, true);
         }
     }
 }
@@ -1199,13 +1199,13 @@ float CPed::GetBikeRidingSkill() const {
 void CPed::ShoulderBoneRotation(RpClump* clump) {
     // Note: Didn't use `GetBoneMatrix` here, because it would be slower
     // (Because it would call `GetAnimHierarchyFromClump` multiple times)
-    auto GetMatrixOf = [hier = GetAnimHierarchyFromClump(clump)](ePedBones bone) mutable -> RwMatrix& {
+    auto GetMatrixOf = [hier = GetAnimHierarchyFromClump(clump)](eBoneTag bone) mutable -> RwMatrix& {
         return (RpHAnimHierarchyGetMatrixArray(hier))[RpHAnimIDGetIndex(hier, (size_t)bone)];
     };
 
-    constexpr struct { ePedBones breast, upperArm, clavicle; } bones[]{
-        {ePedBones::BONE_L_BREAST, ePedBones::BONE_L_UPPER_ARM, ePedBones::BONE_L_CLAVICLE},
-        {ePedBones::BONE_R_BREAST, ePedBones::BONE_R_UPPER_ARM, ePedBones::BONE_R_CLAVICLE},
+    constexpr struct { eBoneTag breast, upperArm, clavicle; } bones[]{
+        {eBoneTag::BONE_L_BREAST, eBoneTag::BONE_L_UPPER_ARM, eBoneTag::BONE_L_CLAVICLE},
+        {eBoneTag::BONE_R_BREAST, eBoneTag::BONE_R_UPPER_ARM, eBoneTag::BONE_R_CLAVICLE},
     };
 
     // Update left, and right sides
@@ -1368,7 +1368,7 @@ void CPed::UpdateStatLeavingVehicle()
 * @param [in,out] inOffsetOutPosn The position to be transformed in-place.
 * @param          updateSkinBones If `UpdateRpHAnim` should be called
 */
-void CPed::GetTransformedBonePosition(RwV3d& inOffsetOutPosn, ePedBones bone, bool updateSkinBones) {
+void CPed::GetTransformedBonePosition(RwV3d& inOffsetOutPosn, eBoneTag bone, bool updateSkinBones) {
     // Pretty much the same as GetBonePosition..
     if (updateSkinBones) {
         if (!bCalledPreRender) {
@@ -1424,7 +1424,7 @@ CEntity* CPed::GetEntityThatThisPedIsHolding()
 }
 
 /*!
-* @addr   0x5E0360
+* @addr  0x5E0360
 * @brief Drop held entity, possibly deleting it.
 */
 void CPed::DropEntityThatThisPedIsHolding(bool bDeleteHeldEntity) {
@@ -1795,7 +1795,7 @@ void CPed::ProcessBuoyancy()
 
     if (m_pPlayerData) {
         CVector vecHeadPos(0.0F, 0.0F, 0.1F);
-        GetTransformedBonePosition(vecHeadPos, ePedBones::BONE_HEAD, false);
+        GetTransformedBonePosition(vecHeadPos, eBoneTag::BONE_HEAD, false);
         if (vecHeadPos.z < mod_Buoyancy.m_fWaterLevel) {
             AsPlayer()->HandlePlayerBreath(true, 1.0F);
         }
@@ -2038,7 +2038,7 @@ bool CPed::IsPointerValid() {
 * @brief Retrieve object-space position of the given \a bone.
 * @param updateSkinBones if not already called `UpdateRpHAnim` will be called. If this param is not set, and the latter function wasn't yet called a default position will be returned.
 */
-void CPed::GetBonePosition(RwV3d& outPosition, ePedBones bone, bool updateSkinBones) {
+void CPed::GetBonePosition(RwV3d& outPosition, eBoneTag bone, bool updateSkinBones) {
     if (updateSkinBones) {
         if (!bCalledPreRender) {
             UpdateRpHAnim();
@@ -2207,7 +2207,7 @@ void CPed::PlayFootSteps() {
         } else {
             if ((lastAssoc->m_nFlags & ANIMATION_ADD_TO_BLEND) == 0) {
                 if (lastAssoc->m_nAnimId != ANIM_ID_FIGHT_IDLE) {
-                    if (lastAssoc->m_nFlags & ANIMATION_PARTIAL || bIsDucking) {
+                    if (lastAssoc->m_nFlags & ANIMATION_IS_PARTIAL || bIsDucking) {
                         idleBlendTotal += lastAssoc->m_fBlendAmount;
                     }
                 }
@@ -2425,7 +2425,7 @@ void CPed::AddWeaponModel(int32 modelIndex) {
            && !activeWep.m_FxSystem
         ) {
            CVector pos{ 0.f, 0.f, 0.f };
-           activeWep.m_FxSystem = g_fxMan.CreateFxSystem("molotov_flame", &pos, &GetBoneMatrix(ePedBones::BONE_R_HAND), false);
+           activeWep.m_FxSystem = g_fxMan.CreateFxSystem("molotov_flame", &pos, &GetBoneMatrix(eBoneTag::BONE_R_HAND), false);
            if (const auto fx = activeWep.m_FxSystem) {
                fx->SetLocalParticles(true);
                fx->CopyParentMatrix();
@@ -3165,7 +3165,7 @@ RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data) {
 void CPed::RemoveBodyPart(ePedNode pedNode, char localDir) {
     UNUSED(localDir);
 
-    if (m_apBones[pedNode]->m_pIFrame) {
+    if (m_apBones[pedNode]->KeyFrame) {
         if (CLocalisation::ShootLimbs()) {
             bRemoveHead = true;
             m_nBodypartToRemove = pedNode;
@@ -3197,7 +3197,7 @@ uint8 CPed::DoesLOSBulletHitPed(CColPoint& colPoint) {
     RwV3d headPos{};
 
     // TODO: Doesn't this just return the position of the matrix? Eg.: `BoneMatrix.pos` ?
-    RwV3dTransformPoint(&headPos, &zero, &GetBoneMatrix((ePedBones)m_apBones[ePedNode::PED_NODE_HEAD]->m_nNodeId));
+    RwV3dTransformPoint(&headPos, &zero, &GetBoneMatrix((eBoneTag)m_apBones[ePedNode::PED_NODE_HEAD]->BoneTag));
 
     if (m_nPedState == PEDSTATE_FALL || colPoint.m_vecPoint.z < headPos.z) { // Ped falling, adjust
         return 1;
@@ -3219,8 +3219,8 @@ void CPed::RemoveWeaponAnims(int32 likeUnused, float blendDelta) {
     bool bFoundNotPartialAnim{};
     for (auto i = 0; i < 34; i++) { // TODO: Magic number `34`
         if (const auto assoc = RpAnimBlendClumpGetAssociation(m_pRwClump, ANIM_ID_FIRE)) {
-            assoc->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
-            if ((assoc->m_Flags & ANIMATION_PARTIAL)) {
+            assoc->m_Flags |= ANIMATION_IS_BLEND_AUTO_REMOVE;
+            if ((assoc->m_Flags & ANIMATION_IS_PARTIAL)) {
                 assoc->m_BlendDelta = blendDelta;
             } else {
                 bFoundNotPartialAnim = true;
@@ -3242,7 +3242,7 @@ bool CPed::IsPedHeadAbovePos(float zPos) {
     RwV3d headPos{};
 
     // TODO: Doesn't this just return the position of the matrix? Eg.: `BoneMatrix.pos` ?
-    RwV3dTransformPoint(&headPos, &zero, &GetBoneMatrix((ePedBones)m_apBones[ePedNode::PED_NODE_HEAD]->m_nNodeId));
+    RwV3dTransformPoint(&headPos, &zero, &GetBoneMatrix((eBoneTag)m_apBones[ePedNode::PED_NODE_HEAD]->BoneTag));
 
     return zPos + GetPosition().z < headPos.z;
 }
@@ -3314,9 +3314,9 @@ bool CPed::IsFollowerOfGroup(const CPedGroup& group) const {
 * @notsa
 * @returns Bone transformation matrix in object space. To transform to world space ped's matrix must be used as well.
 */
-RwMatrix& CPed::GetBoneMatrix(ePedBones bone) const {
-    const auto hierarchy = GetAnimHierarchyFromClump(m_pRwClump);
-    return RpHAnimHierarchyGetMatrixArray(hierarchy)[RpHAnimIDGetIndex(hierarchy, (size_t)bone)];
+RwMatrix& CPed::GetBoneMatrix(eBoneTag bone) const {
+    const auto h = GetAnimHierarchyFromClump(m_pRwClump);
+    return RpHAnimHierarchyGetMatrixArray(h)[RpHAnimIDGetIndex(h, (size_t)bone)];
 }
 
 /*!
@@ -3360,7 +3360,7 @@ void CPed::SetModelIndex(uint32 modelIndex) {
     }
 
     // Deal with animation stuff once again
-    RpClumpGetAnimBlendClumpData(m_pRwClump)->m_PedPosition = (CVector*)&m_vecAnimMovingShiftLocal;
+    RpAnimBlendClumpGetData(m_pRwClump)->m_PedPosition = (CVector*)&m_vecAnimMovingShiftLocal;
 
     // Create hit col model
     if (!mi->m_pHitColModel) {
@@ -3515,7 +3515,7 @@ void CPed::Render() {
     // 0x5E787C
     // Render goggles object
     if (m_pGogglesObject) {
-        auto& headMat = GetBoneMatrix(ePedBones::BONE_HEAD);
+        auto& headMat = GetBoneMatrix(eBoneTag::BONE_HEAD);
 
         // Update goggle's matrix with head's
         *RwFrameGetMatrix(RpClumpGetFrame(m_pGogglesObject)) = headMat; // TODO: Is there a better way to do this?
@@ -3649,7 +3649,7 @@ bool CPed::IsInVehicleAsPassenger() const noexcept {
     return bInVehicle && m_pVehicle && m_pVehicle->m_pDriver != this;
 }
 
-CVector CPed::GetBonePosition(ePedBones boneId, bool updateSkinBones) {
+CVector CPed::GetBonePosition(eBoneTag boneId, bool updateSkinBones) {
     CVector pos;
     GetBonePosition(pos, boneId, updateSkinBones);
     return pos;
