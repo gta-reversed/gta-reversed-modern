@@ -51,8 +51,8 @@ void CGrassRenderer::DrawTriPlants(PPTriPlant* triPlants, int32 numTriPlants, Rp
     { // debug
         CFont::InitPerFrame();
         char buf[32]{};
-        sprintf_s(buf, "hook %d", numTriPlants);
-        CFont::PrintString(100, 200, buf);
+        notsa::format_to_sz(buf, "hook {}", numTriPlants);
+        CFont::PrintString(100, 200, GxtCharFromAscii(buf));
     }
 
     const auto farDist = [] { // OG: located in loop

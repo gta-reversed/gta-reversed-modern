@@ -185,7 +185,7 @@ void UIRenderer::DebugCode() {
         }
     }
     if (pad->IsStandardKeyJustPressed('6')) {
-        CMessages::AddBigMessage("PRESS ~k~~PED_ANSWER_PHONE~ TO FUCK", 1000, eMessageStyle::STYLE_BOTTOM_RIGHT);
+        CMessages::AddBigMessage("PRESS ~k~~PED_ANSWER_PHONE~ TO FUCK"_gxt, 1000, eMessageStyle::STYLE_BOTTOM_RIGHT);
     }
     if (pad->IsStandardKeyJustPressed('7')) {
         //const auto DoTest = [&](auto&& fn) {
