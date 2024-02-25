@@ -21,7 +21,6 @@ void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
     RH_ScopedInstall(NearbyPedsInSphere, 0x671FE0);
     RH_ScopedInstall(ComputeAvoidSphere, 0x672080);
     RH_ScopedInstall(ComputeDetourTarget, 0x672180);
-
     RH_ScopedVMTInstall(Clone, 0x66D050);
     RH_ScopedVMTInstall(GetTaskType, 0x66A1C0);
     RH_ScopedVMTInstall(MakeAbortable, 0x66A260);
@@ -44,17 +43,11 @@ CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering
     m_DetourTargetPt{targetPoint},
     m_bMovingTarget{bMovingTarget}
 {
-    CEntity::SafeRegisterRef(m_PedToAvoid);
 }
 
 CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering(const CTaskComplexAvoidOtherPedWhileWandering& o) :
     CTaskComplexAvoidOtherPedWhileWandering{m_PedToAvoid, m_TargetPt, m_MoveState, o.m_bMovingTarget}
 {
-}
-
-// 0x66A1D0
-CTaskComplexAvoidOtherPedWhileWandering::~CTaskComplexAvoidOtherPedWhileWandering() {
-    CEntity::SafeCleanUpRef(m_PedToAvoid);
 }
 
 // 0x6721B0
@@ -112,16 +105,15 @@ CTask* CTaskComplexAvoidOtherPedWhileWandering::ControlSubTask(CPed* ped) {
     if (!m_Timer.IsOutOfTime()) {
         return m_pSubTask;
     }
-
     m_Timer.Start(200);
 
     if (!m_bMovingTarget) {
         goto quitik_and_end;
     }
 
-    if (const auto followerTask = CTask::DynCast<CTaskComplexGangFollower>(ped->GetIntelligence()->FindTaskByType(TASK_COMPLEX_GANG_FOLLOWER))) {
-        if (followerTask->m_Leader) {
-            m_TargetPt = followerTask->m_Leader->GetPosition() + followerTask->CalculateOffsetPosition();
+    if (const auto tGangFollower = CTask::DynCast<CTaskComplexGangFollower>(ped->GetIntelligence()->FindTaskByType(TASK_COMPLEX_GANG_FOLLOWER))) {
+        if (tGangFollower->m_Leader) {
+            m_TargetPt = tGangFollower->m_Leader->GetPosition() + tGangFollower->CalculateOffsetPosition();
         }
     }
 
@@ -176,7 +168,6 @@ void CTaskComplexAvoidOtherPedWhileWandering::QuitIK(CPed* ped) {
     }
 }
 
-//! Calculate minimum bounding sphere of all peds in `accountedPeds`
 // 0x66A320
 CColSphere CTaskComplexAvoidOtherPedWhileWandering::ComputeSphere(PedsToAvoidArray& accountedPeds) {
     // Step 1: Find center
@@ -226,7 +217,7 @@ void CTaskComplexAvoidOtherPedWhileWandering::SetUpIK(CPed* ped) {
     if (!ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_IK)) {
         return;
     }
-    switch (m_pParentTask->GetTaskType()) {
+    switch (m_Parent->GetTaskType()) {
     case TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING:
     case TASK_COMPLEX_AVOID_ENTITY:
         return;
@@ -247,8 +238,6 @@ void CTaskComplexAvoidOtherPedWhileWandering::SetUpIK(CPed* ped) {
 }
 
 // 0x671FE0
-//! Check if peds in `pedsToCheck` are in the sphere, if so, null out the entry in the latter, and insert into `pedsInSphere` at the first available index
-//! @returns If any peds were in the sphere
 bool CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere(CPed* ped, const CColSphere& colSphere, PedsToAvoidArray& pedsToCheck, PedsToAvoidArray& pedsInSphere) {
     bool anyInSphere = false;
     for (auto&& [i, pedToCheck] : notsa::enumerate(pedsToCheck)) {
