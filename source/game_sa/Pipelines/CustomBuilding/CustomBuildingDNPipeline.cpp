@@ -22,26 +22,29 @@ void CCustomBuildingDNPipeline::InjectHooks() {
     RH_ScopedInstall(DestroyPipe, 0x5D5FA0);
     RH_ScopedInstall(CreateCustomObjPipe, 0x5D6750);
     RH_ScopedInstall(CustomPipeAtomicSetup, 0x5D71C0);
+    RH_ScopedInstall(SetFxEnvTexture, 0x5D9570);
 }
 
 // 0x5D72E0
 bool CCustomBuildingDNPipeline::ExtraVertColourPluginAttach() {
     if ((ms_extraVertColourPluginOffset = RpGeometryRegisterPlugin(
-        sizeof(ExtraVertColour),
-        EXTRA_VERTCOLOUR_PLUGIN_ID,
-        pluginExtraVertColourConstructorCB,
-        pluginExtraVertColourDestructorCB,
-        nullptr
-    )) == -1) {
+             sizeof(ExtraVertColour),
+             rwID_EXTRAVERCOLOURPLUGIN,
+             pluginExtraVertColourConstructorCB,
+             pluginExtraVertColourDestructorCB,
+             nullptr
+         )) == -1
+    ) {
         return false;
     }
 
     if (RpGeometryRegisterPluginStream(
-            EXTRA_VERTCOLOUR_PLUGIN_ID,
+            rwID_EXTRAVERCOLOURPLUGIN,
             pluginExtraVertColourStreamReadCB,
             pluginExtraVertColourStreamWriteCB,
             pluginExtraVertColourStreamGetSizeCB
-    ) < 0) {
+        ) == -1
+    ) {
         ms_extraVertColourPluginOffset = -1;
         return false;
     }
@@ -53,8 +56,9 @@ bool CCustomBuildingDNPipeline::ExtraVertColourPluginAttach() {
 void* CCustomBuildingDNPipeline::pluginExtraVertColourConstructorCB(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
     const auto self = GetExtraVertColourPtr(object);
 
-    self->NightColors = self->DayColors = nullptr;
-    self->Intensity = 0.f;
+    self->NightColors = nullptr;
+    self->DayColors   = nullptr;
+    self->Intensity   = 0.f;
 
     return object;
 }
@@ -64,8 +68,7 @@ void* CCustomBuildingDNPipeline::pluginExtraVertColourDestructorCB(void* object,
     const auto self = GetExtraVertColourPtr(object);
 
     for (const auto ptr : { &self->NightColors, &self->DayColors }) {
-        CMemoryMgr::Free(*ptr);
-        *ptr = nullptr;
+        CMemoryMgr::Free(std::exchange(*ptr, nullptr));
     }
 
     return object;
@@ -74,10 +77,10 @@ void* CCustomBuildingDNPipeline::pluginExtraVertColourDestructorCB(void* object,
 // 0x5D6DE0
 RwStream* CCustomBuildingDNPipeline::pluginExtraVertColourStreamReadCB(
     RwStream* stream,
-    RwInt32 binaryLength,
-    void* object,
-    RwInt32 offsetInObject,
-    RwInt32 sizeInObject
+    RwInt32   binaryLength,
+    void*     object,
+    RwInt32   offsetInObject,
+    RwInt32   sizeInObject
 ) {
     const auto self = GetExtraVertColourPtr(object);
     const auto geo  = static_cast<RpGeometry*>(object);
@@ -95,8 +98,8 @@ RwStream* CCustomBuildingDNPipeline::pluginExtraVertColourStreamReadCB(
 
         VERIFY(RwStreamRead(stream, self->NightColors, sizeof(RwRGBA) * numVerts) != 0);
 
-        if (const auto prelit = RpGeometryGetPreLightColors(geo)) {
-            rng::copy(std::span{prelit, numVerts}, self->DayColors);
+        if (const auto preLitColors = RpGeometryGetPreLightColors(geo)) {
+            rng::copy(std::span{ preLitColors, numVerts }, self->DayColors);
         }
     }
 
@@ -106,7 +109,7 @@ RwStream* CCustomBuildingDNPipeline::pluginExtraVertColourStreamReadCB(
 // 0x5D6D80
 RwStream* CCustomBuildingDNPipeline::pluginExtraVertColourStreamWriteCB(RwStream* stream, RwInt32 binaryLength, const void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
     const auto self = GetExtraVertColourPtr(object);
-    const auto geo = static_cast<const RpGeometry*>(object);
+    const auto geo  = static_cast<const RpGeometry*>(object);
 
     RwStreamWrite(stream, &self->NightColors, sizeof(self->NightColors));
     if (self->NightColors) {
@@ -165,18 +168,19 @@ bool CCustomBuildingDNPipeline::CreatePipe() {
 // 0x5D6750
 RxPipeline* CCustomBuildingDNPipeline::CreateCustomObjPipe() {
     auto pipeline = RxPipelineCreate();
-    auto nodeDefinition = RxNodeDefinitionGetD3D9AtomicAllInOne();
-    if (!pipeline)
-        return nullptr;
-
-    auto lockedPipe = RxPipelineLock(pipeline);
-    if (!lockedPipe || !RxLockedPipeAddFragment(lockedPipe, 0, nodeDefinition, 0) || !RxLockedPipeUnlock(lockedPipe)) {
-        _rxPipelineDestroy(pipeline);
+    auto nodeDef  = RxNodeDefinitionGetD3D9AtomicAllInOne();
+    if (!pipeline) {
         return nullptr;
     }
 
-    auto node = RxPipelineFindNodeByName(pipeline, nodeDefinition->name, nullptr, nullptr);
-    if (*reinterpret_cast<int32*>(0xC02C20)) { // read only
+    auto lockedPipe = RxPipelineLock(pipeline);
+    if (!lockedPipe || !RxLockedPipeAddFragment(lockedPipe, 0, nodeDef, 0) || !RxLockedPipeUnlock(lockedPipe)) {
+        RxPipelineDestroy(pipeline);
+        return nullptr;
+    }
+
+    auto node = RxPipelineFindNodeByName(pipeline, nodeDef->name, nullptr, nullptr);
+    if (*reinterpret_cast<int32*>(0xC02C20)) { // read only (0 by default)
         RxD3D9AllInOneSetInstanceCallBack(node, RxD3D9AllInOneGetInstanceCallBack(node));
         RxD3D9AllInOneSetReinstanceCallBack(node, CustomPipeInstanceCB);
     } else {
@@ -184,16 +188,17 @@ RxPipeline* CCustomBuildingDNPipeline::CreateCustomObjPipe() {
         RxD3D9AllInOneSetReinstanceCallBack(node, RxD3D9AllInOneGetReinstanceCallBack(node));
     }
     RxD3D9AllInOneSetRenderCallBack(node, CustomPipeRenderCB);
-    pipeline->pluginId = CUSTOM_BUILDING_DN_PIPELINE_ID;
+
+    pipeline->pluginId   = CUSTOM_BUILDING_DN_PIPELINE_ID;
     pipeline->pluginData = CUSTOM_BUILDING_DN_PIPELINE_ID;
+
     return pipeline;
 }
 
 // 0x5D5FA0
 void CCustomBuildingDNPipeline::DestroyPipe() {
     if (ObjPipeline) {
-        _rxPipelineDestroy(ObjPipeline);
-        ObjPipeline = nullptr;
+        RxPipelineDestroy(std::exchange(ObjPipeline, nullptr));
     }
 }
 
@@ -218,10 +223,10 @@ RpAtomic* CCustomBuildingDNPipeline::CustomPipeAtomicSetup(RpAtomic* atomic) {
 // android, unused
 uint32 CCustomBuildingDNPipeline::UsesThisPipeline(RpAtomic* atomic) {
     return atomic->pipeline
-           - ObjPipeline
-           + (atomic->pipeline == ObjPipeline) // AtomicHasNVCPipeline	0x5D5FC0
-           + ObjPipeline
-           - atomic->pipeline;
+        - ObjPipeline
+        + (atomic->pipeline == ObjPipeline) // AtomicHasNVCPipeline	0x5D5FC0
+        + ObjPipeline
+        - atomic->pipeline;
 }
 
 // 0x5D7120
@@ -236,11 +241,17 @@ void CCustomBuildingDNPipeline::CustomPipeRenderCB(RwResEntry* entry, void* obje
 
 // 0x5D6E90
 ExtraVertColour* CCustomBuildingDNPipeline::GetExtraVertColourPtr(const void* geometry) {
-    return RWPLUGINOFFSET(ExtraVertColour, geometry, ms_extraVertColourPluginOffset); 
+    return RWPLUGINOFFSET(ExtraVertColour, geometry, ms_extraVertColourPluginOffset);
 }
 
-void CCustomBuildingDNPipeline::SetFxEnvTexture(RpMaterial* material, RwTexture* texture) {
-    plugin::Call<0x5D9570, RpMaterial*, RwTexture*>(material, texture);
+// 0x5D9570
+CustomEnvMapPipeMaterialData* CCustomBuildingDNPipeline::SetFxEnvTexture(CustomEnvMapPipeMaterialData** inOutEnvMapData) {
+    if (*inOutEnvMapData == &CCustomCarEnvMapPipeline::fakeEnvMapPipeMatData) {
+        if (*inOutEnvMapData = CCustomCarEnvMapPipeline::m_gEnvMapPipeMatDataPool->New()) {
+            **inOutEnvMapData = CCustomCarEnvMapPipeline::fakeEnvMapPipeMatData;
+        }
+    }
+    return *inOutEnvMapData;
 }
 
 RwTexture* CCustomBuildingDNPipeline::GetFxEnvTexture(RpMaterial* material) {

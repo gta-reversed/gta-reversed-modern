@@ -4,7 +4,11 @@
 
 struct RxOpenGLMeshInstanceData;
 
-constexpr auto EXTRA_VERTCOLOUR_PLUGIN_ID = MAKECHUNKID(rwVENDORID_DEVELOPER, 0xF9);
+/*!
+* @brief ExtraVertColour plugin unique RW plugin ID
+*/
+#define rwID_EXTRAVERCOLOURPLUGIN MAKECHUNKID(rwVENDORID_DEVELOPER, 0xF9)
+
 constexpr auto CUSTOM_BUILDING_DN_PIPELINE_ID = 0x0;
 
 //! Extra Vertex Colour plugin data [Inside RpGeometry]
@@ -49,7 +53,7 @@ public:
     static ExtraVertColour* GetExtraVertColourPtr(const void* geometry);
 
     static RwTexture* GetFxEnvTexture(RpMaterial* material);
-    static void SetFxEnvTexture(RpMaterial* material, RwTexture* texture);
+    static CustomEnvMapPipeMaterialData* SetFxEnvTexture(CustomEnvMapPipeMaterialData** envMapData);
 
     static float GetFxEnvScaleX(RpMaterial* material);
     static float GetFxEnvScaleY(RpMaterial* material);
