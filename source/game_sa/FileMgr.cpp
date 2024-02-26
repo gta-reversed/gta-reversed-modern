@@ -246,8 +246,9 @@ size_t CFileMgr::LoadFile(const char *path, uint8 *buf, size_t size, const char 
 }
 
 // 0x538900
-FILESTREAM CFileMgr::OpenFile(const char *path, const char *mode)
-{
+FILESTREAM CFileMgr::OpenFile(const char *path, const char *mode) {
+    ZoneScoped;
+
     FILESTREAM fs{nullptr};
     if (WindowsCharset == CP_UTF8) {
         fopen_s(&fs, path, mode);

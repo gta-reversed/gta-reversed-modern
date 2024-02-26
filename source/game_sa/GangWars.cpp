@@ -82,6 +82,8 @@ bool CGangWars::Save() {
 
 // 0x443920
 void CGangWars::InitAtStartOfGame() {
+    ZoneScoped;
+
     State               = NOT_IN_WAR;
     State2              = NO_ATTACK;
     NumSpecificZones    = 0;
@@ -224,7 +226,7 @@ bool CGangWars::CreateDefendingGroup(int32 unused) {
     if (!node.IsValid())
         return false;
 
-    auto nodePos = ThePaths.GetPathNode(node)->GetNodeCoors();
+    auto nodePos = ThePaths.GetPathNode(node)->GetPosition();
     auto playerPos = FindPlayerCoors();
     if (DistanceBetweenPoints2D(playerPos, nodePos) <= 40.0f)
         return false;
@@ -283,7 +285,7 @@ bool CGangWars::CreateDefendingGroup(int32 unused) {
 
     for (auto i = 0; i < 3; i++) { // todo: magic number
         auto carNode = ThePaths.FindNthNodeClosestToCoors(PointOfAttack, 0, 100.0f, false, false, i, false, true, nullptr);
-        auto carNodePos = ThePaths.GetPathNode(carNode)->GetNodeCoors();
+        auto carNodePos = ThePaths.GetPathNode(carNode)->GetPosition();
 
         if (DistanceBetweenPoints2D(carNodePos, playerPos) <= 25.0f)
             continue;
@@ -598,7 +600,7 @@ void CGangWars::StartDefensiveGangWar() {
         }());
 
         bPlayerIsCloseby = false;
-        pZoneInfoToFightOver->Flags1 = pZoneInfoToFightOver->Flags1 & 0x9F | 0x40; // todo: flags
+        pZoneInfoToFightOver->radarMode = 2;
         pZoneInfoToFightOver->ZoneColor = CRGBA{ 255, 0, 0, 160 };
     } else {
         TimeTillNextAttack = CalculateTimeTillNextAttack();
@@ -655,7 +657,7 @@ void CGangWars::StartOffensiveGangWar() {
             Gang2 = Gang1;
 
         TellGangMembersTo(false);
-        zoneInfo->Flags1 = zoneInfo->Flags1 & 0x9F | 0x40; // todo: flags
+        pZoneInfoToFightOver->radarMode = 2;
         zoneInfo->ZoneColor = CRGBA{ 255, 0, 0, 160 };
         pDriveByCar = nullptr;
     }
@@ -731,6 +733,8 @@ void CGangWars::TellStreamingWhichGangsAreNeeded(uint32& gangsBitFlags) {
 
 // 0x446610
 void CGangWars::Update() {
+    ZoneScoped;
+
     return plugin::Call<0x446610>();
 
     if (CTheScripts::IsPlayerOnAMission() && !bIsPlayerOnAMission && NumSpecificZones == 0)

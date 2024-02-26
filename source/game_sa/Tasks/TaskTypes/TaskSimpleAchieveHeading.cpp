@@ -11,6 +11,16 @@ CTaskSimpleAchieveHeading::CTaskSimpleAchieveHeading(float fAngle, float changeR
     m_fMaxHeading     = maxHeading;
 }
 
+//! @notsa
+CTaskSimpleAchieveHeading::CTaskSimpleAchieveHeading(CPed* looker, CEntity* lookTowards, float changeRateMult, float maxHeading) :
+    CTaskSimpleAchieveHeading{
+        (lookTowards->GetPosition2D() - looker->GetPosition2D()).Heading(),
+        changeRateMult,
+        maxHeading
+    }
+{
+}
+
 // 0x668060
 bool CTaskSimpleAchieveHeading::ProcessPed(CPed* ped) {
     return plugin::CallMethodAndReturn<bool, 0x668060, CTaskSimpleAchieveHeading*, CPed*>(this, ped); // untested
@@ -72,7 +82,7 @@ void CTaskSimpleAchieveHeading::SetUpIK(CPed* ped) {
     if (m_b1 || g_ikChainMan.GetLookAtEntity(ped) || ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_IK))
         return;
 
-    if (m_pParentTask && m_pParentTask->GetTaskType() == TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING || m_pParentTask->GetTaskType() == TASK_COMPLEX_AVOID_ENTITY)
+    if (m_Parent && m_Parent->GetTaskType() == TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING || m_Parent->GetTaskType() == TASK_COMPLEX_AVOID_ENTITY)
         return;
 
     auto pos = CVector{
@@ -82,4 +92,11 @@ void CTaskSimpleAchieveHeading::SetUpIK(CPed* ped) {
     } + ped->GetPosition();
     g_ikChainMan.LookAt("TaskAchvHeading", ped, nullptr, 5000, BONE_UNKNOWN, &pos, false, 0.25f, 500, 3, false);
     m_b1 = true;
+}
+
+// unknown addr
+void CTaskSimpleAchieveHeading::SetHeading(float heading, float maxHeading, float changeRateMult) {
+    m_fAngle          = heading;
+    m_fChangeRateMult = changeRateMult;
+    m_fMaxHeading     = maxHeading;
 }

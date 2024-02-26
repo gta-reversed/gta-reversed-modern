@@ -29,11 +29,16 @@
 namespace rng = std::ranges;
 namespace rngv = std::views;
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #include "Base.h"
 #include "config.h"
 
 #include "HookSystem.h"
 #include "reversiblehooks\ReversibleHooks.h"
+
+#include <tracy/Tracy.hpp>
 
 // DirectX
 #include <d3d9.h>
@@ -62,6 +67,8 @@ namespace rngv = std::views;
 #include "game_sa\RenderWare\rw\rwtexdict.h"
 #include "game_sa\RenderWare\rw\skeleton.h"
 #include "game_sa\RenderWare\RenderWare.h"
+#include <PluginBase.h>
+#include <RenderWare.h>
 
 // oswrapper
 #include "oswrapper/oswrapper.h"
@@ -119,7 +126,7 @@ namespace rngv = std::views;
 #include "game_sa\Enums\eFontAlignment.h"
 #include "game_sa\Enums\eGameState.h"
 #include "game_sa\Enums\eModelID.h"
-#include "game_sa\Enums\ePedBones.h"
+#include "game_sa\Enums\eBoneTag.h"
 #include "game_sa\Enums\ePedModel.h"
 #include "game_sa\Enums\ePedState.h"
 #include "game_sa\Enums\eRadioID.h"
@@ -174,10 +181,13 @@ namespace rngv = std::views;
 #include "game_sa\Events\EventAttractor.h"
 #include "game_sa\Events\EventGunShot.h"
 #include "game_sa\Events\EventGunShotWhizzedBy.h"
-#include "game_sa\Events\LeaderEvents.h"
-#include "game_sa\Events\GroupEvents.h"
-#include "game_sa\Events\MentalStateEvents.h"
-#include "game_sa\Events\PotentialWalkIntoEvents.h"
+#include "Events/EventPlayerCommandToGroup.h"
+#include "Events/EventPlayerCommandToGroupAttack.h"
+#include "Events/EventPlayerCommandToGroupGather.h"
+#include "Events/EventPotentialWalkIntoPed.h"
+#include "Events/EventPotentialWalkIntoFire.h"
+#include "Events/EventPotentialWalkIntoObject.h"
+#include "Events/EventPotentialWalkIntoVehicle.h"
 #include "game_sa\Events\EventHitByWaterCannon.h"
 #include "game_sa\Events\EventInWater.h"
 #include "game_sa\Events\EventDeath.h"
@@ -185,7 +195,6 @@ namespace rngv = std::views;
 #include "game_sa\Events\EventVehicleDamage.h"
 #include "game_sa\Events\EventPedToFlee.h"
 #include "game_sa\Events\EventPedToChase.h"
-#include "game_sa\Events\EntityCollisionEvents.h"
 #include "game_sa\Events\EventEditableResponse.h"
 #include "game_sa\Events\EventSoundQuiet.h"
 #include "game_sa\Events\EventHandlerHistory.h"
@@ -409,19 +418,9 @@ namespace rngv = std::views;
 #include "game_sa\Audio\config\eAudioSlot.h"
 #include "game_sa\Audio\config\eSFX.h"
 
-#include "game_sa\Fx\CarFXRenderer.h"
-#include "game_sa\Fx\FxBox.h"
-#include "game_sa\Fx\FxEmitterBP.h"
-#include "game_sa\Fx\FxFrustumInfo.h"
-#include "game_sa\Fx\FxInfoManager.h"
+#include "game_sa\Fx\eFxInfoType.h"
 #include "game_sa\Fx\FxManager.h"
-#include "game_sa\Fx\FxMemoryPool.h"
-#include "game_sa\Fx\FxPlane.h"
-#include "game_sa\Fx\FxPrimBP.h"
 #include "game_sa\Fx\FxPrtMult.h"
-#include "game_sa\Fx\FxSphere.h"
-#include "game_sa\Fx\FxSystemBP.h"
-#include "game_sa\Fx\FxSystem.h"
 #include "game_sa\Fx\Fx.h"
 
 #include "game_sa\Models\AtomicModelInfo.h"

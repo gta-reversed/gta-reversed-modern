@@ -5249,6 +5249,12 @@ RwStream* _rwStreamInitialize(RwStream* stream, RwBool rwOwned, RwStreamType typ
 RwStream* RwStreamOpen(RwStreamType type, RwStreamAccessType accessType, const void* data); // 0x7ECEF0
 RwBool RwStreamClose(RwStream* stream, void* data); // 0x7ECE20
 RwUInt32 RwStreamRead(RwStream* stream, void* buffer, RwUInt32 length); // 0x7EC9D0
+template<typename T>
+T RwStreamRead(RwStream* stream, size_t size = sizeof(T)) {
+    T data;
+    RwStreamRead(stream, &data, size);
+    return data;
+}
 RwStream* RwStreamWrite(RwStream* stream, const void* buffer, RwUInt32 length); // 0x7ECB30
 RwStream* RwStreamSkip(RwStream* stream, RwUInt32 offset); // 0x7ECD00
 RwBool _rwStringOpen(); // 0x80A240
@@ -5329,7 +5335,7 @@ RwSubSystemInfo* RwEngineGetSubSystemInfo(RwSubSystemInfo* subSystemInfo, RwInt3
 RwInt32 RwEngineGetCurrentSubSystem(); // 0x7F2C60
 RwBool RwEngineSetSubSystem(RwInt32 subSystemIndex); // 0x7F2C90
 RwInt32 RwEngineGetNumVideoModes(); // 0x7F2CC0
-RwVideoMode* RwEngineGetVideoModeInfo(RwVideoMode* modeinfo, RwInt32 modeIndex); // 0x7F2CF0
+RwVideoMode RwEngineGetVideoModeInfo(RwInt32 modeIndex); // 0x7F2CF0
 RwInt32 RwEngineGetCurrentVideoMode(); // 0x7F2D20
 RwBool RwEngineSetVideoMode(RwInt32 modeIndex); // 0x7F2D50
 RwInt32 RwEngineGetTextureMemorySize(); // 0x7F2D80

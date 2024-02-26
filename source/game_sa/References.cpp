@@ -17,6 +17,8 @@ void CReferences::InjectHooks() {
 
 // 0x5719B0
 void CReferences::Init() {
+    ZoneScoped;
+
     pEmptyList = aRefs;
 
     // todo: do better

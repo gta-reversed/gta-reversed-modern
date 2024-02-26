@@ -15,7 +15,9 @@
 #include <TaskTypes/TaskComplexWanderStandard.h>
 #include <TaskTypes/TaskComplexTurnToFaceEntityOrCoord.h>
 #include <TaskTypes/TaskComplexKillPedOnFoot.h>
-//#include <TaskTypes/TaskComplexUseEffect.h>
+#include <TaskTypes/TaskComplexEnterCarAsDriver.h>
+#include <TaskTypes/TaskComplexEnterCarAsPassenger.h>
+#include <TaskTypes/TaskSimpleCarSetPedOut.h>
 
 #include <Attractors/PedAttractorPedPlacer.h>
 
@@ -23,10 +25,8 @@
 #include <World.h>
 #include <EntryExitManager.h>
 #include <TimeCycle.h>
-#include <ePedBones.h>
+#include <eBoneTag.h>
 #include <SearchLight.h>
-#include <TaskComplexEnterCarAsDriver.h>
-#include <TaskSimpleCarSetPedOut.h>
 
 using namespace notsa::script;
 /*!
@@ -158,7 +158,7 @@ auto SetCharAreaVisible(CPed& ped, eAreaCodes area) {
     CTimeCycle::StopExtraColour(0);
 }
 
-auto AttachFxSystemToCharBone(tScriptEffectSystem& fx, CPed& ped, ePedBones bone) {
+auto AttachFxSystemToCharBone(tScriptEffectSystem& fx, CPed& ped, eBoneTag bone) {
     fx.m_pFxSystem->AttachToBone(&ped, bone);
 }
 
@@ -433,11 +433,11 @@ auto LocateCharAnyMeansObject2D(CRunningScript& S, CPed& ped, CObject& obj, CVec
     return LocateCharEntity2D(S, ped, obj, radius, highlightArea, false, false);
 }
 
-auto LocateCharOnFootObject2D(CRunningScript& S, CPed& ped, CVehicle& obj, CVector2D radius, bool highlightArea) {
+auto LocateCharOnFootObject2D(CRunningScript& S, CPed& ped, CObject& obj, CVector2D radius, bool highlightArea) {
     return LocateCharEntity2D(S, ped, obj, radius, highlightArea, false, true);
 }
 
-auto LocateCharInCarObject2D(CRunningScript& S, CPed& ped, CVehicle& obj, CVector2D radius, bool highlightArea) {
+auto LocateCharInCarObject2D(CRunningScript& S, CPed& ped, CObject& obj, CVector2D radius, bool highlightArea) {
     return LocateCharEntity2D(S, ped, obj, radius, highlightArea, true, false);
 }
 
@@ -677,7 +677,7 @@ auto SetCharOnlyDamagedByPlayer(CPed& ped, bool enabled) {
 auto GetClosestCharNode(CVector pos) -> CVector {
     CWorld::PutToGroundIfTooLow(pos);
     if (const auto node = ThePaths.FindNodeClosestToCoors(pos)) {
-        return ThePaths.GetPathNode(node)->GetNodeCoors();
+        return ThePaths.GetPathNode(node)->GetPosition();
     }
     return {}; // Can't find anything nearby
 }
@@ -705,7 +705,7 @@ auto IsCurrentCharWeapon(CPed& ped, eWeaponType wep) {
     if (wep == WEAPON_ANYMELEE && ped.GetActiveWeapon().IsTypeMelee()) {
         return true;
     }
-    return ped.GetActiveWeapon().m_nType == wep;
+    return ped.GetActiveWeapon().m_Type == wep;
 }
 
 // GET_RANDOM_CHAR_IN_ZONE
@@ -778,15 +778,16 @@ auto ExplodeCharHead(CPed& ped) {
         false,
         (bool)(ped.bInVehicle)
     };
+    CPedDamageResponseCalculator dmgCalc{
+        nullptr,
+        1000.f,
+        WEAPON_SNIPERRIFLE,
+        PED_PIECE_HEAD,
+        false
+    };
     dmgEvent.ComputeDamageResponseIfAffectsPed(
         &ped,
-        CPedDamageResponseCalculator{
-            nullptr,
-            1000.f,
-            WEAPON_SNIPERRIFLE,
-            PED_PIECE_HEAD,
-            false
-        },
+        dmgCalc,
         true
     );
     ped.GetEventGroup().Add(dmgEvent);
@@ -814,7 +815,7 @@ auto RemoveCharElegantly(CRunningScript& S, CPed* ped) {
             ped->SetCharCreatedBy(PED_GAME);
             if (const auto grp = ped->GetGroup()) {
                 if (grp->GetMembership().IsFollower(ped)) { // TODO: Most likely inlined, this check makes no sense otherwise
-                    grp->GetMembership().RemoveMember(*ped);
+                    grp->GetMembership().RemoveMember(ped);
                 }
             }
             CPopulation::ms_nTotalMissionPeds--;
@@ -882,8 +883,8 @@ auto SetCharMoney(CPed& ped, int16 money) {
 // GET_AMMO_IN_CHAR_WEAPON
 auto GetAmmoInCharWeapon(CPed& ped, eWeaponType wtype) -> uint32 {
     for (auto& wep : ped.m_aWeapons) { 
-        if (wep.m_nType == wtype) { // Originally they continued looping, but that doesn't make sense (A ped can't have the same weapon _twice_)
-            return wep.m_nTotalAmmo;
+        if (wep.m_Type == wtype) { // Originally they continued looping, but that doesn't make sense (A ped can't have the same weapon _twice_)
+            return wep.m_TotalAmmo;
         }
     }
     return 0;
@@ -947,7 +948,7 @@ auto ClearCharLastWeaponDamage(CPed& ped) {
 
 // GET_CURRENT_CHAR_WEAPON
 auto GetCurrentCharWeapon(CPed& ped) {
-    return ped.GetActiveWeapon().m_nType;
+    return ped.GetActiveWeapon().m_Type;
 }
 
 // CAN_CHAR_SEE_DEAD_CHAR
@@ -976,7 +977,7 @@ auto RemoveAllCharWeapons(CPed& ped) {
 
 // HAS_CHAR_GOT_WEAPON
 auto HasCharGotWeapon(CPed& ped, eWeaponType wtype) {
-    return notsa::contains(ped.m_aWeapons, wtype, [](CWeapon& w) { return w.m_nType; });
+    return notsa::contains(ped.m_aWeapons, wtype, [](CWeapon& w) { return w.m_Type; });
 }
 
 // GET_DEAD_CHAR_PICKUP_COORDS
@@ -1018,12 +1019,12 @@ auto IsCharInWater(CPed* ped) {
 // GET_CHAR_WEAPON_IN_SLOT
 auto GetCharWeaponInSlot(CPed& ped, eWeaponSlot slut) {
     const auto& wep = ped.GetWeaponInSlot(slut);
-    return notsa::script::return_multiple(wep.m_nType, wep.m_nTotalAmmo, CPickups::ModelForWeapon(wep.m_nType));
+    return notsa::script::return_multiple(wep.m_Type, wep.m_TotalAmmo, CPickups::ModelForWeapon(wep.m_Type));
 }
 
 // GET_OFFSET_FROM_CHAR_IN_WORLD_COORDS
 auto GetOffsetFromCharInWorldCoords(CPed& ped, CVector offset) {
-    return ped.GetMatrix() * offset;
+    return ped.GetMatrix().TransformPoint(offset);
 }
 
 // HAS_CHAR_BEEN_PHOTOGRAPHED
@@ -1209,14 +1210,14 @@ auto IsCharPlayingAnim(CPed& ped, const char* animName) {
 // SET_CHAR_ANIM_PLAYING_FLAG
 auto SetCharAnimPlayingFlag(CPed& ped, const char* animName, bool started) {
     if (const auto anim = RpAnimBlendClumpGetAssociation(ped.m_pRwClump, animName)) {
-        anim->SetFlag(ANIMATION_STARTED, started);
+        anim->SetFlag(ANIMATION_IS_PLAYING, started);
     }
 }
 
 // GET_CHAR_ANIM_CURRENT_TIME
 auto GetCharAnimCurrentTime(CPed& ped, const char* animName) {
     if (const auto anim = RpAnimBlendClumpGetAssociation(ped.m_pRwClump, animName)) {
-        return anim->m_fCurrentTime / anim->m_pHierarchy->m_fTotalTime;
+        return anim->m_CurrentTime / anim->m_BlendHier->m_fTotalTime;
     }
     return 0.f;
 }
@@ -1224,14 +1225,14 @@ auto GetCharAnimCurrentTime(CPed& ped, const char* animName) {
 // SET_CHAR_ANIM_CURRENT_TIME
 auto SetCharAnimCurrentTime(CPed& ped, const char* animName, float progress) {
     if (const auto anim = RpAnimBlendClumpGetAssociation(ped.m_pRwClump, animName)) {
-        anim->SetCurrentTime(progress * anim->m_pHierarchy->m_fTotalTime);
+        anim->SetCurrentTime(progress * anim->m_BlendHier->m_fTotalTime);
     }
 }
 
 // GET_CHAR_ANIM_TOTAL_TIME (In seconds)
 auto GetCharAnimTotalTime(CPed& ped, const char* animName) {
     if (const auto anim = RpAnimBlendClumpGetAssociation(ped.m_pRwClump, animName)) {
-        return anim->m_pHierarchy->m_fTotalTime * 1000.f;
+        return anim->m_BlendHier->m_fTotalTime * 1000.f;
     }
     return 0.f;
 }
@@ -1311,7 +1312,7 @@ auto GetCharModel(CPed& ped) {
 // SET_CURRENT_CHAR_WEAPON
 void SetCurrentCharWeapon(CPed& ped, eWeaponType weaponType) {
     for (auto&& [slot, weapon] : notsa::enumerate(ped.m_aWeapons)) {
-        if (weapon.m_nType != weaponType)
+        if (weapon.m_Type != weaponType)
             continue;
 
         if (ped.IsPlayer()) {
@@ -1344,7 +1345,7 @@ bool IsCharInSearchlight(uint32 searchLightIdx, CPed& ped) {
 // REMOVE_CHAR_FROM_GROUP
 void RemoveCharFromGroup(CPed& ped) {
     if (auto pedGroup = ped.GetGroup(); pedGroup && !pedGroup->GetMembership().IsLeader(&ped)) {
-        pedGroup->GetMembership().RemoveMember(ped);
+        pedGroup->GetMembership().RemoveMember(&ped);
         pedGroup->Process();
     }
 }
@@ -1360,19 +1361,13 @@ CVehicle* GetCarCharIsUsing(CPed& ped) {
     if (ped.bInVehicle) {
         return ped.m_pVehicle;
     }
-
-    auto task = reinterpret_cast<CTaskComplexEnterCar*>([&ped]() -> CTask* {
-        if (auto driver = ped.GetIntelligence()->FindTaskByType(TASK_COMPLEX_ENTER_CAR_AS_DRIVER)) {
-            return driver;
-        }
-        if (auto passenger = ped.GetIntelligence()->FindTaskByType(TASK_COMPLEX_ENTER_CAR_AS_PASSENGER)) {
-            return passenger;
-        }
-
-        return nullptr;
-    }());
-
-    return task ? task->m_car : nullptr;
+    if (const auto task = ped.GetTaskManager().Find<CTaskComplexEnterCarAsDriver>(false)) {
+        return task->GetTargetCar();
+    }
+    if (const auto task = ped.GetTaskManager().Find<CTaskComplexEnterCarAsPassenger>(false)) {
+        return task->GetTargetCar();
+    }
+    return nullptr;
 }
 
 // ENABLE_CHAR_SPEECH

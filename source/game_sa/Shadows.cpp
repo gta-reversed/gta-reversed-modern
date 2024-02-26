@@ -138,6 +138,8 @@ void CShadows::AddPermanentShadow(uint8 type, RwTexture* texture, CVector* posn,
 
 // 0x70C950
 void CShadows::UpdatePermanentShadows() {
+    ZoneScoped;
+
     ((void(__cdecl*)())0x70C950)();
 }
 
@@ -352,7 +354,7 @@ uint16 CalculateShadowStrength(float currDist, float maxDist, uint16 maxStrength
 // 0x707B40
 void CShadows::StoreShadowForPedObject(CPed* ped, float displacementX, float displacementY, float frontX, float frontY, float sideX, float sideY) {
     // Okay, so.
-    // This function is called from `CCutsceneObject::PreRender_Reversed`
+    // This function is called from `CCutsceneObject::PreRender`
     // And you might ask "what the fuck, an object is not a ped!!"
     // well, in R* world it is.
     // it has bones (as anything can have bones actually, that's a known fact)
@@ -361,7 +363,7 @@ void CShadows::StoreShadowForPedObject(CPed* ped, float displacementX, float dis
     // But we really should fix this in a sensible way in the future.
     assert(ped->IsPed() || ped->IsObject());
 
-    const auto  bonePos           = ped->GetBonePosition(BONE_NORMAL);
+    const auto  bonePos           = ped->GetBonePosition(BONE_ROOT);
     const auto& camPos            = TheCamera.GetPosition();
     const auto  boneToCamDist2DSq = (bonePos - camPos).SquaredMagnitude2D();
 
@@ -405,7 +407,7 @@ void CShadows::StoreRealTimeShadow(CPhysical* physical, float displacementX, flo
     }
     const auto& camPos = TheCamera.GetPosition();
     const auto  shdwPos = physical->IsPed()
-        ? physical->AsPed()->GetBonePosition(BONE_NORMAL)
+        ? physical->AsPed()->GetBonePosition(BONE_ROOT)
         : physical->GetPosition();
     const auto shdwToCamDist2DSq = (shdwPos - camPos).SquaredMagnitude2D();
 

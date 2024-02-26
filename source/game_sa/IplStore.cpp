@@ -282,6 +282,8 @@ void CIplStore::IncludeEntity(int32 iplSlotIndex, CEntity* entity) {
  * @brief Load remaining IPL defs (using the streamer)
  */
 void CIplStore::LoadAllRemainingIpls() {
+    ZoneScoped;
+
     // Can't use `ms_pPool->GetAllValid()` here, because we must ignore the first slot (whenever it's valid or not).
     for (auto slot = 1 /*skip 1st*/; slot < TOTAL_IPL_MODEL_IDS; slot++) {
         auto def = ms_pPool->GetAt(slot);
@@ -437,10 +439,7 @@ bool CIplStore::LoadIplBoundingBox(int32 iplSlotIndex, char* data, int32 dataSiz
         obj->Add(); // Add it to the world
 
         IncludeEntity(iplSlotIndex, obj);
-
-        CRect rect;
-        obj->GetBoundRect(&rect);
-        def.bb.Restrict(rect);
+        def.bb.Restrict(obj->GetBoundRect());
     };
 
     if (strncmp((char*)data, "bnry", 4u) != 0) { // IPL in text format

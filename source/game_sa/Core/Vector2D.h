@@ -7,15 +7,15 @@
 #pragma once
 
 #include <span>
-
-#include "RenderWare.h"
+#include <rwplcore.h>
+#include <Base.h>
 
 class CVector;
 
 class CVector2D : public RwV2d {
 public:
     constexpr CVector2D() = default;
-    constexpr CVector2D(float XY) : RwV2d{XY, XY} {}
+    constexpr explicit CVector2D(float XY) : RwV2d{XY, XY} {}
     constexpr CVector2D(float X, float Y) : RwV2d{ X, Y } {}
     constexpr CVector2D(const RwV2d& vec2d)     { x = vec2d.x; y = vec2d.y; }
     constexpr CVector2D(const CVector2D& vec2d) { x = vec2d.x; y = vec2d.y; }
@@ -95,6 +95,11 @@ public:
         y *= multiplier;
     }
 
+    inline void operator*=(CVector2D multiplier) {
+        x *= multiplier.x;
+        y *= multiplier.y;
+    }
+
     inline void operator/=(float divisor) {
         x /= divisor;
         y /= divisor;
@@ -144,11 +149,11 @@ public:
     //! Get vector perpendicular to `*this` on the right side (Same direction `*this` rotated by -90)
     //! Also see `GetPerpLeft` and `RotatedBy`
     //! (This sometimes is also called a 2D cross product https://stackoverflow.com/questions/243945 )
-    CVector2D GetPerpRight() const;
+    CVector2D GetPerpRight() const { return { y, -x }; }
 
     //! Get vector perpendicular to `*this` on the left side (Same direction `*this` rotated by 90)
     //! Also see `GetPerpRight` and `RotatedBy`
-    CVector2D GetPerpLeft() const;
+    CVector2D GetPerpLeft() const { return { -y, x }; }
 
     /*!
     * @notsa

@@ -89,7 +89,7 @@ public:
     int8      m_nRadioVolume;
     bool      m_bRadioEq;
 
-    int8      m_nRadioStation;
+    eRadioID  m_nRadioStation;
     char      field_53;
     int32     m_nCurrentScreenItem;
     bool      m_bQuitGameNoDVD; // CMenuManager::WaitForUserCD 0x57C5E0
@@ -108,8 +108,8 @@ public:
     CVector2D m_vMousePos;  // Red marker position (world coordinates)
     bool      m_bMapLoaded;
 
-    int32     m_nTitleLanguage;
-    int32     m_nTextLanguage;
+    int32     m_nTitleLanguage; // Value is PRIMARYLANGID(GetSystemDefaultLCID())
+    int32     m_nTextLanguage; // TODO: Change to `eLanguage`
     eLanguage m_nPrefsLanguage;
     eLanguage m_nPreviousLanguage;
     int32     m_nLanguageF0x88;

@@ -27,6 +27,8 @@ void CCover::InjectHooks() {
 
 // 0x698710
 void CCover::Init() {
+    ZoneScoped;
+
     plugin::Call<0x698710>();
 }
 
@@ -51,6 +53,8 @@ bool CCover::ShouldThisBuildingHaveItsCoverPointsCreated(CBuilding* building) {
 
 // 0x6997E0
 void CCover::Update() {
+    ZoneScoped;
+
     plugin::Call<0x6997E0>();
 }
 
@@ -103,11 +107,11 @@ void CCover::FindCoverPointsForThisBuilding(CBuilding* building) {
             continue;
 
         auto vecDir = CVector(effect->coverPoint.m_vecDirection.x, effect->coverPoint.m_vecDirection.y, 0.0F);
-        const auto vedTransformed = Multiply3x3(building->GetMatrix(), vecDir);
+        const auto vedTransformed = building->GetMatrix().TransformVector(vecDir);
 
         const auto fTwoPiToChar = 256.0F / TWO_PI;
         const auto ucAngle = static_cast<uint8>(atan2(vedTransformed.x, vedTransformed.y) * fTwoPiToChar);
-        auto vecPoint = building->GetMatrix() * effect->m_pos;
+        auto vecPoint = building->GetMatrix().TransformPoint(effect->m_pos);
         CCover::AddCoverPoint(3, building, &vecPoint, effect->coverPoint.m_nType, ucAngle);
     }
 }

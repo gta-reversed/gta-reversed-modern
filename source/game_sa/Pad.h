@@ -106,7 +106,7 @@ public:
     void Update(int32 pad);
     static void UpdatePads();
     void UpdateMouse();
-    static void ProcessPad(bool numPad);
+    static void ProcessPad(int numPad);
     void ProcessPCSpecificStuff();
     CControllerState& ReconcileTwoControllersInput(CControllerState& out, const CControllerState& controllerA, const CControllerState& controllerB);
 

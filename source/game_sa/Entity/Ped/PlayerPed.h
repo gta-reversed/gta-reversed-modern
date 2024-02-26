@@ -33,8 +33,6 @@ public:
 
     CPlayerPed(int32 playerId, bool bGroupCreated);
 
-    bool Load_Reversed();
-    bool Save_Reversed();
 
     void ProcessControl() override;
     bool Load() override;

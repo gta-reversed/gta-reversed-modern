@@ -16,7 +16,7 @@ void CEntryExitManager::InjectHooks() {
     RH_ScopedInstall(FindNearestDoor, 0x43F630);
     RH_ScopedInstall(FindNearestEntryExit, 0x43F4B0);
     RH_ScopedInstall(EnableBurglaryHouses, 0x43F180);
-    RH_ScopedInstall(GetPositionRelativeToOutsideWorld, 0x43F150);
+    RH_ScopedInstall(GetPositionRelativeToOutsideWorld, 0x43F150, {.locked = true});
     RH_ScopedInstall(PostEntryExitsCreation, 0x43F0A0);
     RH_ScopedInstall(LinkEntryExit, 0x43F050);
     RH_ScopedInstall(GetEntryExitIndex, 0x43EFD0);
@@ -28,6 +28,8 @@ void CEntryExitManager::InjectHooks() {
 
 // 0x43F880
 void CEntryExitManager::Init() {
+    ZoneScoped;
+
     mp_QuadTree = new CQuadTreeNode(WORLD_BOUNDS, 4);
 
     ms_exitEnterState = 0;
@@ -80,6 +82,8 @@ void CEntryExitManager::ShutdownForRestart() {
 
 // 0x440D10
 void CEntryExitManager::Update() {
+    ZoneScoped;
+
     const bool bDontShowMarkers =
          CCutsceneMgr::ms_cutsceneProcessing
       || CPad::GetPad()->DisablePlayerControls

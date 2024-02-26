@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include "app/app_debug.h"
+
 #define PLUGIN_API
 
 #define VALIDATE_SIZE(struc, size) static_assert(sizeof(struc) == size, "Invalid structure size of " #struc)
@@ -63,7 +65,13 @@ template<typename... Ts>
 [[noreturn]] static void unreachable(std::string_view method, std::string_view file, unsigned line, std::string_view fmt = "", Ts&&... fmtArgs) {
     const auto userDetails = std::vformat(fmt, std::make_format_args(std::forward<Ts>(fmtArgs)...));
     const auto mbMsg = std::format("File: {}\nIn: {}:{}\n\nDetails:\n{}", fs::relative(file, SOURCE_PATH).string(), method, line, userDetails.empty() ? "<None provided>" : userDetails.c_str());
-        
+
+    spdlog::error(mbMsg);
+    spdlog::dump_backtrace();
+    spdlog::apply_all([](std::shared_ptr<spdlog::logger> l) { // Flush all sinks immidiately
+        l->flush();
+    });
+
     const auto result = MessageBox(
         NULL,
         mbMsg.c_str(),
@@ -89,7 +97,7 @@ template<typename... Ts>
 // TODO/NOTE: We might need to manually suppress warnings here?
 // Since all the code here is perfectly valid, so the compiler might
 // still complain that, for example, the function doesn't return on all code paths, etc
-#define NOTSA_UNREACHABLE(...) do { notsa::unreachable(__FUNCTION__, __FILE__, __LINE__ __VA_OPT__(,) ##__VA_ARGS__); } while (false)
+#define NOTSA_UNREACHABLE(...) do { notsa::unreachable("__FUNCTION__", __FILE__, __LINE__ __VA_OPT__(,) ##__VA_ARGS__); } while (false)
 #else 
 #define NOTSA_UNREACHABLE(...) UNREACHABLE_INTRINSIC()
 #endif
@@ -130,9 +138,23 @@ template<typename... Ts>
 * @tparam T    The type of the variable
 * @param Addr  The address of it
 */
+template<typename T>
+T& StaticRef(uintptr addr) {
+    return *reinterpret_cast<T*>(addr);
+}
+
+// TODO: Replace this with the one above
 template<typename T, uintptr Addr>
 T& StaticRef() {
-    return *reinterpret_cast<T*>(Addr);
+    return StaticRef<T>(Addr);
+}
+
+template<typename T>
+void SAFE_RELEASE(T*& ptr) { // DirectX stuff `Release()`
+    if (ptr) {
+        ptr->Release();
+        ptr = nullptr;
+    }
 }
 
 #define _IGNORED_

@@ -8,7 +8,10 @@ project "gta_reversed"
     pchsource "StdInc.cpp"
  
     filter {"options:allow-script-cmd-hooks"}
-        defines { "ENABLE_SCRIPT_COMMAND_HOOKS" }   
+        defines { "ENABLE_SCRIPT_COMMAND_HOOKS" }
+
+    filter "configurations:Debug*"
+        floatingpoint "strict"
 
     filter {} -- Clear filter
 
@@ -33,14 +36,25 @@ project "gta_reversed"
         "../libs/imgui", 
         "../libs/imgui/backends", 
         "../libs/imgui/misc/cpp",
-        "../libs/dxsdk"
+        "../libs/dxsdk",
+        "../libs/spdlog/include",
+        "../libs/tracy/public"
     }
     
     defines { 
         "NOMINMAX", 
         "USE_GTASA_ALLOCATOR", 
         "EXTRA_DEBUG_FEATURES", 
-        "FIX_BUGS" 
+        "FIX_BUGS",
+        "_CRT_SECURE_NO_WARNINGS",
+
+        "TRACY_ENABLE",
+        "TRACY_ON_DEMAND",
+        "TRACY_CALLSTACK",
+
+        "SPDLOG_USE_STD_FORMAT",
+
+        "SA_SKINNED_PEDS"
     }
 
     links { 
@@ -48,15 +62,26 @@ project "gta_reversed"
         "vorbis", 
         "vorbisenc", 
         "vorbisfile", 
-        "imgui" 
+        "imgui",
+        "spdlog",
+        "imgui",
+        "tracy",
+        "ddraw.lib",
+        "Winmm.lib",
+        "dxguid.lib",
+        "strmiids.lib",
+        "dsound.lib",
+        "d3d9.lib",
+        "dbghelp" 
     }
 
     libdirs { 
+        "../libs",
         "../%{cfg.targetdir}/ogg.lib", 
         "../%{cfg.targetdir}/vorbis.lib", 
         "../%{cfg.targetdir}/vorbisfile.lib", 
         "../%{cfg.targetdir}/vorbisenc.lib",  
-        "../%{cfg.targetdir}/imgui.lib", 
+        "../%{cfg.targetdir}/imgui.lib",
         "../libs/dxsdk/d3d9.lib", 
-        "../libs/dxsdk/dinput.lib"
+        "../libs/dxsdk/dinput.lib",
     }

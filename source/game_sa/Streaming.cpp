@@ -176,24 +176,24 @@ CLink<CEntity*>* CStreaming::AddEntity(CEntity* entity) {
     case ENTITY_TYPE_PED:
     case ENTITY_TYPE_VEHICLE:
         return nullptr;
-    default:
-        break;
     }
 
-    CLink<CEntity*>* link = ms_rwObjectInstances.Insert(entity);
-    if (!link) {
-        CLink<CEntity*>* previousLink = ms_rwObjectInstances.usedListTail.prev;
-        for (; previousLink != &ms_rwObjectInstances.usedListHead; previousLink = previousLink->prev) {
-            CEntity* pentity = previousLink->data;
-            if (!pentity->m_bImBeingRendered && !pentity->m_bStreamingDontDelete)
+    auto l = ms_rwObjectInstances.Insert(entity);
+    if (!l) { // No more entries left
+        // Okay, try deleting something now
+        for (auto it = ms_rwObjectInstances.GetTailLink().prev; it != &ms_rwObjectInstances.GetHeadLink(); it = it->prev) {
+            const auto e = it->data;
+
+            if (!e->m_bImBeingRendered && !e->m_bStreamingDontDelete) {
+                e->DeleteRwObject();
                 break;
+            }
         }
-        if (previousLink == &ms_rwObjectInstances.usedListHead)
-            return ms_rwObjectInstances.Insert(entity);
-        previousLink->data->DeleteRwObject();
-        link = ms_rwObjectInstances.Insert(entity);
+
+        // Try inserting again, should succeed now because we've deleted something (Ideally anyways)
+        VERIFY(l = ms_rwObjectInstances.Insert(entity));
     }
-    return link;
+    return l;
 }
 
 // Returns file index
@@ -384,6 +384,8 @@ int32 CStreaming::GetDiscInDrive() {
 
 // 0x408E20
 int32 CStreaming::GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority) {
+    ZoneScoped;
+
     uint32 nextRequestModelPos    = UINT32_MAX;
     uint32 firstRequestModelCdPos = UINT32_MAX;
     int32  firstRequestModelId    = MODEL_INVALID;
@@ -496,7 +498,7 @@ bool CStreaming::ConvertBufferToObject(uint8* fileBuffer, int32 modelId) {
         const TxdDef* txdDef = CTxdStore::ms_pTxdPool->GetAt(nTXDIdx);
         // todo:: add FIX_BUGS
         if ((txdDef && !txdDef->m_pRwDictionary) || /*check TXD (if any)*/
-            animFileIndex != -1 && !CAnimManager::ms_aAnimBlocks[animFileIndex].bLoaded /*check anim (if any)*/
+            animFileIndex != -1 && !CAnimManager::GetAnimBlocks()[animFileIndex].IsLoaded /*check anim (if any)*/
         ) {
             // TXD or IFP not loaded, re-request model. (I don't think this is supposed to happen at all)
             RemoveModel(modelId);
@@ -717,8 +719,9 @@ void CStreaming::DeleteAllRwObjects() {
             next = it->GetNext();
 
             auto* entity = reinterpret_cast<CEntity*>(it->m_item);
-            if (!entity->m_bImBeingRendered && !entity->m_bStreamingDontDelete)
+            if (!entity->m_bImBeingRendered && !entity->m_bStreamingDontDelete) {
                 entity->DeleteRwObject();
+            }
         }
     };
 
@@ -744,35 +747,37 @@ bool CStreaming::DeleteLeastUsedEntityRwObject(bool bNotOnScreen, int32 streamin
     const float fCameraFarPlane = RwCameraGetFarClipPlane(TheCamera.m_pRwCamera);
     CPlayerPed* player = FindPlayerPed();
 
-    for (auto prevLink = ms_rwObjectInstances.usedListTail.prev; prevLink != &ms_rwObjectInstances.usedListHead;) {
-        CEntity* entity = prevLink->data;
-        prevLink = prevLink->prev; // Has to be set here, because at the end of the loop it might be invalid.
+    for (auto it = ms_rwObjectInstances.GetTail(); it != &ms_rwObjectInstances.GetHeadLink();) {
+        const auto e = it->data;
+        it = it->prev; // Has to be set here, because at the end of the loop it might be invalid.
 
-        if (entity->m_bImBeingRendered || entity->m_bStreamingDontDelete)
+        if (e->m_bImBeingRendered || e->m_bStreamingDontDelete) {
             continue;
+        }
 
-        const auto mi = CModelInfo::GetModelInfo(entity->m_nModelIndex);
+        const auto mi = CModelInfo::GetModelInfo(e->m_nModelIndex);
+
         float drawDistanceRadius = TheCamera.m_fLODDistMultiplier * mi->m_fDrawDistance;
-        if (entity->m_bIsBIGBuilding)
+        if (e->m_bIsBIGBuilding)
             drawDistanceRadius *= CRenderer::ms_lowLodDistScale;
 
-        const CVector entityPos = entity->m_pLod ? entity->m_pLod->GetPosition() : entity->GetPosition();
+        const CVector entityPos = e->m_pLod ? e->m_pLod->GetPosition() : e->GetPosition();
         const float fEntityToCamDist = DistanceBetweenPoints(TheCamera.GetPosition(), entityPos);
-        CEntity* const pEntityLastLod = entity->FindLastLOD();
+        CEntity* const pEntityLastLod = e->FindLastLOD();
 
         const float fModelRadius = mi->GetColModel()->GetBoundRadius();
         if (ms_bLoadingScene
             || bNotOnScreen && !pEntityLastLod->GetIsOnScreen()
-            || !entity->IsInCurrentAreaOrBarberShopInterior()
+            || !e->IsInCurrentAreaOrBarberShopInterior()
             || drawDistanceRadius + 50.0f < fEntityToCamDist
             || fModelRadius + fCameraFarPlane < fEntityToCamDist
         ) {
-            CStreamingInfo& streamingInfo = GetInfo(entity->m_nModelIndex);
+            CStreamingInfo& streamingInfo = GetInfo(e->m_nModelIndex);
             if (streamingInfo.InList() && !streamingInfo.AreAnyFlagsSetOutOf(streamingFlags)) {
-                if (!player || player->bInVehicle || player->m_pContactEntity != entity) {
-                    entity->DeleteRwObject();
-                    if (!CModelInfo::GetModelInfo(entity->m_nModelIndex)->m_nRefCount) {
-                        RemoveModel(entity->m_nModelIndex);
+                if (!player || player->bInVehicle || player->m_pContactEntity != e) {
+                    e->DeleteRwObject();
+                    if (!CModelInfo::GetModelInfo(e->m_nModelIndex)->m_nRefCount) {
+                        RemoveModel(e->m_nModelIndex);
                         return true;
                     }
                 }
@@ -1089,6 +1094,8 @@ bool CStreaming::Save() {
 // streaming channel within CStreaming::ms_channel which is 1 (second streaming channel).
 // 0x40EA10
 void CStreaming::LoadAllRequestedModels(bool bOnlyPriorityRequests) {
+    ZoneScoped;
+
     if (m_bLoadingAllRequestedModels) {
         return;
     }
@@ -1154,8 +1161,10 @@ void CStreaming::LoadAllRequestedModels(bool bOnlyPriorityRequests) {
 // Load a directory (aka img file)
 // This will set the `CdSize, CdPosn, m_nImgId, m_nNextIndexOnCd` member variables of
 // each model present in the file (according to file name)
-void CStreaming::LoadCdDirectory(const char* filename, int32 archiveId)
-{
+void CStreaming::LoadCdDirectory(const char* filename, int32 archiveId) {
+    ZoneScoped;
+    ZoneText(filename, strlen(filename));
+
     auto* imgFile = CFileMgr::OpenFile(filename, "rb");
     if (!imgFile)
         return;
@@ -1389,7 +1398,7 @@ void CStreaming::PossiblyStreamCarOutAfterCreation(int32 modelId) {
 void CStreaming::RenderEntity(CLink<CEntity*>* streamingLink) {
     if (streamingLink && streamingLink != ms_renderEntityLink) {
         streamingLink->Remove();
-        ms_renderEntityLink->Insert(streamingLink);
+        streamingLink->Insert(ms_renderEntityLink);
         ms_renderEntityLink = streamingLink;
     }
 }
@@ -1638,6 +1647,8 @@ void CStreaming::FlushChannels()
 // Removes all unused (if not IsRequiredToBeKept()) IFP/TXDs models as well.
 // 0x40CBA0
 void CStreaming::RequestModelStream(int32 chIdx) {
+    ZoneScoped;
+
     int32 modelId = GetNextFileOnCd(CdStreamGetLastPosn(), true);
     if (modelId == MODEL_INVALID)
         return;
@@ -2076,6 +2087,8 @@ void CStreaming::ReInit() {
 // Loads `stream.ini` settings file
 // 0x5BCCD0
 void CStreaming::ReadIniFile() {
+    ZoneScoped;
+
     bool bHasDevkitMemory = false;
     auto* file = CFileMgr::OpenFile("stream.ini", "r");
     for (char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
@@ -2846,6 +2859,8 @@ void CStreaming::Init() {
 
 // 0x5B8AD0
 void CStreaming::Init2() {
+    ZoneScoped;
+
     std::ranges::for_each(ms_aInfoForModel, [](CStreamingInfo& si) { si.Init(); });
     CStreamingInfo::ms_pArrayBase = &GetInfo(0);
 
@@ -2953,6 +2968,8 @@ void CStreaming::Init2() {
 
 // 0x4083C0
 void CStreaming::InitImageList() {
+    ZoneScoped;
+
     std::ranges::fill(ms_files, tStreamingFileDesc());
     AddImageToList("MODELS\\GTA3.IMG", true);
     AddImageToList("MODELS\\GTA_INT.IMG", true);
@@ -3140,7 +3157,7 @@ bool CStreaming::StreamAmbulanceAndMedic(bool bStreamForAccident) {
     }
 
     if (CTheZones::m_CurrLevel == eLevelName::LEVEL_NAME_COUNTRY_SIDE || !bStreamForAccident)
-        return false; // Models for `LEVEL_NAME_COUNTRY_SIDE` are always loaded (I guess so, since they aren't set as deletable above)
+        return false; // Models for `LEVEL_NAME_COUNTRY_SIDE` are always loaded (I guess so, since they aren't set as deleteable above)
 
     // Load medic and ambulance model for current level
     int32 medicModel = ms_aDefaultMedicModel[CTheZones::m_CurrLevel];
@@ -3453,7 +3470,7 @@ void CStreaming::StreamVehiclesAndPeds() {
         if (CWeather::WeatherRegion == WEATHER_REGION_SF) {
             pedGroupId = POPCYCLE_PEDGROUP_BUSINESS_LA;
         } else if (CPopCycle::m_pCurrZoneInfo) {
-            const auto& currenZoneFlags = CPopCycle::m_pCurrZoneInfo->Flags2;
+            const auto& currenZoneFlags = CPopCycle::m_pCurrZoneInfo->zonePopulationRace;
             if (currenZoneFlags & 1)
                 pedGroupId = 0; // POPCYCLE_PEDGROUP_WORKERS_LA ?
             else if (currenZoneFlags & 2)
@@ -3735,6 +3752,8 @@ void CStreaming::StreamZoneModels_Gangs(const CVector& unused) {
 
 // 0x40E670
 void CStreaming::Update() {
+    ZoneScoped;
+
     g_LoadMonitor.m_numModelsRequest = ms_numModelsRequested;
     if (CTimer::GetIsPaused())
         return;

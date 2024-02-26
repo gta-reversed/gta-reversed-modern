@@ -74,7 +74,7 @@ public:
     static void ClearSkip(bool afterMission);
     static void DoWeaponStuffAtStartOf2PlayerGame(bool shareWeapons);
     static void StorePedsWeapons(CPed* ped);
-    static uint32 FindCityClosestToPoint(CVector2D point);
+    static eLevelName FindCityClosestToPoint(CVector2D point);
     static void ForceDeathRestart();
     static void InitAtStartOfGame();
     static bool IsCoopGameGoingOn();

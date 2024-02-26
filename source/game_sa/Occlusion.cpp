@@ -39,8 +39,9 @@ void COcclusion::InjectHooks()
 }
 
 // 0x71DCA0
-void COcclusion::Init()
-{
+void COcclusion::Init() {
+    ZoneScoped;
+
     NumOccludersOnMap         =  0;
     NumInteriorOcculdersOnMap =  0;
     FarAwayList               = -1;

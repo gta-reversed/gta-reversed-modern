@@ -15,7 +15,7 @@ enum e2dEffectType : uint8 {
     EFFECT_MISSING_OR_UNK= 2,
     EFFECT_ATTRACTOR     = 3,
     EFFECT_SUN_GLARE     = 4,
-    EFFECT_FURNITURE     = 5,
+    EFFECT_INTERIOR      = 5,
     EFFECT_ENEX          = 6,
     EFFECT_ROADSIGN      = 7,
     EFFECT_TRIGGER_POINT = 8, // todo: EFFECT_SLOTMACHINE_WHEEL?
@@ -186,6 +186,37 @@ struct tEffectEscalator {
 };
 VALIDATE_SIZE(tEffectEscalator, 0x28);
 
+struct tEffectInterior {
+    static inline constexpr e2dEffectType Type = EFFECT_INTERIOR;
+
+    uint8 m_type;
+    int8  m_groupId;
+    uint8 m_width;
+    uint8 m_depth;
+    uint8 m_height;
+    int8  m_door;
+    int8  m_lDoorStart;
+    int8  m_lDoorEnd;
+    int8  m_rDoorStart;
+    int8  m_rDoorEnd;
+    int8  m_tDoorStart;
+    int8  m_tDoorEnd;
+    int8  m_lWindowStart;
+    int8  m_lWindowEnd;
+    int8  m_rWindowStart;
+    int8  m_rWindowEnd;
+    int8  m_tWindowStart;
+    int8  m_tWindowEnd;
+    int8  m_noGoLeft[3];
+    int8  m_noGoBottom[3];
+    int8  m_noGoWidth[3];
+    int8  m_noGoDepth[3];
+    uint8 m_seed;
+    uint8 m_status;
+    float m_rot;
+};
+VALIDATE_SIZE(tEffectInterior, 0x34 - 0x10);
+
 //! NOTASA base class (otherwise SA)
 struct C2dEffectBase {
     CVector       m_pos;
@@ -204,6 +235,7 @@ struct C2dEffectRoadsign         : C2dEffectBase, tEffectRoadsign {};
 struct C2dEffectSlotMachineWheel : C2dEffectBase, tEffectSlotMachineWheel {};
 struct C2dEffectCoverPoint       : C2dEffectBase, tEffectCoverPoint {};
 struct C2dEffectEscalator        : C2dEffectBase, tEffectEscalator {};
+struct C2dEffectInterior         : C2dEffectBase, tEffectInterior {};
 
 struct C2dEffect : public C2dEffectBase {
     union {

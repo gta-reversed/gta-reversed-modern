@@ -738,7 +738,7 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
         // Return pointer for offset in allocated memory (relative to where it was in the file)
         const auto GetDataPtr = [&]() {
             return reinterpret_cast<T>(
-                p
+                  p
                 + sizeof(CCollisionData)                // Must offset by this (See memory layout above)
                 + fileOffset
                 + sizeof(FileHeader::FileInfo::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compensate for it.
@@ -764,6 +764,8 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
     cd->m_pShadowTriangles = nullptr;
 
     cm.m_bIsSingleColDataAlloc = true;
+
+    assert(!cd->bHasFaceGroups || cd->m_pTriangles); // If it has face groups it should also have triangles allocated
 }
 
 // 0x537CE0
@@ -834,6 +836,8 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
     cd->m_pTrianglePlanes = nullptr;
 
     cm.m_bIsSingleColDataAlloc = true;
+
+    assert(!cd->bHasFaceGroups || cd->m_pTriangles); // If it has face groups it should also have triangles allocated
 }
 
 // 0x537AE0
@@ -904,6 +908,8 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
     cd->m_pTrianglePlanes = nullptr;
 
     cm.m_bIsSingleColDataAlloc = true;
+
+    assert(!cd->bHasFaceGroups || cd->m_pTriangles); // If it has face groups it should also have triangles allocated
 }
 
 // 0x5B3C60
@@ -972,7 +978,7 @@ void CFileLoader::Load2dEffect(const char* line) {
         break;
     case EFFECT_ATTRACTOR:
         break;
-    case EFFECT_FURNITURE:
+    case EFFECT_INTERIOR:
         break;
     case EFFECT_ENEX:
         break;
@@ -1066,12 +1072,9 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
     if (cm) {
         if (cm->m_bHasCollisionVolumes)
         {
-            if (cm->m_nColSlot)
+            if (cm->m_nColSlot) 
             {
-                CRect rect;
-                newEntity->GetBoundRect(&rect);
-                auto* colDef = CColStore::ms_pColPool->GetAt(cm->m_nColSlot);
-                colDef->m_Area.Restrict(rect);
+                CColStore::ms_pColPool->GetAt(cm->m_nColSlot)->m_Area.Restrict(newEntity->GetBoundRect());
             }
         }
         else
@@ -1278,6 +1281,8 @@ void CFileLoader::LoadGarage(const char* line) {
 
 // 0x5B9030
 void CFileLoader::LoadLevel(const char* levelFileName) {
+    ZoneScoped;
+
     auto txd = RwTexDictionaryGetCurrent();
     if (!txd) {
         txd = RwTexDictionaryCreate();
@@ -1316,15 +1321,22 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
             break; // Done
 
         if (LineBeginsWith("TEXDICTION")) {
+            ZoneScopedN("TEXDICTION");
+
             const auto path = ExtractPathFor("TEXDICTION");
+            ZoneText(path, strlen(path));
+
             LoadingScreenLoadingFile(path);
 
             const auto txd = LoadTexDictionary(path);
             RwTexDictionaryForAllTextures(txd, AddTextureCB, txd);
             RwTexDictionaryDestroy(txd);
         } else if (LineBeginsWith("IPL")) {
+            ZoneScopedN("IPL");
+
             // Have to call this here, because line buffer's content may change after the `if` below
             const auto path = ExtractPathFor("IPL");
+            ZoneText(path, strlen(path));
 
             if (!hasLoadedAnyIPLs) {
                 MatchAllModelStrings();
@@ -1378,9 +1390,15 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
             };
             for (const auto& v : functions) {
                 if (LineBeginsWith(v.id)) {
+                    ZoneScoped;
+                    ZoneText(v.id.data(), v.id.size());
+
                     const auto path = ExtractPathFor(v.id);
+                    ZoneText(path, strlen(path));
+
                     LoadingScreenLoadingFile(path);
                     v.fn(path);
+
                     break;
                 }
             }
@@ -1389,8 +1407,8 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
     CFileMgr::CloseFile(f);
 
     RwTexDictionarySetCurrent(txd);
-    if (hasLoadedAnyIPLs)
-    {
+
+    if (hasLoadedAnyIPLs) {
         CIplStore::LoadAllRemainingIpls();
         CColStore::BoundingBoxesPostProcess();
         CTrain::InitTrains();
@@ -1461,33 +1479,24 @@ int32 CFileLoader::LoadPedObject(const char* line) {
         SCANF_S_STR(voiceMax)
     ) == 14);
 
-    const auto FindAnimGroup = [animGroup, nAssocGroups = CAnimManager::ms_numAnimAssocDefinitions] {
-        for (auto i = 0; i < nAssocGroups; i++) {
-            if (CAnimManager::GetAnimGroupName((AssocGroupId)i) == std::string_view{animGroup}) {
-                return (AssocGroupId)i;
-            }
-        }
-        return (AssocGroupId)nAssocGroups;
-    };
-
     const auto mi = CModelInfo::AddPedModel(modelId);
 
     mi->m_nKey = CKeyGen::GetUppercaseKey(modelName);
     mi->SetTexDictionary(texName);
     mi->SetAnimFile(animFile);
     mi->SetColModel(&colModelPeds, false);
-    mi->m_nPedType = CPedType::FindPedType(pedType);
-    mi->m_nStatType = CPedStats::GetPedStatType(statName);
-    mi->m_nAnimType = FindAnimGroup();
+    mi->m_nPedType          = CPedType::FindPedType(pedType);
+    mi->m_nStatType         = CPedStats::GetPedStatType(statName);
+    mi->m_nAnimType         = CAnimManager::GetAnimationGroupIdByName(animGroup);
     mi->m_nCarsCanDriveMask = carsCanDriveMask;
-    mi->m_nPedFlags = flags;
-    mi->m_nRadio2 = (eRadioID)(radio2 + 1);
-    mi->m_nRadio1 = (eRadioID)(radio1 + 1);
-    mi->m_nRace = CPopulation::FindPedRaceFromName(modelName);
-    mi->m_nPedAudioType = CAEPedSpeechAudioEntity::GetAudioPedType(pedVoiceType);
-    mi->m_nVoiceMin = CAEPedSpeechAudioEntity::GetVoice(voiceMin, mi->m_nPedAudioType);
-    mi->m_nVoiceMax = CAEPedSpeechAudioEntity::GetVoice(voiceMax, mi->m_nPedAudioType);
-    mi->m_nVoiceId = mi->m_nVoiceMin;
+    mi->m_nPedFlags         = flags;
+    mi->m_nRadio2           = (eRadioID)(radio2 + 1);
+    mi->m_nRadio1           = (eRadioID)(radio1 + 1);
+    mi->m_nRace             = CPopulation::FindPedRaceFromName(modelName);
+    mi->m_nPedAudioType     = CAEPedSpeechAudioEntity::GetAudioPedType(pedVoiceType);
+    mi->m_nVoiceMin         = CAEPedSpeechAudioEntity::GetVoice(voiceMin, mi->m_nPedAudioType);
+    mi->m_nVoiceMax         = CAEPedSpeechAudioEntity::GetVoice(voiceMax, mi->m_nPedAudioType);
+    mi->m_nVoiceId          = mi->m_nVoiceMin;
 
     return modelId;
 }
@@ -1656,7 +1665,7 @@ void CFileLoader::LoadPickup(const char* line) {
         }
     };
 
-    if (const auto model = GetModel(); model != -1) {
+    if (const auto model = GetModel(); model != MODEL_INVALID) {
         CPickups::GenerateNewOne(pos, model, PICKUP_ON_STREET, 0, 0, false, nullptr);
     }
 }
@@ -1950,15 +1959,14 @@ int32 CFileLoader::LoadWeaponObject(const char* line) {
 
 // 0x5B4AB0
 void CFileLoader::LoadZone(const char* line) {
-    char  name[24];
-    int32 type;
+    char    infoLabel[24];
+    int32   type;
     CVector min{}, max{};
-    int32 island;
-    char  zoneName[12];
+    int32   level;
+    char    textLabel[12];
 
-    auto iNumRead = sscanf_s(line, "%s %d %f %f %f %f %f %f %d %s", SCANF_S_STR(name), &type, &min.x, &min.y, &min.z, &max.x, &max.y, &max.z, &island, SCANF_S_STR(zoneName));
-    if (iNumRead == 10)
-        CTheZones::CreateZone(name, static_cast<eZoneType>(type), min.x, min.y, min.z, max.x, max.y, max.z, static_cast<eLevelName>(island), zoneName);
+    VERIFY(sscanf_s(line, "%s %d %f %f %f %f %f %f %d %s", SCANF_S_STR(infoLabel), &type, &min.x, &min.y, &min.z, &max.x, &max.y, &max.z, &level, SCANF_S_STR(textLabel)) == 10);
+    CTheZones::CreateZone(infoLabel, static_cast<eZoneType>(type), min, max, static_cast<eLevelName>(level), textLabel);
 }
 
 // 0x5B51E0
@@ -1968,6 +1976,8 @@ void LinkLods(int32 a1) {
 
 // 0x5B8700
 void CFileLoader::LoadScene(const char* filename) {
+    ZoneScoped;
+
     gCurrIplInstancesCount = 0;
 
     enum class SectionID {
