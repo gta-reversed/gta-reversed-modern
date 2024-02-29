@@ -8,9 +8,16 @@
 
 #include "SetPieces.h"
 
-bool& CSetPieces::bDebug = *(bool*)0xA957F8;
-uint32& CSetPieces::NumSetPieces = *(uint32*)0xA957FC;
-CSetPiece* CSetPieces::aSetPieces = (CSetPiece*)0xA95818;
+void CSetPieces::InjectHooks() {
+    RH_ScopedClass(CSetPieces);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(AddOne, 0x499500, {.reversed=false});
+    RH_ScopedInstall(Init, 0x4994F0, {.reversed=false});
+    RH_ScopedInstall(Load, 0x5D3CA0, {.reversed=false});
+    RH_ScopedInstall(Save, 0x5D3C70, {.reversed=false});
+    RH_ScopedInstall(Update, 0x49AA00, {.reversed=false});
+}
 
 // 0x499500
 void CSetPieces::AddOne(uint8 type, CVector2D cornerA, CVector2D cornerB, CVector2D spawnCoord1, CVector2D targetCoord1, CVector2D spawnCoord2, CVector2D targetCoord2) {
