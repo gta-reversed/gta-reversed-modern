@@ -1,4 +1,5 @@
 #include "StdInc.h"
+#include "Automobile.h"
 
 void CSetPiece::InjectHooks() {
     RH_ScopedClass(CSetPiece);
@@ -55,7 +56,59 @@ CCopPed* CSetPiece::TryToGenerateCopPed(CVector2D posn) {
 
 // 0x4998A0
 CVehicle* CSetPiece::TryToGenerateCopCar(CVector2D posn, CVector2D target) {
-    return nullptr;
+    const auto carModel = CStreaming::GetDefaultCopCarModel();
+    if (carModel < 0) {
+        return nullptr;
+    }
+
+    auto* car = new CAutomobile(carModel, RANDOM_VEHICLE, true);
+
+    CVector point{ posn, 1000.0f };
+    CColPoint cp{};
+    CEntity*  entity{};
+    if (CWorld::ProcessVerticalLine(
+        point,
+        -1000.0f,
+        cp,
+        entity,
+        true,
+        false,
+        false,
+        false,
+        true
+    )) {
+        point.z = car->GetHeightAboveRoad() + cp.m_vecPoint.z;
+    }
+
+    const CVector dir{ (target - posn).Normalized() };
+    // TODO?
+    car->GetForward()  = dir;
+    car->GetRight()    = CVector{ dir.y, -dir.x, 0.0f };
+    car->GetUp()       = CVector::ZAxisVector();
+    car->GetPosition() = point;
+
+    int16 numCollidingObjects{};
+    CWorld::FindObjectsKindaColliding(
+        point,
+        car->GetColModel()->GetBoundRadius(),
+        false,
+        &numCollidingObjects,
+        16,
+        nullptr,
+        false,
+        true,
+        true,
+        false,
+        false
+    );
+    if (!numCollidingObjects) {
+        delete car;
+        return nullptr;
+    }
+
+    car->ChangeLawEnforcerState(true);
+    CWorld::Add(car);
+    return car;
 }
 
 // 0x499A80
