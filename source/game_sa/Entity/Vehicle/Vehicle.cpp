@@ -3526,27 +3526,20 @@ bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
 }
 
 // 0x6DBA30
-void CVehicle::SetComponentRotation(RwFrame* component, eRotationAxis axis, float angle, bool bResetPosition) {
+void CVehicle::SetComponentRotation(RwFrame* component, eRotationAxis axis, float angle, bool bSetRotate) {
     if (!component) {
         return;
     }
 
     CMatrix mat{ RwFrameGetMatrix(component) };
-    std::invoke(
-        [bResetPosition, axis]() {
-            // We're using the `Only` version of `SetRotate`, that way the position
-            // That way 0x6DBB69 can be omitted (and 0x6DBB02 because it's just there to cancel out the former)
-            switch (axis) {
-            case AXIS_Z: return bResetPosition ? &CMatrix::SetRotateZOnly : &CMatrix::RotateZ;
-            case AXIS_Y: return bResetPosition ? &CMatrix::SetRotateYOnly : &CMatrix::RotateY;
-            case AXIS_X: return bResetPosition ? &CMatrix::SetRotateXOnly : &CMatrix::RotateX;
-            default:
-                NOTSA_UNREACHABLE("Supress warn");
-                return &CMatrix::RotateX;
-            }
-        }(),
-        &mat, angle
-    );
+
+    switch (axis) {
+    case AXIS_X: bSetRotate ? mat.SetRotateXOnly(angle) : mat.RotateX(angle, true); break;
+    case AXIS_Y: bSetRotate ? mat.SetRotateYOnly(angle) : mat.RotateY(angle, true); break;
+    case AXIS_Z: bSetRotate ? mat.SetRotateZOnly(angle) : mat.RotateZ(angle, true); break;
+    default:     NOTSA_UNREACHABLE();
+    }
+
     mat.UpdateRW();
 }
 

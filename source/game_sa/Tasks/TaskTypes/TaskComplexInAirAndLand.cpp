@@ -50,7 +50,7 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask(CPed* ped) {
 
         if (m_bUsingFallGlide) {
             if (subTask->m_pAnim) {
-                subTask->m_pAnim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
+                subTask->m_pAnim->m_Flags |= ANIMATION_IS_BLEND_AUTO_REMOVE;
                 subTask->m_pAnim->m_BlendDelta = -8.0F;
                 subTask->m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
                 subTask->m_pAnim = nullptr;

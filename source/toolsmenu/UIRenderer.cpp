@@ -185,10 +185,17 @@ void UIRenderer::DebugCode() {
         }
     }
     if (pad->IsStandardKeyJustPressed('6')) {
-        CMessages::AddBigMessage("PRESS ~k~~PED_ANSWER_PHONE~ TO FUCK", 1000, eMessageStyle::STYLE_BOTTOM_RIGHT);
+        CMessages::AddBigMessage("PRESS ~k~~PED_ANSWER_PHONE~ TO FUCK"_gxt, 1000, eMessageStyle::STYLE_BOTTOM_RIGHT);
     }
     if (pad->IsStandardKeyJustPressed('7')) {
-        CMessages::AddMessageWithNumberQ("PRESS ~k~~PED_ANSWER_PHONE~TO FUCK ~1~~1~~1~", 1000, 0, 1, 2, 3, 4, 5, 6);
+        //const auto DoTest = [&](auto&& fn) {
+        //    CAnimBlendAssociation* a{};
+        //    float b{};
+        //    const auto m = fn(player->m_pRwClump, &a, &b);
+        //    DEV_LOG("Main={} (Blend: {}); Secondary={} (Blend: {})\n", (void*)m, m->GetBlendAmount(), (void*)a, b);
+        //};
+        //DoTest(&RpAnimBlendClumpGetMainAssociation);
+        //DoTest(&plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6910, RpClump*, CAnimBlendAssociation**, float*>);
     }
 
     if (pad->IsStandardKeyJustPressed('T')) {

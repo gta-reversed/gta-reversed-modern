@@ -1,6 +1,7 @@
 #pragma once
 
 #include <type_traits>
+#include <cstdint>
 
 namespace notsa {
 //! Store enums (of type `Enum`) in a given integral type.
@@ -8,12 +9,16 @@ namespace notsa {
 //! different to the enums underlaying type.
 //! WEnum just sounded like a cool name... Venom.. WEnum, idk
 template<typename Enum, typename StoreAs>
-    requires(std::is_enum_v<Enum> && std::is_integral_v<StoreAs>)
+    requires(std::is_integral_v<StoreAs>)
 struct WEnum {
     StoreAs m_Value;
 
     //! Implicitly convert from the enum value
     WEnum(Enum e = {}) : m_Value{static_cast<StoreAs>(e)} { }
+
+    //! Implicitly convert from another WEnum for the same enum
+    template<typename Y>
+    WEnum(WEnum<Enum, Y> other) : WEnum{static_cast<Enum>(other)} { }
 
     //! Implicitly convert back to the underlaying `Enum` type
     operator Enum() const { return static_cast<Enum>(m_Value); }
