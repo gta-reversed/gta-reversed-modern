@@ -22,14 +22,10 @@ class CSetPiece {
 public:
     int32                      m_nLastGenerationTime{};
     FixedRect<int16, 4.0f>     m_AreaRect;
-//    FixedVector2D<int16, 4.0f> m_AreaCorner1{};
-//    FixedVector2D<int16, 4.0f> m_AreaCorner2{};
-    FixedRect<int16, 4.0f>     m_SpawnRect;
-//    FixedVector2D<int16, 4.0f> m_SpawnCoord1{};
-//    FixedVector2D<int16, 4.0f> m_SpawnCoord2{};
-    FixedRect<int16, 4.0f>     m_TargetRect;
-//    FixedVector2D<int16, 4.0f> m_TargetCoord1{};
-//    FixedVector2D<int16, 4.0f> m_TargetCoord2{};
+    FixedVector2D<int16, 4.0f> m_SpawnCoord1{};
+    FixedVector2D<int16, 4.0f> m_SpawnCoord2{};
+    FixedVector2D<int16, 4.0f> m_TargetCoord1{};
+    FixedVector2D<int16, 4.0f> m_TargetCoord2{};
     eSetPieceType              m_nType{ SETPIECE_NONE };
     char  _pad1D[3];
 
@@ -41,28 +37,28 @@ public:
     CVehicle* TryToGenerateCopCar(CVector2D posn, CVector2D target);
     void Update();
 
-    // Unused shit API, implemented them only because I felt sorry for them.
-    CVector2D GetSpawnCoord1() const { return m_SpawnRect.GetXY1(); }
-    CVector2D GetSpawnCoord2() const { return m_SpawnRect.GetXY2(); }
-    CVector2D GetTargetCoord1() const { return m_TargetRect.GetXY1(); }
-    CVector2D GetTargetCoord2() const { return m_TargetRect.GetXY2(); }
+    // Inlined shit API
+    CVector2D GetSpawnCoord1() const { return m_SpawnCoord1; }
+    CVector2D GetSpawnCoord2() const { return m_SpawnCoord2; }
+    CVector2D GetTargetCoord1() const { return m_TargetCoord1; }
+    CVector2D GetTargetCoord2() const { return m_TargetCoord2; }
     void SetCornerA(CVector2D c) { m_AreaRect.left = c.x; m_AreaRect.top = c.y; }
     void SetCornerB(CVector2D c) { m_AreaRect.right = c.x; m_AreaRect.bottom = c.y; }
-    void SetSpawnCoord1(CVector2D c) { m_SpawnRect.left = c.x; m_SpawnRect.top = c.y; }
-    void SetSpawnCoord2(CVector2D c) { m_SpawnRect.right = c.x; m_SpawnRect.bottom = c.y; }
-    void SetTargetCoord1(CVector2D c) { m_TargetRect.left = c.x; m_TargetRect.top = c.y; }
-    void SetTargetCoord2(CVector2D c) { m_TargetRect.right = c.x; m_TargetRect.bottom = c.y; }
+    void SetSpawnCoord1(CVector2D c) { m_SpawnCoord1 = c; }
+    void SetSpawnCoord2(CVector2D c) { m_SpawnCoord2 = c; }
+    void SetTargetCoord1(CVector2D c) { m_TargetCoord1 = c; }
+    void SetTargetCoord2(CVector2D c) { m_TargetCoord2 = c; }
     float GetCornerAX() const { return m_AreaRect.left; }
     float GetCornerAY() const { return m_AreaRect.top; }
     float GetCornerBX() const { return m_AreaRect.right; }
     float GetCornerBY() const { return m_AreaRect.bottom; }
-    float GetSpawnCoord1X() const { return m_SpawnRect.left; }
-    float GetSpawnCoord1Y() const { return m_SpawnRect.top; }
-    float GetSpawnCoord2X() const { return m_SpawnRect.right; }
-    float GetSpawnCoord2Y() const { return m_SpawnRect.bottom; }
-    float GetTargetCoord1X() const { return m_TargetRect.left; }
-    float GetTargetCoord1Y() const { return m_TargetRect.top; }
-    float GetTargetCoord2X() const { return m_TargetRect.right; }
-    float GetTargetCoord2Y() const { return m_TargetRect.bottom; }
+    float GetSpawnCoord1X() const { return m_SpawnCoord1.x; }
+    float GetSpawnCoord1Y() const { return m_SpawnCoord1.y; }
+    float GetSpawnCoord2X() const { return m_SpawnCoord2.x; }
+    float GetSpawnCoord2Y() const { return m_SpawnCoord2.y; }
+    float GetTargetCoord1X() const { return m_TargetCoord1.x; }
+    float GetTargetCoord1Y() const { return m_TargetCoord1.y; }
+    float GetTargetCoord2X() const { return m_TargetCoord2.x; }
+    float GetTargetCoord2Y() const { return m_TargetCoord2.y; }
 };
 VALIDATE_SIZE(CSetPiece, 0x20);

@@ -457,7 +457,7 @@ void CPlayerPed::Busted() {
 }
 
 // 0x41BE60
-uint32 CPlayerPed::GetWantedLevel() {
+uint32 CPlayerPed::GetWantedLevel() const {
     CWanted* wanted = GetWanted();
     if (wanted) {
         return wanted->m_nWantedLevel;
