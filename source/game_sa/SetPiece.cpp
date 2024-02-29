@@ -6,7 +6,7 @@ void CSetPiece::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(TryToGenerateCopPed, 0x499690);
-    RH_ScopedInstall(TryToGenerateCopCar, 0x4998A0, {.reversed=false});
+    RH_ScopedInstall(TryToGenerateCopCar, 0x4998A0);
     RH_ScopedInstall(Update, 0x499A80, {.reversed=false});
 }
 
@@ -101,16 +101,22 @@ CVehicle* CSetPiece::TryToGenerateCopCar(CVector2D posn, CVector2D target) {
         false,
         false
     );
+
     if (!numCollidingObjects) {
-        delete car;
-        return nullptr;
+        car->ChangeLawEnforcerState(true);
+        CWorld::Add(car);
+    } else {
+        delete std::exchange(car, nullptr);
     }
 
-    car->ChangeLawEnforcerState(true);
-    CWorld::Add(car);
     return car;
 }
 
 // 0x499A80
 void CSetPiece::Update() {
+    if (m_nLastGenerationTime != 0 && CTimer::GetTimeInMS() <= m_nLastGenerationTime + 4000) {
+        return;
+    }
+
+    const auto playerPos = FindPlayerCoors();
 }
