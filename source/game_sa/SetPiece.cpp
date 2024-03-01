@@ -188,7 +188,7 @@ void CSetPiece::Update() {
         }
     };
 
-    switch (const auto t = m_nType) {
+    switch (m_nType) {
     case SETPIECE_2CARS_SLOW_SPEED:
     case SETPIECE_2CARS_MEDIUM_SPEED: {
         if (FindPlayerPed()->GetWantedLevel() < 1 || FindPlayerVehicle()) {
@@ -200,7 +200,7 @@ void CSetPiece::Update() {
             GetTargetCoord1(),
             DRIVING_STYLE_SLOW_DOWN_FOR_CARS,
             MISSION_SLOWLY_DRIVE_TOWARDS_PLAYER_1,
-            (t == SETPIECE_2CARS_SLOW_SPEED) ? 4 : 24,
+            (m_nType == SETPIECE_2CARS_SLOW_SPEED) ? 4 : 24,
             25'000
         );
         if (!car1) {
@@ -212,7 +212,7 @@ void CSetPiece::Update() {
             GetTargetCoord2(),
             DRIVING_STYLE_SLOW_DOWN_FOR_CARS,
             MISSION_SLOWLY_DRIVE_TOWARDS_PLAYER_1,
-            (t == SETPIECE_2CARS_SLOW_SPEED) ? 4 : 24,
+            (m_nType == SETPIECE_2CARS_SLOW_SPEED) ? 4 : 24,
             25'000
         )) {
             CWorld::Remove(car1);

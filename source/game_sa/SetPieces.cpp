@@ -14,12 +14,13 @@ void CSetPieces::InjectHooks() {
 }
 
 // 0x499500
-void CSetPieces::AddOne(uint8 type, CVector2D cornerA, CVector2D cornerB, CVector2D spawnCoord1, CVector2D targetCoord1, CVector2D spawnCoord2, CVector2D targetCoord2) {
+void CSetPieces::AddOne(eSetPieceType type, CVector2D cornerA, CVector2D cornerB, CVector2D spawnCoord1, CVector2D targetCoord1, CVector2D spawnCoord2, CVector2D targetCoord2) {
     if (NumSetPieces >= MAX_SET_PIECES) {
         return;
     }
 
     auto& sp = aSetPieces[NumSetPieces++];
+    sp.m_nType           = type;
     sp.m_AreaRect.left   = (cornerA.x >= cornerB.x) ? cornerB.x : cornerA.x;
     sp.m_AreaRect.top    = (cornerA.y >= cornerB.y) ? cornerB.y : cornerA.y;
     sp.m_AreaRect.right  = (cornerA.x <= cornerB.x) ? cornerB.x : cornerA.x;

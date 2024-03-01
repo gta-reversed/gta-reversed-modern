@@ -13,14 +13,9 @@ public:
 public:
     static void InjectHooks();
 
-    static void AddOne(uint8 type, CVector2D cornerA, CVector2D cornerB, CVector2D spawnCoord1, CVector2D targetCoord1, CVector2D spawnCoord2, CVector2D targetCoord2);
+    static void AddOne(eSetPieceType type, CVector2D cornerA, CVector2D cornerB, CVector2D spawnCoord1, CVector2D targetCoord1, CVector2D spawnCoord2, CVector2D targetCoord2);
     static void Init();
     static bool Load();
     static bool Save();
     static void Update();
-
-    // NOTSA
-    auto GetActiveSetPieces() {
-        return std::span<CSetPiece>{ aSetPieces.data(), (size_t)NumSetPieces };
-    }
 };
