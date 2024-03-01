@@ -19,16 +19,16 @@ void CSetPieces::AddOne(eSetPieceType type, CVector2D cornerA, CVector2D cornerB
         return;
     }
 
+    const auto [left, right] = std::minmax(cornerA.x, cornerB.x);
+    const auto [bottom, top] = std::minmax(cornerA.y, cornerB.y);
+
     auto& sp = aSetPieces[NumSetPieces++];
-    sp.m_nType           = type;
-    sp.m_AreaRect.left   = (cornerA.x >= cornerB.x) ? cornerB.x : cornerA.x;
-    sp.m_AreaRect.top    = (cornerA.y >= cornerB.y) ? cornerB.y : cornerA.y;
-    sp.m_AreaRect.right  = (cornerA.x <= cornerB.x) ? cornerB.x : cornerA.x;
-    sp.m_AreaRect.bottom = (cornerA.x <= cornerB.x) ? cornerB.x : cornerA.x;
-    sp.m_SpawnCoord1     = spawnCoord1;
-    sp.m_SpawnCoord2     = spawnCoord2;
-    sp.m_TargetCoord1    = targetCoord1;
-    sp.m_TargetCoord2    = targetCoord2;
+    sp.m_nType        = type;
+    sp.m_AreaRect     = CRect{ left, bottom, right, top };
+    sp.m_SpawnCoord1  = spawnCoord1;
+    sp.m_SpawnCoord2  = spawnCoord2;
+    sp.m_TargetCoord1 = targetCoord1;
+    sp.m_TargetCoord2 = targetCoord2;
 }
 
 // 0x4994F0
