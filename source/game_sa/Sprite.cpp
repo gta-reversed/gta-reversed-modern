@@ -9,9 +9,9 @@ void CSprite::InjectHooks() {
 
     RH_ScopedInstall(Initialise, 0x70CE10);
     RH_ScopedInstall(InitSpriteBuffer, 0x70CFB0);
-    RH_ScopedInstall(FlushSpriteBuffer, 0x70CF20, { .reversed = false });
+    RH_ScopedInstall(FlushSpriteBuffer, 0x70CF20);
     RH_ScopedInstall(CalcScreenCoors, 0x70CE30);
-    RH_ScopedInstall(CalcHorizonCoors, 0x70E3E0, { .reversed = false });
+    RH_ScopedInstall(CalcHorizonCoors, 0x70E3E0);
     // RH_ScopedOverloadedInstall(Set4Vertices2D, "0", 0x70E1C0, void (*)(RwD3D9Vertex*, const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&));
     // RH_ScopedOverloadedInstall(Set4Vertices2D, "1", 0x70E2D0, void (*)(RwD3D9Vertex*, float, float, float, float, float, float, float, float, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&));
     RH_ScopedInstall(RenderOneXLUSprite, 0x70D000, { .reversed = false });
@@ -64,6 +64,8 @@ void CSprite::FlushSpriteBuffer() {
     if (m_bFlushSpriteBufferSwitchZTest) {
         RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(true));
     }
+
+    nSpriteBufferIndex = 0;
 }
 
 // unused
@@ -95,20 +97,15 @@ bool CSprite::CalcScreenCoors(const RwV3d& posn, RwV3d* out, float* w, float* h,
 
 // 0x70E3E0
 float CSprite::CalcHorizonCoors() {
-    return plugin::CallAndReturn<float, 0x70E3E0>();
-
-    /*
-    auto cameraPosn = TheCamera.GetPosition();
+    const auto& cameraPosn = TheCamera.GetPosition();
     CVector point{
         cameraPosn.x + TheCamera.m_fCamFrontXNorm * 3000.0f,
         cameraPosn.y + TheCamera.m_fCamFrontYNorm * 3000.0f,
         0.0f,
     };
 
-    CVector outPoint;
-    auto vecPos = &outPoint.TransformPoint(&TheCamera.m_mViewMatrix, &point);
-    return 1.0f / vecPos->z * SCREEN_HEIGHT * vecPos->y;
-    */
+    const auto viewPoint = TheCamera.GetViewMatrix().TransformPoint(point);
+    return 1.0f / viewPoint.z * SCREEN_HEIGHT * viewPoint.y;
 }
 
 // 0x70E1C0
