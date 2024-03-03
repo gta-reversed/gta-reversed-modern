@@ -1,10 +1,7 @@
 #include "StdInc.h"
-
 #include "Sprite.h"
 
-float& CSprite::m_f2DNearScreenZ = *(float*)0xC4B8D8;
-float& CSprite::m_f2DFarScreenZ = *(float*)0xC4B8D4;
-float& CSprite::m_fRecipNearClipPlane = *(float*)0xC4B8D0;
+static inline auto& nSpriteBufferIndex = StaticRef<int32>(0xC6A158);
 
 void CSprite::InjectHooks() {
     RH_ScopedClass(CSprite);
@@ -48,7 +45,25 @@ void CSprite::InitSpriteBuffer2D() {
 
 // 0x70CF20
 void CSprite::FlushSpriteBuffer() {
-    plugin::Call<0x70CF20>();
+    if (nSpriteBufferIndex <= 0) {
+        return;
+    }
+
+    if (m_bFlushSpriteBufferSwitchZTest) {
+        RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(false));
+    }
+
+    RwIm2DRenderIndexedPrimitive(
+        rwPRIMTYPETRILIST,
+        TempBufferVertices.m_2d,
+        4 * nSpriteBufferIndex,
+        aTempBufferIndices,
+        6 * nSpriteBufferIndex
+    );
+
+    if (m_bFlushSpriteBufferSwitchZTest) {
+        RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(true));
+    }
 }
 
 // unused

@@ -265,13 +265,19 @@ std::wstring UTF8ToUnicode(const std::string& str);
 std::string UnicodeToUTF8(const std::wstring& str);
 
 constexpr int32 TOTAL_TEMP_BUFFER_INDICES = 4096;
-constexpr int32 TOTAL_TEMP_BUFFER_VERTICES = 2048;
+constexpr int32 TOTAL_TEMP_BUFFER_3DVERTICES = 2048;
+constexpr int32 TOTAL_TEMP_BUFFER_2DVERTICES = 1024;
 constexpr int32 TOTAL_RADIOSITY_VERTEX_BUFFER = 1532;
 
 static inline int32 WindowsCharset = static_cast<int32>(GetACP());
 
+struct TempVertexBuffer {
+    RwIm3DVertex m_3d[TOTAL_TEMP_BUFFER_3DVERTICES]; // For Im3D rendering
+    RwIm2DVertex m_2d[TOTAL_TEMP_BUFFER_2DVERTICES]; // For Im2D rendering
+};
+
 static inline uint16& uiTempBufferIndicesStored = *(uint16*)0xC4B954;
 static inline uint16& uiTempBufferVerticesStored = *(uint16*)0xC4B950;
 static inline RxVertexIndex(&aTempBufferIndices)[TOTAL_TEMP_BUFFER_INDICES] = *(RxVertexIndex(*)[TOTAL_TEMP_BUFFER_INDICES])0xC4B958;
-static inline RxObjSpace3DVertex(&aTempBufferVertices)[TOTAL_TEMP_BUFFER_VERTICES] = *(RxObjSpace3DVertex(*)[TOTAL_TEMP_BUFFER_VERTICES])0xC4D958; // size 1024 - after this there are 2 more arrays like this, both sized 512
+static inline auto& TempBufferVertices = StaticRef<TempVertexBuffer>(0xC4D958);
 static inline RwD3D9Vertex(&aRadiosityVertexBuffer)[TOTAL_RADIOSITY_VERTEX_BUFFER] = *reinterpret_cast<RwD3D9Vertex(*)[TOTAL_RADIOSITY_VERTEX_BUFFER]>(0xC5F958);

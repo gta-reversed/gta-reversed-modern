@@ -1,9 +1,3 @@
-/*
-    Plugin-SDK file
-    Authors: GTA Community. See more here
-    https://github.com/DK22Pac/plugin-sdk
-    Do not delete this comment block. Respect others' work!
-*/
 #pragma once
 
 #include "RenderWare.h"
@@ -11,9 +5,10 @@
 
 class CSprite {
 public:
-    static float& m_f2DNearScreenZ;
-    static float& m_f2DFarScreenZ;
-    static float& m_fRecipNearClipPlane;
+    static inline float& m_f2DNearScreenZ      = *(float*)0xC4B8D8;
+    static inline float& m_f2DFarScreenZ       = *(float*)0xC4B8D4;
+    static inline float& m_fRecipNearClipPlane = *(float*)0xC4B8D0;
+    static inline uint32& m_bFlushSpriteBufferSwitchZTest = *(uint32*)0xC6A15C;
 
 public:
     static void InjectHooks();

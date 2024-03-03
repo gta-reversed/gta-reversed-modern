@@ -246,7 +246,7 @@ void CWeather::RenderRainStreaks() {
 
         const uint8 alphas[]{ streakStrength[s], static_cast<uint8>(streakStrength[s] / 2u) };
         for (auto v = 0u; v < std::size(alphas); v++) {
-            RxObjSpace3DVertex* vertex = &aTempBufferVertices[GetRealVertexIndex(v)];
+            RxObjSpace3DVertex* vertex = &TempBufferVertices.m_3d[GetRealVertexIndex(v)];
 
             const RwRGBA color{ 210, 210, 230, alphas[v] };
             // const RwRGBA color{ 255, 0, 0, 255 }; // For debug (makes it more visible)
@@ -274,7 +274,7 @@ void CWeather::RenderRainStreaks() {
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
 
-    if (RwIm3DTransform(aTempBufferVertices, uiTempBufferVerticesStored, nullptr, rwIM3D_VERTEXXYZ)) {
+    if (RwIm3DTransform(TempBufferVertices.m_3d, uiTempBufferVerticesStored, nullptr, rwIM3D_VERTEXXYZ)) {
         RwIm3DRenderIndexedPrimitive(rwPRIMTYPELINELIST, aTempBufferIndices, uiTempBufferIndicesStored);
         RwIm3DEnd();
     }
