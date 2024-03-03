@@ -1,6 +1,6 @@
 # Reversed Classes
 
-## Completely Reversed (491 classes)
+## Completely Reversed (493 classes)
 
 - cTransmission (4)
 - cHandlingDataMgr (11)
@@ -491,10 +491,12 @@
 - CMissionTextOffsets (1)
 - CKeyArray (4)
 - CData (2)
+- Win (8)
 - Ps (22)
+- Common (6)
 - CBouncingPanel (3)
 
-## Partially Reversed (170 classes)
+## Partially Reversed (168 classes)
 
 - C_PcSave (0/5)
 - CWorld (91/92)
@@ -549,7 +551,7 @@
 - CCustomBuildingPipeline (0/4)
 - CCover (2/16)
 - CCoronas (6/10)
-- CCollision (58/59)
+- CCollision (1/59)
 - CClouds (20/21)
 - CClothesBuilder (15/23)
 - CCheckpoints (6/8)
@@ -657,12 +659,10 @@
 - CRunningScript (24/39)
 - C2dEffect (13/14)
 - Light (26/27)
-- Win (7/8)
 - CCustomCarEnvMapPipeline (31/37)
 - CCustomBuildingDNPipeline (6/12)
 - CPedGroupPlacer (1/4)
 - CPedGroup (10/12)
-- Common (4/6)
 - CCam (3/43)
 - CPedAttractorPedPlacer (0/1)
 - CCarAI (5/25)
