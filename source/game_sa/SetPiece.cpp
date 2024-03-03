@@ -85,7 +85,7 @@ CVehicle* CSetPiece::TryToGenerateCopCar(CVector2D posn, CVector2D target) {
     }
 
     const CVector dir{ (target - posn).Normalized() };
-    // TODO?
+    // TODO: matrix assign shit
     car->GetForward()  = dir;
     car->GetRight()    = CVector{ dir.y, -dir.x, 0.0f };
     car->GetUp()       = CVector::ZAxisVector();
@@ -117,7 +117,7 @@ CVehicle* CSetPiece::TryToGenerateCopCar(CVector2D posn, CVector2D target) {
     return car;
 }
 
-// 0x499A80 -- TODO: TEST
+// 0x499A80
 void CSetPiece::Update() {
     if (m_nLastGenerationTime != 0 && CTimer::GetTimeInMS() <= m_nLastGenerationTime + 4'000u) {
         return;

@@ -21,7 +21,7 @@ struct FixedRect {
         if constexpr (MinMaxOrientation) {
             std::swap(y1, y2);
         }
-        assert(left > right || bottom > top); // CRect::IsFlipped
+        assert(left <= right && bottom <= top); // !CRect::IsFlipped
     }
 
     constexpr FixedRect(CRect rt) :
