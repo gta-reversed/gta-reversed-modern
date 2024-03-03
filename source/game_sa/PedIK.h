@@ -49,7 +49,7 @@ public:
             bool bTorsoUsed : 1; // 0x2
             bool bUseArm : 1; // 0x4
             bool bSlopePitch : 1; // 0x8
-            bool bUnk : 1; // 0x10
+            bool bEverythingUsed : 1; // 0x10
         };
     };
 

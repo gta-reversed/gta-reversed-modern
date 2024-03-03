@@ -228,7 +228,7 @@ void TeleportDebugModule::RenderTeleporterWindow() {
     if (Button("Save", { 36.0f, 19.0f })) {
         const auto posToSave{ GetIO().KeyCtrl ? FindPlayerPed()->GetPosition() : GetPositionWithGroundHeight(m_input.pos) };
         const auto areaToSave{ GetIO().KeyCtrl ? FindPlayerPed()->m_nAreaCode : static_cast<eAreaCodes>(m_input.areaCode) };
-        const auto nameToSave{ m_input.name[0] ? m_input.name : ((areaToSave == AREA_CODE_NORMAL_WORLD) ? CTheZones::GetZoneName(posToSave) : "<Unnamed>")};
+        const auto nameToSave{ m_input.name[0] ? m_input.name : ((areaToSave == AREA_CODE_NORMAL_WORLD) ? GxtCharToUTF8(CTheZones::GetZoneName(posToSave)) : "<Unnamed>")};
 
         // Either use given name or current zone name
         s_SavedLocations.emplace(s_SavedLocations.begin(), nameToSave, posToSave, areaToSave, s_findZGround);

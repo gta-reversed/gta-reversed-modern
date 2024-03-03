@@ -134,8 +134,8 @@ bool CTaskSimpleBeHit::MakeAbortable(CPed* ped, eAbortPriority priority, const C
     switch (priority) {
     case ABORT_PRIORITY_LEISURE: {
         if (m_Anim) {
-            if ((m_Anim->m_Flags & ANIMATION_STARTED) == 0) {
-                m_Anim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
+            if ((m_Anim->m_Flags & ANIMATION_IS_PLAYING) == 0) {
+                m_Anim->m_Flags |= ANIMATION_IS_BLEND_AUTO_REMOVE;
                 m_Anim->m_BlendDelta = -4.f;
             }
         }

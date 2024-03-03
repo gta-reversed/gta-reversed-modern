@@ -128,7 +128,7 @@ bool CTaskSimpleSwim::ProcessPed(CPed* ped) {
         ped->m_nMoveState = PEDMOVE_STILL;
         if (assoc) {
             if (assoc->m_AnimId == ANIM_ID_CLIMB_JUMP)
-                assoc->m_Flags |= ANIMATION_UNLOCK_LAST_FRAME;
+                assoc->m_Flags |= ANIMATION_IS_FINISH_AUTO_REMOVE;
             else
                 assoc->m_BlendDelta = -4.0f;
 
@@ -241,7 +241,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* ped) {
                 m_bFinishedBlending = true;
             }
         }
-        RpAnimBlendClumpSetBlendDeltas(player->m_pRwClump, 0x10, -8.0f); // todo: ANIMATION_PARTIAL ?
+        RpAnimBlendClumpSetBlendDeltas(player->m_pRwClump, 0x10, -8.0f); // todo: ANIMATION_IS_PARTIAL ?
         FxSystem_c::SafeKillAndClear(player->GetActiveWeapon().m_FxSystem); // Removes fire or something in water
 
         if (player->IsPlayer() && !m_nSwimState) {
@@ -400,7 +400,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* ped) {
             if (assocJumpOut) {
                 if (assocJumpOut->m_BlendHier->m_fTotalTime / 4.0f <= assocJumpOut->m_TimeStep + assocJumpOut->m_CurrentTime) {
                     assocJumpOut = CAnimManager::BlendAnimation(player->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_CLIMB_JUMP, 8.0f);
-                    assocJumpOut->m_Flags |= ANIMATION_UNLOCK_LAST_FRAME;
+                    assocJumpOut->m_Flags |= ANIMATION_IS_FINISH_AUTO_REMOVE;
                     m_AnimID = ANIM_ID_CLIMB_JUMP;
                 }
                 break;

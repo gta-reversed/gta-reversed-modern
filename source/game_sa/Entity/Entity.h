@@ -39,6 +39,7 @@ class CBaseModelInfo;
 class NOTSA_EXPORT_VTABLE CEntity : public CPlaceable {
 public:
     using Ref = notsa::EntityRef<CEntity>;
+
 public:
     union {
         struct RwObject* m_pRwObject;

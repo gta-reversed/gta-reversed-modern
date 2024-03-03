@@ -355,13 +355,13 @@ bool CPedIntelligence::GetUsingParachute() {
         return false;
     }
 
-    auto animAssoc = RpAnimBlendClumpGetFirstAssociation(m_pPed->m_pRwClump, ANIMATION_PARTIAL);
+    auto animAssoc = RpAnimBlendClumpGetFirstAssociation(m_pPed->m_pRwClump, ANIMATION_IS_PARTIAL);
     if (!animAssoc) {
         return false;
     }
 
     int32 blockID = animAssoc->m_BlendHier->m_nAnimBlockId;
-    if (_stricmp(CAnimManager::ms_aAnimBlocks[blockID].Name, "parachute") != 0) {
+    if (_stricmp(CAnimManager::GetAnimBlocks()[blockID].Name, "parachute") != 0) {
         while (true) {
             animAssoc = RpAnimBlendGetNextAssociation(animAssoc);
             if (!animAssoc) {

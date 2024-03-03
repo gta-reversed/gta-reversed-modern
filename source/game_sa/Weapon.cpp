@@ -185,7 +185,7 @@ bool CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType we
             RpAnimBlendClumpGetFirstAssociation(victim->m_pRwClump, ANIMATION_800) ? ANIM_ID_FLOOR_HIT_F : ANIM_ID_FLOOR_HIT
         );
         if (floorHitAnim) {
-            floorHitAnim->SetFlag(ANIMATION_UNLOCK_LAST_FRAME, false);
+            floorHitAnim->SetFlag(ANIMATION_IS_FINISH_AUTO_REMOVE, false);
             floorHitAnim->Start();
         }
         return true;
@@ -247,7 +247,7 @@ bool CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType we
                 eventDmg.m_fAnimBlend
             );
             a->m_Speed = eventDmg.m_fAnimSpeed;
-            a->SetFlag(ANIMATION_STARTED);
+            a->SetFlag(ANIMATION_IS_PLAYING);
             break;
         }
         }
