@@ -321,6 +321,8 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
         m_bQuitAfterDraggingPedOut = false;
         return C(m_DraggedPed ? TASK_SIMPLE_WAIT_UNTIL_PED_OUT_CAR : TASK_FINISHED);
     }
+    case TASK_COMPLEX_FALL_AND_GET_UP:
+        return C(TASK_FINISHED);
     default:
         NOTSA_UNREACHABLE("SubTaskType = {}", tt);
     }
