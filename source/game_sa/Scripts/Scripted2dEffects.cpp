@@ -9,13 +9,24 @@ void CScripted2dEffects::InjectHooks() {
     RH_ScopedInstall(Init, 0x6FA6F0, { .reversed = false });
     RH_ScopedInstall(GetEffectPairs, 0x6FA840, { .reversed = false });
     RH_ScopedInstall(GetIndex, 0x6F9F60, { .reversed = false });
-    RH_ScopedInstall(AddScripted2DEffect, 0x6FA7C0, { .reversed = false });
+    RH_ScopedInstall(AddScripted2DEffect, 0x6FA7C0);
     RH_ScopedInstall(ReturnScripted2DEffect, 0x6F9E80, { .reversed = false });
 }
 
 // 0x6FA6F0
+// FIXME: Makes game crash for some reason
 void CScripted2dEffects::Init() {
-    plugin::Call<0x6FA6F0>();
+    for (auto i = 0u; i < NUM_SCRIPTED_2D_EFFECTS; i++) {
+        ms_activated[i]             = false;
+        ScriptReferenceIndex[i]     = 1;
+        ms_effectSequenceTaskIDs[i] = -1;
+        ms_userLists[i].m_bUseList  = false;
+        ms_useAgainFlags[i]         = false;
+        ms_radii[i]                 = -1.0f;
+        rng::fill(ms_userLists[i].m_UserTypes, -1);
+        rng::fill(ms_userLists[i].m_UserTypesByPedType, -1);
+        ms_effectPairs[i].Flush();
+    }
 }
 
 // 0x6FA840
@@ -35,7 +46,20 @@ int32 CScripted2dEffects::GetIndex(const C2dEffectBase* effect) {
 
 // 0x6FA7C0
 int32 CScripted2dEffects::AddScripted2DEffect(float radius) {
-    return plugin::CallAndReturn<int32, 0x6FA7C0, float>(radius);
+    const auto slot = FindFreeSlot();
+    if (slot == NUM_SCRIPTED_2D_EFFECTS) {
+        return NUM_SCRIPTED_2D_EFFECTS;
+    }
+
+    ms_activated[slot]             = true;
+    ms_effectSequenceTaskIDs[slot] = -1;
+    ms_userLists[slot].m_bUseList  = false;
+    ms_useAgainFlags[slot]         = false;
+    ms_radii[slot]                 = radius;
+    rng::fill(ms_userLists[slot].m_UserTypes, -1);
+    rng::fill(ms_userLists[slot].m_UserTypesByPedType, -1);
+    ms_effectPairs[slot].Flush();
+    return slot;
 }
 
 // 0x6F9E80
