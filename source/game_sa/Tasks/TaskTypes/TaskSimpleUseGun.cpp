@@ -12,7 +12,6 @@ void CTaskSimpleUseGun::InjectHooks() {
     //RH_ScopedInstall(Constructor, 0x61DE60);
     //RH_ScopedInstall(Destructor, 0x61DF30);
 
-    
     RH_ScopedGlobalInstall(FinishGunAnimCB, 0x61F3A0);
     RH_ScopedGlobalInstall(RequirePistolWhip, 0x61E200);
     RH_ScopedInstall(Reset, 0x624DC0);
@@ -101,7 +100,7 @@ void CTaskSimpleUseGun::FireGun(CPed* ped, bool isLeftHand) {
             ped->m_pedIK.bGunReachedTarget = g_ikChainMan.IsFacingTarget(ped, isLeftHand ? 2 : 1);
         }
         DoFireGun(origin, gunBarrelOffset);
-    } else { // Otherwise ped is probably not on screen anways, so just do something good enough
+    } else { // Otherwise ped is probably not on screen anyways, so just do something good enough
         CVector origin = ped->GetPosition();
         origin.z += 0.7f;
         DoFireGun(origin, origin);
