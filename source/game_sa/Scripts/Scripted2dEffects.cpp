@@ -7,10 +7,10 @@ void CScripted2dEffects::InjectHooks() {
     RH_ScopedCategory("Scripts");
 
     RH_ScopedInstall(Init, 0x6FA6F0, { .reversed = false });
-    RH_ScopedInstall(GetEffectPairs, 0x6FA840, { .reversed = false });
-    RH_ScopedInstall(GetIndex, 0x6F9F60, { .reversed = false });
+    RH_ScopedInstall(GetEffectPairs, 0x6FA840);
+    RH_ScopedInstall(GetIndex, 0x6F9F60);
     RH_ScopedInstall(AddScripted2DEffect, 0x6FA7C0);
-    RH_ScopedInstall(ReturnScripted2DEffect, 0x6F9E80, { .reversed = false });
+    RH_ScopedInstall(ReturnScripted2DEffect, 0x6F9E80);
 }
 
 // 0x6FA6F0
@@ -31,8 +31,6 @@ void CScripted2dEffects::Init() {
 
 // 0x6FA840
 CScriptedEffectPairs* CScripted2dEffects::GetEffectPairs(const C2dEffect* effect) {
-    return plugin::CallAndReturn<CScriptedEffectPairs*, 0x6FA840, const C2dEffect*>(effect);
-
     return &ms_effectPairs[GetIndex(effect)];
 }
 
@@ -64,8 +62,6 @@ int32 CScripted2dEffects::AddScripted2DEffect(float radius) {
 
 // 0x6F9E80
 void CScripted2dEffects::ReturnScripted2DEffect(int32 index) {
-    return plugin::Call<0x6F9E80, int32>(index);
-
     ms_activated[index] = false;
     return GetPedAttractorManager()->RemoveEffect(&ms_effects[index]);
 }
