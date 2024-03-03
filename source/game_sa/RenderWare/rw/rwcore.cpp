@@ -779,8 +779,8 @@ void RwD3D9DeletePixelShader() {
     ((void(__cdecl *)(void))0x7FACF0)();
 }
 
-const D3DCAPS9* RwD3D9GetCaps() {
-    return ((const D3DCAPS9*(__cdecl *)(void))0x7FAD20)();
+D3DCAPS9* RwD3D9GetCaps() {
+    return ((D3DCAPS9*(__cdecl *)(void))0x7FAD20)();
 }
 
 RwBool RwD3D9CameraIsSphereFullyInsideFrustum(const void* camera, const void* sphere) {
