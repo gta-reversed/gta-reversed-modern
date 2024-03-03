@@ -14,8 +14,7 @@ void CStencilShadows::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x70F9E0);
-    RH_ScopedInstall(Destroy, 0x711310, {.reversed=false});
-    RH_ScopedInstall(Shutdown, 0x711390, {.reversed=false});
+    RH_ScopedInstall(Shutdown, 0x711390);
     RH_ScopedInstall(Process, 0x711D90);
     RH_ScopedInstall(GraphicsHighQuality, 0x70F9B0, {.reversed=false});
     RH_ScopedInstall(UpdateHierarchy, 0x710BC0, {.reversed=false});
@@ -47,13 +46,13 @@ void CStencilShadows::Init() {
     }
 }
 
-// 0x711310
-void CStencilShadows::Destroy() {
-}
-
 // 0x711390
 void CStencilShadows::Shutdown() {
-    plugin::Call<0x711390>();
+    for (auto* obj = pFirstActiveStencilShadowObject; obj;) {
+        auto* next = obj->m_pNext;
+        obj->Destroy();
+        obj = next;
+    }
 }
 
 // 0x710D50

@@ -13,7 +13,7 @@ public:
     eStencilShadowObjType m_Type;
     uint32                m_FaceID;
     uint32                m_SizeOfShadowFacesData;
-    uint32                m_ShadowFacesData;
+    CVector*              m_ShadowFacesData;
     CStencilShadowObject* m_pNext;
     CStencilShadowObject* m_pPrev;
 
@@ -22,6 +22,8 @@ public:
 
     CStencilShadowObject() = default; // 0x70F8D0
     ~CStencilShadowObject() = default; // 0x70F8E0
+
+    void Destroy();
 
 private:
     CStencilShadowObject* Constructor() {
