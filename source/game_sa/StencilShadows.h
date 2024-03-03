@@ -25,5 +25,7 @@ public:
     static void RenderStencilShadows();
     static void RenderForVehicle(CStencilShadowObject*);
     static void RenderForObject(CStencilShadowObject*);
-    static void Render();
+    static void Render(const CRGBA& color);
+
+    static void sub_710CC0(int32 indices, int32 vertices);
 };

@@ -23,6 +23,7 @@ void CStencilShadows::InjectHooks() {
     RH_ScopedInstall(RenderForVehicle, 0x70FAE0, {.reversed=false});
     RH_ScopedInstall(RenderForObject, 0x710310, {.reversed=false});
     RH_ScopedInstall(Render, 0x710D50, {.reversed=false});
+    RH_ScopedInstall(sub_710CC0, 0x710CC0);
 }
 
 // 0x70F9E0
@@ -56,8 +57,61 @@ void CStencilShadows::Shutdown() {
 }
 
 // 0x710D50
-void CStencilShadows::Render() {
+void CStencilShadows::Render(const CRGBA& color) {
     plugin::Call<0x710D50>();
+
+    /*
+    uiTempBufferIndicesStored = 0;
+    uiTempBufferVerticesStored = 0;
+
+    const auto intColor = color.ToInt();
+    for (auto* shadow = pFirstActiveStencilShadowObject; shadow; shadow = shadow->m_pNext) {
+        auto*      facePts  = shadow->m_ShadowFacesData;
+        const auto numFaces = shadow->m_SizeOfShadowFacesData / sizeof(*facePts);
+         
+        for (auto face = 0u; face < numFaces; face++, facePts += 6) {
+            auto points = std::span{ facePts, 6 };
+
+            sub_710CC0(6, 6);
+
+            auto nextVert = std::exchange(uiTempBufferVerticesStored, uiTempBufferVerticesStored + 6);
+            auto nextIdx  = std::exchange(uiTempBufferIndicesStored, uiTempBufferIndicesStored + 6);
+            for (auto i = 0; i < 6; i++) {
+                auto& vert     = TempBufferVertices.m_3d[nextVert + i];
+                vert.objVertex = points[0];
+                vert.color     = intColor;
+
+                aTempBufferIndices[nextIdx + i] = nextIdx + i;
+            }
+        }
+
+        // what the fuck?
+        // TODO: maybe this just boils down to size > 0 && size % 2 == 0
+        const auto v14 = (0x55555556ull * shadow->m_SizeOfShadowFacesData) >> 32;
+        if (((v14 & 0x80000000) != 0) + (v14 & 1) != 0) {
+        }
+    }
+    */
+}
+
+// 0x710CC0
+void CStencilShadows::sub_710CC0(int32 indices, int32 vertices) {
+    if (uiTempBufferIndicesStored + indices < TOTAL_TEMP_BUFFER_INDICES
+        && uiTempBufferVerticesStored + vertices < TOTAL_TEMP_BUFFER_3DVERTICES) {
+        return;
+    }
+
+    if (!uiTempBufferIndicesStored || !uiTempBufferVerticesStored) {
+        return;
+    }
+
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
+    LittleTest();
+    if (RwIm3DTransform(TempBufferVertices.m_3d, uiTempBufferVerticesStored, nullptr, rwIM3D_VERTEXXYZ | rwIM3D_VERTEXRGBA)) {
+        RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, aTempBufferIndices, uiTempBufferIndicesStored);
+        RwIm3DEnd();
+    }
+    uiTempBufferVerticesStored = uiTempBufferIndicesStored = 0;
 }
 
 // 0x7113B0
