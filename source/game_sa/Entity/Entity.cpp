@@ -2333,7 +2333,7 @@ bool CEntity::IsEntityOccluded()
 
     CVector vecScreenPos;
     float fScreenX, fScreenY;
-    if (!COcclusion::NumActiveOccluders || !CalcScreenCoors(vecCenter, &vecScreenPos, &fScreenX, &fScreenY))
+    if (!COcclusion::NumActiveOccluders || !CalcScreenCoors(vecCenter, vecScreenPos, fScreenX, fScreenY))
         return false;
 
     auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
@@ -2361,7 +2361,7 @@ bool CEntity::IsEntityOccluded()
             CVector vecScreen;
 
             auto vecMin = GetMatrix().TransformPoint(bounding.m_vecMin);
-            if (!CalcScreenCoors(vecMin, &vecScreen)
+            if (!CalcScreenCoors(vecMin, vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
                 || !activeOccluder.IsPointBehindOccluder(vecMin, 0.0F)
             ) {
@@ -2370,7 +2370,7 @@ bool CEntity::IsEntityOccluded()
 
             auto vecMax = GetMatrix().TransformPoint(bounding.m_vecMax);
             if (bInView
-                || !CalcScreenCoors(vecMax, &vecScreen)
+                || !CalcScreenCoors(vecMax, vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
                 || !activeOccluder.IsPointBehindOccluder(vecMax, 0.0F)
             ) {
@@ -2379,7 +2379,7 @@ bool CEntity::IsEntityOccluded()
 
             auto vecDiag1 = GetMatrix().TransformVector(CVector(bounding.m_vecMin.x, bounding.m_vecMax.y, bounding.m_vecMax.z));
             if (bInView
-                || !CalcScreenCoors(vecDiag1, &vecScreen)
+                || !CalcScreenCoors(vecDiag1, vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
                 || !activeOccluder.IsPointBehindOccluder(vecDiag1, 0.0F)
             ) {
@@ -2388,7 +2388,7 @@ bool CEntity::IsEntityOccluded()
 
             auto vecDiag2 = GetMatrix().TransformVector(CVector(bounding.m_vecMax.x, bounding.m_vecMin.y, bounding.m_vecMin.z));
             if (!bInView
-                && CalcScreenCoors(vecDiag2, &vecScreen)
+                && CalcScreenCoors(vecDiag2, vecScreen)
                 && activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
                 && activeOccluder.IsPointBehindOccluder(vecDiag2, 0.0F)
             ) {
@@ -2402,7 +2402,7 @@ bool CEntity::IsEntityOccluded()
                     return true;
 
                 auto vecDiag3 = GetMatrix().TransformVector(CVector(bounding.m_vecMin.x, bounding.m_vecMin.y, bounding.m_vecMax.z));
-                if (!CalcScreenCoors(vecDiag3, &vecScreen)
+                if (!CalcScreenCoors(vecDiag3, vecScreen)
                     || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
                     || !activeOccluder.IsPointBehindOccluder(vecDiag3, 0.0F)) {
 
@@ -2411,7 +2411,7 @@ bool CEntity::IsEntityOccluded()
 
                 auto vecDiag4 = GetMatrix().TransformVector(CVector(bounding.m_vecMax.x, bounding.m_vecMin.y, bounding.m_vecMax.z));
                 if (!bInView
-                    && CalcScreenCoors(vecDiag4, &vecScreen)
+                    && CalcScreenCoors(vecDiag4, vecScreen)
                     && activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
                     && activeOccluder.IsPointBehindOccluder(vecDiag4, 0.0F)
                 ) {

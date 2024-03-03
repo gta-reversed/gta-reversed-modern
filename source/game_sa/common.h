@@ -252,8 +252,8 @@ bool GraphicsLowQuality();
  * Writes given raster to PNG file using RtPNGImageWrite
  */
 void WriteRaster(RwRaster* raster, const char* filename);
-bool CalcScreenCoors(const CVector& in, CVector* out, float* screenX, float* screenY);
-bool CalcScreenCoors(const CVector& in, CVector* out);
+bool CalcScreenCoors(const CVector& in, CVector& out, float& screenX, float& screenY);
+bool CalcScreenCoors(const CVector& in, CVector& out);
 bool DoesInfiniteLineTouchScreen(float baseX, float baseY, float deltaX, float deltaY);
 bool IsPointInsideLine(float fLineBaseX, float fLineBaseY, float fDeltaX, float fDeltaY, float fTestPointX, float fTestPointY, float fRadius);
 

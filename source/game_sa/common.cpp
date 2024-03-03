@@ -26,8 +26,8 @@ void InjectCommonHooks() {
     RH_ScopedGlobalInstall(MakeUpperCase, 0x7186E0);
     RH_ScopedGlobalInstall(AsciiToGxtChar, 0x718600);
     RH_ScopedGlobalInstall(WriteRaster, 0x005A4150);
-    RH_ScopedGlobalOverloadedInstall(CalcScreenCoors, "VVff", 0x71DA00, bool(*)(const CVector&, CVector*, float*, float*), { .reversed = false });
-    RH_ScopedGlobalOverloadedInstall(CalcScreenCoors, "VV", 0x71DAB0, bool(*)(const CVector&, CVector*), { .reversed = false });
+    RH_ScopedGlobalOverloadedInstall(CalcScreenCoors, "VVff", 0x71DA00, bool(*)(const CVector&, CVector&, float&, float&), { .reversed = true });
+    RH_ScopedGlobalOverloadedInstall(CalcScreenCoors, "VV", 0x71DAB0, bool(*)(const CVector&, CVector&), { .reversed = true });
     RH_ScopedGlobalInstall(LittleTest, 0x541330);
 }
 
@@ -88,23 +88,17 @@ void WriteRaster(RwRaster* raster, const char* filename) {
 }
 
 // 0x71DA00
-bool CalcScreenCoors(const CVector& in, CVector* out, float* screenX, float* screenY) {
-    return plugin::CallAndReturn<bool, 0x71DA00, const CVector&, CVector*, float*, float*>(in, out, screenX, screenY);
-
-    // TODO: Figure out how to get screen size..
-    CVector screen =  TheCamera.m_mViewMatrix.TransformPoint(in);
+bool CalcScreenCoors(const CVector& in, CVector& out, float& screenX, float& screenY) {
+    const auto screen = TheCamera.GetViewMatrix().TransformPoint(in);
     if (screen.z <= 1.0f)
         return false;
 
     const float depth = 1.0f / screen.z;
 
-    CVector2D screenSize{};
-
-    *out = screen * depth * CVector(screenSize.x, screenSize.y, 1.0f);
-
-    *screenX = screenSize.x * depth / CDraw::ms_fFOV * 70.0f;
-    *screenY = screenSize.y * depth / CDraw::ms_fFOV * 70.0f;
-
+    out.x *= SCREEN_WIDTH * depth;
+    out.y *= SCREEN_HEIGHT * depth;
+    screenX = SCREEN_WIDTH * depth / CDraw::ms_fFOV * 70.0f;
+    screenY = SCREEN_HEIGHT * depth / CDraw::ms_fFOV * 70.0f;
     return true;
 }
 
@@ -115,16 +109,14 @@ bool CalcScreenCoors(const CVector& in, CVector* out, float* screenX, float* scr
 * @param out out The 2D screen position (Also includes the depth in the `z` component)
 * @returns False if the depth was <= 1 (in which case the `x, y` positions are not not calculated, but `z` is)
 */
-bool CalcScreenCoors(const CVector& in, CVector* out) {
-    return plugin::CallAndReturn<bool, 0x71DAB0, const CVector&, CVector*>(in, out);
-
-    *out = TheCamera.GetViewMatrix().TransformPoint(in);
-    if (out->z <= 1.0f)
+bool CalcScreenCoors(const CVector& in, CVector& out) {
+    out = TheCamera.GetViewMatrix().TransformPoint(in);
+    if (out.z <= 1.0f)
         return false;
 
-    const auto depthRecp = 1.0f / out->z;
-    out->x = SCREEN_WIDTH * depthRecp * out->x;
-    out->y = SCREEN_HEIGHT * depthRecp * out->y;
+    const auto depthRecp = 1.0f / out.z;
+    out.x = SCREEN_WIDTH * depthRecp * out.x;
+    out.y = SCREEN_HEIGHT * depthRecp * out.y;
 
     return true;
 }

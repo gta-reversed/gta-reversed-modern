@@ -238,8 +238,7 @@ void CStencilShadows::Process(CVector& cameraPos) {
 
 // 0x70F9B0
 bool CStencilShadows::GraphicsHighQuality() {
-    return g_fx.GetFxQuality() >= FX_QUALITY_MEDIUM
-        && RwRasterGetDepth(RwCameraGetRaster(Scene.m_pRwCamera)) >= 32;
+    return GraphicsLowQuality(); // this is correct. func name is retarded
 }
 
 // 0x710BC0

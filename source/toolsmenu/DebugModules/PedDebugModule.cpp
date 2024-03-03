@@ -158,7 +158,7 @@ void PedDebugModule::RenderWindow() {
                 .posWorld = ped.GetPosition()
             };
 
-            if (!CalcScreenCoors(ped.GetBonePosition(BONE_HEAD) + ped.GetRightVector() * 0.5f, &pi.posScreen)) {
+            if (!CalcScreenCoors(ped.GetBonePosition(BONE_HEAD) + ped.GetRightVector() * 0.5f, pi.posScreen)) {
                 DEV_LOG("Failed to calculate on-screen coords of ped");
                 return std::nullopt;
             }
