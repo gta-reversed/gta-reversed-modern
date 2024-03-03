@@ -17,7 +17,7 @@ void CStencilShadows::InjectHooks() {
     RH_ScopedInstall(Shutdown, 0x711390);
     RH_ScopedInstall(Process, 0x711D90);
     RH_ScopedInstall(GraphicsHighQuality, 0x70F9B0, {.reversed=false});
-    RH_ScopedInstall(UpdateHierarchy, 0x710BC0, {.reversed=false});
+    RH_ScopedInstall(UpdateHierarchy, 0x710BC0);
     RH_ScopedInstall(RegisterStencilShadows, 0x711760, {.reversed=false});
     RH_ScopedInstall(RenderStencilShadows, 0x7113B0, {.reversed=false});
     RH_ScopedInstall(RenderForVehicle, 0x70FAE0, {.reversed=false});
@@ -188,7 +188,30 @@ bool CStencilShadows::GraphicsHighQuality() {
         && RwRasterGetDepth(RwCameraGetRaster(Scene.m_pRwCamera)) >= 32;
 }
 
-void CStencilShadows::UpdateHierarchy() {
+// 0x710BC0
+void CStencilShadows::UpdateHierarchy(CStencilShadowObject*& firstAvailable, CStencilShadowObject*& firstActive, CStencilShadowObject* newOne) {
+    if (auto* prev = newOne->m_pPrev) {
+        auto* next = newOne->m_pNext;
+        if (next) {
+            next->m_pPrev = prev;
+            newOne->m_pPrev->m_pNext = newOne->m_pNext;
+        } else {
+            prev->m_pNext = nullptr;
+        }
+    } else {
+        auto* next     = newOne->m_pNext;
+        firstAvailable = next;
+        if (next) {
+            next->m_pPrev = nullptr;
+        }
+    }
+    newOne->m_pNext = firstActive;
+    newOne->m_pPrev = nullptr;
+    firstActive     = newOne;
+
+    if (newOne->m_pNext) {
+        newOne->m_pNext->m_pPrev = newOne;
+    }
 }
 
 // 0x711760

@@ -19,7 +19,7 @@ public:
     // NOTSA/FIX_BUGS: It was named GraphicsLowQuality for some reason
     static bool GraphicsHighQuality();
 
-    static void UpdateHierarchy();
+    static void UpdateHierarchy(CStencilShadowObject*& firstAvailable, CStencilShadowObject*& firstActive, CStencilShadowObject* newOne);
     static void RegisterStencilShadows(CVector& cameraPos, bool doNotCreateNew);
 
     static void RenderStencilShadows();
