@@ -52,6 +52,8 @@ CCopPed* CSetPiece::TryToGenerateCopPed(CVector2D posn) {
 
     auto* cop = new CCopPed(0);
     cop->SetPosn(point);
+
+    NOTSA_LOG_DEBUG("generated cop at ({}, {}, {}) dist to player {:.2f}", cop->GetPosition().x, cop->GetPosition().y, cop->GetPosition().z, DistanceBetweenPoints(FindPlayerCoors(), cop->GetPosition()));
     CWorld::Add(cop);
     return cop;
 }
@@ -106,6 +108,7 @@ CVehicle* CSetPiece::TryToGenerateCopCar(CVector2D posn, CVector2D target) {
 
     if (!numCollidingObjects) {
         car->ChangeLawEnforcerState(true);
+        NOTSA_LOG_DEBUG("generated cop car at ({}, {}, {}) dist to player {:.2f}", car->GetPosition().x, car->GetPosition().y, car->GetPosition().z, DistanceBetweenPoints(FindPlayerCoors(), car->GetPosition()));
         CWorld::Add(car);
     } else {
         delete std::exchange(car, nullptr);
@@ -228,24 +231,7 @@ void CSetPiece::Update() {
             break;
         }
 
-        if ((FindPlayerCoors() - GetSpawnCoord1()).Dot(FindPlayerSpeed()) >= 0.0f) {
-            break;
-        }
-
-        if (!SetupCar(
-            GetSpawnCoord1(),
-            GetTargetCoord1(),
-            DRIVING_STYLE_PLOUGH_THROUGH,
-            MISSION_BLOCKPLAYER_FORWARDANDBACK,
-            16,
-            10'000,
-            true,
-            true
-        )) {
-            break;
-        }
-
-        m_nLastGenerationTime = CTimer::GetTimeInMS();
+        SetupQuickCar(GetSpawnCoord1(), GetTargetCoord1(), DRIVING_STYLE_PLOUGH_THROUGH, MISSION_BLOCKPLAYER_FORWARDANDBACK);
         break;
     }
     case SETPIECE_1CAR_MEDIUM_SPEED: {
@@ -253,24 +239,7 @@ void CSetPiece::Update() {
             break;
         }
 
-        if ((FindPlayerCoors() - GetSpawnCoord1()).Dot(FindPlayerSpeed()) >= 0.0f) {
-            break;
-        }
-
-        if (!SetupCar(
-            GetSpawnCoord1(),
-            GetTargetCoord1(),
-            DRIVING_STYLE_AVOID_CARS,
-            MISSION_RAMPLAYER_CLOSE,
-            16,
-            10'000,
-            true,
-            true
-        )) {
-            break;
-        }
-
-        m_nLastGenerationTime = CTimer::GetTimeInMS();
+        SetupQuickCar(GetSpawnCoord1(), GetTargetCoord1(), DRIVING_STYLE_AVOID_CARS, MISSION_RAMPLAYER_CLOSE);
         break;
     }
     case SETPIECE_1PED:
@@ -281,7 +250,6 @@ void CSetPiece::Update() {
         if (!SetupCop(GetSpawnCoord1(), GetTargetCoord1())) {
             break;
         }
-
         m_nLastGenerationTime = CTimer::GetTimeInMS();
         break;
     case SETPIECE_2PEDS: {
@@ -299,7 +267,6 @@ void CSetPiece::Update() {
             delete cop1;
             break;
         }
-
         m_nLastGenerationTime = CTimer::GetTimeInMS();
         break;
     }
@@ -311,7 +278,6 @@ void CSetPiece::Update() {
         // NOTE: No check of the first car
         SetupQuickCar(GetSpawnCoord1(), GetTargetCoord1(), DRIVING_STYLE_PLOUGH_THROUGH, MISSION_BLOCKPLAYER_FORWARDANDBACK);
         SetupQuickCar(GetSpawnCoord2(), GetTargetCoord2(), DRIVING_STYLE_PLOUGH_THROUGH, MISSION_BLOCKPLAYER_FORWARDANDBACK);
-        /* m_nLastGenerationTime updated by SetupQuickCar */
         break;
     }
     case SETPIECE_2CARS_QUICK_SPEED: {
@@ -322,7 +288,6 @@ void CSetPiece::Update() {
         // NOTE: No check of the first car
         SetupQuickCar(GetSpawnCoord1(), GetTargetCoord1(), DRIVING_STYLE_AVOID_CARS, MISSION_RAMPLAYER_CLOSE);
         SetupQuickCar(GetSpawnCoord2(), GetTargetCoord2(), DRIVING_STYLE_AVOID_CARS, MISSION_RAMPLAYER_CLOSE);
-        /* m_nLastGenerationTime updated by SetupQuickCar */
         break;
     }
     default:

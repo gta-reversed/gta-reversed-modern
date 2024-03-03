@@ -20,13 +20,13 @@ enum eSetPieceType : uint8 {
 
 class CSetPiece {
 public:
-    int32                      m_nLastGenerationTime{};
-    FixedRect<int16, 4.0f>     m_AreaRect;
-    FixedVector2D<int16, 4.0f> m_SpawnCoord1{};
-    FixedVector2D<int16, 4.0f> m_SpawnCoord2{};
-    FixedVector2D<int16, 4.0f> m_TargetCoord1{};
-    FixedVector2D<int16, 4.0f> m_TargetCoord2{};
-    eSetPieceType              m_nType{ SETPIECE_NONE };
+    int32                        m_nLastGenerationTime{};
+    FixedRect<int16, 4.0f, true> m_AreaRect;
+    FixedVector2D<int16, 4.0f>   m_SpawnCoord1{};
+    FixedVector2D<int16, 4.0f>   m_SpawnCoord2{};
+    FixedVector2D<int16, 4.0f>   m_TargetCoord1{};
+    FixedVector2D<int16, 4.0f>   m_TargetCoord2{};
+    eSetPieceType                m_nType{ SETPIECE_NONE };
     char  _pad1D[3];
 
 public:
@@ -42,16 +42,16 @@ public:
     CVector2D GetSpawnCoord2() const { return m_SpawnCoord2; }
     CVector2D GetTargetCoord1() const { return m_TargetCoord1; }
     CVector2D GetTargetCoord2() const { return m_TargetCoord2; }
-    void SetCornerA(CVector2D c) { m_AreaRect.left = c.x; m_AreaRect.top = c.y; }
-    void SetCornerB(CVector2D c) { m_AreaRect.right = c.x; m_AreaRect.bottom = c.y; }
+    void SetCornerA(CVector2D c) { m_AreaRect.x1 = c.x; m_AreaRect.y1 = c.y; }
+    void SetCornerB(CVector2D c) { m_AreaRect.x2 = c.x; m_AreaRect.y2 = c.y; }
     void SetSpawnCoord1(CVector2D c) { m_SpawnCoord1 = c; }
     void SetSpawnCoord2(CVector2D c) { m_SpawnCoord2 = c; }
     void SetTargetCoord1(CVector2D c) { m_TargetCoord1 = c; }
     void SetTargetCoord2(CVector2D c) { m_TargetCoord2 = c; }
-    float GetCornerAX() const { return m_AreaRect.left; }
-    float GetCornerAY() const { return m_AreaRect.top; }
-    float GetCornerBX() const { return m_AreaRect.right; }
-    float GetCornerBY() const { return m_AreaRect.bottom; }
+    float GetCornerAX() const { return m_AreaRect.x1; }
+    float GetCornerAY() const { return m_AreaRect.y1; }
+    float GetCornerBX() const { return m_AreaRect.x2; }
+    float GetCornerBY() const { return m_AreaRect.y2; }
     float GetSpawnCoord1X() const { return m_SpawnCoord1.x; }
     float GetSpawnCoord1Y() const { return m_SpawnCoord1.y; }
     float GetSpawnCoord2X() const { return m_SpawnCoord2.x; }

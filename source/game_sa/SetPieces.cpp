@@ -41,6 +41,10 @@ void CSetPieces::Init() {
 bool CSetPieces::Load() {
     LoadDataFromWorkBuffer(NumSetPieces);
     LoadDataFromWorkBuffer(aSetPieces);
+
+    for (auto& sp : aSetPieces) {
+        volatile CRect _{ sp.m_AreaRect };
+    }
     return true;
 }
 
