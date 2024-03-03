@@ -35,7 +35,7 @@ void CPhysical::InjectHooks()
     RH_ScopedInstall(ApplyTurnForce, 0x542A50);
     RH_ScopedInstall(ApplyForce, 0x542B50);
     RH_ScopedInstall(GetSpeed, 0x542CE0);
-    RH_ScopedInstall(ApplyMoveSpeed, 0x542DD0, { .reversed = false }); // Go to the function definition and see why this is commented
+    RH_ScopedInstall(ApplyMoveSpeed, 0x542DD0);
     RH_ScopedInstall(ApplyTurnSpeed, 0x542E20);
     RH_ScopedOverloadedInstall(ApplyMoveForce, "vec", 0x5429F0, void(CPhysical::*)(CVector force));
     RH_ScopedInstall(SetDamagedPieceRecord, 0x5428C0);
@@ -799,15 +799,6 @@ CVector CPhysical::GetSpeed(CVector point)
     return speed;
 }
 
-/*
-    The code for this function is fine, but it will crash if we hook it. This function should be
-    only hooked after reversing all references to this function:
-    CPhysical::ApplySpeed (done)
-    CWorld::Process (done)
-    CAutoMobile::ProcessControlCollisionCheck
-    CBike::ProcessControlCollisionCheck
-    CTrain::ProcessControl (Done)
-*/
 void CPhysical::ApplyMoveSpeed()
 {
     if (physicalFlags.bDontApplySpeed || physicalFlags.bDisableMoveForce)
