@@ -33,22 +33,38 @@ void InjectCommonHooks() {
 
 // 0x54ECE0
 void TransformPoint(RwV3d& point, const CSimpleTransform& placement, const RwV3d& vecPos) {
-    plugin::Call<0x54ECE0, RwV3d&, const CSimpleTransform&, const RwV3d&>(point, placement, vecPos);
+    const auto cos = std::cos(placement.m_fHeading), sin = std::sin(placement.m_fHeading);
+
+    point.x = cos * vecPos.x - sin * vecPos.y + placement.m_vPosn.x;
+    point.y = sin * vecPos.x + cos * vecPos.y + placement.m_vPosn.y;
+    point.z = vecPos.z + placement.m_vPosn.z;
 }
 
 // 0x54EEA0
-void TransformVectors(RwV3d* vecsOut, int32 numVectors, const CMatrix& matrix, const RwV3d* vecsin) {
-    plugin::Call<0x54EEA0, RwV3d*, int32, const CMatrix&, const RwV3d*>(vecsOut, numVectors, matrix, vecsin);
+void TransformVectors(RwV3d* vecsOut, int32 numVectors, const CMatrix& matrix, const RwV3d* vecsIn) {
+    matrix.CopyToRwMatrix(CGame::m_pWorkingMatrix1);
+    RwMatrixUpdate(CGame::m_pWorkingMatrix1);
+
+    for (auto i = 0; i < numVectors; i++) {
+        RwV3dTransformVector(vecsOut++, vecsIn++, CGame::m_pWorkingMatrix1);
+    }
 }
 
 // 0x54EE30
-void TransformVectors(RwV3d* vecsOut, int32 numVectors, const CSimpleTransform& transform, const RwV3d* vecsin) {
-    plugin::Call<0x54EE30, RwV3d*, int32, const CSimpleTransform&, const RwV3d*>(vecsOut, numVectors, transform, vecsin);
+void TransformVectors(RwV3d* vecsOut, int32 numVectors, const CSimpleTransform& transform, const RwV3d* vecsIn) {
+    for (auto i = 0; i < numVectors; i++) {
+        TransformPoint(*vecsOut++, transform, *vecsIn++);
+    }
 }
 
 // 0x54EEF0
-void TransformPoints(RwV3d* pointOut, int count, const RwMatrix& transformMatrix, RwV3d* pointIn) {
-    plugin::Call<0x54EEF0, RwV3d*, int, const RwMatrix&, RwV3d*>(pointOut, count, transformMatrix, pointIn);
+void TransformPoints(RwV3d* pointOut, int count, const CMatrix& transformMatrix, RwV3d* pointIn) {
+    transformMatrix.CopyToRwMatrix(CGame::m_pWorkingMatrix1);
+    RwMatrixUpdate(CGame::m_pWorkingMatrix1);
+
+    for (auto i = 0; i < count; i++) {
+        RwV3dTransformPoint(pointOut++, pointIn++, CGame::m_pWorkingMatrix1);
+    }
 }
 
 // 0x7186E0
