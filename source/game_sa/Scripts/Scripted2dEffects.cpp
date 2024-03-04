@@ -45,7 +45,7 @@ int32 CScripted2dEffects::GetIndex(const C2dEffectBase* effect) {
 // 0x6FA7C0
 int32 CScripted2dEffects::AddScripted2DEffect(float radius) {
     const auto slot = FindFreeSlot();
-    if (slot == NUM_SCRIPTED_2D_EFFECTS) {
+    if (slot == -1) {
         return NUM_SCRIPTED_2D_EFFECTS;
     }
 

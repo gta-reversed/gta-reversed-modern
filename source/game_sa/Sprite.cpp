@@ -51,7 +51,7 @@ void CSprite::FlushSpriteBuffer() {
     }
 
     if (m_bFlushSpriteBufferSwitchZTest) {
-        RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(false));
+        RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(FALSE));
     }
 
     RwIm2DRenderIndexedPrimitive(
@@ -63,7 +63,7 @@ void CSprite::FlushSpriteBuffer() {
     );
 
     if (m_bFlushSpriteBufferSwitchZTest) {
-        RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(true));
+        RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(TRUE));
     }
 
     nSpriteBufferIndex = 0;
@@ -123,16 +123,11 @@ void CSprite::Set4Vertices2D(RwIm2DVertex* verts, const CRect& rt, const CRGBA& 
 
         vert.emissiveColor = [&] {
             switch (i) {
-            case 0:
-                return bottomLeftColor.ToInt();
-            case 1:
-                return bottomRightColor.ToInt();
-            case 2:
-                return topRightColor.ToInt();
-            case 3:
-                return topLeftColor.ToInt();
-            default:
-                NOTSA_UNREACHABLE();
+            case 0: return bottomLeftColor.ToInt();
+            case 1: return bottomRightColor.ToInt();
+            case 2: return topRightColor.ToInt();
+            case 3: return topLeftColor.ToInt();
+            default: NOTSA_UNREACHABLE();
             }
         }();
     }

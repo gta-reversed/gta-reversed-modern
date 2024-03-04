@@ -127,8 +127,9 @@ bool CalcScreenCoors(const CVector& in, CVector& out, float& screenX, float& scr
 */
 bool CalcScreenCoors(const CVector& in, CVector& out) {
     out = TheCamera.GetViewMatrix().TransformPoint(in);
-    if (out.z <= 1.0f)
+    if (out.z <= 1.0f) {
         return false;
+    }
 
     const auto depthRecp = 1.0f / out.z;
     out.x = SCREEN_WIDTH * depthRecp * out.x;

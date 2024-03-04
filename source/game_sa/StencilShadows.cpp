@@ -210,8 +210,8 @@ void CStencilShadows::Process(CVector& cameraPos) {
     RegisterStencilShadows(cameraPos, ++s_RegisterShadowCounter % 8);
 
     // why do we even do this?
-    s_ShadowTrianglePointsUnk = (RxVertexIndex*)CMemoryMgr::Malloc(0x3000 * sizeof(RxVertexIndex));
-    s_ShadowTrianglePoints = (CVector*)CMemoryMgr::Malloc(2048 * sizeof(CVector));
+    s_ShadowTrianglePointsUnk = (RxVertexIndex*)CMemoryMgr::Malloc(12'288 * sizeof(RxVertexIndex));
+    s_ShadowTrianglePoints = (CVector*)CMemoryMgr::Malloc(2'048 * sizeof(CVector));
     s_TransformedShadowTrianglePoints = (CVector*)CMemoryMgr::Malloc(2'048 * sizeof(CVector));
 
     auto i{ 0 };

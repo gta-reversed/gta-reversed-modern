@@ -81,13 +81,13 @@ public:
     static void Save() { } // NOP
 
     // NOTSA
-    static int FindFreeSlot() {
+    static int32 FindFreeSlot() {
         for (auto&& [i, activated] : notsa::enumerate(ms_activated)) {
             if (!activated) {
                 return i;
             }
         }
 
-        return NUM_SCRIPTED_2D_EFFECTS;
+        return -1;
     }
 };

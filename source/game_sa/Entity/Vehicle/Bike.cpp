@@ -589,7 +589,7 @@ void CBike::RemoveRefsToVehicle(CEntity* entityToRemove) {
 
 // 0x6B6620
 void CBike::ProcessControlCollisionCheck(bool applySpeed) {
-    const auto oldMat = GetMatrix();
+    const CMatrix oldMat = GetMatrix();
     m_bIsStuck = false;
     SkipPhysics();
     physicalFlags.bSkipLineCol     = false;

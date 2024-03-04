@@ -56,10 +56,9 @@ void ProcSurfaceInfo_c::Exit() {
 
         m_Objects.RemoveItem(it);
         g_procObjMan.m_ObjectsList.AddItem(it);
+        it->m_Obj->DeleteRwObject();
         CWorld::Remove(it->m_Obj);
-        if (it->m_Obj) {
-            delete std::exchange(it->m_Obj, nullptr);
-        }
+        delete std::exchange(it->m_Obj, nullptr);
 
         it = next;
     }
