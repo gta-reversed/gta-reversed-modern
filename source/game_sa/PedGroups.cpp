@@ -6,7 +6,19 @@ void CPedGroups::InjectHooks() {
     RH_ScopedClass(CPedGroups);
     RH_ScopedCategory("Ped Groups");
 
-
+    RH_ScopedInstall(AddGroup, 0x5FB800, {.reversed=false});
+    RH_ScopedInstall(RemoveGroup, 0x5FB870, {.reversed=false});
+    RH_ScopedInstall(RemoveAllFollowersFromGroup, 0x5FB8A0, {.reversed=false});
+    RH_ScopedInstall(Init, 0x5FB8C0, {.reversed=false});
+    RH_ScopedInstall(RegisterKillByPlayer, 0x5F7E30);
+    RH_ScopedInstall(CleanUpForShutDown, 0x5FB930, {.reversed=false});
+    RH_ScopedInstall(IsGroupLeader, 0x5F7E40, {.reversed=false});
+    RH_ScopedInstall(GetPedsGroup, 0x5F7E80, {.reversed=false});
+    RH_ScopedInstall(GetGroupId, 0x5F7EE0, {.reversed=false});
+    RH_ScopedInstall(Process, 0x5FC800, {.reversed=false});
+    RH_ScopedInstall(AreInSameGroup, 0x5F7F40, {.reversed=false});
+    RH_ScopedInstall(IsInPlayersGroup, 0x5F7F10, {.reversed=false});
+    // RH_ScopedInstall(GetGroup, 0x0, {.reversed=false});
 }
 
 #ifdef ANDROID
