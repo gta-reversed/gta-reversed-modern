@@ -87,24 +87,6 @@ bool IsForegroundApp() {
     return ForegroundApp;
 }
 
-// 0x746480
-// FIX_BUGS: Vanilla version was broken (on purpose?)
-const char** CommandLineToArgv(char* cmdLine, int* argCount) {
-    // Very hacky but it's better than reimplementing the wheel imo.
-    static std::vector<std::string> args{};
-
-    auto** argvw = CommandLineToArgvW(UTF8ToUnicode(cmdLine).c_str(), argCount);
-    const char** argv = (const char**)malloc((*argCount + 1) * sizeof(char*));
-    for (auto i = 0; i < *argCount; i++) {
-        args.push_back(UnicodeToUTF8(argvw[i]));
-        argv[i] = args.back().c_str();
-    }
-    argv[*argCount] = nullptr;
-
-    LocalFree(argvw);
-    return argv;
-}
-
 // Code from winmain, 0x748DCF
 bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
     if (RsGlobal.quit || FrontEndMenuManager.m_bStartGameLoading) {
@@ -340,11 +322,10 @@ INT WINAPI NOTSA_WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdL
         return false;
     }
 
-    cmdLine = GetCommandLine();
-    int argc;
-    const char** argv = CommandLineToArgv(cmdLine, &argc);
+    char** argv = __argv;
+    int    argc = __argc;
     for (int i = 0; i < argc; i++) {
-        RsEventHandler(rsPREINITCOMMANDLINE, const_cast<char*>(argv[i]));
+        RsEventHandler(rsPREINITCOMMANDLINE, argv[i]);
     }
 
     PSGLOBAL(window) = InitInstance(instance);
@@ -367,7 +348,7 @@ INT WINAPI NOTSA_WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdL
 
     // 0x7488EE
     for (auto i = 0; i < argc; i++) {
-        RsEventHandler(rsCOMMANDLINE, const_cast<char*>(argv[i]));
+        RsEventHandler(rsCOMMANDLINE, argv[i]);
     }
 
     if (MultipleSubSystems || PSGLOBAL(fullScreen)) {
@@ -435,7 +416,6 @@ void InjectWinMainStuff() {
 
     RH_ScopedGlobalInstall(IsForegroundApp, 0x746060);
     RH_ScopedGlobalInstall(IsAlreadyRunning, 0x7468E0);
-    RH_ScopedGlobalInstall(CommandLineToArgv, 0x746480);
 
     // Unhooking these 2 after the game has started will do nothing
     RH_ScopedGlobalInstall(NOTSA_WinMain, 0x748710, {.locked = true});
