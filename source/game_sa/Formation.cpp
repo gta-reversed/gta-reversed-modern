@@ -20,7 +20,7 @@ void CFormation::DistributeDestinations(CPedList* pedlist) {
     NOTSA_UNREACHABLE();
 }
 
-void CFormation::DistributeDestinations_CoverPoints(CPedList* pedlist, CVector pos) {
+void CFormation::DistributeDestinations_CoverPoints(CPedList* pedlist) {
 }
 
 void CFormation::DistributeDestinations_PedsToAttack(CPedList* pedlist) {

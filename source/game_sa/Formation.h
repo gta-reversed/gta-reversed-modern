@@ -21,7 +21,7 @@ public:
     static void InjectHooks();
 
     static void DistributeDestinations(CPedList* pedlist);
-    static void DistributeDestinations_CoverPoints(CPedList* pedlist, CVector pos);
+    static void DistributeDestinations_CoverPoints(CPedList* pedlist);
     static void DistributeDestinations_PedsToAttack(CPedList* pedlist);
     static void FindCoverPoints(CVector pos, float radius);
     static void FindCoverPointsBehindBox(CPointList* pointlist, CVector Pos, CMatrix* coverEntityMatrix, const CVector* vecCenter, const CVector* vecMin, const CVector* vecMax, float radius);
