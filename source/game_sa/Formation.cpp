@@ -32,8 +32,17 @@ void CFormation::FindCoverPoints(CVector pos, float radius) {
 void CFormation::FindCoverPointsBehindBox(CPointList* pointlist, CVector Pos, CMatrix* coverEntityMatrix, const CVector* vecCenter, const CVector* vecMin, const CVector* vecMax, float radius) {
 }
 
-int32 CFormation::FindNearestAvailableDestination(CVector pos, float* pOutDistance) {
-    return int32();
+// 0x69B1B0
+int32 CFormation::FindNearestAvailableDestination(CVector pos, float& pOutDistance) {
+    auto minDist = FLT_MAX;
+    auto minIdx  = -1;
+    for (auto&& [i, p] : notsa::enumerate(m_Destinations.GetPoints())) {
+        if (const auto d = DistanceBetweenPoints(pos, p); d < minDist) {
+            minDist = d;
+            minIdx  = i;
+        }
+    }
+    return minIdx;
 }
 
 // 0x69A620

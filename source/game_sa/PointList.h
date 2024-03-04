@@ -26,6 +26,12 @@ public:
     auto& Get(size_t i) {
         return m_Coords[i];
     }
+
+    auto GetPoints() const {
+        return m_Coords | rng::views::take(m_Count) | rng::views::filter([this](auto& pt) {
+            return m_UsedCoords[&pt - m_Coords.data()];
+        });
+    }
 };
 
 VALIDATE_SIZE(CPointList, 0x13C);
