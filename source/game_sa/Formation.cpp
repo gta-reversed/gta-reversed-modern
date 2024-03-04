@@ -42,7 +42,15 @@ void CFormation::GenerateGatherDestinations(CPedList* pedList, CPed* ped) {
 void CFormation::GenerateGatherDestinations_AroundCar(CPedList* pedlist, CVehicle* vehicle) {
 }
 
+// 0x699FA0
 bool CFormation::ReturnDestinationForPed(CPed* ped, CVector& pos) {
+    for (auto&& [i, p] : notsa::enumerate(m_Peds.GetPeds())) {
+        if (ped != p || m_aFinalPedLinkToDestinations[i] < 0) {
+            continue;
+        }
+        pos = m_Destinations.Get(i);
+        return true;
+    }
     return false;
 }
 
@@ -52,7 +60,6 @@ void CFormation::ReturnTargetPedForPed(CPed* ped, CPed*& outTargetPed) {
         if (ped != p || m_aFinalPedLinkToDestinations[i] < 0) {
             continue;
         }
-
         outTargetPed = m_DestinationPeds.Get(m_aFinalPedLinkToDestinations[i]);
         return;
     }

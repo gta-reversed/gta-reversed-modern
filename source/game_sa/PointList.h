@@ -10,11 +10,20 @@
 
 class CPointList {
 public:
-    uint32  m_nCount;
-    CVector m_avCoords[24];
-    bool    m_abUsedCoords[24];
+    uint32                  m_Count{};
+    std::array<CVector, 24> m_Coords{};
+    std::array<bool, 24>    m_UsedCoords{};
 
-    void Empty();
+    // 0x699F00
+    void Empty() {
+        m_Count = 0;
+        rng::fill(m_UsedCoords, false);
+    }
+
+    // NOTSA
+    auto& Get(size_t i) {
+        return m_Coords[i];
+    }
 };
 
 VALIDATE_SIZE(CPointList, 0x13C);
