@@ -131,7 +131,7 @@ bool CPedGroup::IsActive() const {
 
 void CPedGroup::InjectHooks() {
     RH_ScopedClass(CPedGroup);
-    RH_ScopedCategory(); // TODO: Change this to the appropriate category!
+    RH_ScopedCategory("Ped Groups");
 
     RH_ScopedInstall(Constructor, 0x5FC150);
     RH_ScopedInstall(Destructor, 0x5FC190);

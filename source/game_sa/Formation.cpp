@@ -2,7 +2,7 @@
 
 void CFormation::InjectHooks() {
     RH_ScopedClass(CFormation);
-    RH_ScopedCategoryGlobal();
+    RH_ScopedCategory("Ped Groups");
 
     // RH_ScopedInstall(DistributeDestinations, 0x0);
     RH_ScopedInstall(DistributeDestinations_CoverPoints, 0x69B240, {.reversed=false});

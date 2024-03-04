@@ -4,7 +4,7 @@
 
 void CPedGroups::InjectHooks() {
     RH_ScopedClass(CPedGroups);
-    RH_ScopedCategoryGlobal();
+    RH_ScopedCategory("Ped Groups");
 
 
 }
