@@ -29,7 +29,7 @@ public:
     static void GenerateGatherDestinations(CPedList* pedList, CPed* ped);
     static void GenerateGatherDestinations_AroundCar(CPedList* pedlist, CVehicle* vehicle);
     static bool ReturnDestinationForPed(CPed* ped, CVector& pos);
-    static int32 ReturnTargetPedForPed(CPed* ped, CPed** outTargetPed);
+    static void ReturnTargetPedForPed(CPed* ped, CPed*& outTargetPed);
 };
 
 static inline auto& m_aFinalPedLinkToDestinations = StaticRef<std::array<int32, 8>>(0xC1A2C0);

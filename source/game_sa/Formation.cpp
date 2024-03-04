@@ -46,6 +46,14 @@ bool CFormation::ReturnDestinationForPed(CPed* ped, CVector& pos) {
     return false;
 }
 
-int32 CFormation::ReturnTargetPedForPed(CPed* ped, CPed** outTargetPed) {
-    return int32();
+// 0x699F50
+void CFormation::ReturnTargetPedForPed(CPed* ped, CPed*& outTargetPed) {
+    for (auto&& [i, p] : notsa::enumerate(m_Peds.GetPeds())) {
+        if (ped != p || m_aFinalPedLinkToDestinations[i] < 0) {
+            continue;
+        }
+
+        outTargetPed = m_DestinationPeds.Get(m_aFinalPedLinkToDestinations[i]);
+        return;
+    }
 }
