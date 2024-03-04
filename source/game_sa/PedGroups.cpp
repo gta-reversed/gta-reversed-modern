@@ -49,7 +49,17 @@ void CPedGroups::RemoveAllFollowersFromGroup(int32 groupId) {
 
 // 0x5FB8C0
 void CPedGroups::Init() {
-    plugin::Call<0x5FB8C0>();
+    for (auto i = 0; i < NUM_PEDGROUPS; i++) {
+        ScriptReferenceIndex[i] = 1;
+
+        if (!ms_activeGroups[i]) {
+            continue;
+        }
+        ms_activeGroups[i] = false;
+        for (auto& member : ms_groups[i].GetMembership().GetMembers()) {
+            ms_groups[i].GetMembership().RemoveMember(&member);
+        }
+    }
 }
 
 // 0x5F7E30

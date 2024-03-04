@@ -9,13 +9,15 @@
 class CPed;
 class CPedGroup;
 
+constexpr auto NUM_PEDGROUPS = 8;
+
 class CPedGroups {
 public:
-    static inline std::array<uint16, 8>& ScriptReferenceIndex = *reinterpret_cast<std::array<uint16, 8>*>(0xC098D0);
-    static inline std::array<char, 8>& ms_activeGroups = *reinterpret_cast<std::array<char, 8>*>(0xC098E0);
+    static inline std::array<uint16, NUM_PEDGROUPS>& ScriptReferenceIndex = *reinterpret_cast<std::array<uint16, NUM_PEDGROUPS>*>(0xC098D0);
+    static inline std::array<char, NUM_PEDGROUPS>& ms_activeGroups = *reinterpret_cast<std::array<char, NUM_PEDGROUPS>*>(0xC098E0);
     static inline bool& ms_bIsPlayerOnAMission = *reinterpret_cast<bool*>(0xC098E8);
     static inline uint32& ms_iNoOfPlayerKills = *reinterpret_cast<uint32*>(0xC098EC);
-    static inline std::array<CPedGroup, 8>& ms_groups = *reinterpret_cast<std::array<CPedGroup, 8>*>(0xC09920);
+    static inline std::array<CPedGroup, NUM_PEDGROUPS>& ms_groups = *reinterpret_cast<std::array<CPedGroup, NUM_PEDGROUPS>*>(0xC09920);
 
 public:
     static void InjectHooks();
