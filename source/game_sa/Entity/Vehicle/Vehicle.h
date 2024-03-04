@@ -113,6 +113,7 @@ enum eCarPiece {
 };
 constexpr inline eCarPiece eCarPiece_WheelPieces[]{ CAR_PIECE_WHEEL_LF, CAR_PIECE_WHEEL_RF, CAR_PIECE_WHEEL_RL, CAR_PIECE_WHEEL_RR };
 
+// Do not change the order!
 enum eRotationAxis : int32 {
     AXIS_X = 0,
     AXIS_Y = 1,

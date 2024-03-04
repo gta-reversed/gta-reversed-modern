@@ -308,6 +308,8 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
     }
     case TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER:
         return C(TASK_FINISHED);
+    case TASK_NONE:
+        return C(TASK_FINISHED);
     case TASK_SIMPLE_CAR_QUICK_DRAG_PED_OUT: { // 0x63F2ED
         CCarEnterExit::MakeUndraggedPassengerPedsLeaveCar(m_Car, m_DraggedPed, ped);
         return C(TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER);
@@ -319,6 +321,8 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
         m_bQuitAfterDraggingPedOut = false;
         return C(m_DraggedPed ? TASK_SIMPLE_WAIT_UNTIL_PED_OUT_CAR : TASK_FINISHED);
     }
+    case TASK_COMPLEX_FALL_AND_GET_UP:
+        return C(TASK_FINISHED);
     default:
         NOTSA_UNREACHABLE("SubTaskType = {}", tt);
     }
@@ -693,7 +697,7 @@ CTask* CTaskComplexEnterCar::CreateSubTask(eTaskType taskType, CPed* ped) {
         return new CTaskComplexFallAndGetUp{ IsTargetDoorOnTheLeft() ? ANIM_ID_KO_SPIN_L : ANIM_ID_KO_SPIN_R, ANIM_GROUP_DEFAULT, 2000 };
     }
     case TASK_NONE:
-        return new CTaskSimpleLeaveGroup{}; // 0x63E0F8 - NOTE/TODO: Weird
+        return new CTaskSimpleNone{}; // 0x63E0F8 - NOTE/TODO: Weird
     case TASK_SIMPLE_STAND_STILL:
         return new CTaskSimpleStandStill{}; // 0x63E0CE
     default:
