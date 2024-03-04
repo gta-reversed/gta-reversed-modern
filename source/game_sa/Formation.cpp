@@ -36,7 +36,33 @@ int32 CFormation::FindNearestAvailableDestination(CVector pos, float* pOutDistan
     return int32();
 }
 
+// 0x69A620
 void CFormation::GenerateGatherDestinations(CPedList* pedList, CPed* ped) {
+    m_Destinations.Empty();
+
+    const auto radius = [pedList] {
+        switch (pedList->m_count) {
+        case 1:  return 1.25f;
+        case 2:  return 1.5f;
+        case 3:  return 1.75f;
+        case 4:  return 2.125f;
+        default: return 2.5f;
+        }
+    }();
+
+    for (auto&& [i, member] : notsa::enumerate(pedList->GetPeds())) {
+        const auto angle = [&i, ped, count = pedList->m_count] {
+            if (count > 1) {
+                return (float)i / (float)count * TWO_PI - ped->m_fCurrentRotation + PI / (float)count;
+            } else {
+                return ped->m_fCurrentRotation + HALF_PI;
+            }
+        }();
+
+        if (i < NUM_POINTLIST_POINTS) {
+            m_Destinations.Get(i) = CVector{ std::sin(angle) * radius, std::cos(angle) * radius, 0.0f } + ped->GetPosition();
+        }
+    }
 }
 
 void CFormation::GenerateGatherDestinations_AroundCar(CPedList* pedlist, CVehicle* vehicle) {

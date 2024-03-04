@@ -8,11 +8,13 @@
 
 #include "Vector.h"
 
+constexpr auto NUM_POINTLIST_POINTS = 24;
+
 class CPointList {
 public:
-    uint32                  m_Count{};
-    std::array<CVector, 24> m_Coords{};
-    std::array<bool, 24>    m_UsedCoords{};
+    uint32                                    m_Count{};
+    std::array<CVector, NUM_POINTLIST_POINTS> m_Coords{};
+    std::array<bool, NUM_POINTLIST_POINTS>    m_UsedCoords{};
 
     // 0x699F00
     void Empty() {
