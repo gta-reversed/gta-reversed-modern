@@ -12,7 +12,7 @@ void CPedGroups::InjectHooks() {
     RH_ScopedInstall(Init, 0x5FB8C0);
     RH_ScopedInstall(RegisterKillByPlayer, 0x5F7E30);
     RH_ScopedInstall(CleanUpForShutDown, 0x5FB930);
-    RH_ScopedInstall(IsGroupLeader, 0x5F7E40, {.reversed=false});
+    RH_ScopedInstall(IsGroupLeader, 0x5F7E40);
     RH_ScopedInstall(GetPedsGroup, 0x5F7E80);
     RH_ScopedInstall(GetGroupId, 0x5F7EE0);
     RH_ScopedInstall(Process, 0x5FC800, {.reversed=false});
@@ -86,7 +86,12 @@ void CPedGroups::CleanUpForShutDown() {
 
 // 0x5F7E40
 bool CPedGroups::IsGroupLeader(CPed* ped) {
-    return plugin::CallAndReturn<bool, 0x5F7E40, CPed*>(ped);
+    for (auto& group : GetActiveGroups()) {
+        if (group.GetMembership().IsLeader(ped)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // 0x5F7E80
