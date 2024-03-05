@@ -14,7 +14,7 @@ void CPedGroups::InjectHooks() {
     RH_ScopedInstall(CleanUpForShutDown, 0x5FB930);
     RH_ScopedInstall(IsGroupLeader, 0x5F7E40, {.reversed=false});
     RH_ScopedInstall(GetPedsGroup, 0x5F7E80, {.reversed=false});
-    RH_ScopedInstall(GetGroupId, 0x5F7EE0, {.reversed=false});
+    RH_ScopedInstall(GetGroupId, 0x5F7EE0);
     RH_ScopedInstall(Process, 0x5FC800, {.reversed=false});
     RH_ScopedInstall(AreInSameGroup, 0x5F7F40, {.reversed=false});
     RH_ScopedInstall(IsInPlayersGroup, 0x5F7F10, {.reversed=false});
@@ -96,7 +96,12 @@ CPedGroup* CPedGroups::GetPedsGroup(const CPed* ped) {
 
 // 0x5F7EE0
 int32 CPedGroups::GetGroupId(const CPedGroup* pedGroup) {
-    return plugin::CallAndReturn<int32, 0x5F7EE0, const CPedGroup*>(pedGroup);
+    for (const auto&& [i, group] : notsa::enumerate(ms_groups)) {
+        if (&group == pedGroup) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 // 0x5FC800
