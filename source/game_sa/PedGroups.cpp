@@ -17,7 +17,7 @@ void CPedGroups::InjectHooks() {
     RH_ScopedInstall(GetGroupId, 0x5F7EE0);
     RH_ScopedInstall(Process, 0x5FC800, {.reversed=false});
     RH_ScopedInstall(AreInSameGroup, 0x5F7F40);
-    RH_ScopedInstall(IsInPlayersGroup, 0x5F7F10, {.reversed=false});
+    RH_ScopedInstall(IsInPlayersGroup, 0x5F7F10);
     // RH_ScopedInstall(GetGroup, 0x0, {.reversed=false});
 }
 
@@ -30,6 +30,12 @@ void CPedGroups::Load() {
     
 }
 #endif
+
+auto GetActiveGroups() {
+    return CPedGroups::ms_groups | rng::views::filter([](auto& g) {
+        return CPedGroups::ms_activeGroups[&g - CPedGroups::ms_groups.data()];
+    });
+}
 
 // return the index of the added group , return -1 if failed.
 // 0x5FB800
@@ -121,7 +127,13 @@ void CPedGroups::Process() {
 
 // 0x5F7F10
 bool CPedGroups::IsInPlayersGroup(CPed* ped) {
-    return plugin::CallAndReturn<bool, 0x5F7F10, CPed*>(ped);
+    // Group 0 is player's group.
+    for (auto& mem : GetGroup(0).GetMembership().GetMembers()) {
+        if (&mem == ped) {
+            return true;
+        }
+    }
+    return false;
 }
 
 CPedGroup& CPedGroups::GetGroup(int32 groupId) {

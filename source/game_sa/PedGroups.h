@@ -7,7 +7,6 @@
 #pragma once
 
 class CPed;
-class CPedGroup;
 
 constexpr auto NUM_PEDGROUPS = 8;
 
@@ -44,12 +43,6 @@ public:
 
     // inlined
     static CPedGroup& GetGroup(int32 groupId);
-
-    static auto GetActiveGroups() {
-        return ms_groups | rng::views::filter([](auto& g) {
-            return ms_activeGroups[&g - ms_groups.data()];
-        });
-    }
 
     static int32 FindFreeGroupSlot() {
         for (auto i = 0; i < NUM_PEDGROUPS; i++) {
