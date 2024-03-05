@@ -45,6 +45,12 @@ public:
     // inlined
     static CPedGroup& GetGroup(int32 groupId);
 
+    static auto GetActiveGroups() {
+        return ms_groups | rng::views::filter([](auto& g) {
+            return ms_activeGroups[&g - ms_groups.data()];
+        });
+    }
+
     static int32 FindFreeGroupSlot() {
         for (auto i = 0; i < NUM_PEDGROUPS; i++) {
             if (!ms_activeGroups[i]) {
