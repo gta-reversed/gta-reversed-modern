@@ -44,7 +44,9 @@ void CPedGroups::RemoveGroup(int32 groupId) {
 
 // 0x5FB8A0
 void CPedGroups::RemoveAllFollowersFromGroup(int32 groupId) {
-    plugin::Call<0x5FB8A0, int32>(groupId);
+    if (ms_activeGroups[groupId]) {
+        ms_groups[groupId].RemoveAllFollowers();
+    }
 }
 
 // 0x5FB8C0
