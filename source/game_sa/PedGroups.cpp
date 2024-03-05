@@ -16,7 +16,7 @@ void CPedGroups::InjectHooks() {
     RH_ScopedInstall(GetPedsGroup, 0x5F7E80);
     RH_ScopedInstall(GetGroupId, 0x5F7EE0);
     RH_ScopedInstall(Process, 0x5FC800, {.reversed=false});
-    RH_ScopedInstall(AreInSameGroup, 0x5F7F40, {.reversed=false});
+    RH_ScopedInstall(AreInSameGroup, 0x5F7F40);
     RH_ScopedInstall(IsInPlayersGroup, 0x5F7F10, {.reversed=false});
     // RH_ScopedInstall(GetGroup, 0x0, {.reversed=false});
 }
@@ -130,5 +130,12 @@ CPedGroup& CPedGroups::GetGroup(int32 groupId) {
 
 // 0x5F7F40
 bool CPedGroups::AreInSameGroup(const CPed* ped1, const CPed* ped2) {
-    return plugin::CallAndReturn<bool, 0x5F7F40, const CPed*, const CPed*>(ped1, ped2);
+    for (const auto& group : GetActiveGroups()) {
+        const auto& mem = group.GetMembership();
+
+        if (mem.IsMember(ped1)) {
+            return mem.IsMember(ped2);
+        }
+    }
+    return false;
 }
