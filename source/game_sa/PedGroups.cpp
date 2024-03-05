@@ -11,7 +11,7 @@ void CPedGroups::InjectHooks() {
     RH_ScopedInstall(RemoveAllFollowersFromGroup, 0x5FB8A0);
     RH_ScopedInstall(Init, 0x5FB8C0);
     RH_ScopedInstall(RegisterKillByPlayer, 0x5F7E30);
-    RH_ScopedInstall(CleanUpForShutDown, 0x5FB930, {.reversed=false});
+    RH_ScopedInstall(CleanUpForShutDown, 0x5FB930);
     RH_ScopedInstall(IsGroupLeader, 0x5F7E40, {.reversed=false});
     RH_ScopedInstall(GetPedsGroup, 0x5F7E80, {.reversed=false});
     RH_ScopedInstall(GetGroupId, 0x5F7EE0, {.reversed=false});
@@ -81,7 +81,7 @@ void CPedGroups::RegisterKillByPlayer() {
 
 // 0x5FB930
 void CPedGroups::CleanUpForShutDown() {
-    plugin::Call<0x5FB930>();
+    rng::for_each(ms_groups, &CPedGroup::Flush);
 }
 
 // 0x5F7E40
