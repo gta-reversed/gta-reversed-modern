@@ -7,9 +7,9 @@ void CPedGroups::InjectHooks() {
     RH_ScopedCategory("Ped Groups");
 
     RH_ScopedInstall(AddGroup, 0x5FB800, {.reversed=false});
-    RH_ScopedInstall(RemoveGroup, 0x5FB870, {.reversed=false});
-    RH_ScopedInstall(RemoveAllFollowersFromGroup, 0x5FB8A0, {.reversed=false});
-    RH_ScopedInstall(Init, 0x5FB8C0, {.reversed=false});
+    RH_ScopedInstall(RemoveGroup, 0x5FB870);
+    RH_ScopedInstall(RemoveAllFollowersFromGroup, 0x5FB8A0);
+    RH_ScopedInstall(Init, 0x5FB8C0);
     RH_ScopedInstall(RegisterKillByPlayer, 0x5F7E30);
     RH_ScopedInstall(CleanUpForShutDown, 0x5FB930, {.reversed=false});
     RH_ScopedInstall(IsGroupLeader, 0x5F7E40, {.reversed=false});
@@ -39,7 +39,10 @@ int32 CPedGroups::AddGroup() {
 
 // 0x5FB870
 void CPedGroups::RemoveGroup(int32 groupId) {
-    plugin::Call<0x5FB870, int32>(groupId);
+    if (ms_activeGroups[groupId]) {
+        ms_activeGroups[groupId] = false;
+        ms_groups[groupId].Flush();
+    }
 }
 
 // 0x5FB8A0
