@@ -44,4 +44,13 @@ public:
 
     // inlined
     static CPedGroup& GetGroup(int32 groupId);
+
+    static int32 FindFreeGroupSlot() {
+        for (auto i = 0; i < NUM_PEDGROUPS; i++) {
+            if (!ms_activeGroups[i]) {
+                return i;
+            }
+        }
+        return -1;
+    }
 };

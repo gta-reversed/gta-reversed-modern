@@ -6,7 +6,7 @@ void CPedGroups::InjectHooks() {
     RH_ScopedClass(CPedGroups);
     RH_ScopedCategory("Ped Groups");
 
-    RH_ScopedInstall(AddGroup, 0x5FB800, {.reversed=false});
+    RH_ScopedInstall(AddGroup, 0x5FB800);
     RH_ScopedInstall(RemoveGroup, 0x5FB870);
     RH_ScopedInstall(RemoveAllFollowersFromGroup, 0x5FB8A0);
     RH_ScopedInstall(Init, 0x5FB8C0);
@@ -34,7 +34,14 @@ void CPedGroups::Load() {
 // return the index of the added group , return -1 if failed.
 // 0x5FB800
 int32 CPedGroups::AddGroup() {
-    return plugin::CallAndReturn<int32, 0x5FB800>();
+    const auto slot = FindFreeGroupSlot();
+    if (slot == -1) {
+        return -1;
+    }
+
+    ms_activeGroups[slot] = true;
+    ms_groups[slot].Flush();
+    return slot;
 }
 
 // 0x5FB870
@@ -57,12 +64,11 @@ void CPedGroups::Init() {
     for (auto i = 0; i < NUM_PEDGROUPS; i++) {
         ScriptReferenceIndex[i] = 1;
 
-        if (!ms_activeGroups[i]) {
-            continue;
-        }
-        ms_activeGroups[i] = false;
-        for (auto& member : ms_groups[i].GetMembership().GetMembers()) {
-            ms_groups[i].GetMembership().RemoveMember(&member);
+        if (ms_activeGroups[i]) {
+            ms_activeGroups[i] = false;
+            for (auto& member : ms_groups[i].GetMembership().GetMembers()) {
+                ms_groups[i].GetMembership().RemoveMember(&member);
+            }
         }
     }
 }
