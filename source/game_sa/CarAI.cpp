@@ -155,11 +155,11 @@ void CCarAI::BackToCruisingIfNoWantedLevel(CVehicle* vehicle) {
     }
 
     CCarCtrl::JoinCarWithRoadSystem(vehicle);
-    vehicle->m_autoPilot.m_nCarMission = MISSION_CRUISE;
+
     vehicle->m_autoPilot.m_nCarDrivingStyle = DRIVING_STYLE_STOP_FOR_CARS;
-    if (CCullZones::NoPolice()) {
-        vehicle->m_autoPilot.m_nCarMission = MISSION_NONE;
-    }
+    vehicle->m_autoPilot.m_nCarMission = CCullZones::NoPolice()
+        ? MISSION_NONE
+        : MISSION_CRUISE;
 }
 
 // 0x41C050
