@@ -77,60 +77,68 @@ void CCarAI::AddPoliceCarOccupants(CVehicle* vehicle, bool arg2) {
     if (vehicle->vehicleFlags.bOccupantsHaveBeenGenerated) {
         return;
     }
+    vehicle->vehicleFlags.bOccupantsHaveBeenGenerated = true;
 
-    vehicle->vehicleFlags.bOccupantsHaveBeenGenerated = 1;
     switch (vehicle->m_nModelIndex) {
     case MODEL_ENFORCER:
     case MODEL_FBIRANCH:
         vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
-        vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
-        vehicle->SetupPassenger(1, PED_TYPE_NONE, false, false);
-        vehicle->SetupPassenger(2, PED_TYPE_NONE, false, false);
-        return;
+        for (int32 i = 0; i < 3; i++) {
+            vehicle->SetupPassenger(i, PED_TYPE_NONE, false, false);
+        }
+        break;
     case MODEL_PREDATOR:
         if (FindPlayerPed()->GetWantedLevel() > 1) {
-            CPed* driver = vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
-            CTaskSimpleCarSetPedOut{ vehicle, TARGET_DOOR_DRIVER, true }.ProcessPed(driver);
-            driver->AttachPedToEntity(vehicle, CVector(0.0, 0.0, 0.0), 0, (float)6.2831855, WEAPON_PISTOL);
-            driver->bStayInSamePlace = true;
-            driver->GetTaskManager().SetTask(new CTaskComplexKillPedFromBoat{ FindPlayerPed() }, TASK_PRIMARY_PRIMARY);
+            const auto drvr = vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
+            CTaskSimpleCarSetPedOut{ vehicle, TARGET_DOOR_DRIVER, true }.ProcessPed(drvr);
+            drvr->AttachPedToEntity(vehicle, CVector(0.f, 0.f, 0.f), 0, TWO_PI, WEAPON_PISTOL);
+            drvr->bStayInSamePlace = true;
+            drvr->GetTaskManager().SetTask(
+                new CTaskComplexKillPedFromBoat{ FindPlayerPed() },
+                TASK_PRIMARY_PRIMARY
+            );
         }
         vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
+        break;
     case MODEL_RHINO:
     case MODEL_COPBIKE:
         vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
-        return;
+        break;
     case MODEL_BARRACKS:
     case MODEL_COPCARLA:
     case MODEL_COPCARSF:
     case MODEL_COPCARVG:
     case MODEL_COPCARRU:
-        CPed*  driver      = vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
-        uint32 wantedLevel = FindPlayerPed()->GetWantedLevel();
-        if (wantedLevel > 1) {
-            CPed* passenger = vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
-            if (wantedLevel > 2) {
-                CPed* selectedPed;
+        const auto drvr = vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
+        const auto plyrWantedLvl = FindPlayerPed()->GetWantedLevel();
+        if (plyrWantedLvl > 1) {
+            // The player's in some serious gourmet shit now... Let's give the cop a partner too!
+            const auto psgr = vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
+
+            // Give one of them a weapon
+            if (plyrWantedLvl > 2) {
                 if (CGeneral::RandomBool(25.0f)) {
-                    selectedPed = driver;
-                }
-                if (CGeneral::RandomBool(25.0f)) {
-                    selectedPed = passenger;
-                }
-                if (selectedPed) {
-                    selectedPed->GiveDelayedWeapon(WEAPON_SHOTGUN, 1000);
+                    drvr->GiveDelayedWeapon(WEAPON_SHOTGUN, 1000);
+                } else if (CGeneral::RandomBool(25.0f)) {
+                    psgr->GiveDelayedWeapon(WEAPON_SHOTGUN, 1000);
                 }
             }
-            driver->GetIntelligence()->ClearTasks(true, true);
-            driver->GetTaskManager().SetTask(new CTaskComplexCopInCar{ vehicle, passenger, FindPlayerPed(), true }, TASK_PRIMARY_PRIMARY, true);
-            passenger->GetIntelligence()->ClearTasks(true, true);
-            driver->GetTaskManager().SetTask(new CTaskComplexCopInCar{ vehicle, driver, FindPlayerPed(), true }, TASK_PRIMARY_PRIMARY, false);
-            return;
-        }
 
-        if (arg2 || CGeneral::RandomBool(50.0f)) {
+            // Now set the tasks for them
+            const auto SetPedTasks = [vehicle](CPed* ped, CPed* partner, bool isDriver) {
+                ped->GetIntelligence()->ClearTasks(true, true);
+                ped->GetTaskManager().SetTask(
+                    new CTaskComplexCopInCar{ vehicle, partner, FindPlayerPed(), isDriver },
+                    TASK_PRIMARY_PRIMARY,
+                    true
+                );
+            };
+            SetPedTasks(drvr, psgr, true);
+            SetPedTasks(psgr, drvr, false);
+        } else if (arg2 || CGeneral::RandomBool(50.0f)) {
             vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
         }
+        break;
     }
 }
 
