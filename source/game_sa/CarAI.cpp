@@ -39,7 +39,7 @@ void CCarAI::InjectHooks() {
     RH_ScopedInstall(GetCarToGoToCoorsAccurate, 0x41D0E0);
     RH_ScopedInstall(GetCarToGoToCoorsRacing, 0x41D210);
     RH_ScopedInstall(GetCarToGoToCoorsStraightLine, 0x41CFB0);
-    RH_ScopedInstall(GetCarToParkAtCoors, 0x41D350, { .reversed = false });
+    RH_ScopedInstall(GetCarToParkAtCoors, 0x41D350);
     RH_ScopedInstall(MakeWayForCarWithSiren, 0x41D660, { .reversed = false });
     RH_ScopedInstall(MellowOutChaseSpeed, 0x41D3D0, { .reversed = false });
     RH_ScopedInstall(MellowOutChaseSpeedBoat, 0x41CB70);
@@ -250,8 +250,7 @@ float CCarAI::GetCarToGoToCoors(CVehicle* veh, const CVector& coors, eCarDriving
         break;
     case MISSION_GOTOCOORDS:
     case MISSION_GOTOCOORDS_STRAIGHT: {
-        const auto vp = veh->GetPosition2D();
-        if (std::abs(vp.x - coors.x) <= 5.f && std::abs(vp.y - coors.y) <= 5.f) {
+        if (veh->GetPosition2D().EqualTo(coors, 5.f)) {
             break;
         }
         [[fallthrough]];
@@ -282,8 +281,7 @@ float CCarAI::GetCarToGoToCoorsAccurate(CVehicle* veh, const CVector& coors, eCa
     switch (ap->m_nCarMission) {
     case MISSION_GOTOCOORDS_ACCURATE:
     case MISSION_GOTOCOORDS_STRAIGHT_ACCURATE: {
-        const auto vp = veh->GetPosition();
-        if (std::abs(vp.x - coors.x) >= 2.f || std::abs(vp.x - coors.x) >= 2.f) {
+        if (!veh->GetPosition2D().EqualTo(coors, 2.f)) {
             ap->m_vecDestinationCoors = coors;
         }
         break;
@@ -372,8 +370,10 @@ float CCarAI::GetCarToGoToCoorsStraightLine(CVehicle* veh, const CVector& coors,
 }
 
 // 0x41D350
-float CCarAI::GetCarToParkAtCoors(CVehicle* vehicle, const CVector& vec) {
-    return plugin::CallAndReturn<float, 0x41D350, CVehicle*, const CVector&>(vehicle, vec);
+float CCarAI::GetCarToParkAtCoors(CVehicle* veh, const CVector& coors) {
+    veh->vehicleFlags.bCanPark      = true;
+    veh->m_autoPilot.m_nCruiseSpeed = 10;
+    return (veh->GetPosition2D() - coors).Magnitude();
 }
 
 // 0x41D660

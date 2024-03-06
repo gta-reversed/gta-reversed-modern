@@ -174,6 +174,10 @@ public:
     float& operator[](size_t i) {
         return (&x)[i];
     }
+
+    bool EqualTo(CVector2D o, float epsilon) {
+        return approxEqual(x, o.x, epsilon) && approxEqual(y, o.y, epsilon);
+    }
 };
 
 /// Negate all components of the vector
