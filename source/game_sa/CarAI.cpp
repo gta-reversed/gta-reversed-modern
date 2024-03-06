@@ -40,7 +40,7 @@ void CCarAI::InjectHooks() {
     RH_ScopedInstall(GetCarToGoToCoorsRacing, 0x41D210);
     RH_ScopedInstall(GetCarToGoToCoorsStraightLine, 0x41CFB0);
     RH_ScopedInstall(GetCarToParkAtCoors, 0x41D350);
-    RH_ScopedInstall(MakeWayForCarWithSiren, 0x41D660, { .reversed = false });
+    RH_ScopedInstall(MakeWayForCarWithSiren, 0x41D660);
     RH_ScopedInstall(MellowOutChaseSpeed, 0x41D3D0, { .reversed = false });
     RH_ScopedInstall(MellowOutChaseSpeedBoat, 0x41CB70);
     RH_ScopedInstall(TellCarToBlockOtherCar, 0x41C900, { .reversed = false });
@@ -262,7 +262,7 @@ float CCarAI::GetCarToGoToCoors(CVehicle* veh, const CVector& coors, eCarDriving
             ap->m_nCruiseSpeed = 20;
         }
         ap->m_nTimeToStartMission = CTimer::GetTimeInMS();
-        if (veh->GetStatus() == STATUS_GHOST) {
+        if (veh->GetStatus() != STATUS_GHOST) {
             veh->SetStatus(STATUS_PHYSICS);
         }
         ap->m_nCarMission = CCarCtrl::JoinCarWithRoadSystemGotoCoors(veh, coors, false, false)
@@ -293,7 +293,7 @@ float CCarAI::GetCarToGoToCoorsAccurate(CVehicle* veh, const CVector& coors, eCa
             ap->m_nCruiseSpeed = 20;
         }
         ap->m_nTimeToStartMission = CTimer::GetTimeInMS();
-        if (veh->GetStatus() == STATUS_GHOST) {
+        if (veh->GetStatus() != STATUS_GHOST) {
             veh->SetStatus(STATUS_PHYSICS);
         }
         ap->m_nCarMission = CCarCtrl::JoinCarWithRoadSystemGotoCoors(veh, coors, false, false)
@@ -325,7 +325,7 @@ float CCarAI::GetCarToGoToCoorsRacing(CVehicle* veh, const CVector& coors, eCarD
             ap->m_nCruiseSpeed = 20;
         }
         ap->m_nTimeToStartMission = CTimer::GetTimeInMS();
-        if (veh->GetStatus() == STATUS_GHOST) {
+        if (veh->GetStatus() != STATUS_GHOST) {
             veh->SetStatus(STATUS_PHYSICS);
         }
         ap->m_vecDestinationCoors = coors;
@@ -356,7 +356,7 @@ float CCarAI::GetCarToGoToCoorsStraightLine(CVehicle* veh, const CVector& coors,
             ap->m_nCruiseSpeed = 20;
         }
         ap->m_nTimeToStartMission = CTimer::GetTimeInMS();
-        if (veh->GetStatus() == STATUS_GHOST) {
+        if (veh->GetStatus() != STATUS_GHOST) {
             veh->SetStatus(STATUS_PHYSICS);
         }
         ap->m_vecDestinationCoors = coors;
@@ -377,8 +377,83 @@ float CCarAI::GetCarToParkAtCoors(CVehicle* veh, const CVector& coors) {
 }
 
 // 0x41D660
-void CCarAI::MakeWayForCarWithSiren(CVehicle* vehicle) {
-    plugin::Call<0x41D660, CVehicle*>(vehicle);
+void CCarAI::MakeWayForCarWithSiren(CVehicle* carWithSiren) {
+    float      carWithSirenSpeed2D;
+    const auto carWithSirenMoveDir2D = CVector2D{ carWithSiren->GetMoveSpeed() }.Normalized(&carWithSirenSpeed2D);
+    for (auto& v : GetVehiclePool()->GetAllValid()) {
+        if (!v.IsAutomobile() && !v.IsBike()) {
+            continue;
+        }
+        if (!notsa::contains({ STATUS_SIMPLE, STATUS_PHYSICS }, v.GetStatus())) {
+            continue;
+        }
+        if (!v.IsCreatedBy(RANDOM_VEHICLE)) {
+            continue;
+        }
+        if (v.vehicleFlags.bIsLawEnforcer) {
+            continue;
+        }
+        if (v.m_pDriver && !v.m_pDriver->IsCreatedBy(PED_GAME)) {
+            continue;
+        }
+        if (carWithSiren == &v) { // Thank god they remembered to check this!
+            continue;
+        }
+        if (v.vehicleFlags.bIsFireTruckOnDuty || v.vehicleFlags.bIsAmbulanceOnDuty) {
+            continue;
+        }
+        if (v.vehicleFlags.bMadDriver) {
+            continue;
+        }
+        if (v.GetVehicleModelInfo()->m_nVehicleClass == VEHICLE_CLASS_BIG) {
+            continue;
+        }
+        CVector dirToCarWithSiren = v.GetPosition() - carWithSiren->GetPosition();
+        if (std::abs(dirToCarWithSiren.z) >= 5.f) { // TODO: Really should use a boundingbox height here instead....
+            continue;
+        }
+        CVector2D dirToCarWithSiren2D{dirToCarWithSiren};
+        const auto distToCarWithSiren = dirToCarWithSiren.Magnitude2D();
+        if (distToCarWithSiren >= carWithSirenSpeed2D * 45.f + 40.f) {
+            continue;
+        }
+        if (v.GetMoveSpeed().SquaredMagnitude2D() <= 0.05f) {
+            continue;
+        }
+        const auto vehAP = &v.m_autoPilot;
+        if (carWithSirenMoveDir2D.Dot(dirToCarWithSiren2D / distToCarWithSiren) <= 0.8f) { // 0x41D8A2
+            if (dirToCarWithSiren2D.Dot(CVector2D{ v.GetMoveSpeed() }) < 0.f) { // Going in different directions?
+                if (!notsa::contains({ TEMPACT_WAIT, TEMPACT_BRAKE }, vehAP->m_nTempAction)) {
+                    vehAP->SetTempAction(TEMPACT_WAIT, 2'000);
+                }
+            }
+        } else { // 0x41D8BD
+            const auto goingSameDirDot = carWithSirenMoveDir2D.Dot(v.GetForward());
+            if (goingSameDirDot > 0.7f || goingSameDirDot < -0.9f) { // 0x41D8DE
+                if (!notsa::contains({ TEMPACT_SWIRVELEFT_STOP, TEMPACT_SWIRVERIGHT_STOP }, vehAP->m_nTempAction)) {
+                    eAutoPilotTempAction a = carWithSirenMoveDir2D.Dot(dirToCarWithSiren2D) <= 0.f // 0x41D954
+                        ? TEMPACT_SWIRVERIGHT_STOP
+                        : TEMPACT_SWIRVELEFT_STOP;
+                    if (goingSameDirDot < 0.f) {
+                        a = a == TEMPACT_SWIRVELEFT_STOP
+                            ? TEMPACT_SWIRVERIGHT_STOP
+                            : TEMPACT_SWIRVELEFT_STOP;
+                    }
+                    if (a == TEMPACT_SWIRVERIGHT_STOP) {
+                        a = TEMPACT_WAIT;
+                    }
+                    vehAP->SetTempAction(a, 2'500);
+                }
+                if (v.GetStatus() != STATUS_GHOST) {
+                    v.SetStatus(STATUS_PHYSICS);
+                }
+            } else if (dirToCarWithSiren2D.Dot(v.GetMoveSpeed()) < 0.f) { // 0x41D910
+                if (!notsa::contains({ TEMPACT_SWIRVELEFT_STOP, TEMPACT_SWIRVERIGHT_STOP }, vehAP->m_nTempAction)) {
+                    vehAP->SetTempAction(TEMPACT_WAIT, 4'000);
+                }
+            }
+        }
+    }
 }
 
 // 0x41D3D0
@@ -497,15 +572,16 @@ void CCarAI::TellCarToBlockOtherCar(CVehicle* vehicle1, CVehicle* vehicle2) {
 }
 
 // 0x41C960
-void CCarAI::TellCarToFollowOtherCar(CVehicle* vehicle1, CVehicle* vehicle2, float radius) {
-    vehicle1->m_autoPilot.m_pTargetCar = vehicle2;
-    CEntity::SafeRegisterRef(vehicle1->m_autoPilot.m_pTargetCar);
-    CCarCtrl::JoinCarWithRoadSystem(vehicle1);
-    vehicle1->m_autoPilot.m_nCarMission = MISSION_FOLLOW_CAR;
-    vehicle1->vehicleFlags.bEngineOn    = !vehicle1->vehicleFlags.bEngineBroken;
+void CCarAI::TellCarToFollowOtherCar(CVehicle* follower, CVehicle* toFollow, float radius) {
+    follower->m_autoPilot.m_pTargetCar = toFollow;
+    CEntity::SafeRegisterRef(follower->m_autoPilot.m_pTargetCar);
 
-    vehicle1->m_autoPilot.m_nCruiseSpeed = std::max(vehicle1->m_autoPilot.m_nCruiseSpeed, (uint8)6);
-    vehicle1->m_autoPilot.m_ucCarFollowDist = radius;
+    CCarCtrl::JoinCarWithRoadSystem(follower);
+
+    follower->m_autoPilot.m_nCarMission     = MISSION_FOLLOW_CAR;
+    follower->vehicleFlags.bEngineOn        = follower->vehicleFlags.bEngineBroken == 0;
+    follower->m_autoPilot.m_nCruiseSpeed    = std::max(follower->m_autoPilot.m_nCruiseSpeed, (uint8)6);
+    follower->m_autoPilot.m_ucCarFollowDist = (uint8)radius;
 }
 
 // unused

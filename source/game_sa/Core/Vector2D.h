@@ -175,9 +175,7 @@ public:
         return (&x)[i];
     }
 
-    bool EqualTo(CVector2D o, float epsilon) {
-        return approxEqual(x, o.x, epsilon) && approxEqual(y, o.y, epsilon);
-    }
+    bool EqualTo(CVector2D o, float epsilon);
 };
 
 /// Negate all components of the vector

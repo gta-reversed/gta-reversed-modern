@@ -17,6 +17,34 @@
 class CVehicle;
 class CEntity;
 
+enum eAutoPilotTempAction {
+    TEMPACT_NONE                     = 0,
+    TEMPACT_WAIT                     = 1,
+    TEMPACT_EMPTYTOBEREUSED          = 2,
+    TEMPACT_REVERSE                  = 3,
+    TEMPACT_HANDBRAKETURNLEFT        = 4,
+    TEMPACT_HANDBRAKETURNRIGHT       = 5,
+    TEMPACT_HANDBRAKESTRAIGHT        = 6,
+    TEMPACT_TURNLEFT                 = 7,
+    TEMPACT_TURNRIGHT                = 8,
+    TEMPACT_GOFORWARD                = 9,
+    TEMPACT_SWIRVELEFT               = 10,
+    TEMPACT_SWIRVERIGHT              = 11,
+    TEMPACT_STUCKINTRAFFIC           = 12,
+    TEMPACT_REVERSE_LEFT             = 13,
+    TEMPACT_REVERSE_RIGHT            = 14,
+    TEMPACT_PLANE_FLY_UP             = 15,
+    TEMPACT_PLANE_FLY_STRAIGHT       = 16,
+    TEMPACT_PLANE_SHARP_LEFT         = 17,
+    TEMPACT_PLANE_SHARP_RIGHT        = 18,
+    TEMPACT_HEADON_COLLISION         = 19,
+    TEMPACT_SWIRVELEFT_STOP          = 20,
+    TEMPACT_SWIRVERIGHT_STOP         = 21,
+    TEMPACT_REVERSE_STRAIGHT         = 22,
+    TEMPACT_BOOST_USE_STEERING_ANGLE = 23,
+    TEMPACT_BRAKE                    = 24,
+};
+
 class CAutoPilot {
 public:
     CNodeAddress        m_currentAddress;

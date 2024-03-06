@@ -31,7 +31,7 @@ public:
     static float GetCarToGoToCoorsAccurate(CVehicle* veh, const CVector& coors, eCarDrivingStyle drivingStyle, bool setCruiseSpeed);
     static float GetCarToGoToCoorsRacing(CVehicle* veh, const CVector& coors, eCarDrivingStyle drivingStyle, bool setCruiseSpeed);
     static float GetCarToGoToCoorsStraightLine(CVehicle* veh, const CVector& coors, eCarDrivingStyle drivingStyle, bool setCruiseSpeed);
-    static float GetCarToParkAtCoors(CVehicle* veh, const CVector&);
+    static float GetCarToParkAtCoors(CVehicle* veh, const CVector& coors);
 
     static void MakeWayForCarWithSiren(CVehicle* veh);
     static void MellowOutChaseSpeed(CVehicle* veh);
