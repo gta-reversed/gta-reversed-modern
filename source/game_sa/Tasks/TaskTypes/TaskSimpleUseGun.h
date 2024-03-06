@@ -65,38 +65,30 @@ private:
         return this;
     }
 
-    CVector                       GetAimTargetPosition(CPed* ped) const;
-    std::pair<CVector, ePedBones> GetAimLookAtInfo() const;
+    CVector                      GetAimTargetPosition(CPed* ped) const;
+    std::pair<CVector, eBoneTag> GetAimLookAtInfo() const;
 
 public:
-    bool m_IsFinished{};
-    bool m_IsInControl{ true };
-    bool m_HasMoveControl{};
-    bool m_HasFiredGun{};
-    bool m_IsLOSBlocked{};
-
-    union {
-        uint8 m_FireGunThisFrame{};
-
-        struct {
-            uint8 m_IsFiringGunRightHandThisFrame : 1;
-            uint8 m_IsFiringGunLeftHandThisFrame : 1;
-        };
-    };
-
-    bool                   m_SkipAim{};
-    eGunCommand            m_NextCmd{};                       //! Active command
-    eGunCommand            m_LastCmd{ eGunCommand::UNKNOWN }; //! Previous command
-    CVector2D              m_MoveCmd{ 0.f, 0.f };             //! Where we should be moving towards
-    CEntity::Ref           m_TargetEntity{};                  //! Entity we're aiming for (If set, `m_TargetPos` is ignored)
-    CVector                m_TargetPos{};                     //! Either a position, or a direction vector (?) - Only used if `m_TargetEntity` is not set.
-    CAnimBlendAssociation* m_Anim{};                          //! Animation for the current command (Reloading, Firing, etc)
-    CWeaponInfo*           m_WeaponInfo{};                    //! Ped active weapon's info
-    uint16                 m_BurstLength{};                   //! How many bullets to fire in a burst (For eGunCommand::FIREBURST)
-    uint16                 m_BurstShots{};                    //! How many bullets have been fired this burst (For eGunCommand::FIREBURST)
-    uint8                  m_CountDownFrames{ 0xFF };         //! Some countdown (Maybe for burst?)
-    bool                   m_IsArmIKInUse{};                  //! Are we using arm IK (PointArmAt)
-    bool                   m_IsLookIKInUse{};                 //! Are we using look at IK (LookAt)
-    bool                   m_IsAimImmediate{};                //! How fast the aim animation should be (?)
+    bool                   m_IsFinished{};
+    bool                   m_IsInControl{ true };
+    bool                   m_HasMoveControl{};
+    bool                   m_HasFiredGun{};
+    bool                   m_IsLOSBlocked{};
+    bool                   m_IsFiringGunRightHandThisFrame : 1{};
+    bool                   m_IsFiringGunLeftHandThisFrame : 1{};
+    bool                   m_SkipAim{};                           //!< Don't aim (So no crosshair on HUD, etc)
+    eGunCommand            m_NextCmd{};                           //!< Active command
+    eGunCommand            m_LastCmd{ eGunCommand::UNKNOWN };     //!< Previous command
+    CVector2D              m_MoveCmd{ 0.f, 0.f };                 //!< Where we should be moving towards
+    CEntity::Ref           m_TargetEntity{};                      //!< Entity we're aiming for (If set, `m_TargetPos` is ignored)
+    CVector                m_TargetPos{};                         //!< Either a position, or a direction vector (?) - Only used if `m_TargetEntity` is not set.
+    CAnimBlendAssociation* m_Anim{};                              //!< Animation for the current command (Reloading, Firing, etc)
+    CWeaponInfo*           m_WeaponInfo{};                        //!< Ped active weapon's info
+    uint16                 m_BurstLength{};                       //!< How many bullets to fire in a burst (For eGunCommand::FIREBURST)
+    uint16                 m_BurstShots{};                        //!< How many bullets have been fired this burst (For eGunCommand::FIREBURST)
+    uint8                  m_CountDownFrames{ 0xFF };             //!< Some countdown (Maybe for burst?)
+    bool                   m_IsArmIKInUse{};                      //!< Are we using arm IK (PointArmAt)
+    bool                   m_IsLookIKInUse{};                     //!< Are we using look at IK (LookAt)
+    bool                   m_IsAimImmediate{};                    //!< How fast the aim animation should be (?)
 };
 VALIDATE_SIZE(CTaskSimpleUseGun, 0x3C);

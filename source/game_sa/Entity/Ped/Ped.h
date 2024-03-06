@@ -419,7 +419,7 @@ public:
     bool IsAlive() const;
     void UpdateStatEnteringVehicle();
     void UpdateStatLeavingVehicle();
-    void GetTransformedBonePosition(RwV3d& inOffsetOutPosn, eBoneTag boneId, bool updateSkinBones = false);
+    void GetTransformedBonePosition(RwV3d& inOutPos, eBoneTag boneId, bool updateSkinBones = false);
     void ReleaseCoverPoint();
     CTaskSimpleHoldEntity* GetHoldingTask();
     CEntity* GetEntityThatThisPedIsHolding();
@@ -451,6 +451,7 @@ public:
     void GetBonePosition(RwV3d& outPosition, eBoneTag boneId, bool updateSkinBones = false);
     void GiveObjectToPedToHold(int32 modelIndex, uint8 replace);
     void SetPedState(ePedState pedState);
+    ePedState GetPedState() { return m_nPedState; }
     //1 = default, 2 = scm/mission script
     void SetCharCreatedBy(ePedCreatedBy createdBy);
     void CalculateNewVelocity();

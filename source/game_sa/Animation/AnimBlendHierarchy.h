@@ -9,11 +9,12 @@
 #include "AnimBlendSequence.h"
 
 /*!
-* @brief The animation object. It contains `CAnimBlendSequence`'s each of which are the animation for one bone (node).
-* 
-* The sequence/frames data is copied from it to `CAnimBlendAssociation` when a clump requests an animation.
-* It is never destroyed and stays in memory unless `CStreaming` forces the IFP to unload to create space in memory.
-*/
+ * @brief The animation object.
+ * 
+ * @detail It contains `CAnimBlendSequence`'s each of which is the animation for one bone (node).
+ * @detail The data from here is copied to `CAnimBlendAssociation` when an animation is requested for a clump.
+ * @detail It is never destroyed and stays in memory unless `CStreaming` forces the IFP to unload to free up memory.
+ */
 class CAnimBlendHierarchy {
 public:
     uint32              m_hashKey;
@@ -23,7 +24,7 @@ public:
     bool                m_bKeepCompressed;
     int32               m_nAnimBlockId;
     float               m_fTotalTime;
-    CLink<CAnimBlendHierarchy*>* m_Link;
+    CLink<CAnimBlendHierarchy*>* m_Link; //!< Link to the next animation in the block (?)
 
 public:
     CAnimBlendHierarchy();

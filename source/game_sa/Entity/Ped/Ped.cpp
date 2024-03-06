@@ -1366,12 +1366,12 @@ void CPed::UpdateStatLeavingVehicle()
 
 /*!
 * @addr 0x5E01C0
-* @brief Transform \r inOffsetOutPosn into the given \a bone's space
+* @brief Transform \r inOutPos into the given \a bone's space
 *
-* @param [in,out] inOffsetOutPosn The position to be transformed in-place.
+* @param [in,out] inOutPos The position to be transformed in-place.
 * @param          updateSkinBones If `UpdateRpHAnim` should be called
 */
-void CPed::GetTransformedBonePosition(RwV3d& inOffsetOutPosn, eBoneTag bone, bool updateSkinBones) {
+void CPed::GetTransformedBonePosition(RwV3d& inOutPos, eBoneTag bone, bool updateSkinBones) {
     // Pretty much the same as GetBonePosition..
     if (updateSkinBones) {
         if (!bCalledPreRender) {
@@ -1379,12 +1379,12 @@ void CPed::GetTransformedBonePosition(RwV3d& inOffsetOutPosn, eBoneTag bone, boo
             bCalledPreRender = true;
         }
     } else if (!bCalledPreRender) { // Return static local bone position instead
-        inOffsetOutPosn = m_matrix->TransformPoint(GetPedBoneStdPosition(bone));
+        inOutPos = m_matrix->TransformPoint(GetPedBoneStdPosition(bone));
         return;
     }
 
     // Return actual position
-    RwV3dTransformPoints(&inOffsetOutPosn, &inOffsetOutPosn, 1, &GetBoneMatrix(bone));
+    RwV3dTransformPoints(&inOutPos, &inOutPos, 1, &GetBoneMatrix(bone));
 }
 
 /*!

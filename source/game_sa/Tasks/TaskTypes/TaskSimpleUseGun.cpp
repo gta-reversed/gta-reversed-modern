@@ -79,27 +79,27 @@ void CTaskSimpleUseGun::FinishGunAnimCB(CAnimBlendAssociation* anim, void* data)
 
 // 0x61EB10
 void CTaskSimpleUseGun::FireGun(CPed* ped, bool isLeftHand) {
-    const auto DoFireGun = [&](CVector origin, CVector gunBarrelOffset) {
+    const auto DoFireGun = [&](CVector origin, CVector barrelPos) {
         ped->GetActiveWeapon().Fire(
             ped,
             &origin,
-            &gunBarrelOffset,
+            &barrelPos,
             m_TargetEntity,
-            m_TargetPos.x != 0.f && m_TargetPos.y != 0.f ? &m_TargetPos : nullptr,
+            m_TargetPos.x == 0.f || m_TargetPos.y == 0.f ? nullptr : &m_TargetPos,
             nullptr
         );
     };
 
     if (ped->bCalledPreRender) { // If pre-render was called, the bone positions are up-to-date
-        const auto& gunBarrelOffset = m_WeaponInfo->m_vecFireOffset;
+        CVector    barrelPos  = m_WeaponInfo->m_vecFireOffset;
         const auto handBoneId = isLeftHand ? BONE_L_HAND : BONE_R_HAND;
-        CVector origin = ped->GetBonePosition(handBoneId);
-        origin.z += gunBarrelOffset.z + 0.15f;
-        ped->GetTransformedBonePosition(origin, handBoneId);
+        CVector    origin     = ped->GetBonePosition(handBoneId);
+        origin.z += barrelPos.z + 0.15f;
+        ped->GetTransformedBonePosition(barrelPos, handBoneId);
         if (!ped->m_pedIK.bUseArm) {
-            ped->m_pedIK.bGunReachedTarget = g_ikChainMan.IsFacingTarget(ped, isLeftHand ? 2 : 1);
+            ped->m_pedIK.bGunReachedTarget = g_ikChainMan.IsFacingTarget(ped, isLeftHand ? eIKChainSlot::LEFT_ARM : eIKChainSlot::RIGHT_ARM);
         }
-        DoFireGun(origin, gunBarrelOffset);
+        DoFireGun(origin, barrelPos);
     } else { // Otherwise ped is probably not on screen anyways, so just do something good enough
         CVector origin = ped->GetPosition();
         origin.z += 0.7f;
@@ -126,15 +126,14 @@ bool CTaskSimpleUseGun::PlayerPassiveControlGun() {
 
 // 0x61E8E0
 void CTaskSimpleUseGun::RemoveStanceAnims(CPed* ped, float x) {
-    if (m_Anim && !(m_Anim->m_Flags & ANIMATION_STARTED) && m_Anim->GetTimeProgress() < 1.f) {
+    if (m_Anim && !(m_Anim->m_Flags & ANIMATION_IS_PLAYING) && m_Anim->GetTimeProgress() < 1.f) {
         if (m_WeaponInfo && m_WeaponInfo->GetAnimLoopStart() == m_Anim->GetCurrentTime()) {
             m_Anim->SetCurrentTime(m_WeaponInfo->GetAnimLoopEnd());
         }
-        m_Anim->SetFlag(ANIMATION_STARTED);
+        m_Anim->SetFlag(ANIMATION_IS_PLAYING);
     }
 
-    // Freze anims associated with this task
-    bool anyAnimsFrozen = false;
+    bool pedHasStanceAnims = false;
     for (const auto animId : {
         ANIM_ID_GUN_STAND,
         ANIM_ID_GUNMOVE_FWD,
@@ -143,21 +142,21 @@ void CTaskSimpleUseGun::RemoveStanceAnims(CPed* ped, float x) {
         ANIM_ID_GUNMOVE_R,
     }) {
         if (const auto a = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, animId)) {
-            a->SetFlag(ANIMATION_FREEZE_LAST_FRAME);
-            anyAnimsFrozen = true;
+            a->SetFlag(ANIMATION_IS_BLEND_AUTO_REMOVE);
+            pedHasStanceAnims = true;
         }
     }
 
     ped->SetMoveState(PEDMOVE_STILL);
     ped->m_nSwimmingMoveState = PEDMOVE_STILL;
 
-    if (!anyAnimsFrozen) {
+    if (!pedHasStanceAnims) {
         return;
     }
 
     const auto DoBlendAnimAndStart = [ped](AnimationId animId) {
         const auto animWalk = CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, animId);
-        animWalk->SetFlag(ANIMATION_STARTED);
+        animWalk->SetFlag(ANIMATION_IS_PLAYING);
     };
 
     if (ped->IsPlayer()) {
@@ -196,8 +195,10 @@ bool CTaskSimpleUseGun::RequirePistolWhip(CPed* ped, CEntity* targetEntity) {
             return false;
         }
     }
-    const auto IsPistolWhipRequiredForPed = [&,
-                                             &pedPos = ped->GetPosition()](CPed& otherPed) {
+    const auto IsPistolWhipRequiredForPed = [
+        &,
+        &pedPos = ped->GetPosition()
+    ](CPed& otherPed) {
         if (!otherPed.IsAlive()) { // Ped is dead :D
             return false;
         }
@@ -241,16 +242,15 @@ bool CTaskSimpleUseGun::ControlGun(CPed* ped, CEntity* target, eGunCommand cmd) 
 // 0x61DFA0
 void CTaskSimpleUseGun::AbortIK(CPed* ped) {
     if (m_IsArmIKInUse) {
-        for (int32 armN = 0; armN < 2; armN++) {
-            g_ikChainMan.AbortPointArm(armN, ped); // No need to call IsArmPointing, as AbortPointArm does checks too...
-        }
+        g_ikChainMan.AbortPointArmIfPointing(eIKArm::IK_ARM_RIGHT, ped);
+        g_ikChainMan.AbortPointArmIfPointing(eIKArm::IK_ARM_LEFT, ped);
         m_IsArmIKInUse = false;
     }
     if (m_IsLookIKInUse) {
-        g_ikChainMan.AbortLookAt(ped); // No need to check `IsLooking` here either
+        g_ikChainMan.AbortLookAtIfLooking(ped);
         m_IsLookIKInUse = false;
     }
-    ped->m_pedIK.bUnk = false;
+    ped->m_pedIK.bEverythingUsed = false;
 }
 
 // 0x61ED10
@@ -258,17 +258,16 @@ void CTaskSimpleUseGun::AimGun(CPed* ped) {
     const auto ikBlendTime = m_IsAimImmediate ? 0 : 250;
     const auto ikSpeed     = m_IsAimImmediate ? 1.f : 0.5f;
 
-
     const auto isAimingWithArm = ped->bIsDucking || !m_WeaponInfo->flags.bAimWithArm;
     if (isAimingWithArm) {
-        if (!ped->m_pedIK.bUnk) {
+        if (!ped->m_pedIK.bEverythingUsed) {
             AbortIK(ped);
         }
     }
-    ped->m_pedIK.bUseArm = !isAimingWithArm;
-    ped->m_pedIK.bUnk    = isAimingWithArm;
+    ped->m_pedIK.bUseArm         = !isAimingWithArm;
+    ped->m_pedIK.bEverythingUsed = isAimingWithArm;
 
-    const auto DoLookAt = [this, ped](ePedBones lookAtBone, CEntity* lookAtEntity, CVector* lookAtPos) {
+    const auto DoLookAt = [this, ped](eBoneTag lookAtBone, CEntity* lookAtEntity, CVector* lookAtPos) {
         g_ikChainMan.LookAt(
             "TaskUseGun",
             ped,
@@ -285,7 +284,7 @@ void CTaskSimpleUseGun::AimGun(CPed* ped) {
         m_IsLookIKInUse = true;
     };
 
-    const auto DoPointArm = [&, this, ped](int32 arm, ePedBones armBone = BONE_UNKNOWN, CEntity* lookAtEntity = nullptr, CVector* lookAtPos = nullptr) {
+    const auto DoPointArm = [&, this, ped](eIKArm arm, eBoneTag armBone = BONE_UNKNOWN, CEntity* lookAtEntity = nullptr, CVector* lookAtPos = nullptr) {
         g_ikChainMan.PointArm(
             "CTaskSimpleUseGun",
             arm,
@@ -297,6 +296,7 @@ void CTaskSimpleUseGun::AimGun(CPed* ped) {
             ikBlendTime,
             100.f
         );
+        m_IsArmIKInUse = true;
     };
 
     if (m_TargetEntity) { // If there's a target entity, aim at them
@@ -314,9 +314,9 @@ void CTaskSimpleUseGun::AimGun(CPed* ped) {
             }
              
             if (!m_IsArmIKInUse) { // 0x61EF0B
-                DoPointArm(0, lookAtBone, m_TargetEntity, nullptr);
+                DoPointArm(eIKArm::IK_ARM_RIGHT, lookAtBone, m_TargetEntity, nullptr);
                 if (m_WeaponInfo->flags.bTwinPistol && !ped->bLeftArmBlocked) {
-                    DoPointArm(1, lookAtBone, m_TargetEntity, nullptr);
+                    DoPointArm(eIKArm::IK_ARM_LEFT, lookAtBone, m_TargetEntity, nullptr);
                 } 
             }
 
@@ -334,10 +334,11 @@ void CTaskSimpleUseGun::AimGun(CPed* ped) {
                 DoLookAt(BONE_UNKNOWN, nullptr, &target);
             }
 
-            DoPointArm(0, BONE_UNKNOWN, nullptr, &target);
+            DoPointArm(eIKArm::IK_ARM_RIGHT, BONE_UNKNOWN, nullptr, &target);
             if (m_WeaponInfo->flags.bTwinPistol && !ped->bLeftArmBlocked) {
-                DoPointArm(1, BONE_UNKNOWN, nullptr, &target);
+                DoPointArm(eIKArm::IK_ARM_LEFT, BONE_UNKNOWN, nullptr, &target);
             }
+
             ped->m_pedIK.RotateTorsoForArm(target);
         } else if (!m_IsArmIKInUse || !m_IsLookIKInUse) { // 0x61F144 - Neither pointing with arm, or looking at anything -> Just look somewhere...
             if (m_TargetPos.x == 0.f || m_TargetPos.y == 0.f) { // TODO/NOTE: Bug? Perhaps they meant &&?
@@ -347,18 +348,18 @@ void CTaskSimpleUseGun::AimGun(CPed* ped) {
                     DoLookAt(BONE_UNKNOWN, nullptr, &target);
                 }
 
-                DoPointArm(0, BONE_R_UPPER_ARM, ped, &target);
+                DoPointArm(eIKArm::IK_ARM_RIGHT, BONE_R_UPPER_ARM, ped, &target);
                 if (m_WeaponInfo->flags.bTwinPistol && !ped->bLeftArmBlocked) {
-                    DoPointArm(1, BONE_L_UPPER_ARM, ped, &target);
+                    DoPointArm(eIKArm::IK_ARM_LEFT, BONE_L_UPPER_ARM, ped, &target);
                 }
             } else { // 0x61F172 - Either arm/look IK is in use, meaning there's a target
                 if (m_Anim->GetBlendAmount() > 0.98f) {
                     DoLookAt(BONE_UNKNOWN, nullptr, &m_TargetPos);
                 }
 
-                DoPointArm(0, BONE_UNKNOWN, nullptr, &m_TargetPos);
+                DoPointArm(eIKArm::IK_ARM_RIGHT, BONE_UNKNOWN, nullptr, &m_TargetPos);
                 if (m_WeaponInfo->flags.bTwinPistol && !ped->bLeftArmBlocked) {
-                    DoPointArm(1, BONE_UNKNOWN, nullptr, &m_TargetPos);
+                    DoPointArm(eIKArm::IK_ARM_LEFT, BONE_UNKNOWN, nullptr, &m_TargetPos);
                 }
             }
         }
@@ -373,8 +374,8 @@ void CTaskSimpleUseGun::AimGun(CPed* ped) {
         ped->m_pedIK.PointGunAtPosition(m_TargetPos, m_Anim->GetBlendAmount());
     }
 
-    if (m_WeaponInfo->flags.bTwinPistol && ped->bLeftArmBlocked) { // No need for the `IsArmPointing` check here
-        g_ikChainMan.AbortPointArm(1, ped);
+    if (m_WeaponInfo->flags.bTwinPistol && ped->bLeftArmBlocked) {
+        g_ikChainMan.AbortPointArmIfPointing(eIKArm::IK_ARM_RIGHT, ped);
     }
 }
 
@@ -426,7 +427,8 @@ bool CTaskSimpleUseGun::ProcessPed(CPed* ped) {
     * 
     m_IsLookIKInUse    = m_IsLookIKInUse && g_ikChainMan.IsLooking(ped);
     m_IsArmIKInUse     = m_IsArmIKInUse && g_ikChainMan.IsArmPointing(0, ped);
-    m_FireGunThisFrame = false;
+    m_IsFiringGunRightHandThisFrame = false;
+    m_IsFiringGunLeftHandThisFrame = false;
 
     if (m_WeaponInfo) { // Inverted
         if (m_WeaponInfo != &ped->GetActiveWeapon().GetWeaponInfo(ped)) {
@@ -466,7 +468,7 @@ bool CTaskSimpleUseGun::ProcessPed(CPed* ped) {
                 if (m_LastCmd != eGunCommand::PISTOLWHIP && (m_NextCmd != eGunCommand::PISTOLWHIP || m_Anim)) { // 0x62A532
                     if (m_Anim) {
                         m_Anim->SetBlendDelta(-4.f);
-                        m_Anim->SetFlag(ANIMATION_STARTED, false);
+                        m_Anim->SetFlag(ANIMATION_IS_PLAYING, false);
                         m_Anim->SetFlag(ANIMATION_FREEZE_LAST_FRAME, true);
                     } else if (notsa::contains({ eGunCommand::AIM, eGunCommand::FIRE, eGunCommand::FIREBURST }, m_NextCmd)) { // 0x62A63B - Inverted
                         AbortIK(ped);
@@ -573,13 +575,13 @@ CVector CTaskSimpleUseGun::GetAimTargetPosition(CPed* ped) const {
 }
 
 // notsa
-std::pair<CVector, ePedBones> CTaskSimpleUseGun::GetAimLookAtInfo() const {
+std::pair<CVector, eBoneTag> CTaskSimpleUseGun::GetAimLookAtInfo() const {
     if (m_TargetEntity->IsPed()) {
         const auto targetPed = m_TargetEntity->AsPed();
         if (const auto pd = targetPed->m_pPlayerData) {
             CVector ret = pd->m_vecTargetBoneOffset;
-            targetPed->GetTransformedBonePosition(ret, (ePedBones)pd->m_nTargetBone);
-            return {ret, (ePedBones)pd->m_nTargetBone};
+            targetPed->GetTransformedBonePosition(ret, (eBoneTag)pd->m_nTargetBone);
+            return {ret, (eBoneTag)pd->m_nTargetBone};
         }
     }
     return {m_TargetEntity->GetPosition(), BONE_SPINE1};
@@ -647,7 +649,7 @@ void CTaskSimpleUseGun::SetMoveAnim(CPed* ped) {
         const auto resetPlayTime = moveAnim && moveAnim->GetBlendAmount() > 0.95f;
         for (const auto anim : { animGunMoveBwd, animGunMoveL, animGunMoveR, animGunMoveBwd }) {
             if (anim) {
-                anim->SetFlag(ANIMATION_STARTED, false);
+                anim->SetFlag(ANIMATION_IS_PLAYING, false);
                 if (resetPlayTime) {
                     anim->SetCurrentTime(0.f);
                 }
@@ -672,7 +674,7 @@ void CTaskSimpleUseGun::SetMoveAnim(CPed* ped) {
                         : ANIM_ID_GUNMOVE_BWD,
             8.f
         );
-        moveAnim->SetFlag(ANIMATION_STARTED, true);
+        moveAnim->SetFlag(ANIMATION_IS_PLAYING, true);
         ped->SetMoveState(PEDMOVE_NONE);
         return; // 0x61E675
     }
@@ -710,7 +712,7 @@ void CTaskSimpleUseGun::SetMoveAnim(CPed* ped) {
         // Set params of the anim we're transitioning to
         toAnim->SetBlendDelta(0.f);
         toAnim->SetBlendAmount(toAnimBlendAmnt);
-        toAnim->SetFlag(ANIMATION_STARTED, true);
+        toAnim->SetFlag(ANIMATION_IS_PLAYING, true);
         toAnim->SetSpeed(m_WeaponInfo->m_fMoveSpeed * moveCmdDist);
     };
 
@@ -786,7 +788,7 @@ void CTaskSimpleUseGun::StartAnim(CPed* ped) {
         if (m_LastCmd == eGunCommand::RELOAD) {
             if (m_WeaponInfo->flags.bReload2Start) {
                 m_Anim->SetCurrentTime(m_WeaponInfo->GetAnimLoopStart(ped->bIsDucking));
-                m_Anim->SetFlag(ANIMATION_STARTED, false);
+                m_Anim->SetFlag(ANIMATION_IS_PLAYING, false);
             }
         }
 
