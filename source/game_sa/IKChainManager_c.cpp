@@ -275,12 +275,12 @@ void IKChainManager_c::PointArm(Const char* purpose, eIKArm pedArmId, CPed* ped,
     }
 
     const auto offset = pOffset ? *pOffset : CVector{};
-    auto& tIKMgr = *GetPedIKManagerTask(ped, true);
+    const auto tIKMgr = GetPedIKManagerTask(ped, true);
 
     // Now, either createIfNotExists or update existing
-    if (const auto pointArm = static_cast<CTaskSimpleIKPointArm*>(tIKMgr.GetTaskAtSlot(IKArmToIKSlot(pedArmId)))) {
-        pointArm->UpdatePointArmInfo(purpose, lookAtEntity, offsetBoneTag, offset, speed, blendTime);
+    if (const auto tPointArm = static_cast<CTaskSimpleIKPointArm*>(tIKMgr->GetTaskAtSlot(IKArmToIKSlot(pedArmId)))) {
+        tPointArm->UpdatePointArmInfo(purpose, lookAtEntity, offsetBoneTag, offset, speed, blendTime);
     } else { // Create task
-        tIKMgr.AddIKChainTask(new CTaskSimpleIKPointArm{purpose, pedArmId, lookAtEntity, offsetBoneTag, offset, speed, blendTime}, IKArmToIKSlot(pedArmId));
+        tIKMgr->AddIKChainTask(new CTaskSimpleIKPointArm{purpose, pedArmId, lookAtEntity, offsetBoneTag, offset, speed, blendTime}, IKArmToIKSlot(pedArmId));
     }
 }

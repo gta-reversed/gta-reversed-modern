@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
 #include "UIRenderer.h"
-#include "TaskSimpleGoToPoint.h"
+#include "TaskSimpleAchieveHeading.h"
 #include "TaskComplexWalkAlongsidePed.h"
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
 #include "TaskComplexFollowNodeRoute.h"
@@ -187,33 +187,30 @@ void UIRenderer::DebugCode() {
     if (pad->IsStandardKeyJustPressed('6')) {
         CMessages::AddBigMessage("PRESS ~k~~PED_ANSWER_PHONE~ TO FUCK"_gxt, 1000, eMessageStyle::STYLE_BOTTOM_RIGHT);
     }
-    if (pad->IsStandardKeyJustPressed('7')) {
-        //const auto DoTest = [&](auto&& fn) {
-        //    CAnimBlendAssociation* a{};
-        //    float b{};
-        //    const auto m = fn(player->m_pRwClump, &a, &b);
-        //    DEV_LOG("Main={} (Blend: {}); Secondary={} (Blend: {})\n", (void*)m, m->GetBlendAmount(), (void*)a, b);
-        //};
-        //DoTest(&RpAnimBlendClumpGetMainAssociation);
-        //DoTest(&plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6910, RpClump*, CAnimBlendAssociation**, float*>);
-    }
 
     if (pad->IsStandardKeyJustPressed('T')) {
-        const auto ped = new CPed(ePedType::PED_TYPE_GANG1);
-        ped->SetCreatedBy(PED_GAME);
-        ped->SetModelIndex(MODEL_MALE01);
-        ped->SetHeading(player->GetHeading());
-        CWorld::Add(ped);
-        ped->SetPosn(player->GetPosition() + player->GetForward() * 6.f);
-        ped->GetTaskManager().SetTask(
-            new CTaskSimpleGoToPoint{PEDMOVE_SPRINT, ped->GetPosition() + ped->GetForward() * 40.f},
-            TASK_PRIMARY_PRIMARY
-        );
         player->GetTaskManager().SetTask(
-            new CTaskComplexWalkAlongsidePed{ped, 15.f},
+            new CTaskSimpleAchieveHeading{PI/2.f},
             TASK_PRIMARY_PRIMARY
         );
     }
+
+    //if (pad->IsStandardKeyJustPressed('T')) {
+    //    const auto ped = new CPed(ePedType::PED_TYPE_GANG1);
+    //    ped->SetCreatedBy(PED_GAME);
+    //    ped->SetModelIndex(MODEL_MALE01);
+    //    ped->SetHeading(player->GetHeading());
+    //    CWorld::Add(ped);
+    //    ped->SetPosn(player->GetPosition() + player->GetForward() * 6.f);
+    //    ped->GetTaskManager().SetTask(
+    //        new CTaskSimpleGoToPoint{PEDMOVE_SPRINT, ped->GetPosition() + ped->GetForward() * 40.f},
+    //        TASK_PRIMARY_PRIMARY
+    //    );
+    //    player->GetTaskManager().SetTask(
+    //        new CTaskComplexWalkAlongsidePed{ped, 15.f},
+    //        TASK_PRIMARY_PRIMARY
+    //    );
+    //}
 
     //if (pad->IsStandardKeyJustPressed('8')) {
     //    CMessages::AddToPreviousBriefArray("PRESS ~k~~PED_ANSWER_PHONE~ TO FUCK");
