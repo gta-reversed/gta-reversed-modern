@@ -36,7 +36,7 @@ void CCarAI::InjectHooks() {
     RH_ScopedInstall(FindSwitchDistanceClose, 0x41BF50);
     RH_ScopedInstall(FindSwitchDistanceFar, 0x41BF70);
     RH_ScopedInstall(GetCarToGoToCoors, 0x41CE30);
-    RH_ScopedInstall(GetCarToGoToCoorsAccurate, 0x41D0E0, { .reversed = false });
+    RH_ScopedInstall(GetCarToGoToCoorsAccurate, 0x41D0E0);
     RH_ScopedInstall(GetCarToGoToCoorsRacing, 0x41D210, { .reversed = false });
     RH_ScopedInstall(GetCarToGoToCoorsStraightLine, 0x41CFB0, { .reversed = false });
     RH_ScopedInstall(GetCarToParkAtCoors, 0x41D350, { .reversed = false });
@@ -276,18 +276,46 @@ float CCarAI::GetCarToGoToCoors(CVehicle* veh, const CVector& coors, eCarDriving
 }
 
 // 0x41D0E0
-float CCarAI::GetCarToGoToCoorsAccurate(CVehicle* vehicle, const CVector& coors, eCarDrivingStyle drivingStyle, bool bSpeedLimit20) {
-    return plugin::CallAndReturn<float, 0x41D0E0, CVehicle*, const CVector&, int32, bool>(vehicle, coors, drivingStyle, bSpeedLimit20);
+float CCarAI::GetCarToGoToCoorsAccurate(CVehicle* veh, const CVector& coors, eCarDrivingStyle drivingStyle, bool setCruiseSpeed) {
+    const auto ap = &veh->m_autoPilot;
+
+    switch (ap->m_nCarMission) {
+    case MISSION_GOTOCOORDS_ACCURATE:
+    case MISSION_GOTOCOORDS_STRAIGHT_ACCURATE: {
+        const auto vp = veh->GetPosition();
+        if (std::abs(vp.x - coors.x) >= 2.f || std::abs(vp.x - coors.x) >= 2.f) {
+            ap->m_vecDestinationCoors = coors;
+        }
+        break;
+    }
+    default: { // Copy paste from `GetCarToGoToCoors`
+        ap->m_nCarDrivingStyle = drivingStyle;
+        ap->ClearTempAction();
+        if (setCruiseSpeed) {
+            ap->m_nCruiseSpeed = 20;
+        }
+        ap->m_nTimeToStartMission = CTimer::GetTimeInMS();
+        if (veh->GetStatus() == STATUS_GHOST) {
+            veh->SetStatus(STATUS_PHYSICS);
+        }
+        ap->m_nCarMission = CCarCtrl::JoinCarWithRoadSystemGotoCoors(veh, coors, false, false)
+            ? MISSION_GOTOCOORDS_STRAIGHT_ACCURATE
+            : MISSION_GOTOCOORDS_ACCURATE;
+        break;
+    }
+    }
+
+    return (veh->GetPosition2D() - coors).Magnitude();
 }
 
 // 0x41D210
-float CCarAI::GetCarToGoToCoorsRacing(CVehicle* vehicle, const CVector& vec, eCarDrivingStyle drivingStyle, bool bSpeedLimit20) {
-    return plugin::CallAndReturn<float, 0x41D210, CVehicle*, const CVector&, int32, bool>(vehicle, vec, drivingStyle, bSpeedLimit20);
+float CCarAI::GetCarToGoToCoorsRacing(CVehicle* veh, const CVector& coors, eCarDrivingStyle drivingStyle, bool setCruiseSpeed) {
+    return plugin::CallAndReturn<float, 0x41D210, CVehicle*, const CVector&, int32, bool>(veh, coors, drivingStyle, setCruiseSpeed);
 }
 
 // 0x41CFB0
-float CCarAI::GetCarToGoToCoorsStraightLine(CVehicle* vehicle, const CVector& vec, eCarDrivingStyle drivingStyle, bool bSpeedLimit20) {
-    return plugin::CallAndReturn<float, 0x41CFB0, CVehicle*, const CVector&, int32, bool>(vehicle, vec, drivingStyle, bSpeedLimit20);
+float CCarAI::GetCarToGoToCoorsStraightLine(CVehicle* veh, const CVector& coors, eCarDrivingStyle drivingStyle, bool setCruiseSpeed) {
+    return plugin::CallAndReturn<float, 0x41CFB0, CVehicle*, const CVector&, int32, bool>(veh, coors, drivingStyle, setCruiseSpeed);
 }
 
 // 0x41D350

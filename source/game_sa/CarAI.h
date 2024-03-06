@@ -27,10 +27,10 @@ public:
     static float FindSwitchDistanceClose(CVehicle* veh);
     static float FindSwitchDistanceFar(CVehicle* veh);
 
-    static float GetCarToGoToCoors(CVehicle* veh, const CVector&, eCarDrivingStyle drivingStyle, bool bSpeedLimit20);
-    static float GetCarToGoToCoorsAccurate(CVehicle* veh, const CVector&, eCarDrivingStyle drivingStyle, bool bSpeedLimit20);
-    static float GetCarToGoToCoorsRacing(CVehicle* veh, const CVector&, eCarDrivingStyle drivingStyle, bool bSpeedLimit20);
-    static float GetCarToGoToCoorsStraightLine(CVehicle* veh, const CVector&, eCarDrivingStyle drivingStyle, bool bSpeedLimit20);
+    static float GetCarToGoToCoors(CVehicle* veh, const CVector& coors, eCarDrivingStyle drivingStyle, bool setCruiseSpeed);
+    static float GetCarToGoToCoorsAccurate(CVehicle* veh, const CVector& coors, eCarDrivingStyle drivingStyle, bool setCruiseSpeed);
+    static float GetCarToGoToCoorsRacing(CVehicle* veh, const CVector& coors, eCarDrivingStyle drivingStyle, bool setCruiseSpeed);
+    static float GetCarToGoToCoorsStraightLine(CVehicle* veh, const CVector& coors, eCarDrivingStyle drivingStyle, bool setCruiseSpeed);
     static float GetCarToParkAtCoors(CVehicle* veh, const CVector&);
 
     static void MakeWayForCarWithSiren(CVehicle* veh);
