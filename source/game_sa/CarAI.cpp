@@ -6,6 +6,7 @@
 */
 #include "StdInc.h"
 
+#include "VehicleRecording.h"
 #include "CarAI.h"
 #include "CarCtrl.h"
 #include "CullZones.h"
@@ -41,9 +42,9 @@ void CCarAI::InjectHooks() {
     RH_ScopedInstall(GetCarToGoToCoorsStraightLine, 0x41CFB0);
     RH_ScopedInstall(GetCarToParkAtCoors, 0x41D350);
     RH_ScopedInstall(MakeWayForCarWithSiren, 0x41D660);
-    RH_ScopedInstall(MellowOutChaseSpeed, 0x41D3D0, { .reversed = false });
+    RH_ScopedInstall(MellowOutChaseSpeed, 0x41D3D0);
     RH_ScopedInstall(MellowOutChaseSpeedBoat, 0x41CB70);
-    RH_ScopedInstall(TellCarToBlockOtherCar, 0x41C900, { .reversed = false });
+    RH_ScopedInstall(TellCarToBlockOtherCar, 0x41C900);
     RH_ScopedInstall(TellCarToFollowOtherCar, 0x41C960);
     RH_ScopedInstall(TellCarToRamOtherCar, 0x41C8A0);
     RH_ScopedInstall(TellOccupantsToLeaveCar, 0x41C760);
@@ -174,16 +175,16 @@ bool CCarAI::EntitiesGoHeadOn(CEntity* entity1, CEntity* entity2) {
 
 // 0x41CA40
 eCarMission CCarAI::FindPoliceBikeMissionForWantedLevel() {
-    return MISSION_POLICE_BIKE;
+    return MISSION_APPROACHPLAYER_FARAWAY;
 }
 
 // 0x41CA50
 eCarMission CCarAI::FindPoliceBoatMissionForWantedLevel() {
     const auto& wantedLevel = FindPlayerWanted()->m_nWantedLevel;
     if (wantedLevel < 2 || wantedLevel > 6)
-        return FindPlayerVehicle() ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_BOAT_CIRCLING_PLAYER;
+        return FindPlayerVehicle() ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_BOAT_CIRCLEPLAYER;
     else
-        return FindPlayerVehicle() ? MISSION_ATTACKPLAYER : MISSION_BOAT_CIRCLING_PLAYER;
+        return FindPlayerVehicle() ? MISSION_ATTACKPLAYER : MISSION_BOAT_CIRCLEPLAYER;
 }
 
 // 0x41C9D0
@@ -311,7 +312,7 @@ float CCarAI::GetCarToGoToCoorsRacing(CVehicle* veh, const CVector& coors, eCarD
     const auto ap = &veh->m_autoPilot;
 
     switch (ap->m_nCarMission) {
-    case MISSION_FOLLOW_PATH_RACING:
+    case MISSION_GOTOCOORDINATES_RACING:
     case MISSION_GOTOCOORDS_STRAIGHT: {
         if (!veh->GetPosition2D().EqualTo(coors, 2.f)) {
             ap->m_vecDestinationCoors = coors;
@@ -329,7 +330,7 @@ float CCarAI::GetCarToGoToCoorsRacing(CVehicle* veh, const CVector& coors, eCarD
             veh->SetStatus(STATUS_PHYSICS);
         }
         ap->m_vecDestinationCoors = coors;
-        ap->m_nCarMission         = MISSION_FOLLOW_PATH_RACING;
+        ap->m_nCarMission         = MISSION_GOTOCOORDINATES_RACING;
         CCarCtrl::JoinCarWithRoadSystemGotoCoors(veh, coors, false, false);
         break;
     }
@@ -578,7 +579,7 @@ void CCarAI::TellCarToFollowOtherCar(CVehicle* follower, CVehicle* toFollow, flo
 
     CCarCtrl::JoinCarWithRoadSystem(follower);
 
-    follower->m_autoPilot.m_nCarMission     = MISSION_FOLLOW_CAR;
+    follower->m_autoPilot.m_nCarMission     = MISSION_FOLLOWCAR_FARAWAY;
     follower->vehicleFlags.bEngineOn        = follower->vehicleFlags.bEngineBroken == 0;
     follower->m_autoPilot.m_nCruiseSpeed    = std::max(follower->m_autoPilot.m_nCruiseSpeed, (uint8)6);
     follower->m_autoPilot.m_ucCarFollowDist = (uint8)radius;
@@ -619,6 +620,128 @@ void CCarAI::TellOccupantsToLeaveCar(CVehicle* vehicle) {
 }
 
 // 0x41DA30
-void CCarAI::UpdateCarAI(CVehicle* vehicle) {
-    plugin::Call<0x41DA30, CVehicle*>(vehicle);
+void CCarAI::UpdateCarAI(CVehicle* veh) {
+    const auto ap = &veh->m_autoPilot;
+    if (ap->m_vehicleRecordingId >= 0 && (!CVehicleRecording::bUseCarAI[ap->m_vehicleRecordingId] || veh->IsSubHeli())) {
+        return;
+    }
+
+    if (ap->m_nCarMission == MISSION_PLANE_ATTACK_PLAYER_POLICE) { // 0x41DAA0
+        const auto wntd = FindPlayerWanted();
+        if (wntd->m_nWantedLevel < 3 || !FindPlayerVehicle()) {
+            ap->m_vecDestinationCoors = CVector{-6'000.f, -10'000.f, 500.f};
+        }
+    }
+
+    if (veh->vehicleFlags.bIsLawEnforcer) { // 0x41DAF8
+        switch (ap->m_nCarMission) {
+        case MISSION_BLOCKPLAYER_FARAWAY:
+        case MISSION_RAMPLAYER_FARAWAY:
+        case MISSION_BLOCKPLAYER_CLOSE:
+        case MISSION_RAMPLAYER_CLOSE:
+        case MISSION_APPROACHPLAYER_FARAWAY:
+        case MISSION_APPROACHPLAYER_CLOSE:
+        case MISSION_KILLPED_FARAWAY:
+        case MISSION_KILLPED_CLOSE:
+            ap->m_nCruiseSpeed = FindPoliceCarSpeedForWantedLevel(veh);
+        }
+    }
+
+    const auto& vehPos  = veh->GetPosition();
+    const auto  plyrVeh = FindPlayerVehicle();
+    const auto  plyr    = FindPlayerPed();
+    const auto& plyrPos = plyr->GetPosition();
+
+    switch (veh->GetStatus()) {
+    case STATUS_SIMPLE:
+    case STATUS_PHYSICS:
+    case STATUS_GHOST: {
+        switch (ap->m_nCarMission) {
+        case MISSION_RAMPLAYER_FARAWAY: { // 0x41DB72
+            const auto vehPlyrDist2DSq = (vehPos - plyrPos).SquaredMagnitude2D();
+            if (   vehPlyrDist2DSq <= sq((float)ap->m_nStraightLineDistance)
+                || EntitiesGoHeadOn(plyr, veh) && vehPlyrDist2DSq < sq(40.f)
+            ) {
+                ap->m_nCarMission = MISSION_RAMPLAYER_CLOSE;
+                if (veh->UsesSiren()) {
+                    veh->vehicleFlags.bSirenOrAlarm = true;
+                }
+            }
+            BackToCruisingIfNoWantedLevel(veh);
+            break;
+        }
+        case MISSION_RAMPLAYER_CLOSE: { // 0x41DC92
+            const auto vehPlyrDist2DSq = (vehPos - plyrPos).SquaredMagnitude2D();
+            if (sq(FindSwitchDistanceFar(veh)) < vehPlyrDist2DSq) { // 0x41DD4F
+                if (!CCarCtrl::JoinCarWithRoadSystemGotoCoors(veh, FindPlayerCoors(), true, false)) {
+                    ap->m_nCarMission   = MISSION_RAMPLAYER_FARAWAY;
+                    veh->m_nHornCounter = 0;
+                    veh->vehicleFlags.bSirenOrAlarm = false;
+                }
+                if (veh->vehicleFlags.bIsLawEnforcer) {
+                    MellowOutChaseSpeed(veh);
+                    BackToCruisingIfNoWantedLevel(veh);
+                    break; // goto LABEL_576;
+                }
+            } else {
+                if (plyrVeh && veh->GetHasCollidedWith(plyrVeh)) { // 0x41DDA2
+                    if (!notsa::contains({ TEMPACT_TURNLEFT, TEMPACT_TURNRIGHT }, ap->m_nTempAction)) {
+                        ap->SetTempAction(
+                            TEMPACT_REVERSE,
+                            plyrVeh->GetMoveSpeed().SquaredMagnitude() >= sq(0.05f) ? 50 : 800
+                        );
+                    }
+                }
+
+                if (plyrVeh && plyrVeh->GetMoveSpeed().SquaredMagnitude() < sq(0.05f)) { // 0x41DE22
+                    veh->m_nCopsInCarTimer += (int16)(CTimer::GetTimeStep() * (1000.f / 60.f));
+                } else {
+                    veh->m_nCopsInCarTimer = 0;
+                }
+
+                if (veh->vehicleFlags.bIsLawEnforcer) {
+                    if (   !plyrVeh // 0x41DE95
+                        || plyrVeh->IsUpsideDown()
+                        || plyrVeh->GetMoveSpeed().SquaredMagnitude() < sq(0.05f) && veh->m_nCopsInCarTimer > 2500
+                    ) {
+                        if ((veh->GetModelID() != MODEL_RHINO || veh->m_nRandomSeed > 10'000) && vehPlyrDist2DSq <= sq(10.f)) { // 0x41DEE1
+                            TellOccupantsToLeaveCar(veh);
+                            ap->m_nCruiseSpeed = 0;
+                            ap->m_nCarMission  = MISSION_NONE;
+                            if (plyr->GetWantedLevel() <= 1) {
+                                veh->vehicleFlags.bSirenOrAlarm = false;
+                            }
+                        }
+                    }
+                    MellowOutChaseSpeed(veh);
+                    BackToCruisingIfNoWantedLevel(veh);
+                    break; // goto LABEL_576;
+                }
+            }
+
+        // LABEL_583: 0x41FAEB
+            if (veh->GetMoveSpeed().SquaredMagnitude2D() >= sq(0.05f)) {
+                ap->m_nTimeSwitchedToRealPhysics = CTimer::GetTimeInMS();
+                ap->m_nTimeToStartMission        = CTimer::GetTimeInMS();
+            }
+
+
+
+            break;
+        }
+        }
+
+        break;
+    }
+    case STATUS_ABANDONED:
+    case STATUS_WRECKED: {
+        ap->m_nCruiseSpeed = 0;
+        ap->m_nCarMission = MISSION_NONE;
+        break;
+    }
+    }
+
+    // 0x41FA99 (LABEL_576)
+
+
 }
