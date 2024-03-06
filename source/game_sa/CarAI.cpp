@@ -33,8 +33,8 @@ void CCarAI::InjectHooks() {
     RH_ScopedInstall(FindPoliceBoatMissionForWantedLevel, 0x41CA50);
     RH_ScopedInstall(FindPoliceCarMissionForWantedLevel, 0x41C9D0);
     RH_ScopedInstall(FindPoliceCarSpeedForWantedLevel, 0x41CAA0);
-    RH_ScopedInstall(FindSwitchDistanceClose, 0x41BF50, { .reversed = false });
-    RH_ScopedInstall(FindSwitchDistanceFar, 0x41BF70, { .reversed = false });
+    RH_ScopedInstall(FindSwitchDistanceClose, 0x41BF50);
+    RH_ScopedInstall(FindSwitchDistanceFar, 0x41BF70);
     RH_ScopedInstall(GetCarToGoToCoors, 0x41CE30, { .reversed = false });
     RH_ScopedInstall(GetCarToGoToCoorsAccurate, 0x41D0E0, { .reversed = false });
     RH_ScopedInstall(GetCarToGoToCoorsRacing, 0x41D210, { .reversed = false });
