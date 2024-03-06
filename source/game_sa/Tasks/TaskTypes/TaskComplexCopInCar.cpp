@@ -28,11 +28,11 @@ void CTaskComplexCopInCar::InjectHooks() {
 }
 
 // 0x68C7F0
-CTaskComplexCopInCar::CTaskComplexCopInCar(CVehicle* vehicle, CPed* partnerCop, CPed* suspect, bool bSuspectDeadOrLost) : CTaskComplex(),
+CTaskComplexCopInCar::CTaskComplexCopInCar(CVehicle* vehicle, CPed* partnerCop, CPed* suspect, bool isDriver) : CTaskComplex(),
     m_Vehicle{ vehicle },
     m_Cop{ partnerCop },
     m_Suspect{ suspect },
-    m_bSuspectDeadOrLost{ bSuspectDeadOrLost }
+    m_IsDriver{ isDriver }
 {
     m_flag0x4 = true;
     CEntity::SafeRegisterRef(m_Vehicle);
@@ -165,7 +165,7 @@ CTask* CTaskComplexCopInCar::CreateNextSubTask(CPed* ped) {
             }
 
             if (m_Suspect->bInVehicle && m_Vehicle != m_Suspect->m_pVehicle) {
-                if (m_Vehicle && m_bSuspectDeadOrLost) {
+                if (m_Vehicle && m_IsDriver) {
                     if (ped->bInVehicle) {
                         return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
                     } else if ((m_Vehicle->GetPosition() - ped->GetPosition()).SquaredMagnitude() < 4.f * 4.f) {
@@ -208,7 +208,7 @@ CTask* CTaskComplexCopInCar::CreateNextSubTask(CPed* ped) {
 CTask* CTaskComplexCopInCar::CreateFirstSubTask(CPed* ped) {
     ped->GetIntelligence()->SetPedDecisionMakerType(DM_EVENT_SHOT_FIRED);
     if (!m_Cop) {
-        m_bSuspectDeadOrLost = true;
+        m_IsDriver = true;
     }
     return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
 }
@@ -224,8 +224,8 @@ CTask* CTaskComplexCopInCar::ControlSubTask(CPed* ped) {
         m_Vehicle->m_autoPilot.m_nCarMission = MISSION_NONE;
     }
 
-    if (!m_bSuspectDeadOrLost && (!m_Cop || m_Cop->IsStateDead())) { // 0x68FDA7
-        m_bSuspectDeadOrLost = true;
+    if (!m_IsDriver && (!m_Cop || m_Cop->IsStateDead())) { // 0x68FDA7
+        m_IsDriver = true;
     }
 
     switch (m_pSubTask->GetTaskType()) {
@@ -242,7 +242,7 @@ CTask* CTaskComplexCopInCar::ControlSubTask(CPed* ped) {
             return m_pSubTask;
         }
 
-        if (m_bSuspectDeadOrLost) {
+        if (m_IsDriver) {
             return m_pSubTask;
         }
 
@@ -293,7 +293,7 @@ CTask* CTaskComplexCopInCar::ControlSubTask(CPed* ped) {
             return m_pSubTask;
         }
 
-        if (!m_bSuspectDeadOrLost) {
+        if (!m_IsDriver) {
             if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
                 m_flag0x2 = false;
                 return CreateNextSubTask(ped);
