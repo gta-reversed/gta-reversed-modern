@@ -38,7 +38,7 @@ void CCarAI::InjectHooks() {
     RH_ScopedInstall(GetCarToGoToCoors, 0x41CE30);
     RH_ScopedInstall(GetCarToGoToCoorsAccurate, 0x41D0E0);
     RH_ScopedInstall(GetCarToGoToCoorsRacing, 0x41D210);
-    RH_ScopedInstall(GetCarToGoToCoorsStraightLine, 0x41CFB0, { .reversed = false });
+    RH_ScopedInstall(GetCarToGoToCoorsStraightLine, 0x41CFB0);
     RH_ScopedInstall(GetCarToParkAtCoors, 0x41D350, { .reversed = false });
     RH_ScopedInstall(MakeWayForCarWithSiren, 0x41D660, { .reversed = false });
     RH_ScopedInstall(MellowOutChaseSpeed, 0x41D3D0, { .reversed = false });
@@ -342,7 +342,33 @@ float CCarAI::GetCarToGoToCoorsRacing(CVehicle* veh, const CVector& coors, eCarD
 
 // 0x41CFB0
 float CCarAI::GetCarToGoToCoorsStraightLine(CVehicle* veh, const CVector& coors, eCarDrivingStyle drivingStyle, bool setCruiseSpeed) {
-    return plugin::CallAndReturn<float, 0x41CFB0, CVehicle*, const CVector&, int32, bool>(veh, coors, drivingStyle, setCruiseSpeed);
+    const auto ap = &veh->m_autoPilot;
+
+    switch (ap->m_nCarMission) {
+    case MISSION_GOTOCOORDS_STRAIGHT: {
+        if (!veh->GetPosition2D().EqualTo(coors, 2.f)) {
+            ap->m_vecDestinationCoors = coors;
+        }
+        break;
+    }
+    default: {
+        ap->m_nCarDrivingStyle = drivingStyle;
+        ap->ClearTempAction();
+        if (setCruiseSpeed) {
+            ap->m_nCruiseSpeed = 20;
+        }
+        ap->m_nTimeToStartMission = CTimer::GetTimeInMS();
+        if (veh->GetStatus() == STATUS_GHOST) {
+            veh->SetStatus(STATUS_PHYSICS);
+        }
+        ap->m_vecDestinationCoors = coors;
+        ap->m_nCarMission         = MISSION_GOTOCOORDS_STRAIGHT;
+        // TODO/BUG: No `CCarCtrl::JoinCarWithRoadSystemGotoCoors` ?
+        break;
+    }
+    }
+
+    return (veh->GetPosition2D() - coors).Magnitude();
 }
 
 // 0x41D350
