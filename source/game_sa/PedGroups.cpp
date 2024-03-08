@@ -123,6 +123,41 @@ int32 CPedGroups::GetGroupId(const CPedGroup* pedGroup) {
 // 0x5FC800
 void CPedGroups::Process() {
     plugin::Call<0x5FC800>();
+    /*
+    for (auto&& [i, group] : notsa::enumerate(GetActiveGroups())) {
+        group.GetMembership().Process();
+        group.GetIntelligence().Process();
+
+        // ranges::size doesn't work for some reason
+        if (!group.GetMembership().GetMembers().size()) {
+            RemoveGroup(i);
+        }
+    }
+
+    auto decisionMarks{ -1 };
+
+    if (CTheScripts::IsPlayerOnAMission() && !ms_bIsPlayerOnAMission) {
+        ms_iNoOfPlayerKills = 0;
+        decisionMarks       = 9;
+    } else if (CTheScripts::IsPlayerOnAMission() || ms_bIsPlayerOnAMission) {
+        if (!CTheScripts::IsPlayerOnAMission() || ms_iNoOfPlayerKills != 0) {
+            if (!CTheScripts::IsPlayerOnAMission())
+
+        }
+    }
+
+    for (auto& group : GetActiveGroups()) {
+        if (!group.m_bIsMissionGroup) {
+            continue;
+        }
+        group.GetIntelligence().m_DecisionMakerType = decisionMarks;
+    }
+
+    ms_bIsPlayerOnAMission = CTheScripts::IsPlayerOnAMission();
+    if (!ms_bIsPlayerOnAMission) {
+        ms_iNoOfPlayerKills = 0;
+    }
+    */
 }
 
 // 0x5F7F10
