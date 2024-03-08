@@ -21,7 +21,9 @@ public:
 public:
     static void InjectHooks();
 
+    // return the index of the added group, return -1 if failed.
     static int32 AddGroup();
+
     static void RemoveGroup(int32 groupID);
     static void RemoveAllFollowersFromGroup(int32 groupId);
 

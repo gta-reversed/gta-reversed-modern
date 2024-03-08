@@ -36,8 +36,8 @@ void CFormation::FindCoverPointsBehindBox(CPointList* pointlist, CVector Pos, CM
 int32 CFormation::FindNearestAvailableDestination(CVector pos, float& pOutDistance) {
     auto minDist = FLT_MAX;
     auto minIdx  = -1;
-    for (auto&& [i, p] : notsa::enumerate(m_Destinations.GetPoints())) {
-        if (const auto d = DistanceBetweenPoints(pos, p); d < minDist) {
+    for (auto&& [i, dst] : notsa::enumerate(m_Destinations.GetPoints())) {
+        if (const auto d = DistanceBetweenPoints(pos, dst); d < minDist) {
             minDist = d;
             minIdx  = i;
         }
@@ -59,14 +59,10 @@ void CFormation::GenerateGatherDestinations(CPedList* pedList, CPed* ped) {
         }
     }();
 
+    const auto numPeds = pedList->m_count;
     for (auto&& [i, member] : notsa::enumerate(pedList->GetPeds())) {
-        const auto angle = [&i, ped, count = pedList->m_count] {
-            if (count > 1) {
-                return (float)i / (float)count * TWO_PI - ped->m_fCurrentRotation + PI / (float)count;
-            } else {
-                return ped->m_fCurrentRotation + HALF_PI;
-            }
-        }();
+        const auto angle = (!numPeds) ? ped->m_fCurrentRotation + HALF_PI
+            : (float)i / (float)numPeds * TWO_PI - ped->m_fCurrentRotation + PI / (float)numPeds;
 
         if (i < NUM_POINTLIST_POINTS) {
             m_Destinations.Get(i) = CVector{ std::sin(angle) * radius, std::cos(angle) * radius, 0.0f } + ped->GetPosition();

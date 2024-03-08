@@ -24,6 +24,7 @@ public:
 
     // NOTSA
     auto& Get(size_t i) {
+        assert(m_UsedCoords[i]);
         return m_Coords[i];
     }
 

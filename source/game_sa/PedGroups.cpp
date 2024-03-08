@@ -37,7 +37,6 @@ auto GetActiveGroups() {
     });
 }
 
-// return the index of the added group , return -1 if failed.
 // 0x5FB800
 int32 CPedGroups::AddGroup() {
     const auto slot = FindFreeGroupSlot();
