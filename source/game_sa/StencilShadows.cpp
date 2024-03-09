@@ -1,10 +1,10 @@
 #include "StdInc.h"
 #include "StencilShadowObject.h"
 
-// FIX_BUGS: Originally heap allocated in Process
-static inline std::array<RxVertexIndex, 12'288> s_ShadowTrianglePointsUnk;
-static inline std::array<CVector, 2'048>        s_ShadowTrianglePoints;
-static inline std::array<CVector, 2'048>        s_TransformedShadowTrianglePoints;
+// TODO: Statically allocate after reversing RenderForVehicle&RenderForObject.
+static inline auto& s_ShadowTrianglePointsUnk         = StaticRef<RxVertexIndex*>(0xC6A170);
+static inline auto& s_ShadowTrianglePoints            = StaticRef<CVector*>(0xC6A174);
+static inline auto& s_TransformedShadowTrianglePoints = StaticRef<CVector*>(0xC6A178);
 
 void CStencilShadows::InjectHooks() {
     RH_ScopedClass(CStencilShadows);
@@ -204,6 +204,11 @@ void CStencilShadows::Process(CVector& cameraPos) {
 
     RegisterStencilShadows(cameraPos, ++s_RegisterShadowCounter % 8);
 
+    // why do we even do this?
+    s_ShadowTrianglePointsUnk         = (RxVertexIndex*)CMemoryMgr::Malloc(12'288 * sizeof(RxVertexIndex));
+    s_ShadowTrianglePoints            = (CVector*)CMemoryMgr::Malloc(2'048 * sizeof(CVector));
+    s_TransformedShadowTrianglePoints = (CVector*)CMemoryMgr::Malloc(2'048 * sizeof(CVector));
+
     auto i{ 0 };
     for (auto* obj = pFirstActiveStencilShadowObject; obj; obj = obj->m_pNext) {
         switch (obj->m_Type) {
@@ -220,6 +225,10 @@ void CStencilShadows::Process(CVector& cameraPos) {
         }
     }
     s_RenderForObjCounter = (s_RenderForObjCounter + 1) % 4;
+
+    CMemoryMgr::Free(std::exchange(s_ShadowTrianglePointsUnk, nullptr));
+    CMemoryMgr::Free(std::exchange(s_ShadowTrianglePoints, nullptr));
+    CMemoryMgr::Free(std::exchange(s_TransformedShadowTrianglePoints, nullptr));
 }
 
 // 0x70F9B0
