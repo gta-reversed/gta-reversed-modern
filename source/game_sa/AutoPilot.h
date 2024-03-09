@@ -128,7 +128,7 @@ public:
 
     void SetCarMission(eCarMission carMission, uint32 cruiseSpeed) { // NOTSA
         m_nCarMission = carMission;
-        m_nCruiseSpeed = cruiseSpeed;
+        SetCruiseSpeed(cruiseSpeed);
     }
 
     void ClearCarMission() {
@@ -137,7 +137,7 @@ public:
 
     void SetCruiseSpeed(uint32 s) {
         assert(s <= UINT8_MAX);
-        m_nCruiseSpeed = s;
+        m_nCruiseSpeed = (uint8)s;
     }
 
     /*!

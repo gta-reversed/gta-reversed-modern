@@ -264,7 +264,7 @@ float CCarAI::GetCarToGoToCoors(CVehicle* veh, const CVector& coors, eCarDriving
         ap->m_nCarDrivingStyle = drivingStyle;
         ap->ClearTempAct();
         if (setCruiseSpeed) {
-            ap->m_nCruiseSpeed = 20;
+            ap->SetCruiseSpeed(20);
         }
         ap->m_nTimeToStartMission = CTimer::GetTimeInMS();
         if (veh->GetStatus() != STATUS_GHOST) {
@@ -295,7 +295,7 @@ float CCarAI::GetCarToGoToCoorsAccurate(CVehicle* veh, const CVector& coors, eCa
         ap->m_nCarDrivingStyle = drivingStyle;
         ap->ClearTempAct();
         if (setCruiseSpeed) {
-            ap->m_nCruiseSpeed = 20;
+            ap->SetCruiseSpeed(20);
         }
         ap->m_nTimeToStartMission = CTimer::GetTimeInMS();
         if (veh->GetStatus() != STATUS_GHOST) {
@@ -327,7 +327,7 @@ float CCarAI::GetCarToGoToCoorsRacing(CVehicle* veh, const CVector& coors, eCarD
         ap->m_nCarDrivingStyle = drivingStyle;
         ap->ClearTempAct();
         if (setCruiseSpeed) {
-            ap->m_nCruiseSpeed = 20;
+            ap->SetCruiseSpeed(20);
         }
         ap->m_nTimeToStartMission = CTimer::GetTimeInMS();
         if (veh->GetStatus() != STATUS_GHOST) {
@@ -358,7 +358,7 @@ float CCarAI::GetCarToGoToCoorsStraightLine(CVehicle* veh, const CVector& coors,
         ap->m_nCarDrivingStyle = drivingStyle;
         ap->ClearTempAct();
         if (setCruiseSpeed) {
-            ap->m_nCruiseSpeed = 20;
+            ap->SetCruiseSpeed(20);
         }
         ap->m_nTimeToStartMission = CTimer::GetTimeInMS();
         if (veh->GetStatus() != STATUS_GHOST) {
@@ -377,7 +377,7 @@ float CCarAI::GetCarToGoToCoorsStraightLine(CVehicle* veh, const CVector& coors,
 // 0x41D350
 float CCarAI::GetCarToParkAtCoors(CVehicle* veh, const CVector& coors) {
     veh->vehicleFlags.bCanPark      = true;
-    veh->m_autoPilot.m_nCruiseSpeed = 10;
+    veh->m_autoPilot.SetCruiseSpeed(10);
     return (veh->GetPosition2D() - coors).Magnitude();
 }
 
@@ -468,66 +468,66 @@ void CCarAI::MellowOutChaseSpeed(CVehicle* vehicle) {
     if (FindPlayerVehicle()) {
         if (FindPlayerWanted()->m_nWantedLevel == 1) {
             if (distance < 10.0f) {
-                vehicle->m_autoPilot.m_nCruiseSpeed = 15;
+                vehicle->m_autoPilot.SetCruiseSpeed(15);
                 return;
             }
 
             if (distance < 20.0f) {
-                vehicle->m_autoPilot.m_nCruiseSpeed = 22;
+                vehicle->m_autoPilot.SetCruiseSpeed(22);
                 return;
             }
 
-            vehicle->m_autoPilot.m_nCruiseSpeed = 25;
+            vehicle->m_autoPilot.SetCruiseSpeed(25);
             return;
         } else if (FindPlayerWanted()->m_nWantedLevel == 2) {
             if (distance < 10.0f) {
-                vehicle->m_autoPilot.m_nCruiseSpeed = 27;
+                vehicle->m_autoPilot.SetCruiseSpeed(27);
                 return;
             }
 
             if (distance < 20.0f) {
-                vehicle->m_autoPilot.m_nCruiseSpeed = 30;
+                vehicle->m_autoPilot.SetCruiseSpeed(30);
                 return;
             }
 
-            vehicle->m_autoPilot.m_nCruiseSpeed = 34;
+            vehicle->m_autoPilot.SetCruiseSpeed(34);
             return;
         }
     } else {
         if (FindPlayerWanted()->m_nWantedLevel == 1) {
             if (distance < 20.0f) {
-                vehicle->m_autoPilot.m_nCruiseSpeed = 5;
+                vehicle->m_autoPilot.SetCruiseSpeed(5);
                 return;
             }
 
             if (distance >= 20.0f && distance < 40.0f) {
-                vehicle->m_autoPilot.m_nCruiseSpeed = 13;
+                vehicle->m_autoPilot.SetCruiseSpeed(13);
                 if (isPlayerSlowEnough && distance <= 30.0f && vehicle->m_autoPilot.m_nCruiseSpeed >= 10) {
-                    vehicle->m_autoPilot.m_nCruiseSpeed = 10;
+                    vehicle->m_autoPilot.SetCruiseSpeed(10);
                 }
                 return;
             }
 
-            vehicle->m_autoPilot.m_nCruiseSpeed = 25;
+            vehicle->m_autoPilot.SetCruiseSpeed(25);
             return;
         } else if (FindPlayerWanted()->m_nWantedLevel == 2) {
             if (distance < 20.0f) {
-                vehicle->m_autoPilot.m_nCruiseSpeed = 5;
+                vehicle->m_autoPilot.SetCruiseSpeed(5);
                 return;
             }
 
             if (distance >= 20.0f && distance < 40.0f) {
-                vehicle->m_autoPilot.m_nCruiseSpeed = 18;
+                vehicle->m_autoPilot.SetCruiseSpeed(18);
                 if (isPlayerSlowEnough && distance <= 30.0f && vehicle->m_autoPilot.m_nCruiseSpeed >= 10) {
-                    vehicle->m_autoPilot.m_nCruiseSpeed = 10;
+                    vehicle->m_autoPilot.SetCruiseSpeed(10);
                 }
                 return;
             }
 
-            vehicle->m_autoPilot.m_nCruiseSpeed = 34;
+            vehicle->m_autoPilot.SetCruiseSpeed(34);
             return;
         } else if (isPlayerSlowEnough && distance <= 30.0f && vehicle->m_autoPilot.m_nCruiseSpeed >= 10) {
-                vehicle->m_autoPilot.m_nCruiseSpeed = 10;
+                vehicle->m_autoPilot.SetCruiseSpeed(10);
         }
     }
 }
@@ -559,7 +559,7 @@ void CCarAI::TellCarToBlockOtherCar(CVehicle* vehicle1, CVehicle* vehicle2) {
     vehicle1->m_autoPilot.m_nCarMission = MISSION_BLOCKCAR_FARAWAY;
     vehicle1->vehicleFlags.bEngineOn    = !vehicle1->vehicleFlags.bEngineBroken;
 
-    vehicle1->m_autoPilot.m_nCruiseSpeed = std::max(vehicle1->m_autoPilot.m_nCruiseSpeed, (uint8)6);
+    vehicle1->m_autoPilot.SetCruiseSpeed(std::max(vehicle1->m_autoPilot.m_nCruiseSpeed, (uint8)6));
     */
     NOTSA_UNREACHABLE("Unused");
 }
@@ -587,7 +587,7 @@ void CCarAI::TellCarToRamOtherCar(CVehicle* vehicle1, CVehicle* vehicle2) {
     vehicle1->m_autoPilot.m_nCarMission = MISSION_RAMCAR_FARAWAY;
     vehicle1->vehicleFlags.bEngineOn    = !vehicle1->vehicleFlags.bEngineBroken;
 
-    vehicle1->m_autoPilot.m_nCruiseSpeed = std::max(vehicle1->m_autoPilot.m_nCruiseSpeed, (uint8)6);
+    vehicle1->m_autoPilot.SetCruiseSpeed(std::max(vehicle1->m_autoPilot.m_nCruiseSpeed, (uint8)6));
     */
     NOTSA_UNREACHABLE("Unused");
 }
@@ -635,7 +635,7 @@ void CCarAI::UpdateCarAI(CVehicle* veh) {
         case MISSION_APPROACHPLAYER_CLOSE:
         case MISSION_KILLPED_FARAWAY:
         case MISSION_KILLPED_CLOSE:
-            ap->m_nCruiseSpeed = FindPoliceCarSpeedForWantedLevel(veh);
+            ap->SetCruiseSpeed(FindPoliceCarSpeedForWantedLevel(veh));
         }
     }
 
@@ -711,7 +711,7 @@ void CCarAI::UpdateCarAI(CVehicle* veh) {
                         if (veh->vehicleFlags.bIsLawEnforcer) { // 0x41DED4 | 0x41E23F
                             if ((veh->GetModelID() != MODEL_RHINO || veh->m_nRandomSeed > 10'000) && vehPlyrDist2DSq <= sq(10.f)) { // 0x41DEE1 | 0x41E254
                                 TellOccupantsToLeaveCar(veh);
-                                ap->m_nCruiseSpeed = 0;
+                                ap->SetCruiseSpeed(0);
                                 ap->m_nCarMission = MISSION_NONE;
                                 if (plyr->GetWantedLevel() <= 1) {
                                     veh->vehicleFlags.bSirenOrAlarm = false;
@@ -1099,7 +1099,7 @@ void CCarAI::UpdateCarAI(CVehicle* veh) {
     }
     case STATUS_ABANDONED:
     case STATUS_WRECKED: {
-        ap->m_nCruiseSpeed = 0;
+        ap->SetCruiseSpeed(0);
         ap->m_nCarMission = MISSION_NONE;
         break;
     }
@@ -1335,7 +1335,7 @@ void CCarAI::UpdateCarAI(CVehicle* veh) {
     if (CTimer::GetFrameCounter() % 16 == 14 && veh->vehicleFlags.bIsLawEnforcer) {
         if (notsa::contains({ STATUS_SIMPLE, STATUS_PHYSICS }, veh->GetStatus()) && ap->m_nCarMission == MISSION_CRUISE && veh->IsSubAutomobile()) {
             if (CPopCycle::m_bCurrentZoneIsGangArea) {
-                ap->m_nCruiseSpeed = 10; // Start at 10, go down to min 1
+                ap->SetCruiseSpeed(10); // Start at 10, go down to min 1
                 for (auto& p : GetPedPool()->GetAllValid()) {
                     if (!IsPedTypeGang(p.m_nPedType) && p.m_nPedType != PED_TYPE_DEALER) {
                         continue;

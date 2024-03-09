@@ -125,7 +125,7 @@ void CTaskComplexDieInCar::PreparePedVehicleForPedDeath(CVehicle *vehicle) {
         CCarCtrl::SwitchVehicleToRealPhysics(vehicle);
     }
     const auto ap      = &vehicle->m_autoPilot;
-    ap->m_nCruiseSpeed = 0;
+    ap->SetCruiseSpeed(0);
     ap->m_nCarMission  = eCarMission::MISSION_NONE;
     ap->SetTempAction(TEMPACT_HANDBRAKESTRAIGHT, 2'000);
 }

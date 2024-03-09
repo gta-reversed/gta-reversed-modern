@@ -16,7 +16,7 @@ CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo() {
     m_nCarDrivingStyle = DRIVING_STYLE_STOP_FOR_CARS;
     m_nCarMission = eCarMission::MISSION_NONE;
     m_nTempAction = TEMPACT_NONE;
-    m_nCruiseSpeed = 10;
+    SetCruiseSpeed(10);
     m_speed = 10.0F;
     m_nPathFindNodesCount = 0;
     m_TargetEntity = nullptr;

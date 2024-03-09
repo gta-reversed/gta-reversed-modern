@@ -29,7 +29,7 @@ void CTaskComplexDriveToPoint::SetUpCar() {
 
     if (m_CruiseSpeed > 0.0f) {
         assert(m_CruiseSpeed < 255.0f);
-        m_Veh->m_autoPilot.m_nCruiseSpeed = (uint8)m_CruiseSpeed;
+        m_Veh->m_autoPilot.SetCruiseSpeed((uint8)m_CruiseSpeed);
     }
     m_Veh->m_autoPilot.m_nCarDrivingStyle    = static_cast<eCarDrivingStyle>(m_CarDrivingStyle);
     m_Veh->m_autoPilot.m_nTimeToStartMission = CTimer::GetTimeInMS();
@@ -49,7 +49,7 @@ CTask* CTaskComplexDriveToPoint::Drive(CPed* ped) {
     if (dist >= 3.0f || m_Veh->m_autoPilot.m_nCarMission) {
         if (!m_Veh->m_autoPilot.m_nCruiseSpeed) {
             assert(m_CruiseSpeed < 255.0f);
-            m_Veh->m_autoPilot.m_nCruiseSpeed = (uint8)m_CruiseSpeed;
+            m_Veh->m_autoPilot.SetCruiseSpeed((uint8)m_CruiseSpeed);
         }
 
         if (IsTargetBlocked(ped)) {

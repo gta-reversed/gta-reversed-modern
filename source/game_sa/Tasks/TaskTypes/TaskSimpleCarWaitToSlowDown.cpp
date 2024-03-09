@@ -58,7 +58,7 @@ bool CTaskSimpleCarWaitToSlowDown::ProcessPed(CPed* ped) {
         if (!driver->IsPlayer() && ped == driver) {
             // Start stopping the car completely
             auto& ap = m_TargetVehicle->m_autoPilot;
-            ap.m_nCruiseSpeed = 0;
+            ap.SetCruiseSpeed(0);
             ap.m_nCarMission = MISSION_NONE;
         }
     }

@@ -204,7 +204,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
         boat->m_autoPilot.m_nCarMission = eCarMission::MISSION_NONE;
         boat->m_autoPilot.m_nTempAction = TEMPACT_NONE;
         boat->m_autoPilot.m_speed = 20.0F;
-        boat->m_autoPilot.m_nCruiseSpeed = 20;
+        boat->m_autoPilot.SetCruiseSpeed(20);
 
         if (doMissionCleanup)
             boat->m_bIsStaticWaitingForCollision = true;
@@ -247,7 +247,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
     vehicle->m_autoPilot.m_nTempAction = TEMPACT_NONE;
     vehicle->m_autoPilot.m_nCarDrivingStyle = DRIVING_STYLE_STOP_FOR_CARS;
     vehicle->m_autoPilot.m_speed = 13.0F;
-    vehicle->m_autoPilot.m_nCruiseSpeed = 13;
+    vehicle->m_autoPilot.SetCruiseSpeed(13);
     vehicle->m_autoPilot.m_nCurrentLane = 0;
     vehicle->m_autoPilot.m_nNextLane = 0;
 
