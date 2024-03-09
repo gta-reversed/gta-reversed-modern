@@ -192,35 +192,39 @@ eCarMission CCarAI::FindPoliceBikeMissionForWantedLevel() {
 
 // 0x41CA50
 eCarMission CCarAI::FindPoliceBoatMissionForWantedLevel() {
-    const auto& wantedLevel = FindPlayerWanted()->m_nWantedLevel;
-    if (wantedLevel < 2 || wantedLevel > 6)
-        return FindPlayerVehicle() ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_BOAT_CIRCLEPLAYER;
-    else
-        return FindPlayerVehicle() ? MISSION_ATTACKPLAYER : MISSION_BOAT_CIRCLEPLAYER;
+    if (FindPlayerWanted()->GetWantedLevel() < 2) {
+        return FindPlayerVehicle()
+            ? MISSION_BLOCKPLAYER_FARAWAY
+            : MISSION_BOAT_CIRCLEPLAYER;
+    }
+    return FindPlayerVehicle()
+        ? MISSION_ATTACKPLAYER
+        : MISSION_BOAT_CIRCLEPLAYER;
 }
 
 // 0x41C9D0
 eCarMission CCarAI::FindPoliceCarMissionForWantedLevel() {
-    double probability = CGeneral::GetRandomNumberInRange(0.0, 1.0);
+    float chance = 100.f;
     switch (FindPlayerWanted()->m_nWantedLevel) {
-    case 2:
-        return CGeneral::RandomBool(75.0f) ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_RAMPLAYER_FARAWAY;
-    case 3:
-        return CGeneral::RandomBool(50.0f) ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_RAMPLAYER_FARAWAY;
+    case 0:
+    case 1:  return MISSION_BLOCKPLAYER_FARAWAY;
+    case 2:  chance = 75.f; break; // rand() % 4 != 3
+    case 3:  chance = 50.f; break; // rand() % 4 < 2
     case 4:
     case 5:
-    case 6:
-        return CGeneral::RandomBool(25.0f) ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_RAMPLAYER_FARAWAY;
-    default:
-        return MISSION_BLOCKPLAYER_FARAWAY;
+    case 6:  chance = 25.f; break; // rand() % 4 == 0
+    default: NOTSA_UNREACHABLE();
     }
+    return CGeneral::RandomBool(chance)
+        ? MISSION_BLOCKPLAYER_FARAWAY
+        : MISSION_BLOCKPLAYER_HANDBRAKESTOP;
 }
 
 // 0x41CAA0
 int32 CCarAI::FindPoliceCarSpeedForWantedLevel(CVehicle* vehicle) {
     const auto& maxVelocity = vehicle->m_pHandlingData->m_transmissionData.m_fMaxVelocity;
     switch (FindPlayerWanted()->m_nWantedLevel) {
-    case 0:  return (int32)CGeneral::GetRandomNumberInRange(12.0f, 16.0f);
+    case 0:  return CGeneral::GetRandomNumberInRange<int32>(12, 16);
     case 1:  return 25;
     case 2:  return 34;
     case 3:  return (int32)(maxVelocity * GAME_SPEED_TO_CAR_AI_SPEED * 0.90f);
@@ -840,7 +844,7 @@ void CCarAI::UpdateCarAI(CVehicle* veh) {
             const auto wntd = FindPlayerWanted();
             if (   vehToPlayerDist2DSq <= sq(13.f) || vehToPlayerDist2DSq >= sq(70.f)
                 || wntd->m_bEverybodyBackOff
-                || veh->vehicleFlags.bIsLawEnforcer && (wntd->GetWantedLevel() == 0 || wntd->m_bEverybodyBackOff || wntd->m_bPoliceBackOffGarage || wntd->m_bPoliceBackOff || CCullZones::NoPolice())
+                || veh->vehicleFlags.bIsLawEnforcer && (wntd->GetWantedLevel() == 0 || wntd->BackOff() || CCullZones::NoPolice())
             ) {
                 TellOccupantsToLeaveCar(veh);
                 ap->SetCarMission(MISSION_STOP_FOREVER);

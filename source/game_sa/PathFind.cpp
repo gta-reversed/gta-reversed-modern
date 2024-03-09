@@ -489,7 +489,7 @@ void CPathFind::ComputeRoute(uint8 nodeType, const CVector& vecStart, const CVec
 }
 
 void CPathFind::SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, float fYMax, bool value) {
-    const auto areaRect = CRect{ {fXMin, fYMax}, {fXMax, fYMin} };
+    const auto areaRect = CRect{ fXMin, fYMin, fXMax, fYMax };
 
     for (auto areaId = 0u; areaId < NUM_PATH_MAP_AREAS; areaId++) {
         if (!IsAreaLoaded(areaId)) {
