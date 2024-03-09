@@ -46,7 +46,7 @@ void TimeCycleDebugModule::RenderWindow() {
     ImGui::Checkbox("Stop Time", &CClock::gbFreezeTime);
     ImGui::SameLine();
     if (ImGui::Button("Save")) {
-        CMessages::AddBigMessage("Saved", 3000, STYLE_MIDDLE);
+        CMessages::AddBigMessage("Saved"_gxt, 3000, STYLE_MIDDLE);
     }
     ImGui::SameLine();
     if (ImGui::Button("Reset")) {

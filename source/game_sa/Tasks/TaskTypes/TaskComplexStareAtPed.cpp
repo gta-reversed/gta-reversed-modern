@@ -34,7 +34,7 @@ CTaskComplexStareAtPed::CTaskComplexStareAtPed(const CTaskComplexStareAtPed& o) 
         o.m_pPedGroup,
         o.m_pPed,
         o.m_timer.m_bStarted
-            ? o.m_timer.m_nStartTime + o.m_timer.m_nInterval - CTimer::GetTimeInMS() // Either time left of timer
+            ? static_cast<int32>(o.m_timer.m_nStartTime) + o.m_timer.m_nInterval - static_cast<int32>(CTimer::GetTimeInMS()) // Either time left of timer
             : o.m_timeout // Or the original timeout
     }
 {
@@ -74,7 +74,7 @@ CTask* CTaskComplexStareAtPed::ControlSubTask(CPed* ped) {
         }
     } else if (CTaskComplexGangLeader::ShouldLoadGangAnims()) {
         const auto blk = CAnimManager::GetAnimationBlockIndex("gangs");
-        if (CAnimManager::ms_aAnimBlocks[blk].bLoaded) {
+        if (CAnimManager::GetAnimBlocks()[blk].IsLoaded) {
             CAnimManager::AddAnimBlockRef(blk);
             m_animsReferenced = true;
         } else {

@@ -49,7 +49,7 @@ class CWeaponModelInfo;
 struct RwObject;
 
 // originally an abstract class
-class CBaseModelInfo {
+class NOTSA_EXPORT_VTABLE CBaseModelInfo {
 public:
     uint32 m_nKey;
     uint16 m_nRefCount;
@@ -75,6 +75,7 @@ public:
             uint8 bIsBackfaceCulled : 1;
             uint8 bIsLod : 1;
 
+            // 1st byte
             union {
                 struct { // Atomic flags
                     uint8 bIsRoad : 1;
@@ -134,7 +135,7 @@ public:
     void AddRef();
     void RemoveRef();
     // initPairedModel defines if we need to set col model for time model
-    void SetColModel(CColModel* colModel, bool bIsLodModel);
+    void SetColModel(CColModel* colModel, bool bIsLodModel = false);
     void Init2dEffects();
     void DeleteCollisionModel();
     // index is a number of effect (max number is (m_n2dfxCount - 1))
@@ -190,15 +191,6 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CAtomicModelInfo* AsAtomicModelInfoPtr_Reversed();
-    CDamageAtomicModelInfo* AsDamageAtomicModelInfoPtr_Reversed();
-    CLodAtomicModelInfo* AsLodAtomicModelInfoPtr_Reversed();
-    CTimeInfo* GetTimeInfo_Reversed();
-    void Init_Reversed();
-    void Shutdown_Reversed();
-    void SetAnimFile_Reversed(const char* filename);
-    void ConvertAnimFileIndex_Reversed();
-    int32 GetAnimFileIndex_Reversed();
 };
 VALIDATE_SIZE(CBaseModelInfo, 0x20);
 

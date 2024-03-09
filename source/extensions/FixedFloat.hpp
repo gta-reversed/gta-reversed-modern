@@ -1,15 +1,26 @@
 #pragma once
 
-template<typename T, float CompressValue> requires std::is_integral_v<T>
-class FixedFloat {
-    T value{};
+#include <concepts>
 
+//! Fixed point number (With implicit conversion to float)
+template<std::integral T, float CompressValue>
+class FixedFloat {
 public:
     constexpr FixedFloat() = default;
-    constexpr FixedFloat(float X) : value(X * CompressValue) {}
-    explicit constexpr FixedFloat(T X) : value(X) {}
+    constexpr FixedFloat(float v) : value(static_cast<T>(v * CompressValue)) {}
+    template<std::integral Y>
+    constexpr FixedFloat(Y x) : value(x) {}
 
-    constexpr operator float() const {
-        return value / CompressValue;
-    }
+    constexpr operator float() const { return static_cast<float>(value) / CompressValue; }
+
+    void  Set(float v, bool round) { value = round ? static_cast<T>(v * CompressValue + 0.5f) : static_cast<T>(v * CompressValue); }
+    //float Get(bool round) const { return round ? (float)v * CompressValue + 0.5f; }
+
+    // I'm not ready for this
+    //friend FixedFloat operator+(const FixedFloat& a, const FixedFloat& b) { return a.value + b.value; }
+    //friend FixedFloat operator-(const FixedFloat& a, const FixedFloat& b) { return a.value - b.value; }
+    //friend FixedFloat operator*(const FixedFloat& a, const FixedFloat& b) { return a.value * b.value; }
+    //friend FixedFloat operator/(const FixedFloat& a, const FixedFloat& b) { return a.value / b.value; }
+private:
+    T value{};
 };

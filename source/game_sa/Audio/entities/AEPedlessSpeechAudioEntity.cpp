@@ -78,7 +78,7 @@ bool CAEPedlessSpeechAudioEntity::IsPedFemaleForAudio() {
 }
 
 void CAEPedlessSpeechAudioEntity::InjectHooks() {
-    RH_ScopedClass(CAEPedlessSpeechAudioEntity);
+    RH_ScopedVirtualClass(CAEPedlessSpeechAudioEntity, 0x85F330, 8);
     RH_ScopedCategory("Audio/Entities");
 
     RH_ScopedInstall(Constructor, 0x4E6070, { .reversed = false });
@@ -87,11 +87,11 @@ void CAEPedlessSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(Initialise, 0x4E4E10, { .reversed = false });
     RH_ScopedInstall(StopCurrentSpeech, 0x4E4E80, { .reversed = false });
     RH_ScopedInstall(AddSayEvent, 0x4E60D0, { .reversed = false });
-    RH_ScopedVirtualInstall(UpdateParameters, 0x4E4D10, { .reversed = false });
-    RH_ScopedVirtualInstall(Terminate, 0x4E6300, { .reversed = false });
-    RH_ScopedVirtualInstall(PlayLoadedSound, 0x4E6380, { .reversed = false });
-    RH_ScopedVirtualInstall(GetAllocatedVoice, 0x4E6090);
-    RH_ScopedVirtualInstall(WillPedChatAboutTopic, 0x4E60A0);
+    RH_ScopedVMTInstall(UpdateParameters, 0x4E4D10, { .reversed = false });
+    RH_ScopedVMTInstall(Terminate, 0x4E6300, { .reversed = false });
+    RH_ScopedVMTInstall(PlayLoadedSound, 0x4E6380, { .reversed = false });
+    RH_ScopedVMTInstall(GetAllocatedVoice, 0x4E6090);
+    RH_ScopedVMTInstall(WillPedChatAboutTopic, 0x4E60A0);
 }
 
 CAEPedlessSpeechAudioEntity* CAEPedlessSpeechAudioEntity::Constructor() {
@@ -102,24 +102,4 @@ CAEPedlessSpeechAudioEntity* CAEPedlessSpeechAudioEntity::Constructor() {
 CAEPedlessSpeechAudioEntity* CAEPedlessSpeechAudioEntity::Destructor() {
     this->CAEPedlessSpeechAudioEntity::~CAEPedlessSpeechAudioEntity();
     return this;
-}
-
-void CAEPedlessSpeechAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {
-    CAEPedlessSpeechAudioEntity::UpdateParameters(sound, curPlayPos);
-}
-
-void CAEPedlessSpeechAudioEntity::Terminate_Reversed() {
-    CAEPedlessSpeechAudioEntity::Terminate();
-}
-
-void CAEPedlessSpeechAudioEntity::PlayLoadedSound_Reversed() {
-    CAEPedlessSpeechAudioEntity::PlayLoadedSound();
-}
-
-int16 CAEPedlessSpeechAudioEntity::GetAllocatedVoice_Reversed() {
-    return CAEPedlessSpeechAudioEntity::GetAllocatedVoice();
-}
-
-bool CAEPedlessSpeechAudioEntity::WillPedChatAboutTopic_Reversed(int16 topic) {
-    return CAEPedlessSpeechAudioEntity::WillPedChatAboutTopic(topic);
 }

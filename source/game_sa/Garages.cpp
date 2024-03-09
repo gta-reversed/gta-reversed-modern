@@ -38,6 +38,8 @@ void CGarages::InjectHooks() {
 
 // 0x447120
 void CGarages::Init() {
+    ZoneScoped;
+
     NumGarages = 0;
     MessageEndTime = 0;
     MessageStartTime = 0;
@@ -88,6 +90,8 @@ void CGarages::Shutdown() {
 
 // 0x44C8C0
 void CGarages::Update() {
+    ZoneScoped;
+
     if (CReplay::Mode == eReplayMode::MODE_PLAYBACK || CGameLogic::IsCoopGameGoingOn())
         return;
 
@@ -126,7 +130,7 @@ void CGarages::GivePlayerDetonator() {
     auto player = FindPlayerPed();
     auto slot = CWeaponInfo::GetWeaponInfo(WEAPON_DETONATOR, eWeaponSkill::STD)->m_nSlot;
     player->GiveWeapon(WEAPON_DETONATOR, 1, true);
-    player->m_aWeapons[slot].m_nState = WEAPONSTATE_READY;
+    player->m_aWeapons[slot].m_State = WEAPONSTATE_READY;
     player->m_pPlayerData->m_nChosenWeapon = slot;
     if (player->m_nSavedWeapon != WEAPON_UNIDENTIFIED)
         player->m_nSavedWeapon = WEAPON_DETONATOR;
@@ -369,10 +373,10 @@ void CGarages::PrintMessages() {
     }
 
     // Draw it
-    CFont::SetScale(SCREEN_WIDTH_UNIT * 0.5f, SCREEN_HEIGHT_UNIT * 1.4f);
+    CFont::SetScale(SCREEN_STRETCH_X(0.5f), SCREEN_STRETCH_Y(1.4f));
     CFont::SetProportional(true);
     CFont::SetBackground(false, false);
-    CFont::SetCentreSize(SCREEN_WIDTH - SCREEN_WIDTH_UNIT * 230.f);
+    CFont::SetCentreSize(SCREEN_STRETCH_FROM_RIGHT(230.f));
     CFont::SetOrientation(eFontAlignment::ALIGN_CENTER);
     CFont::SetFontStyle(eFontStyle::FONT_MENU);
     CFont::SetColor(HudColour.GetRGB(eHudColours::HUD_COLOUR_LIGHT_BLUE));
@@ -381,12 +385,12 @@ void CGarages::PrintMessages() {
 
     const auto DrawFormattedString = [&](auto... formatArgs) {
         CMessages::InsertNumberInString(TheText.Get(MessageIDString), formatArgs..., gGxtString);
-        CFont::PrintString(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT_UNIT * 155.f, gGxtString);
+        CFont::PrintString(SCREEN_WIDTH / 2.f, SCREEN_STRETCH_Y(155.f), gGxtString);
     };
 
     if (MessageNumberInString < 0) {
         if (MessageNumberInString2 < 0) {
-            CFont::PrintString(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT_UNIT * 155.f, TheText.Get(MessageIDString));
+            CFont::PrintString(SCREEN_WIDTH / 2.f, SCREEN_STRETCH_Y(155.f), TheText.Get(MessageIDString));
         } else {
             DrawFormattedString(MessageNumberInString2, -1, -1, -1, -1, -1);
         }

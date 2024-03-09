@@ -105,8 +105,9 @@ void CPickup::GiveUsAPickUpObject(CObject** obj, int32 slotIndex) {
     auto& object = *obj;
     object = nullptr;
 
-    if (CCutsceneMgr::ms_cutsceneLoadStatus == 2)
+    if (CCutsceneMgr::HasLoaded()) {
         return;
+    }
 
     if (mi->GetModelType() == MODEL_INFO_WEAPON) {
         CWeaponInfo::GetWeaponInfo(mi->AsWeaponModelInfoPtr()->m_weaponInfo);
@@ -386,7 +387,7 @@ bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
                             const auto& weaponInfo = CWeaponInfo::GetWeaponInfo(weapon);
                             auto& pedWeapon = player->GetWeaponInSlot(weaponInfo->m_nSlot);
 
-                            if (pedWeapon.m_nType != weapon) {
+                            if (pedWeapon.m_Type != weapon) {
                                 if (!CStreaming::GetInfo(m_pObject->m_nModelIndex).IsLoaded()) {
                                     return false;
                                 }
@@ -402,7 +403,7 @@ bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
                                     }
                                 };
 
-                                if (pedWeapon.m_nType != WEAPON_UNARMED && (pedWeapon.m_nTotalAmmo != 0 || IsSlotExchangeable(weaponInfo->m_nSlot))) {
+                                if (pedWeapon.m_Type != WEAPON_UNARMED && (pedWeapon.m_TotalAmmo != 0 || IsSlotExchangeable(weaponInfo->m_nSlot))) {
                                     CPickups::PlayerOnWeaponPickup = 6;
 
                                     if (IsSlotExchangeable(weaponInfo->m_nSlot)) {
@@ -598,7 +599,7 @@ bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
                                     CHud::SetHelpMessage(gGxtString, false, false, false);
                                 }
                                 if (CollectPickupBuffer) {
-                                    const char* textToPrint = nullptr;
+                                    const GxtChar* textToPrint = nullptr;
                                     if (CTheScripts::IsPlayerOnAMission()) {
                                         textToPrint = TheText.Get("PROP_2");
                                     } else if (FindPlayerInfo().m_nMoney < (int32)m_nAmmo) {

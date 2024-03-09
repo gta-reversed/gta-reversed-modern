@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 if (MSVC)
     set(CMAKE_GENERATOR_PLATFORM Win32)
 endif()
@@ -12,6 +15,7 @@ project(GTASA C CXX)
 
 if (MSVC)
     add_compile_options("/bigobj")
+    add_compile_options("/utf-8")
 endif()
 
 option(BUILD_DOC "Build documentation" OFF)

@@ -2,7 +2,7 @@
 
 #include "TaskComplex.h"
 
-class CTaskComplexPolicePursuit : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexPolicePursuit : public CTaskComplex {
 public:
     uint8 m_nFlags;
     CPed* m_pursuer;
@@ -12,11 +12,23 @@ public:
     static constexpr auto Type = TASK_COMPLEX_POLICE_PURSUIT;
 
     CTaskComplexPolicePursuit();
+    CTaskComplexPolicePursuit(const CTaskComplexPolicePursuit&);
     ~CTaskComplexPolicePursuit() override;
 
-    eTaskType GetTaskType() override { return Type; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return m_pSubTask->MakeAbortable(ped, priority, event); } // 0x68BAB0
-    CTask* Clone() override;
+
+// 0x0
+eTaskType GetTaskType() const override { return Type; }
+
+
+// 0x68BAB0
+bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override { return m_pSubTask->MakeAbortable(ped, priority, event); }
+
+ 
+
+// 0x68CDD0
+CTask* Clone() const override { return new CTaskComplexPolicePursuit{*this}; }
+
+ 
     CTask* ControlSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;
@@ -33,12 +45,6 @@ public:
 
     CTaskComplexPolicePursuit* Constructor();
 
-    CTask* Clone_Reversed();
-    eTaskType GetTaskType_Reversed();
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
-    CTask* CreateNextSubTask_Reversed(CPed* ped);
-    CTask* CreateFirstSubTask_Reversed(CPed* ped);
-    CTask* ControlSubTask_Reversed(CPed* ped);
 };
 
 VALIDATE_SIZE(CTaskComplexPolicePursuit, 0x18);

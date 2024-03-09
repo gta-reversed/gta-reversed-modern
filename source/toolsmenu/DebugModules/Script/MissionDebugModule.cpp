@@ -165,7 +165,7 @@ void InitializeAndStartNewScript() {
 
 bool MissionDebugModule::StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
     if (!m_bStartMission && CTheScripts::IsPlayerOnAMission()) {
-        if (CCutsceneMgr::ms_cutsceneLoadStatus == 2) {
+        if (CCutsceneMgr::HasLoaded()) {
             CCutsceneMgr::DeleteCutsceneData();
         }
         CTheScripts::FailCurrentMission = 2;
@@ -264,7 +264,7 @@ void MissionDebugModule::RenderWindow() {
             }
 
             if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && m_SelectedMissionIdx != -1) {
-                CHud::SetHelpMessage("Starting Mission!", true, false, false);
+                CHud::SetHelpMessage("Starting Mission!"_gxt, true, false, false);
                 StartMission(m_SelectedMissionIdx);
             }
             //ImGui::EndGroup();

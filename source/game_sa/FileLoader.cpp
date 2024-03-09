@@ -224,10 +224,13 @@ char* CFileLoader::LoadLine(auto file) {
     return FindFirstNonNullOrWS(ms_line);
 }
 
-// 0x536FE0
-// Load line from a text buffer
-// bufferIt - Iterator into buffer. It is modified by this function to point after the last character of this line
-// buffSize - Size of buffer. It is modified to represent the size of the buffer remaining after the end of this line
+/*!
+* Load line from a text buffer with sanitization (replaces chars < 32 (space) with a space)
+* @param bufferIt Iterator into buffer. It is modified by this function to point after the last character of this line
+* @param buffSize Size of buffer. It is modified to represent the size of the buffer remaining after the end of this line
+* @returns The beginning of the line - Note, this isn't a pointer into the passed in buffer!
+* @addr 0x536FE0
+*/
 char* CFileLoader::LoadLine(char*& bufferIt, int32& buffSize) {
     if (buffSize <= 0 || !*bufferIt)
         return nullptr;
@@ -235,6 +238,12 @@ char* CFileLoader::LoadLine(char*& bufferIt, int32& buffSize) {
     // Copy with sanitization (Otherwise random crashes appear)
     char* copyIt = s_MemoryHeapBuffer;
     for (; *bufferIt && *bufferIt != '\n' && buffSize != 0; bufferIt++, buffSize--) {
+        // Handle EOL (\r\n) correctly
+        // Technically a bugfix, but can't place it under the macro
+        // cause code(See `LoadCutSceneFile`) relies on it filtering `\r` even in vanilla mode
+        if (*bufferIt == '\r') {
+            continue;
+        }
         // Have to cast to uint8, because signed ASCII is retarded
         *copyIt++ = ((uint8)*bufferIt < (uint8)' ' || *bufferIt == ',') ? ' ' : *bufferIt; // Replace chars before space and ',' (comma) by space, otherwise copy
     }
@@ -248,18 +257,18 @@ char* CFileLoader::LoadLine(char*& bufferIt, int32& buffSize) {
 // IPL -> AUZO
 // 0x5B4D70
 void CFileLoader::LoadAudioZone(const char* line) {
-    char  name[16];
+    char name[8];
     int32 id;
-    int32 enabled;
+    int32 flags;
     float x1, y1, z1;
     float x2, y2, z2;
     float radius;
 
-    if (sscanf_s(line, "%s %d %d %f %f %f %f %f %f", SCANF_S_STR(name), &id, &enabled, &x1, &y1, &z1, &x2, &y2, &z2) == 9) {
-        CAudioZones::RegisterAudioBox(name, id, enabled != 0, x1, y1, z1, x2, y2, z2);
+    if (sscanf_s(line, "%s %d %d %f %f %f %f %f %f", SCANF_S_STR(name), &id, &flags, &x1, &y1, &z1, &x2, &y2, &z2) == 9) {
+        CAudioZones::RegisterAudioBox(name, id, flags == 1, {x1, y1, z1}, {x2, y2, z2});
     } else {
-        VERIFY(sscanf_s(line, "%s %d %d %f %f %f %f", SCANF_S_STR(name), &id, &enabled, &x1, &y1, &z1, &radius) == 7);
-        CAudioZones::RegisterAudioSphere(name, id, enabled != 0, x1, y1, z1, radius);
+        VERIFY(sscanf_s(line, "%s %d %d %f %f %f %f", SCANF_S_STR(name), &id, &flags, &x1, &y1, &z1, &radius) == 7);
+        CAudioZones::RegisterAudioSphere(name, id, flags == 1, {x1, y1, z1}, radius);
     }
 }
 
@@ -729,7 +738,7 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
         // Return pointer for offset in allocated memory (relative to where it was in the file)
         const auto GetDataPtr = [&]() {
             return reinterpret_cast<T>(
-                p
+                  p
                 + sizeof(CCollisionData)                // Must offset by this (See memory layout above)
                 + fileOffset
                 + sizeof(FileHeader::FileInfo::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compensate for it.
@@ -755,6 +764,8 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
     cd->m_pShadowTriangles = nullptr;
 
     cm.m_bIsSingleColDataAlloc = true;
+
+    assert(!cd->bHasFaceGroups || cd->m_pTriangles); // If it has face groups it should also have triangles allocated
 }
 
 // 0x537CE0
@@ -825,6 +836,8 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
     cd->m_pTrianglePlanes = nullptr;
 
     cm.m_bIsSingleColDataAlloc = true;
+
+    assert(!cd->bHasFaceGroups || cd->m_pTriangles); // If it has face groups it should also have triangles allocated
 }
 
 // 0x537AE0
@@ -895,6 +908,8 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
     cd->m_pTrianglePlanes = nullptr;
 
     cm.m_bIsSingleColDataAlloc = true;
+
+    assert(!cd->bHasFaceGroups || cd->m_pTriangles); // If it has face groups it should also have triangles allocated
 }
 
 // 0x5B3C60
@@ -953,8 +968,8 @@ void CFileLoader::Load2dEffect(const char* line) {
 
     auto& effect = CModelInfo::Get2dEffectStore()->AddItem();
     CModelInfo::GetModelInfo(modelId)->Add2dEffect(&effect);
-    effect.m_vecPosn = pos;
-    effect.m_nType = *reinterpret_cast<e2dEffectType*>(type);
+    effect.m_pos = pos;
+    effect.m_type = *reinterpret_cast<e2dEffectType*>(type);
 
     switch (type) {
     case EFFECT_LIGHT:
@@ -963,7 +978,7 @@ void CFileLoader::Load2dEffect(const char* line) {
         break;
     case EFFECT_ATTRACTOR:
         break;
-    case EFFECT_FURNITURE:
+    case EFFECT_INTERIOR:
         break;
     case EFFECT_ENEX:
         break;
@@ -1057,12 +1072,9 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
     if (cm) {
         if (cm->m_bHasCollisionVolumes)
         {
-            if (cm->m_nColSlot)
+            if (cm->m_nColSlot) 
             {
-                CRect rect;
-                newEntity->GetBoundRect(&rect);
-                auto* colDef = CColStore::ms_pColPool->GetAt(cm->m_nColSlot);
-                colDef->m_Area.Restrict(rect);
+                CColStore::ms_pColPool->GetAt(cm->m_nColSlot)->m_Area.Restrict(newEntity->GetBoundRect());
             }
         }
         else
@@ -1157,7 +1169,7 @@ void CFileLoader::LoadEntryExit(const char* line) {
     uint32 timeOn = 0, timeOff = 24;
     CVector enter{}, exit{};
     CVector2D range;
-    float enteranceAngle;
+    float entranceAngle;
     float unused;
     float exitAngle;
     int32 area;
@@ -1169,7 +1181,7 @@ void CFileLoader::LoadEntryExit(const char* line) {
         line,
         "%f %f %f %f %f %f %f %f %f %f %f %d %d %s %d %d %d %d",
         &enter.x, &enter.y, &enter.z,
-        &enteranceAngle,
+        &entranceAngle,
         &range.x, &range.y,
         &unused,
         &exit.x, &exit.y, &exit.z,
@@ -1191,13 +1203,13 @@ void CFileLoader::LoadEntryExit(const char* line) {
 
     const auto enexPoolIdx = CEntryExitManager::AddOne(
         enter.x, enter.y, enter.z,
-        enteranceAngle,
+        entranceAngle,
         range.x, range.y,
         unused,
         exit.x, exit.y, exit.z,
         exitAngle,
         area,
-        flags,
+        (CEntryExit::eFlags)flags,
         skyColor,
         timeOn,
         timeOff,
@@ -1219,28 +1231,28 @@ void CFileLoader::LoadEntryExit(const char* line) {
     };
 
     if (flags & UNKNOWN_INTERIOR)
-        enex->m_nFlags.bUnknownInterior = true;
+        enex->bUnknownInterior = true;
 
     if (flags & UNKNOWN_PAIRING)
-        enex->m_nFlags.bUnknownPairing = true;
+        enex->bUnknownPairing = true;
 
     if (flags & CREATE_LINKED_PAIR)
-        enex->m_nFlags.bCreateLinkedPair = true;
+        enex->bCreateLinkedPair = true;
 
     if (flags & REWARD_INTERIOR)
-        enex->m_nFlags.bRewardInterior = true;
+        enex->bRewardInterior = true;
 
     if (flags & USED_REWARD_ENTRANCE)
-        enex->m_nFlags.bUsedRewardEntrance = true;
+        enex->bUsedRewardEntrance = true;
 
     if (flags & CARS_AND_AIRCRAFT)
-        enex->m_nFlags.bCarsAndAircraft = true;
+        enex->bCarsAndAircraft = true;
 
     if (flags & BIKES_AND_MOTORCYCLES)
-        enex->m_nFlags.bBikesAndMotorcycles = true;
+        enex->bBikesAndMotorcycles = true;
 
     if (flags & DISABLE_ONFOOT)
-        enex->m_nFlags.bDisableOnFoot = true;
+        enex->bDisableOnFoot = true;
 }
 
 // IPL -> GRGE
@@ -1269,6 +1281,8 @@ void CFileLoader::LoadGarage(const char* line) {
 
 // 0x5B9030
 void CFileLoader::LoadLevel(const char* levelFileName) {
+    ZoneScoped;
+
     auto txd = RwTexDictionaryGetCurrent();
     if (!txd) {
         txd = RwTexDictionaryCreate();
@@ -1307,15 +1321,22 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
             break; // Done
 
         if (LineBeginsWith("TEXDICTION")) {
+            ZoneScopedN("TEXDICTION");
+
             const auto path = ExtractPathFor("TEXDICTION");
+            ZoneText(path, strlen(path));
+
             LoadingScreenLoadingFile(path);
 
             const auto txd = LoadTexDictionary(path);
             RwTexDictionaryForAllTextures(txd, AddTextureCB, txd);
             RwTexDictionaryDestroy(txd);
         } else if (LineBeginsWith("IPL")) {
+            ZoneScopedN("IPL");
+
             // Have to call this here, because line buffer's content may change after the `if` below
             const auto path = ExtractPathFor("IPL");
+            ZoneText(path, strlen(path));
 
             if (!hasLoadedAnyIPLs) {
                 MatchAllModelStrings();
@@ -1369,9 +1390,15 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
             };
             for (const auto& v : functions) {
                 if (LineBeginsWith(v.id)) {
+                    ZoneScoped;
+                    ZoneText(v.id.data(), v.id.size());
+
                     const auto path = ExtractPathFor(v.id);
+                    ZoneText(path, strlen(path));
+
                     LoadingScreenLoadingFile(path);
                     v.fn(path);
+
                     break;
                 }
             }
@@ -1380,8 +1407,8 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
     CFileMgr::CloseFile(f);
 
     RwTexDictionarySetCurrent(txd);
-    if (hasLoadedAnyIPLs)
-    {
+
+    if (hasLoadedAnyIPLs) {
         CIplStore::LoadAllRemainingIpls();
         CColStore::BoundingBoxesPostProcess();
         CTrain::InitTrains();
@@ -1452,33 +1479,24 @@ int32 CFileLoader::LoadPedObject(const char* line) {
         SCANF_S_STR(voiceMax)
     ) == 14);
 
-    const auto FindAnimGroup = [animGroup, nAssocGroups = CAnimManager::ms_numAnimAssocDefinitions] {
-        for (auto i = 0; i < nAssocGroups; i++) {
-            if (CAnimManager::GetAnimGroupName((AssocGroupId)i) == std::string_view{animGroup}) {
-                return (AssocGroupId)i;
-            }
-        }
-        return (AssocGroupId)nAssocGroups;
-    };
-
     const auto mi = CModelInfo::AddPedModel(modelId);
 
     mi->m_nKey = CKeyGen::GetUppercaseKey(modelName);
     mi->SetTexDictionary(texName);
     mi->SetAnimFile(animFile);
     mi->SetColModel(&colModelPeds, false);
-    mi->m_nPedType = CPedType::FindPedType(pedType);
-    mi->m_nStatType = CPedStats::GetPedStatType(statName);
-    mi->m_nAnimType = FindAnimGroup();
+    mi->m_nPedType          = CPedType::FindPedType(pedType);
+    mi->m_nStatType         = CPedStats::GetPedStatType(statName);
+    mi->m_nAnimType         = CAnimManager::GetAnimationGroupIdByName(animGroup);
     mi->m_nCarsCanDriveMask = carsCanDriveMask;
-    mi->m_nPedFlags = flags;
-    mi->m_nRadio2 = (eRadioID)(radio2 + 1);
-    mi->m_nRadio1 = (eRadioID)(radio1 + 1);
-    mi->m_nRace = CPopulation::FindPedRaceFromName(modelName);
-    mi->m_nPedAudioType = CAEPedSpeechAudioEntity::GetAudioPedType(pedVoiceType);
-    mi->m_nVoiceMin = CAEPedSpeechAudioEntity::GetVoice(voiceMin, mi->m_nPedAudioType);
-    mi->m_nVoiceMax = CAEPedSpeechAudioEntity::GetVoice(voiceMax, mi->m_nPedAudioType);
-    mi->m_nVoiceId = mi->m_nVoiceMin;
+    mi->m_nPedFlags         = flags;
+    mi->m_nRadio2           = (eRadioID)(radio2 + 1);
+    mi->m_nRadio1           = (eRadioID)(radio1 + 1);
+    mi->m_nRace             = CPopulation::FindPedRaceFromName(modelName);
+    mi->m_nPedAudioType     = CAEPedSpeechAudioEntity::GetAudioPedType(pedVoiceType);
+    mi->m_nVoiceMin         = CAEPedSpeechAudioEntity::GetVoice(voiceMin, mi->m_nPedAudioType);
+    mi->m_nVoiceMax         = CAEPedSpeechAudioEntity::GetVoice(voiceMax, mi->m_nPedAudioType);
+    mi->m_nVoiceId          = mi->m_nVoiceMin;
 
     return modelId;
 }
@@ -1647,7 +1665,7 @@ void CFileLoader::LoadPickup(const char* line) {
         }
     };
 
-    if (const auto model = GetModel(); model != -1) {
+    if (const auto model = GetModel(); model != MODEL_INVALID) {
         CPickups::GenerateNewOne(pos, model, PICKUP_ON_STREET, 0, 0, false, nullptr);
     }
 }
@@ -1941,15 +1959,14 @@ int32 CFileLoader::LoadWeaponObject(const char* line) {
 
 // 0x5B4AB0
 void CFileLoader::LoadZone(const char* line) {
-    char  name[24];
-    int32 type;
+    char    infoLabel[24];
+    int32   type;
     CVector min{}, max{};
-    int32 island;
-    char  zoneName[12];
+    int32   level;
+    char    textLabel[12];
 
-    auto iNumRead = sscanf_s(line, "%s %d %f %f %f %f %f %f %d %s", SCANF_S_STR(name), &type, &min.x, &min.y, &min.z, &max.x, &max.y, &max.z, &island, SCANF_S_STR(zoneName));
-    if (iNumRead == 10)
-        CTheZones::CreateZone(name, static_cast<eZoneType>(type), min.x, min.y, min.z, max.x, max.y, max.z, static_cast<eLevelName>(island), zoneName);
+    VERIFY(sscanf_s(line, "%s %d %f %f %f %f %f %f %d %s", SCANF_S_STR(infoLabel), &type, &min.x, &min.y, &min.z, &max.x, &max.y, &max.z, &level, SCANF_S_STR(textLabel)) == 10);
+    CTheZones::CreateZone(infoLabel, static_cast<eZoneType>(type), min, max, static_cast<eLevelName>(level), textLabel);
 }
 
 // 0x5B51E0
@@ -1959,6 +1976,8 @@ void LinkLods(int32 a1) {
 
 // 0x5B8700
 void CFileLoader::LoadScene(const char* filename) {
+    ZoneScoped;
+
     gCurrIplInstancesCount = 0;
 
     enum class SectionID {
