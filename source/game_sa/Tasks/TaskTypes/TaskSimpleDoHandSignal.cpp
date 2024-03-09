@@ -7,7 +7,6 @@ void CTaskSimpleDoHandSignal::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x660880);
-
     RH_ScopedInstall(Destructor, 0x6608B0);
 
     RH_ScopedVMTInstall(Clone, 0x6608C0);
@@ -17,7 +16,7 @@ void CTaskSimpleDoHandSignal::InjectHooks() {
 }
 
 CTaskSimpleDoHandSignal::CTaskSimpleDoHandSignal(const CTaskSimpleDoHandSignal& o) :
-    m_initialised{ o.m_initialised }
+    m_Initialized{ o.m_Initialized }
 {
 }
 
@@ -27,17 +26,17 @@ bool CTaskSimpleDoHandSignal::ProcessPed(CPed* ped) {
         return true;
     }
 
-    const auto partialAnimTask = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
+    const auto animTask = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
 
-    if (m_initialised) {
-        return !partialAnimTask || CTask::IsA<TASK_COMPLEX_HANDSIGNAL_ANIM>(partialAnimTask);
+    if (m_Initialized) {
+        return !animTask || !CTask::IsA<TASK_COMPLEX_HANDSIGNAL_ANIM>(animTask);
     }
 
-    if (partialAnimTask) {
-        if (CTask::IsA<TASK_COMPLEX_HANDSIGNAL_ANIM>(partialAnimTask)) {
+    if (animTask) {
+        if (CTask::IsA<TASK_COMPLEX_HANDSIGNAL_ANIM>(animTask)) {
             return true;
         }
-        partialAnimTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);
+        animTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);
         return false;
     }
 
@@ -45,6 +44,6 @@ bool CTaskSimpleDoHandSignal::ProcessPed(CPed* ped) {
         new CTaskComplexPlayHandSignalAnim{},
         TASK_SECONDARY_PARTIAL_ANIM
     );
-    m_initialised = true;
+    m_Initialized = true;
     return false;
 }

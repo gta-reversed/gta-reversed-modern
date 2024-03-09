@@ -7,10 +7,6 @@ class CPed;
 class CEvent;
 
 class NOTSA_EXPORT_VTABLE CTaskSimpleDoHandSignal : public CTaskSimple {
-
-public:
-    bool m_initialised{};
-
 public:
     static void InjectHooks();
 
@@ -20,8 +16,8 @@ public:
     CTaskSimpleDoHandSignal(const CTaskSimpleDoHandSignal&);
     ~CTaskSimpleDoHandSignal() = default;
 
-    CTask*    Clone() override { return new CTaskSimpleDoHandSignal{*this}; }
-    eTaskType GetTaskType() override { return Type; }
+    CTask*    Clone() const override { return new CTaskSimpleDoHandSignal{*this}; }
+    eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return true; }
     bool      ProcessPed(CPed* ped) override;
 
@@ -36,4 +32,7 @@ private: // Wrappers for hooks
         this->CTaskSimpleDoHandSignal::~CTaskSimpleDoHandSignal();
         return this;
     }
+
+protected:
+    bool m_Initialized{};
 };
