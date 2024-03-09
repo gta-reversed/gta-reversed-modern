@@ -100,7 +100,7 @@ void FxManager_c::DestroyFxSystem(FxSystem_c* system) {
 
         for (Particle_c* particle = particles.GetHead(); particle; particle = particles.GetNext(particle)) {
             if (particle->m_System == system) {
-                prim->m_Particles.RemoveItem(particle);
+                prim->m_Particles.RemoveItem(particle); // TODO: Pre-cache next here, because if the item is removed it corrupts the iterator
                 m_FxEmitterParticles.AddItem(particle);
             }
         }

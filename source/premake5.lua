@@ -10,6 +10,9 @@ project "gta_reversed"
     filter {"options:allow-script-cmd-hooks"}
         defines { "ENABLE_SCRIPT_COMMAND_HOOKS" }
 
+    filter "configurations:Debug*"
+        floatingpoint "strict"
+
     filter {} -- Clear filter
 
     vpaths {
@@ -49,7 +52,9 @@ project "gta_reversed"
         "TRACY_ON_DEMAND",
         "TRACY_CALLSTACK",
 
-        "SPDLOG_USE_STD_FORMAT"
+        "SPDLOG_USE_STD_FORMAT",
+
+        "SA_SKINNED_PEDS"
     }
 
     links { 
@@ -66,14 +71,9 @@ project "gta_reversed"
         "dxguid.lib",
         "strmiids.lib",
         "dsound.lib",
-        "d3d9.lib"
+        "d3d9.lib",
+        "dbghelp" 
     }
-
-    filter "configurations:Debug*"
-        links { 
-            "dbghelp" 
-        }
-    filter {}
 
     libdirs { 
         "../libs",

@@ -264,7 +264,7 @@ void MissionDebugModule::RenderWindow() {
             }
 
             if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && m_SelectedMissionIdx != -1) {
-                CHud::SetHelpMessage("Starting Mission!", true, false, false);
+                CHud::SetHelpMessage("Starting Mission!"_gxt, true, false, false);
                 StartMission(m_SelectedMissionIdx);
             }
             //ImGui::EndGroup();

@@ -26,6 +26,70 @@ int16& CAEPedSpeechAudioEntity::s_NextSpeechSlot = *(int16*)0xB61414;
 static inline auto& gGlobalSpeechContextNextPlayTime = *reinterpret_cast<std::array<uint32, 360>*>(0xB61670);
 static inline auto& gSpeechContextLookup = *reinterpret_cast<notsa::mdarray<int16, 8, 360>*>(0x8C6A68);
 
+void CAEPedSpeechAudioEntity::InjectHooks() {
+    RH_ScopedVirtualClass(CAEPedSpeechAudioEntity, 0x85F310, 8);
+    RH_ScopedCategory("Audio/Entities");
+
+    RH_ScopedInstall(Constructor, 0x4E4F10);
+    RH_ScopedInstall(IsGlobalContextImportantForInterupting, 0x4E4600);
+    RH_ScopedInstall(IsGlobalContextUberImportant, 0x4E46F0);
+    RH_ScopedInstall(GetNextMoodToUse, 0x4E4700);
+    RH_ScopedInstall(GetVoiceForMood, 0x4E4760);
+    RH_ScopedInstall(CanWePlayScriptedSpeech, 0x4E4950);
+    RH_ScopedInstall(GetSpeechContextVolumeOffset, 0x4E4AE0, { .reversed = false });
+    RH_ScopedInstall(RequestPedConversation, 0x4E50E0, { .reversed = false });
+    RH_ScopedInstall(ReleasePedConversation, 0x4E52A0, { .reversed = false });
+    RH_ScopedInstall(GetCurrentCJMood, 0x4E53B0, { .reversed = false });
+    RH_ScopedInstall(StaticInitialise, 0x5B98C0, { .reversed = true });
+    RH_ScopedInstall(GetSpecificSpeechContext, 0x4E4470, { .reversed = false });
+    RH_ScopedInstall(Service, 0x4E3710, { .reversed = false });
+    RH_ScopedInstall(Reset, 0x4E37B0);
+    RH_ScopedInstall(ReservePedConversationSpeechSlots, 0x4E37F0, { .reversed = false });
+    RH_ScopedInstall(ReservePlayerConversationSpeechSlot, 0x4E3870, { .reversed = false });
+    RH_ScopedInstall(RequestPlayerConversation, 0x4E38C0);
+    RH_ScopedInstall(ReleasePlayerConversation, 0x4E3960, { .reversed = false });
+    RH_ScopedInstall(SetUpConversation, 0x4E3A00, { .reversed = false });
+    RH_ScopedInstall(GetAudioPedType, 0x4E3C60);
+    RH_ScopedInstall(GetVoice, 0x4E3CD0, { .reversed = false });
+    RH_ScopedInstall(DisableAllPedSpeech, 0x4E3EB0);
+    RH_ScopedInstall(IsGlobalContextPain, 0x4E44F0, { .reversed = true });
+    RH_ScopedInstall(SetCJMood, 0x4E3ED0, { .reversed = false });
+    RH_ScopedInstall(EnableAllPedSpeech, 0x4E3EC0);
+    RH_ScopedInstall(IsCJDressedInForGangSpeech, 0x4E4270, { .reversed = true });
+    RH_ScopedInstall(GetSexForSpecialPed, 0x4E4260);
+    RH_ScopedInstall(IsGlobalContextImportantForWidescreen, 0x4E46B0, { .reversed = true });
+    RH_ScopedInstall(GetRepeatTime, 0x4E47E0, { .reversed = false });
+    RH_ScopedInstall(LoadAndPlaySpeech, 0x4E4840, { .reversed = false });
+    RH_ScopedInstall(GetNumSlotsPlayingContext, 0x4E49B0, { .reversed = true });
+    RH_ScopedInstall(GetNextPlayTime, 0x4E49E0, { .reversed = true });
+    RH_ScopedInstall(SetNextPlayTime, 0x4E4A20, { .reversed = true });
+    RH_ScopedInstall(DisablePedSpeech, 0x4E56D0);
+    RH_ScopedInstall(DisablePedSpeechForScriptSpeech, 0x4E5700);
+    RH_ScopedInstall(CanPedSayGlobalContext, 0x4E5730, { .reversed = false });
+    RH_ScopedInstall(GetVoiceAndTypeFromModel, 0x4E58C0);
+    RH_ScopedInstall(GetSoundAndBankIDs, 0x4E5920, { .reversed = false });
+    RH_ScopedInstall(CanWePlayGlobalSpeechContext, 0x4E5F10, { .reversed = false });
+    RH_ScopedInstall(AddSayEvent, 0x4E6550, { .reversed = false });
+    RH_ScopedInstall(Initialise, 0x4E68D0, { .reversed = false });
+    RH_ScopedInstall(CanPedHoldConversation, 0x4E69E0, { .reversed = false });
+    RH_ScopedInstall(IsGlobalContextImportantForStreaming, 0x4E4510, { .reversed = false });
+    RH_ScopedInstall(EnablePedSpeech, 0x4E3F70, { .reversed = false });
+    RH_ScopedInstall(EnablePedSpeechForScriptSpeech, 0x4E3F90, { .reversed = false });
+    RH_ScopedInstall(StopCurrentSpeech, 0x4E3FB0, { .reversed = false });
+    RH_ScopedInstall(GetSoundAndBankIDsForScriptedSpeech, 0x4E4400, { .reversed = false });
+    RH_ScopedInstall(GetSexFromModel, 0x4E4200, { .reversed = false });
+    RH_ScopedInstall(GetPedTalking, 0x4E3F50, { .reversed = false });
+    RH_ScopedInstall(GetVoiceAndTypeForSpecialPed, 0x4E4170, { .reversed = false });
+    RH_ScopedVMTInstall(UpdateParameters, 0x4E3520, { .reversed = false });
+    RH_ScopedVMTInstall(AddScriptSayEvent, 0x4E4F70, { .reversed = false });
+    RH_ScopedVMTInstall(Terminate, 0x4E5670, { .reversed = false });
+    RH_ScopedVMTInstall(PlayLoadedSound, 0x4E5CD0, { .reversed = false });
+    RH_ScopedVMTInstall(GetAllocatedVoice, 0x4E4120);
+    RH_ScopedVMTInstall(WillPedChatAboutTopic, 0x4E5800);
+    RH_ScopedVMTInstall(GetPedType, 0x4E4130);
+    RH_ScopedVMTInstall(IsPedFemaleForAudio, 0x4E4150);
+}
+
 // 0x4E4F10
 CAEPedSpeechAudioEntity::CAEPedSpeechAudioEntity() : CAEAudioEntity() {
     f90                         = false;
@@ -285,7 +349,7 @@ int8 CAEPedSpeechAudioEntity::GetSexForSpecialPed(uint32 a1) {
 // Methods
 // 0x4E46B0
 bool CAEPedSpeechAudioEntity::IsGlobalContextImportantForWidescreen(int16 globalCtx) {
-    return notsa::contains({4, 2}, m_nVoiceType) || notsa::contains({13, 15, 116}, globalCtx);
+    return notsa::contains<int>({4, 2}, m_nVoiceType) || notsa::contains<int>({13, 15, 116}, globalCtx);
 }
 
 // 0x4E47E0
@@ -529,112 +593,10 @@ bool CAEPedSpeechAudioEntity::IsPedFemaleForAudio() {
         return false;
 }
 
-void CAEPedSpeechAudioEntity::InjectHooks() {
-    RH_ScopedClass(CAEPedSpeechAudioEntity);
-    RH_ScopedCategory("Audio/Entities");
-
-    RH_ScopedInstall(Constructor, 0x4E4F10);
-    RH_ScopedInstall(IsGlobalContextImportantForInterupting, 0x4E4600);
-    RH_ScopedInstall(IsGlobalContextUberImportant, 0x4E46F0);
-    RH_ScopedInstall(GetNextMoodToUse, 0x4E4700);
-    RH_ScopedInstall(GetVoiceForMood, 0x4E4760);
-    RH_ScopedInstall(CanWePlayScriptedSpeech, 0x4E4950);
-    RH_ScopedInstall(GetSpeechContextVolumeOffset, 0x4E4AE0, { .reversed = false });
-    RH_ScopedInstall(RequestPedConversation, 0x4E50E0, { .reversed = false });
-    RH_ScopedInstall(ReleasePedConversation, 0x4E52A0, { .reversed = false });
-    RH_ScopedInstall(GetCurrentCJMood, 0x4E53B0, { .reversed = false });
-    RH_ScopedInstall(StaticInitialise, 0x5B98C0, { .reversed = true });
-    RH_ScopedInstall(GetSpecificSpeechContext, 0x4E4470, { .reversed = false });
-    RH_ScopedInstall(Service, 0x4E3710, { .reversed = false });
-    RH_ScopedInstall(Reset, 0x4E37B0);
-    RH_ScopedInstall(ReservePedConversationSpeechSlots, 0x4E37F0, { .reversed = false });
-    RH_ScopedInstall(ReservePlayerConversationSpeechSlot, 0x4E3870, { .reversed = false });
-    RH_ScopedInstall(RequestPlayerConversation, 0x4E38C0);
-    RH_ScopedInstall(ReleasePlayerConversation, 0x4E3960, { .reversed = false });
-    RH_ScopedInstall(SetUpConversation, 0x4E3A00, { .reversed = false });
-    RH_ScopedInstall(GetAudioPedType, 0x4E3C60);
-    RH_ScopedInstall(GetVoice, 0x4E3CD0, { .reversed = false });
-    RH_ScopedInstall(DisableAllPedSpeech, 0x4E3EB0);
-    RH_ScopedInstall(IsGlobalContextPain, 0x4E44F0, { .reversed = true });
-    RH_ScopedInstall(SetCJMood, 0x4E3ED0, { .reversed = false });
-    RH_ScopedInstall(EnableAllPedSpeech, 0x4E3EC0);
-    RH_ScopedInstall(IsCJDressedInForGangSpeech, 0x4E4270, { .reversed = true });
-    RH_ScopedInstall(GetSexForSpecialPed, 0x4E4260);
-    RH_ScopedInstall(IsGlobalContextImportantForWidescreen, 0x4E46B0, { .reversed = true });
-    RH_ScopedInstall(GetRepeatTime, 0x4E47E0, { .reversed = false });
-    RH_ScopedInstall(LoadAndPlaySpeech, 0x4E4840, { .reversed = false });
-    RH_ScopedInstall(GetNumSlotsPlayingContext, 0x4E49B0, { .reversed = true });
-    RH_ScopedInstall(GetNextPlayTime, 0x4E49E0, { .reversed = true });
-    RH_ScopedInstall(SetNextPlayTime, 0x4E4A20, { .reversed = true });
-    RH_ScopedInstall(DisablePedSpeech, 0x4E56D0);
-    RH_ScopedInstall(DisablePedSpeechForScriptSpeech, 0x4E5700);
-    RH_ScopedInstall(CanPedSayGlobalContext, 0x4E5730, { .reversed = false });
-    RH_ScopedInstall(GetVoiceAndTypeFromModel, 0x4E58C0);
-    RH_ScopedInstall(GetSoundAndBankIDs, 0x4E5920, { .reversed = false });
-    RH_ScopedInstall(CanWePlayGlobalSpeechContext, 0x4E5F10, { .reversed = false });
-    RH_ScopedInstall(AddSayEvent, 0x4E6550, { .reversed = false });
-    RH_ScopedInstall(Initialise, 0x4E68D0, { .reversed = false });
-    RH_ScopedInstall(CanPedHoldConversation, 0x4E69E0, { .reversed = false });
-    RH_ScopedInstall(IsGlobalContextImportantForStreaming, 0x4E4510, { .reversed = false });
-    RH_ScopedInstall(EnablePedSpeech, 0x4E3F70, { .reversed = false });
-    RH_ScopedInstall(EnablePedSpeechForScriptSpeech, 0x4E3F90, { .reversed = false });
-    RH_ScopedInstall(StopCurrentSpeech, 0x4E3FB0, { .reversed = false });
-    RH_ScopedInstall(GetSoundAndBankIDsForScriptedSpeech, 0x4E4400, { .reversed = false });
-    RH_ScopedInstall(GetSexFromModel, 0x4E4200, { .reversed = false });
-    RH_ScopedInstall(GetPedTalking, 0x4E3F50, { .reversed = false });
-    RH_ScopedInstall(GetVoiceAndTypeForSpecialPed, 0x4E4170, { .reversed = false });
-    RH_ScopedVirtualInstall(UpdateParameters, 0x4E3520, { .reversed = false });
-    RH_ScopedVirtualInstall(AddScriptSayEvent, 0x4E4F70, { .reversed = false });
-    RH_ScopedVirtualInstall(Terminate, 0x4E5670, { .reversed = false });
-    RH_ScopedVirtualInstall(PlayLoadedSound, 0x4E5CD0, { .reversed = false });
-    RH_ScopedVirtualInstall(GetAllocatedVoice, 0x4E4120);
-    RH_ScopedVirtualInstall(WillPedChatAboutTopic, 0x4E5800);
-    RH_ScopedVirtualInstall(GetPedType, 0x4E4130);
-    RH_ScopedVirtualInstall(IsPedFemaleForAudio, 0x4E4150);
-}
-
 // 0x4E4F10
 CAEPedSpeechAudioEntity* CAEPedSpeechAudioEntity::Constructor() {
     this->CAEPedSpeechAudioEntity::CAEPedSpeechAudioEntity();
     return this;
 }
 
-// 0x4E3520
-void CAEPedSpeechAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {
-    CAEPedSpeechAudioEntity::UpdateParameters(sound, curPlayPos);
-}
-
-// 0x4E4F70
-void CAEPedSpeechAudioEntity::AddScriptSayEvent_Reversed(int32 a1, int32 a2, uint8 a3, uint8 a4, uint8 a5) {
-    CAEPedSpeechAudioEntity::AddScriptSayEvent(a1, a2, a3, a4, a5);
-}
-
-// 0x4E5670
-void CAEPedSpeechAudioEntity::Terminate_Reversed() {
-    CAEPedSpeechAudioEntity::Terminate();
-}
-
-// 0x4E5CD0
-void CAEPedSpeechAudioEntity::PlayLoadedSound_Reversed() {
-    CAEPedSpeechAudioEntity::PlayLoadedSound();
-}
-
-// 0x4E4120
-int16 CAEPedSpeechAudioEntity::GetAllocatedVoice_Reversed() {
-    return CAEPedSpeechAudioEntity::GetAllocatedVoice();
-}
-
-// 0x4E5800
-bool CAEPedSpeechAudioEntity::WillPedChatAboutTopic_Reversed(int16 topic) {
-    return CAEPedSpeechAudioEntity::WillPedChatAboutTopic(topic);
-}
-
-// 0x4E4130
-int16 CAEPedSpeechAudioEntity::GetPedType_Reversed() {
-    return CAEPedSpeechAudioEntity::GetPedType();
-}
-
-// 0x4E4150
-bool CAEPedSpeechAudioEntity::IsPedFemaleForAudio_Reversed() {
-    return CAEPedSpeechAudioEntity::IsPedFemaleForAudio();
-}
+// 0x4E3520// 0x4E4F70// 0x4E5670// 0x4E5CD0// 0x4E4120// 0x4E5800// 0x4E4130// 0x4E4150

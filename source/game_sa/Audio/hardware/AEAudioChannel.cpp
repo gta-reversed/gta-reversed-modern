@@ -8,7 +8,7 @@
 uint32& g_numSoundChannelsUsed = *(uint32*)0xB5F898;
 
 void CAEAudioChannel::InjectHooks() {
-    RH_ScopedClass(CAEAudioChannel);
+    RH_ScopedVirtualClass(CAEAudioChannel, 0x85F03C, 9);
     RH_ScopedCategory("Audio/Hardware");
 
     RH_ScopedInstall(SetPosition, 0x4D7950);
@@ -19,7 +19,7 @@ void CAEAudioChannel::InjectHooks() {
     RH_ScopedInstall(SetFrequency, 0x4D7A50);
     RH_ScopedInstall(SetVolume, 0x4D7C60);
     RH_ScopedInstall(SetOriginalFrequency, 0x4D7A70);
-    RH_ScopedVirtualInstall(SetFrequencyScalingFactor, 0x4D7D00);
+    RH_ScopedVMTInstall(SetFrequencyScalingFactor, 0x4D7D00);
     RH_ScopedInstall(GetCurrentPlaybackPosition, 0x4D79A0);
 }
 
@@ -94,9 +94,6 @@ void CAEAudioChannel::SetFrequencyScalingFactor(float factor) {
         }
         m_bNoScalingFactor = false;
     }
-}
-void CAEAudioChannel::SetFrequencyScalingFactor_Reversed(float factor) {
-    CAEAudioChannel::SetFrequencyScalingFactor(factor);
 }
 
 // 0x4D7950

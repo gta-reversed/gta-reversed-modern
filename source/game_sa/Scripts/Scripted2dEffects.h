@@ -67,13 +67,13 @@ public:
     static void Init();
 
     static CScriptedEffectPairs* GetEffectPairs(const C2dEffect* effect);
-    static int32 GetIndex(const C2dEffect* effect);
+    static int32 GetIndex(const C2dEffectBase* effect);
 
     static int32 AddScripted2DEffect(float radius);
     static void ReturnScripted2DEffect(int32 index);
 
     /// Index of the effect if it's from `ms_effects` `nullopt` otherwise.
-    static auto IndexOfEffect(const C2dEffect* effect) ->std::optional<size_t>;
+    static auto IndexOfEffect(const C2dEffectBase* effect) ->std::optional<size_t>;
 
     static void Load() { } // NOP
     static void Save() { } // NOP

@@ -210,7 +210,7 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
         }
     } else if (ShouldLoadGangAnims()) {
         const auto blk = CAnimManager::GetAnimationBlockIndex("gangs");
-        if (CAnimManager::ms_aAnimBlocks[blk].bLoaded) {
+        if (CAnimManager::GetAnimBlocks()[blk].IsLoaded) {
             CAnimManager::AddAnimBlockRef(blk);
             m_animsReferenced = true;
         } else {
@@ -219,9 +219,9 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
     }
 
     // If we're wandering and the wander time is out of time...
-    if (const auto wander = CTask::DynCast<CTaskComplexWander>(m_pSubTask)) { // 0x66241F
+    if (const auto tWander = CTask::DynCast<CTaskComplexWander>(m_pSubTask)) { // 0x66241F
         if (m_wanderTimer.IsOutOfTime()) {
-            if (wander->GetDistSqOfClosestPathNodeToPed(ped) <= 2.f) {
+            if (tWander->GetDistSqOfClosestPathNodeToPed(ped) <= 2.f) {
                 m_gang->GetIntelligence().SetDefaultTaskAllocatorType(ePedGroupDefaultTaskAllocatorType::RANDOM);
                 // Above call causes this task to be flushed (deleted), and changes our vfptr to `CTaskComplex`'s.
                 // If we return non-null here, `CTaskManager::ParentsControlChildren` will be called, and calls our
@@ -238,7 +238,7 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
             if (auto matrix = RwFrameGetMatrix(RpClumpGetFrame(ped->m_pRwClump))) {
                 CVector PoS{ 0.f, 0.1f, 0.f };
                 if (const auto fx = g_fxMan.CreateFxSystem("exhale", &PoS, matrix)) {
-                    fx->AttachToBone(ped, ePedBones::BONE_HEAD);
+                    fx->AttachToBone(ped, eBoneTag::BONE_HEAD);
                     fx->PlayAndKill();
                 }
             }
@@ -336,7 +336,7 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
                 std::array{ SMKCIG_PRTL, SMKCIG_PRTL_F },
                 [&](auto idx) {
                     const auto anim = anims[idx];
-                    return anim && anim->m_fCurrentTime < 0.5f;
+                    return anim && anim->m_CurrentTime < 0.5f;
                 })
             ) {
                 m_exhaleTimer.Start(2700);

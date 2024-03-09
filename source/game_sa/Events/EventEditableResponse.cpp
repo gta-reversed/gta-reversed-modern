@@ -6,12 +6,12 @@
 #include "IKChainManager_c.h"
 
 void CEventEditableResponse::InjectHooks() {
-    RH_ScopedClass(CEventEditableResponse);
+    RH_ScopedVirtualClass(CEventEditableResponse, 0x85AB80, 17);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AC450);
-    RH_ScopedVirtualInstall(Clone, 0x420ED0);
-    RH_ScopedVirtualInstall(HasEditableResponse, 0x420EF0);
+    RH_ScopedVMTInstall(Clone, 0x420ED0);
+    RH_ScopedVMTInstall(HasEditableResponse, 0x420EF0);
     RH_ScopedInstall(WillRespond, 0x4AC490);
     RH_ScopedInstall(InformVehicleOccupants, 0x4AC4A0);
     RH_ScopedInstall(InformRespectedFriends, 0x4B2B00);
@@ -28,7 +28,7 @@ CEventEditableResponse::CEventEditableResponse(eTaskType taskType) :
 {
     m_bAddToEventGroup = true;
     m_taskId = (int16)taskType;
-    field_10 = -1;
+    m_FacialExpressionType = -1;
 }
 
 CEventEditableResponse* CEventEditableResponse::Constructor() {
@@ -38,18 +38,9 @@ CEventEditableResponse* CEventEditableResponse::Constructor() {
 
 // 0x420ED0
 CEvent* CEventEditableResponse::Clone() {
-    return CEventEditableResponse::Clone_Reversed();
-}
-
-// 0x420EF0
-bool CEventEditableResponse::HasEditableResponse() const {
-    return CEventEditableResponse::HasEditableResponse_Reversed();
-}
-
-CEvent* CEventEditableResponse::Clone_Reversed() {
     CEventEditableResponse* clonedEvent = CloneEditable();
     clonedEvent->m_taskId = m_taskId;
-    clonedEvent->field_10 = field_10;
+    clonedEvent->m_FacialExpressionType = m_FacialExpressionType;
     clonedEvent->m_bAddToEventGroup = m_bAddToEventGroup;
     return clonedEvent;
 }
@@ -167,10 +158,10 @@ void CEventEditableResponse::ComputeResponseTaskType(CPed* ped, bool bDecisionMa
         TASK_SIMPLE_INFORM_RESPECTED_FRIENDS,
         TASK_SIMPLE_INFORM_GROUP,
         TASK_SIMPLE_LOOK_AT_ENTITY_OR_COORD,
-        -1,
+        TASK_INVALID,
         bDecisionMakerTypeInGroup,
         m_taskId,
-        field_10
+        m_FacialExpressionType
     );
 }
 
@@ -200,7 +191,7 @@ void CEventEditableResponse::ComputeResponseTaskType(CPedGroup* pedGroup) {
             TASK_SIMPLE_INFORM_GROUP,
             TASK_SIMPLE_INFORM_RESPECTED_FRIENDS,
             TASK_SIMPLE_LOOK_AT_ENTITY_OR_COORD,
-            -1
+            TASK_INVALID
         );
     } else {
         m_taskId = TASK_NONE;
@@ -216,7 +207,7 @@ void CEventEditableResponse::ComputeResponseTaskType(CPedGroup* pedGroup) {
                 TASK_SIMPLE_INFORM_GROUP,
                 TASK_SIMPLE_INFORM_RESPECTED_FRIENDS,
                 TASK_SIMPLE_LOOK_AT_ENTITY_OR_COORD,
-                -1
+                TASK_INVALID
             );
         }
     }
@@ -224,21 +215,21 @@ void CEventEditableResponse::ComputeResponseTaskType(CPedGroup* pedGroup) {
 
 // 0x4B5730
 bool CEventEditableResponse::ComputeResponseTaskOfType(CPed* ped, int32 taskId) {
-    int16 outTaskId = -1;
-    int16 unknownId = -1;
+    int16 outTaskId = TASK_INVALID;
+    int16 facialTaskType = TASK_INVALID;
     int32 eventSourceType = CEventSource::ComputeEventSourceType(*this, *ped);
     CDecisionMakerTypes::GetInstance()->MakeDecision(
         ped,
         GetEventType(),
         eventSourceType,
         ped->bInVehicle,
-        -1,
-        -1,
-        -1,
+        TASK_INVALID,
+        TASK_INVALID,
+        TASK_INVALID,
         taskId,
         false,
         outTaskId,
-        unknownId
+        facialTaskType
     );
     return taskId == outTaskId;
 }

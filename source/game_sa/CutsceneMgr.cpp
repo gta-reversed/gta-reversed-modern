@@ -50,7 +50,7 @@ void CCutsceneMgr::AttachObjectToBone(CCutsceneObject* attachment, CCutsceneObje
 // 0x5B0480
 void CCutsceneMgr::AttachObjectToFrame(CCutsceneObject* attachment, CEntity* object, const char* frameName) {
     attachment->m_pAttachmentObject = nullptr;
-    attachment->m_pAttachToFrame    = RpAnimBlendClumpFindFrame(object->m_pRwClump, frameName)->m_pFrame;
+    attachment->m_pAttachToFrame    = RpAnimBlendClumpFindFrame(object->m_pRwClump, frameName)->Frame;
 }
 
 // 0x5B04B0
@@ -866,28 +866,28 @@ void CCutsceneMgr::SetCutsceneAnim(const char* animName, CObject* object) {
         return;
     }
 
-    if (theAnim->m_pHierarchy->m_bIsCompressed) {
-        theAnim->m_pHierarchy->m_bKeepCompressed = true;
+    if (theAnim->m_BlendHier->m_bIsCompressed) {
+        theAnim->m_BlendHier->m_bKeepCompressed = true;
     }
 
     CStreaming::ImGonnaUseStreamingMemory();
     const auto cpyOfTheAnim = ms_cutsceneAssociations.CopyAnimation(animName);
     CStreaming::IHaveUsedStreamingMemory();
 
-    cpyOfTheAnim->SetFlag(ANIMATION_TRANSLATE_Y, true);
+    cpyOfTheAnim->SetFlag(ANIMATION_CAN_EXTRACT_VELOCITY, true);
     cpyOfTheAnim->Start(0.f);
 
-    const auto blendData = RpClumpGetAnimBlendClumpData(object->m_pRwClump);
-    blendData->m_Associations.Prepend(&cpyOfTheAnim->m_Link);
+    const auto blendData = RpAnimBlendClumpGetData(object->m_pRwClump);
+    blendData->m_AnimList.Prepend(&cpyOfTheAnim->m_Link);
 
-    if (cpyOfTheAnim->m_pHierarchy->m_bKeepCompressed) {
-        blendData->m_Frames->m_bIsCompressed = true;
+    if (cpyOfTheAnim->m_BlendHier->m_bKeepCompressed) {
+        blendData->m_FrameDatas[0].IsCompressed = true;
     }
 }
 
 // 0x5B0420
 void CCutsceneMgr::SetCutsceneAnimToLoop(const char* animName) {
-    ms_cutsceneAssociations.GetAnimation(animName)->m_nFlags |= ANIMATION_LOOPED;
+    ms_cutsceneAssociations.GetAnimation(animName)->m_Flags |= ANIMATION_IS_LOOPED;
 }
 
 // 0x5B0440
@@ -910,17 +910,17 @@ void CCutsceneMgr::SetupCutsceneToStart() {
 
         if (const auto anim = RpAnimBlendClumpGetFirstAssociation(csobj->m_pRwClump)) {
             if (csobj->m_pAttachToFrame) {
-                anim->SetFlag(ANIMATION_TRANSLATE_Y, false);
-                anim->SetFlag(ANIMATION_STARTED, true);
+                anim->SetFlag(ANIMATION_CAN_EXTRACT_VELOCITY, false);
+                anim->SetFlag(ANIMATION_IS_PLAYING, true);
             } else {
                 // Get anim translation and offset the object's position by it
-                const auto animTrans = anim->m_pHierarchy->m_bIsCompressed
-                    ? anim->m_pHierarchy->m_pSequences->GetCompressedFrame(1)->GetTranslation()
-                    : anim->m_pHierarchy->m_pSequences->GetUncompressedFrame(1)->translation;
+                const CVector animTrans = anim->m_BlendHier->m_bIsCompressed
+                    ? (CVector)anim->m_BlendHier->m_pSequences[0].GetCKeyFrame(1)->Trans
+                    : (CVector)anim->m_BlendHier->m_pSequences[0].GetUKeyFrame(1)->Trans;
                 SetObjPos(ms_cutsceneOffset + animTrans);
 
                 // Start the anim
-                anim->SetFlag(ANIMATION_STARTED, true);
+                anim->SetFlag(ANIMATION_IS_PLAYING, true);
             }
         } else { // Object has no animation applied
             SetObjPos(ms_cutsceneOffset);

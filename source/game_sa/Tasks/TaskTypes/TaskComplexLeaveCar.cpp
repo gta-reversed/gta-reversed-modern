@@ -3,7 +3,7 @@
 #include "TaskComplexLeaveCar.h"
 
 void CTaskComplexLeaveCar::InjectHooks() {
-    RH_ScopedClass(CTaskComplexLeaveCar);
+    RH_ScopedVirtualClass(CTaskComplexLeaveCar, 0x86E828, 11);
     RH_ScopedCategory("Tasks/TaskTypes");
 }
 

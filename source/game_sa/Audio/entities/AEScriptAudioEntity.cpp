@@ -785,7 +785,7 @@ void CAEScriptAudioEntity::Service() {
 }
 
 void CAEScriptAudioEntity::InjectHooks() {
-    RH_ScopedClass(CAEScriptAudioEntity);
+    RH_ScopedVirtualClass(CAEScriptAudioEntity, 0x862E58, 1);
     RH_ScopedCategory("Audio/Entities");
 
     RH_ScopedInstall(Constructor, 0x5074D0);
@@ -806,14 +806,10 @@ void CAEScriptAudioEntity::InjectHooks() {
     RH_ScopedInstall(ProcessMissionAudioEvent, 0x4ECCF0, { .reversed = false });
     RH_ScopedOverloadedInstall(ReportMissionAudioEvent, "1", 0x4EE960, void (CAEScriptAudioEntity::*)(eAudioEvents, CPhysical*, float, float));
     RH_ScopedOverloadedInstall(ReportMissionAudioEvent, "2", 0x4EE940, void (CAEScriptAudioEntity::*)(eAudioEvents, CVector&));
-    RH_ScopedVirtualInstall(UpdateParameters, 0x4EC970, { .reversed = false });
+    RH_ScopedVMTInstall(UpdateParameters, 0x4EC970, { .reversed = false });
 }
 
 CAEScriptAudioEntity* CAEScriptAudioEntity::Constructor() {
     this->CAEScriptAudioEntity::CAEScriptAudioEntity();
     return this;
-}
-
-void CAEScriptAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {
-    CAEScriptAudioEntity::UpdateParameters(sound, curPlayPos);
 }
