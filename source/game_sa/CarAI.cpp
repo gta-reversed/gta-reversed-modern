@@ -56,24 +56,30 @@ void CCarAI::InjectHooks() {
 
 // 0x41C4A0
 void CCarAI::AddAmbulanceOccupants(CVehicle* vehicle) {
-    CPed* driver    = vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
-    CPed* passenger = vehicle->SetupPassenger(1, PED_TYPE_NONE, false, false);
+    const auto driver    = vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
+    const auto passenger = vehicle->SetupPassenger(1, PED_TYPE_NONE, false, false);
 
-    driver->GetTaskManager().SetTask(new CTaskSimpleCarDrive{ vehicle }, TASK_PRIMARY_DEFAULT);
-    driver->GetTaskManager().SetTask(new CTaskComplexMedicTreatInjuredPed{ vehicle, passenger, true }, TASK_PRIMARY_PRIMARY);
-    passenger->GetTaskManager().SetTask(new CTaskSimpleCarDrive{ vehicle }, TASK_PRIMARY_DEFAULT);
-    passenger->GetTaskManager().SetTask(new CTaskComplexMedicTreatInjuredPed{ vehicle, driver, false }, TASK_PRIMARY_PRIMARY);
+    const auto SetupPed = [vehicle](CPed* ped, CPed* partner, bool isDriver) {
+        ped->GetTaskManager().SetTask(new CTaskSimpleCarDrive{ vehicle }, TASK_PRIMARY_DEFAULT);
+        ped->GetTaskManager().SetTask(new CTaskComplexMedicTreatInjuredPed{ vehicle, partner, isDriver }, TASK_PRIMARY_PRIMARY);
+    };
+
+    SetupPed(driver, passenger, true);
+    SetupPed(passenger, driver, false);
 }
 
 // 0x41C600
 void CCarAI::AddFiretruckOccupants(CVehicle* vehicle) {
-    CPed* driver = vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
-    CPed* passenger = vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
+    const auto driver    = vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
+    const auto passenger = vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
 
-    driver->GetTaskManager().SetTask(new CTaskSimpleCarDrive{ vehicle }, TASK_PRIMARY_DEFAULT);
-    driver->GetTaskManager().SetTask(new CTaskComplexDriveFireTruck{ vehicle, passenger, true }, TASK_PRIMARY_PRIMARY);
-    passenger->GetTaskManager().SetTask(new CTaskSimpleCarDrive{ vehicle }, TASK_PRIMARY_DEFAULT);
-    passenger->GetTaskManager().SetTask(new CTaskComplexDriveFireTruck{ vehicle, driver, false }, TASK_PRIMARY_PRIMARY);
+    const auto SetupPed  = [vehicle](CPed* ped, CPed* partner, bool isDriver) {
+        ped->GetTaskManager().SetTask(new CTaskSimpleCarDrive{ vehicle }, TASK_PRIMARY_DEFAULT);
+        ped->GetTaskManager().SetTask(new CTaskComplexDriveFireTruck{ vehicle, partner, isDriver }, TASK_PRIMARY_PRIMARY);
+    };
+
+    SetupPed(driver, passenger, true);
+    SetupPed(passenger, driver, false);
 }
 
 // 0x41C070
@@ -129,7 +135,7 @@ void CCarAI::AddPoliceCarOccupants(CVehicle* vehicle, bool arg2) {
             }
 
             // Now set the tasks for them
-            const auto SetPedTasks = [vehicle](CPed* ped, CPed* partner, bool isDriver) {
+            const auto SetupPed = [vehicle](CPed* ped, CPed* partner, bool isDriver) {
                 ped->GetIntelligence()->ClearTasks(true, true);
                 ped->GetTaskManager().SetTask(
                     new CTaskComplexCopInCar{ vehicle, partner, FindPlayerPed(), isDriver },
@@ -137,8 +143,8 @@ void CCarAI::AddPoliceCarOccupants(CVehicle* vehicle, bool arg2) {
                     true
                 );
             };
-            SetPedTasks(drvr, psgr, true);
-            SetPedTasks(psgr, drvr, false);
+            SetupPed(drvr, psgr, true);
+            SetupPed(psgr, drvr, false);
         } else if (arg2 || CGeneral::RandomBool(50.0f)) {
             vehicle->SetupPassenger(0, PED_TYPE_NONE, false, false);
         }
@@ -173,9 +179,10 @@ void CCarAI::CarHasReasonToStop(CVehicle* vehicle) {
 }
 
 // 0x41CD00
-bool CCarAI::EntitiesGoHeadOn(CEntity* entity1, CEntity* entity2) {
-    CVector positionDiff = (entity1->GetPosition() - entity2->GetPosition()).Normalized();
-    return entity1->GetForwardVector().Dot(positionDiff) <= -0.8f && entity2->GetForwardVector().Dot(positionDiff) >= 0.8f;
+bool CCarAI::EntitiesGoHeadOn(CEntity* eA, CEntity* eB) {
+    const auto d = (eA->GetPosition() - eB->GetPosition()).Normalized();
+    return eA->GetForwardVector().Dot(d) <= -0.8f
+        && eB->GetForwardVector().Dot(d) >= 0.8f;
 }
 
 // 0x41CA40
@@ -213,22 +220,14 @@ eCarMission CCarAI::FindPoliceCarMissionForWantedLevel() {
 int32 CCarAI::FindPoliceCarSpeedForWantedLevel(CVehicle* vehicle) {
     const auto& maxVelocity = vehicle->m_pHandlingData->m_transmissionData.m_fMaxVelocity;
     switch (FindPlayerWanted()->m_nWantedLevel) {
-    case 0:
-        return (int32)CGeneral::GetRandomNumberInRange(12.0f, 16.0f);
-    case 1:
-        return 25;
-    case 2:
-        return 34;
-    case 3:
-        return int32(maxVelocity * GAME_SPEED_TO_CAR_AI_SPEED * 0.90f);
-    case 4:
-        return int32(maxVelocity * GAME_SPEED_TO_CAR_AI_SPEED * 1.20f);
-    case 5:
-        return int32(maxVelocity * GAME_SPEED_TO_CAR_AI_SPEED * 1.25f);
-    case 6:
-        return int32(maxVelocity * GAME_SPEED_TO_CAR_AI_SPEED * 1.30f);
-    default:
-        return 0;
+    case 0:  return (int32)CGeneral::GetRandomNumberInRange(12.0f, 16.0f);
+    case 1:  return 25;
+    case 2:  return 34;
+    case 3:  return (int32)(maxVelocity * GAME_SPEED_TO_CAR_AI_SPEED * 0.90f);
+    case 4:  return (int32)(maxVelocity * GAME_SPEED_TO_CAR_AI_SPEED * 1.20f);
+    case 5:  return (int32)(maxVelocity * GAME_SPEED_TO_CAR_AI_SPEED * 1.25f);
+    case 6:  return (int32)(maxVelocity * GAME_SPEED_TO_CAR_AI_SPEED * 1.30f);
+    default: NOTSA_UNREACHABLE();
     }
 }
 
@@ -378,7 +377,7 @@ float CCarAI::GetCarToGoToCoorsStraightLine(CVehicle* veh, const CVector& coors,
 
 // 0x41D350
 float CCarAI::GetCarToParkAtCoors(CVehicle* veh, const CVector& coors) {
-    veh->vehicleFlags.bCanPark      = true;
+    veh->vehicleFlags.bCanPark = true;
     veh->m_autoPilot.SetCruiseSpeed(10);
     return (veh->GetPosition2D() - coors).Magnitude();
 }
@@ -465,73 +464,51 @@ void CCarAI::MakeWayForCarWithSiren(CVehicle* carWithSiren) {
 
 // 0x41D3D0
 void CCarAI::MellowOutChaseSpeed(CVehicle* vehicle) {
-    float distance = (vehicle->GetPosition() - FindPlayerCoors()).Magnitude();
-    bool  isPlayerSlowEnough = FindPlayerPed()->m_vecMoveSpeed.Magnitude() < 0.07f;
-    if (FindPlayerVehicle()) {
-        if (FindPlayerWanted()->m_nWantedLevel == 1) {
-            if (distance < 10.0f) {
-                vehicle->m_autoPilot.SetCruiseSpeed(15);
-                return;
-            }
-
-            if (distance < 20.0f) {
-                vehicle->m_autoPilot.SetCruiseSpeed(22);
-                return;
-            }
-
-            vehicle->m_autoPilot.SetCruiseSpeed(25);
-            return;
-        } else if (FindPlayerWanted()->m_nWantedLevel == 2) {
-            if (distance < 10.0f) {
-                vehicle->m_autoPilot.SetCruiseSpeed(27);
-                return;
-            }
-
-            if (distance < 20.0f) {
-                vehicle->m_autoPilot.SetCruiseSpeed(30);
-                return;
-            }
-
-            vehicle->m_autoPilot.SetCruiseSpeed(34);
-            return;
-        }
-    } else {
-        if (FindPlayerWanted()->m_nWantedLevel == 1) {
-            if (distance < 20.0f) {
-                vehicle->m_autoPilot.SetCruiseSpeed(5);
-                return;
-            }
-
-            if (distance >= 20.0f && distance < 40.0f) {
-                vehicle->m_autoPilot.SetCruiseSpeed(13);
-                if (isPlayerSlowEnough && distance <= 30.0f && vehicle->m_autoPilot.m_nCruiseSpeed >= 10) {
-                    vehicle->m_autoPilot.SetCruiseSpeed(10);
+    const auto isPlayerInVeh = !!FindPlayerVehicle();
+    const auto plyrToVehDist3D = (vehicle->GetPosition() - FindPlayerCoors()).Magnitude();
+    const auto desiredSpeed = [&]() -> uint32 {
+        switch (FindPlayerWanted()->GetWantedLevel())
+        {
+        case 1: { // 0x41D438
+            if (isPlayerInVeh) {
+                if (plyrToVehDist3D < 10.0f) {
+                    return 15;
+                } else if (plyrToVehDist3D < 20.0f) {
+                    return 22;
                 }
-                return;
-            }
-
-            vehicle->m_autoPilot.SetCruiseSpeed(25);
-            return;
-        } else if (FindPlayerWanted()->m_nWantedLevel == 2) {
-            if (distance < 20.0f) {
-                vehicle->m_autoPilot.SetCruiseSpeed(5);
-                return;
-            }
-
-            if (distance >= 20.0f && distance < 40.0f) {
-                vehicle->m_autoPilot.SetCruiseSpeed(18);
-                if (isPlayerSlowEnough && distance <= 30.0f && vehicle->m_autoPilot.m_nCruiseSpeed >= 10) {
-                    vehicle->m_autoPilot.SetCruiseSpeed(10);
+            } else {
+                if (plyrToVehDist3D < 20.0f) {
+                    return 5;
+                } else if (plyrToVehDist3D < 40.0f) {
+                    return 13;
                 }
-                return;
             }
-
-            vehicle->m_autoPilot.SetCruiseSpeed(34);
-            return;
-        } else if (isPlayerSlowEnough && distance <= 30.0f && vehicle->m_autoPilot.m_nCruiseSpeed >= 10) {
-                vehicle->m_autoPilot.SetCruiseSpeed(10);
+            return 25;
         }
-    }
+        case 2: {
+            if (isPlayerInVeh) {
+                if (plyrToVehDist3D < 10.0f) {
+                    return 27;
+                } else if (plyrToVehDist3D < 20.0f) {
+                    return 30;
+                }
+            } else {
+                if (plyrToVehDist3D < 20.0f) {
+                    return 5;
+                } else if (plyrToVehDist3D < 40.0f) {
+                    return 18;
+                }
+            }
+            return 34;
+        }
+        }
+        return (uint32)vehicle->m_autoPilot.m_nCruiseSpeed;
+    }();
+    vehicle->m_autoPilot.SetCruiseSpeed(
+        !isPlayerInVeh && desiredSpeed >= 10 && plyrToVehDist3D <= 30.f && FindPlayerPed()->m_vecMoveSpeed.SquaredMagnitude() < sq(0.07f)
+            ? 10            // Clamp to 10
+            : desiredSpeed
+    );
 }
 
 // 0x41CB70
@@ -616,6 +593,7 @@ void CCarAI::TellOccupantsToLeaveCar(CVehicle* vehicle) {
 // 0x41DA30
 void CCarAI::UpdateCarAI(CVehicle* veh) {
     const auto ap = &veh->m_autoPilot;
+
     if (ap->m_vehicleRecordingId >= 0 && (!CVehicleRecording::bUseCarAI[ap->m_vehicleRecordingId] || veh->IsSubHeli())) {
         return;
     }
