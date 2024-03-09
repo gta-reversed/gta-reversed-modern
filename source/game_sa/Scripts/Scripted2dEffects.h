@@ -84,7 +84,7 @@ public:
     static int32 FindFreeSlot() {
         for (auto&& [i, activated] : notsa::enumerate(ms_activated)) {
             if (!activated) {
-                return i;
+                return (int32)i;
             }
         }
 
