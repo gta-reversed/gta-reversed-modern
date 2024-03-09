@@ -24,6 +24,7 @@
 #include <tuple>
 #include <initializer_list>
 #include <format>
+#undef GetCurrentTime // gtfo windows.h
 
 #include <ranges>
 namespace rng = std::ranges;

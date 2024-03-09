@@ -178,7 +178,6 @@ public:
     void SetBlend(float blendAmount, float blendDelta);
     void SetBlendTo(float blendAmount, float blendDelta);
     void SetCurrentTime(float currentTime);
-    #undef GetCurrentTime // gtfo windows.h
     float GetCurrentTime() const { return m_CurrentTime; }
 
     void SetDeleteCallback(void(*callback)(CAnimBlendAssociation*, void*), void* data = nullptr);
