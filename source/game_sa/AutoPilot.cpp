@@ -52,6 +52,11 @@ void CAutoPilot::RemoveOnePathNode() {
     plugin::CallMethod<0x41B950, CAutoPilot*>(this);
 }
 
+void CAutoPilot::SetCarMission(eCarMission carMission, uint32 timeOffsetMs) {
+    m_nCarMission = carMission;
+    m_nTimeToStartMission = CTimer::GetTimeInMS() + timeOffsetMs;
+}
+
 // notsa
 void CAutoPilot::SetTempAction(eAutoPilotTempAction action, uint32 durMs) {
     m_nTempAction = action;

@@ -125,6 +125,8 @@ public:
         m_nCarMission = carMission;
     }
 
+    void SetCarMission(eCarMission carMission, uint32 timeOffsetMs);
+
     void ClearCarMission() {
         m_nCarMission = MISSION_NONE;
     }

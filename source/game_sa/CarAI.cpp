@@ -266,13 +266,15 @@ float CCarAI::GetCarToGoToCoors(CVehicle* veh, const CVector& coors, eCarDriving
         if (setCruiseSpeed) {
             ap->SetCruiseSpeed(20);
         }
-        ap->m_nTimeToStartMission = CTimer::GetTimeInMS();
         if (veh->GetStatus() != STATUS_GHOST) {
             veh->SetStatus(STATUS_PHYSICS);
         }
-        ap->m_nCarMission = CCarCtrl::JoinCarWithRoadSystemGotoCoors(veh, coors, false, false)
-            ? MISSION_GOTOCOORDINATES_STRAIGHTLINE
-            : MISSION_GOTOCOORDINATES;
+        ap->SetCarMission(
+            CCarCtrl::JoinCarWithRoadSystemGotoCoors(veh, coors, false, false)
+                ? MISSION_GOTOCOORDINATES_STRAIGHTLINE
+                : MISSION_GOTOCOORDINATES,
+            0
+        );
         break;
     }
     }
@@ -297,13 +299,15 @@ float CCarAI::GetCarToGoToCoorsAccurate(CVehicle* veh, const CVector& coors, eCa
         if (setCruiseSpeed) {
             ap->SetCruiseSpeed(20);
         }
-        ap->m_nTimeToStartMission = CTimer::GetTimeInMS();
         if (veh->GetStatus() != STATUS_GHOST) {
             veh->SetStatus(STATUS_PHYSICS);
         }
-        ap->m_nCarMission = CCarCtrl::JoinCarWithRoadSystemGotoCoors(veh, coors, false, false)
-            ? MISSION_GOTOCOORDINATES_STRAIGHTLINE_ACCURATE
-            : MISSION_GOTOCOORDINATES_ACCURATE;
+        ap->SetCarMission(
+            CCarCtrl::JoinCarWithRoadSystemGotoCoors(veh, coors, false, false)
+                ? MISSION_GOTOCOORDINATES_STRAIGHTLINE_ACCURATE
+                : MISSION_GOTOCOORDINATES_ACCURATE,
+            0
+        );
         break;
     }
     }
@@ -329,12 +333,11 @@ float CCarAI::GetCarToGoToCoorsRacing(CVehicle* veh, const CVector& coors, eCarD
         if (setCruiseSpeed) {
             ap->SetCruiseSpeed(20);
         }
-        ap->m_nTimeToStartMission = CTimer::GetTimeInMS();
         if (veh->GetStatus() != STATUS_GHOST) {
             veh->SetStatus(STATUS_PHYSICS);
         }
         ap->m_vecDestinationCoors = coors;
-        ap->m_nCarMission         = MISSION_GOTOCOORDINATES_RACING;
+        ap->SetCarMission(MISSION_GOTOCOORDINATES_RACING, 0);
         CCarCtrl::JoinCarWithRoadSystemGotoCoors(veh, coors, false, false);
         break;
     }
@@ -360,12 +363,11 @@ float CCarAI::GetCarToGoToCoorsStraightLine(CVehicle* veh, const CVector& coors,
         if (setCruiseSpeed) {
             ap->SetCruiseSpeed(20);
         }
-        ap->m_nTimeToStartMission = CTimer::GetTimeInMS();
         if (veh->GetStatus() != STATUS_GHOST) {
             veh->SetStatus(STATUS_PHYSICS);
         }
         ap->m_vecDestinationCoors = coors;
-        ap->m_nCarMission         = MISSION_GOTOCOORDINATES_STRAIGHTLINE;
+        ap->SetCarMission(MISSION_GOTOCOORDINATES_STRAIGHTLINE, 0);
         // TODO/BUG: No `CCarCtrl::JoinCarWithRoadSystemGotoCoors` ?
         break;
     }
