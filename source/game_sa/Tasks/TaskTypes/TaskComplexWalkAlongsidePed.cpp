@@ -126,8 +126,7 @@ CTask* CTaskComplexWalkAlongsidePed::ControlSubTask(CPed* ped) {
 
     bool bChangedAnimSpeed = false;
     if (pedTaskGoToPoint && !pedTaskFollowNodeRoute) { // 0x685308 (Inverted)
-        auto targetPtForPed = m_TargetPed->GetMatrix() * m_Offset;
-
+        auto targetPtForPed = m_TargetPed->GetMatrix().TransformPoint(m_Offset);
         if (isTargetMoving) { // 0x68535C
             if (m_TargetPed->GetPosition().Dot(m_TargetPed->GetForward()) - targetPtForPed.Dot(m_TargetPed->GetForward()) < 0.f) { // Target pt is behind target ped (I think?)
                 if (pedWalkAnim) { // 0x6853C6

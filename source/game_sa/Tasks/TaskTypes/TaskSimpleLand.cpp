@@ -3,14 +3,14 @@
 #include "TaskSimpleLand.h"
 
 void CTaskSimpleLand::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleLand);
+    RH_ScopedVirtualClass(CTaskSimpleLand, 0x8704FC, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x678E90);
     RH_ScopedInstall(LeftFootLanded, 0x679010);
     RH_ScopedInstall(RightFootLanded, 0x678FE0);
     RH_ScopedInstall(FinishAnimCB, 0x678FA0);
-    RH_ScopedVirtualInstall(MakeAbortable, 0x678F40);
-    RH_ScopedVirtualInstall(ProcessPed, 0x67D380);
+    RH_ScopedVMTInstall(MakeAbortable, 0x678F40);
+    RH_ScopedVMTInstall(ProcessPed, 0x67D380);
 }
 
 CTaskSimpleLand* CTaskSimpleLand::Constructor(AnimationId nAnimId) {
@@ -36,15 +36,6 @@ CTaskSimpleLand::~CTaskSimpleLand() {
 
 // 0x67D380
 bool CTaskSimpleLand::ProcessPed(CPed* ped) {
-    return ProcessPed_Reversed(ped);
-}
-
-// 0x678F40
-bool CTaskSimpleLand::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return MakeAbortable_Reversed(ped, priority, event);
-}
-
-bool CTaskSimpleLand::ProcessPed_Reversed(CPed* ped) {
     if (bIsFinished) {
         ped->bIsLanding = false;
         if (!bNoAnimation) {
@@ -91,13 +82,14 @@ bool CTaskSimpleLand::ProcessPed_Reversed(CPed* ped) {
     }
 }
 
-bool CTaskSimpleLand::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
+// 0x678F40
+bool CTaskSimpleLand::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (priority != ABORT_PRIORITY_IMMEDIATE)
         return false;
 
     if (m_pAnim) {
         m_pAnim->m_BlendDelta = -1000.0F;
-        m_pAnim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
+        m_pAnim->m_Flags |= ANIMATION_IS_BLEND_AUTO_REMOVE;
         m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr); // doesn't make sense, since there is only one callback function
         m_pAnim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
         m_pAnim = nullptr;

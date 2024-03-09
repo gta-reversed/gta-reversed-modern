@@ -55,7 +55,7 @@ bool CTaskSimpleUseGun::SetPedPosition(CPed* ped) {
 }
 
 void CTaskSimpleUseGun::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleUseGun);
+    RH_ScopedVirtualClass(CTaskSimpleUseGun, 0x86D724, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
     using namespace ReversibleHooks;
 }

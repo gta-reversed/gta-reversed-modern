@@ -2,6 +2,8 @@
 
 #include "Event.h"
 
+#include "Event.h"
+
 class NOTSA_EXPORT_VTABLE CEventCreatePartnerTask : public CEvent {
 public:
     int32 m_partnerType;

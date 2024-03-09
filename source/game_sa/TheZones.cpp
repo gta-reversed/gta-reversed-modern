@@ -428,10 +428,11 @@ void CTheZones::PostZoneCreation() {
     // NOP
 }
 
-const char* CTheZones::GetZoneName(const CVector& point) {
+const GxtChar* CTheZones::GetZoneName(const CVector& point) {
     CZone* zone{};
     auto extraInfo = GetZoneInfo(point, &zone);
     if (zone)
         return zone->GetTranslatedName();
-    return "Unknown zone";
+
+    return "Unknown zone"_gxt;
 }

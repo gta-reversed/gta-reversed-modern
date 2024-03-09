@@ -277,14 +277,6 @@ public:
     void SetClump(RpClump* clump) override;
 
     // VTable implementations
-    ModelInfoType GetModelType_Reversed();
-    void Init_Reversed();
-    void DeleteRwObject_Reversed();
-    RwObject* CreateInstance_Reversed();
-    void SetAnimFile_Reversed(const char* filename);
-    void ConvertAnimFileIndex_Reversed();
-    int32 GetAnimFileIndex_Reversed();
-    void SetClump_Reversed(RpClump* clump);
 
     // Class methods
     // setup model render callbacks

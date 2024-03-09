@@ -31,11 +31,6 @@ private:
     CAEPedlessSpeechAudioEntity* Constructor();
     CAEPedlessSpeechAudioEntity* Destructor();
 
-    void UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos);
-    void Terminate_Reversed();
-    void PlayLoadedSound_Reversed();
-    int16 GetAllocatedVoice_Reversed();
-    bool WillPedChatAboutTopic_Reversed(int16 topic);
 };
 
 VALIDATE_SIZE(CAEPedlessSpeechAudioEntity, 0x118);

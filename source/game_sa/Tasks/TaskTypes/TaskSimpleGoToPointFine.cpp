@@ -4,12 +4,12 @@
 #include "TaskSimpleDuck.h"
 
 void CTaskSimpleGoToPointFine::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleGoToPointFine);
+    RH_ScopedVirtualClass(CTaskSimpleGoToPointFine, 0x86F964, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x65EEB0);
-    RH_ScopedVirtualInstall(Clone, 0x662040);
-    RH_ScopedVirtualInstall(MakeAbortable, 0x663500);
-    RH_ScopedVirtualInstall(ProcessPed, 0x663540);
+    RH_ScopedVMTInstall(Clone, 0x662040);
+    RH_ScopedVMTInstall(MakeAbortable, 0x663500);
+    RH_ScopedVMTInstall(ProcessPed, 0x663540);
     RH_ScopedInstall(SetBlendedMoveAnim, 0x65EF80);
     RH_ScopedInstall(Finish, 0x65EF00);
     RH_ScopedInstall(SetTargetPos, 0x65F330);
@@ -29,24 +29,11 @@ CTaskSimpleGoToPointFine* CTaskSimpleGoToPointFine::Constructor(float moveRatio,
 
 // 0x662040
 CTask* CTaskSimpleGoToPointFine::Clone() const {
-    return CTaskSimpleGoToPointFine::Clone_Reversed();
+    return new CTaskSimpleGoToPointFine(m_fMoveRatio, m_vecTargetPoint, m_fRadius, nullptr);
 }
 
 // 0x663500
 bool CTaskSimpleGoToPointFine::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return CTaskSimpleGoToPointFine::MakeAbortable_Reversed(ped, priority, event);
-}
-
-// 0x663540
-bool CTaskSimpleGoToPointFine::ProcessPed(CPed* ped) {
-    return CTaskSimpleGoToPointFine::ProcessPed_Reversed(ped);
-}
-
-CTask* CTaskSimpleGoToPointFine::Clone_Reversed() const {
-    return new CTaskSimpleGoToPointFine(m_fMoveRatio, m_vecTargetPoint, m_fRadius, nullptr);
-}
-
-bool CTaskSimpleGoToPointFine::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     QuitIK(ped);
     Finish(ped);
     return true;
@@ -60,7 +47,8 @@ void CTaskSimpleGoToPointFine::Finish(CPed* ped) {
     ped->SetMoveAnim();
 }
 
-bool CTaskSimpleGoToPointFine::ProcessPed_Reversed(CPed* ped) {
+// 0x663540
+bool CTaskSimpleGoToPointFine::ProcessPed(CPed* ped) {
     CVector2D vecDistance = m_vecTargetPoint - ped->GetPosition();
     if (m_fRadius * m_fRadius >= vecDistance.SquaredMagnitude() || HasCircledTarget(ped)) {
         QuitIK(ped);
@@ -139,7 +127,7 @@ void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped) {
                 runAnimAssoc->m_BlendAmount = 0.0f;
                 runAnimAssoc->m_Speed = 1.0f;
             }
-            runAnimAssoc->m_Flags |= ANIMATION_STARTED;
+            runAnimAssoc->m_Flags |= ANIMATION_IS_PLAYING;
             runAnimAssoc->m_BlendDelta = 0.0f;
             runAnimAssoc->m_BlendAmount = 3.0f - m_fMoveRatio;
             if (!sprintAnimAssoc) {
@@ -147,7 +135,7 @@ void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped) {
                 sprintAnimAssoc->m_BlendAmount = 0.0f;
                 sprintAnimAssoc->m_Speed = 1.0f;
             }
-            sprintAnimAssoc->m_Flags |= ANIMATION_STARTED;
+            sprintAnimAssoc->m_Flags |= ANIMATION_IS_PLAYING;
             sprintAnimAssoc->m_BlendDelta = 0.0f;
             moveState = PEDMOVE_SPRINT;
             sprintAnimAssoc->m_BlendAmount = m_fMoveRatio - 2.0f;
@@ -157,7 +145,7 @@ void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped) {
                 walkAnimAssoc->m_BlendAmount = 0.0f;
                 walkAnimAssoc->m_Speed = 1.0f;
             }
-            walkAnimAssoc->m_Flags |= ANIMATION_STARTED;
+            walkAnimAssoc->m_Flags |= ANIMATION_IS_PLAYING;
             walkAnimAssoc->m_BlendDelta = 0.0f;
             walkAnimAssoc->m_BlendAmount = 2.0f - m_fMoveRatio;
             if (!runAnimAssoc) {
@@ -165,7 +153,7 @@ void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped) {
                 runAnimAssoc->m_BlendAmount = 0.0f;
                 runAnimAssoc->m_Speed = 1.0f;
             }
-            runAnimAssoc->m_Flags |= ANIMATION_STARTED;
+            runAnimAssoc->m_Flags |= ANIMATION_IS_PLAYING;
             runAnimAssoc->m_BlendDelta = 0.0f;
             runAnimAssoc->m_BlendAmount = m_fMoveRatio - 1.0f;
             delete sprintAnimAssoc;
@@ -177,7 +165,7 @@ void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped) {
             walkAnimAssoc->m_BlendAmount = 0.0f;
             walkAnimAssoc->m_Speed = 1.0f;
         }
-        walkAnimAssoc->m_Flags |= ANIMATION_STARTED;
+        walkAnimAssoc->m_Flags |= ANIMATION_IS_PLAYING;
         walkAnimAssoc->m_BlendAmount = 1.0f;
         walkAnimAssoc->m_BlendDelta = 0.0f;
         delete runAnimAssoc;

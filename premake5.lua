@@ -53,7 +53,7 @@ solution "gta_reversed"
     filter "action:vs*"
         flags { "MultiProcessorCompile" }
         linkoptions   { "/ignore:4099,4251,4275" }
-        buildoptions { "/EHsc", "/Zc:preprocessor", "/bigobj" }
+        buildoptions { "/EHsc", "/Zc:preprocessor", "/bigobj", "/utf-8" }
         disablewarnings { 26812, 26495, 4275, 4251, 4200, 4099 }
 
     filter "files:libs/**"

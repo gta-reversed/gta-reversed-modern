@@ -36,18 +36,18 @@ public:
     CEventDamage(CEntity* source, uint32 startTime, eWeaponType weaponType, ePedPieceTypes pieceHit, uint8 direction, bool a7, bool bPedInVehicle);
     ~CEventDamage() override;
 
-    eEventType GetEventType() const override;
-    int32 GetEventPriority() const override;
-    int32 GetLifeTime() override;
+    eEventType GetEventType() const override { return EVENT_DAMAGE; } // 0x4AD910;
+    int32 GetEventPriority() const override { return 65; } // 0x4AD950;
+    int32 GetLifeTime() override { return 0; } // 0x4AD920;
     bool AffectsPed(CPed* ped) override;
     bool AffectsPedGroup(CPedGroup* pedGroup) override;
     bool IsCriminalEvent() override;
     void ReportCriminalEvent(CPed* ped) override;
     CEntity* GetSourceEntity() const override;
     bool TakesPriorityOver(const CEvent& refEvent) override;
-    float GetLocalSoundLevel() override;
+    float GetLocalSoundLevel() override { return 55.0f; } // 0x4AD930;
     bool DoInformVehicleOccupants(CPed* ped) override;
-    bool CanBeInterruptedBySameEvent() override;
+    bool CanBeInterruptedBySameEvent() override { return true; } // 0x4AD940;
     CEventEditableResponse* CloneEditable() override;
 
     void From(const CEventDamage& event);
@@ -81,19 +81,6 @@ private:
     CEventDamage* Constructor(const CEventDamage& event);
     CEventDamage* Constructor(CEntity * source, uint32 startTime, eWeaponType weaponType, ePedPieceTypes pieceHit, uint8 direction, bool a7, bool bPedInVehicle);
 
-    eEventType GetEventType_Reversed() const { return EVENT_DAMAGE; }
-    int32 GetEventPriority_Reversed() const { return 65; }
-    int32 GetLifeTime_Reversed() { return 0; }
-    bool AffectsPed_Reversed(CPed* ped);
-    bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
-    bool IsCriminalEvent_Reversed();
-    void ReportCriminalEvent_Reversed(CPed* ped);
-    CEntity* GetSourceEntity_Reversed() const;
-    bool TakesPriorityOver_Reversed(const CEvent& refEvent);
-    float GetLocalSoundLevel_Reversed() { return 55.0f; }
-    bool DoInformVehicleOccupants_Reversed(CPed* ped);
-    bool CanBeInterruptedBySameEvent_Reversed() { return true; };
-    CEventEditableResponse* CloneEditable_Reversed();
-};
+                };
 
 VALIDATE_SIZE(CEventDamage, 0x44);

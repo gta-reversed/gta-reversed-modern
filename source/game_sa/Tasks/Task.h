@@ -23,7 +23,7 @@ class CTask;
 template<typename T>
 concept Task = std::is_base_of_v<CTask, T>;
 
-class CTask {
+class NOTSA_EXPORT_VTABLE CTask {
     friend class CTaskComplex;
 
 public:
@@ -86,6 +86,9 @@ public:
     //! @brief Check if this task is any of the given types
     template<eTaskType... Types>
     static bool IsA(CTask* task) {
+        if (!task) {
+            return false;
+        }
         const auto ttype = task->GetTaskType();
         return ((ttype == Types) || ...);
     }

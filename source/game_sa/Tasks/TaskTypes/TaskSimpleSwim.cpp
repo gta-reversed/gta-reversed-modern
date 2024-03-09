@@ -4,12 +4,12 @@
 #include "TaskSimpleClimb.h"
 
 void CTaskSimpleSwim::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleSwim);
+    RH_ScopedVirtualClass(CTaskSimpleSwim, 0x870920, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x688930);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x68B1C0);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x68B100);
+    RH_ScopedVMTInstall(ProcessPed, 0x68B1C0);
+    RH_ScopedVMTInstall(MakeAbortable, 0x68B100);
     RH_ScopedInstall(ApplyRollAndPitch, 0x68A8E0);
     RH_ScopedInstall(ProcessSwimAnims, 0x6899F0);
     RH_ScopedInstall(ProcessSwimmingResistance, 0x68A1D0);
@@ -20,8 +20,6 @@ void CTaskSimpleSwim::InjectHooks() {
     RH_ScopedInstall(DestroyFxSystem, 0x68AA50);
 }
 CTaskSimpleSwim* CTaskSimpleSwim::Constructor(CVector* pos, CPed* ped) { this->CTaskSimpleSwim::CTaskSimpleSwim(pos, ped); return this; }
-bool CTaskSimpleSwim::MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable_Reversed(ped, priority, event); }
-bool CTaskSimpleSwim::ProcessPed(CPed* ped) { return ProcessPed_Reversed(ped); }
 
 // 0x688930
 CTaskSimpleSwim::CTaskSimpleSwim(const CVector* pos, CPed* ped) :
@@ -75,7 +73,9 @@ void CTaskSimpleSwim::DestroyFxSystem() {
 }
 
 // 0x68B100
-bool CTaskSimpleSwim::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event) {
+
+
+bool CTaskSimpleSwim::MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (priority == ABORT_PRIORITY_IMMEDIATE) {
         CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 1000.0f);
         ped->m_nMoveState = PEDMOVE_STILL;
@@ -106,7 +106,9 @@ bool CTaskSimpleSwim::MakeAbortable_Reversed(class CPed* ped, eAbortPriority pri
 }
 
 // 0x68B1C0
-bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* ped) {
+
+// 0x0
+bool CTaskSimpleSwim::ProcessPed(CPed* ped) {
     if (m_pEntity) {
         CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 8.0f);
         ped->m_nMoveState = PEDMOVE_STILL;
@@ -126,7 +128,7 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* ped) {
         ped->m_nMoveState = PEDMOVE_STILL;
         if (assoc) {
             if (assoc->m_AnimId == ANIM_ID_CLIMB_JUMP)
-                assoc->m_Flags |= ANIMATION_UNLOCK_LAST_FRAME;
+                assoc->m_Flags |= ANIMATION_IS_FINISH_AUTO_REMOVE;
             else
                 assoc->m_BlendDelta = -4.0f;
 
@@ -239,7 +241,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* ped) {
                 m_bFinishedBlending = true;
             }
         }
-        RpAnimBlendClumpSetBlendDeltas(player->m_pRwClump, 0x10, -8.0f); // todo: ANIMATION_PARTIAL ?
+        RpAnimBlendClumpSetBlendDeltas(player->m_pRwClump, 0x10, -8.0f); // todo: ANIMATION_IS_PARTIAL ?
         FxSystem_c::SafeKillAndClear(player->GetActiveWeapon().m_FxSystem); // Removes fire or something in water
 
         if (player->IsPlayer() && !m_nSwimState) {
@@ -398,7 +400,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* ped) {
             if (assocJumpOut) {
                 if (assocJumpOut->m_BlendHier->m_fTotalTime / 4.0f <= assocJumpOut->m_TimeStep + assocJumpOut->m_CurrentTime) {
                     assocJumpOut = CAnimManager::BlendAnimation(player->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_CLIMB_JUMP, 8.0f);
-                    assocJumpOut->m_Flags |= ANIMATION_UNLOCK_LAST_FRAME;
+                    assocJumpOut->m_Flags |= ANIMATION_IS_FINISH_AUTO_REMOVE;
                     m_AnimID = ANIM_ID_CLIMB_JUMP;
                 }
                 break;

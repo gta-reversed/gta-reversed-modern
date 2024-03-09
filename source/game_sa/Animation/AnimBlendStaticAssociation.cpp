@@ -3,7 +3,7 @@
 #include "AnimBlendStaticAssociation.h"
 
 void CAnimBlendStaticAssociation::InjectHooks() {
-    RH_ScopedClass(CAnimBlendStaticAssociation);
+    RH_ScopedVirtualClass(CAnimBlendStaticAssociation, 0x85C6CC, 1);
     RH_ScopedCategory("Animation");
 
     RH_ScopedInstall(Destructor, 0x4CDF50);
@@ -31,22 +31,26 @@ void CAnimBlendStaticAssociation::Init(RpClump* clump, CAnimBlendHierarchy* h) {
         return;
     }
 
-    const auto clumpAnimData = RpClumpGetAnimBlendClumpData(clump);
+    const auto clumpAnimData = RpAnimBlendClumpGetData(clump);
     assert(clumpAnimData);
 
-    m_NumBlendNodes = clumpAnimData->m_NumFrames;
+    m_NumBlendNodes = clumpAnimData->m_NumFrameData;
     AllocateSequenceArray(m_NumBlendNodes);
 
     // Initialize sequences from the data in the clump
     for (auto& seq : m_BlendHier->GetSequences()) {
-        const AnimBlendFrameData* frameData = seq.m_bUsingBones
-            ? RpAnimBlendClumpFindBone(clump, seq.m_BoneID)
-            : RpAnimBlendClumpFindFrameFromHashKey(clump, seq.m_FrameHashKey);
-        if (frameData && seq.m_FramesNum > 0) {
-            const auto nodeIdx = frameData - clumpAnimData->m_Frames;
-            assert(nodeIdx >= 0 && nodeIdx < m_NumBlendNodes);
-            m_BlendSeqs[nodeIdx] = &seq;
+        if (!seq.m_FramesNum) {
+            continue;
         }
+        const auto frameData = seq.IsUsingBoneTag()
+            ? RpAnimBlendClumpFindBone(clump, seq.GetBoneTag())
+            : RpAnimBlendClumpFindFrameFromHashKey(clump, seq.GetNameHashKey());
+        if (!frameData) {
+            continue;
+        }
+        const auto nodeIdx = frameData - clumpAnimData->m_FrameDatas;
+        assert(nodeIdx >= 0 && nodeIdx < m_NumBlendNodes);
+        m_BlendSeqs[nodeIdx] = &seq;
     }
 }
 

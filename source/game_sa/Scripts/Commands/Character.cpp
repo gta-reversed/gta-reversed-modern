@@ -25,7 +25,7 @@
 #include <World.h>
 #include <EntryExitManager.h>
 #include <TimeCycle.h>
-#include <ePedBones.h>
+#include <eBoneTag.h>
 #include <SearchLight.h>
 
 using namespace notsa::script;
@@ -158,7 +158,7 @@ auto SetCharAreaVisible(CPed& ped, eAreaCodes area) {
     CTimeCycle::StopExtraColour(0);
 }
 
-auto AttachFxSystemToCharBone(tScriptEffectSystem& fx, CPed& ped, ePedBones bone) {
+auto AttachFxSystemToCharBone(tScriptEffectSystem& fx, CPed& ped, eBoneTag bone) {
     fx.m_pFxSystem->AttachToBone(&ped, bone);
 }
 
@@ -433,11 +433,11 @@ auto LocateCharAnyMeansObject2D(CRunningScript& S, CPed& ped, CObject& obj, CVec
     return LocateCharEntity2D(S, ped, obj, radius, highlightArea, false, false);
 }
 
-auto LocateCharOnFootObject2D(CRunningScript& S, CPed& ped, CVehicle& obj, CVector2D radius, bool highlightArea) {
+auto LocateCharOnFootObject2D(CRunningScript& S, CPed& ped, CObject& obj, CVector2D radius, bool highlightArea) {
     return LocateCharEntity2D(S, ped, obj, radius, highlightArea, false, true);
 }
 
-auto LocateCharInCarObject2D(CRunningScript& S, CPed& ped, CVehicle& obj, CVector2D radius, bool highlightArea) {
+auto LocateCharInCarObject2D(CRunningScript& S, CPed& ped, CObject& obj, CVector2D radius, bool highlightArea) {
     return LocateCharEntity2D(S, ped, obj, radius, highlightArea, true, false);
 }
 
@@ -778,15 +778,16 @@ auto ExplodeCharHead(CPed& ped) {
         false,
         (bool)(ped.bInVehicle)
     };
+    CPedDamageResponseCalculator dmgCalc{
+        nullptr,
+        1000.f,
+        WEAPON_SNIPERRIFLE,
+        PED_PIECE_HEAD,
+        false
+    };
     dmgEvent.ComputeDamageResponseIfAffectsPed(
         &ped,
-        CPedDamageResponseCalculator{
-            nullptr,
-            1000.f,
-            WEAPON_SNIPERRIFLE,
-            PED_PIECE_HEAD,
-            false
-        },
+        dmgCalc,
         true
     );
     ped.GetEventGroup().Add(dmgEvent);
@@ -1023,7 +1024,7 @@ auto GetCharWeaponInSlot(CPed& ped, eWeaponSlot slut) {
 
 // GET_OFFSET_FROM_CHAR_IN_WORLD_COORDS
 auto GetOffsetFromCharInWorldCoords(CPed& ped, CVector offset) {
-    return ped.GetMatrix() * offset;
+    return ped.GetMatrix().TransformPoint(offset);
 }
 
 // HAS_CHAR_BEEN_PHOTOGRAPHED
@@ -1209,7 +1210,7 @@ auto IsCharPlayingAnim(CPed& ped, const char* animName) {
 // SET_CHAR_ANIM_PLAYING_FLAG
 auto SetCharAnimPlayingFlag(CPed& ped, const char* animName, bool started) {
     if (const auto anim = RpAnimBlendClumpGetAssociation(ped.m_pRwClump, animName)) {
-        anim->SetFlag(ANIMATION_STARTED, started);
+        anim->SetFlag(ANIMATION_IS_PLAYING, started);
     }
 }
 

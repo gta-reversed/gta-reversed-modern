@@ -185,7 +185,7 @@ bool CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType we
             RpAnimBlendClumpGetFirstAssociation(victim->m_pRwClump, ANIMATION_800) ? ANIM_ID_FLOOR_HIT_F : ANIM_ID_FLOOR_HIT
         );
         if (floorHitAnim) {
-            floorHitAnim->SetFlag(ANIMATION_UNLOCK_LAST_FRAME, false);
+            floorHitAnim->SetFlag(ANIMATION_IS_FINISH_AUTO_REMOVE, false);
             floorHitAnim->Start();
         }
         return true;
@@ -247,7 +247,7 @@ bool CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType we
                 eventDmg.m_fAnimBlend
             );
             a->m_Speed = eventDmg.m_fAnimSpeed;
-            a->SetFlag(ANIMATION_STARTED);
+            a->SetFlag(ANIMATION_IS_PLAYING);
             break;
         }
         }
@@ -1546,8 +1546,8 @@ bool CWeapon::FireM16_1stPerson(CPed* owner) {
         }
 
         // Move the camera around a little
-        cam->m_fHorizontalAngle += (float)CGeneral::GetRandomNumberInRange(-64, 64);
-        cam->m_fVerticalAngle += (float)CGeneral::GetRandomNumberInRange(-64, 64);
+        cam->m_fHorizontalAngle += (float)CGeneral::GetRandomNumberInRange(-64, 64) * intensity;
+        cam->m_fVerticalAngle += (float)CGeneral::GetRandomNumberInRange(-64, 64) * intensity;
 
         // Do pad shaking
         const auto shakeFreq = (uint8)lerp(130.f, 210.f, std::clamp((20.f - (wi->m_fAnimLoopEnd - wi->m_fAnimLoopStart) * 900.f) / 80.f, 0.f, 1.f));
@@ -1577,7 +1577,7 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
         ? barrelPosn
         : &point;
     if (!startPosn) {
-        point     = firedBy->GetMatrix() * point;
+        point     = firedBy->GetMatrix().TransformPoint(point);
         startPosn = &point;
     }
 

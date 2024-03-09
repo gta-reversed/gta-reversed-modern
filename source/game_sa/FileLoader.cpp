@@ -1072,12 +1072,9 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
     if (cm) {
         if (cm->m_bHasCollisionVolumes)
         {
-            if (cm->m_nColSlot)
+            if (cm->m_nColSlot) 
             {
-                CRect rect;
-                newEntity->GetBoundRect(&rect);
-                auto* colDef = CColStore::ms_pColPool->GetAt(cm->m_nColSlot);
-                colDef->m_Area.Restrict(rect);
+                CColStore::ms_pColPool->GetAt(cm->m_nColSlot)->m_Area.Restrict(newEntity->GetBoundRect());
             }
         }
         else
