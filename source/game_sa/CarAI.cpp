@@ -1123,7 +1123,7 @@ void CCarAI::UpdateCarAI(CVehicle* veh) {
             }
 
             if (vehMvSpeed2DSq <= sq(0.012f)) { // 0x41FBB6
-                const auto updateInterval = notsa::contains({ DRIVING_STYLE_STOP_FOR_CARS, DRIVING_STYLE_STOP_FOR_CARS_IGNORE_LIGHTS }, ap->m_nCarMission)
+                const auto updateInterval = notsa::contains({ DRIVING_STYLE_STOP_FOR_CARS, DRIVING_STYLE_STOP_FOR_CARS_IGNORE_LIGHTS }, ap->m_nCarDrivingStyle)
                     ? 500u * (veh->m_nRandomSeed % 16) + 40u
                     : 1000u;
                 if ((CTimer::GetTimeInMS() - ap->m_nTimeToStartMission) > updateInterval) {
