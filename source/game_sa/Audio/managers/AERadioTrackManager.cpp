@@ -287,15 +287,15 @@ void CAERadioTrackManager::DisplayRadioStationName() {
 }
 
 // 0x4E9E10
-const char* CAERadioTrackManager::GetRadioStationName(eRadioID id) {
+const GxtChar* CAERadioTrackManager::GetRadioStationName(eRadioID id) {
     if (id <= 0) {
         NOTSA_UNREACHABLE();
         return nullptr;
     }
 
-    char str[8];
-    GetRadioStationNameKey(id, str);
-    return TheText.Get(str);
+    char key[8];
+    GetRadioStationNameKey(id, key);
+    return TheText.Get(key);
 }
 
 // 0x4E8380

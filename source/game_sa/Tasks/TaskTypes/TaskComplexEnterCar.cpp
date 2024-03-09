@@ -31,6 +31,9 @@
 #include "TaskSimpleStandStill.h"
 
 #include "EventCopCarBeingStolen.h"
+#include "EventLeaderQuitEnteringCarAsDriver.h"
+#include "EventLeaderExitedCarAsDriver.h"
+#include "EventLeaderEnteredCarAsDriver.h"
 
 void CTaskComplexEnterCar::InjectHooks() {
     RH_ScopedVirtualClass(CTaskComplexEnterCar, 0x86e6f0, 12);
@@ -305,6 +308,8 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
     }
     case TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER:
         return C(TASK_FINISHED);
+    case TASK_NONE:
+        return C(TASK_FINISHED);
     case TASK_SIMPLE_CAR_QUICK_DRAG_PED_OUT: { // 0x63F2ED
         CCarEnterExit::MakeUndraggedPassengerPedsLeaveCar(m_Car, m_DraggedPed, ped);
         return C(TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER);
@@ -316,6 +321,8 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
         m_bQuitAfterDraggingPedOut = false;
         return C(m_DraggedPed ? TASK_SIMPLE_WAIT_UNTIL_PED_OUT_CAR : TASK_FINISHED);
     }
+    case TASK_COMPLEX_FALL_AND_GET_UP:
+        return C(TASK_FINISHED);
     default:
         NOTSA_UNREACHABLE("SubTaskType = {}", tt);
     }
@@ -483,7 +490,7 @@ CTask* CTaskComplexEnterCar::CreateFirstSubTask(CPed* ped) {
 
     if (   !m_Car || m_Car->m_pFire
         || !CCarEnterExit::IsVehicleHealthy(m_Car) || !CCarEnterExit::IsPedHealthy(ped)
-        || !m_bAsDriver && !m_Car->m_nNumPassengers
+        || !m_bAsDriver && !m_Car->m_nMaxPassengers                                         // Wants to enter as passenger, but there are no passenger seats
         || m_Car->IsTrain() && m_Car->AsTrain()->trainFlags.bNotOnARailRoad
     ) {
         return C(TASK_FINISHED);
@@ -491,7 +498,7 @@ CTask* CTaskComplexEnterCar::CreateFirstSubTask(CPed* ped) {
 
     if (m_bAsDriver && !m_bQuitAfterDraggingPedOut && !m_bQuitAfterOpeningDoor) {
         if (const auto pedGrp = ped->GetGroup()) {
-            if (pedGrp->GetMembership().IsLeader(ped)) {
+            if (pedGrp->GetMembership().IsLeader(ped)) { // 0x643B15
                 pedGrp->GetIntelligence().AddEvent(CEventGroupEvent{ ped, new CEventLeaderEnteredCarAsDriver{ m_Car } });
             }
         }
@@ -674,9 +681,9 @@ CTask* CTaskComplexEnterCar::CreateSubTask(eTaskType taskType, CPed* ped) {
         if (m_Car) {
             CTaskSimpleCarSetPedOut::PositionPedOutOfCollision(ped, m_Car, m_TargetDoor);
 
-            assert(m_Car->m_nNumGettingIn < m_NumGettingInSet);
+            assert(m_Car->m_nNumGettingIn >= m_NumGettingInSet);
             m_Car->m_nNumGettingIn -= m_NumGettingInSet;
-            m_NumGettingInSet       = false;
+            m_NumGettingInSet       = 0;
 
             m_Car->ClearGettingInFlags(m_DoorFlagsSet);
             m_DoorFlagsSet = 0;
@@ -690,7 +697,7 @@ CTask* CTaskComplexEnterCar::CreateSubTask(eTaskType taskType, CPed* ped) {
         return new CTaskComplexFallAndGetUp{ IsTargetDoorOnTheLeft() ? ANIM_ID_KO_SPIN_L : ANIM_ID_KO_SPIN_R, ANIM_GROUP_DEFAULT, 2000 };
     }
     case TASK_NONE:
-        return new CTaskSimpleLeaveGroup{}; // 0x63E0F8 - NOTE/TODO: Weird
+        return new CTaskSimpleNone{}; // 0x63E0F8 - NOTE/TODO: Weird
     case TASK_SIMPLE_STAND_STILL:
         return new CTaskSimpleStandStill{}; // 0x63E0CE
     default:

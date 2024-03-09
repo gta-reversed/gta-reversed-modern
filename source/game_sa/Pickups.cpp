@@ -261,7 +261,8 @@ CPickup* CPickups::FindPickUpForThisObject(CObject* object) {
 // returns pickup handle
 // 0x456F20
 tPickupReference CPickups::GenerateNewOne(CVector coors, uint32 modelId, ePickupType pickupType, uint32 ammo, uint32 moneyPerDay, bool isEmpty, char* message) {
-    return plugin::CallAndReturn<tPickupReference, 0x456F20, CVector, uint32, ePickupType, uint32, uint32, bool, char*>(coors, modelId, pickupType, ammo, moneyPerDay, isEmpty, message);
+    NOTSA_UNREACHABLE("For some reason the arguments are shifted by a stack slot to the right, not sure why... This function can't be hooked and must be implemented");
+    //return plugin::CallAndReturn<tPickupReference, 0x456F20, CVector, uint32, ePickupType, uint32, uint32, bool, char*>(coors, modelId, pickupType, ammo, moneyPerDay, isEmpty, message);
 }
 
 /*!
@@ -568,17 +569,17 @@ void CPickups::RemoveUnnecessaryPickups(const CVector& posn, float radius) {
 
 // 0x455000
 void CPickups::RenderPickUpText() {
+    GxtChar msgText[352]{};
     for (auto& message : std::span{ aMessages.data(), NumMessages }) {
         if (message.price == 0u) {
             if (!message.text)
                 continue;
 
             if (message.flags & 2) {
-                CMessages::InsertNumberInString(message.text, 0, 0, 0, 0, 0, 0, gString);
+                CMessages::InsertNumberInString(message.text, 0, 0, 0, 0, 0, 0, msgText);
             }
         } else {
-            sprintf_s(gString, "$%d", message.price);
-            AsciiToGxtChar(gString, gGxtString);
+            AsciiToGxtChar(std::format("${:d}", message.price).c_str(), msgText);
         }
 
         // TODO: scaled wrong in windowed mode, but it's fine in fullscreen.

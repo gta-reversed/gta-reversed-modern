@@ -158,7 +158,7 @@ bool CEntryExit::IsVisibleByTime() const {
 
 // Transforms a point into the entrance rect
 CVector CEntryExit::TransformEntrancePoint(const CVector& point) const {
-    return MultiplyMatrixWithVector(GetRectEntranceMatrix(), point - GetPosition());
+    return GetRectEntranceMatrix().TransformPoint(point - GetPosition());
 }
 
 // 0x43EAF0

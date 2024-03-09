@@ -160,7 +160,7 @@ CTask* CTaskComplexFleePoint::ControlSubTask(CPed* ped) {
     // Moved this here for simplicity, logic unchanged
     if (!g_ikChainMan.IsLooking(ped)) {
         if (CGeneral::GetRandomNumberInRange(0, 100) <= 5) { // TODO: CGeneral::DoCoinFlip()
-            g_ikChainMan.LookAt("TaskFleePoint", ped, nullptr, 2000, ePedBones::BONE_UNKNOWN, &m_fleeFromPos, false, 0.25f, 500, 3, false);
+            g_ikChainMan.LookAt("TaskFleePoint", ped, nullptr, 2000, eBoneTag::BONE_UNKNOWN, &m_fleeFromPos, false, 0.25f, 500, 3, false);
         }
     }
 

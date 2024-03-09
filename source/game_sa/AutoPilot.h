@@ -121,20 +121,13 @@ public:
     void ModifySpeed(float target);
     void RemoveOnePathNode();
 
-    void SetCarMission(eCarMission carMission) {
-        m_nCarMission = carMission;
-    }
+    void SetCarMission(eCarMission carMission) { m_nCarMission = carMission; }
 
     void SetCarMission(eCarMission carMission, uint32 timeOffsetMs);
 
-    void ClearCarMission() {
-        m_nCarMission = MISSION_NONE;
-    }
+    void ClearCarMission() { m_nCarMission = MISSION_NONE; }
 
-    void SetCruiseSpeed(uint32 s) {
-        assert(s <= UINT8_MAX);
-        m_nCruiseSpeed = (uint8)s;
-    }
+    void SetCruiseSpeed(uint32 s) { assert(s <= UINT8_MAX); m_nCruiseSpeed = (uint8)s; }
 
     /*!
      * @notsa
@@ -147,9 +140,9 @@ public:
     /*!
      * @brief Clear current temp. act.
     */
-    void ClearTempAct() {
-        m_nTempAction = TEMPACT_NONE;
-    }
+    void ClearTempAct() { m_nTempAction = TEMPACT_NONE; }
+
+    void SetDrivingStyle(eCarDrivingStyle s) { m_nCarDrivingStyle = s; }
 };
 
 VALIDATE_SIZE(CAutoPilot, 0x98);

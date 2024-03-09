@@ -599,7 +599,7 @@ bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
                                     CHud::SetHelpMessage(gGxtString, false, false, false);
                                 }
                                 if (CollectPickupBuffer) {
-                                    const char* textToPrint = nullptr;
+                                    const GxtChar* textToPrint = nullptr;
                                     if (CTheScripts::IsPlayerOnAMission()) {
                                         textToPrint = TheText.Get("PROP_2");
                                     } else if (FindPlayerInfo().m_nMoney < (int32)m_nAmmo) {

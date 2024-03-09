@@ -14,12 +14,17 @@ class CWeaponInfo;
 enum class eDrivebyStyle : int8 {
     FIXED_LHS      = 0,
     FIXED_RHS      = 1,
+
     START_FROM_LHS = 2,
     START_FROM_RHS = 3,
+
     AI_SIDE        = 4,
+
     FIXED_FWD      = 5,
     FIXED_BAK      = 6,
+    
     AI_FWD_BAK     = 7,
+    
     AI_ALL_DIRN    = 8,
 };
 

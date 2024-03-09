@@ -6,7 +6,7 @@
 #include "AEAudioUtility.h"
 
 void CAECollisionAudioEntity::InjectHooks() {
-    RH_ScopedClass(CAECollisionAudioEntity);
+    RH_ScopedVirtualClass(CAECollisionAudioEntity, 0x862E64, 1);
     RH_ScopedCategory("Audio/Entities");
 
     RH_ScopedInstall(Initialise, 0x5B9BD0);

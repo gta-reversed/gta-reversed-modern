@@ -417,8 +417,8 @@ bool CCarEnterExit::IsPathToDoorBlockedByVehicleCollisionModel(const CPed* ped, 
 
     const auto vehMatInv = Invert(*vehicle->m_matrix);
     const CColLine line{
-        vehMatInv * ped->GetPosition(),
-        vehMatInv * pos
+        vehMatInv.TransformPoint(ped->GetPosition()),
+        vehMatInv.TransformPoint(pos)
     };
 
     for (const auto& sp : vehicle->GetColModel()->GetData()->GetSpheres()) {
@@ -540,17 +540,17 @@ void CCarEnterExit::QuitEnteringCar(CPed* ped, CVehicle* vehicle, int32 doorId, 
 // 0x64F680
 void CCarEnterExit::RemoveCarSitAnim(const CPed* ped) {
     for (auto anim = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIMATION_SECONDARY_TASK_ANIM); anim; anim = RpAnimBlendGetNextAssociation(anim, ANIMATION_SECONDARY_TASK_ANIM)) {
-        anim->SetFlag(ANIMATION_FREEZE_LAST_FRAME);
-        anim->m_fBlendDelta = -1000.f;
+        anim->SetFlag(ANIMATION_IS_BLEND_AUTO_REMOVE);
+        anim->m_BlendDelta = -1000.f;
     }
     CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 1000.0);
 }
 
 // 0x64F6E0
 void CCarEnterExit::RemoveGetInAnims(const CPed* ped) {
-    for (auto anim = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIMATION_PARTIAL); anim; anim = RpAnimBlendGetNextAssociation(anim, ANIMATION_PARTIAL)) {
-        anim->SetFlag(ANIMATION_FREEZE_LAST_FRAME);
-        anim->m_fBlendDelta = -1000.f;
+    for (auto anim = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIMATION_IS_PARTIAL); anim; anim = RpAnimBlendGetNextAssociation(anim, ANIMATION_IS_PARTIAL)) {
+        anim->SetFlag(ANIMATION_IS_BLEND_AUTO_REMOVE);
+        anim->m_BlendDelta = -1000.f;
     }
 }
 
@@ -576,9 +576,9 @@ void CCarEnterExit::SetAnimOffsetForEnterOrExitVehicle() {
 
     {
         const auto anim = CAnimManager::GetAnimAssociation(ANIM_GROUP_DEFAULT, ANIM_ID_GETUP_0);
-        CAnimManager::UncompressAnimation(anim->m_pHierarchy);
-        const auto& seq = anim->m_pHierarchy->GetSequences()[0];
-        ms_vecPedGetUpAnimOffset = seq.m_nFrameCount ? seq.GetUncompressedFrame(0)->translation : CVector{};
+        CAnimManager::UncompressAnimation(anim->m_BlendHier);
+        const auto& seq = anim->m_BlendHier->GetSequences()[0];
+        ms_vecPedGetUpAnimOffset = seq.m_FramesNum ? seq.GetUKeyFrame(0)->Trans : CVector{};
     }
 
     ms_vecPedQuickDraggedOutCarAnimOffset = CVector{ -1.841797f, -0.3261719f, -0.01269531f };
@@ -593,10 +593,10 @@ void CCarEnterExit::SetAnimOffsetForEnterOrExitVehicle() {
         // Calculate translation delta between first and last sequence frames
         *out = [grpId, animId] {
             const auto anim = CAnimManager::GetAnimAssociation(grpId, animId);
-            CAnimManager::UncompressAnimation(anim->m_pHierarchy);
-            const auto& seq = anim->m_pHierarchy->GetSequences()[0];
-            if (seq.m_nFrameCount > 0) {
-                return seq.GetUncompressedFrame(seq.m_nFrameCount - 1)->translation - seq.GetUncompressedFrame(0)->translation;
+            CAnimManager::UncompressAnimation(anim->m_BlendHier);
+            const auto& seq = anim->m_BlendHier->GetSequences()[0];
+            if (seq.m_FramesNum > 0) {
+                return seq.GetUKeyFrame(seq.m_FramesNum - 1)->Trans - seq.GetUKeyFrame(0)->Trans;
             }
             return CVector{};
         }();

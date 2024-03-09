@@ -62,9 +62,9 @@ static inline int32 gDefaultTaskTime = 9'999'999; // or 0x98967F a.k.a (ten mill
 static inline char (&gString)[352] = *(char (*)[352])0xB71670;
 static inline char (&gString2)[352] = *(char (*)[352])0xB71510;
 
-static inline char (&gGxtString)[552] = *(char (*)[552])0xC1B100;
-static inline char (&gGxtString2)[552] = *(char (*)[552])0xC1AED8;
-static inline char (&GxtErrorString)[32] = *(char (*)[32])0xC1AEB8;
+static inline GxtChar (&gGxtString)[552]    = *(GxtChar (*)[552])0xC1B100;
+static inline GxtChar (&gGxtString2)[552]   = *(GxtChar(*)[552])0xC1AED8;
+static inline GxtChar (&GxtErrorString)[32] = *(GxtChar(*)[32])0xC1AEB8;
 
 static inline int32& g_nNumIm3dDrawCalls = *(int32*)0xB73708;
 
@@ -198,7 +198,7 @@ T stepto(const T& from, const T& to, float step) {
 
 template<typename T>
 T lerp(const T& from, const T& to, float t) {
-    // Same as from + (to - from) * t
+    // Same as `from + (to - from) * t` (Or `from + t * (to - from)`
     return static_cast<T>(to * t + from * (1.f - t));
 }
 
@@ -233,7 +233,7 @@ extern constexpr bool make_fourcc4(const char* line, const char abcd[4]) {
 }
 
 // shit
-extern constexpr uint32 make_fourcc4(const char fourcc[4]) {
+inline constexpr uint32 MakeFourCC(const char fourcc[4]) {
     return fourcc[0] << 0 |
            fourcc[1] << 8 |
            fourcc[2] << 16 |
