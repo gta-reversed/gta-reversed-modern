@@ -363,7 +363,7 @@ void CShadows::StoreShadowForPedObject(CPed* ped, float displacementX, float dis
     // But we really should fix this in a sensible way in the future.
     assert(ped->IsPed() || ped->IsObject());
 
-    const auto  bonePos           = ped->GetBonePosition(BONE_NORMAL);
+    const auto  bonePos           = ped->GetBonePosition(BONE_ROOT);
     const auto& camPos            = TheCamera.GetPosition();
     const auto  boneToCamDist2DSq = (bonePos - camPos).SquaredMagnitude2D();
 
@@ -407,7 +407,7 @@ void CShadows::StoreRealTimeShadow(CPhysical* physical, float displacementX, flo
     }
     const auto& camPos = TheCamera.GetPosition();
     const auto  shdwPos = physical->IsPed()
-        ? physical->AsPed()->GetBonePosition(BONE_NORMAL)
+        ? physical->AsPed()->GetBonePosition(BONE_ROOT)
         : physical->GetPosition();
     const auto shdwToCamDist2DSq = (shdwPos - camPos).SquaredMagnitude2D();
 

@@ -171,7 +171,7 @@ bool CTaskSimpleInAir::ProcessPed(CPed* ped)
             if (m_pAnim && m_bUsingFallGlide)
             {
                 m_pAnim->m_BlendDelta = -1000.0F;
-                m_pAnim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
+                m_pAnim->m_Flags |= ANIMATION_IS_BLEND_AUTO_REMOVE;
                 m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
                 m_pAnim = nullptr;
             }
@@ -217,7 +217,7 @@ bool CTaskSimpleInAir::MakeAbortable(CPed* ped, eAbortPriority priority, const C
         if (m_pAnim)
         {
             m_pAnim->m_BlendDelta = -8.0F;
-            m_pAnim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
+            m_pAnim->m_Flags |= ANIMATION_IS_BLEND_AUTO_REMOVE;
             m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
             m_pAnim = nullptr;
         }

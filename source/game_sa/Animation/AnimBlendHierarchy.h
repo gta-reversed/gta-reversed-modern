@@ -17,7 +17,7 @@
 class CAnimBlendHierarchy {
 public:
     uint32              m_hashKey;
-    CAnimBlendSequence* m_pSequences;
+    CAnimBlendSequence* m_pSequences; //!< Per-node animations - NOTE: Order of these depends on the order of nodes in Clump this was built from
     uint16              m_nSeqCount;
     bool                m_bIsCompressed;
     bool                m_bKeepCompressed;
@@ -54,6 +54,12 @@ public:
 
     auto GetSequences() const { return std::span{ m_pSequences, (size_t)m_nSeqCount }; }
     auto GetHashKey() const { return m_hashKey; }
+    auto GetTotalTime() const { return m_fTotalTime; }
+    bool IsRunningCompressed() const { return m_bKeepCompressed; }
+    bool IsUncompressed() const { return !m_bIsCompressed; }
+    void SetNumSequences(size_t n);
+
+    uint32 GetIndex() const;
 
 private: // Function implementations
     template<bool Compressed>

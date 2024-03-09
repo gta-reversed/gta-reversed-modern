@@ -126,7 +126,7 @@ namespace fs = std::filesystem;
 #include "game_sa\Enums\eFontAlignment.h"
 #include "game_sa\Enums\eGameState.h"
 #include "game_sa\Enums\eModelID.h"
-#include "game_sa\Enums\ePedBones.h"
+#include "game_sa\Enums\eBoneTag.h"
 #include "game_sa\Enums\ePedModel.h"
 #include "game_sa\Enums\ePedState.h"
 #include "game_sa\Enums\eRadioID.h"
