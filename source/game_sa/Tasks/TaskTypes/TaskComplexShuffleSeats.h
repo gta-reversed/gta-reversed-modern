@@ -43,10 +43,10 @@ private: // Wrappers for hooks
     }
 
 private:
-    CVehicle*                     m_Veh{};
-    eTargetDoor                   m_OriginDoor{};
-    eTargetDoor                   m_TargetDoor{};
+    CVehicle::Ref                 m_Veh{};
+    int32                         m_OriginDoor{};
+    int32                         m_TargetDoor{};
     CVector                       m_TargetDoorPos{};
-    CTaskUtilityLineUpPedWithCar* m_UtilityLineUp{};
+    CTaskUtilityLineUpPedWithCar* m_TaskUtilityLineUpPedWithCar{};
     bool                          m_bAbort{};
 };

@@ -14,7 +14,6 @@ void CTaskComplexShuffleSeats::InjectHooks() {
 
     RH_ScopedInstall(CreateSubTask, 0x63D240);
     RH_ScopedInstall(CreateTaskUtilityLineUpPedWithCar, 0x63D610);
-
     RH_ScopedVMTInstall(Clone, 0x63DEB0);
     RH_ScopedVMTInstall(GetTaskType, 0x63D190);
     RH_ScopedVMTInstall(MakeAbortable, 0x63D220);
@@ -27,7 +26,6 @@ void CTaskComplexShuffleSeats::InjectHooks() {
 CTaskComplexShuffleSeats::CTaskComplexShuffleSeats(CVehicle* veh) :
     m_Veh{veh}
 {
-    CEntity::SafeRegisterRef(m_Veh);
 }
 
 CTaskComplexShuffleSeats::CTaskComplexShuffleSeats(const CTaskComplexShuffleSeats& o) :
@@ -37,19 +35,24 @@ CTaskComplexShuffleSeats::CTaskComplexShuffleSeats(const CTaskComplexShuffleSeat
 
 // 0x63D1A0
 CTaskComplexShuffleSeats::~CTaskComplexShuffleSeats() {
-    CEntity::SafeCleanUpRef(m_Veh);
-    delete m_UtilityLineUp;
+    delete m_TaskUtilityLineUpPedWithCar;
 }
 
 // 0x63D240
 CTask* CTaskComplexShuffleSeats::CreateSubTask(eTaskType taskType, CPed* ped) {
     switch (taskType) {
     case TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER:
-        return new CTaskSimpleCarSetPedInAsDriver{m_Veh, m_UtilityLineUp};
+        return new CTaskSimpleCarSetPedInAsDriver{m_Veh, m_TaskUtilityLineUpPedWithCar};
     case TASK_SIMPLE_CAR_SHUFFLE:
-        return new CTaskSimpleCarShuffle{ m_Veh, (int32)m_OriginDoor, m_UtilityLineUp };
-    case TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER:
-        return new CTaskSimpleCarSetPedInAsPassenger{ m_Veh, m_TargetDoor, false, m_UtilityLineUp };
+        return new CTaskSimpleCarShuffle{ m_Veh, m_OriginDoor, m_TaskUtilityLineUpPedWithCar };
+    case TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER: {
+        if (m_Veh->m_pDriver == ped) {
+            m_Veh->RemoveDriver(ped);
+        } else {
+            m_Veh->RemovePassenger(ped);
+        }
+        return new CTaskSimpleCarSetPedInAsPassenger{ m_Veh, (eTargetDoor)m_TargetDoor, false, m_TaskUtilityLineUpPedWithCar };
+    }
     case TASK_SIMPLE_CAR_SET_PED_OUT:
         return new CTaskSimpleCarSetPedOut{ m_Veh, (eTargetDoor)CCarEnterExit::ComputeTargetDoorToExit(m_Veh, ped), true };
     case TASK_FINISHED: {
@@ -71,20 +74,18 @@ void CTaskComplexShuffleSeats::CreateTaskUtilityLineUpPedWithCar(CPed* ped) {
         }
         if (const auto optPsgrIdx = m_Veh->GetPassengerIndex(ped)) {
             switch (*optPsgrIdx) {
-            case 0:
-                return TARGET_DOOR_FRONT_RIGHT;
-            case 1:
-                return TARGET_DOOR_REAR_LEFT;
+            case 0: return TARGET_DOOR_FRONT_RIGHT;
+            case 1: return TARGET_DOOR_REAR_LEFT;
             }
         }
         return TARGET_DOOR_REAR_RIGHT;
     }();
 
-    m_UtilityLineUp = new CTaskUtilityLineUpPedWithCar{
+    m_TaskUtilityLineUpPedWithCar = new CTaskUtilityLineUpPedWithCar{
         CCarEnterExit::GetPositionToOpenCarDoor(m_Veh, m_OriginDoor) - ped->GetPosition(),
         600,
         0,
-        (int32)m_OriginDoor
+        m_OriginDoor
     };
 }
 
@@ -118,19 +119,13 @@ CTask* CTaskComplexShuffleSeats::CreateNextSubTask(CPed* ped) {
         case TASK_SIMPLE_CAR_SHUFFLE: {
             m_TargetDoor = [this, ped] {
                 switch (m_OriginDoor) {
-                case TARGET_DOOR_FRONT_RIGHT:
-                    return TARGET_DOOR_DRIVER;
-                case TARGET_DOOR_REAR_RIGHT:
-                    return TARGET_DOOR_REAR_LEFT;
-                case TARGET_DOOR_DRIVER:
-                    return TARGET_DOOR_FRONT_RIGHT;
-                case TARGET_DOOR_REAR_LEFT:
-                    return TARGET_DOOR_REAR_RIGHT;
-                default:
-                    NOTSA_UNREACHABLE();
+                case TARGET_DOOR_FRONT_RIGHT: return TARGET_DOOR_DRIVER;
+                case TARGET_DOOR_REAR_RIGHT:  return TARGET_DOOR_REAR_LEFT;
+                case TARGET_DOOR_DRIVER:      return TARGET_DOOR_FRONT_RIGHT;
+                case TARGET_DOOR_REAR_LEFT:   return TARGET_DOOR_REAR_RIGHT;
+                default:                      NOTSA_UNREACHABLE();
                 }
             }();
-
             if (m_TargetDoor == TARGET_DOOR_DRIVER) { // Inverted
                 return m_Veh->m_pDriver
                     ? TASK_FINISHED
@@ -144,7 +139,6 @@ CTask* CTaskComplexShuffleSeats::CreateNextSubTask(CPed* ped) {
         default:
             NOTSA_UNREACHABLE();
         }
-        
     }(), ped);
 }
 
