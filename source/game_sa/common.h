@@ -246,7 +246,7 @@ bool EndsWith(const char* str, const char* with, bool caseSensitive = true);
 RpAtomic* RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data);
 void RemoveRefsForAtomic(RpClump* clump);
 
-bool GraphicsLowQuality();
+bool GraphicsHighQuality();
 
 /**
  * Writes given raster to PNG file using RtPNGImageWrite

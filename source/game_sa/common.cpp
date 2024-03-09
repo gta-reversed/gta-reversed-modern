@@ -83,7 +83,7 @@ bool EndsWith(const char* str, const char* with, bool caseSensitive) {
 }
 
 // 0x70F9B0
-bool GraphicsLowQuality() {
+bool GraphicsHighQuality() {
     if (g_fx.GetFxQuality() < FX_QUALITY_MEDIUM)
         return false;
     if (RwRasterGetDepth(RwCameraGetRaster(Scene.m_pRwCamera)) < 32)

@@ -1,9 +1,5 @@
 #include "StdInc.h"
-
 #include "StencilShadowObject.h"
-
-CStencilShadowObject* CStencilShadows::pFirstAvailableStencilShadowObject = reinterpret_cast<CStencilShadowObject *>(0xC6A168);
-CStencilShadowObject* CStencilShadows::pFirstActiveStencilShadowObject = reinterpret_cast<CStencilShadowObject *>(0xC6A16C);
 
 static inline auto* s_ShadowTrianglePointsUnk = StaticRef<RxVertexIndex*>(0xC6A170);
 static inline auto* s_ShadowTrianglePoints = StaticRef<CVector*>(0xC6A170);
@@ -19,7 +15,7 @@ void CStencilShadows::InjectHooks() {
     RH_ScopedInstall(GraphicsHighQuality, 0x70F9B0, {.reversed=false});
     RH_ScopedInstall(UpdateHierarchy, 0x710BC0);
     RH_ScopedInstall(RegisterStencilShadows, 0x711760, {.reversed=false});
-    RH_ScopedInstall(RenderStencilShadows, 0x7113B0, {.reversed=false});
+    RH_ScopedInstall(RenderStencilShadows, 0x7113B0);
     RH_ScopedInstall(RenderForVehicle, 0x70FAE0, {.reversed=false});
     RH_ScopedInstall(RenderForObject, 0x710310, {.reversed=false});
     RH_ScopedInstall(Render, 0x710D50, {.reversed=false});
@@ -116,7 +112,7 @@ void CStencilShadows::sub_710CC0(int32 indices, int32 vertices) {
 
 // 0x7113B0
 void CStencilShadows::RenderStencilShadows() {
-    return plugin::Call<0x7113B0>();
+    ZoneScoped;
 
     if (!GraphicsHighQuality()) {
         return;
@@ -124,67 +120,65 @@ void CStencilShadows::RenderStencilShadows() {
 
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,             RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATESTENCILENABLE,            RWRSTATE(TRUE));
-    RwRenderStateSet(rwRENDERSTATESHADEMODE,                RWRSTATE(1u));
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,                RWRSTATE(rwSHADEMODEFLAT));
     RwRenderStateSet(rwRENDERSTATEFOGENABLE,                RWRSTATE(FALSE));
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,            RWRSTATE(0));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,            RWRSTATE(NULL));
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,        RWRSTATE(TRUE));
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,                 RWRSTATE(1u));
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,                RWRSTATE(2u));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,                 RWRSTATE(rwBLENDZERO));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,                RWRSTATE(rwBLENDONE));
     RwRenderStateSet(rwRENDERSTATESTENCILFUNCTIONMASK,      RWRSTATE(uint32(-1)));
     RwRenderStateSet(rwRENDERSTATESTENCILFUNCTIONWRITEMASK, RWRSTATE(uint32(-1)));
-    RwRenderStateSet(rwRENDERSTATESTENCILFUNCTION,          RWRSTATE(8u));
-    RwRenderStateSet(rwRENDERSTATESTENCILFAIL,              RWRSTATE(1u));
-    RwRenderStateSet(rwRENDERSTATESTENCILZFAIL,             RWRSTATE(1u));
-    RwRenderStateSet(rwRENDERSTATESTENCILPASS,              RWRSTATE(1u));
+    RwRenderStateSet(rwRENDERSTATESTENCILFUNCTION,          RWRSTATE(rwSTENCILFUNCTIONALWAYS));
+    RwRenderStateSet(rwRENDERSTATESTENCILFAIL,              RWRSTATE(rwSTENCILOPERATIONKEEP));
+    RwRenderStateSet(rwRENDERSTATESTENCILZFAIL,             RWRSTATE(rwSTENCILOPERATIONKEEP));
+    RwRenderStateSet(rwRENDERSTATESTENCILPASS,              RWRSTATE(rwSTENCILOPERATIONKEEP));
     RwRenderStateSet(rwRENDERSTATESTENCILFUNCTIONREF,       RWRSTATE(0));
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,              RWRSTATE(1u));
-    RwRenderStateSet(rwRENDERSTATESTENCILZFAIL,             RWRSTATE(7u));
-    RwRenderStateSet(rwRENDERSTATECULLMODE,                 RWRSTATE(3u));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,              RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESTENCILZFAIL,             RWRSTATE(rwSTENCILOPERATIONINCR));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,                 RWRSTATE(rwCULLMODECULLFRONT));
 
-    const auto black = CRGBA(0, 0, 0, 255);
-    // RenderStencil(black); // 0x710D50
+    Render(CRGBA{ 0, 0, 0, 255 });
 
-    RwRenderStateSet(rwRENDERSTATESTENCILZFAIL,             RWRSTATE(8u));
-    RwRenderStateSet(rwRENDERSTATECULLMODE,                 RWRSTATE(2u));
+    RwRenderStateSet(rwRENDERSTATESTENCILZFAIL,             RWRSTATE(rwSTENCILOPERATIONDECR));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,                 RWRSTATE(rwCULLMODECULLBACK));
 
-    // RenderStencil(black);
+    Render(CRGBA{ 0, 0, 0, 255 });
 
     // WTF is up with these states?
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,        RWRSTATE(FALSE)); // same state
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,             RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,              RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATESTENCILENABLE,            RWRSTATE(FALSE));
-    RwRenderStateSet(rwRENDERSTATESHADEMODE,                RWRSTATE(2u));
-    RwRenderStateSet(rwRENDERSTATECULLMODE,                 RWRSTATE(2u));
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,                RWRSTATE(rwSHADEMODEGOURAUD));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,                 RWRSTATE(rwCULLMODECULLBACK));
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,             RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,              RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATESTENCILENABLE,            RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATEFOGENABLE,                RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,        RWRSTATE(TRUE)); // same state
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,                 RWRSTATE(5u));
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,                RWRSTATE(6u));
-    RwRenderStateSet(rwRENDERSTATESHADEMODE,                RWRSTATE(1u));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,                 RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,                RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,                RWRSTATE(rwSHADEMODEFLAT));
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER,            RWRSTATE(NULL));
-    RwRenderStateSet(rwRENDERSTATECULLMODE,                 RWRSTATE(1u));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,                 RWRSTATE(rwCULLMODECULLNONE));
     RwRenderStateSet(rwRENDERSTATESTENCILFUNCTIONREF,       RWRSTATE(1u));
-    RwRenderStateSet(rwRENDERSTATESTENCILFUNCTION,          RWRSTATE(4u));
-    RwRenderStateSet(rwRENDERSTATESTENCILFAIL,              RWRSTATE(1u));
-    RwRenderStateSet(rwRENDERSTATESTENCILZFAIL,             RWRSTATE(1u));
-    RwRenderStateSet(rwRENDERSTATESTENCILPASS,              RWRSTATE(1u));
+    RwRenderStateSet(rwRENDERSTATESTENCILFUNCTION,          RWRSTATE(rwSTENCILFUNCTIONLESSEQUAL));
+    RwRenderStateSet(rwRENDERSTATESTENCILFAIL,              RWRSTATE(rwSTENCILOPERATIONKEEP));
+    RwRenderStateSet(rwRENDERSTATESTENCILZFAIL,             RWRSTATE(rwSTENCILOPERATIONKEEP));
+    RwRenderStateSet(rwRENDERSTATESTENCILPASS,              RWRSTATE(rwSTENCILOPERATIONKEEP));
 
     CSprite2d::InitPerFrame();
-
-    auto color = CRGBA(0, 0, 0, 50u);
-    color.a    = (color.a * CTimeCycle::m_CurrentColours.m_nShadowStrength) >> 8;
-    CRect rect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT);
-    CSprite2d::DrawRect(rect, color);
+    CSprite2d::DrawRect(
+        CRect{ 0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT },
+        CRGBA{ 0, 0, 0, (uint8)(50u * CTimeCycle::m_CurrentColours.m_nShadowStrength / 256) }
+    );
 
     RwRenderStateSet(rwRENDERSTATESTENCILENABLE,            RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,             RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,              RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,        RWRSTATE(FALSE));
-    RwRenderStateSet(rwRENDERSTATESHADEMODE,                RWRSTATE(2u));
-    RwRenderStateSet(rwRENDERSTATECULLMODE,                 RWRSTATE(2u));
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,                RWRSTATE(rwSHADEMODEGOURAUD));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,                 RWRSTATE(rwCULLMODECULLBACK));
 }
 
 // 0x70FAE0
@@ -238,7 +232,7 @@ void CStencilShadows::Process(CVector& cameraPos) {
 
 // 0x70F9B0
 bool CStencilShadows::GraphicsHighQuality() {
-    return GraphicsLowQuality(); // this is correct. func name is retarded
+    return ::GraphicsHighQuality();
 }
 
 // 0x710BC0
