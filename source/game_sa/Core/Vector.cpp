@@ -88,6 +88,11 @@ auto CVector::Dot(const CVector& o) const -> float{
     return DotProduct(*this, o);
 }
 
+auto CVector::Dot2D(const CVector& o) const -> float {
+    return y * o.y
+         + x * o.x;
+}
+
 // notsa
 CVector CVector::Cross(const CVector& o) const {
     return {

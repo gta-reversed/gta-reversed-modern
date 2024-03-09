@@ -6,6 +6,7 @@
 */
 #include "StdInc.h"
 
+#include "TrafficLights.h"
 #include "VehicleRecording.h"
 #include "CarAI.h"
 #include "CarCtrl.h"
@@ -16,6 +17,8 @@
 #include "TaskComplexKillPedFromBoat.h"
 #include "TaskComplexLeaveCar.h"
 #include "TaskSimpleCarDrive.h"
+#include "TaskComplexEnterCarAsDriver.h"
+#include "TaskSimpleGangDriveBy.h"
 #include "TaskSimpleCarSetPedOut.h"
 #include "Timer.h"
 #include "eWeaponType.h"
@@ -48,7 +51,7 @@ void CCarAI::InjectHooks() {
     RH_ScopedInstall(TellCarToFollowOtherCar, 0x41C960);
     RH_ScopedInstall(TellCarToRamOtherCar, 0x41C8A0);
     RH_ScopedInstall(TellOccupantsToLeaveCar, 0x41C760);
-    RH_ScopedInstall(UpdateCarAI, 0x41DA30, { .reversed = false });
+    RH_ScopedInstall(UpdateCarAI, 0x41DA30);
 }
 
 // 0x41C4A0
@@ -145,6 +148,8 @@ void CCarAI::AddPoliceCarOccupants(CVehicle* vehicle, bool arg2) {
 
 // 0x41BFA0
 void CCarAI::BackToCruisingIfNoWantedLevel(CVehicle* vehicle) {
+    assert(vehicle->IsBoat());
+
     if (!vehicle->vehicleFlags.bIsLawEnforcer) {
         return;
     }
@@ -234,10 +239,9 @@ float CCarAI::FindSwitchDistanceClose(CVehicle* vehicle) {
 
 // 0x41BF70
 float CCarAI::FindSwitchDistanceFar(CVehicle* vehicle) {
-    if (vehicle->vehicleFlags.bIsLawEnforcer)
-        return 50.0f;
-    else
-        return FindSwitchDistanceClose(vehicle) + 5.0f;
+    return vehicle->vehicleFlags.bIsLawEnforcer
+        ? 50.f
+        : FindSwitchDistanceClose(vehicle) + 5.0f;
 }
 
 // 0x41CE30
@@ -249,8 +253,8 @@ float CCarAI::GetCarToGoToCoors(CVehicle* veh, const CVector& coors, eCarDriving
     case MISSION_PARK_PARALLEL_0:
     case MISSION_PARK_PARALLEL_1:
         break;
-    case MISSION_GOTOCOORDS:
-    case MISSION_GOTOCOORDS_STRAIGHT: {
+    case MISSION_GOTOCOORDINATES:
+    case MISSION_GOTOCOORDINATES_STRAIGHTLINE: {
         if (veh->GetPosition2D().EqualTo(coors, 5.f)) {
             break;
         }
@@ -258,7 +262,7 @@ float CCarAI::GetCarToGoToCoors(CVehicle* veh, const CVector& coors, eCarDriving
     }
     default: {
         ap->m_nCarDrivingStyle = drivingStyle;
-        ap->ClearTempAction();
+        ap->ClearTempAct();
         if (setCruiseSpeed) {
             ap->m_nCruiseSpeed = 20;
         }
@@ -267,8 +271,8 @@ float CCarAI::GetCarToGoToCoors(CVehicle* veh, const CVector& coors, eCarDriving
             veh->SetStatus(STATUS_PHYSICS);
         }
         ap->m_nCarMission = CCarCtrl::JoinCarWithRoadSystemGotoCoors(veh, coors, false, false)
-            ? MISSION_GOTOCOORDS_STRAIGHT
-            : MISSION_GOTOCOORDS;
+            ? MISSION_GOTOCOORDINATES_STRAIGHTLINE
+            : MISSION_GOTOCOORDINATES;
         break;
     }
     }
@@ -280,8 +284,8 @@ float CCarAI::GetCarToGoToCoorsAccurate(CVehicle* veh, const CVector& coors, eCa
     const auto ap = &veh->m_autoPilot;
 
     switch (ap->m_nCarMission) {
-    case MISSION_GOTOCOORDS_ACCURATE:
-    case MISSION_GOTOCOORDS_STRAIGHT_ACCURATE: {
+    case MISSION_GOTOCOORDINATES_ACCURATE:
+    case MISSION_GOTOCOORDINATES_STRAIGHTLINE_ACCURATE: {
         if (!veh->GetPosition2D().EqualTo(coors, 2.f)) {
             ap->m_vecDestinationCoors = coors;
         }
@@ -289,7 +293,7 @@ float CCarAI::GetCarToGoToCoorsAccurate(CVehicle* veh, const CVector& coors, eCa
     }
     default: { // Copy paste from `GetCarToGoToCoors`
         ap->m_nCarDrivingStyle = drivingStyle;
-        ap->ClearTempAction();
+        ap->ClearTempAct();
         if (setCruiseSpeed) {
             ap->m_nCruiseSpeed = 20;
         }
@@ -298,8 +302,8 @@ float CCarAI::GetCarToGoToCoorsAccurate(CVehicle* veh, const CVector& coors, eCa
             veh->SetStatus(STATUS_PHYSICS);
         }
         ap->m_nCarMission = CCarCtrl::JoinCarWithRoadSystemGotoCoors(veh, coors, false, false)
-            ? MISSION_GOTOCOORDS_STRAIGHT_ACCURATE
-            : MISSION_GOTOCOORDS_ACCURATE;
+            ? MISSION_GOTOCOORDINATES_STRAIGHTLINE_ACCURATE
+            : MISSION_GOTOCOORDINATES_ACCURATE;
         break;
     }
     }
@@ -313,7 +317,7 @@ float CCarAI::GetCarToGoToCoorsRacing(CVehicle* veh, const CVector& coors, eCarD
 
     switch (ap->m_nCarMission) {
     case MISSION_GOTOCOORDINATES_RACING:
-    case MISSION_GOTOCOORDS_STRAIGHT: {
+    case MISSION_GOTOCOORDINATES_STRAIGHTLINE: {
         if (!veh->GetPosition2D().EqualTo(coors, 2.f)) {
             ap->m_vecDestinationCoors = coors;
         }
@@ -321,7 +325,7 @@ float CCarAI::GetCarToGoToCoorsRacing(CVehicle* veh, const CVector& coors, eCarD
     }
     default: {
         ap->m_nCarDrivingStyle = drivingStyle;
-        ap->ClearTempAction();
+        ap->ClearTempAct();
         if (setCruiseSpeed) {
             ap->m_nCruiseSpeed = 20;
         }
@@ -344,7 +348,7 @@ float CCarAI::GetCarToGoToCoorsStraightLine(CVehicle* veh, const CVector& coors,
     const auto ap = &veh->m_autoPilot;
 
     switch (ap->m_nCarMission) {
-    case MISSION_GOTOCOORDS_STRAIGHT: {
+    case MISSION_GOTOCOORDINATES_STRAIGHTLINE: {
         if (!veh->GetPosition2D().EqualTo(coors, 2.f)) {
             ap->m_vecDestinationCoors = coors;
         }
@@ -352,7 +356,7 @@ float CCarAI::GetCarToGoToCoorsStraightLine(CVehicle* veh, const CVector& coors,
     }
     default: {
         ap->m_nCarDrivingStyle = drivingStyle;
-        ap->ClearTempAction();
+        ap->ClearTempAct();
         if (setCruiseSpeed) {
             ap->m_nCruiseSpeed = 20;
         }
@@ -361,7 +365,7 @@ float CCarAI::GetCarToGoToCoorsStraightLine(CVehicle* veh, const CVector& coors,
             veh->SetStatus(STATUS_PHYSICS);
         }
         ap->m_vecDestinationCoors = coors;
-        ap->m_nCarMission         = MISSION_GOTOCOORDS_STRAIGHT;
+        ap->m_nCarMission         = MISSION_GOTOCOORDINATES_STRAIGHTLINE;
         // TODO/BUG: No `CCarCtrl::JoinCarWithRoadSystemGotoCoors` ?
         break;
     }
@@ -530,31 +534,19 @@ void CCarAI::MellowOutChaseSpeed(CVehicle* vehicle) {
 
 // 0x41CB70
 void CCarAI::MellowOutChaseSpeedBoat(CVehicle* vehicle) {
-    switch (FindPlayerWanted()->m_nWantedLevel) {
-    case 0:
-        vehicle->m_autoPilot.m_nCruiseSpeed = 8;
-        break;
-    case 1:
-        vehicle->m_autoPilot.m_nCruiseSpeed = 10;
-        break;
-    case 2:
-        vehicle->m_autoPilot.m_nCruiseSpeed = 15;
-        break;
-    case 3:
-        vehicle->m_autoPilot.m_nCruiseSpeed = 20;
-        break;
-    case 4:
-        vehicle->m_autoPilot.m_nCruiseSpeed = 25;
-        break;
-    case 5:
-        vehicle->m_autoPilot.m_nCruiseSpeed = 30;
-        break;
-    case 6:
-        vehicle->m_autoPilot.m_nCruiseSpeed = 40;
-        break;
-    default:
-        return;
-    }
+    assert(vehicle->IsBoat());
+    vehicle->m_autoPilot.m_nCruiseSpeed = []{
+        switch (FindPlayerWanted()->GetWantedLevel()) {
+        case 0:  return 8;
+        case 1:  return 10;
+        case 2:  return 15;
+        case 3:  return 20;
+        case 4:  return 25;
+        case 5:  return 30;
+        case 6:  return 40;
+        default: NOTSA_UNREACHABLE();
+        }
+    }();
 }
 
 // unused
@@ -574,8 +566,8 @@ void CCarAI::TellCarToBlockOtherCar(CVehicle* vehicle1, CVehicle* vehicle2) {
 
 // 0x41C960
 void CCarAI::TellCarToFollowOtherCar(CVehicle* follower, CVehicle* toFollow, float radius) {
-    follower->m_autoPilot.m_pTargetCar = toFollow;
-    CEntity::SafeRegisterRef(follower->m_autoPilot.m_pTargetCar);
+    follower->m_autoPilot.m_TargetEntity = toFollow;
+    CEntity::SafeRegisterRef(follower->m_autoPilot.m_TargetEntity);
 
     CCarCtrl::JoinCarWithRoadSystem(follower);
 
@@ -647,19 +639,20 @@ void CCarAI::UpdateCarAI(CVehicle* veh) {
         }
     }
 
-    const auto& vehPos  = veh->GetPosition();
-    const auto  plyrVeh = FindPlayerVehicle();
-    const auto  plyr    = FindPlayerPed();
-    const auto& plyrPos = plyr->GetPosition();
+    const auto& vehPos    = veh->GetPosition();
+    const auto  plyrVeh   = FindPlayerVehicle();
+    const auto  plyr      = FindPlayerPed();
+    const auto& plyrPos   = plyr->GetPosition();
+    const auto  plyrCoors = FindPlayerCoors();
 
     switch (veh->GetStatus()) {
     case STATUS_SIMPLE:
     case STATUS_PHYSICS:
     case STATUS_GHOST: {
         switch (ap->m_nCarMission) {
-        case MISSION_RAMPLAYER_FARAWAY: { // 0x41DB72
+        case MISSION_RAMPLAYER_FARAWAY: { // 0x41DB72 - If close enough switch to `MISSION_RAMPLAYER_CLOSE`
             const auto vehPlyrDist2DSq = (vehPos - plyrPos).SquaredMagnitude2D();
-            if (   vehPlyrDist2DSq <= sq((float)ap->m_nStraightLineDistance)
+            if (   vehPlyrDist2DSq <= sq(FindSwitchDistanceClose(veh))
                 || EntitiesGoHeadOn(plyr, veh) && vehPlyrDist2DSq < sq(40.f)
             ) {
                 ap->m_nCarMission = MISSION_RAMPLAYER_CLOSE;
@@ -670,67 +663,438 @@ void CCarAI::UpdateCarAI(CVehicle* veh) {
             BackToCruisingIfNoWantedLevel(veh);
             break;
         }
-        case MISSION_RAMPLAYER_CLOSE: { // 0x41DC92
+        case MISSION_RAMPLAYER_CLOSE: // 0x41DC92
+        case MISSION_BLOCKPLAYER_CLOSE: // 0x41E07D (This and `MISSION_RAMPLAYER_CLOSE` have very similar code, so i combined them. (The code below is based on it [0x41DC92])
+        { 
             const auto vehPlyrDist2DSq = (vehPos - plyrPos).SquaredMagnitude2D();
-            if (sq(FindSwitchDistanceFar(veh)) < vehPlyrDist2DSq) { // 0x41DD4F
+
+            const auto maxSpeedSq = ap->m_nCarMission == MISSION_RAMPLAYER_CLOSE
+                ? sq(0.05f)
+                : sq(0.04f);
+
+            if (sq(FindSwitchDistanceFar(veh)) < vehPlyrDist2DSq) { // 0x41DD4F | 0x41E13A
                 if (!CCarCtrl::JoinCarWithRoadSystemGotoCoors(veh, FindPlayerCoors(), true, false)) {
-                    ap->m_nCarMission   = MISSION_RAMPLAYER_FARAWAY;
-                    veh->m_nHornCounter = 0;
+                    ap->m_nCarMission               = MISSION_RAMPLAYER_FARAWAY;
+                    veh->m_nHornCounter             = 0;
                     veh->vehicleFlags.bSirenOrAlarm = false;
                 }
                 if (veh->vehicleFlags.bIsLawEnforcer) {
                     MellowOutChaseSpeed(veh);
                     BackToCruisingIfNoWantedLevel(veh);
-                    break; // goto LABEL_576;
                 }
-            } else {
+                break;
+            }
+
+            if (ap->m_nCarMission == MISSION_RAMPLAYER_CLOSE) { // 0x41DDA2
                 if (plyrVeh && veh->GetHasCollidedWith(plyrVeh)) { // 0x41DDA2
                     if (!notsa::contains({ TEMPACT_TURNLEFT, TEMPACT_TURNRIGHT }, ap->m_nTempAction)) {
                         ap->SetTempAction(
                             TEMPACT_REVERSE,
-                            plyrVeh->GetMoveSpeed().SquaredMagnitude() >= sq(0.05f) ? 50 : 800
+                            plyrVeh->GetMoveSpeed().SquaredMagnitude() >= maxSpeedSq
+                                ? 50
+                                : 800
                         );
                     }
                 }
+            }
 
-                if (plyrVeh && plyrVeh->GetMoveSpeed().SquaredMagnitude() < sq(0.05f)) { // 0x41DE22
-                    veh->m_nCopsInCarTimer += (int16)(CTimer::GetTimeStep() * (1000.f / 60.f));
+            if (plyrVeh && plyrVeh->GetMoveSpeed().SquaredMagnitude() < maxSpeedSq) { // 0x41DE22 | 0x41E18D
+                veh->m_nCopsInCarTimer += (int16)(CTimer::GetTimeStep() * (1000.f / 60.f));
+            } else {
+                veh->m_nCopsInCarTimer = 0;
+            }
+
+            if (   !plyrVeh // 0x41DE95 | 0x41E1F0
+                || plyrVeh->IsUpsideDown()
+                || plyrVeh->GetMoveSpeed().SquaredMagnitude() < maxSpeedSq && veh->m_nCopsInCarTimer > 2500
+                    ) {
+                        if (veh->vehicleFlags.bIsLawEnforcer) { // 0x41DED4 | 0x41E23F
+                            if ((veh->GetModelID() != MODEL_RHINO || veh->m_nRandomSeed > 10'000) && vehPlyrDist2DSq <= sq(10.f)) { // 0x41DEE1 | 0x41E254
+                                TellOccupantsToLeaveCar(veh);
+                                ap->m_nCruiseSpeed = 0;
+                                ap->m_nCarMission = MISSION_NONE;
+                                if (plyr->GetWantedLevel() <= 1) {
+                                    veh->vehicleFlags.bSirenOrAlarm = false;
+                                }
+                            }
+                        }
+            }
+
+            break;
+        }
+        case MISSION_GOTOCOORDINATES: { // 0x41E2BF - If close enough switch to `MISSION_GOTOCOORDS_STRAIGHT`
+            if ((veh->GetPosition() - ap->m_vecDestinationCoors).SquaredMagnitude2D() <= sq(FindSwitchDistanceClose(veh))) {
+                ap->m_nCarMission = MISSION_GOTOCOORDINATES_STRAIGHTLINE;
+            }
+            break;
+        }
+        case MISSION_GOTOCOORDINATES_STRAIGHTLINE: { // 0x41E3B1
+            const auto distToDestSq = (veh->GetPosition() - ap->m_vecDestinationCoors).SquaredMagnitude2D();
+
+            if (distToDestSq < sq(3.f)) {
+                ap->ClearTempAct();
+                ap->ClearCarMission();
+            }
+            else if (distToDestSq >= sq((float)ap->m_nStraightLineDistance + 5.f) && CTimer::GetFrameCounter() % 8 == 0) {
+                ap->ClearTempAct();
+                ap->SetCarMission(
+                    CCarCtrl::JoinCarWithRoadSystemGotoCoors(veh, ap->m_vecDestinationCoors, true, false)
+                    ? MISSION_GOTOCOORDINATES_STRAIGHTLINE
+                    : MISSION_GOTOCOORDINATES
+                );
+            }
+
+            break;
+        }
+        case MISSION_EMERGENCYVEHICLE_STOP:
+        case MISSION_PROTECTION_REAR:
+        case MISSION_PROTECTION_FRONT:
+            break;
+        case MISSION_GOTOCOORDINATES_ACCURATE: { // 0x41E338 (Pretty much copy paste `MISSION_GOTOCOORDINATES`)
+            if ((veh->GetPosition() - ap->m_vecDestinationCoors).SquaredMagnitude2D() <= sq(FindSwitchDistanceClose(veh))) {
+                ap->m_nCarMission = MISSION_GOTOCOORDINATES_STRAIGHTLINE_ACCURATE;
+            }
+            break;
+        }
+        case MISSION_GOTOCOORDINATES_STRAIGHTLINE_ACCURATE: { // 0x41E473 (Pretty much copy paste `MISSION_GOTOCOORDINATES_STRAIGHTLINE`)
+            const auto distToDest2DSq = (veh->GetPosition() - ap->m_vecDestinationCoors).SquaredMagnitude2D();
+
+            if (distToDest2DSq < sq(1.f)) { // Inverted
+                ap->ClearTempAct();
+                ap->ClearCarMission();
+                if (veh->vehicleFlags.bParking) {
+                    TellOccupantsToLeaveCar(veh);
+                    veh->vehicleFlags.bParking = false;
+                }
+            }
+            else if (distToDest2DSq >= sq((float)ap->m_nStraightLineDistance + 5.f) && CTimer::GetFrameCounter() % 8 == 0) {
+                ap->ClearTempAct();
+                ap->SetCarMission(
+                    CCarCtrl::JoinCarWithRoadSystemGotoCoors(veh, ap->m_vecDestinationCoors, true, false)
+                    ? MISSION_GOTOCOORDINATES_STRAIGHTLINE_ACCURATE
+                    : MISSION_GOTOCOORDINATES_ACCURATE
+                );
+            }
+
+            break;
+        }
+        case MISSION_RAMCAR_FARAWAY: { // 0x41E568 (Pretty much copy-paste `MISSION_GOTOCOORDINATES_STRAIGHTLINE`)
+            if (!ap->m_TargetEntity) { // Entity was destroyed
+                ap->ClearCarMission();
+                break;
+            }
+
+            if ((veh->GetPosition() - ap->m_TargetEntity->GetPosition()).SquaredMagnitude2D() <= sq(FindSwitchDistanceClose(veh))) {
+                ap->m_nCarMission = MISSION_RAMCAR_CLOSE;
+            }
+
+            break;
+        }
+        case MISSION_RAMCAR_CLOSE: { // 0x41E642
+            if (!ap->m_TargetEntity) {
+                ap->SetCarMission(MISSION_CRUISE); // Weird, above it was `NONE`
+                break;
+            }
+
+            if ((veh->GetPosition() - ap->m_TargetEntity->GetPosition()).SquaredMagnitude2D() >= sq(FindSwitchDistanceFar(veh))) { // Inverted
+                ap->SetCarMission(MISSION_RAMCAR_FARAWAY);
+                CCarCtrl::JoinCarWithRoadSystem(veh);
+            }
+            else {
+                if (veh->GetHasCollidedWith(ap->m_TargetEntity) && veh->GetMoveSpeed().SquaredMagnitude() <= sq(0.04f)) {
+                    ap->SetTempAction(TEMPACT_REVERSE, 800);
+                }
+            }
+
+            break;
+        }
+        case MISSION_BLOCKCAR_FARAWAY: { // 0x41E79D
+            if (!ap->m_TargetEntity) {
+                ap->ClearCarMission();
+                break;
+            }
+
+            if ((veh->GetPosition() - ap->m_TargetEntity->GetPosition()).SquaredMagnitude2D() <= sq(FindSwitchDistanceClose(veh))) {
+                ap->SetCarMission(MISSION_BLOCKCAR_CLOSE);
+                if (veh->UsesSiren()) {
+                    veh->vehicleFlags.bSirenOrAlarm = true;
+                }
+            }
+
+            break;
+        }
+        case MISSION_BLOCKCAR_CLOSE: { // 0x41E88D
+            if (!ap->m_TargetEntity) {
+                ap->ClearCarMission();
+                break;
+            }
+
+            if ((veh->GetPosition() - ap->m_TargetEntity->GetPosition()).SquaredMagnitude2D() >= sq(FindSwitchDistanceClose(veh))) {
+                veh->vehicleFlags.bSirenOrAlarm = false;
+                veh->m_nHornCounter             = 0;
+                CCarCtrl::JoinCarWithRoadSystem(veh);
+            }
+
+            break;
+        }
+        case MISSION_ATTACKPLAYER: { // 0x41EE05
+            if (!veh->vehicleFlags.bIsLawEnforcer) {
+                break;
+            }
+            if (!plyrVeh) {
+                ap->SetCarMission(MISSION_BOAT_CIRCLEPLAYER);
+            }
+            MellowOutChaseSpeedBoat(veh);
+            BackToCruisingIfNoWantedLevel(veh);
+            break;
+        }
+
+        case MISSION_SLOWLY_DRIVE_TOWARDS_PLAYER_1: { // 0x41EB46
+            if ((veh->GetPosition() - ap->m_vecDestinationCoors).SquaredMagnitude2D() <= sq(1.5f)) {
+                ap->SetCarMission(MISSION_SLOWLY_DRIVE_TOWARDS_PLAYER_2);
+            }
+            break;
+        }
+        case MISSION_SLOWLY_DRIVE_TOWARDS_PLAYER_2: { // 0x41EBB9
+            const auto vehToPlayerDist2DSq = (FindPlayerCoors() - veh->GetPosition()).SquaredMagnitude2D();
+            const auto wntd = FindPlayerWanted();
+            if (   vehToPlayerDist2DSq <= sq(13.f) || vehToPlayerDist2DSq >= sq(70.f)
+                || wntd->m_bEverybodyBackOff
+                || veh->vehicleFlags.bIsLawEnforcer && (wntd->GetWantedLevel() == 0 || wntd->m_bEverybodyBackOff || wntd->m_bPoliceBackOffGarage || wntd->m_bPoliceBackOff || CCullZones::NoPolice())
+            ) {
+                TellOccupantsToLeaveCar(veh);
+                ap->SetCarMission(MISSION_STOP_FOREVER, 0);
+            }
+            break;
+        }
+        case MISSION_BLOCKPLAYER_FORWARDANDBACK: { // 0x41ED1C
+            if (!plyrVeh || FindPlayerSpeed().Dot2D((veh->GetPosition() - FindPlayerCoors()).Normalized()) > 0.05f) {
+                ap->SetCarMission(MISSION_BLOCKPLAYER_CLOSE);
+            }
+            BackToCruisingIfNoWantedLevel(veh);
+            break;
+        }
+        case MISSION_ESCORT_LEFT:
+        case MISSION_ESCORT_RIGHT:
+        case MISSION_ESCORT_REAR:
+        case MISSION_ESCORT_FRONT: { // 0x41F771
+            if (ap->m_nStraightLineDistance >= 240) {
+                break;
+            }
+
+            if ((veh->GetPosition() - FindPlayerCoors()).SquaredMagnitude2D() >= sq(FindSwitchDistanceFar(veh))) {
+                if (!CCarCtrl::JoinCarWithRoadSystemGotoCoors(veh, FindPlayerCoors())) {
+                    ap->m_nCarMission = [&]{
+                        switch (ap->m_nCarMission) {
+                        case MISSION_ESCORT_LEFT:  return MISSION_ESCORT_LEFT_FARAWAY;
+                        case MISSION_ESCORT_RIGHT: return MISSION_ESCORT_RIGHT_FARAWAY;
+                        case MISSION_ESCORT_REAR:  return MISSION_ESCORT_REAR_FARAWAY;
+                        case MISSION_ESCORT_FRONT: return MISSION_ESCORT_FRONT_FARAWAY;
+                        default:                   NOTSA_UNREACHABLE();
+                        }
+                    }();
+                }
+            }
+
+            break;
+        }
+        case MISSION_APPROACHPLAYER_FARAWAY: { // 0x41F033
+            if ((FindPlayerCoors() - veh->GetPosition()).SquaredMagnitude2D() <= sq(FindSwitchDistanceClose(veh))) {
+                ap->SetCarMission(MISSION_APPROACHPLAYER_CLOSE);
+                if (veh->UsesSiren()) {
+                    veh->vehicleFlags.bSirenOrAlarm = true;
+                }
+            }
+            CCarAI::BackToCruisingIfNoWantedLevel(veh);
+            break;
+        }
+        case MISSION_APPROACHPLAYER_CLOSE: { // 0x41F12D
+            const auto vehToPlyrDist2DSq = (FindPlayerCoors() - veh->GetPosition()).SquaredMagnitude2D();
+
+            if (vehToPlyrDist2DSq <= sq(FindSwitchDistanceFar(veh))) {
+                if (plyrVeh && plyrVeh->GetMoveSpeed().SquaredMagnitude() <= sq(0.05f)) {
+                    veh->m_nCopsInCarTimer += (uint32)CTimer::GetTimeStepInMS();
                 } else {
                     veh->m_nCopsInCarTimer = 0;
                 }
 
-                if (veh->vehicleFlags.bIsLawEnforcer) {
-                    if (   !plyrVeh // 0x41DE95
-                        || plyrVeh->IsUpsideDown()
-                        || plyrVeh->GetMoveSpeed().SquaredMagnitude() < sq(0.05f) && veh->m_nCopsInCarTimer > 2500
-                    ) {
-                        if ((veh->GetModelID() != MODEL_RHINO || veh->m_nRandomSeed > 10'000) && vehPlyrDist2DSq <= sq(10.f)) { // 0x41DEE1
-                            TellOccupantsToLeaveCar(veh);
-                            ap->m_nCruiseSpeed = 0;
-                            ap->m_nCarMission  = MISSION_NONE;
-                            if (plyr->GetWantedLevel() <= 1) {
-                                veh->vehicleFlags.bSirenOrAlarm = false;
-                            }
-                        }
+                if ((!plyrVeh || plyrVeh->IsUpsideDown() || veh->m_nCopsInCarTimer >= (veh->GetModelID() == MODEL_COPBIKE ? 2500 : 20'000)) && veh->vehicleFlags.bIsLawEnforcer && vehToPlyrDist2DSq <= sq(10.f)) {
+                    TellOccupantsToLeaveCar(veh);
+                    ap->ClearCarMission();
+                    ap->SetCruiseSpeed(0);
+                    if (FindPlayerWanted()->GetWantedLevel() <= 1) {
+                        veh->vehicleFlags.bSirenOrAlarm = false;
                     }
-                    MellowOutChaseSpeed(veh);
-                    BackToCruisingIfNoWantedLevel(veh);
-                    break; // goto LABEL_576;
+                } else if (veh->GetModelID() == MODEL_COPBIKE && veh->m_pDriver) {
+                    const auto tUseSeq = CTask::DynCast<CTaskComplexSequence>(veh->m_pDriver->GetTaskManager().GetTaskPrimary(TASK_PRIMARY_PRIMARY));
+                    if (!tUseSeq || (!tUseSeq->Contains(TASK_COMPLEX_ENTER_CAR_AS_DRIVER)) && !tUseSeq->Contains(TASK_SIMPLE_GANG_DRIVEBY)) { 
+                        veh->m_pDriver->GetEventGroup().Add(
+                            CEventScriptCommand{
+                                TASK_PRIMARY_PRIMARY,
+                                new CTaskComplexSequence{
+                                    new CTaskComplexEnterCarAsDriver{veh},
+                                    new CTaskSimpleGangDriveBy{FindPlayerPed(), nullptr, 50.f, 50, eDrivebyStyle::AI_ALL_DIRN, false}
+                                }
+                            }
+                        );
+                        veh->m_pDriver->SetCurrentWeapon(WEAPON_PISTOL_SILENCED);
+                    }
+                }
+            } else if (!CCarCtrl::JoinCarWithRoadSystemGotoCoors(veh, FindPlayerCoors())) {
+                veh->vehicleFlags.bSirenOrAlarm = false;
+                veh->m_nHornCounter             = 0;
+                ap->SetCarMission(MISSION_APPROACHPLAYER_FARAWAY);
+            }
+
+            if (veh->vehicleFlags.bIsLawEnforcer) {
+                MellowOutChaseSpeed(veh);
+            }
+            BackToCruisingIfNoWantedLevel(veh);
+            break;
+        }
+        case MISSION_FOLLOWCAR_FARAWAY: { // 0x41E989
+            if (!ap->m_TargetEntity) {
+                ap->ClearCarMission();
+                break;
+            }
+
+            if ((veh->GetPosition() - ap->m_TargetEntity->GetPosition()).SquaredMagnitude2D() <= sq(FindSwitchDistanceClose(veh))) {
+                ap->SetCarMission(MISSION_FOLLOWCAR_CLOSE);
+            }
+
+            break;
+        }
+        case MISSION_FOLLOWCAR_CLOSE: { // 0x41EA63
+            if (!ap->m_TargetEntity) {
+                ap->ClearCarMission();
+                break;
+            }
+
+            if ((veh->GetPosition() - ap->m_TargetEntity->GetPosition()).SquaredMagnitude2D() >= sq(FindSwitchDistanceFar(veh))) {
+                ap->SetCarMission(MISSION_FOLLOWCAR_FARAWAY);
+                CCarCtrl::JoinCarWithRoadSystem(veh);
+            }
+
+            break;
+        }
+        case MISSION_KILLPED_FARAWAY: { // 0x41EE76
+            if (!ap->m_TargetEntity) {
+                ap->ClearCarMission();
+                break;
+            }
+
+            if ((veh->GetPosition() - ap->m_TargetEntity->GetPosition()).SquaredMagnitude2D() >= sq(FindSwitchDistanceFar(veh))) {
+                ap->SetCarMission(MISSION_KILLPED_CLOSE);
+            }
+
+            break;
+        }
+        case MISSION_KILLPED_CLOSE: { // 0x41EF50
+            if (!ap->m_TargetEntity) {
+                ap->ClearCarMission();
+                break;
+            }
+
+            if ((veh->GetPosition() - ap->m_TargetEntity->GetPosition()).SquaredMagnitude2D() >= sq(FindSwitchDistanceFar(veh))) {
+                ap->SetCarMission(MISSION_KILLPED_FARAWAY);
+                CCarCtrl::JoinCarWithRoadSystem(veh);
+            }
+
+            break;
+        }
+        case MISSION_DO_DRIVEBY_CLOSE: { // 0x41F5B1
+            if (!ap->m_TargetEntity) {
+                ap->ClearCarMission();
+                break;
+            }
+
+            if ((veh->GetPosition() - ap->m_TargetEntity->GetPosition()).SquaredMagnitude2D() >= sq(FindSwitchDistanceFar(veh))) {
+                ap->SetCarMission(MISSION_DO_DRIVEBY_FARAWAY);
+                CCarCtrl::JoinCarWithRoadSystem(veh);
+            }
+
+            break;
+        }
+        case MISSION_DO_DRIVEBY_FARAWAY: { // 0x41F4D7
+            if (!ap->m_TargetEntity) {
+                ap->ClearCarMission();
+                break;
+            }
+
+            if ((veh->GetPosition() - ap->m_TargetEntity->GetPosition()).SquaredMagnitude2D() <= sq(FindSwitchDistanceClose(veh))) {
+                ap->SetCarMission(MISSION_DO_DRIVEBY_CLOSE);
+            }
+
+            break;
+        }
+        case MISSION_BOAT_CIRCLEPLAYER: { // 0x41EE3D
+            if (veh->vehicleFlags.bIsLawEnforcer) {
+                if (plyrVeh) {
+                    ap->SetCarMission(MISSION_ATTACKPLAYER);
+                }
+                ap->SetCruiseSpeed(10);
+                BackToCruisingIfNoWantedLevel(veh);
+            }
+            break;
+        }
+        case MISSION_ESCORT_LEFT_FARAWAY:
+        case MISSION_ESCORT_RIGHT_FARAWAY:
+        case MISSION_ESCORT_REAR_FARAWAY:
+        case MISSION_ESCORT_FRONT_FARAWAY: {
+            if ((veh->GetPosition() - FindPlayerCoors()).SquaredMagnitude2D() <= sq(FindSwitchDistanceClose(veh))) {
+                ap->m_nCarMission = [&]{
+                    switch (ap->m_nCarMission) {
+                    case MISSION_ESCORT_LEFT_FARAWAY:  return MISSION_ESCORT_LEFT;
+                    case MISSION_ESCORT_RIGHT_FARAWAY: return MISSION_ESCORT_RIGHT;
+                    case MISSION_ESCORT_REAR_FARAWAY:  return MISSION_ESCORT_REAR;
+                    case MISSION_ESCORT_FRONT_FARAWAY: return MISSION_ESCORT_FRONT;
+                    default:                           NOTSA_UNREACHABLE();
+                    }
+                }();
+            }
+            break;
+        }
+        default: {
+            if (!veh->vehicleFlags.bIsLawEnforcer) {
+                break;
+            }
+
+            if (FindPlayerWanted()->GetWantedLevel() <= 0 || CCullZones::NoPolice()) {
+                break;
+            }
+
+            if (std::abs(plyrCoors.x - vehPos.x) >= 10.f || std::abs(plyrCoors.y - vehPos.y) >= 10.f) { // 0x41F9B4
+                ap->SetCruiseSpeed(FindPoliceCarSpeedForWantedLevel(veh));
+
+                if (veh->GetStatus() != STATUS_GHOST) {
+                    veh->SetStatus(STATUS_PHYSICS);
+                }
+
+                switch (veh->GetVehicleAppearance()) {
+                case VEHICLE_APPEARANCE_BOAT: ap->SetCarMission(FindPoliceBoatMissionForWantedLevel()); break;
+                case VEHICLE_APPEARANCE_BIKE: ap->SetCarMission(FindPoliceBikeMissionForWantedLevel()); break;
+                default:                      ap->SetCarMission(FindPoliceCarMissionForWantedLevel());  break;
+                }
+
+                ap->ClearTempAct();
+                ap->m_nCarDrivingStyle = DRIVING_STYLE_AVOID_CARS;
+            } else if (ap->m_nCarMission == MISSION_CRUISE) { // 0x41F9CE
+                if (veh->GetStatus() != STATUS_GHOST) {
+                    veh->SetStatus(STATUS_PHYSICS);
+                }
+
+                TellOccupantsToLeaveCar(veh);
+
+                ap->SetCruiseSpeed(0);
+                ap->ClearCarMission();
+                if (FindPlayerWanted()->GetWantedLevel() <= 1) {
+                    veh->vehicleFlags.bSirenOrAlarm = false;
                 }
             }
-
-        // LABEL_583: 0x41FAEB
-            if (veh->GetMoveSpeed().SquaredMagnitude2D() >= sq(0.05f)) {
-                ap->m_nTimeSwitchedToRealPhysics = CTimer::GetTimeInMS();
-                ap->m_nTimeToStartMission        = CTimer::GetTimeInMS();
-            }
-
-
 
             break;
         }
         }
-
         break;
     }
     case STATUS_ABANDONED:
@@ -741,7 +1105,249 @@ void CCarAI::UpdateCarAI(CVehicle* veh) {
     }
     }
 
-    // 0x41FA99 (LABEL_576)
+    // 0x41E2A5 [It's actually here, not inside the switch]
+    if (veh->vehicleFlags.bIsLawEnforcer) {
+        if (FindPlayerWanted()->GetWantedLevel() >= 1) {
+            if (CCullZones::CurrentFlags_Player & eZoneAttributes::CAM_CLOSE_IN_FOR_PLAYER) {
+                TellOccupantsToLeaveCar(veh);
+                ap->SetCarMission(MISSION_NONE, 0);
+            }
+        }
+    }
 
+    const auto vehMvSpeed2DSq = veh->GetMoveSpeed().SquaredMagnitude2D();
 
+    if (vehMvSpeed2DSq >= sq(0.05f)) {
+        ap->m_nTimeSwitchedToRealPhysics = CTimer::GetTimeInMS();
+        ap->m_nTimeToStartMission        = CTimer::GetTimeInMS();
+    }
+
+    if (ap->m_nTempAction == TEMPACT_NONE) { // 0x41FB1B
+        if (ap->m_nCruiseSpeed == 0 || notsa::contains({ // 0x41FB29
+                MISSION_NONE,
+                MISSION_STOP_FOREVER,
+                MISSION_BLOCKPLAYER_HANDBRAKESTOP,
+                MISSION_PROTECTION_REAR,
+                MISSION_PROTECTION_FRONT,
+                MISSION_ESCORT_LEFT,
+                MISSION_ESCORT_RIGHT,
+                MISSION_ESCORT_REAR,
+                MISSION_ESCORT_FRONT,
+                MISSION_FOLLOWCAR_CLOSE,
+            }, ap->m_nCarMission)
+        ) {
+            if (CTimer::GetTimeInMS() - veh->m_nLastCollisionTime > 500) { // 0x41FBA8
+                ap->m_nTimeToStartMission = CTimer::GetTimeInMS();
+            }
+
+            if (vehMvSpeed2DSq <= sq(0.012f)) { // 0x41FBB6
+                const auto updateInterval = notsa::contains({ DRIVING_STYLE_STOP_FOR_CARS, DRIVING_STYLE_STOP_FOR_CARS_IGNORE_LIGHTS }, ap->m_nCarMission)
+                    ? 500u * (veh->m_nRandomSeed % 16) + 40u
+                    : 1000u;
+                if ((CTimer::GetTimeInMS() - ap->m_nTimeToStartMission) > updateInterval) {
+                    ap->m_ucTempActionMode = CTimer::GetTimeInMS() >= ap->m_LastUpdateTimeMs + 10'000 // 0x41FC02
+                        ? 0
+                        : (ap->m_ucTempActionMode + 1) % 4;
+
+                    ap->m_LastUpdateTimeMs = CTimer::GetTimeInMS();
+
+                    if (ap->m_nCarMission != MISSION_CRUISE || veh->IsCreatedBy(MISSION_VEHICLE) || (veh->vehicleFlags.bUsedForReplay)) { // 0x41FC4E
+                        switch (ap->m_ucTempActionMode) {
+                        case 0:  ap->SetTempAction(TEMPACT_REVERSE, 1'500);       break;
+                        case 1:  ap->SetTempAction(TEMPACT_REVERSE, 4'000);       break;
+                        case 2:  ap->SetTempAction(TEMPACT_REVERSE_LEFT, 2'500);  break;
+                        case 3:  ap->SetTempAction(TEMPACT_REVERSE_RIGHT, 2'500); break;
+                        default: NOTSA_UNREACHABLE();
+                        }
+                    } else {
+                        ap->SetTempAction(TEMPACT_REVERSE, 750); 
+                    }
+
+                    ap->m_nTimeToStartMission = CTimer::GetTimeInMS();
+
+                    if (veh->IsCreatedBy(RANDOM_VEHICLE)) { // 0x41FCF2
+                        switch (ap->m_nCarDrivingStyle) {
+                        case DRIVING_STYLE_STOP_FOR_CARS:
+                        case DRIVING_STYLE_SLOW_DOWN_FOR_CARS:
+                        case DRIVING_STYLE_STOP_FOR_CARS_IGNORE_LIGHTS:
+                        case DRIVING_STYLE_STOP_FOR_CARS_IGNORE_LIGHTS|DRIVING_STYLE_AVOID_CARS:
+                            veh->m_autoPilot.m_nCarDrivingStyle = DRIVING_STYLE_AVOID_CARS;
+                            break;
+                        }
+                    }
+
+                    if (veh->GetStatus() == STATUS_SIMPLE) { // 0x41FD18
+                        veh->SetStatus(STATUS_PHYSICS);
+                    }
+
+                    veh->PlayCarHorn();
+                }
+            }
+        }
+    }
+
+    if (veh->m_nRandomSeed % 8 == 0) { // 0x41FD3C
+        if (   CTimer::GetTimeInMS() - ap->m_nTimeSwitchedToRealPhysics > 30'000
+            && CTimer::GetPreviousTimeInMS() - ap->m_nTimeSwitchedToRealPhysics < 30'000
+            && ap->m_nCarMission == MISSION_CRUISE
+            && !CTrafficLights::ShouldCarStopForBridge(veh)
+            ) {
+            CCarCtrl::SwitchVehicleToRealPhysics(veh);
+            ap->m_nCarDrivingStyle = DRIVING_STYLE_AVOID_CARS;
+            ap->SetTempAction(TEMPACT_REVERSE, 400);
+        }
+    }
+
+    if (veh->vehicleFlags.bIsLawEnforcer) { // 0x41FDA1
+        if (notsa::contains({ MISSION_RAMPLAYER_FARAWAY, MISSION_RAMPLAYER_CLOSE }, ap->m_nCarMission)) {
+            if (plyrVeh) {
+                if (plyrVeh->GetVehicleAppearance() == VEHICLE_APPEARANCE_BIKE) {
+                    ap->m_nCarMission = MISSION_BLOCKPLAYER_FARAWAY;
+                }
+            }
+        }
+    }
+
+    if (veh->GetUp().z <= -0.7f) { // 0x41FDEA
+        ap->SetTempAction(TEMPACT_REVERSE, 1'000);
+    }
+
+    if (   notsa::contains({ TEMPACT_NONE, TEMPACT_BOOST_USE_STEERING_ANGLE }, ap->m_nTempAction)
+        && notsa::contains(
+            {
+                MISSION_RAMPLAYER_FARAWAY,
+                MISSION_RAMPLAYER_CLOSE,
+                MISSION_BLOCKPLAYER_FARAWAY,
+                MISSION_BLOCKPLAYER_CLOSE,
+                MISSION_APPROACHPLAYER_FARAWAY,
+                MISSION_APPROACHPLAYER_CLOSE
+            },
+            ap->m_nCarMission
+          )
+        && plyrVeh
+    ) { // 0x41FE1B
+        const auto  plyrVehFwdDir2D = CVector2D{ plyrVeh->GetForwardVector() }.Normalized();
+        const auto  thisVehFwdDir2D = CVector2D{ veh->GetForwardVector() }.Normalized();
+        const auto& plyrVelocity3D  = FindPlayerSpeed();
+        const auto  plyrSpeed3DSq   = plyrVelocity3D.SquaredMagnitude();
+        const auto  plyrCoors       = FindPlayerCoors();
+
+        const auto vehiclesFwdDot = plyrVehFwdDir2D.Dot(thisVehFwdDir2D);
+        const auto vehToPlyrDir3D = FindPlayerCoors() - veh->GetPosition();
+
+        if (plyrSpeed3DSq >= sq(0.1f) && veh->GetMoveSpeed().SquaredMagnitude() <= plyrSpeed3DSq) { // 0x41FEE8
+            if (vehiclesFwdDot > 0.f) { // 0x41FF25 - Same direction
+                if (plyrVelocity3D.Magnitude2D() * 0.5f < vehToPlyrDir3D.Magnitude2D()) { // 0x41FF9F - OG: plyrVelocity3D.Magnitude2D() * vehToPlyrDir.Magnitude2D() * 0.5f < vehToPlyrDir.SquaredMagnitude2D()
+                    const auto vehToPlyrDist3DSq = vehToPlyrDir3D.SquaredMagnitude();
+                    if (vehToPlyrDist3DSq >= sq(12.f)) { // 0x42002A
+                        ap->SetTempAction(TEMPACT_WAIT, 250);
+                    }
+
+                    // Calculate steer angle to hit the player
+                    if (vehToPlyrDist3DSq <= sq(20.f) && thisVehFwdDir2D.Dot(plyrVehFwdDir2D) > 0.8f && plyrSpeed3DSq >= sq(0.6f)) { // 0x420087 + 0x4200D6
+                        ap->SetTempAction(TEMPACT_BOOST_USE_STEERING_ANGLE, 250);
+
+                        const auto targetSteerAngle = CGeneral::LimitRadianAngle(
+                            CGeneral::GetATanOf(plyrCoors + plyrVelocity3D * 120.f - veh->GetPosition()) // 0x42019F
+                            - CGeneral::GetATanOf(thisVehFwdDir2D) // 0x4201B3
+                        ); 
+                        const auto maxSteerAngle = CCarCtrl::FindMaxSteerAngle(veh);
+                        veh->m_fSteerAngle = std::clamp(targetSteerAngle, -maxSteerAngle, maxSteerAngle); // 0x42025C
+                    }
+
+                }
+            }
+        }
+
+        if (   vehiclesFwdDot < -0.8f // 0x420262
+            && plyrSpeed3DSq >= sq(0.3f) // 0x42029B
+            && vehToPlyrDir3D.SquaredMagnitude() <= sq(45.f) // 0x4202E6
+            && veh->GetMoveSpeed().SquaredMagnitude() >= sq(0.5f) // 0x420344
+            ) {
+            const auto rdot = vehToPlyrDir3D.Dot(veh->GetRightVector());
+            ap->SetTempAction(
+                std::abs(rdot) < 15.f
+                    ? rdot >= 0.f
+                        ? TEMPACT_HANDBRAKETURNRIGHT
+                        : TEMPACT_HANDBRAKETURNLEFT
+                    : ap->m_nTempAction, // No change
+                2'000
+            );
+        }
+    }
+
+    //> 0x4203C1
+    if (veh->vehicleFlags.bSirenOrAlarm && ((uint8)veh->m_nRandomSeed ^ (uint8)rand()) == 0xAD) {
+        veh->m_nHornCounter = 45;
+    }
+
+    //> 0x4203F0 - Handle speed mult change based on time
+    ap->m_SpeedMult = [&]{
+        const auto targetSpeedMult = ap->m_nCarMission == MISSION_CRUISE
+            ? CCarCtrl::FindSpeedMultiplierWithSpeedFromNodes(ap->field_41)
+            : 1.f;
+        const auto delta = std::abs(ap->m_SpeedMult - targetSpeedMult);
+        const auto step  = CTimer::GetTimeStep() * 0.01f;
+        if (delta < step) {
+            return ap->m_SpeedMult; // No change
+        }
+        return targetSpeedMult >= ap->m_SpeedMult
+            ? ap->m_SpeedMult + step
+            : ap->m_SpeedMult - step;
+    }();
+
+    //> 0x420445 - Handle player changing water/land vehicles while being chased
+    if (veh->vehicleFlags.bIsLawEnforcer && FindPlayerWanted()->GetWantedLevel() > 0) {
+        if (plyrVeh) {
+            switch (plyrVeh->GetVehicleAppearance()) {
+            case VEHICLE_APPEARANCE_AUTOMOBILE:
+            case VEHICLE_APPEARANCE_BIKE: {
+                if (veh->GetVehicleAppearance() == VEHICLE_APPEARANCE_BOAT) {
+                    ap->SetTempAction(TEMPACT_WAIT, 1'000);
+                }
+                break;
+            }
+            case VEHICLE_APPEARANCE_BOAT: {
+                switch (veh->GetVehicleAppearance()) {
+                case VEHICLE_APPEARANCE_AUTOMOBILE:
+                case VEHICLE_APPEARANCE_BIKE:
+                    ap->SetTempAction(TEMPACT_WAIT, 1'000);
+                }
+                break;
+            }
+            }
+        } else {
+            if (plyr->GetIntelligence()->GetTaskSwim()) { // Inverted!
+                switch (veh->GetVehicleAppearance()) {
+                case VEHICLE_APPEARANCE_AUTOMOBILE:
+                case VEHICLE_APPEARANCE_BIKE:
+                    ap->SetTempAction(TEMPACT_WAIT, 1'000);
+                }
+            } else {
+                if (veh->GetVehicleAppearance() == VEHICLE_APPEARANCE_BOAT) {
+                    ap->SetTempAction(TEMPACT_WAIT, 1'000);
+                }
+            }
+        }
+    }
+
+    //> 0x420559 - 0x42064E - Adjust cruise speed in some cases
+    if (CTimer::GetFrameCounter() % 16 == 14 && veh->vehicleFlags.bIsLawEnforcer) {
+        if (notsa::contains({ STATUS_SIMPLE, STATUS_PHYSICS }, veh->GetStatus()) && ap->m_nCarMission == MISSION_CRUISE && veh->IsSubAutomobile()) {
+            if (CPopCycle::m_bCurrentZoneIsGangArea) {
+                ap->m_nCruiseSpeed = 10; // Start at 10, go down to min 1
+                for (auto& p : GetPedPool()->GetAllValid()) {
+                    if (!IsPedTypeGang(p.m_nPedType) && p.m_nPedType != PED_TYPE_DEALER) {
+                        continue;
+                    }
+                    if ((veh->GetPosition() - p.GetPosition()).SquaredMagnitude() >= sq(10.f)) {
+                        continue;
+                    }
+                    if (--ap->m_nCruiseSpeed == 1) { // Minimum 1
+                        break;
+                    }
+                }
+            }
+        }
+    }
 }

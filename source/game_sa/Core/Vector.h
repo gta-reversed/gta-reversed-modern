@@ -55,6 +55,9 @@ public:
     /// Perform a dot product with this and `o`, returning the result
     auto Dot(const CVector& o) const -> float;
 
+    /// Perform a 2D dot product with this and `o`, returning the result
+    auto Dot2D(const CVector& o) const -> float;
+
     /*!
     * @notsa
     *

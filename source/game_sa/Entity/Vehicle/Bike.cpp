@@ -144,7 +144,7 @@ CBike::CBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy
     CBike::SetupSuspensionLines();
 
     m_autoPilot.m_nCarMission = MISSION_NONE;
-    m_autoPilot.m_nTempAction = 0;
+    m_autoPilot.m_nTempAction = TEMPACT_NONE;
     m_autoPilot.m_nTimeToStartMission = CTimer::GetTimeInMS();
     m_autoPilot.carCtrlFlags.bAvoidLevelTransitions = false;
 

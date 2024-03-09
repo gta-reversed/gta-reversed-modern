@@ -112,6 +112,8 @@ public:
 
     //! Heading of the vector - 
     float Heading() const {
+        // -x, y is basically GetPerpRight()
+        // that's the same as std::atan(y, x) - 90deg;
         return std::atan2(-x, y);
     }
 

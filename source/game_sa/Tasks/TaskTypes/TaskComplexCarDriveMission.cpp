@@ -40,10 +40,10 @@ void CTaskComplexCarDriveMission::SetUpCar() {
     autopilot.m_nCruiseSpeed        = (uint32)m_CruiseSpeed;
     autopilot.m_speed               = (float)autopilot.m_nCruiseSpeed;
     autopilot.m_nCarDrivingStyle    = (eCarDrivingStyle)m_CarDrivingStyle;
-    autopilot.m_pTargetCar          = m_pTargetVehicle;
+    autopilot.m_TargetEntity          = m_pTargetVehicle;
     autopilot.m_nTimeToStartMission = CTimer::GetTimeInMS();
 
-    CEntity::SafeRegisterRef(autopilot.m_pTargetCar);
+    CEntity::SafeRegisterRef(autopilot.m_TargetEntity);
 
     m_Veh->vehicleFlags.bEngineOn = m_Veh->vehicleFlags.bEngineBroken ? false : true;
 }

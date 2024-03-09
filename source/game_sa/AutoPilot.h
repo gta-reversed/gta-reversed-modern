@@ -17,7 +17,7 @@
 class CVehicle;
 class CEntity;
 
-enum eAutoPilotTempAction {
+enum eAutoPilotTempAction : int8 {
     TEMPACT_NONE                     = 0,
     TEMPACT_WAIT                     = 1,
     TEMPACT_EMPTYTOBEREUSED          = 2,
@@ -65,9 +65,9 @@ public:
     int8                m_nNextLane;
     eCarDrivingStyle    m_nCarDrivingStyle;
     eCarMission         m_nCarMission;
-    char                m_nTempAction;
+    eAutoPilotTempAction m_nTempAction;
     uint32              m_nTempActionTime;
-    uint32              _someStartTime;
+    uint32              m_LastUpdateTimeMs; // 
     uint8               m_ucTempActionMode;
     uint8               m_ucCarMissionModeCounter;
     char                field_36[2];
@@ -76,7 +76,7 @@ public:
     uint8               m_nCruiseSpeed;
     char                field_41;
     char                field_42[2];
-    float               field_44;
+    float               m_SpeedMult;
     uint8               m_ucHeliTargetDist;
     uint8               m_ucHeliSpeedMult;
     char                field_4A;
@@ -110,16 +110,12 @@ public:
     CNodeAddress    m_aPathFindNodesInfo[8];
     uint16          m_nPathFindNodesCount;
     char            field_8A[2];
-    CVehicle*       m_pTargetCar; // More like "target entity", see 0x63C5B9
-    CEntity*        m_pCarWeMakingSlowDownFor;
+    CVehicle*       m_TargetEntity;
+    CEntity*        m_ObstructingEntity; // Entity to slow down for
     int8            m_vehicleRecordingId;
     bool            m_bPlaneDogfightSomething;
     int16           field_96;
 
-    // NOTSA Section
-    void SetTempAction(uint32 action, uint32 timeMs) noexcept;
-    void ClearTempAction() noexcept;
-public:
     CAutoPilot();
 
     void ModifySpeed(float target);
@@ -133,6 +129,30 @@ public:
     void SetCarMission(eCarMission carMission, uint32 cruiseSpeed) { // NOTSA
         m_nCarMission = carMission;
         m_nCruiseSpeed = cruiseSpeed;
+    }
+
+    void ClearCarMission() {
+        m_nCarMission = MISSION_NONE;
+    }
+
+    void SetCruiseSpeed(uint32 s) {
+        assert(s <= UINT8_MAX);
+        m_nCruiseSpeed = s;
+    }
+
+    /*!
+     * @notsa
+     * @brief Set the temporary action
+     * @param action The action set add
+     * @param durMs  The action's duration in milliseconds
+    */
+    void SetTempAction(eAutoPilotTempAction action, uint32 durMs);
+
+    /*!
+     * @brief Clear current temp. act.
+    */
+    void ClearTempAct() {
+        m_nTempAction = TEMPACT_NONE;
     }
 };
 

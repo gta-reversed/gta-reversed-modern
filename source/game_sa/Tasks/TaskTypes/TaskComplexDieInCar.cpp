@@ -126,7 +126,7 @@ void CTaskComplexDieInCar::PreparePedVehicleForPedDeath(CVehicle *vehicle) {
     }
     vehicle->m_autoPilot.m_nCruiseSpeed    = 0;
     vehicle->m_autoPilot.m_nCarMission     = eCarMission::MISSION_NONE;
-    vehicle->m_autoPilot.m_nTempAction     = 6;
+    vehicle->m_autoPilot.m_nTempAction     = TEMPACT_HANDBRAKESTRAIGHT;
     vehicle->m_autoPilot.m_nTempActionTime = CTimer::GetTimeInMS() + 2000;
 }
 
