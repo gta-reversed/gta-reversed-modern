@@ -250,12 +250,7 @@ public:
     */
     template<Task T>
     T* GetSimplestActiveTaskAs() {
-        if (const auto task = GetSimplestActiveTask()) {
-            if (task->GetTaskType() == T::Type) {
-                return static_cast<T*>(task);
-            }
-        }
-        return nullptr;
+        return CTask::DynCast<T>(GetSimplestActiveTask());
     }
 
     /*!

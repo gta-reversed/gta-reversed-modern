@@ -114,7 +114,7 @@ bool CTaskSimplePlayerOnFoot::ProcessPed(CPed* ped) {
             PlayerControlDucked(player);
         } else if (!intelligence->GetTaskFighting() || bPedMoving) {
             CTaskSimpleUseGun* simpleTaskUseGun = intelligence->GetTaskUseGun();
-            if (simpleTaskUseGun && simpleTaskUseGun->m_pWeaponInfo && !simpleTaskUseGun->m_pWeaponInfo->flags.bAimWithArm) {
+            if (simpleTaskUseGun && simpleTaskUseGun->m_WeaponInfo && !simpleTaskUseGun->m_WeaponInfo->flags.bAimWithArm) {
                 PlayerControlZeldaWeapon(player);
             } else {
                 PlayerControlZelda(player, false);
@@ -507,7 +507,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                 }
                 if (player->m_pTargetedObject || playerData->m_bFreeAiming) {
                     CTaskSimpleUseGun* taskUseGun = intelligence->GetTaskUseGun();
-                    taskUseGun->SkipAim(player);
+                    taskUseGun->AbortIK(player);
                 }
             }
             if (player->m_pTargetedObject) {
@@ -776,7 +776,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPlayerPed* player) {
     CPad* pad = player->GetPadFromPlayer();
     float pedWalkUpDown = moveSpeed.y;
     float pedWalkLeftRight = moveSpeed.x;
-    if (!taskUseGun->m_pWeaponInfo->flags.b1stPerson || CGameLogic::IsPlayerUse2PlayerControls(player)) {
+    if (!taskUseGun->m_WeaponInfo->flags.b1stPerson || CGameLogic::IsPlayerUse2PlayerControls(player)) {
         pedWalkUpDown = pad->GetPedWalkUpDown();
         pedWalkLeftRight = pad->GetPedWalkLeftRight();
     } else if (TheCamera.Using1stPersonWeaponMode()) {
@@ -860,7 +860,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
     if (pad->DuckJustDown() || pad->GetSprint() || pad->JumpJustDown() || pad->ExitVehicleJustDown() || !CTaskSimpleDuck::CanPedDuck(player)) {
         player->GetIntelligence()->ClearTaskDuckSecondary();
         auto useGunTask = player->GetIntelligence()->GetTaskUseGun();
-        if (!useGunTask || useGunTask->m_pWeaponInfo->flags.bAimWithArm) {
+        if (!useGunTask || useGunTask->m_WeaponInfo->flags.bAimWithArm) {
             auto pedMoveState = PEDMOVE_NONE;
             if (pad->GetSprint()) {
                 if (pedMoveBlendRatio <= 0.5f) {

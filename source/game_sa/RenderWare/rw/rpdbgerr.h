@@ -1,10 +1,10 @@
 /***************************************************************************
- *                                                                         *
- * Module  : badebug.h                                                     *
- *                                                                         *
- * Purpose : Debug handling                                                *
- *                                                                         *
- **************************************************************************/
+*                                                                         *
+* Module  : badebug.h                                                     *
+*                                                                         *
+* Purpose : Debug handling                                                *
+*                                                                         *
+**************************************************************************/
 
 #ifndef RWDEBUG_H
 #define RWDEBUG_H
@@ -40,16 +40,16 @@
 #endif /* (!defined(RWPEXIT)) */
 
 /****************************************************************************
- Includes
- */
+Includes
+*/
 
 #include <rwcore.h>
 
 #include "rpplugin.h"
 
 /****************************************************************************
- Defines
- */
+Defines
+*/
 
 #ifdef RWDEBUG
 
@@ -62,10 +62,10 @@
 #ifdef RWTRACE
 
 /* Note RWTRACE should only be defined for internal builds. It should
- * also only be used rarely. It will cause the generation of Trace
- * messages for all functions. Not just those directly called from
- * the application
- */
+* also only be used rarely. It will cause the generation of Trace
+* messages for all functions. Not just those directly called from
+* the application
+*/
 
 #define RWAPIFUNCTION(function)                                         \
 static const RwChar __dbFunctionName[] = function;                      \
@@ -129,11 +129,11 @@ while(0)
 #else /* RWTRACE */
 
 /* Defining RWSTACKDEPTHCHECKING in a non-RWTRACE build will enable stack
-   depth checking on entry and exit of API and non API functions. It also
-   allows a trace of the entry and exit from the RenderWare Graphics
-   library.
-   This functionality is disabled by default because it is not thread-safe
- */
+depth checking on entry and exit of API and non API functions. It also
+allows a trace of the entry and exit from the RenderWare Graphics
+library.
+This functionality is disabled by default because it is not thread-safe
+*/
 #ifdef RWSTACKDEPTHCHECKING
 
 #define RWSTACKDEPTHCHECKONENTRY()                                      \
@@ -225,7 +225,7 @@ do                                                      \
 }                                                       \
 while(0);
 
-//{@ 20050511 DDonSS : 占쌨쇽옙占쏙옙 占쏙옙占?占쏙옙占쏙옙占쌀쇽옙 占쌍듸옙占쏙옙 占쏙옙占쏙옙
+//{@ 20050511 DDonSS : �޼��� ��� �����Ҽ� �ֵ��� ����
 #define RWMESSAGE(args)                             \
 do                                                  \
 {                                                   \
@@ -299,15 +299,15 @@ while (0)
 #endif /* RWSTACKDEPTHCHECKING */
 
 /****************************************************************************
- Functions
- */
+Functions
+*/
 
 #ifdef    __cplusplus
 extern              "C"
 {
 #endif                          /* __cplusplus */
 
-RwChar             *rwPLUGIN_ERRFUNC(RwInt32 code, ...);
+    RwChar             *rwPLUGIN_ERRFUNC(RwInt32 code, ...);
 
 #ifdef    __cplusplus
 }

@@ -1120,21 +1120,24 @@ bool CPed::DoWeHaveWeaponAvailable(eWeaponType weaponType) {
 * @addr 0x5DF340
 * @brief Do gun flash by resetting it's alpha to max
 */
-void CPed::DoGunFlash(int32 lifetime, bool bRightHand) {
+bool CPed::DoGunFlash(int32 duration, bool isLeftHand) {
     if (!m_pGunflashObject || !m_pWeaponObject) {
-        return;
+        return false;
     }
 
     // Really elegant.. ;D
-    if (bRightHand) {
+    if (isLeftHand) {
         m_nWeaponGunflashAlphaMP2     = m_sGunFlashBlendStart;
-        m_nWeaponGunFlashAlphaProgMP2 = (uint16)m_sGunFlashBlendStart / lifetime;
+        m_nWeaponGunFlashAlphaProgMP2 = (uint16)m_sGunFlashBlendStart / duration;
     } else {
         m_nWeaponGunflashAlphaMP1     = m_sGunFlashBlendStart;
-        m_nWeaponGunFlashAlphaProgMP1 = (uint16)m_sGunFlashBlendStart / lifetime;
+        m_nWeaponGunFlashAlphaProgMP1 = (uint16)m_sGunFlashBlendStart / duration;
     }
+
     const auto angle = CGeneral::GetRandomNumberInRange(-360.0f, 360.0f);
     RwMatrixRotate(RwFrameGetMatrix(m_pGunflashObject), &CPedIK::XaxisIK, angle, rwCOMBINEPRECONCAT);
+
+    return true;
 }
 
 /*!
@@ -1363,12 +1366,12 @@ void CPed::UpdateStatLeavingVehicle()
 
 /*!
 * @addr 0x5E01C0
-* @brief Transform \r inOffsetOutPosn into the given \a bone's space
+* @brief Transform \r inOutPos into the given \a bone's space
 *
-* @param [in,out] inOffsetOutPosn The position to be transformed in-place.
+* @param [in,out] inOutPos The position to be transformed in-place.
 * @param          updateSkinBones If `UpdateRpHAnim` should be called
 */
-void CPed::GetTransformedBonePosition(RwV3d& inOffsetOutPosn, eBoneTag bone, bool updateSkinBones) {
+void CPed::GetTransformedBonePosition(RwV3d& inOutPos, eBoneTag bone, bool updateSkinBones) {
     // Pretty much the same as GetBonePosition..
     if (updateSkinBones) {
         if (!bCalledPreRender) {
@@ -1376,12 +1379,12 @@ void CPed::GetTransformedBonePosition(RwV3d& inOffsetOutPosn, eBoneTag bone, boo
             bCalledPreRender = true;
         }
     } else if (!bCalledPreRender) { // Return static local bone position instead
-        inOffsetOutPosn = m_matrix->TransformPoint(GetPedBoneStdPosition(bone));
+        inOutPos = m_matrix->TransformPoint(GetPedBoneStdPosition(bone));
         return;
     }
 
     // Return actual position
-    RwV3dTransformPoints(&inOffsetOutPosn, &inOffsetOutPosn, 1, &GetBoneMatrix(bone));
+    RwV3dTransformPoints(&inOutPos, &inOutPos, 1, &GetBoneMatrix(bone));
 }
 
 /*!

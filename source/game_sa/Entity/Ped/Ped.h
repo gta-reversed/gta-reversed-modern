@@ -113,41 +113,41 @@ public:
     /* https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CPedSA.h */
     struct {
         // 1st byte starts here (m_nPedFlags)
-        bool bIsStanding : 1 = false;            // is ped standing on something
-        bool bWasStanding : 1 = false;           // was ped standing on something
-        bool bIsLooking : 1 = false;             // is ped looking at something or in a direction
-        bool bIsRestoringLook : 1 = false;       // is ped restoring head position from a look
-        bool bIsAimingGun : 1 = false;           // is ped aiming gun
-        bool bIsRestoringGun : 1 = false;        // is ped moving gun back to default posn
-        bool bCanPointGunAtTarget : 1 = false;   // can ped point gun at target
-        bool bIsTalking : 1 = false;             // is ped talking(see Chat())
+        bool bIsStanding : 1 = false;            // 0 is ped standing on something
+        bool bWasStanding : 1 = false;           // 1 was ped standing on something
+        bool bIsLooking : 1 = false;             // 2 is ped looking at something or in a direction
+        bool bIsRestoringLook : 1 = false;       // 3 is ped restoring head position from a look
+        bool bIsAimingGun : 1 = false;           // 4 is ped aiming gun
+        bool bIsRestoringGun : 1 = false;        // 5 is ped moving gun back to default posn
+        bool bCanPointGunAtTarget : 1 = false;   // 6 can ped point gun at target
+        bool bIsTalking : 1 = false;             // 7 is ped talking(see Chat())
 
-        bool bInVehicle : 1 = false;             // is in a vehicle [Sometimes accessed as `(ped->m_nPedFlags >> 8) & 1`]
-        bool bIsInTheAir : 1 = false;            // is in the air
-        bool bIsLanding : 1 = false;             // is landing after being in the air
-        bool bHitSomethingLastFrame : 1 = false; // has been in a collision last frame
-        bool bIsNearCar : 1 = false;             // has been in a collision last frame
-        bool bRenderPedInCar : 1 = true;         // has been in a collision last frame
-        bool bUpdateAnimHeading : 1 = false;     // update ped heading due to heading change during anim sequence
-        bool bRemoveHead : 1 = false;            // waiting on AntiSpazTimer to remove head - TODO: See `RemoveBodyPart` - The name seems to be incorrect. It should be like `bHasBodyPartToRemove`.
+        bool bInVehicle : 1 = false;             // 8  is in a vehicle [Sometimes accessed as `(ped->m_nPedFlags >> 8) & 1`]
+        bool bIsInTheAir : 1 = false;            // 9  is in the air
+        bool bIsLanding : 1 = false;             // 10 is landing after being in the air
+        bool bHitSomethingLastFrame : 1 = false; // 11 has been in a collision last frame
+        bool bIsNearCar : 1 = false;             // 12 has been in a collision last frame
+        bool bRenderPedInCar : 1 = true;         // 13 has been in a collision last frame
+        bool bUpdateAnimHeading : 1 = false;     // 14 update ped heading due to heading change during anim sequence
+        bool bRemoveHead : 1 = false;            // 15 waiting on AntiSpazTimer to remove head - TODO: See `RemoveBodyPart` - The name seems to be incorrect. It should be like `bHasBodyPartToRemove`.
 
-        bool bFiringWeapon : 1 = false;         // is pulling trigger
-        bool bHasACamera : 1;                   // does ped possess a camera to document accidents
-        bool bPedIsBleeding : 1 = false;        // Ped loses a lot of blood if true
-        bool bStopAndShoot : 1 = false;         // Ped cannot reach target to attack with fist, need to use gun
-        bool bIsPedDieAnimPlaying : 1 = false;  // is ped die animation finished so can dead now
-        bool bStayInSamePlace : 1 = false;      // when set, ped stays put
-        bool bKindaStayInSamePlace : 1 = false; // when set, ped doesn't seek out opponent or cover large distances. Will still shuffle and look for cover
-        bool bBeingChasedByPolice : 1 = false;  // use nodes for route find
+        bool bFiringWeapon : 1 = false;         // 16 is pulling trigger
+        bool bHasACamera : 1;                   // 17 does ped possess a camera to document accidents
+        bool bPedIsBleeding : 1 = false;        // 18 Ped loses a lot of blood if true
+        bool bStopAndShoot : 1 = false;         // 19 Ped cannot reach target to attack with fist, need to use gun
+        bool bIsPedDieAnimPlaying : 1 = false;  // 20 is ped die animation finished so can dead now
+        bool bStayInSamePlace : 1 = false;      // 21 when set, ped stays put
+        bool bKindaStayInSamePlace : 1 = false; // 22 when set, ped doesn't seek out opponent or cover large distances. Will still shuffle and look for cover
+        bool bBeingChasedByPolice : 1 = false;  // 23 use nodes for route find
 
-        bool bNotAllowedToDuck : 1 = false;     // Is this ped allowed to duck at all?
-        bool bCrouchWhenShooting : 1 = false;   // duck behind cars etc
-        bool bIsDucking : 1 = false;            // duck behind cars etc
-        bool bGetUpAnimStarted : 1 = false;     // don't want to play getup anim if under something
-        bool bDoBloodyFootprints : 1 = false;   // bIsLeader
-        bool bDontDragMeOutCar : 1 = false;
-        bool bStillOnValidPoly : 1 = false;     // set if the polygon the ped is on is still valid for collision
-        bool bAllowMedicsToReviveMe : 1 = true;
+        bool bNotAllowedToDuck : 1 = false;     // 24 Is this ped allowed to duck at all?
+        bool bCrouchWhenShooting : 1 = false;   // 25 duck behind cars etc
+        bool bIsDucking : 1 = false;            // 26 duck behind cars etc
+        bool bGetUpAnimStarted : 1 = false;     // 27 don't want to play getup anim if under something
+        bool bDoBloodyFootprints : 1 = false;   // 28 bIsLeader
+        bool bDontDragMeOutCar : 1 = false;     // 29
+        bool bStillOnValidPoly : 1 = false;     // 30 set if the polygon the ped is on is still valid for collision
+        bool bAllowMedicsToReviveMe : 1 = true; // 31
 
         // 5th byte starts here (m_nSecondPedFlags)
         bool bResetWalkAnims : 1 = false;
@@ -261,9 +261,9 @@ public:
     RpClump*            m_pGogglesObject;
     bool*               m_pGogglesState;           // Stores a pointer to either `CPostEffects::m_bInfraredVision` or `m_bNightVision`, see \r PutOnGoggles and \r AddGogglesModel
 
-    int16               m_nWeaponGunflashAlphaMP1; // AKA m_nWeaponGunflashStateLeftHand
+    int16               m_nWeaponGunflashAlphaMP1; // AKA m_nWeaponGunflashStateRightHand
     int16               m_nWeaponGunFlashAlphaProgMP1;
-    int16               m_nWeaponGunflashAlphaMP2; // AKA m_nWeaponGunflashStateRightHand
+    int16               m_nWeaponGunflashAlphaMP2; // AKA m_nWeaponGunflashStateLeftHand
     int16               m_nWeaponGunFlashAlphaProgMP2;
 
     CPedIK              m_pedIK;
@@ -402,7 +402,7 @@ public:
     void GrantAmmo(eWeaponType weaponType, uint32 ammo);
     void SetAmmo(eWeaponType weaponType, uint32 ammo);
     bool DoWeHaveWeaponAvailable(eWeaponType weaponType);
-    void DoGunFlash(int32 lifetime, bool bRightHand);
+    bool DoGunFlash(int32 lifetime, bool bRightHand);
     void SetGunFlashAlpha(bool rightHand);
     void ResetGunFlashAlpha();
     float GetBikeRidingSkill() const;
@@ -419,7 +419,7 @@ public:
     bool IsAlive() const;
     void UpdateStatEnteringVehicle();
     void UpdateStatLeavingVehicle();
-    void GetTransformedBonePosition(RwV3d& inOffsetOutPosn, eBoneTag boneId, bool updateSkinBones = false);
+    void GetTransformedBonePosition(RwV3d& inOutPos, eBoneTag boneId, bool updateSkinBones = false);
     void ReleaseCoverPoint();
     CTaskSimpleHoldEntity* GetHoldingTask();
     CEntity* GetEntityThatThisPedIsHolding();
@@ -451,6 +451,7 @@ public:
     void GetBonePosition(RwV3d& outPosition, eBoneTag boneId, bool updateSkinBones = false);
     void GiveObjectToPedToHold(int32 modelIndex, uint8 replace);
     void SetPedState(ePedState pedState);
+    ePedState GetPedState() { return m_nPedState; }
     //1 = default, 2 = scm/mission script
     void SetCharCreatedBy(ePedCreatedBy createdBy);
     void CalculateNewVelocity();
