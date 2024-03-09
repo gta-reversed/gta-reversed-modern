@@ -3922,7 +3922,7 @@ float CAutomobile::GetMovingCollisionOffset() {
 // 0x6A2390
 void CAutomobile::TellHeliToGoToCoors(float x, float y, float z, float altitudeMin, float altitudeMax) {
     m_autoPilot.m_vecDestinationCoors = CVector{ x, y, z };
-    m_autoPilot.m_nCarMission = MISSION_HELI_FLYTOCOORS;
+    m_autoPilot.SetCarMission(MISSION_HELI_FLYTOCOORS);
     m_autoPilot.SetCruiseSpeed(100);
 
     AsHeli()->m_fMinAltitude = altitudeMin;
@@ -3956,7 +3956,7 @@ void CAutomobile::ClearHeliOrientation() {
 // 0x6A2470
 void CAutomobile::TellPlaneToGoToCoors(float x, float y, float z, float altitudeMin, float altitudeMax) {
     m_autoPilot.m_vecDestinationCoors = CVector{ x, y, z };
-    m_autoPilot.m_nCarMission = MISSION_PLANE_FLYTOCOORS;
+    m_autoPilot.SetCarMission(MISSION_PLANE_FLYTOCOORS);
     m_autoPilot.SetCruiseSpeed(0);
 
     AsPlane()->m_minAltitude = std::max(altitudeMin, z);

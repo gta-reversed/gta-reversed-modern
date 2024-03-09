@@ -41,7 +41,7 @@ CTask* CTaskComplexDriveToPoint::Drive(CPed* ped) {
 
     auto dist = DistanceBetweenPoints(m_Veh->GetPosition(), m_Point);
     if (dist < m_Radius) {
-        m_Veh->m_autoPilot.m_nCarMission = MISSION_NONE;
+        m_Veh->m_autoPilot.SetCarMission(MISSION_NONE);
         field_38 = true;
         return CTaskComplexCarDrive::CreateSubTask(TASK_FINISHED, ped);
     }

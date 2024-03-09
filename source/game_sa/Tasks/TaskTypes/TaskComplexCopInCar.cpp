@@ -131,7 +131,7 @@ bool CTaskComplexCopInCar::MakeAbortable(CPed* ped, eAbortPriority priority, CEv
     if (ped->m_pVehicle == m_Vehicle && m_Vehicle) {
         if (m_Vehicle->IsDriver(ped)) {
             m_Vehicle->m_nStatus = STATUS_ABANDONED;
-            m_Vehicle->m_autoPilot.m_nCarMission = MISSION_NONE;
+            m_Vehicle->m_autoPilot.SetCarMission(MISSION_NONE);
             m_Vehicle->m_autoPilot.SetCruiseSpeed(0);
         }
     }
@@ -181,7 +181,7 @@ CTask* CTaskComplexCopInCar::CreateNextSubTask(CPed* ped) {
         return CreateSubTask(TASK_COMPLEX_WANDER, ped);
     }
     case TASK_SIMPLE_CAR_DRIVE: {
-        m_Vehicle->m_autoPilot.m_nCarMission = MISSION_NONE;
+        m_Vehicle->m_autoPilot.SetCarMission(MISSION_NONE);
         return CreateSubTask(TASK_COMPLEX_LEAVE_CAR, ped);
     }
     case TASK_COMPLEX_ENTER_CAR_AS_PASSENGER: // 0x68FA89
@@ -221,7 +221,7 @@ CTask* CTaskComplexCopInCar::ControlSubTask(CPed* ped) {
 
     // 0x68FD7E
     if (m_Vehicle && !m_Vehicle->m_pDriver && m_Vehicle->m_autoPilot.m_nCarMission != MISSION_NONE) {
-        m_Vehicle->m_autoPilot.m_nCarMission = MISSION_NONE;
+        m_Vehicle->m_autoPilot.SetCarMission(MISSION_NONE);
     }
 
     if (!m_IsDriver && (!m_Cop || m_Cop->IsStateDead())) { // 0x68FDA7

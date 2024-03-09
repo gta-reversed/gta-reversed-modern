@@ -556,7 +556,7 @@ void CCarAI::TellCarToBlockOtherCar(CVehicle* vehicle1, CVehicle* vehicle2) {
     vehicle1->m_autoPilot.m_pTargetCar = vehicle2;
     CEntity::SafeRegisterRef(vehicle1->m_autoPilot.m_pTargetCar);
     CCarCtrl::JoinCarWithRoadSystem(vehicle1);
-    vehicle1->m_autoPilot.m_nCarMission = MISSION_BLOCKCAR_FARAWAY;
+    vehicle1->m_autoPilot.SetCarMission(MISSION_BLOCKCAR_FARAWAY);
     vehicle1->vehicleFlags.bEngineOn    = !vehicle1->vehicleFlags.bEngineBroken;
 
     vehicle1->m_autoPilot.SetCruiseSpeed(std::max(vehicle1->m_autoPilot.m_nCruiseSpeed, (uint8)6));
@@ -584,7 +584,7 @@ void CCarAI::TellCarToRamOtherCar(CVehicle* vehicle1, CVehicle* vehicle2) {
     vehicle1->m_autoPilot.m_pTargetCar = vehicle2;
     CEntity::SafeRegisterRef(vehicle1->m_autoPilot.m_pTargetCar);
     CCarCtrl::JoinCarWithRoadSystem(vehicle1);
-    vehicle1->m_autoPilot.m_nCarMission = MISSION_RAMCAR_FARAWAY;
+    vehicle1->m_autoPilot.SetCarMission(MISSION_RAMCAR_FARAWAY);
     vehicle1->vehicleFlags.bEngineOn    = !vehicle1->vehicleFlags.bEngineBroken;
 
     vehicle1->m_autoPilot.SetCruiseSpeed(std::max(vehicle1->m_autoPilot.m_nCruiseSpeed, (uint8)6));
@@ -655,7 +655,7 @@ void CCarAI::UpdateCarAI(CVehicle* veh) {
             if (   vehPlyrDist2DSq <= sq(FindSwitchDistanceClose(veh))
                 || EntitiesGoHeadOn(plyr, veh) && vehPlyrDist2DSq < sq(40.f)
             ) {
-                ap->m_nCarMission = MISSION_RAMPLAYER_CLOSE;
+                ap->SetCarMission(MISSION_RAMPLAYER_CLOSE);
                 if (veh->UsesSiren()) {
                     veh->vehicleFlags.bSirenOrAlarm = true;
                 }
@@ -712,7 +712,7 @@ void CCarAI::UpdateCarAI(CVehicle* veh) {
                             if ((veh->GetModelID() != MODEL_RHINO || veh->m_nRandomSeed > 10'000) && vehPlyrDist2DSq <= sq(10.f)) { // 0x41DEE1 | 0x41E254
                                 TellOccupantsToLeaveCar(veh);
                                 ap->SetCruiseSpeed(0);
-                                ap->m_nCarMission = MISSION_NONE;
+                                ap->SetCarMission(MISSION_NONE);
                                 if (plyr->GetWantedLevel() <= 1) {
                                     veh->vehicleFlags.bSirenOrAlarm = false;
                                 }
@@ -724,7 +724,7 @@ void CCarAI::UpdateCarAI(CVehicle* veh) {
         }
         case MISSION_GOTOCOORDINATES: { // 0x41E2BF - If close enough switch to `MISSION_GOTOCOORDS_STRAIGHT`
             if ((veh->GetPosition() - ap->m_vecDestinationCoors).SquaredMagnitude2D() <= sq(FindSwitchDistanceClose(veh))) {
-                ap->m_nCarMission = MISSION_GOTOCOORDINATES_STRAIGHTLINE;
+                ap->SetCarMission(MISSION_GOTOCOORDINATES_STRAIGHTLINE);
             }
             break;
         }
@@ -752,7 +752,7 @@ void CCarAI::UpdateCarAI(CVehicle* veh) {
             break;
         case MISSION_GOTOCOORDINATES_ACCURATE: { // 0x41E338 (Pretty much copy paste `MISSION_GOTOCOORDINATES`)
             if ((veh->GetPosition() - ap->m_vecDestinationCoors).SquaredMagnitude2D() <= sq(FindSwitchDistanceClose(veh))) {
-                ap->m_nCarMission = MISSION_GOTOCOORDINATES_STRAIGHTLINE_ACCURATE;
+                ap->SetCarMission(MISSION_GOTOCOORDINATES_STRAIGHTLINE_ACCURATE);
             }
             break;
         }
@@ -785,7 +785,7 @@ void CCarAI::UpdateCarAI(CVehicle* veh) {
             }
 
             if ((veh->GetPosition() - ap->m_TargetEntity->GetPosition()).SquaredMagnitude2D() <= sq(FindSwitchDistanceClose(veh))) {
-                ap->m_nCarMission = MISSION_RAMCAR_CLOSE;
+                ap->SetCarMission(MISSION_RAMCAR_CLOSE);
             }
 
             break;
@@ -863,7 +863,8 @@ void CCarAI::UpdateCarAI(CVehicle* veh) {
                 || veh->vehicleFlags.bIsLawEnforcer && (wntd->GetWantedLevel() == 0 || wntd->m_bEverybodyBackOff || wntd->m_bPoliceBackOffGarage || wntd->m_bPoliceBackOff || CCullZones::NoPolice())
             ) {
                 TellOccupantsToLeaveCar(veh);
-                ap->SetCarMission(MISSION_STOP_FOREVER, 0);
+                ap->SetCarMission(MISSION_STOP_FOREVER);
+                ap->SetCruiseSpeed(0);
             }
             break;
         }
@@ -1100,7 +1101,7 @@ void CCarAI::UpdateCarAI(CVehicle* veh) {
     case STATUS_ABANDONED:
     case STATUS_WRECKED: {
         ap->SetCruiseSpeed(0);
-        ap->m_nCarMission = MISSION_NONE;
+        ap->SetCarMission(MISSION_NONE);
         break;
     }
     }
@@ -1110,7 +1111,8 @@ void CCarAI::UpdateCarAI(CVehicle* veh) {
         if (FindPlayerWanted()->GetWantedLevel() >= 1) {
             if (CCullZones::CurrentFlags_Player & eZoneAttributes::CAM_CLOSE_IN_FOR_PLAYER) {
                 TellOccupantsToLeaveCar(veh);
-                ap->SetCarMission(MISSION_NONE, 0);
+                ap->SetCarMission(MISSION_NONE);
+                ap->SetCruiseSpeed(0);
             }
         }
     }
@@ -1202,7 +1204,7 @@ void CCarAI::UpdateCarAI(CVehicle* veh) {
         if (notsa::contains({ MISSION_RAMPLAYER_FARAWAY, MISSION_RAMPLAYER_CLOSE }, ap->m_nCarMission)) {
             if (plyrVeh) {
                 if (plyrVeh->GetVehicleAppearance() == VEHICLE_APPEARANCE_BIKE) {
-                    ap->m_nCarMission = MISSION_BLOCKPLAYER_FARAWAY;
+                    ap->SetCarMission(MISSION_BLOCKPLAYER_FARAWAY);
                 }
             }
         }

@@ -201,7 +201,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
         boat->m_nStatus = eEntityStatus::STATUS_ABANDONED;
         JoinCarWithRoadSystem(boat);
 
-        boat->m_autoPilot.m_nCarMission = eCarMission::MISSION_NONE;
+        boat->m_autoPilot.SetCarMission(eCarMission::MISSION_NONE);
         boat->m_autoPilot.m_nTempAction = TEMPACT_NONE;
         boat->m_autoPilot.m_speed = 20.0F;
         boat->m_autoPilot.SetCruiseSpeed(20);
@@ -243,7 +243,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
     vehicle->vehicleFlags.bEngineOn = false;
     vehicle->vehicleFlags.bHasBeenOwnedByPlayer = true;
 
-    vehicle->m_autoPilot.m_nCarMission = eCarMission::MISSION_NONE;
+    vehicle->m_autoPilot.SetCarMission(eCarMission::MISSION_NONE);
     vehicle->m_autoPilot.m_nTempAction = TEMPACT_NONE;
     vehicle->m_autoPilot.m_nCarDrivingStyle = DRIVING_STYLE_STOP_FOR_CARS;
     vehicle->m_autoPilot.m_speed = 13.0F;
@@ -714,7 +714,7 @@ bool CCarCtrl::ScriptGenerateOneEmergencyServicesCar(uint32 modelId, CVector pos
     if (CStreaming::IsModelLoaded(modelId)) {
         if (auto pAuto = GenerateOneEmergencyServicesCar(modelId, posn)) {
             pAuto->m_autoPilot.m_vecDestinationCoors = posn;
-            pAuto->m_autoPilot.m_nCarMission = JoinCarWithRoadSystemGotoCoors(pAuto, posn, false, false) ? MISSION_GOTOCOORDINATES_STRAIGHTLINE : MISSION_GOTOCOORDINATES;
+            pAuto->m_autoPilot.SetCarMission(JoinCarWithRoadSystemGotoCoors(pAuto, posn, false, false) ? MISSION_GOTOCOORDINATES_STRAIGHTLINE : MISSION_GOTOCOORDINATES);
             return true;
         }
     }
