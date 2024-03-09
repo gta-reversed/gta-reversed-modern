@@ -121,14 +121,8 @@ public:
     void ModifySpeed(float target);
     void RemoveOnePathNode();
 
-    void SetCarMission(eCarMission carMission) { // NOTSA | inlined
-        //if (m_nCarMission != MISSION_CRASH_PLANE_AND_BURN && m_nCarMission != MISSION_CRASH_HELI_AND_BURN) // This was here for some reason, yet no explanation... 
+    void SetCarMission(eCarMission carMission) {
         m_nCarMission = carMission;
-    }
-
-    void SetCarMission(eCarMission carMission, uint32 cruiseSpeed) { // NOTSA
-        m_nCarMission = carMission;
-        SetCruiseSpeed(cruiseSpeed);
     }
 
     void ClearCarMission() {
