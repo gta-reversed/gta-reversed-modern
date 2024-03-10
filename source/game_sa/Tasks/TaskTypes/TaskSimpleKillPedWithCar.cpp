@@ -40,8 +40,12 @@ void CTaskSimpleKillPedWithCar::DamageCarBonnet(CPed const*) {
         return;
     }
 
-    const auto dir = m_Car->GetRight() * 0.1f + m_Car->GetUp() * 0.5f;
-    flyingObj->m_vecMoveSpeed += CGeneral::DoCoinFlip() ? dir : -dir;
+    const auto dir =
+          m_Car->GetRight() * 0.1f
+        + m_Car->GetUp() * 0.5f;
+    flyingObj->m_vecMoveSpeed += CGeneral::DoCoinFlip()
+        ? dir
+        : -dir;
 
     flyingObj->ApplyTurnForce(m_Car->GetUp() * 10.f, m_Car->GetForward());
 }
@@ -53,8 +57,7 @@ bool CTaskSimpleKillPedWithCar::ProcessPed(CPed* ped) {
     const auto& carBB         = carCM->GetBoundingBox();
     const auto& carVel        = m_Car->GetMoveSpeed();
     const auto& carFwd        = m_Car->GetForward();
-    const auto  carVelFwd     = carFwd.Dot(carVel); // Velocity forwards
-    const auto  carIsGoingFwd = carVelFwd >= 0.f;
+    const auto  carIsGoingFwd = carFwd.Dot(carVel) >= 0.f;
 
     const auto pedPos     = ped->GetPosition();
     const auto pedToCar   = pedPos - carPos;
@@ -86,7 +89,7 @@ bool CTaskSimpleKillPedWithCar::ProcessPed(CPed* ped) {
                 pedHitSide = eDirection::FORWARD;
             }
         }
-    } else if (pedPosOS.z > 0.1f) { // 0x6566CB
+    } else if (pedPosOS.z > 0.1f) { // 0x6566CB - Ped is on the bonnet
         carDir = FROM_BACK;
 
         const auto ApplyMoveSpeed = [&](float x, float w) {
@@ -139,7 +142,6 @@ bool CTaskSimpleKillPedWithCar::ProcessPed(CPed* ped) {
     // 0x6568E2
 
     CPedDamageResponseCalculator dmgRespCalc{m_Car, 1000.f, killWT, PED_PIECE_HEAD, false};
-
 
     const auto ppiece = [&]{
         switch (carDir) {
