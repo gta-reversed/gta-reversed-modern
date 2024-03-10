@@ -4,7 +4,7 @@
 
 class CEntity;
 
-class CTaskComplexChat : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexChat : public CTaskComplex {
 public:
     bool  m_IsChatter{};
     CPed* m_ChatPartner{};

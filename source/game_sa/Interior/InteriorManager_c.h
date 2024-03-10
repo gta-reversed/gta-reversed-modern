@@ -10,23 +10,23 @@ class InteriorManager_c {
 public:
     // TODO: Use TList_c instead of List_c
 
-    Interior_c               m_interiors[8];               // 0x0
-    TList_c<Interior_c>      m_interiorPool;               // 0x3CA0
-    InteriorGroup_c          m_interiorGroups[8];          // 0x3CAC
-    TList_c<InteriorGroup_c> m_interiorGroupList;          // 0x428C
-    TList_c<InteriorGroup_c> m_interiorGroupPool;          // 0x4298
-    size_t                   m_interiorCount;              // 0x42A4
-    int32                    m_InteriorIds[64];            // 0x42A8
-    int32                    m_objectCount;                // 0x43A8
-    InteriorObject           m_objects[32];                // 0x43AC
-    char                     m_interiorPedsAliveState[16]; // 0x472C
-    CEntryExit*              m_enex;                       // 0x473C
-    CRect                    m_enexRect;                   // 0x4740
-    bool                     m_freeze;             // 0x4750
-    int8                     m_pruneVisibleEffects;        // 0x4751
-    int8                     m_bPedsEnabled;               // 0x4752
-    int8                     field_4753;                   // 0x4753
-    int32                    m_lastUpdateTimeInMs;         // 0x4754
+    Interior_c               m_interiors[8]{};               // 0x0
+    TList_c<Interior_c>      m_interiorPool{};               // 0x3CA0
+    InteriorGroup_c          m_interiorGroups[8]{};          // 0x3CAC
+    TList_c<InteriorGroup_c> m_interiorGroupList{};          // 0x428C
+    TList_c<InteriorGroup_c> m_interiorGroupPool{};          // 0x4298
+    size_t                   m_interiorCount{};              // 0x42A4
+    int32                    m_InteriorIds[64]{};            // 0x42A8
+    int32                    m_objectCount{};                // 0x43A8
+    InteriorObject           m_objects[32]{};                // 0x43AC
+    char                     m_interiorPedsAliveState[16]{}; // 0x472C
+    CEntryExit*              m_enex{};                       // 0x473C
+    CRect                    m_enexRect{};                   // 0x4740
+    bool                     m_freeze{};                     // 0x4750
+    int8                     m_pruneVisibleEffects{};        // 0x4751
+    int8                     m_bPedsEnabled{};               // 0x4752
+    int8                     field_4753{};                   // 0x4753
+    int32                    m_lastUpdateTimeInMs{};         // 0x4754
 
 public:
     static void InjectHooks();
@@ -70,14 +70,14 @@ public:
     *
     * @returns The interior the ped (it's position) is within, or null
     */
-    Interior_c* GetPedsInterior(CPed* ped);
+    Interior_c* GetPedsInterior(const CPed* ped);
 
     void SetStealableObjectStolen(CEntity* entity, uint8 a3);
     int32 FindStealableObjectId(CEntity* entity);
     int32 FindStealableObjectId(int32 interiorId, int32 modelId, CVector point);
     bool HasInteriorHadStealDataSetup(Interior_c* interior);
     int8 IsGroupActive(int32 group);
-    InteriorGroup_c* GetPedsInteriorGroup(CPed* ped);
+    InteriorGroup_c* GetPedsInteriorGroup(const CPed* ped);
     void SetEntryExitPtr(CEntryExit* exit);
     bool GetBoundingBox(FurnitureEntity_c* entity, CVector* pos);
     void ActivatePeds(bool enable);

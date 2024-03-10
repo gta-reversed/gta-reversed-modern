@@ -30,7 +30,6 @@ void WaitForDebugger() {
 static constexpr auto DEFAULT_INI_FILENAME = "gta-reversed.ini";
 
 #include "extensions/Configs/FastLoader.hpp"
-#include "extensions/Configs/WindowedMode.hpp"
 
 void LoadConfigurations() {
     // Firstly load the INI into the memory.
@@ -38,7 +37,6 @@ void LoadConfigurations() {
 
     // Then load all specific configurations.
     g_FastLoaderConfig.Load();
-    g_WindowedModeConfig.Load();
     // ...
 }
 
@@ -54,6 +52,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
             MessageBox(NULL, "gta_reversed failed to load (RenderWare has already been started)", "Error", MB_ICONERROR | MB_OK);
             return FALSE;
         }
+
+        std::setlocale(LC_ALL, "en_US.UTF-8");
+        // Support UTF-8 IO for Windows Terminal. (or CMD if a supported font is used)
+        SetConsoleCP(CP_UTF8);
+        SetConsoleOutputCP(CP_UTF8);
 
         DisplayConsole();
         CommandLine::Load(__argc, __argv);

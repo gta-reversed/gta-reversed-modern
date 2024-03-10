@@ -302,12 +302,12 @@ bool CTrailer::GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* v
             outPos.x = 0.0f;
             outPos.y = mi->GetColModel()->GetBoundingBox().m_vecMax.y + 1.0f;
             outPos.z = 0.5f - m_fFrontHeightAboveRoad;
-            outPos = MultiplyMatrixWithVector(*m_matrix, outPos);
+            outPos = m_matrix->TransformPoint(outPos);
             return true;
         }
         return false;
     }
-    outPos = MultiplyMatrixWithVector(*m_matrix, outPos);
+    outPos = m_matrix->TransformPoint(outPos);
     return true;
 }
 
@@ -323,7 +323,7 @@ bool CTrailer::GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh
     outPos.x = 0.0f;
     outPos.y = mi->GetColModel()->GetBoundingBox().m_vecMin.y - -0.05f;
     outPos.z = 0.5f - m_fFrontHeightAboveRoad;
-    outPos = MultiplyMatrixWithVector(*m_matrix, outPos);
+    outPos = m_matrix->TransformPoint(outPos);
     return true;
 }
 

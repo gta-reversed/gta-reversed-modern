@@ -436,9 +436,6 @@ void CVehicle::operator delete(void* data, int32 poolRef) {
 
 // 0x6D6A40
 void CVehicle::SetModelIndex(uint32 index) {
-    return CVehicle::SetModelIndex_Reversed(index);
-}
-void CVehicle::SetModelIndex_Reversed(uint32 index) {
     CEntity::SetModelIndex(index);
     auto mi = CModelInfo::GetModelInfo(index)->AsVehicleModelInfoPtr();
     CustomCarPlate_TextureCreate(mi);
@@ -478,9 +475,6 @@ void CVehicle::SetModelIndex_Reversed(uint32 index) {
 
 // 0x6D6410
 void CVehicle::DeleteRwObject() {
-    CVehicle::DeleteRwObject_Reversed();
-}
-void CVehicle::DeleteRwObject_Reversed() {
     SetRemapTexDictionary(-1);
     RemoveAllUpgrades();
     CEntity::DeleteRwObject();
@@ -488,10 +482,6 @@ void CVehicle::DeleteRwObject_Reversed() {
 
 // 0x6D6640
 void CVehicle::SpecialEntityPreCollisionStuff(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled,
-    bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck) {
-    CVehicle::SpecialEntityPreCollisionStuff_Reversed(colPhysical, bIgnoreStuckCheck, bCollisionDisabled, bCollidedEntityCollisionIgnored, bCollidedEntityUnableToMove, bThisOrCollidedEntityStuck);
-}
-void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled,
     bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck) {
     if (colPhysical->IsPed()
         && colPhysical->AsPed()->bKnockedOffBike
@@ -581,14 +571,14 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, b
                     if (vecMax.x < 1.0F && vecMax.y < 1.0F && vecMax.z < 1.0F)
                     {
                         const auto vecSize = cm->GetBoundingBox().GetSize();
-                        const auto vecTransformed = *colPhysical->m_matrix * vecSize;
+                        const auto vecTransformed = colPhysical->m_matrix->TransformPoint(vecSize);
 
                         if (GetPosition().z > vecTransformed.z)
                             bCollidedEntityCollisionIgnored = true;
                         else
                         {
                             Invert(*m_matrix, tempMat);
-                            if ((tempMat * vecTransformed).z < 0.0F)
+                            if (tempMat.TransformPoint(vecTransformed).z < 0.0F) // `m_matrix->GetUp().Dot(vecTransformed)` should work too
                                 bCollidedEntityCollisionIgnored = true;
                         }
                     }
@@ -632,9 +622,6 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, b
 
 // 0x6D0E90
 uint8 CVehicle::SpecialEntityCalcCollisionSteps(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2) {
-    return CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bProcessCollisionBeforeSettingTimeStep, unk2);
-}
-uint8 CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2) {
     if (physicalFlags.bDisableCollisionForce)
         return 1;
 
@@ -673,9 +660,6 @@ uint8 CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollision
 
 // 0x6D6480
 void CVehicle::PreRender() {
-    return CVehicle::PreRender_Reversed();
-}
-void CVehicle::PreRender_Reversed() {
     if (!IsTrain())
         CalculateLightingFromCollision();
 
@@ -692,10 +676,8 @@ void CVehicle::PreRender_Reversed() {
     GetVehicleModelInfo()->SetEnvMapCoeff(fCoeff);
 }
 
+// 0x6D0E60
 void CVehicle::Render() {
-    return CVehicle::Render_Reversed();
-}
-void CVehicle::Render_Reversed() {
     auto* mi = GetVehicleModelInfo();
     const auto iDirtLevel = static_cast<int32>(m_fDirtLevel) & 0xF;
     CVehicleModelInfo::SetDirtTextures(mi, iDirtLevel);
@@ -703,18 +685,14 @@ void CVehicle::Render_Reversed() {
     CEntity::Render();
 }
 
+// 0x553F20
 bool CVehicle::SetupLighting() {
-    return CVehicle::SetupLighting_Reversed();
-}
-bool CVehicle::SetupLighting_Reversed() {
     ActivateDirectional();
     return CRenderer::SetupLightingForEntity(this);
 }
 
+// 0x5533D0
 void CVehicle::RemoveLighting(bool bRemove) {
-    CVehicle::RemoveLighting_Reversed(bRemove);
-}
-void CVehicle::RemoveLighting_Reversed(bool bRemove) {
     if (!physicalFlags.bDestroyed)
         CPointLights::RemoveLightsAffectingObject();
 
@@ -722,11 +700,8 @@ void CVehicle::RemoveLighting_Reversed(bool bRemove) {
     DeActivateDirectional();
 }
 
-// 0x871EF0
-void CVehicle::ProcessOpenDoor(CPed* ped, uint32 doorComponentId, uint32 animGroup, uint32 animId, float fTime) {
-    CVehicle::ProcessOpenDoor_Reversed(ped, doorComponentId, animGroup, animId, fTime);
-}
-void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId_, uint32 animGroup, uint32 animId, float fTime) {
+// 0x871EF0// 0x6D56C0
+void CVehicle::ProcessOpenDoor(CPed* ped, uint32 doorComponentId_, uint32 animGroup, uint32 animId, float fTime) {
     auto doorComponentId = (int32)doorComponentId_; // silence warns, todo: OpenDoor receives int32, why?
     eDoors iCheckedDoor = [&] {
         switch (doorComponentId) {
@@ -936,9 +911,6 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId_, uint
 
 // 0x6DF4A0
 void CVehicle::ProcessDrivingAnims(CPed* driver, bool blend) {
-    CVehicle::ProcessDrivingAnims_Reversed(driver, blend);
-}
-void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, bool blend) {
     if (m_bOffscreen || !driver->IsPlayer())
         return;
 
@@ -984,14 +956,14 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, bool blend) {
         return;
     }
 
-    if (idleAnim->m_fBlendAmount < 1.0F)
+    if (idleAnim->m_BlendAmount < 1.0F)
         return;
 
     if (lookBackAnim
         && CCamera::GetActiveCamera().m_nMode == eCamMode::MODE_1STPERSON
         && CCamera::GetActiveCamera().m_nDirectionWasLooking == eLookingDirection::LOOKING_DIRECTION_BEHIND
     ) {
-        lookBackAnim->m_fBlendDelta = -1000.0F;
+        lookBackAnim->m_BlendDelta = -1000.0F;
     }
 
     // 0x6DF6DA
@@ -1008,7 +980,7 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, bool blend) {
     ) {
         if ((CCamera::GetActiveCamera().m_nMode != eCamMode::MODE_1STPERSON
             || CCamera::GetActiveCamera().m_nDirectionWasLooking != eLookingDirection::LOOKING_DIRECTION_BEHIND)
-            && (!lookBackAnim || lookBackAnim->m_fBlendAmount < 1.0F && lookBackAnim->m_fBlendDelta <= 0.0F)
+            && (!lookBackAnim || lookBackAnim->m_BlendAmount < 1.0F && lookBackAnim->m_BlendDelta <= 0.0F)
         ) {
             CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, usedAnims->back, 4.0F);
         }
@@ -1016,9 +988,9 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, bool blend) {
     }
 
     if (m_fSteerAngle == 0.0F || driveByAnim) {
-        if (lookLeftAnim)  lookLeftAnim->m_fBlendDelta  = -4.0F;
-        if (lookRightAnim) lookRightAnim->m_fBlendDelta = -4.0F;
-        if (lookBackAnim)  lookBackAnim->m_fBlendDelta  = -4.0F;
+        if (lookLeftAnim)  lookLeftAnim->m_BlendDelta  = -4.0F;
+        if (lookRightAnim) lookRightAnim->m_BlendDelta = -4.0F;
+        if (lookBackAnim)  lookBackAnim->m_BlendDelta  = -4.0F;
         return;
     }
 
@@ -1027,46 +999,40 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, bool blend) {
 
     if (m_fSteerAngle < 0) {
         if (lookLeftAnim) {
-            lookLeftAnim->m_fBlendAmount = 0.0F;
-            lookLeftAnim->m_fBlendDelta  = 0.0F;
+            lookLeftAnim->m_BlendAmount = 0.0F;
+            lookLeftAnim->m_BlendDelta  = 0.0F;
         }
         if (lookRightAnim) {
-            lookRightAnim->m_fBlendAmount = fUsedAngle;
-            lookRightAnim->m_fBlendDelta  = 0.0F;
+            lookRightAnim->m_BlendAmount = fUsedAngle;
+            lookRightAnim->m_BlendDelta  = 0.0F;
         } else {
             CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, usedAnims->right, 4.0F);
         }
     } else {
         if (lookRightAnim) {
-            lookRightAnim->m_fBlendAmount = 0.0f;
-            lookRightAnim->m_fBlendDelta = 0.0F;
+            lookRightAnim->m_BlendAmount = 0.0f;
+            lookRightAnim->m_BlendDelta = 0.0F;
         }
         if (lookLeftAnim) {
-            lookLeftAnim->m_fBlendAmount = fUsedAngle;
-            lookLeftAnim->m_fBlendDelta = 0.0F;
+            lookLeftAnim->m_BlendAmount = fUsedAngle;
+            lookLeftAnim->m_BlendDelta = 0.0F;
         } else {
             CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, usedAnims->left, 4.0F);
         }
     }
 
     if (lookBackAnim) {
-        lookBackAnim->m_fBlendDelta = -4.0F;
+        lookBackAnim->m_BlendDelta = -4.0F;
     }
 }
 
-// 0x871F54
+// 0x871F54// 0x6D63F0
 float CVehicle::GetHeightAboveRoad() {
-    return CVehicle::GetHeightAboveRoad_Reversed();
-}
-float CVehicle::GetHeightAboveRoad_Reversed() {
     return CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox().m_vecMin.z * -1.0F;
 }
 
 // 0x6D1F30
 bool CVehicle::CanPedStepOutCar(bool bIgnoreSpeedUpright) const {
-    return CVehicle::CanPedStepOutCar_Reversed(bIgnoreSpeedUpright);
-}
-bool CVehicle::CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright) const {
     auto const fUpZ = m_matrix->GetUp().z;
     if (std::fabs(fUpZ) <= 0.1F) {
         if (std::fabs(m_vecMoveSpeed.z) > 0.05F || m_vecMoveSpeed.Magnitude2D() > 0.01F || m_vecTurnSpeed.SquaredMagnitude() > 0.0004F) { // 0.02F / 50.0f
@@ -1088,9 +1054,6 @@ bool CVehicle::CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright) const {
 
 // 0x6D2030
 bool CVehicle::CanPedJumpOutCar(CPed* ped) {
-    return CVehicle::CanPedJumpOutCar_Reversed(ped);
-}
-bool CVehicle::CanPedJumpOutCar_Reversed(CPed* ped) {
     if (IsBike())
     {
         if (!m_apPassengers[0] || ped == m_apPassengers[0])
@@ -1127,39 +1090,30 @@ bool CVehicle::CanPedJumpOutCar_Reversed(CPed* ped) {
     return false;
 }
 
-// 0x871F6C
+// 0x871F6C// 0x6DFB70
 bool CVehicle::GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) {
-    return CVehicle::GetTowHitchPos_Reversed(outPos, bCheckModelInfo, vehicle);
-}
-bool CVehicle::GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) {
     if (!bCheckModelInfo)
         return false;
 
     auto const fColFront = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox().m_vecMax.y;
     outPos.Set(0.0F, fColFront + 1.0F, 0.0F);
-    outPos = *m_matrix * outPos;
+    outPos = m_matrix->TransformPoint(outPos);
     return true;
 }
 
-// 0x871F70
+// 0x871F70// 0x6DFBE0
 bool CVehicle::GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) {
-    return CVehicle::GetTowBarPos_Reversed(outPos, bCheckModelInfo, vehicle);
-}
-bool CVehicle::GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) {
     if (!bCheckModelInfo)
         return false;
 
     auto const fColRear = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox().m_vecMin.y;
     outPos.Set(0.0F, fColRear - 1.0F, 0.0F);
-    outPos = *m_matrix * outPos;
+    outPos = m_matrix->TransformPoint(outPos);
     return true;
 }
 
-// 0x871F80
+// 0x871F80// 0x5D4760
 bool CVehicle::Save() {
-    return CVehicle::Save_Reversed();
-}
-bool CVehicle::Save_Reversed() {
     uint32 size = sizeof(CVehicleSaveStructure);
     CVehicleSaveStructure data;
     data.Construct(this);
@@ -1168,11 +1122,8 @@ bool CVehicle::Save_Reversed() {
     return true;
 }
 
-// 0x871F84
+// 0x871F84// 0x5D2900
 bool CVehicle::Load() {
-    return CVehicle::Load_Reversed();
-}
-bool CVehicle::Load_Reversed() {
     uint32 size;
     CVehicleSaveStructure data;
     CGenericGameStorage::LoadDataFromWorkBuffer(&size, sizeof(uint32));
@@ -1726,7 +1677,7 @@ bool CVehicle::IsOnItsSide() const {
 }
 
 // 0x6D1E20
-bool CVehicle::CanPedOpenLocks(CPed* ped) {
+bool CVehicle::CanPedOpenLocks(const CPed* ped) const {
     switch (m_nDoorLock) {
     case CARLOCK_LOCKED:
     case CARLOCK_COP_CAR:
@@ -1975,11 +1926,11 @@ void CVehicle::ApplyBoatWaterResistance(tBoatHandlingData* boatHandling, float f
     float fUsedTimeStep = CTimer::GetTimeStep() * 0.5F;
     auto vecSpeedMult = Pow(boatHandling->m_vecMoveRes * fSpeedMult, fUsedTimeStep);
 
-    CVector vecMoveSpeedMatrixDotProduct = Multiply3x3(m_vecMoveSpeed, GetMatrix());
+    CVector vecMoveSpeedMatrixDotProduct = GetMatrix().InverseTransformVector(m_vecMoveSpeed);
     m_vecMoveSpeed = vecMoveSpeedMatrixDotProduct * vecSpeedMult;
 
     auto fMassMult = (vecSpeedMult.y - 1.0F) * m_vecMoveSpeed.y * m_fMass;
-    CVector vecTransformedMoveSpeed = Multiply3x3(GetMatrix(), m_vecMoveSpeed);
+    CVector vecTransformedMoveSpeed = GetMatrix().TransformVector(m_vecMoveSpeed);
     m_vecMoveSpeed = vecTransformedMoveSpeed;
 
     auto vecDown = GetUp() * -1.0F;
@@ -2017,7 +1968,7 @@ CVector CVehicle::GetDummyPositionObjSpace(eVehicleDummy dummy) const {
 CVector CVehicle::GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace) {
     CVector pos = GetDummyPositionObjSpace(dummy);
     if (bWorldSpace)
-        pos = GetMatrix() * pos; // transform to world-space
+        pos = GetMatrix().TransformPoint(pos); // transform to world-space
     return pos;
 }
 
@@ -2553,7 +2504,7 @@ void CVehicle::UpdateWinch() {
     CRopes::RegisterRope(
         ropeID,
         m_ropeType,
-        MultiplyMatrixWithVector(*m_matrix, CVector{ 0.f, 0.f, pointZ }),
+        m_matrix->TransformPoint(CVector{ 0.f, 0.f, pointZ }),
         false,
         segCount,
         1u,
@@ -2584,7 +2535,7 @@ CVector CVehicle::GetDriverSeatDummyPositionOS() const {
 }
 
 CVector CVehicle::GetDriverSeatDummyPositionWS() {
-    return GetMatrix() * GetDriverSeatDummyPositionOS();
+    return GetMatrix().TransformPoint(GetDriverSeatDummyPositionOS());
 }
 
 CVehicleAnimGroup& CVehicle::GetAnimGroup() const {
@@ -2592,31 +2543,31 @@ CVehicleAnimGroup& CVehicle::GetAnimGroup() const {
 }
 
 AssocGroupId CVehicle::GetAnimGroupId() const {
-    return (AssocGroupId)((int32)ANIM_GROUP_STDCARAMIMS + (int32)m_pHandlingData->m_nAnimGroup);
+    return m_pHandlingData->GetAnimGroupId();
 }
 
 // 0x6D3CB0
-void CVehicle::ReleasePickedUpEntityWithWinch() {
+void CVehicle::ReleasePickedUpEntityWithWinch() const {
     return CRopes::GetRope(GetRopeID()).ReleasePickedUpObject();
 }
 
 // 0x6D3CD0
-void CVehicle::PickUpEntityWithWinch(CEntity* entity) {
+void CVehicle::PickUpEntityWithWinch(CEntity* entity) const {
     return CRopes::GetRope(GetRopeID()).PickUpObject(entity);
 }
 
 // 0x6D3CF0
-CEntity* CVehicle::QueryPickedUpEntityWithWinch() {
+CEntity* CVehicle::QueryPickedUpEntityWithWinch() const {
     return CRopes::GetRope(GetRopeID()).m_pRopeAttachObject;
 }
 
 // 0x6D3D10
-float CVehicle::GetRopeHeightForHeli() {
+float CVehicle::GetRopeHeightForHeli() const {
     return CRopes::GetRope(GetRopeID()).m_fSegmentLength;
 }
 
 // 0x6D3D30
-void CVehicle::SetRopeHeightForHeli(float height) {
+void CVehicle::SetRopeHeightForHeli(float height) const {
     CRopes::GetRope(GetRopeID()).m_fSegmentLength = height;
 }
 
@@ -2940,7 +2891,7 @@ void CVehicle::FirePlaneGuns() {
 
           auto planeGunPosMS  = GetPlaneGunsPosition(m_nGunsCycleIndex); // MS = Model Space
     const auto velocityOffset = m_vecMoveSpeed * CTimer::GetTimeStep();
-          auto gunShellPos    = velocityOffset +  MultiplyMatrixWithVector(*m_matrix, planeGunPosMS);
+          auto gunShellPos    = velocityOffset +  m_matrix->TransformPoint(planeGunPosMS);
 
     const auto FireGun = [&](const auto gunId) {
         DoPlaneGunFireFX(
@@ -3006,7 +2957,7 @@ void CVehicle::FireUnguidedMissile(eOrdnanceType type, bool bCheckTime) {
     CWeapon weapon{ WEAPON_RLAUNCHER, 5000 };
 
     for (auto i = 0; i < 2; i++) {
-        const auto ordnancePos = MultiplyMatrixWithVector(*m_matrix, GetPlaneOrdnancePosition(type));
+        const auto ordnancePos = m_matrix->TransformPoint(GetPlaneOrdnancePosition(type));
         // This places a point somewhere in front of us, depending on our velocity's direction
         auto origin = ordnancePos + m_matrix->GetForward() * (std::max(0.f, DotProduct(m_matrix->GetForward(), m_vecMoveSpeed)) * CTimer::GetTimeStep());
         weapon.FireProjectile(this, &origin);
@@ -3324,7 +3275,7 @@ void CVehicle::KillPedsGettingInVehicle() {
         }
 
         if (const auto task = static_cast<CTaskComplexEnterCar*>(ped.GetTaskManager().Find<CTaskComplexEnterCarAsPassenger, CTaskComplexEnterCarAsDriver>());
-            !task || task->m_car != this
+            !task || task->GetTargetCar() != this
         ) {
             continue;
         }
@@ -3454,8 +3405,8 @@ bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
     };
 
     const auto [rotorUp, rotorSizeMS] = GetRotorDirUpAndThickness();
-    const auto rotorSize              = Multiply3x3(matrix, rotorSizeMS);
-    const auto colModelCenter         = MultiplyMatrixWithVector(matrix, colModel.GetBoundCenter());
+    const auto rotorSize              = matrix.TransformVector(rotorSizeMS);
+    const auto colModelCenter         = matrix.TransformPoint(colModel.GetBoundCenter());
     const auto& thisPosn              = GetPosition();
 
     for (CPtrNode* it = ptrList.GetNode(), *next{}; it; it = next) {
@@ -3575,27 +3526,20 @@ bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
 }
 
 // 0x6DBA30
-void CVehicle::SetComponentRotation(RwFrame* component, eRotationAxis axis, float angle, bool bResetPosition) {
+void CVehicle::SetComponentRotation(RwFrame* component, eRotationAxis axis, float angle, bool bSetRotate) {
     if (!component) {
         return;
     }
 
     CMatrix mat{ RwFrameGetMatrix(component) };
-    std::invoke(
-        [bResetPosition, axis]() {
-            // We're using the `Only` version of `SetRotate`, that way the position
-            // That way 0x6DBB69 can be omitted (and 0x6DBB02 because it's just there to cancel out the former)
-            switch (axis) {
-            case AXIS_Z: return bResetPosition ? &CMatrix::SetRotateZOnly : &CMatrix::RotateZ;
-            case AXIS_Y: return bResetPosition ? &CMatrix::SetRotateYOnly : &CMatrix::RotateY;
-            case AXIS_X: return bResetPosition ? &CMatrix::SetRotateXOnly : &CMatrix::RotateX;
-            default:
-                NOTSA_UNREACHABLE("Supress warn");
-                return &CMatrix::RotateX;
-            }
-        }(),
-        &mat, angle
-    );
+
+    switch (axis) {
+    case AXIS_X: bSetRotate ? mat.SetRotateXOnly(angle) : mat.RotateX(angle, true); break;
+    case AXIS_Y: bSetRotate ? mat.SetRotateYOnly(angle) : mat.RotateY(angle, true); break;
+    case AXIS_Z: bSetRotate ? mat.SetRotateZOnly(angle) : mat.RotateZ(angle, true); break;
+    default:     NOTSA_UNREACHABLE();
+    }
+
     mat.UpdateRW();
 }
 
@@ -3761,7 +3705,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
             const auto& vecBoundingMin = CEntity::GetColModel()->m_boundBox.m_vecMin;
             CVector vecThrustPoint(0.0F, vecBoundingMin.y * boatHandling->m_fThrustY, vecBoundingMin.z * boatHandling->m_fThrustZ);
-            auto vecTransformedThrustPoint = Multiply3x3(GetMatrix(), vecThrustPoint);
+            auto vecTransformedThrustPoint = GetMatrix().TransformVector(vecThrustPoint);
 
             auto vecWorldThrustPos = GetPosition() + vecTransformedThrustPoint;
             float fWaterLevel;
@@ -3788,7 +3732,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
                     auto fSteerAngle = std::fabs(m_fSteerAngle);
                     CVector vecSteer(-fSteerAngleSin, fSteerAngleCos, -fSteerAngle);
-                    CVector vecSteerMoveForce = Multiply3x3(GetMatrix(), vecSteer);
+                    CVector vecSteerMoveForce = GetMatrix().TransformVector(vecSteer);
                     vecSteerMoveForce *= fThrustDepth * m_fGasPedal * 40.0F * m_pHandlingData->m_transmissionData.m_fEngineAcceleration * m_fMass;
 
                     if (vecSteerMoveForce.z > 0.2F)
@@ -3841,7 +3785,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
                     CVector vecTractionLoss(-fSteerAngleSin, 0.0F, 0.0F);
                     vecTractionLoss *= fTractionLoss;
-                    CVector vecTractionLossTransformed = Multiply3x3(GetMatrix(), vecTractionLoss);
+                    CVector vecTractionLossTransformed = GetMatrix().TransformVector(vecTractionLoss);
                     vecTractionLossTransformed *= fThrustDepth * CTimer::GetTimeStep();
 
                     CPhysical::ApplyMoveForce(vecTractionLossTransformed);
@@ -3889,7 +3833,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
     // 0x6DCD63
     if ((m_nModelIndex != MODEL_SKIMMER || m_f2ndSteerAngle == 0.0F) && !bCollidedWithWorld) {
         auto vecTurnRes = Pow(boatHandling->m_vecTurnRes, CTimer::GetTimeStep());
-        m_vecTurnSpeed = Multiply3x3(m_vecTurnSpeed, GetMatrix());
+        m_vecTurnSpeed = GetMatrix().InverseTransformVector(m_vecTurnSpeed);
         m_vecTurnSpeed.y *= vecTurnRes.y;
         m_vecTurnSpeed.z *= vecTurnRes.z;
 
@@ -3897,8 +3841,8 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
         fMult *= m_fTurnMass;
         auto vecTurnForce = GetUp() * fMult;
 
-        m_vecTurnSpeed = Multiply3x3(GetMatrix(), m_vecTurnSpeed);
-        auto vecCentreOfMass = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
+        m_vecTurnSpeed = GetMatrix().TransformVector(m_vecTurnSpeed);
+        auto vecCentreOfMass = GetMatrix().TransformVector(m_vecCentreOfMass);
         auto vecTurnPoint = GetForward() + vecCentreOfMass;
         CPhysical::ApplyTurnForce(vecTurnForce, vecTurnPoint);
     }
@@ -4008,7 +3952,7 @@ void CVehicle::DoBoatSplashes(float fWaterDamping) {
     auto baseVel = CVector{ -GetForward().x, -GetRight().y, -GetRight().z };
 
     CVector p0 = { colMin.x * X_MULT, colMax.y / 2.0f, colMin.z * Z_MULT };
-    p0 = MultiplyMatrixWithVector(*m_matrix, &p0);
+    p0 = m_matrix->TransformPoint(&p0);
     auto vel0 = baseVel * CGeneral::GetRandomNumberInRange(0.8f, 1.2f);
     vel0 -= GetRight() * CGeneral::GetRandomNumberInRange(0.3f, 0.7f); // minus
     vel0 += GetUp() * CGeneral::GetRandomNumberInRange(0.8f, 1.2f);
@@ -4016,7 +3960,7 @@ void CVehicle::DoBoatSplashes(float fWaterDamping) {
     g_fx.m_BoatSplash->AddParticle(&p0, &vel0, 0.0f, &particleData, -1.0f, 1.2f, 0.6f, false);
 
     CVector p1 = { colMax.x * X_MULT, colMax.y / 2.0f, colMin.z * Z_MULT };
-    p1 = MultiplyMatrixWithVector(*m_matrix, &p1);
+    p1 = m_matrix->TransformPoint(&p1);
     auto vel1 = baseVel * CGeneral::GetRandomNumberInRange(0.8f, 1.2f);
     vel1 += GetRight() * CGeneral::GetRandomNumberInRange(0.3f, 0.7f);  // plus
     vel1 += GetUp() * CGeneral::GetRandomNumberInRange(0.8f, 1.2f);
@@ -4048,7 +3992,7 @@ void CVehicle::AddWaterSplashParticles() {
         // Get and transform triangle vertices to world space
         auto vertices = cd.GetTriVertices(tri);
         for (auto& v : vertices) {
-            v = MultiplyMatrixWithVector(*m_matrix, v);
+            v = m_matrix->TransformPoint(v);
         }
 
         const auto v0v1 = vertices[1] - vertices[0];
@@ -4112,7 +4056,7 @@ void CVehicle::AddExhaustParticles() {
         vecParticleVelocity = randomFactor * GetForward();
     }
 
-    firstExhaustPos = entityMatrix * firstExhaustPos;
+    firstExhaustPos = entityMatrix.TransformPoint(firstExhaustPos);
     bool bFirstExhaustSubmergedInWater = false;
     bool bSecondExhaustSubmergedInWater = false;
     float pLevel = 0.0f;
@@ -4122,7 +4066,7 @@ void CVehicle::AddExhaustParticles() {
     }
 
     if (bHasDoubleExhaust) {
-        secondExhaustPos = entityMatrix * secondExhaustPos;
+        secondExhaustPos = entityMatrix.TransformPoint(secondExhaustPos);
         if (physicalFlags.bTouchingWater && CWaterLevel::GetWaterLevel(secondExhaustPos, pLevel, true) &&
             pLevel >= secondExhaustPos.z) {
             bSecondExhaustSubmergedInWater = true;
@@ -4267,7 +4211,7 @@ void CVehicle::DoHeadLightBeam(eVehicleDummy dummyId, CMatrix& matrix, bool arg2
     if (dummyId == DUMMY_LIGHT_REAR_MAIN && pointModelSpace.IsZero())
         return;
 
-    CVector point = matrix.GetPosition() + Multiply3x3(matrix, pointModelSpace);
+    CVector point = matrix.GetPosition() + matrix.TransformVector(pointModelSpace);
     if (!arg2) {
         point -= 2 * pointModelSpace.x * matrix.GetRight();
     }

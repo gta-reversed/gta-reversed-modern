@@ -6,7 +6,7 @@
 #include "AEAudioUtility.h"
 
 void CAECollisionAudioEntity::InjectHooks() {
-    RH_ScopedClass(CAECollisionAudioEntity);
+    RH_ScopedVirtualClass(CAECollisionAudioEntity, 0x862E64, 1);
     RH_ScopedCategory("Audio/Entities");
 
     RH_ScopedInstall(Initialise, 0x5B9BD0);
@@ -62,8 +62,7 @@ void CAECollisionAudioEntity::AddCollisionSoundToList(CEntity* entity1, CEntity*
     });
 
     if (newEntry == m_Entries.end()) {
-        // Game tries to access m_Entries[300] in this case.
-        NOTSA_UNREACHABLE();
+        return;
     }
 
     // ? check

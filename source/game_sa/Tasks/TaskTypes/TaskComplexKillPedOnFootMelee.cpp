@@ -180,7 +180,7 @@ CTask* CTaskComplexKillPedOnFootMelee::ControlSubTask(CPed* ped) {
     }
 
     const auto TryAbortAndCreate = [&, this](eTaskType taskToCreate) {
-        return m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)
+        return m_pSubTask->MakeAbortable(ped)
             ? CreateSubTask(taskToCreate, ped)
             : m_pSubTask;
     };
