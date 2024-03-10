@@ -53,7 +53,7 @@ void CTaskSimpleKillPedWithCar::DamageCarBonnet(CPed const*) {
 // 0x6564A0
 bool CTaskSimpleKillPedWithCar::ProcessPed(CPed* ped) {
     const auto  carPos        = m_Car->GetPosition();
-    const auto  carCM         = m_Car->GetColModel();
+    const auto  carCM         = m_Car->GetColModel();   
     const auto& carBB         = carCM->GetBoundingBox();
     const auto& carVel        = m_Car->GetMoveSpeed();
     const auto& carFwd        = m_Car->GetForward();
@@ -61,7 +61,7 @@ bool CTaskSimpleKillPedWithCar::ProcessPed(CPed* ped) {
 
     const auto pedPos     = ped->GetPosition();
     const auto pedToCar   = pedPos - carPos;
-    const auto pedPosOS   = Multiply3x3(pedToCar, m_Car->GetMatrix()); // Ped's position in the Car's object space
+    const auto pedPosOS   = m_Car->GetMatrix().TransformPoint(pedToCar); // Ped's position in the Car's object space
     auto       pedHitSide = (eDirection)CPedGeometryAnalyser::ComputePedHitSide(*ped, *m_Car);
 
     eWeaponType killWT = WEAPON_RAMMEDBYCAR;
