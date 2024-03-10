@@ -540,7 +540,7 @@ void CCarEnterExit::QuitEnteringCar(CPed* ped, CVehicle* vehicle, int32 doorId, 
 // 0x64F680
 void CCarEnterExit::RemoveCarSitAnim(const CPed* ped) {
     for (auto anim = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIMATION_SECONDARY_TASK_ANIM); anim; anim = RpAnimBlendGetNextAssociation(anim, ANIMATION_SECONDARY_TASK_ANIM)) {
-        anim->SetFlag(ANIMATION_FREEZE_LAST_FRAME);
+        anim->SetFlag(ANIMATION_IS_BLEND_AUTO_REMOVE);
         anim->m_BlendDelta = -1000.f;
     }
     CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 1000.0);
@@ -548,8 +548,8 @@ void CCarEnterExit::RemoveCarSitAnim(const CPed* ped) {
 
 // 0x64F6E0
 void CCarEnterExit::RemoveGetInAnims(const CPed* ped) {
-    for (auto anim = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIMATION_PARTIAL); anim; anim = RpAnimBlendGetNextAssociation(anim, ANIMATION_PARTIAL)) {
-        anim->SetFlag(ANIMATION_FREEZE_LAST_FRAME);
+    for (auto anim = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIMATION_IS_PARTIAL); anim; anim = RpAnimBlendGetNextAssociation(anim, ANIMATION_IS_PARTIAL)) {
+        anim->SetFlag(ANIMATION_IS_BLEND_AUTO_REMOVE);
         anim->m_BlendDelta = -1000.f;
     }
 }

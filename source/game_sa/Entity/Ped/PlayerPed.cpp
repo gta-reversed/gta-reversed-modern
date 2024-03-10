@@ -268,7 +268,7 @@ void CPlayerPed::ReApplyMoveAnims() {
                 addedAnim->m_BlendDelta = anim->m_BlendDelta;
                 addedAnim->m_BlendAmount = anim->m_BlendAmount;
 
-                anim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
+                anim->m_Flags |= ANIMATION_IS_BLEND_AUTO_REMOVE;
                 anim->m_BlendDelta = -1000.0f;
             }
         }
@@ -457,9 +457,8 @@ void CPlayerPed::Busted() {
 }
 
 // 0x41BE60
-uint32 CPlayerPed::GetWantedLevel() {
-    CWanted* wanted = GetWanted();
-    if (wanted) {
+uint32 CPlayerPed::GetWantedLevel() const {
+    if (const auto* wanted = GetWanted()) {
         return wanted->m_nWantedLevel;
     }
 
@@ -757,7 +756,7 @@ void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
 
 
     if (auto anim = RpAnimBlendClumpGetAssociation(m_pRwClump, ANIM_ID_FIRE))
-        anim->m_Flags |= ANIMATION_STARTED & ANIMATION_UNLOCK_LAST_FRAME;
+        anim->m_Flags |= ANIMATION_IS_PLAYING & ANIMATION_IS_FINISH_AUTO_REMOVE;
 
     TheCamera.ClearPlayerWeaponMode();
 }
@@ -766,7 +765,7 @@ void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
 bool LOSBlockedBetweenPeds(CEntity* entity1, CEntity* entity2) {
     CVector origin{};
     if (entity1->IsPed()) {
-        entity1->AsPed()->GetBonePosition(origin, ePedBones::BONE_NECK, false);
+        entity1->AsPed()->GetBonePosition(origin, eBoneTag::BONE_NECK, false);
         if (entity1->AsPed()->bIsDucking)
             origin.z += 0.35f;
     } else {
@@ -775,7 +774,7 @@ bool LOSBlockedBetweenPeds(CEntity* entity1, CEntity* entity2) {
 
     CVector target{};
     if (entity2->IsPed())
-        entity1->AsPed()->GetBonePosition(target, ePedBones::BONE_NECK, false);
+        entity1->AsPed()->GetBonePosition(target, eBoneTag::BONE_NECK, false);
     else
         target = entity1->GetPosition();
 
@@ -1035,7 +1034,7 @@ void CPlayerPed::ProcessControl() {
         if (GetActiveWeapon().m_Type == WEAPON_MINIGUN) {
             auto weaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_MINIGUN, eWeaponSkill::STD);
             if (m_pIntelligence->GetTaskUseGun()) {
-                auto animAssoc = m_pIntelligence->GetTaskUseGun()->m_pAnim;
+                auto animAssoc = m_pIntelligence->GetTaskUseGun()->m_Anim;
                 if (animAssoc && animAssoc->m_CurrentTime - animAssoc->m_TimeStep < weaponInfo->m_fAnimLoopEnd) {
                     if (m_pPlayerData->m_fGunSpinSpeed < 0.45f) {
                         m_pPlayerData->m_fGunSpinSpeed += CTimer::GetTimeStep() * 0.025f;
@@ -1080,7 +1079,7 @@ void CPlayerPed::ProcessControl() {
                     m_pPlayerData->m_vecTargetBoneOffset.x = 0.2f;
                 }
                 effectPos = m_pPlayerData->m_vecTargetBoneOffset;
-                targetPed->GetTransformedBonePosition(effectPos, static_cast<ePedBones>(m_pPlayerData->m_nTargetBone), false);
+                targetPed->GetTransformedBonePosition(effectPos, static_cast<eBoneTag>(m_pPlayerData->m_nTargetBone), false);
                 bool targetIsInVehicle = false;
                 if (markColor > 0.0f) {
                     if (!targetPed->bInVehicle && targetPed->m_nMoveState != PEDMOVE_STILL) {

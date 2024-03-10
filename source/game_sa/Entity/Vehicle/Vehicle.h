@@ -114,6 +114,7 @@ enum eCarPiece {
 };
 constexpr inline eCarPiece eCarPiece_WheelPieces[]{ CAR_PIECE_WHEEL_LF, CAR_PIECE_WHEEL_RF, CAR_PIECE_WHEEL_RL, CAR_PIECE_WHEEL_RR };
 
+// Do not change the order!
 enum eRotationAxis : int32 {
     AXIS_X = 0,
     AXIS_Y = 1,
@@ -181,7 +182,7 @@ VALIDATE_SIZE(tHydraulicData, 0x28);
 class NOTSA_EXPORT_VTABLE CVehicle : public CPhysical {
 public:
     using Ref = notsa::EntityRef<CVehicle>;
-  
+    
 public:
     static constexpr auto NUM_VEHICLE_UPGRADES = 15u;
 

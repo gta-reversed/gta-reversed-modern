@@ -53,6 +53,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
             return FALSE;
         }
 
+        std::setlocale(LC_ALL, "en_US.UTF-8");
+        // Support UTF-8 IO for Windows Terminal. (or CMD if a supported font is used)
+        SetConsoleCP(CP_UTF8);
+        SetConsoleOutputCP(CP_UTF8);
+
         DisplayConsole();
         CommandLine::Load(__argc, __argv);
 

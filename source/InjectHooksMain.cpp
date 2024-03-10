@@ -97,6 +97,8 @@
 #include "Buoyancy.h"
 #include "CreepingFire.h"
 #include "Restart.h"
+#include "SetPiece.h"
+#include "SetPieces.h"
 #include "BulletInfo.h"
 #include "Explosion.h"
 #include "C_PcSave.h"
@@ -269,6 +271,7 @@
 #include "TaskSimpleSwim.h"
 #include "TaskComplexWalkRoundObject.h"
 #include "TaskSimplePause.h"
+#include "TaskSimpleHurtPedWithCar.h"
 #include "TaskComplexPassObject.h"
 #include "TaskComplexEnterCarAsPassenger.h"
 #include "TaskComplexEnterCarAsDriver.h"
@@ -557,6 +560,8 @@ void InjectHooksMain() {
     CClothes::InjectHooks();
     CBulletInfo::InjectHooks();
     CRestart::InjectHooks();
+    CSetPiece::InjectHooks();
+    CSetPieces::InjectHooks();
     CCopPed::InjectHooks();
     CDamageManager::InjectHooks();
     CCreepingFire::InjectHooks();
@@ -731,11 +736,15 @@ void InjectHooksMain() {
     CLocalisation::InjectHooks();
     CSimpleVariablesSaveStructure::InjectHooks();
     CPedGeometryAnalyser::InjectHooks();
+
     NodeNamePlugin::InjectHooks();
     JPegPlugin::InjectHooks();
     PipelinePlugin::InjectHooks();
+    RpAnimBlendPlugin::InjectHooks();
     CCollisionPlugin::InjectHooks();
     BreakablePlugin::InjectHooks();
+    RtAnim::InjectHooks();
+
     CIplStore::InjectHooks();
     cHandlingDataMgr::InjectHooks();
     CLoadingScreen::InjectHooks();
@@ -1038,7 +1047,7 @@ void InjectHooksMain() {
         CTaskSimpleHitFromLeft::InjectHooks();
         CTaskSimpleHitFromRight::InjectHooks();
         CTaskSimpleHitWall::InjectHooks();
-        // CTaskSimpleHurtPedWithCar::InjectHooks();
+        CTaskSimpleHurtPedWithCar::InjectHooks();
         // CTaskSimpleKillPedWithCar::InjectHooks();
         CTaskSimpleLookAbout::InjectHooks();
         // CTaskSimpleOnEscalator::InjectHooks();
@@ -1095,7 +1104,7 @@ void InjectHooksMain() {
         CTaskSimpleDie__InjectHooks();
         CTaskSimpleDuck::InjectHooks();
         CTaskComplexPolicePursuit::InjectHooks();
-        // CTaskSimpleFacial::InjectHooks();
+        CTaskSimpleFacial::InjectHooks();
         CTaskComplexCopInCar::InjectHooks();
         CTaskComplexFacial::InjectHooks();
         CTaskComplexInAirAndLand::InjectHooks();
@@ -1123,7 +1132,7 @@ void InjectHooksMain() {
         CTaskComplexUseGoggles::InjectHooks();
         // CTaskComplexCrossRoadLookAndAchieveHeading::InjectHooks();
         CTaskComplexGoToPointAndStandStill::InjectHooks();
-        // CTaskSimpleAchieveHeading::InjectHooks();
+        CTaskSimpleAchieveHeading::InjectHooks();
         CTaskSimpleGiveCPR::InjectHooks();
         // CTaskSimpleCarSetPedInAsPassenger::InjectHooks();
         CTaskComplexDriveFireTruck::InjectHooks();

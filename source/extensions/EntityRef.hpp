@@ -33,4 +33,5 @@ struct EntityRef {
 private:
     T* m_Ptr;
 };
+VALIDATE_SIZE(EntityRef<int>, sizeof(int*));
 }; // namespace notsa

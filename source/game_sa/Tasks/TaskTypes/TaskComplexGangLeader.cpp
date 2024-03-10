@@ -210,7 +210,7 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
         }
     } else if (ShouldLoadGangAnims()) {
         const auto blk = CAnimManager::GetAnimationBlockIndex("gangs");
-        if (CAnimManager::ms_aAnimBlocks[blk].IsLoaded) {
+        if (CAnimManager::GetAnimBlocks()[blk].IsLoaded) {
             CAnimManager::AddAnimBlockRef(blk);
             m_animsReferenced = true;
         } else {
@@ -238,7 +238,7 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
             if (auto matrix = RwFrameGetMatrix(RpClumpGetFrame(ped->m_pRwClump))) {
                 CVector PoS{ 0.f, 0.1f, 0.f };
                 if (const auto fx = g_fxMan.CreateFxSystem("exhale", &PoS, matrix)) {
-                    fx->AttachToBone(ped, ePedBones::BONE_HEAD);
+                    fx->AttachToBone(ped, eBoneTag::BONE_HEAD);
                     fx->PlayAndKill();
                 }
             }
