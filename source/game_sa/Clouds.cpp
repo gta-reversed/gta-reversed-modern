@@ -96,25 +96,25 @@ void CClouds::SetUpOneSkyPoly(CVector vert1pos, CVector vert2pos, CVector vert3p
     uint16 uiStartVertex = uiTempBufferVerticesStored;
     uint16 iStartIndex = uiTempBufferIndicesStored;
 
-    RwIm3DVertexSetRGBA(&aTempBufferVertices[uiStartVertex + 0], topRed, topGreen, topBlue, 0xFF);
-    RwIm3DVertexSetPos(&aTempBufferVertices[uiStartVertex + 0], vert1pos.x, vert1pos.y, vert1pos.z);
-    RwIm3DVertexSetU(&aTempBufferVertices[uiStartVertex + 0], 0.f);
-    RwIm3DVertexSetV(&aTempBufferVertices[uiStartVertex + 0], 0.f);
+    RwIm3DVertexSetRGBA(&TempBufferVertices.m_3d[uiStartVertex + 0], topRed, topGreen, topBlue, 0xFF);
+    RwIm3DVertexSetPos(&TempBufferVertices.m_3d[uiStartVertex + 0], vert1pos.x, vert1pos.y, vert1pos.z);
+    RwIm3DVertexSetU(&TempBufferVertices.m_3d[uiStartVertex + 0], 0.f);
+    RwIm3DVertexSetV(&TempBufferVertices.m_3d[uiStartVertex + 0], 0.f);
 
-    RwIm3DVertexSetRGBA(&aTempBufferVertices[uiStartVertex + 1], topRed, topGreen, topBlue, 0xFF);
-    RwIm3DVertexSetPos(&aTempBufferVertices[uiStartVertex + 1], vert2pos.x, vert2pos.y, vert2pos.z);
-    RwIm3DVertexSetU(&aTempBufferVertices[uiStartVertex + 1], 0.f);
-    RwIm3DVertexSetV(&aTempBufferVertices[uiStartVertex + 1], 0.f);
+    RwIm3DVertexSetRGBA(&TempBufferVertices.m_3d[uiStartVertex + 1], topRed, topGreen, topBlue, 0xFF);
+    RwIm3DVertexSetPos(&TempBufferVertices.m_3d[uiStartVertex + 1], vert2pos.x, vert2pos.y, vert2pos.z);
+    RwIm3DVertexSetU(&TempBufferVertices.m_3d[uiStartVertex + 1], 0.f);
+    RwIm3DVertexSetV(&TempBufferVertices.m_3d[uiStartVertex + 1], 0.f);
 
-    RwIm3DVertexSetRGBA(&aTempBufferVertices[uiStartVertex + 2], bottomRed, bottomGreen, bottomBlue, 0xFF);
-    RwIm3DVertexSetPos(&aTempBufferVertices[uiStartVertex + 2], vert3pos.x, vert3pos.y, vert3pos.z);
-    RwIm3DVertexSetU(&aTempBufferVertices[uiStartVertex + 2], 0.f);
-    RwIm3DVertexSetV(&aTempBufferVertices[uiStartVertex + 2], 0.f);
+    RwIm3DVertexSetRGBA(&TempBufferVertices.m_3d[uiStartVertex + 2], bottomRed, bottomGreen, bottomBlue, 0xFF);
+    RwIm3DVertexSetPos(&TempBufferVertices.m_3d[uiStartVertex + 2], vert3pos.x, vert3pos.y, vert3pos.z);
+    RwIm3DVertexSetU(&TempBufferVertices.m_3d[uiStartVertex + 2], 0.f);
+    RwIm3DVertexSetV(&TempBufferVertices.m_3d[uiStartVertex + 2], 0.f);
 
-    RwIm3DVertexSetRGBA(&aTempBufferVertices[uiStartVertex + 3], bottomRed, bottomGreen, bottomBlue, 0xFF);
-    RwIm3DVertexSetPos(&aTempBufferVertices[uiStartVertex + 3], vert4pos.x, vert4pos.y, vert4pos.z);
-    RwIm3DVertexSetU(&aTempBufferVertices[uiStartVertex + 3], 0.f);
-    RwIm3DVertexSetV(&aTempBufferVertices[uiStartVertex + 3], 0.f);
+    RwIm3DVertexSetRGBA(&TempBufferVertices.m_3d[uiStartVertex + 3], bottomRed, bottomGreen, bottomBlue, 0xFF);
+    RwIm3DVertexSetPos(&TempBufferVertices.m_3d[uiStartVertex + 3], vert4pos.x, vert4pos.y, vert4pos.z);
+    RwIm3DVertexSetU(&TempBufferVertices.m_3d[uiStartVertex + 3], 0.f);
+    RwIm3DVertexSetV(&TempBufferVertices.m_3d[uiStartVertex + 3], 0.f);
 
     aTempBufferIndices[iStartIndex + 0] = uiStartVertex;
     aTempBufferIndices[iStartIndex + 1] = uiStartVertex + 2;
@@ -251,7 +251,7 @@ void CClouds::MovingFogRender() {
 
     int32 numVerts = 0;
     const auto RenderVertices = [&] {
-        if (RwIm3DTransform(aTempBufferVertices, numVerts, nullptr, rwIM3D_VERTEXXYZ | rwIM3D_VERTEXUV)) {
+        if (RwIm3DTransform(TempBufferVertices.m_3d, numVerts, nullptr, rwIM3D_VERTEXXYZ | rwIM3D_VERTEXUV)) {
             RwIm3DRenderPrimitive(rwPRIMTYPETRILIST);
             RwIm3DEnd();
         }
@@ -279,14 +279,14 @@ void CClouds::MovingFogRender() {
         for (const auto& vertIdx : ms_mf.m_nPrimIndices) {
             const auto& corner = corners[vertIdx];
 
-            auto& vert = aTempBufferVertices[numVerts++];
+            auto& vert = TempBufferVertices.m_3d[numVerts++];
             RwV3dAssign(RwIm3DVertexGetPos(&vert), &corner.pos);
             RwIm3DVertexSetRGBA(&vert, red, green, blue, alpha);
             RwIm3DVertexSetU(&vert, corner.uv.u);
             RwIm3DVertexSetV(&vert, corner.uv.v);
 
             // Flush buffer if it's getting full
-            if (numVerts == TOTAL_TEMP_BUFFER_VERTICES - 2) {
+            if (numVerts == TOTAL_TEMP_BUFFER_3DVERTICES - 2) {
                 RenderVertices();
             }
         }

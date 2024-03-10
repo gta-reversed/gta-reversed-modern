@@ -217,7 +217,7 @@ LRESULT CALLBACK __MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
         //> 0x748087 - Set gamma (If changed)
         if (gbGammaChanged) {
             if (const auto dev = RwD3D9GetCurrentD3DDevice()) {
-                dev->SetGammaRamp(9, 0, wndBeingActivated ? &gammaTable : &savedGamma);
+                dev->SetGammaRamp(9, 0, wndBeingActivated ? &CGamma::ms_GammaTable : &CGamma::ms_SavedGamma);
             }
         }
 

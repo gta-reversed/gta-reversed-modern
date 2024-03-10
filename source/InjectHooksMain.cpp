@@ -672,7 +672,6 @@ void InjectHooksMain() {
     CPostEffects::InjectHooks();
     CIniFile::InjectHooks();
     CStencilShadowObject::InjectHooks();
-    CStencilShadowObjects::InjectHooks();
     CStencilShadows::InjectHooks();
     CFont::InjectHooks();
     CGameLogic::InjectHooks();

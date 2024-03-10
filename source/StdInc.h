@@ -339,7 +339,6 @@ namespace fs = std::filesystem;
 #include "game_sa\Sprite2d.h"
 #include "game_sa\Stats.h"
 #include "game_sa\StencilShadowObject.h"
-#include "game_sa\StencilShadowObjects.h"
 #include "game_sa\StencilShadows.h"
 #include "game_sa\StoredCollPoly.h"
 #include "game_sa\StreamedScripts.h"
