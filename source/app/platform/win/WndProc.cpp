@@ -139,7 +139,6 @@ LRESULT CALLBACK __MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
     if (imio) {
         if (imio->MouseDrawCursor) {
             imio->ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
-
         } else {
             imio->ConfigFlags |= ImGuiConfigFlags_NoMouse;
         }
