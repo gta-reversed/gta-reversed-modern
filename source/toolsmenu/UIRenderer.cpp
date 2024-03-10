@@ -50,29 +50,33 @@ void UIRenderer::PreRenderUpdate() {
     ZoneScoped;
 
     m_ImIO->DeltaTime   = CTimer::GetTimeStepInSeconds();
-    m_ImIO->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT); // Update display size, in case of window resize after imgui was already initialized
+    m_ImIO->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT); // Update display size, in case of window resize after ImGui was already initialized
 
     m_DebugModules.PreRenderUpdate();
     DebugCode();
     ReversibleHooks::CheckAll();
 
-    // A delay of a frame has to be added, otherwise the release of F7 wont be processed
-    // and the menu will close
-    const auto Shortcut = [](ImGuiKeyChord chord) { return ImGui::Shortcut(chord, ImGuiKeyOwner_Any, ImGuiInputFlags_RouteAlways); };
+    // A delay of a frame has to be added, otherwise
+    // the release of F7 wont be processed and the menu will close
+    const auto Shortcut = [](ImGuiKeyChord chord) {
+        return ImGui::Shortcut(chord, ImGuiKeyOwner_Any, ImGuiInputFlags_RouteAlways);
+    };
     if (Shortcut(ImGuiKey_F7) || Shortcut(ImGuiKey_M | ImGuiMod_Ctrl)) {
-        auto pad = CPad::GetPad(0);
+        const auto pad = CPad::GetPad(0);
+
         m_InputActive = !m_InputActive;
-        if (m_InputActive) {
-            pad->NewMouseControllerState.Clear();
-            pad->NewMouseControllerState.X = 0;
-            pad->NewMouseControllerState.Y = 0;
-            pad->OldMouseControllerState.Clear();
-            pad->OldMouseControllerState.X = 0;
-            pad->OldMouseControllerState.Y = 0;
+
+        if (m_InputActive) { // Clear controller states
+            pad->OldMouseControllerState
+                = pad->NewMouseControllerState
+                = CMouseControllerState{};
+        } else {
+            SetFocus(PSGLOBAL(window)); // Re-focus GTA main window
         }
+        pad->Clear(false, true);
+
         m_ImIO->MouseDrawCursor = m_InputActive;
-        m_ImIO->NavActive = m_InputActive;
-        pad->Clear(m_InputActive, true);
+        m_ImIO->NavActive       = m_InputActive;
     }
 }
 
