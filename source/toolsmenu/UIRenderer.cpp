@@ -29,13 +29,6 @@ UIRenderer::UIRenderer() :
     m_ImIO->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT);
     m_ImIO->NavActive   = false;
 
-    ImGuiStyle& style = ImGui::GetStyle();
-    style.WindowBorderSize = 0.0f;
-    style.FrameBorderSize = 0.0f;
-    style.PopupBorderSize = 0.0f;
-    style.ChildBorderSize = 0.0f;
-    style.PopupBorderSize = 0.0f;
-
     ImGui_ImplWin32_Init(PSGLOBAL(window));
     ImGui_ImplDX9_Init(GetD3DDevice());
 
