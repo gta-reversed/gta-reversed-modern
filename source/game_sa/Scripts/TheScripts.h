@@ -6,6 +6,7 @@
 */
 #pragma once
 
+#include "Text/Text.h"
 #include "RunningScript.h"
 #include "Ped.h"
 #include "Vehicle.h"

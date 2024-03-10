@@ -159,4 +159,4 @@ public: // TODO: Eventually make this private
 
 VALIDATE_SIZE(CWeapon, 0x1C);
 
-void FireOneInstantHitRound(CVector* startPoint, CVector* endPoint, int32 intensity);
+void FireOneInstantHitRound(const CVector& startPoint, const CVector& endPoint, int32 intensity);

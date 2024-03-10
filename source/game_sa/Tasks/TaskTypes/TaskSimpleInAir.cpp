@@ -10,13 +10,13 @@ uint32 CTaskSimpleInAir::ms_nMaxSlowFallFrames = 10;
 
 void CTaskSimpleInAir::InjectHooks()
 {
-    RH_ScopedClass(CTaskSimpleInAir);
+    RH_ScopedVirtualClass(CTaskSimpleInAir, 0x8704D8, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x678CD0);
     RH_ScopedInstall(DeleteAnimCB, 0x678E60);
-    RH_ScopedVirtualInstall(ProcessPed, 0x680600);
-    RH_ScopedVirtualInstall(MakeAbortable, 0x678DC0);
+    RH_ScopedVMTInstall(ProcessPed, 0x680600);
+    RH_ScopedVMTInstall(MakeAbortable, 0x678DC0);
 }
 
 CTaskSimpleInAir* CTaskSimpleInAir::Constructor(bool bUsingJumpGlide, bool bUsingFallGlide, bool bUsingClimbJump)
@@ -51,17 +51,6 @@ CTaskSimpleInAir::~CTaskSimpleInAir()
 
 // 0x680600
 bool CTaskSimpleInAir::ProcessPed(CPed* ped)
-{
-    return ProcessPed_Reversed(ped);
-}
-
-// 0x678DC0
-bool CTaskSimpleInAir::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
-{
-    return MakeAbortable_Reversed(ped, priority, event);
-}
-
-bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
 {
     CColPoint colPoint{}; // default initialization is NOTSA
     CEntity* colEntity;
@@ -182,7 +171,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
             if (m_pAnim && m_bUsingFallGlide)
             {
                 m_pAnim->m_BlendDelta = -1000.0F;
-                m_pAnim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
+                m_pAnim->m_Flags |= ANIMATION_IS_BLEND_AUTO_REMOVE;
                 m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
                 m_pAnim = nullptr;
             }
@@ -215,7 +204,8 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
     return false;
 }
 
-bool CTaskSimpleInAir::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
+// 0x678DC0
+bool CTaskSimpleInAir::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
     if (priority == ABORT_PRIORITY_IMMEDIATE
         || priority == ABORT_PRIORITY_URGENT && (
@@ -227,7 +217,7 @@ bool CTaskSimpleInAir::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
         if (m_pAnim)
         {
             m_pAnim->m_BlendDelta = -8.0F;
-            m_pAnim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
+            m_pAnim->m_Flags |= ANIMATION_IS_BLEND_AUTO_REMOVE;
             m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
             m_pAnim = nullptr;
         }

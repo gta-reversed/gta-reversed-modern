@@ -4,17 +4,17 @@
 #include "TaskSimpleFight.h"
 
 void CTaskSimpleBeHit::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleBeHit);
+    RH_ScopedVirtualClass(CTaskSimpleBeHit, 0x86D844, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x620780);
     RH_ScopedInstall(Destructor, 0x620810);
     RH_ScopedGlobalInstall(FinishAnimBeHitCB, 0x620900);
     RH_ScopedInstall(StartAnim, 0x620910);
-    RH_ScopedVirtualInstall2(Clone, 0x623290);
-    RH_ScopedVirtualInstall2(GetTaskType, 0x620800);
-    RH_ScopedVirtualInstall2(MakeAbortable, 0x620890);
-    RH_ScopedVirtualInstall2(ProcessPed, 0x620A20);
+    RH_ScopedVMTInstall(Clone, 0x623290);
+    RH_ScopedVMTInstall(GetTaskType, 0x620800);
+    RH_ScopedVMTInstall(MakeAbortable, 0x620890);
+    RH_ScopedVMTInstall(ProcessPed, 0x620A20);
 }
 
 /*!
@@ -134,8 +134,8 @@ bool CTaskSimpleBeHit::MakeAbortable(CPed* ped, eAbortPriority priority, const C
     switch (priority) {
     case ABORT_PRIORITY_LEISURE: {
         if (m_Anim) {
-            if ((m_Anim->m_Flags & ANIMATION_STARTED) == 0) {
-                m_Anim->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
+            if ((m_Anim->m_Flags & ANIMATION_IS_PLAYING) == 0) {
+                m_Anim->m_Flags |= ANIMATION_IS_BLEND_AUTO_REMOVE;
                 m_Anim->m_BlendDelta = -4.f;
             }
         }

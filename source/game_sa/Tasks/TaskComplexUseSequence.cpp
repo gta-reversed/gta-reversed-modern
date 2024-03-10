@@ -45,27 +45,7 @@ CTaskComplexUseSequence* CTaskComplexUseSequence::Constructor(int32 sequenceInde
     return this;
 }
 
-// 0x639730
 bool CTaskComplexUseSequence::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return MakeAbortable_Reversed(ped, priority, event);
-}
-
-// 0x6354A0
-CTask* CTaskComplexUseSequence::CreateNextSubTask(CPed* ped) {
-    return CreateNextSubTask_Reversed(ped);
-}
-
-// 0x6354D0
-CTask* CTaskComplexUseSequence::CreateFirstSubTask(CPed* ped) {
-    return CreateFirstSubTask_Reversed(ped);
-}
-
-// 0x635530
-CTask* CTaskComplexUseSequence::ControlSubTask(CPed* ped) {
-    return ControlSubTask_Reversed(ped);
-}
-
-bool CTaskComplexUseSequence::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     bool bMakeAbortable = m_pSubTask->MakeAbortable(ped, priority, event);
     if (bMakeAbortable && event && event->GetEventType() == EVENT_DAMAGE) {
         auto* eventDamage = (CEventDamage*)event;
@@ -83,7 +63,7 @@ bool CTaskComplexUseSequence::MakeAbortable_Reversed(CPed* ped, eAbortPriority p
     return bMakeAbortable;
 }
 
-CTask* CTaskComplexUseSequence::CreateNextSubTask_Reversed(CPed* ped) {
+CTask* CTaskComplexUseSequence::CreateNextSubTask(CPed* ped) {
     if (m_nSequenceIndex == -1) {
         return nullptr;
     } else {
@@ -92,7 +72,8 @@ CTask* CTaskComplexUseSequence::CreateNextSubTask_Reversed(CPed* ped) {
     }
 }
 
-CTask* CTaskComplexUseSequence::CreateFirstSubTask_Reversed(CPed* ped) {
+
+CTask* CTaskComplexUseSequence::CreateFirstSubTask(CPed* ped) {
     if (m_nSequenceIndex == -1) {
         return nullptr;
     }
@@ -113,6 +94,7 @@ CTask* CTaskComplexUseSequence::CreateFirstSubTask_Reversed(CPed* ped) {
     return firstSubTask;
 }
 
-CTask* CTaskComplexUseSequence::ControlSubTask_Reversed(CPed* ped) {
+// 0x0
+CTask* CTaskComplexUseSequence::ControlSubTask(CPed* ped) {
     return m_pSubTask;
 }

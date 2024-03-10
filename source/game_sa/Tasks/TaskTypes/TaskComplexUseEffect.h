@@ -1,15 +1,16 @@
 #pragma once
 
 #include "TaskComplex.h"
+#include "Enums/eMoveState.h"
 
-class C2dEffect;
+class C2dEffectBase;
 class CEntity;
-class CTaskComplexUseEffect;
 class CPedAttractor;
 class CEvent;
 class CPed;
+class C2dEffectBase;
 
-class NOTSA_EXPORT_VTABLE CTaskComplexUseEffect final : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexUseEffect : public CTaskComplex {
 public:
     static constexpr auto Type = eTaskType::TASK_COMPLEX_USE_EFFECT;
 
@@ -17,14 +18,14 @@ public:
 
     CTaskComplexUseEffect(C2dEffectBase* fx, CEntity* entity);
     CTaskComplexUseEffect(const CTaskComplexUseEffect&);
-    ~CTaskComplexUseEffect();
+    ~CTaskComplexUseEffect() override;
 
     CTask*    Clone() const override { return new CTaskComplexUseEffect{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
-    bool      MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, CEvent const* event = nullptr) override;
-    CTask*    CreateNextSubTask(CPed* ped) override;
-    CTask*    CreateFirstSubTask(CPed* ped) override;
-    CTask*    ControlSubTask(CPed* ped) override;
+    bool      MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, CEvent const* event = nullptr) final override;
+    CTask*    CreateNextSubTask(CPed* ped) final override;
+    CTask*    CreateFirstSubTask(CPed* ped) final override;
+    CTask*    ControlSubTask(CPed* ped) final override;
 
 private: // Wrappers for hooks
     // 0x6321F0

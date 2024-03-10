@@ -69,6 +69,7 @@ class CEventPotentialGetRunOver;
 class CEventPotentialWalkIntoVehicle;
 class CEventHitByWaterCannon;
 class CEventPedEnteredMyVehicle;
+class CEventVehicleToSteal;
 
 class CEventHandler {
 public:

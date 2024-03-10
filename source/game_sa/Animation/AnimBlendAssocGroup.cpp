@@ -77,7 +77,7 @@ void CAnimBlendAssocGroup::CreateAssociations(const char* blockName) {
     const auto ablock = AllocateForBlock(blockName, -1);
 
     for (size_t i = 0; i < ablock->NumAnims; i++) {
-        const auto id    = (AnimationId)(ablock->FirstAnimId + i);
+        const auto id    = (AnimationId)(ablock->FirstAnimIdx + i);
         const auto anim  = &CAnimManager::GetAnimation(id);
         const auto assoc = &GetAssociations()[i];
         const auto mi    = CModelInfo::GetModelInfoFromHashKey(anim->m_hashKey);
@@ -103,7 +103,7 @@ void CAnimBlendAssocGroup::CreateAssociations(const char* blockName, const char*
     const auto ablock = AllocateForBlock(blockName, -1);
 
     for (size_t i = 0; i < ablock->NumAnims; i++) {
-        const auto id    = (AnimationId)(ablock->FirstAnimId + i);
+        const auto id    = (AnimationId)(ablock->FirstAnimIdx + i);
         const auto anim  = &CAnimManager::GetAnimation(id);
         const auto assoc = &GetAssociations()[i];
 
