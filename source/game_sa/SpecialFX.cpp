@@ -19,7 +19,7 @@ void CSpecialFX::InjectHooks() {
     RH_ScopedInstall(Init, 0x7268F0, { .reversed = false });
     RH_ScopedInstall(Update, 0x726AA0, { .reversed = false });
     RH_ScopedInstall(Shutdown, 0x723390);
-    //RH_ScopedInstall(AddWeaponStreak, 0x0, { .reversed = false });
+    RH_ScopedInstall(AddWeaponStreak, 0x7233F0);
     RH_ScopedInstall(Render, 0x726AD0);
     RH_ScopedInstall(Render2DFXs, 0x721660, { .reversed = false });
     RH_ScopedInstall(ReplayStarted, 0x721D30);
@@ -50,7 +50,36 @@ void CSpecialFX::Shutdown() {
 // unused function
 // 0x7233F0
 void CSpecialFX::AddWeaponStreak(eWeaponType weaponType) {
+    RwMatrix* LTM;
+	static CMatrix attachMat;
+	CVector start;
+	CVector end;
+	if (FindPlayerPed() && FindPlayerPed()->m_pWeaponObject) {
+		switch (weaponType) {
+		case WEAPON_BASEBALLBAT:
+			LTM = RwFrameGetLTM(RpAtomicGetFrame(FindPlayerPed()->m_pWeaponObject));
+			attachMat = CMatrix(LTM, false);
+			start = attachMat * CVector(0.02f, 0.05f, 0.07f);
+			end = attachMat * CVector(0.246f, 0.0325f, 0.796f);
+			break;
+		case WEAPON_GOLFCLUB:
+			LTM = RwFrameGetLTM(RpAtomicGetFrame(FindPlayerPed()->m_pWeaponObject));
+			attachMat = CMatrix(LTM, false);
+			start = attachMat * CVector(0.02f, 0.05f, 0.07f);
+			end = attachMat * CVector(-0.054f, 0.0325f, 0.796f);
+			break;
+		case WEAPON_KATANA:
+			LTM = RwFrameGetLTM(RpAtomicGetFrame(FindPlayerPed()->m_pWeaponObject));
+			attachMat = CMatrix(LTM, false);
+			start = attachMat * CVector(0.02f, 0.05f, 0.07f);
+			end = attachMat * CVector(0.096f, -0.0175f, 1.096f);
+			break;
+		default:
+			return;
+		}
 
+		CMotionBlurStreaks::RegisterStreak((uint32_t)FindPlayerPed()->m_pWeaponObject, 100, 100, 100, 255, start, end);
+	}
 }
 
 // 0x726AD0
