@@ -77,7 +77,7 @@ void CSpecialFX::AddWeaponStreak(eWeaponType weaponType) {
         return;
     }
 
-    CMotionBlurStreaks::RegisterStreak((uint32_t)WeaponObject, 100, 100, 100, 255, start, end);
+    CMotionBlurStreaks::RegisterStreak((uint32)WeaponObject, 100, 100, 100, 255, start, end);
 }
 
 // 0x726AD0
