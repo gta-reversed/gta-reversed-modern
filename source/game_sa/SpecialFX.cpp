@@ -50,36 +50,34 @@ void CSpecialFX::Shutdown() {
 // unused function
 // 0x7233F0
 void CSpecialFX::AddWeaponStreak(eWeaponType weaponType) {
-    RwMatrix* LTM;
-	static CMatrix attachMat;
-	CVector start;
-	CVector end;
-	if (FindPlayerPed() && FindPlayerPed()->m_pWeaponObject) {
-		switch (weaponType) {
-		case WEAPON_BASEBALLBAT:
-			LTM = RwFrameGetLTM(RpAtomicGetFrame(FindPlayerPed()->m_pWeaponObject));
-			attachMat = CMatrix(LTM, false);
-			start = attachMat * CVector(0.02f, 0.05f, 0.07f);
-			end = attachMat * CVector(0.246f, 0.0325f, 0.796f);
-			break;
-		case WEAPON_GOLFCLUB:
-			LTM = RwFrameGetLTM(RpAtomicGetFrame(FindPlayerPed()->m_pWeaponObject));
-			attachMat = CMatrix(LTM, false);
-			start = attachMat * CVector(0.02f, 0.05f, 0.07f);
-			end = attachMat * CVector(-0.054f, 0.0325f, 0.796f);
-			break;
-		case WEAPON_KATANA:
-			LTM = RwFrameGetLTM(RpAtomicGetFrame(FindPlayerPed()->m_pWeaponObject));
-			attachMat = CMatrix(LTM, false);
-			start = attachMat * CVector(0.02f, 0.05f, 0.07f);
-			end = attachMat * CVector(0.096f, -0.0175f, 1.096f);
-			break;
-		default:
-			return;
-		}
+    CPlayerPed* playa = FindPlayerPed();
+    if (!playa || !playa->m_pWeaponObject)
+        return;
 
-		CMotionBlurStreaks::RegisterStreak((uint32_t)FindPlayerPed()->m_pWeaponObject, 100, 100, 100, 255, start, end);
-	}
+    auto const& WeaponObject = playa->m_pWeaponObject;
+    RwMatrix* LTM = RwFrameGetLTM(RpAtomicGetFrame(WeaponObject));
+    if (!LTM)
+        return;
+
+    CMatrix attachMat(LTM, false);
+    CVector start = attachMat * CVector(0.02f, 0.05f, 0.07f);
+    CVector end;
+
+    switch (weaponType) {
+    case WEAPON_BASEBALLBAT:
+        end = attachMat * CVector(0.246f, 0.0325f, 0.796f);
+        break;
+    case WEAPON_GOLFCLUB:
+        end = attachMat * CVector(-0.054f, 0.0325f, 0.796f);
+        break;
+    case WEAPON_KATANA:
+        end = attachMat * CVector(0.096f, -0.0175f, 1.096f);
+        break;
+    default:
+        return;
+    }
+
+    CMotionBlurStreaks::RegisterStreak((uint32_t)WeaponObject, 100, 100, 100, 255, start, end);
 }
 
 // 0x726AD0
