@@ -50,32 +50,28 @@ void CSpecialFX::Shutdown() {
 // unused function
 // 0x7233F0
 void CSpecialFX::AddWeaponStreak(eWeaponType weaponType) {
-    CPlayerPed* playa = FindPlayerPed();
-    if (!playa || !playa->m_pWeaponObject)
-        return;
+    const auto plyr = FindPlayerPed();
 
-    auto const& WeaponObject = playa->m_pWeaponObject;
-    RwMatrix* LTM = RwFrameGetLTM(RpAtomicGetFrame(WeaponObject));
-    
-    CMatrix attachMat(LTM, false);
-    CVector start = attachMat * CVector(0.02f, 0.05f, 0.07f);
-    CVector end;
-
-    switch (weaponType) {
-    case WEAPON_BASEBALLBAT:
-        end = attachMat * CVector(0.246f, 0.0325f, 0.796f);
-        break;
-    case WEAPON_GOLFCLUB:
-        end = attachMat * CVector(-0.054f, 0.0325f, 0.796f);
-        break;
-    case WEAPON_KATANA:
-        end = attachMat * CVector(0.096f, -0.0175f, 1.096f);
-        break;
-    default:
+    if (!plyr || !plyr->m_pWeaponObject) {
         return;
     }
 
-    CMotionBlurStreaks::RegisterStreak((uint32)WeaponObject, 100, 100, 100, 255, start, end);
+    const auto DoStreak = [](CVector endO) {
+        const CMatrix ltm(RwFrameGetLTM(RpAtomicGetFrame(plyr->m_pWeaponObject)));
+        CMotionBlurStreaks::RegisterStreak(
+            reinterpret_cast<uint32>(plyr->m_pWeaponObject),
+            100, 100, 100, 255,
+            ltm.TransformPoint({0.02f, 0.05f, 0.07f}),
+            end.TransformPoint(endO)
+        );
+    };
+
+    switch (weaponType) {
+    case WEAPON_BASEBALLBAT: DoStreak({0.246f,  0.0325f,  0.796f});
+    case WEAPON_GOLFCLUB:    DoStreak({-0.054f, 0.0325f,  0.796f});
+    case WEAPON_KATANA:      DoStreak({0.096f,  -0.0175f, 1.096f});
+    default:                 break; // OG: No streak is created
+    }
 }
 
 // 0x726AD0
