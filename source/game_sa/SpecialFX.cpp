@@ -56,9 +56,7 @@ void CSpecialFX::AddWeaponStreak(eWeaponType weaponType) {
 
     auto const& WeaponObject = playa->m_pWeaponObject;
     RwMatrix* LTM = RwFrameGetLTM(RpAtomicGetFrame(WeaponObject));
-    if (!LTM)
-        return;
-
+    
     CMatrix attachMat(LTM, false);
     CVector start = attachMat * CVector(0.02f, 0.05f, 0.07f);
     CVector end;
