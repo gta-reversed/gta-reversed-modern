@@ -51,25 +51,28 @@ void CSpecialFX::Shutdown() {
 // 0x7233F0
 void CSpecialFX::AddWeaponStreak(eWeaponType weaponType) {
     const auto plyr = FindPlayerPed();
-
+    static CMatrix attachMat;
+    RwMatrix* LTM;
     if (!plyr || !plyr->m_pWeaponObject) {
         return;
     }
 
-    const auto DoStreak = [](CVector endO) {
-        const CMatrix ltm(RwFrameGetLTM(RpAtomicGetFrame(plyr->m_pWeaponObject)));
+    const auto DoStreak = [plyr, LTM](CVector endO) {
+         *LTM = *RwFrameGetLTM(RpAtomicGetFrame(plyr->m_pWeaponObject));
+         attachMat = CMatrix(LTM, false);
         CMotionBlurStreaks::RegisterStreak(
             reinterpret_cast<uint32>(plyr->m_pWeaponObject),
             100, 100, 100, 255,
-            ltm.TransformPoint({0.02f, 0.05f, 0.07f}),
+            ltm.TransformPoint({ 0.02f, 0.05f, 0.07f }),
             end.TransformPoint(endO)
         );
     };
 
+
     switch (weaponType) {
-    case WEAPON_BASEBALLBAT: DoStreak({0.246f,  0.0325f,  0.796f});
-    case WEAPON_GOLFCLUB:    DoStreak({-0.054f, 0.0325f,  0.796f});
-    case WEAPON_KATANA:      DoStreak({0.096f,  -0.0175f, 1.096f});
+    case WEAPON_BASEBALLBAT: DoStreak({ 0.246f,  0.0325f,  0.796f });
+    case WEAPON_GOLFCLUB:    DoStreak({ -0.054f, 0.0325f,  0.796f });
+    case WEAPON_KATANA:      DoStreak({ 0.096f,  -0.0175f, 1.096f });
     default:                 break; // OG: No streak is created
     }
 }
