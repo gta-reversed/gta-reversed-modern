@@ -74,9 +74,9 @@ void CSpecialFX::AddWeaponStreak(eWeaponType weaponType) {
 
 
     switch (weaponType) {
-    case WEAPON_BASEBALLBAT: DoStreak({ 0.246f,  0.0325f,  0.796f });
-    case WEAPON_GOLFCLUB:    DoStreak({ -0.054f, 0.0325f,  0.796f });
-    case WEAPON_KATANA:      DoStreak({ 0.096f,  -0.0175f, 1.096f });
+    case WEAPON_BASEBALLBAT: DoStreak({ 0.246f,  0.0325f,  0.796f }); break;
+    case WEAPON_GOLFCLUB:    DoStreak({ -0.054f, 0.0325f,  0.796f }); break;
+    case WEAPON_KATANA:      DoStreak({ 0.096f,  -0.0175f, 1.096f }); break;
     default:                 break; // OG: No streak is created
     }
 }
