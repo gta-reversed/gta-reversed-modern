@@ -50,13 +50,11 @@ CAEAudioChannel::CAEAudioChannel(IDirectSound* directSound, uint16 channelId, ui
 CAEAudioChannel::~CAEAudioChannel() {
     if (m_pDirectSoundBuffer) {
         --g_numSoundChannelsUsed;
-        m_pDirectSoundBuffer->Release();
-        m_pDirectSoundBuffer = nullptr;
+        std::exchange(m_pDirectSoundBuffer, nullptr)->Release();
     }
 
     if (m_pDirectSound3DBuffer) {
-        m_pDirectSound3DBuffer->Release();
-        m_pDirectSound3DBuffer = nullptr;
+        std::exchange(m_pDirectSound3DBuffer, nullptr)->Release();
     }
 }
 
