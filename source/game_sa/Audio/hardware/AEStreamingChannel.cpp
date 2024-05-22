@@ -23,16 +23,16 @@ CAEStreamingChannel::~CAEStreamingChannel() {
         m_pDirectSoundBuffer8->SetFX(0, nullptr, nullptr);
 
     if (m_pSilenceBuffer)
-        m_pSilenceBuffer->Release();
+        std::exchange(m_pSilenceBuffer, nullptr)->Release();
 
     if (m_pDirectSoundBuffer)
-        m_pDirectSoundBuffer->Release();
+        std::exchange(m_pDirectSoundBuffer, nullptr)->Release();
 
     if (m_pStreamingDecoder)
-        delete m_pStreamingDecoder;
+        delete std::exchange(m_pStreamingDecoder, nullptr);
 
     if (m_pNextStreamingDecoder)
-        delete m_pNextStreamingDecoder;
+        delete std::exchange(m_pNextStreamingDecoder, nullptr);
 }
 
 // 0x4F22F0

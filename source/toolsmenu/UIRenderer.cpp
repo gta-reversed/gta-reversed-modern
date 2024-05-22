@@ -43,7 +43,7 @@ UIRenderer::~UIRenderer() {
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext(m_ImCtx);
 
-    DEV_LOG("Good bye!");
+    //DEV_LOG("Good bye!");
 }
 
 void UIRenderer::PreRenderUpdate() {
