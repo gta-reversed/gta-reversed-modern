@@ -257,7 +257,7 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
 
 // Code from winmain, 0x7489FB
 void MainLoop(INT nCmdShow, MSG& Msg) {
-    bool bNewGameFirstTime = false;
+    bool isNewGameFirstTime = true;
     while (true) {
         RwInitialized = true;
 
@@ -285,7 +285,7 @@ void MainLoop(INT nCmdShow, MSG& Msg) {
             CGame::ShutDownForRestart();
             CGame::InitialiseWhenRestarting();
             FrontEndMenuManager.m_bLoadingData = false;
-        } else if (bNewGameFirstTime) {
+        } else if (isNewGameFirstTime) {
             CTimer::Stop();
             ChangeGameStateTo(
                 FrontEndMenuManager.m_nGameState != 1
@@ -299,7 +299,7 @@ void MainLoop(INT nCmdShow, MSG& Msg) {
             CGame::InitialiseWhenRestarting();
         }
 
-        bNewGameFirstTime = false;
+        isNewGameFirstTime = false;
         FrontEndMenuManager.m_nGameState = 0;
         FrontEndMenuManager.m_bStartGameLoading = false;
     }
