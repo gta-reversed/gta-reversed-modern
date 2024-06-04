@@ -570,7 +570,7 @@ void CPickups::RemoveUnnecessaryPickups(const CVector& posn, float radius) {
 // 0x455000
 void CPickups::RenderPickUpText() {
     GxtChar msgText[352]{};
-    for (auto& message : std::span{ aMessages.data(), NumMessages }) {
+    for (const auto& message : std::span{ aMessages.data(), NumMessages }) {
         if (message.price == 0u) {
             if (!message.text)
                 continue;
@@ -593,7 +593,7 @@ void CPickups::RenderPickUpText() {
         CFont::SetCentreSize(SCREEN_WIDTH);
         CFont::SetColor(message.color);
         CFont::SetFontStyle(eFontStyle::FONT_PRICEDOWN);
-        CFont::PrintString(message.pos.x, message.pos.y, gGxtString);
+        CFont::PrintString(message.pos.x, message.pos.y, msgText);
     }
     NumMessages = 0;
 }
