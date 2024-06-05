@@ -4,6 +4,7 @@
 
 #include "StdInc.h"
 #include "config.h"
+#include "RootHookCategory.h"
 
 #include "extensions/CommandLine.h"
 #include "extensions/Configuration.hpp"
@@ -40,6 +41,48 @@ void LoadConfigurations() {
     // ...
 }
 
+static void ApplyCommandLineHookSettings() {
+    using namespace ReversibleHooks;
+
+    const auto ResultText = [](SetCatOrItemStateResult res) {
+        switch (res) {
+        case SetCatOrItemStateResult::NotFound: return "not found";
+        case SetCatOrItemStateResult::Locked: return "locked";
+        case SetCatOrItemStateResult::Done: return "done";
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    };
+
+    if (CommandLine::unhookAll || !CommandLine::unhookExcept.empty()) {
+        ReversibleHooks::GetRootCategory().SetAllItemsEnabled(false);
+
+        NOTSA_LOG_DEBUG("Unhooked all via command-line");
+        for (const auto& item : CommandLine::unhookExcept) {
+            const auto res = SetCategoryOrItemStateByPath(item, true);
+
+            if (res == SetCatOrItemStateResult::Done) {
+                NOTSA_LOG_DEBUG("Rehooked '{}' via command-line.", item);
+            } else {
+                NOTSA_LOG_WARN("Couldn't rehook '{}' via command-line: {}", item, ResultText(res));
+            }
+        }
+        return;
+    }
+
+    if (!CommandLine::unhookSome.empty()) {
+        for (const auto& item : CommandLine::unhookSome) {
+            const auto res = SetCategoryOrItemStateByPath(item, false);
+
+            if (res == SetCatOrItemStateResult::Done) {
+                NOTSA_LOG_DEBUG("Unhooked '{}' via command-line.", item);
+            } else {
+                NOTSA_LOG_WARN("Couldn't unhook '{}' via command-line: {}", item, ResultText(res));
+            }
+        }
+    }
+}
+
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
 {
     switch (ul_reason_for_call)
@@ -67,6 +110,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
         LoadConfigurations();
 
         InjectHooksMain(hModule);
+        ApplyCommandLineHookSettings();
         break;
     }
     case DLL_THREAD_ATTACH:
