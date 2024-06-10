@@ -60,7 +60,7 @@ void CCarEnterExit::AddInCarAnim(const CVehicle* vehicle, CPed* ped, bool bAsDri
                     return { ANIM_GROUP_DEFAULT, ANIM_ID_DRIVE_BOAT };
                 }
             } else if (vehicle->vehicleFlags.bLowVehicle) {
-                return { ANIM_GROUP_DEFAULT, ANIM_ID_CAR_SITPLO };
+                return { ANIM_GROUP_DEFAULT, ANIM_ID_CAR_LSIT };
             }
 
             return { ANIM_GROUP_DEFAULT, ANIM_ID_CAR_SIT };
