@@ -55,7 +55,7 @@ static void ApplyCommandLineHookSettings() {
     };
 
     if (CommandLine::unhookAll || !CommandLine::unhookExcept.empty()) {
-        ReversibleHooks::GetRootCategory().SetAllItemsEnabled(false);
+        GetRootCategory().SetAllItemsEnabled(false);
 
         NOTSA_LOG_DEBUG("Unhooked all via command-line");
         for (const auto& item : CommandLine::unhookExcept) {
