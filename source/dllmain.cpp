@@ -47,18 +47,17 @@ static void ApplyCommandLineHookSettings() {
     const auto ResultText = [](SetCatOrItemStateResult res) {
         switch (res) {
         case SetCatOrItemStateResult::NotFound: return "not found";
-        case SetCatOrItemStateResult::Locked: return "locked";
-        case SetCatOrItemStateResult::Done: return "done";
-        default:
-            NOTSA_UNREACHABLE();
+        case SetCatOrItemStateResult::Locked:   return "locked";
+        case SetCatOrItemStateResult::Done:     return "done";
+        default: NOTSA_UNREACHABLE();
         }
     };
 
-    if (CommandLine::unhookAll || !CommandLine::unhookExcept.empty()) {
+    if (CommandLine::s_UnhookAll || !CommandLine::s_UnhookExcept.empty()) {
         ReversibleHooks::GetRootCategory().SetAllItemsEnabled(false);
 
         NOTSA_LOG_DEBUG("Unhooked all via command-line");
-        for (const auto& item : CommandLine::unhookExcept) {
+        for (const auto& item : CommandLine::s_UnhookExcept) {
             const auto res = SetCategoryOrItemStateByPath(item, true);
 
             if (res == SetCatOrItemStateResult::Done) {
@@ -70,8 +69,8 @@ static void ApplyCommandLineHookSettings() {
         return;
     }
 
-    if (!CommandLine::unhookSome.empty()) {
-        for (const auto& item : CommandLine::unhookSome) {
+    if (!CommandLine::s_UnhookSome.empty()) {
+        for (const auto& item : CommandLine::s_UnhookSome) {
             const auto res = SetCategoryOrItemStateByPath(item, false);
 
             if (res == SetCatOrItemStateResult::Done) {

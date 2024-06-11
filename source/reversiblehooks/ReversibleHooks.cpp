@@ -29,7 +29,8 @@ SetCatOrItemStateResult SetCategoryOrItemStateByPath(std::string_view path, bool
     const auto    seperated = SplitStringView(path, "/") | rng::to<std::vector>();
     HookCategory* cat       = &GetRootCategory();
     for (auto name : std::span(seperated).first(seperated.size() - 1)) {
-        if (cat = cat->FindSubcategory(name); !cat) {
+        cat = cat->FindSubcategory(name);
+        if (!cat) {
             return SetCatOrItemStateResult::NotFound;
         }
     }
