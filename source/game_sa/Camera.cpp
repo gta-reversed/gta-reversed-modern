@@ -1060,6 +1060,7 @@ void CCamera::TakeControl(CEntity* target, eCamMode modeToGoTo, eSwitchType swit
             return;
         }
     }
+    m_nWhoIsInControlOfTheCamera = whoIsInControlOfTheCamera;
 
     const auto [newGoToMode, newTargetEntity] = [&, this]() -> std::tuple<eCamMode, CEntity*>{
         if (target) {
@@ -1085,7 +1086,7 @@ void CCamera::TakeControl(CEntity* target, eCamMode modeToGoTo, eSwitchType swit
     CEntity::ChangeEntityReference(m_pTargetEntity, newTargetEntity);
     m_nModeToGoTo = newGoToMode;
 
-    m_nMusicFadingDirection = (eFadeFlag)switchType; // TODO: Investigate, this looks sus
+    m_nTypeOfSwitch    = switchType;
     m_bLookingAtPlayer = m_bLookingAtVector = false;
     m_bStartInterScript = true;
 }
