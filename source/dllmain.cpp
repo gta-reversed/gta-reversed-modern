@@ -4,10 +4,10 @@
 
 #include "StdInc.h"
 #include "config.h"
-#include "RootHookCategory.h"
 
 #include "extensions/CommandLine.h"
 #include "extensions/Configuration.hpp"
+#include "reversiblehooks/RootHookCategory.h"
 
 void InjectHooksMain(HMODULE hThisDLL);
 
@@ -54,7 +54,7 @@ static void ApplyCommandLineHookSettings() {
     };
 
     if (CommandLine::s_UnhookAll || !CommandLine::s_UnhookExcept.empty()) {
-        ReversibleHooks::GetRootCategory().SetAllItemsEnabled(false);
+        GetRootCategory().SetAllItemsEnabled(false);
 
         NOTSA_LOG_DEBUG("Unhooked all via command-line");
         for (const auto& item : CommandLine::s_UnhookExcept) {
