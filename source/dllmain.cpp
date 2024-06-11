@@ -4,10 +4,10 @@
 
 #include "StdInc.h"
 #include "config.h"
-#include "RootHookCategory.h"
 
 #include "extensions/CommandLine.h"
 #include "extensions/Configuration.hpp"
+#include "reversiblehooks/RootHookCategory.h"
 
 void InjectHooksMain(HMODULE hThisDLL);
 
