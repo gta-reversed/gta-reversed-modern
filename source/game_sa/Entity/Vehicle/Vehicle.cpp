@@ -3031,7 +3031,6 @@ bool CVehicle::GetVehicleLightsStatus() {
     return m_fContactSurfaceBrightness < 0.05f && CCullZones::CamNoRain();
 }
 
-
 // 0x6D5CF0
 bool CVehicle::CanPedLeanOut(CPed* ped) {
     switch (m_pHandlingData->m_nAnimGroup) {
