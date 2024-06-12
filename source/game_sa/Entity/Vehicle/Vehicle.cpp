@@ -3013,11 +3013,14 @@ bool CVehicle::GetVehicleLightsStatus() {
 
     // The rest pretty much follows the original code
 
-    if (CClock::GetIsTimeInRange(20, 6)) {
+    if (CClock::GetIsTimeInRange(21, 6)) {
         return true;
     }
 
-    if (CClock::GetIsTimeInRange(19u, 7u) && CClock::GetGameClockMinutes() > (m_nRandomSeed % 64)) {
+    if (CClock::GetGameClockHours() == 20 && CClock::GetGameClockMinutes() > (m_nRandomSeed % 64)) {
+        return true;
+    }
+    if (CClock::GetGameClockHours() == 6 && CClock::GetGameClockMinutes() < (m_nRandomSeed % 64)) {
         return true;
     }
 
@@ -3025,8 +3028,9 @@ bool CVehicle::GetVehicleLightsStatus() {
         return true;
     }
 
-    return m_fContactSurfaceBrightness > 0.05f && CCullZones::CamNoRain();
+    return m_fContactSurfaceBrightness < 0.05f && CCullZones::CamNoRain();
 }
+
 
 // 0x6D5CF0
 bool CVehicle::CanPedLeanOut(CPed* ped) {
