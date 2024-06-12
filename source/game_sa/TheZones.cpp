@@ -126,9 +126,9 @@ bool CTheZones::PointLiesWithinZone(const CVector* point, CZone* zone) {
 // Returns eLevelName from position
 eLevelName CTheZones::GetLevelFromPosition(const CVector& point) {
     const auto& mapZones = GetMapZones();
-    for (size_t i = 1; i < mapZones.size(); ++i) {
-        if (mapZones[i].GetBB().IsPointInside(point)) {
-            return mapZones[i].m_nLevel;
+    for (auto& z : mapZones | rng::views::drop(1)) {
+        if (z.GetBB().IsPointInside(point)) {
+            return z.m_nLevel;
         }
     }
     return mapZones[0].m_nLevel;
