@@ -8,15 +8,15 @@ CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(CVehicle* targetVehic
 {
 }
 
-CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(const CTaskComplexEnterCarAsDriver& o) :
-    CTaskComplexEnterCarAsDriver{ o.m_Car }
+CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(CVehicle* targetVehicle, eMoveState moveState) : // NOTSA
+    CTaskComplexEnterCarAsDriver{ targetVehicle }
 {
-    m_MoveState = o.m_MoveState;
+    m_MoveState = moveState;
 }
 
 // For 0x643780
 CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(const CTaskComplexEnterCarAsDriver& o) :
-    CTaskComplexEnterCarAsDriver{ m_Car }
+    CTaskComplexEnterCarAsDriver{ o.m_Car }
 {
     m_MoveState = o.m_MoveState;
 }
