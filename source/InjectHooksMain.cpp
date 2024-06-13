@@ -1361,12 +1361,6 @@ void InjectHooksMain() {
     Vehicle();
     Interior();
     Scripts();
-
-    if (CommandLine::unhookAll)
-        ReversibleHooks::GetRootCategory().SetAllItemsEnabled(false);
-
-    if (!CommandLine::unhookSome.empty() || !CommandLine::unhookExcept.empty())
-        NOTSA_LOG_WARN("Command line arguments --unhook and --unhook-except are unimplemented!");
 }
 
 void InjectHooksMain(HMODULE hThisDLL) {

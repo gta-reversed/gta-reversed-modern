@@ -21,6 +21,33 @@ RootHookCategory& GetRootCategory() {
     return s_RootCategory;
 }
 
+SetCatOrItemStateResult SetCategoryOrItemStateByPath(std::string_view path, bool enabled) {
+    if (path.ends_with("/")) {
+        path.remove_suffix(1);
+    }
+
+    const auto    seperated = SplitStringView(path, "/") | rng::to<std::vector>();
+    HookCategory* cat       = &GetRootCategory();
+    for (auto name : std::span(seperated).first(seperated.size() - 1)) {
+        cat = cat->FindSubcategory(name);
+        if (!cat) {
+            return SetCatOrItemStateResult::NotFound;
+        }
+    }
+
+    if (auto category = cat->FindSubcategory(seperated.back())) {
+        category->SetAllItemsEnabled(enabled);
+        return SetCatOrItemStateResult::Done;
+    } else if (auto item = cat->FindItem(seperated.back())) {
+        if (item->Hooked() == enabled) {
+            return SetCatOrItemStateResult::Done;
+        }
+        return item->State(enabled) ? SetCatOrItemStateResult::Done : SetCatOrItemStateResult::Locked;
+    }
+
+    return SetCatOrItemStateResult::NotFound;
+}
+
 void CheckAll() {
     s_RootCategory.ForEachItem([](auto& item) {
         item->Check();
