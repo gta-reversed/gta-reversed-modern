@@ -112,6 +112,8 @@ public:
 
     //! Heading of the vector - 
     float Heading() const {
+        // -x, y is basically GetPerpRight()
+        // that's the same as std::atan(y, x) - 90deg;
         return std::atan2(-x, y);
     }
 
@@ -174,6 +176,8 @@ public:
     float& operator[](size_t i) {
         return (&x)[i];
     }
+
+    bool EqualTo(CVector2D o, float epsilon);
 };
 
 /// Negate all components of the vector
