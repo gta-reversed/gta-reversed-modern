@@ -146,17 +146,11 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
             || (!m_Car->IsDoorMissingU32(m_TargetDoor) && !m_Car->IsDoorFullyOpenU32(m_TargetDoor) && !m_Car->IsDoorClosedU32(m_TargetDoor));
     };
     const auto OpenCarDoor = [this]() {
-        // TODO: should we add more _Component functions to CDamageManager?
         if (m_Car->IsAutomobile()) {
             auto& damage = m_Car->AsAutomobile()->m_damageManager;
             auto  door   = (tComponent)m_TargetDoor;
-            auto  status = damage.GetDoorStatus_Component(door);
-            if (status == eDoorStatus::DAMSTATE_OK) {
-                damage.SetDoorStatus_Component(door, eDoorStatus::DAMSTATE_OPENED);
-            } else if (status == eDoorStatus::DAMSTATE_DAMAGED) {
-                damage.SetDoorStatus_Component(door, eDoorStatus::DAMSTATE_OPENED_DAMAGED);
-            }
-        }
+            damage.SetDoorOpen_Component(door);
+        };
     };
 
     switch (const auto tt = m_pSubTask->GetTaskType()) {
