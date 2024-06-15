@@ -72,6 +72,8 @@ solution "gta_reversed"
     }
 
     include "source/"
+    debugcommand "$(GTA_SA_DIR)/gta_sa.exe"
+    debugdir "$(GTA_SA_DIR)"
 
     group "Dependencies"
         defines { "WIN32", "_WINDOWS" }
