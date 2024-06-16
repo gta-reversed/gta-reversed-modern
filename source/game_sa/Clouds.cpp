@@ -424,8 +424,8 @@ void CClouds::Render_MaybeRenderRockstarLogo(float colorBalance) {
     constexpr auto LOGO_VISIBLE_FROM_HRS  = 22u,
                    LOGO_VISIBLE_UNTIL_HRS = 6u;
 
-    constexpr auto R_OFFSET_FROM_CAMERA    = CVector{ 100.f, 0.f, 10.f }; // Letter `R` offset from camera
-    constexpr auto STAR_OFFSET_FROM_CAMERA = CVector{ 100.f, -90.f, R_OFFSET_FROM_CAMERA.z }; // `*` [As in R*] offset from camera
+    constexpr auto R_OFFSET_FROM_CAMERA    = CVector{ 100.f,   0.f, 10.f }; // Letter `R` offset from camera
+    constexpr auto STAR_OFFSET_FROM_CAMERA = CVector{ 100.f, -90.f, 10.f }; // `*` [As in R*] offset from camera
 
     constexpr auto  STARS_NUM_POSITIONS                    = 9;
     constexpr float STARS_Y_POSITIONS[STARS_NUM_POSITIONS] = { 0.00f, 0.05f, 0.13f, 0.40f, 0.70f, 0.60f, 0.27f, 0.55f, 0.75f }; // 0x8D55EC
