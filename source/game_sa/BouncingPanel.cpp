@@ -9,7 +9,7 @@ float& CBouncingPanel::BOUNCE_HANGING_RETURN_MULT = *(float*)0x8D3964;
 
 void CBouncingPanel::InjectHooks() {
     RH_ScopedClass(CBouncingPanel);
-    RH_ScopedCategory("Global/CBouncingPanel");
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(ResetPanel, 0x6F4910);
     RH_ScopedInstall(SetPanel, 0x6F4920);
