@@ -447,12 +447,9 @@ void CClouds::Render_MaybeRenderRockstarLogo(float colorBalance) {
           : 60u - CClock::GetGameClockMinutes();
 
     auto colorB = 255u;
-    if (CClock::GetGameClockHours() >= 5u && CClock::GetGameClockHours() <= 22u) {
+    if (CClock::GetGameClockHours() == LOGO_VISIBLE_UNTIL_HRS - 1 || CClock::GetGameClockHours() == LOGO_VISIBLE_FROM_HRS) {
         colorB = 255u * time / 60u;
     }
-
-    if (!colorB)
-        return;
 
     const auto colorRG = CalculateColorWithBalance(colorB, colorBalance);
 
@@ -479,7 +476,7 @@ void CClouds::Render_MaybeRenderRockstarLogo(float colorBalance) {
             continue;
         }
 
-        const auto cc = CalculateColorWithBalance(colorB, (int8)(rand() % 32) * 0.015f);
+        const auto cc = CalculateColorWithBalance(colorB, (float)(rand() % 32) * 0.015f);
 
         starSizeScr *= STARS_SIZES[posIdx] * 0.8f;
 
@@ -498,7 +495,7 @@ void CClouds::Render_MaybeRenderRockstarLogo(float colorBalance) {
     CVector   lastStarPosScr;
     CVector2D lastStarSizeScr;
     if (CSprite::CalcScreenCoors(camPos + STAR_OFFSET_FROM_CAMERA, &lastStarPosScr, &lastStarSizeScr.x, &lastStarSizeScr.y, false, true)) {
-        const auto cc = CalculateColorWithBalance(colorB, (int8)(rand() % 128) * 0.0015625f + 0.5f);
+        const auto cc = CalculateColorWithBalance(colorB, (float)(rand() % 128) * 0.0015625f + 0.5f);
 
         lastStarSizeScr.x *= 5.f;
         lastStarSizeScr.y *= 5.f;
@@ -550,7 +547,7 @@ void CClouds::Render_RenderLowClouds(float colorBalance) {
 
     // Render clouds
     auto camPos = TheCamera.GetPosition();
-    camPos.z = 0;
+    camPos.z = 0; // GTA immediately overwrites input.z of CalcScreenCoors with offset.z * 60.f + 40.f (notice that there is no "+ camPos.z", maybe R* simply confused = with +=)
     for (const auto& offset : LOW_CLOUDS_COORDS) {
         CVector   cloudPosScr;
         CVector2D cloudSizeScr;
