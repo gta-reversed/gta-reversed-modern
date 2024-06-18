@@ -32,44 +32,48 @@ enum class eCheckpointType : uint32 {
 
 class CCheckpoint {
 public:
-    uint16  m_nType;
-    bool    m_bIsUsed;
-    bool    m_bMustBeRenderedThisFrame;
-    int32   m_nIdentifier;
-    CRGBA   m_Colour;
-    int16   m_nPulsePeriod;
-    int16   m_nRotateRate;
-    CVector m_vecPosition;
-    CVector m_vecDirection;
-    float   m_fPulseFraction;
-    float   m_fSize;
-    float   m_fDistanceToPlayer; // or CameraRange
-    float   m_fMultiSize;
+    void Init() {
+        *this = CCheckpoint{};
+    }
+
+    static void InjectHooks();
+
+    /*!
+     * @brief Render this checkpoint. Checkpoints are basically just markers, so what we're really doing here is placing markers each time.
+    */
+    void Render();
+
+    /*!
+     * @brief Change the position
+     * @param pos The new position. Z axis is ignored for the type `TORUS_DOWN`.
+    */
+    void SetPosition(const CVector& pos);
+
+    /*!
+     * @brief Mark this checkpoint as not used. (See 0x722FC0 aka `CCheckpoints::DeleteCP`)
+    */
+    void MarkAsDeleted();
+
+    /*!
+     * @brief Set the pointing direction
+     * @param heading The new pointing direction in degrees
+    */
+    void SetHeading(float headingDeg);
 
 public:
-    static void InjectHooks() {
-        RH_ScopedClass(CCheckpoint);
-        RH_ScopedCategoryGlobal();
-        RH_ScopedInstall(Render, 0x725C00, { .reversed = false });
-    }
+    notsa::WEnumU16<eCheckpointType> m_Type{eCheckpointType::NA};
+    bool                             m_IsUsed{false};
+    bool                             m_RotFlag{true};
+    int32                            m_ID{0};
+    CRGBA                            m_Colour{255, 255, 255, 255};
+    uint16                           m_PulsePeriod{1'024};
+    int16                            m_RotateRate{5};
+    CVector                          m_Pos{};
+    CVector                          m_Fwd{}; ///< Pointing direction
+    float                            m_PulseFraction{0.25f};
+    float                            m_Size{1.f};
+    float                            m_CameraRange{0.f};
+    float                            m_MultiSize{0.f};
 
-    void Init() {
-        m_nType                    = 257; // MARKER3D_NA?
-        m_bIsUsed                  = false;
-        m_nIdentifier              = 0;
-        m_Colour                   = CRGBA(255, 255, 255, 255);
-        m_nPulsePeriod             = 1024;
-        m_nRotateRate              = 5;
-        m_vecPosition              = CVector();
-        m_vecDirection             = CVector();
-        m_fPulseFraction           = 0.25f;
-        m_fSize                    = 1.0f;
-        m_fDistanceToPlayer        = 0.0f;
-        m_fMultiSize               = 0.0f;
-        m_bMustBeRenderedThisFrame = true;
-    }
-
-    void Render();
 };
-
 VALIDATE_SIZE(CCheckpoint, 0x38);

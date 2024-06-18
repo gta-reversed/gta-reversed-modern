@@ -33,7 +33,7 @@ void CCheckpoints::Shutdown() {
 // NOTSA
 CCheckpoint* CCheckpoints::FindById(uint32 id) {
     for (auto& checkpoint : m_aCheckPtArray) {
-        if (checkpoint.m_nIdentifier == id) {
+        if (checkpoint.m_ID == id) {
             return &checkpoint;
         }
     }
@@ -43,9 +43,9 @@ CCheckpoint* CCheckpoints::FindById(uint32 id) {
 // 0x722970
 void CCheckpoints::SetHeading(uint32 id, float angle) {
     if (auto* checkpoint = FindById(id)) {
-        checkpoint->m_vecDirection.x = std::cos(DegreesToRadians(angle));
-        checkpoint->m_vecDirection.y = std::sin(DegreesToRadians(angle));
-        checkpoint->m_vecDirection.Normalise();
+        checkpoint->m_Fwd.x = std::cos(DegreesToRadians(angle));
+        checkpoint->m_Fwd.y = std::sin(DegreesToRadians(angle));
+        checkpoint->m_Fwd.Normalise();
     }
 }
 
@@ -67,24 +67,16 @@ CCheckpoint* CCheckpoints::PlaceMarker(uint32 id, uint16 type,
 
 // 0x722900
 void CCheckpoints::UpdatePos(uint32 id, CVector& posn) {
-    if (auto* checkpoint = FindById(id)) {
-        checkpoint->m_vecPosition.x = posn.x;
-        checkpoint->m_vecPosition.y = posn.y;
-        if (checkpoint->m_nType == 7) {
-            checkpoint->m_vecPosition.z = checkpoint->m_fMultiSize + posn.z;
-        } else if (checkpoint->m_nType != 8) {
-            checkpoint->m_vecPosition.z = posn.z;
-        }
+    if (const auto cp = FindById(id)) {
+        cp->SetPosition(posn);
     }
 }
 
 // 0x722FC0
 void CCheckpoints::DeleteCP(uint32 id, uint16 type) {
-    for (auto& checkpoint : m_aCheckPtArray) {
-        if (checkpoint.m_bIsUsed && checkpoint.m_nIdentifier == id && checkpoint.m_nType == type) {
-            checkpoint.m_bIsUsed     = false;
-            checkpoint.m_nType       = MARKER3D_NA;
-            checkpoint.m_nIdentifier = 0;
+    for (auto& cp : m_aCheckPtArray) {
+        if (cp.m_IsUsed && cp.m_ID == id && cp.m_Type == (eCheckpointType)type) {
+            cp.MarkAsDeleted();
         }
     }
 }
@@ -94,7 +86,7 @@ void CCheckpoints::Render() {
     ZoneScoped;
 
     for (auto& checkpoint : m_aCheckPtArray) {
-        if (checkpoint.m_bIsUsed) {
+        if (checkpoint.m_IsUsed) {
             checkpoint.Render();
         }
     }

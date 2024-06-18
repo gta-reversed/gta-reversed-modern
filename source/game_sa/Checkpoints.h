@@ -17,6 +17,11 @@ public:
     static void SetHeading(uint32 id, float angle);
     static void Update();
     static CCheckpoint* PlaceMarker(uint32 id, uint16 type, CVector& posn, CVector& direction, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);
+    /*!
+     * @brief Set the position of a checkpoint with the given `id`
+     * @param id ID of the checkpoint
+     * @param posn The new position
+    */
     static void UpdatePos(uint32 id, CVector& posn);
     static void DeleteCP(uint32 id, uint16 type);
     static void Render();
