@@ -25,6 +25,9 @@ struct WEnum {
 
     //! Use this in cases you want to cast to an int (for cout or something)
     Enum get() const { return static_cast<Enum>(m_Value); }
+
+    //! Get the underlaying value
+    StoreAs get_underlaying() const { return m_Value; }
 };
 
 template<typename E>
