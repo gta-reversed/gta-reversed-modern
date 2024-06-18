@@ -9,7 +9,27 @@
 #include "RGBA.h"
 #include "Vector.h"
 
-// see C3dMarker
+/*!
+ * @brief Checkpoint types. Original enum had prefix of `CHECKPOINT_`
+*/
+enum class eCheckpointType : uint32 {
+    TUBE         = 0x0,
+    ENDTUBE      = 0x1,
+    EMPTYTUBE    = 0x2,
+    TORUS        = 0x3,
+    TORUS_NOFADE = 0x4,
+    TORUSROT     = 0x5,
+    TORUSTHROUGH = 0x6,
+    TORUS_UPDOWN = 0x7,
+    TORUS_DOWN   = 0x8,
+
+    //
+    // Add above this
+    //
+    NUM = 0x9,   ///< Count of different checkpoint types
+    NA  = 0x101, ///< Sentinel value (Used for markers not in use)
+};
+
 class CCheckpoint {
 public:
     uint16  m_nType;
