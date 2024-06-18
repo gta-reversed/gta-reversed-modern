@@ -436,7 +436,7 @@ void CClouds::Render_MaybeRenderRockstarLogo(float colorBalance) {
         return;
     }
 
-   if (!s_DebugSettings.Rockstar.Force) {
+    if (!s_DebugSettings.Rockstar.Force) {
         if (!CClock::GetIsTimeInRange(LOGO_VISIBLE_FROM_HRS, LOGO_VISIBLE_UNTIL_HRS)) {
             return;
         }
