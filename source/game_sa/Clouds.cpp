@@ -445,8 +445,8 @@ void CClouds::Render_MaybeRenderRockstarLogo(float colorBalance) {
     const uint32_t t = CClock::GetGameClockHours() == LOGO_VISIBLE_FROM_HRS
         ? CClock::GetGameClockMinutes() // Fading in
         : CClock::GetGameClockHours() == LOGO_VISIBLE_UNTIL_HRS - 1
-          ? 60u - CClock::GetGameClockMinutes() // Fading out
-          : 60u; // Static
+              ? 60u - CClock::GetGameClockMinutes() // Fading out
+              : 60u; // Static
 
     if (t == 0) {
         return;
