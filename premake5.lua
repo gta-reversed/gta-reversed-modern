@@ -27,7 +27,8 @@ end
     The Solution
 --]]
 
-solution "gta_reversed"
+workspace "gta_sa_modern"
+    startproject "gta_reversed"
     configurations { "Release", "Debug" }
 
     location(_OPTIONS["outdir"])
@@ -72,6 +73,8 @@ solution "gta_reversed"
     }
 
     include "source/"
+    debugcommand "$The game folder / .exe"
+    debugdir "$The game folder"
 
     group "Dependencies"
         defines { "WIN32", "_WINDOWS" }
