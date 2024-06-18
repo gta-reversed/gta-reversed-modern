@@ -9,9 +9,9 @@ rem Create a shortcut to the solution - http://superuser.com/questions/392061/ho
 set SCRIPTFILE="%TEMP%\CreateMyShortcut.vbs"
 (
   echo Set oWS = WScript.CreateObject^("WScript.Shell"^) 
-  echo sLinkFile = oWS.ExpandEnvironmentStrings^("gta_sa_modern.sln - Shortcut.lnk"^)
+  echo sLinkFile = oWS.ExpandEnvironmentStrings^("gta_reversed.sln - Shortcut.lnk"^)
   echo Set oLink = oWS.CreateShortcut^(sLinkFile^) 
-  echo oLink.TargetPath = oWS.ExpandEnvironmentStrings^("%~dp0\build\gta_sa_modern.sln"^)
+  echo oLink.TargetPath = oWS.ExpandEnvironmentStrings^("%~dp0\build\gta_reversed.sln"^)
   echo oLink.Save
 ) 1>%SCRIPTFILE%
 cscript //nologo %SCRIPTFILE%
