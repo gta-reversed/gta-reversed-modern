@@ -421,8 +421,8 @@ void CClouds::Render_MaybeRenderMoon(float colorBalance) {
 // From `CClouds::Render` [0x713D2A - 0x714019]
 // Draws the R* logo on the sky
 void CClouds::Render_MaybeRenderRockstarLogo(float colorBalance) {
-    constexpr auto LOGO_VISIBLE_FROM_HRS  = 22u,
-                   LOGO_VISIBLE_UNTIL_HRS = 6u;
+    constexpr auto LOGO_VISIBLE_FROM_HRS  = 22u, // From this hour (Eg.: 22:XX)
+                   LOGO_VISIBLE_UNTIL_HRS = 6u;  // Up to this hour (So at 06:00 it's not visible anymore)
 
     constexpr auto R_OFFSET_FROM_CAMERA    = CVector{ 100.f,   0.f, 10.f }; // Letter `R` offset from camera
     constexpr auto STAR_OFFSET_FROM_CAMERA = CVector{ 100.f, -90.f, 10.f }; // `*` [As in R*] offset from camera
@@ -436,21 +436,23 @@ void CClouds::Render_MaybeRenderRockstarLogo(float colorBalance) {
         return;
     }
 
-    if (!s_DebugSettings.Rockstar.Force) {
+   if (!s_DebugSettings.Rockstar.Force) {
         if (!CClock::GetIsTimeInRange(LOGO_VISIBLE_FROM_HRS, LOGO_VISIBLE_UNTIL_HRS)) {
             return;
         }
     }
 
-    const auto time = CClock::GetGameClockHours() == LOGO_VISIBLE_FROM_HRS
-          ? CClock::GetGameClockMinutes()
-          : 60u - CClock::GetGameClockMinutes();
+    const uint32_t t = CClock::GetGameClockHours() == LOGO_VISIBLE_FROM_HRS
+        ? CClock::GetGameClockMinutes() // Fading in
+        : CClock::GetGameClockHours() == LOGO_VISIBLE_UNTIL_HRS - 1
+        ? 60u - CClock::GetGameClockMinutes() // Fading out
+        : 60u; // Static
 
-    auto colorB = 255u;
-    if (CClock::GetGameClockHours() == LOGO_VISIBLE_UNTIL_HRS - 1 || CClock::GetGameClockHours() == LOGO_VISIBLE_FROM_HRS) {
-        colorB = 255u * time / 60u;
+    if (t == 0) {
+        return;
     }
 
+    const auto colorB  = (uint8)(255u * t / 60u);
     const auto colorRG = CalculateColorWithBalance(colorB, colorBalance);
 
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(gpCoronaTexture[0])));
