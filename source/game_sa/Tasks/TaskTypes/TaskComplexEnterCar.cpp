@@ -147,9 +147,7 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
     };
     const auto OpenCarDoor = [this]() {
         if (m_Car->IsAutomobile()) {
-            auto& damage = m_Car->AsAutomobile()->m_damageManager;
-            auto  door   = (tComponent)m_TargetDoor;
-            damage.SetDoorOpen_Component(door);
+            m_Car->AsAutomobile()->GetDamageManager().SetDoorOpen_Component((tComponent)m_TargetDoor);
         };
     };
 
