@@ -27,8 +27,8 @@ end
     The Solution
 --]]
 
-workspace "gta_sa_modern"
-    startproject "gta_reversed"
+workspace "gta_reversed"
+    startproject "gta_sa_modern"
     configurations { "Release", "Debug" }
 
     location(_OPTIONS["outdir"])
