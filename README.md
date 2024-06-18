@@ -83,19 +83,9 @@ Alternatively, you can install them by yourself:
 You can download them in a single [archive](https://github.com/gta-reversed/gta-reversed-modern/blob/master/contrib/plugins.zip).
 Using other plugins is strongly discouraged and we provide __**no support**__.
 
-### Preparing Environment (Optional)
-[If you have ran `install.py` in the previous step then this step is already done]
+### Debug Run
+Just run the "Local Windows Debugger"
 
-<details>
-<summary>Instructions</summary>
-
-You can create symbolic links [symlinks] for artifacts [the `.asi`] to need not copy them every time you compile the project.
-
-Open a console with **__administrator privileges__** in the git repo's directory and run `contrib\link_asi.bat` or right click `link_asi.bat` file and click `Run as administrator`, then
-follow instructions at the command window.
-
-</details>
-    
 ### What to work on?
 Check [this](https://github.com/gta-reversed/gta-reversed-modern/discussions/402) out for some inspiration ;)
     
