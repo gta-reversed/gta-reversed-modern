@@ -18,12 +18,11 @@ def modern():
     if git_repo_root.parts[-1] == 'contrib':
         git_repo_root = git_repo_root.parent
 
-    gta = tkFileDialog.askopenfilename(
+    gta_sa_file = Path(tkFileDialog.askopenfilename(
         title='Select the executable file from the GTA:SA installation directory'
-    )
-    gta_sa_file = Path(gta)
+    ))
     gta_root_dir = gta_sa_file.parent
-    if not gta or gta_root_dir.is_relative_to(git_repo_root):
+    if gta_root_dir.is_relative_to(git_repo_root):
         print("The project directory cannot be an assembly.")
         return modern()
 
@@ -45,8 +44,8 @@ def modern():
         # This fails [WinError 1314] if the script isn't run with admin rights [softlinks require it]
         os.symlink(config_bin_dir / filename, dst)
 
-    setting_file = git_repo_root / 'build' / 'gta_reversed.vcxproj.user'
-    # We check the availability of the project through the availability of parameters for gta_reversed
+    setting_file = git_repo_root / 'build' / 'gta_sa_modern.vcxproj.user'
+    # We check the availability of the solution by the availability of the gta_sa_modern project
     if os.path.exists(setting_file):
         try:
             with open(setting_file) as file:
@@ -57,7 +56,7 @@ def modern():
             content = re.sub(r'<LocalDebuggerWorkingDirectory>(.*?)</LocalDebuggerWorkingDirectory>', f'<LocalDebuggerWorkingDirectory>{gta_root_dir.as_posix()}</LocalDebuggerWorkingDirectory>', content)
             with open(setting_file, 'w') as file:
                 file.write(content)
-            print("The debugger settings have been changed. It is better to re-open the project.")
+            print("The debugger settings have been changed. We recommend reopening the project.")
         # For some reason, it was not possible to change
         except Except:
             print(f"The changes in {setting_file} could not be applied.")
