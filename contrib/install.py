@@ -56,7 +56,7 @@ def modern():
             content = re.sub(r'<LocalDebuggerWorkingDirectory>(.*?)</LocalDebuggerWorkingDirectory>', f'<LocalDebuggerWorkingDirectory>{gta_root_dir.as_posix()}</LocalDebuggerWorkingDirectory>', content)
             with open(setting_file, 'w') as file:
                 file.write(content)
-            print("The debugger settings have been changed. We recommend reopening the project.")
+            print("The debugger settings have been changed. We recommend reopening the solution.")
         # For some reason, it was not possible to change
         except Except:
             print(f"The changes in {setting_file} could not be applied.")
