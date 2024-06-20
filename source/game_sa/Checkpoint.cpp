@@ -155,6 +155,63 @@ void CCheckpoint::Render() {
     }
 }
 
+// Based on
+void CCheckpoint::Update() {
+    const auto UpdateRotFlag = [this](float maxSz, float minSz) {
+        if (m_MultiSize > maxSz) {
+            m_RotFlag = false;
+        } else if (m_MultiSize < minSz) {
+            m_RotFlag = true;
+        }
+    };
+
+    if (m_Type == eCheckpointType::TORUSROT) { // 0x7229E7
+        UpdateRotFlag(0.5f, -0.5f);
+        m_MultiSize = m_RotFlag
+            ? 0.1f
+            : -0.1f;
+        m_Fwd = (m_Fwd + CVector{m_MultiSize}).Normalized(); // 0x722A37
+    }
+
+    if (m_Type == eCheckpointType::TORUSTHROUGH) { // 0x722A53
+        UpdateRotFlag(0.75f, 0.f);
+        m_MultiSize += m_RotFlag // TODO/BUG: Use timestep here!
+            ? 0.1f
+            : -0.1f;
+        if (m_MultiSize < 0.f) {
+            m_Type = eCheckpointType::NA; // Weird?
+        }
+    }
+
+    if (m_Type == eCheckpointType::TORUS_UPDOWN) { // 0x722ABD
+        if ((CVector2D{ m_Pos } - FindPlayerCoors()).SquaredMagnitude() > sq(m_Size)) { // 0x722B21
+            m_Type = eCheckpointType::TORUS_DOWN;
+            m_MultiSize = -0.1f;
+        } else { // 0x722B2E
+            UpdateRotFlag(0.2f, -0.2f);
+            m_MultiSize += m_RotFlag // TODO/BUG: Use timestep here!
+                ? 0.2f
+                : -0.2f;
+            m_Pos.z += m_MultiSize;
+        }
+    }
+
+    if (m_Type == eCheckpointType::TORUS_DOWN) { // 0x722B84
+        if ((CVector2D{ m_Pos } - CVector2D{FindPlayerCoors()}).SquaredMagnitude() > sq(m_Size)) { // 0x722BE1
+            m_Type = eCheckpointType::TORUS_UPDOWN;
+            m_RotFlag = true;
+            m_MultiSize = 0.02f;
+        }
+
+        if (FindPlayerCoors().z - 0.75f > m_Pos.z) {
+            DEV_LOG("Done"); // OG
+        } else {
+            m_Pos.z += m_MultiSize;
+        }
+    }
+
+}
+
 // Based on 0x722900
 void CCheckpoint::SetPosition(const CVector& pos) {
     m_Pos.x = pos.x;

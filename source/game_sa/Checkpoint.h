@@ -44,6 +44,11 @@ public:
     void Render();
 
     /*!
+     * @brief Update heading, position, etc as necessary (Based on 0x7229C0)
+    */
+    void Update();
+
+    /*!
      * @brief Change the position
      * @param pos The new position. Z axis is ignored for the type `TORUS_DOWN`.
     */

@@ -9,7 +9,7 @@ void CCheckpoints::InjectHooks() {
 
     RH_ScopedInstall(Init, 0x722880);
     RH_ScopedInstall(Shutdown, 0x7228F0);
-    RH_ScopedInstall(Update, 0x7229C0, { .reversed = false });
+    RH_ScopedInstall(Update, 0x7229C0);
     RH_ScopedInstall(Render, 0x726060);
     RH_ScopedInstall(PlaceMarker, 0x722C40, { .reversed = false });
     RH_ScopedInstall(DeleteCP, 0x722FC0);
@@ -51,7 +51,7 @@ void CCheckpoints::SetHeading(uint32 id, float angle) {
 
 // 0x7229C0
 void CCheckpoints::Update() {
-    plugin::Call<0x7229C0>();
+    rng::for_each(m_aCheckPtArray, &CCheckpoint::Update);
 }
 
 // 0x722C40
