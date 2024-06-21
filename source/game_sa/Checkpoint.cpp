@@ -152,7 +152,7 @@ void CCheckpoint::Render() {
         break;
     }
     default:
-        NOTSA_UNREACHABLE("Unknown checkpoint type ({})", m_Type.get_underlaying());
+        NOTSA_UNREACHABLE("Unknown checkpoint type ({})", m_Type.get_underlying());
     }
 }
 
@@ -205,7 +205,7 @@ void CCheckpoint::Update() {
         }
 
         if (FindPlayerCoors().z - 0.75f > m_Pos.z) {
-            DEV_LOG("Done"); // OG
+            NOTSA_LOG_DEBUG("Done"); // OG
         } else {
             m_Pos.z += m_MultiSize;
         }

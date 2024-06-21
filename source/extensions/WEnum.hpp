@@ -27,7 +27,7 @@ struct WEnum {
     Enum get() const { return static_cast<Enum>(m_Value); }
 
     //! Get the underlaying value
-    StoreAs get_underlaying() const { return m_Value; }
+    StoreAs get_underlying() const { return m_Value; }
 };
 
 template<typename E>
