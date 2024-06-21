@@ -56,8 +56,8 @@ void CCheckpoints::Update() {
 CCheckpoint* CCheckpoints::PlaceMarker(
     uint32 id,
     notsa::WEnumU16<eCheckpointType> type,
-    CVector& pos,
-    CVector& direction,
+    const CVector& pos,
+    const CVector& direction,
     float size,
     CRGBA color, // Originally 4 separate uint8's
     uint16 pulsePeriod,
@@ -126,7 +126,7 @@ CCheckpoint* CCheckpoints::PlaceMarker(
 }
 
 // 0x722900
-void CCheckpoints::UpdatePos(uint32 id, CVector& posn) {
+void CCheckpoints::UpdatePos(uint32 id, const CVector& posn) {
     if (const auto cp = FindById(id)) {
         cp->SetPosition(posn);
     }

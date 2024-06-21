@@ -11,6 +11,9 @@
 #include <Base.h>
 
 class CVector;
+class CVector2D;
+
+constexpr CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo);
 
 class CVector2D : public RwV2d {
 public:
