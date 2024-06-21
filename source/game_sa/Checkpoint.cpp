@@ -149,6 +149,7 @@ void CCheckpoint::Render() {
             PlaceTorusMarker(i);
         }
         PlaceTorusMarker(0);
+        break;
     }
     default:
         NOTSA_UNREACHABLE("Unknown checkpoint type ({})", m_Type.get_underlaying());
