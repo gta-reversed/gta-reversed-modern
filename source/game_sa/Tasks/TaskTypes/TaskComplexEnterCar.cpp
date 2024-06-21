@@ -128,6 +128,7 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
         case TASK_COMPLEX_FALL_AND_GET_UP:
         case TASK_SIMPLE_BIKE_PICK_UP:
         case TASK_SIMPLE_CAR_SHUFFLE:
+        case TASK_NONE:
             return C(TASK_FINISHED);
         default:
             NOTSA_UNREACHABLE("SubTaskType = {}", tt);
@@ -140,8 +141,14 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
 
     // These are likely some functions inlined from `CCarEnterExit`
     const auto CanUseTargetDoor = [this]() {
+        // actually U32 == Component
         return (m_Car->IsDoorReadyU32(m_TargetDoor) || m_Car->IsDoorFullyOpenU32(m_TargetDoor))
             || (!m_Car->IsDoorMissingU32(m_TargetDoor) && !m_Car->IsDoorFullyOpenU32(m_TargetDoor) && !m_Car->IsDoorClosedU32(m_TargetDoor));
+    };
+    const auto OpenCarDoor = [this]() {
+        if (m_Car->IsAutomobile()) {
+            m_Car->AsAutomobile()->GetDamageManager().SetDoorOpen_Component((tComponent)m_TargetDoor);
+        };
     };
 
     switch (const auto tt = m_pSubTask->GetTaskType()) {
@@ -182,8 +189,15 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
     }
     case TASK_SIMPLE_CAR_ALIGN: // 0x63F2C1
         return CreateNextSubTask_AfterSimpleCarAlign(ped);
+    case TASK_SIMPLE_CAR_OPEN_LOCKED_DOOR_FROM_OUTSIDE: { // 0x63ED58
+        // This does not make sense, i have no idea why R* put it here
+        if (m_Car && m_CruiseSpeed >= 0.f) {
+            m_Car->m_autoPilot.m_nCruiseSpeed = (uint32)m_CruiseSpeed;
+        }
+        return C(TASK_SIMPLE_STAND_STILL);
+    }
     case TASK_SIMPLE_CAR_OPEN_DOOR_FROM_OUTSIDE:
-    case TASK_SIMPLE_BIKE_PICK_UP: // 0x63EE0D
+    case TASK_SIMPLE_BIKE_PICK_UP: { // 0x63EE0D
         if (m_Car->GetMoveSpeed().SquaredMagnitude2D() > sq(ped->IsPlayer() ? 0.2f : 0.1f)) { // 0x63EDAB
             ped->m_bUsesCollision = true;
             return C(ped->IsPlayer() ? TASK_FINISHED : TASK_COMPLEX_FALL_AND_GET_UP);
@@ -212,9 +226,7 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
                 }
 
                 if (m_bQuitAfterDraggingPedOut) {
-                    if (m_Car->IsAutomobile()) {
-                        m_Car->AsAutomobile()->m_damageManager.SetDoorOpen((eDoors)m_TargetDoor);
-                    }
+                    OpenCarDoor();
                     return C(TASK_FINISHED);
                 }
             }
@@ -225,11 +237,12 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
             return C(TASK_FINISHED);
         }
         return C(TASK_SIMPLE_CAR_GET_IN);
+    }
     case TASK_SIMPLE_CAR_CLOSE_DOOR_FROM_INSIDE: { // 0x63F69A
         if (!m_Car || !CCarEnterExit::IsVehicleHealthy(m_Car) || !CCarEnterExit::IsPedHealthy(ped)) { // 0x63F69A
             return C(TASK_FINISHED);
         }
-        if (!m_bAsDriver || m_TargetDoor != 0) {
+        if (!m_bAsDriver || m_TargetDoor != 8) {
             return C(m_bAsDriver ? TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER : TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER);
         }
         if (const auto drvr = m_Car->m_pDriver) {
@@ -255,7 +268,7 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
                     const auto pad = CPad::GetPad();
                     if (pad->GetAccelerate() >= 255.f || pad->GetBrake() >= 255.f) {
                         if (CCarEnterExit::CarHasDoorToClose(m_Car, m_TargetDoor)) {
-                            m_Car->AsAutomobile()->m_damageManager.SetDoorClosed((eDoors)m_TargetDoor);
+                            OpenCarDoor();
                         }
                         bDontCloseDoors = true;
                     }
@@ -268,7 +281,7 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
         }
 
         if (!m_bAsDriver) {
-            return  C(TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER);
+            return C(TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER);
         }
 
         if (m_TargetDoor != 8 || !m_Car->IsAutomobile() || m_Car->m_pHandlingData->m_bTandemSeats) {
