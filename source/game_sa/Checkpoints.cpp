@@ -19,9 +19,7 @@ void CCheckpoints::InjectHooks() {
 
 // 0x722880
 void CCheckpoints::Init() {
-    for (auto& checkpoint : m_aCheckPtArray) {
-        checkpoint.Init();
-    }
+    rng::for_each(m_aCheckPtArray, &CCheckpoint::Init);
     NumActiveCPts = 0;
 }
 
@@ -58,7 +56,7 @@ void CCheckpoints::Update() {
 CCheckpoint* CCheckpoints::PlaceMarker(
     uint32 id,
     notsa::WEnumU16<eCheckpointType> type,
-    CVector& posn,
+    CVector& pos,
     CVector& direction,
     float size,
     CRGBA color, // Originally 4 separate uint8's
@@ -68,7 +66,7 @@ CCheckpoint* CCheckpoints::PlaceMarker(
 ) {
     CCheckpoint* cp{};
 
-    const auto cpDistToPlayer3D = (posn - FindPlayerCoors(0)).Magnitude();
+    const auto cpDistToPlayer3D = CVector::Dist(pos, FindPlayerCentreOfWorld(0));
 
     if (cp = FindById(id)) { // 0x722CA1 - re-use existing
         assert(cp->m_IsUsed); // NOTE: OG code checked for this, but `FindById` doesn't
@@ -77,7 +75,7 @@ CCheckpoint* CCheckpoints::PlaceMarker(
         case eCheckpointType::TORUS:
         case eCheckpointType::TORUSROT:
         case eCheckpointType::TORUS_UPDOWN: {
-            if ((CVector2D{ posn } - CVector2D{ FindPlayerCoors() }).SquaredMagnitude() <= sq(2.f)) {
+            if (CVector2D::DistSqr(pos, FindPlayerCoors()) <= sq(2.f)) {
                 type = type == eCheckpointType::TORUS_UPDOWN
                     ? eCheckpointType::TORUS_DOWN
                     : eCheckpointType::TORUSTHROUGH;
@@ -89,22 +87,25 @@ CCheckpoint* CCheckpoints::PlaceMarker(
         //> 0x722D7A - Try finding an unused one
         for (auto& v : m_aCheckPtArray) {
             if (v.m_Type == eCheckpointType::NA) {
-                return &v;
+                cp = &v;
+                break;
             }
         }
 
         //> 0x722DA6 - Find furthest one from player and use that
         if (!cp) {
             for (auto& v : m_aCheckPtArray) {
-                if (cpDistToPlayer3D < v.m_DistToCam3D && (!cp || v.m_DistToCam3D > cp->m_DistToCam3D)) {
+                if (cpDistToPlayer3D < v.m_DistToCam3D && (!cp || v.m_DistToCam3D > cp->m_DistToCam3D)) { // NOTE/BUG: Not checking if the cp is in use!
                     cp = &v;
                 }
             }
+
+            // This is useless, as the `Type` is overwritten below by the initialization code anyways....
+            //if (cp) {
+            //    cp->m_Type = eCheckpointType::NA; // No fucking clue what this NA type is for
+            //}
         }
 
-        if (cp) {
-            cp->m_Type = eCheckpointType::NA; // No fucking clue what this NA type is for
-        }
     }
 
     if (cp) { // 0x722F07
@@ -112,8 +113,8 @@ CCheckpoint* CCheckpoints::PlaceMarker(
         cp->m_Colour        = color;
         cp->m_Size          = size;
         cp->m_RotateRate    = rotateRate;
-        cp->m_Pos           = posn;
-        cp->m_Fwd           = (direction - posn).Normalized();
+        cp->m_Pos           = pos;
+        cp->m_Fwd           = (direction - pos).Normalized();
         cp->m_ID            = id;
         cp->m_Type          = type;
         cp->m_PulsePeriod   = pulsePeriod;
