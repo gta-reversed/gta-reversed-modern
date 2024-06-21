@@ -174,6 +174,26 @@ public:
     float& operator[](size_t i) {
         return (&x)[i];
     }
+
+    /*!
+     * @brief Prefer this over (a - b).Magnitude()
+     * @param a Point A
+     * @param b Point B
+     * @return 2D Distance between 2 points
+    */
+    static inline float Dist(CVector2D a, CVector2D b) {
+        return (a - b).Magnitude();
+    }
+
+    /*!
+    * @brief Prefer this over (a - b).SquaredMagnitude()
+    * @param a Point A
+    * @param b Point B
+    * @return 2D Squared distance between 2 points
+    */
+    static inline float DistSqr(CVector2D a, CVector2D b) {
+        return (a - b).SquaredMagnitude();
+    }
 };
 
 /// Negate all components of the vector
