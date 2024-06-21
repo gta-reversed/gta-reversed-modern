@@ -233,7 +233,9 @@ void CCheckpoint::MarkAsDeleted() {
 
 // Based on 0x722970
 void CCheckpoint::SetHeading(float heading) {
-    m_Fwd.x = std::cos(RWDEG2RAD(heading));
-    m_Fwd.y = std::sin(RWDEG2RAD(heading));
-    m_Fwd.Normalise();
+    m_Fwd = CVector{
+        std::cos(DegreesToRadians(heading)),
+        std::sin(DegreesToRadians(heading)),
+        m_Fwd.z
+    }.Normalized();
 }
