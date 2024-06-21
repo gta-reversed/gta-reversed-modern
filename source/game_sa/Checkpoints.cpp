@@ -11,7 +11,7 @@ void CCheckpoints::InjectHooks() {
     RH_ScopedInstall(Shutdown, 0x7228F0);
     RH_ScopedInstall(Update, 0x7229C0);
     RH_ScopedInstall(Render, 0x726060);
-    RH_ScopedInstall(PlaceMarker, 0x722C40, { .reversed = false });
+    RH_ScopedInstall(PlaceMarker, 0x722C40);
     RH_ScopedInstall(DeleteCP, 0x722FC0);
     RH_ScopedInstall(SetHeading, 0x722970);
     RH_ScopedInstall(UpdatePos, 0x722900);
@@ -55,14 +55,73 @@ void CCheckpoints::Update() {
 }
 
 // 0x722C40
-CCheckpoint* CCheckpoints::PlaceMarker(uint32 id, uint16 type,
-                                       CVector& posn, CVector& direction,
-                                       float size,
-                                       uint8 red, uint8 green, uint8 blue, uint8 alpha,
-                                       uint16 pulsePeriod,
-                                       float pulseFraction, int16 rotateRate
+CCheckpoint* CCheckpoints::PlaceMarker(
+    uint32 id,
+    notsa::WEnumU16<eCheckpointType> type,
+    CVector& posn,
+    CVector& direction,
+    float size,
+    CRGBA color, // Originally 4 separate uint8's
+    uint16 pulsePeriod,
+    float pulseFraction,
+    int16 rotateRate
 ) {
-    return plugin::CallAndReturn<CCheckpoint*, 0x722C40, uint32, uint16, CVector&, CVector&, float, uint8, uint8, uint8, uint8, uint16, float, uint16>(id, type, posn, direction, size, red, green, blue, alpha, pulsePeriod, pulseFraction, rotateRate);
+    CCheckpoint* cp{};
+
+    const auto cpDistToPlayer3D = (posn - FindPlayerCoors(0)).Magnitude();
+
+    if (cp = FindById(id)) { // 0x722CA1 - re-use existing
+        assert(cp->m_IsUsed); // NOTE: OG code checked for this, but `FindById` doesn't
+
+        switch (type) {
+        case eCheckpointType::TORUS:
+        case eCheckpointType::TORUSROT:
+        case eCheckpointType::TORUS_UPDOWN: {
+            if ((CVector2D{ posn } - CVector2D{ FindPlayerCoors() }).SquaredMagnitude() <= sq(2.f)) {
+                type = type == eCheckpointType::TORUS_UPDOWN
+                    ? eCheckpointType::TORUS_DOWN
+                    : eCheckpointType::TORUSTHROUGH;
+            }
+            break;
+        }
+        }
+    } else {
+        //> 0x722D7A - Try finding an unused one
+        for (auto& v : m_aCheckPtArray) {
+            if (v.m_Type == eCheckpointType::NA) {
+                return &v;
+            }
+        }
+
+        //> 0x722DA6 - Find furthest one from player and use that
+        if (!cp) {
+            for (auto& v : m_aCheckPtArray) {
+                if (cpDistToPlayer3D < v.m_DistToCam3D && (!cp || v.m_DistToCam3D > cp->m_DistToCam3D)) {
+                    cp = &v;
+                }
+            }
+        }
+
+        if (cp) {
+            cp->m_Type = eCheckpointType::NA; // No fucking clue what this NA type is for
+        }
+    }
+
+    if (cp) { // 0x722F07
+        cp->m_DistToCam3D   = cpDistToPlayer3D;
+        cp->m_Colour        = color;
+        cp->m_Size          = size;
+        cp->m_RotateRate    = rotateRate;
+        cp->m_Pos           = posn;
+        cp->m_Fwd           = (direction - posn).Normalized();
+        cp->m_ID            = id;
+        cp->m_Type          = type;
+        cp->m_PulsePeriod   = pulsePeriod;
+        cp->m_IsUsed        = true;
+        cp->m_PulseFraction = pulseFraction;
+    }
+
+    return cp; // May be null
 }
 
 // 0x722900

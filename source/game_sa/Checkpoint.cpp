@@ -155,7 +155,7 @@ void CCheckpoint::Render() {
     }
 }
 
-// Based on
+// Based on 0x7229C0
 void CCheckpoint::Update() {
     const auto UpdateRotFlag = [this](float maxSz, float minSz) {
         if (m_MultiSize > maxSz) {
