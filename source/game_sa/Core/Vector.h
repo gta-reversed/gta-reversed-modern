@@ -196,7 +196,7 @@ public:
     * @param b Point B
     * @return 3D Distance between 2 points
     */
-    static inline float Dist(CVector2D a, CVector2D b) {
+    static inline float Dist(CVector a, CVector b) {
         return (a - b).Magnitude();
     }
 
@@ -206,7 +206,7 @@ public:
     * @param b Point B
     * @return 3D Squared distance between 2 points
     */
-    static inline float DistSqr(CVector2D a, CVector2D b) {
+    static inline float DistSqr(CVector a, CVector b) {
         return (a - b).SquaredMagnitude();
     }
 };
