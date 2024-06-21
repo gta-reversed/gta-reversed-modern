@@ -2,7 +2,6 @@ from tkinter import filedialog as tkFileDialog
 from pathlib import Path
 import zipfile
 import ctypes
-import winreg
 import sys
 import os
 
@@ -14,13 +13,7 @@ def main():
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
 
 def set_env_var(name, value):
-    try:
-        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment", 0, winreg.KEY_ALL_ACCESS)
-    except:
-        key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, "Environment")
-    winreg.SetValueEx(key, name, 0, winreg.REG_EXPAND_SZ, value)
-    winreg.CloseKey(key)
-    os.environ[name] = value
+    os.system(f"powershell [Environment]::SetEnvironmentVariable('{name}', '{value}', [EnvironmentVariableTarget]::User)")
 
 def modern():
     git_repo_root = Path.cwd()
@@ -54,7 +47,7 @@ def modern():
         # This fails [WinError 1314] if the script isn't run with admin rights [softlinks require it]
         os.symlink(config_bin_dir / filename, dst)
 
-    print("The Env variables have been changed. We recommend reopening the solution.")
+    print("The Env variables are changing. If you had a project open, reopen it.")
     set_env_var('GTA_SA_EXE', gta_sa_file.as_posix())
     set_env_var('GTA_SA_DIR', gta_root_dir.as_posix())
     input('Done! Press Enter...')
