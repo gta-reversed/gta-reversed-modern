@@ -2,8 +2,8 @@ from tkinter import filedialog as tkFileDialog
 from pathlib import Path
 import zipfile
 import ctypes
+import winreg
 import sys
-import re
 import os
 
 def main():
@@ -13,15 +13,25 @@ def main():
         print('Allow the launch as an administrator!')
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
 
+def set_env_var(name, value):
+    try:
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment", 0, winreg.KEY_ALL_ACCESS)
+    except:
+        key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, "Environment")
+    winreg.SetValueEx(key, name, 0, winreg.REG_EXPAND_SZ, value)
+    winreg.CloseKey(key)
+    os.environ[name] = value
+
 def modern():
     git_repo_root = Path.cwd()
     if git_repo_root.parts[-1] == 'contrib':
         git_repo_root = git_repo_root.parent
 
     gta_sa_file = Path(tkFileDialog.askopenfilename(
-        title='Select the executable file from the GTA:SA installation directory'
+        title='Select the executable file from the GTA:SA installation directory',
+        filetypes=[("GTA:SA", ".exe")]
     ))
-    gta_root_dir = gta_sa_file.parent
+    gta_root_dir = gta_sa_file.parent.resolve()
     if gta_root_dir.is_relative_to(git_repo_root):
         print("The project directory cannot be an assembly.")
         return modern()
@@ -44,22 +54,9 @@ def modern():
         # This fails [WinError 1314] if the script isn't run with admin rights [softlinks require it]
         os.symlink(config_bin_dir / filename, dst)
 
-    setting_file = git_repo_root / 'build' / 'gta_sa_modern.vcxproj.user'
-    # We check the availability of the solution by the availability of the gta_sa_modern project
-    if os.path.exists(setting_file):
-        try:
-            with open(setting_file) as file:
-                content = file.read()
-
-            # We substitute the current parameters for debugging, namely: "Command" and "Working directory"
-            content = re.sub(r'<LocalDebuggerCommand>(.*?)</LocalDebuggerCommand>', f'<LocalDebuggerCommand>{gta_sa_file.as_posix()}</LocalDebuggerCommand>', content)
-            content = re.sub(r'<LocalDebuggerWorkingDirectory>(.*?)</LocalDebuggerWorkingDirectory>', f'<LocalDebuggerWorkingDirectory>{gta_root_dir.as_posix()}</LocalDebuggerWorkingDirectory>', content)
-            with open(setting_file, 'w') as file:
-                file.write(content)
-            print("The debugger settings have been changed. We recommend reopening the solution.")
-        # For some reason, it was not possible to change
-        except Except:
-            print(f"The changes in {setting_file} could not be applied.")
+    print("The Env variables have been changed. We recommend reopening the solution.")
+    set_env_var('GTA_SA_EXE', gta_sa_file.as_posix())
+    set_env_var('GTA_SA_DIR', gta_root_dir.as_posix())
     input('Done! Press Enter...')
 
 if __name__ == "__main__":

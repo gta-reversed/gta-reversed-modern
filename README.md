@@ -83,8 +83,7 @@ Alternatively, you can install them by yourself:
 You can download them in a single [archive](https://github.com/gta-reversed/gta-reversed-modern/blob/master/contrib/plugins.zip).
 Using other plugins is strongly discouraged and we provide __**no support**__.
 
-### Debug Run
-Just run the "Local Windows Debugger"
+To run the game with the Modern plugin, you just need to run the "Local Windows Debugger" in Visual Studio.
 
 ### What to work on?
 Check [this](https://github.com/gta-reversed/gta-reversed-modern/discussions/402) out for some inspiration ;)
