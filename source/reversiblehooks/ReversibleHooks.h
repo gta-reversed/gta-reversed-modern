@@ -104,6 +104,14 @@ namespace ReversibleHooks {
 
     RootHookCategory& GetRootCategory();
 
+    enum class SetCatOrItemStateResult {
+        NotFound,
+        Locked,
+        Done
+    };
+
+    SetCatOrItemStateResult SetCategoryOrItemStateByPath(std::string_view path, bool enabled);
+
     namespace detail {
         // Change protection of memory pages, and automatically rollback on scope exit
         struct ScopedVirtualProtectModify {

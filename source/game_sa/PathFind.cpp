@@ -951,7 +951,7 @@ CNodeAddress CPathFind::FindNodeClosestToCoorsFavourDirection(CVector pos, ePath
                 continue;
             }
 
-            const auto score = dotScore - (dir.Dot(dirToNodeUN) - 1.f) * 20.f;
+            const auto score = dotScore - (dir.Dot(CVector2D{ dirToNodeUN }.Normalized()) - 1.f) * 20.f;
             if (score <= scoreOfClosest) {
                 scoreOfClosest = score;
                 closest = node.GetAddress();

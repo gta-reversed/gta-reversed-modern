@@ -1,5 +1,5 @@
 project "gta_reversed"
-    cppdialect "C++20"        
+    cppdialect "C++latest"         -- C++23
     kind "SharedLib"
     targetname "gta_reversed"
     targetextension ".asi"
