@@ -8,27 +8,6 @@
 
 class InteriorManager_c {
 public:
-    // TODO: Use TList_c instead of List_c
-
-    Interior_c               m_interiors[8];               // 0x0
-    TList_c<Interior_c>      m_interiorPool;               // 0x3CA0
-    InteriorGroup_c          m_interiorGroups[8];          // 0x3CAC
-    TList_c<InteriorGroup_c> m_interiorGroupList;          // 0x428C
-    TList_c<InteriorGroup_c> m_interiorGroupPool;          // 0x4298
-    size_t                   m_interiorCount;              // 0x42A4
-    int32                    m_InteriorIds[64];            // 0x42A8
-    int32                    m_objectCount;                // 0x43A8
-    InteriorObject           m_objects[32];                // 0x43AC
-    char                     m_interiorPedsAliveState[16]; // 0x472C
-    CEntryExit*              m_enex;                       // 0x473C
-    CRect                    m_enexRect;                   // 0x4740
-    bool                     m_freeze;             // 0x4750
-    int8                     m_pruneVisibleEffects;        // 0x4751
-    int8                     m_bPedsEnabled;               // 0x4752
-    int8                     field_4753;                   // 0x4753
-    int32                    m_lastUpdateTimeInMs;         // 0x4754
-
-public:
     static void InjectHooks();
 
     InteriorManager_c() = default;  // 0x5984C0
@@ -38,7 +17,7 @@ public:
     bool Update();
     void Exit();
 
-    static int8 AddSameGroupEffectInfos(InteriorEffectInfo_t* effectInfo, int32 a2);
+    static void AddSameGroupEffectInfos(InteriorEffectInfo_t* intFxInfo, int32 a2);
     static bool AreAnimsLoaded(int32 animBlock);
 
     void PruneVisibleEffects(InteriorEffectInfo_t* pInteriorEffectInfos, int32 numInfos, int32 reqdNumInfos, float maxDis);
@@ -73,8 +52,8 @@ public:
     Interior_c* GetPedsInterior(const CPed* ped);
 
     void SetStealableObjectStolen(CEntity* entity, uint8 a3);
-    int32 FindStealableObjectId(CEntity* entity);
-    int32 FindStealableObjectId(int32 interiorId, int32 modelId, CVector point);
+    int32 FindStealableObjectId(CEntity* entity) const;
+    int32 FindStealableObjectId(int32 interiorId, int32 modelId, CVector point) const;
     bool HasInteriorHadStealDataSetup(Interior_c* interior);
     int8 IsGroupActive(int32 group);
     InteriorGroup_c* GetPedsInteriorGroup(const CPed* ped);
@@ -82,10 +61,28 @@ public:
     bool GetBoundingBox(FurnitureEntity_c* entity, CVector* pos);
     void ActivatePeds(bool enable);
 
-    auto GetInteriorIds() const { return m_InteriorIds | rng::views::take(m_interiorCount); }
-    auto GetObjects() const { return m_objects | rng::views::take(m_objectCount); }
+    auto GetInteriorIds() const { return m_InteriorIds | rng::views::take(m_InteriorCount); }
+    auto GetObjects() const { return m_Objects | rng::views::take(m_ObjectCount); }
 
-    void inlined_prune_visible_effects(bool prune) { m_pruneVisibleEffects = prune; } // 0x598070
+    void inlined_prune_visible_effects(bool prune) { m_IsActive = prune; } // 0x598070
+
+private:
+    Interior_c               m_Interiors[8]{};               // 0x0
+    TList_c<Interior_c>      m_InteriorPool{};               // 0x3CA0
+    InteriorGroup_c          m_InteriorGroups[8]{};          // 0x3CAC
+    TList_c<InteriorGroup_c> m_InteriorGroupList{};          // 0x428C
+    TList_c<InteriorGroup_c> m_InteriorGroupPool{};          // 0x4298
+    size_t                   m_InteriorCount{};              // 0x42A4
+    int32                    m_InteriorIds[64]{};            // 0x42A8
+    int32                    m_ObjectCount{};                // 0x43A8
+    InteriorObject           m_Objects[32]{};                // 0x43AC
+    bool                     m_InteriorPedsAliveState[16]{}; // 0x472C
+    CEntryExit*              m_EnEx{};                       // 0x473C
+    CRect                    m_EnExRect{};                   // 0x4740
+    bool                     m_IsFrozen{};                   // 0x4750
+    bool                     m_IsActive{};                   // 0x4751
+    bool                     m_ArePedsEnabled{};             // 0x4752
+    int32                    m_TimeLastPickupsGenerated{};   // 0x4754
 };
 VALIDATE_SIZE(InteriorManager_c, 0x4758);
 
