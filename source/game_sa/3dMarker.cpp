@@ -32,10 +32,10 @@ RpAtomic* GetAtomicForMarkerType(e3dMarkerType type) {
 
 // uint8 r, uint8 g, uint8 b, uint8 a -> CRGBA
 // 0x722230
-bool C3dMarker::AddMarker(uint32 id, uint16 type, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate) {
+bool C3dMarker::AddMarker(uint32 id, e3dMarkerType type, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate) {
     const CRGBA color = { red, green, blue, alpha };
 
-    m_pAtomic = RpAtomicClone(GetAtomicForMarkerType((e3dMarkerType)type));
+    m_pAtomic = RpAtomicClone(GetAtomicForMarkerType(type));
     assert(m_pAtomic);
 
     const auto frame = RwFrameCreate();
@@ -60,7 +60,7 @@ bool C3dMarker::AddMarker(uint32 id, uint16 type, float size, uint8 red, uint8 g
     m_nStartTime        = CTimer::GetTimeInMS();
     m_nOnScreenTestTime = CTimer::GetTimeInMS();
     m_vecLastPosition   = CVector{};
-    m_nType             = static_cast<e3dMarkerType>(type);
+    m_nType             = type;
     m_fRoofHeight       = 65535.0f;
 
     return m_pAtomic != nullptr;
