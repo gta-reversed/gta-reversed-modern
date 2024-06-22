@@ -369,7 +369,7 @@ C3dMarker* C3dMarkers::PlaceMarker(
         case MARKER3D_ARROW2:
         case MARKER3D_CONE:
         case MARKER3D_CONE_NO_COLLISION: {
-            m->m_fStdSize = size * (1.f - 0.3f * (25.0 - std::clamp(markerToPlayerDist2D, 5.f, 25.f)) / 20.0);
+            m->m_fStdSize = size * (1.f - 0.3f * (25.f - std::clamp(markerToPlayerDist2D, 5.f, 25.f)) / 20.f);
         }
         }
 
@@ -417,7 +417,7 @@ C3dMarker* C3dMarkers::PlaceMarker(
         }
         case MARKER3D_CYLINDER: { //> 0x7258C2
             auto& markerZ = m->m_mat.GetPosition().z;
-            if (float waterZ; !CWaterLevel::GetWaterLevelNoWaves(m->m_mat.GetPosition(), &waterZ, false, false) || waterZ < markerZ) {
+            if (float waterZ; !CWaterLevel::GetWaterLevelNoWaves(m->m_mat.GetPosition(), &waterZ, nullptr, nullptr) || waterZ < markerZ) {
                 m->UpdateZCoordinate(pos, size);
             } else {
                 markerZ = waterZ;
@@ -457,7 +457,7 @@ C3dMarker* C3dMarkers::PlaceMarker(
         switch (type) {
         case MARKER3D_CYLINDER: {
             auto& markerZ = m->m_mat.GetPosition().z;
-            if (float waterZ; !CWaterLevel::GetWaterLevelNoWaves(m->m_mat.GetPosition(), &waterZ, false, false) || waterZ < markerZ) {
+            if (float waterZ; !CWaterLevel::GetWaterLevelNoWaves(m->m_mat.GetPosition(), &waterZ, nullptr, nullptr) || waterZ < markerZ) {
                 m->UpdateZCoordinate(pos, size);
             } else {
                 markerZ = waterZ;
@@ -474,7 +474,7 @@ C3dMarker* C3dMarkers::PlaceMarker(
         case MARKER3D_ARROW2:
         case MARKER3D_CONE:
         case MARKER3D_CONE_NO_COLLISION: {
-            m->m_fStdSize = size * (1.f - 0.3f * (25.0 - std::clamp(markerToPlayerDist2D, 5.f, 25.f)) / 20.0);
+            m->m_fStdSize = size * (1.f - 0.3f * (25.f - std::clamp(markerToPlayerDist2D, 5.f, 25.f)) / 20.f);
         }
         }
     }
@@ -519,7 +519,18 @@ void C3dMarkers::PlaceMarkerCone(uint32 id, CVector& point, float size, uint8 re
 
 //> 0x725BA0
 void C3dMarkers::PlaceMarkerSet(uint32 id, e3dMarkerType type, CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate) {
-    PlaceMarker(id, type, posn, size, red, green, blue, static_cast<uint8>((float)alpha * 1.0f / 3.0f), pulsePeriod, pulseFraction, 1, 0.0f, 0.0f, 0.0f, false);
+    PlaceMarker(
+        id,
+        type,
+        posn,
+        size,
+        red, green, blue, static_cast<uint8>((float)alpha * 1.0f / 3.0f),
+        pulsePeriod,
+        pulseFraction,
+        1,
+        CVector{0.0f, 0.0f, 0.0f},
+        false
+    );
 }
 
 //> 0x7210D0
