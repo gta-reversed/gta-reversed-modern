@@ -1,9 +1,9 @@
+import os
 from tkinter import filedialog as tkFileDialog
 from pathlib import Path
 import zipfile
 import ctypes
 import sys
-import os
 
 def main():
     if ctypes.windll.shell32.IsUserAnAdmin():
@@ -26,7 +26,7 @@ def modern():
     ))
     gta_root_dir = gta_sa_file.parent.resolve()
     if gta_root_dir.is_relative_to(git_repo_root):
-        print("The project directory cannot be an assembly.")
+        print("GTA root directory can't be relative to this project's git root path")
         return modern()
 
     gta_scripts_dir = gta_root_dir / 'scripts'
