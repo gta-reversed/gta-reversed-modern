@@ -189,6 +189,26 @@ public:
         return false;
     }
 #endif
+
+    /*!
+    * @brief Prefer this over (a - b).Magnitude()
+    * @param a Point A
+    * @param b Point B
+    * @return 3D Distance between 2 points
+    */
+    static inline float Dist(CVector a, CVector b) {
+        return (a - b).Magnitude();
+    }
+
+    /*!
+    * @brief Prefer this over (a - b).SquaredMagnitude()
+    * @param a Point A
+    * @param b Point B
+    * @return 3D Squared distance between 2 points
+    */
+    static inline float DistSqr(CVector a, CVector b) {
+        return (a - b).SquaredMagnitude();
+    }
 };
 VALIDATE_SIZE(CVector, 0xC);
 
