@@ -39,11 +39,9 @@ CCheckpoint* CCheckpoints::FindById(uint32 id) {
 }
 
 // 0x722970
-void CCheckpoints::SetHeading(uint32 id, float angle) {
-    if (auto* checkpoint = FindById(id)) {
-        checkpoint->m_Fwd.x = std::cos(DegreesToRadians(angle));
-        checkpoint->m_Fwd.y = std::sin(DegreesToRadians(angle));
-        checkpoint->m_Fwd.Normalise();
+void CCheckpoints::SetHeading(uint32 id, float headingDeg) {
+    if (auto* cp = FindById(id)) {
+        cp->SetHeading(headingDeg);
     }
 }
 
@@ -59,15 +57,15 @@ CCheckpoint* CCheckpoints::PlaceMarker(
     const CVector& pos,
     const CVector& direction,
     float size,
-    CRGBA color, // Originally 4 separate uint8's
+    uint8 red, uint8 green, uint8 blue, uint8 alpha,
     uint16 pulsePeriod,
     float pulseFraction,
     int16 rotateRate
 ) {
+    const auto cpDistToPlayer2D = CVector2D::Dist(pos, FindPlayerCentreOfWorld(0));
+
     CCheckpoint* cp{};
-
-    const auto cpDistToPlayer3D = CVector::Dist(pos, FindPlayerCentreOfWorld(0));
-
+    
     if (cp = FindById(id)) { // 0x722CA1 - re-use existing
         assert(cp->m_IsUsed); // NOTE: OG code checked for this, but `FindById` doesn't
 
@@ -95,7 +93,7 @@ CCheckpoint* CCheckpoints::PlaceMarker(
         //> 0x722DA6 - Find furthest one from player and use that
         if (!cp) {
             for (auto& v : m_aCheckPtArray) {
-                if (cpDistToPlayer3D < v.m_DistToCam3D && (!cp || v.m_DistToCam3D > cp->m_DistToCam3D)) { // NOTE/BUG: Not checking if the cp is in use!
+                if (cpDistToPlayer2D < v.m_DistToCam2D && (!cp || v.m_DistToCam2D > cp->m_DistToCam2D)) { // NOTE/BUG: Not checking if the cp is in use!
                     cp = &v;
                 }
             }
@@ -109,8 +107,8 @@ CCheckpoint* CCheckpoints::PlaceMarker(
     }
 
     if (cp) { // 0x722F07
-        cp->m_DistToCam3D   = cpDistToPlayer3D;
-        cp->m_Colour        = color;
+        cp->m_DistToCam2D   = cpDistToPlayer2D;
+        cp->m_Colour        = {red, green, blue, alpha};
         cp->m_Size          = size;
         cp->m_RotateRate    = rotateRate;
         cp->m_Pos           = pos;

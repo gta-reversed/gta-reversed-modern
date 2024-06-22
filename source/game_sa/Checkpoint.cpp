@@ -18,8 +18,8 @@ void CCheckpoint::Render() {
     case eCheckpointType::EMPTYTUBE: {
         //> 0x725C1C - Make sure it's above the water
         float waterZ;
-        const auto wasUnderWater = CWaterLevel::GetWaterLevelNoWaves(m_Pos, &waterZ) && waterZ >= m_Pos.z;
-        if (wasUnderWater) {
+        const auto wasUnderwater = CWaterLevel::GetWaterLevelNoWaves(m_Pos, &waterZ) && waterZ >= m_Pos.z;
+        if (wasUnderwater) {
             m_Pos.z = waterZ;
         }
 
@@ -68,7 +68,7 @@ void CCheckpoint::Render() {
             m_PulseFraction,
             1,
             0.f, 0.f, 0.f,
-            wasUnderWater
+            !wasUnderwater // `!` needed because the variable is inverted
         );
         
         //> 0x725DF6 - Render direction arrow too
@@ -89,7 +89,7 @@ void CCheckpoint::Render() {
         break;
     }
     case eCheckpointType::TORUS: { // 0x725E6D
-        if (sq(m_Size * 2.f) >= (m_Pos - FindPlayerCoors()).SquaredMagnitude()) {
+        if (sq(m_Size * 2.f) >= CVector::DistSqr(m_Pos, FindPlayerCoors())) { // Inverted
             break;
         }
         [[fallthrough]];
@@ -145,12 +145,14 @@ void CCheckpoint::Render() {
                 false
             );
         };
-        for (size_t i = 1; i <= 4; i++) {
+        for (size_t i = 1; i < 4; i++) {
             PlaceTorusMarker(i);
         }
         PlaceTorusMarker(0);
         break;
     }
+    case eCheckpointType::NA:
+        break; // See `CCheckpoint::Update` - This type is used for something (Perhaps to make a checkpoint invisible? Not sure.)
     default:
         NOTSA_UNREACHABLE("Unknown checkpoint type ({})", m_Type.get_underlying());
     }
@@ -179,32 +181,32 @@ void CCheckpoint::Update() {
         m_MultiSize += m_RotFlag // TODO/BUG: Use timestep here!
             ? 0.1f
             : -0.1f;
-        if (m_MultiSize < 0.f) {
+        if (m_MultiSize < 0.f) { // 0x722AA7
             m_Type = eCheckpointType::NA; // Weird?
         }
     }
 
     if (m_Type == eCheckpointType::TORUS_UPDOWN) { // 0x722ABD
-        if ((CVector2D{ m_Pos } - FindPlayerCoors()).SquaredMagnitude() > sq(m_Size)) { // 0x722B21
-            m_Type = eCheckpointType::TORUS_DOWN;
+        if (CVector2D::DistSqr(m_Pos, FindPlayerCoors()) < sq(m_Size)) { // 0x722B21
+            m_Type      = eCheckpointType::TORUS_DOWN;
             m_MultiSize = -0.1f;
         } else { // 0x722B2E
             UpdateRotFlag(0.2f, -0.2f);
             m_MultiSize += m_RotFlag // TODO/BUG: Use timestep here!
-                ? 0.2f
-                : -0.2f;
+                ? 0.02f
+                : -0.02f;
             m_Pos.z += m_MultiSize;
         }
     }
 
     if (m_Type == eCheckpointType::TORUS_DOWN) { // 0x722B84
-        if ((CVector2D{ m_Pos } - CVector2D{FindPlayerCoors()}).SquaredMagnitude() > sq(m_Size)) { // 0x722BE1
-            m_Type = eCheckpointType::TORUS_UPDOWN;
-            m_RotFlag = true;
+        if (CVector2D::DistSqr(m_Pos, FindPlayerCoors()) > sq(m_Size)) { // 0x722BE1
+            m_Type      = eCheckpointType::TORUS_UPDOWN;
+            m_RotFlag   = true;
             m_MultiSize = 0.02f;
         }
 
-        if (FindPlayerCoors().z - 0.75f > m_Pos.z) {
+        if (FindPlayerCoors().z - 0.75f >= m_Pos.z) {
             NOTSA_LOG_DEBUG("Done"); // OG
         } else {
             m_Pos.z += m_MultiSize;

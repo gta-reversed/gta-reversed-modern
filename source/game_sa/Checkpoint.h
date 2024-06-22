@@ -77,7 +77,7 @@ public:
     CVector                          m_Fwd{}; ///< Pointing direction
     float                            m_PulseFraction{0.25f};
     float                            m_Size{1.f};
-    float                            m_DistToCam3D{0.f}; ///< (AKA CameraRange) - Distance to player's camera at the moment it's placed
+    float                            m_DistToCam2D{0.f}; ///< (AKA CameraRange) - Distance to player's camera at the moment it's placed
     float                            m_MultiSize{0.f};
 
 };
