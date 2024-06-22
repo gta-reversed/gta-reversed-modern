@@ -16,7 +16,7 @@ void CMenuManager::UserInput() {
     { // NOTSA
     const auto pad = CPad::GetPad();
     if (pad->IsStandardKeyJustPressed('q') || pad->IsStandardKeyJustPressed('Q')) {
-        CFont::PrintString(50, 250, "switched");
+        CFont::PrintString(50, 250, "switched"_gxt);
         ReversibleHooks::SwitchHook("DisplaySlider");
     }
     }
@@ -315,8 +315,8 @@ void CMenuManager::CheckForMenuClosing() {
                 if (field_F4) {
                     auto player = FindPlayerPed();
 
-                    if (player->GetActiveWeapon().m_nType != WEAPON_CAMERA
-                        || CTimer::GetTimeInMS() >= player->GetActiveWeapon().m_nTimeForNextShot) {
+                    if (player->GetActiveWeapon().m_Type != WEAPON_CAMERA
+                        || CTimer::GetTimeInMS() >= player->GetActiveWeapon().m_TimeForNextShotMs) {
                         TheCamera.SetFadeColour(0u, 0u, 0u);
                         TheCamera.Fade(0.0f, eFadeFlag::FADE_IN);
                         TheCamera.ProcessFade();

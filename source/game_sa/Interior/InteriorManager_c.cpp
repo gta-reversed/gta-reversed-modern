@@ -63,62 +63,63 @@ bool InteriorManager_c::Update() {
 
     const auto plyr = FindPlayerPed();
 
-    InteriorEffectInfo_t visibleFxBuf[32];
-    const auto numVisibleFx = plyr->m_nAreaCode != eAreaCodes::AREA_CODE_NORMAL_WORLD && m_pruneVisibleEffects && !plyr->GetTaskManager().GetActiveTaskAs<CTaskSimpleCarDrive>()
-        ? GetVisibleEffects(visibleFxBuf, std::size(visibleFxBuf))
+    InteriorEffectInfo_t visibleIntFxBuf[32];
+    const auto numVisibleIntFx = plyr->m_nAreaCode != eAreaCodes::AREA_CODE_NORMAL_WORLD && m_pruneVisibleEffects && !plyr->GetTaskManager().GetActiveTaskAs<CTaskSimpleCarDrive>()
+        ? GetVisibleEffects(visibleIntFxBuf, std::size(visibleIntFxBuf))
         : 0;
-    PruneVisibleEffects(visibleFxBuf, numVisibleFx, 8, 20.f);
-    const auto visibleFx = visibleFxBuf | rng::views::take(numVisibleFx);
+    PruneVisibleEffects(visibleIntFxBuf, numVisibleIntFx, 8, 20.f);
+    const auto visibleIntFx = visibleIntFxBuf | rng::views::take(numVisibleIntFx);
 
-    const auto InteriorGroupHasSameEffect = [](InteriorEffectInfo_t& fx, InteriorGroup_c& g) {
+    const auto IsFxAssociatedWithGroup = [](InteriorEffectInfo_t& fx, InteriorGroup_c& g) {
         return fx.entity == g.GetEntity() && fx.fxs[0]->m_groupId == g.GetId();
     };
 
-    for (auto& g : m_interiorGroupList) {
-        if (rng::none_of(visibleFx, [&](InteriorEffectInfo_t& fx){
-            return InteriorGroupHasSameEffect(fx, g) && !fx.culled;
-        })) { // Remove this group
+    // Remove interiors that are associated with effects that aren't visible anymore
+    for (auto it = m_interiorGroupList.begin(); it != m_interiorGroupList.end();) {
+        auto& g = *it;
+        it++; // `RemoveItem` below invalidates the iterator, so increment here
+        if (rng::none_of(visibleIntFx, [&](InteriorEffectInfo_t& fx){
+            return IsFxAssociatedWithGroup(fx, g) && !fx.culled; }
+        )) {
             g.Exit();
+            m_interiorGroupList.RemoveItem(&g);
             m_interiorGroupPool.AddItem(&g);
-            m_interiorGroupList.RemoveItem(&g); 
         }
     }
 
     bool hasAddedAnyInteriors{};
-    for (auto& fx : visibleFx) {
-        //> 0x599071
-        if (fx.culled) {
+    for (auto& intFx : visibleIntFx) {
+        //> 0x599071 - Not visible?
+        if (intFx.culled) {
             continue;
         }
 
-        //> 0x59909F
-        if (rng::any_of(m_interiorGroupList, [&](InteriorGroup_c& g) {
-            return InteriorGroupHasSameEffect(fx, g);
-        })) {
+        //> 0x59909F - Check if there's an existing interior group for this effect
+        if (rng::any_of(m_interiorGroupList, [&](InteriorGroup_c& g) { return IsFxAssociatedWithGroup(intFx, g); })) {
             continue;
         }
 
-        //> 0x5990B8
+        //> 0x5990B8 - Make an interior group for this effect
         const auto grp = m_interiorGroupPool.RemoveHead();
         assert(grp);
-        grp->Init(fx.entity, fx.fxs[0]->m_groupId);
+        grp->Init(intFx.entity, intFx.fxs[0]->m_groupId);
         grp->m_enex = m_enex;
         m_interiorGroupList.AddItem(grp);
 
-        //> 0x59910C
-        for (auto k = fx.numFx; k-->0;) {
+        //> 0x59910C - Create interiors for it
+        for (auto k = 0u; k < intFx.numFx; k++) {
             const auto i = m_interiorPool.RemoveHead();
-            if (!k) {
+            if (!i) { // No more interiors to allocate
                 break;
             }
-            const auto& fxpos = fx.entity->GetPosition();
+            const auto& fxPos = intFx.entity->GetPosition();
 
-            i->m_box        = fx.fxs[k];
-            i->m_interiorId = (uint32)(fxpos.x * fxpos.y * fxpos.z) + fx.fxIds[k];
-            i->m_areaCode   = fx.entity->m_nAreaCode;
+            i->m_box        = intFx.fxs[k];
+            i->m_interiorId = (uint32)(fxPos.x * fxPos.y * fxPos.z) + intFx.fxIds[k];
+            i->m_areaCode   = intFx.entity->m_nAreaCode;
             i->m_pGroup     = grp;
 
-            i->Init(fx.fxs[k]->m_pos);
+            i->Init(intFx.fxs[k]->m_pos);
             grp->AddInterior(i);
 
             hasAddedAnyInteriors = true;
@@ -128,7 +129,8 @@ bool InteriorManager_c::Update() {
 
         m_lastUpdateTimeInMs = CTimer::GetTimeInMS();
     }
-    
+
+    // Update all created groups
     for (auto& g : m_interiorGroupList) {
         g.Update();
     }
@@ -156,7 +158,7 @@ bool InteriorManager_c::AreAnimsLoaded(int32 animBlock) {
         default: return animBlock;
         }
     }();
-    return CAnimManager::GetAnimationBlock((AssocGroupId)animBlock)->bLoaded;
+    return CAnimManager::GetAnimationBlock((AssocGroupId)animBlock)->IsLoaded;
 }
 
 // 0x598010
@@ -181,7 +183,7 @@ int32 InteriorManager_c::IsInteriorEffectVisible(C2dEffect* effect, CEntity* ent
 }
 
 // 0x598620
-Interior_c* InteriorManager_c::GetPedsInterior(CPed* ped) {
+Interior_c* InteriorManager_c::GetPedsInterior(const CPed* ped) {
     return GetVectorsInterior(ped->GetPosition());
 }
 
@@ -247,7 +249,7 @@ int8 InteriorManager_c::IsGroupActive(int32 groupType) {
 }
 
 // 0x598240
-InteriorGroup_c* InteriorManager_c::GetPedsInteriorGroup(CPed* ped) {
+InteriorGroup_c* InteriorManager_c::GetPedsInteriorGroup(const CPed* ped) {
     for (auto& grp : m_interiorGroupList) {
         if (notsa::contains(grp.GetPeds(), ped)) {
             return &grp;

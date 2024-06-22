@@ -480,7 +480,7 @@ void CPlantMgr::_ProcessEntryCollisionDataSections(const CPlantColEntEntry& entr
         auto& box = faceGroup.bb;
 
         CVector out[2]{};
-        TransformPoints(out, 2, (RwMatrix&)entry.m_Entity->GetMatrix(), (CVector*)&box);
+        TransformPoints(out, 2, entry.m_Entity->GetMatrix(), (CVector*)&box);
         box.Set(out[0], out[1]);
         box.Recalc();
 
@@ -509,7 +509,7 @@ void CPlantMgr::_ProcessEntryCollisionDataSections_AddLocTris(const CPlantColEnt
             cd->GetTrianglePoint(vertices[1], tri.vB);
             cd->GetTrianglePoint(vertices[2], tri.vC);
 
-            TransformPoints(vertices, 3, (RwMatrix&)entity->GetMatrix(), vertices);
+            TransformPoints(vertices, 3, entity->GetMatrix(), vertices);
 
             CVector cmp[] = {
                 vertices[1],

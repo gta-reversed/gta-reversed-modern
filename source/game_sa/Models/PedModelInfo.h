@@ -11,7 +11,7 @@
 
 struct tPedColNodeInfo {
     char    _pad[4];
-    int32   m_nBoneID; // see ePedBones
+    int32   m_nBoneID; // see eBoneTag
     int32   m_nFlags;
     CVector m_vecCenter;
     float   m_fRadius;
@@ -49,9 +49,6 @@ public:
     void DeleteRwObject() override;
     void SetClump(RpClump* clump) override;
 
-    ModelInfoType GetModelType_Reversed();
-    void DeleteRwObject_Reversed();
-    void SetClump_Reversed(RpClump* clump);
 
     void AddXtraAtomics(RpClump* clump);
     void SetFaceTexture(RwTexture* texture);

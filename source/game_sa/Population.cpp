@@ -20,8 +20,8 @@
 #include <TaskTypes/TaskComplexFollowLeaderInFormation.h>
 #include <TaskTypes/TaskSimpleHoldEntity.h>
 
-#include <Events/EventAcquaintancePed.h>
 #include <Events/EventSexyPed.h>
+#include "Events/EventAcquaintancePedHate.h"
 
 //! Define this to have extra DEV_LOG's of CPopulation
 #define EXTRA_DEBUG_LOGS
@@ -1185,7 +1185,7 @@ void CPopulation::CreateWaitingCoppers(CVector createAt, float createaWithHeadin
             const auto veh = new CAutomobile{ copCarModel, RANDOM_VEHICLE, true };
 
             // Set vehicle's position to the node's 
-            veh->SetPosn(ThePaths.GetPathNode(nodeAddr)->GetNodeCoors());
+            veh->SetPosn(ThePaths.GetPathNode(nodeAddr)->GetPosition());
             veh->SetStatus(STATUS_ABANDONED);
 
             // Adjust vehicle to be pointing at the creation coords
@@ -1680,7 +1680,7 @@ int32 CPopulation::GeneratePedsAtAttractors(
                 }
             }
 
-            const auto effectPosWS = ent->GetMatrix() * effect->m_pos; // ws = world space
+            const auto effectPosWS = ent->GetMatrix().TransformPoint(effect->m_pos); // ws = world space
             if (!IsEffectInRadius(effectPosWS)) {
                 continue;
             }
@@ -1867,8 +1867,8 @@ void CPopulation::PopulateInterior(int32 numPedsToCreate, CVector pos) {
 
         ped->GetIntelligence()->SetPedDecisionMakerType(7);
 
-        if (ped->m_nAnimGroup == CAnimManager::GetAnimationGroupId("jogger")) { // TODO: Move `GetAnimationGroupId` out the loop?
-            ped->m_nAnimGroup = CAnimManager::GetAnimationGroupId("man");
+        if (ped->m_nAnimGroup == CAnimManager::GetAnimationGroupIdByName("jogger")) { // TODO: Move `GetAnimationGroupId` out the loop?
+            ped->m_nAnimGroup = CAnimManager::GetAnimationGroupIdByName("man");
         }
     }
 }

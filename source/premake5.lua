@@ -1,5 +1,5 @@
 project "gta_reversed"
-    cppdialect "C++20"        
+    cppdialect "C++latest"         -- C++23
     kind "SharedLib"
     targetname "gta_reversed"
     targetextension ".asi"
@@ -9,6 +9,9 @@ project "gta_reversed"
  
     filter {"options:allow-script-cmd-hooks"}
         defines { "ENABLE_SCRIPT_COMMAND_HOOKS" }
+
+    filter "configurations:Debug*"
+        floatingpoint "strict"
 
     filter {} -- Clear filter
 
@@ -35,7 +38,7 @@ project "gta_reversed"
         "../libs/imgui/misc/cpp",
         "../libs/dxsdk",
         "../libs/spdlog/include",
-        "../libs/tracy/public",
+        "../libs/tracy/public"
     }
     
     defines { 
@@ -43,12 +46,15 @@ project "gta_reversed"
         "USE_GTASA_ALLOCATOR", 
         "EXTRA_DEBUG_FEATURES", 
         "FIX_BUGS",
+        "_CRT_SECURE_NO_WARNINGS",
 
         "TRACY_ENABLE",
         "TRACY_ON_DEMAND",
         "TRACY_CALLSTACK",
 
-        "SPDLOG_USE_STD_FORMAT"
+        "SPDLOG_USE_STD_FORMAT",
+
+        "SA_SKINNED_PEDS"
     }
 
     links { 
@@ -65,14 +71,9 @@ project "gta_reversed"
         "dxguid.lib",
         "strmiids.lib",
         "dsound.lib",
-        "d3d9.lib"
+        "d3d9.lib",
+        "dbghelp" 
     }
-
-    filter "configurations:Debug*"
-        links { 
-            "dbghelp" 
-        }
-    filter {}
 
     libdirs { 
         "../libs",
@@ -80,7 +81,7 @@ project "gta_reversed"
         "../%{cfg.targetdir}/vorbis.lib", 
         "../%{cfg.targetdir}/vorbisfile.lib", 
         "../%{cfg.targetdir}/vorbisenc.lib",  
-        "../%{cfg.targetdir}/imgui.lib", 
+        "../%{cfg.targetdir}/imgui.lib",
         "../libs/dxsdk/d3d9.lib", 
         "../libs/dxsdk/dinput.lib",
     }
