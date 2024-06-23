@@ -17,7 +17,7 @@ void Interior_c::InjectHooks() {
     RH_ScopedInstall(FindBoundingBox, 0x5922C0);
     RH_ScopedInstall(IsPtInside, 0x5913E0);
     RH_ScopedInstall(CalcMatrix, 0x5914D0);
-    RH_ScopedInstall(AddGotoPt, 0x591D20, { .reversed = false });
+    RH_ScopedInstall(AddGotoPt, 0x591D20);
     RH_ScopedInstall(AddInteriorInfo, 0x591E40, { .reversed = false });
     RH_ScopedInstall(AddPickups, 0x591F90);
     RH_ScopedInstall(CalcExitPts, 0x5924A0, { .reversed = false });
@@ -219,7 +219,7 @@ void Interior_c::FindBoundingBox(
     // Depth-first search for all bounding box of connected tiles
     for (int32 iterY = posY;;) {
         const auto CheckTile = [&](int32 x, int32 y) {
-            if (GetTileStatus(x, y) != eTileSate::STATE_5) {
+            if (GetTileStatus(x, y) != eTileStatus::STATE_5) {
                 return false;
             }
             if (std::exchange(tilesVisited[x][y], true)) { // Already checked?
@@ -258,7 +258,7 @@ void Interior_c::FindBoundingBox(
             break;
         }
 
-        if (GetTileStatus(posX, iterY) != eTileSate::STATE_5) {
+        if (GetTileStatus(posX, iterY) != eTileStatus::STATE_5) {
             break;
         }
 
@@ -290,8 +290,28 @@ void Interior_c::CalcMatrix(const CVector& pos) {
 }
 
 // 0x591D20
-void Interior_c::AddGotoPt(int32 a, int32 b, float a3, float a4) {
-    plugin::CallMethod<0x591D20, Interior_c*, int32, int32, float, float>(this, a, b, a3, a4);
+void Interior_c::AddGotoPt(int32 tileX, int32 tileY, float offsetX, float offsetY) {
+    if (m_NumGoToPts >= std::size(m_GoToPts)) {
+        return;
+    }
+    switch (GetTileStatus(tileX, tileY)) {
+    case eTileStatus::STATE_3:
+    case eTileStatus::STATE_7:
+        break;
+    default:
+        return;
+    }
+    m_GoToPts[m_NumGoToPts++] = {
+        .TileX = (int8)tileX,
+        .TileY = (int8)tileY,
+        .Pos   = GetTileCentre((float)tileX + offsetX, (float)tileY + offsetY)
+    };
+    switch (GetTileStatus(tileX, tileY)) {
+    case eTileStatus::STATE_3:
+    case eTileStatus::STATE_0: {
+        SetTileStatus(tileX, tileY, eTileStatus::STATE_4);
+    }
+    }
 }
 
 // 0x591E40
@@ -310,9 +330,9 @@ void Interior_c::AddPickups() {
         const auto tileY = CGeneral::GetRandomNumberInRange(m_Props->m_depth - 1u);
 
         switch (GetTileStatus(tileX, tileY)) {
-        case eTileSate::STATE_0:
-        case eTileSate::STATE_3:
-        case eTileSate::STATE_4:
+        case eTileStatus::STATE_0:
+        case eTileStatus::STATE_3:
+        case eTileStatus::STATE_4:
             break;
         default:
             continue;
@@ -557,21 +577,28 @@ void Interior_c::SetTilesStatus(int32 x, int32 y, int32 w, int32 d, int32 status
     plugin::CallMethod<0x591700>(this, x, y, w, d, status, force);
 }
 
+// notsa
+void Interior_c::SetTileStatus(int32 x, int32 y, eTileStatus status) {
+    assert(x > 0 && x < m_Props->m_width);
+    assert(y > 0 && y < m_Props->m_depth);
+    m_Tiles[x][y] = status;
+}
+
 // 0x5917C0
 void Interior_c::SetCornerTiles(int32 a4, int32 a3, int32 a5, uint8 a6) {
     plugin::CallMethod<0x5917C0, Interior_c*, int32, int32, int32, uint8>(this, a4, a3, a5, a6);
 }
 
 // 0x5918E0
-Interior_c::eTileSate Interior_c::GetTileStatus(int32 x, int32 y) const {
+Interior_c::eTileStatus Interior_c::GetTileStatus(int32 x, int32 y) const {
     assert(m_Props->m_width < NUM_TILES_PER_AXIS);
     if (x < 0 || x >= m_Props->m_width) {
-        return eTileSate::STATE_1;
+        return eTileStatus::STATE_1;
     }
 
     assert(m_Props->m_depth < NUM_TILES_PER_AXIS);
     if (y < 0 || y >= m_Props->m_depth) {
-        return eTileSate::STATE_1;
+        return eTileStatus::STATE_1;
     }
 
     return m_Tiles[x][y];

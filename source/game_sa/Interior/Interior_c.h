@@ -18,9 +18,9 @@ class InteriorGroup_c;
 struct tEffectInterior;
 
 struct GoToPt_t {
-    int8    tileX, tileY;
-    int8    link1, link2;
-    CVector pos;
+    int8    TileX, TileY;
+    int8    LinkA, LinkB;
+    CVector Pos;
 };
 VALIDATE_SIZE(GoToPt_t, 0x10);
 
@@ -45,7 +45,7 @@ using eInteriorTypeS32 = notsa::WEnumS32<eInteriorType>;
 using eInteriorTypeS8 = notsa::WEnumS8<eInteriorType>;
 
 class Interior_c : public ListItem_c<Interior_c> {
-    enum class eTileSate : uint8 {
+    enum class eTileStatus : uint8 {
         STATE_0 = 0,
         STATE_1 = 1,
         STATE_2 = 2,
@@ -87,13 +87,13 @@ public:
         int32& minY, int32& maxY,
         Tiles<int32>& tileInfo
     );
-    void AddGotoPt(int32 a, int32 b, float a3, float a4);
+    bool IsPtInside(const CVector& pt, CVector bias = {});
+    void CalcMatrix(const CVector& pos);
+    void AddGotoPt(int32 tileX, int32 tileY, float offsetX, float offsetY);
     void CalcExitPts();
     bool AddInteriorInfo(int32 actionType, float offsetX, float offsetY, int32 direction, CEntity* entityIgnoredCollision);
-    bool IsPtInside(const CVector& pt, CVector bias = {});
     void AddPickups();
     bool IsVisible();
-    void CalcMatrix(const CVector& pos);
     auto GetDoorNodeAddress() const { return m_DoorAddr; }
 
     //
@@ -158,8 +158,9 @@ public:
     void ResetTiles();
     int8 CheckTilesEmpty(int32 a1, int32 a2, int32 a3, int32 a4, uint8 a5);
     void SetTilesStatus(int32 x, int32 y, int32 w, int32 d, int32 status, bool force);
+    void SetTileStatus(int32 x, int32 y, eTileStatus status); // notsa
     void SetCornerTiles(int32 a4, int32 a3, int32 a5, uint8 a6);
-    eTileSate GetTileStatus(int32 x, int32 y) const;
+    eTileStatus GetTileStatus(int32 x, int32 y) const;
     int32 GetNumEmptyTiles(int32 a2, int32 a3, int32 a4, int32 a5);
     int32 GetRandomTile(int32 a2, int32* a3, int32* a4);
     void GetTileCentre_OG(float offsetX, float offsetY, CVector* outPos) const;
@@ -174,7 +175,7 @@ public:
     RwMatrix                                                      m_Mat{};                 // 0x18
     float                                                         m_DistSq{};              // 0x58
     TList_c<FurnitureEntity_c>                                    m_FurnitureEntityList{}; // 0x5C
-    Tiles<eTileSate>                                              m_Tiles{};               // 0x68
+    Tiles<eTileStatus>                                              m_Tiles{};               // 0x68
     CNodeAddress                                                  m_ExitAddr{};            // 0x3EC
     CNodeAddress                                                  m_DoorAddr{};            // 0x3F0
     CVector                                                       m_ExitPos{};             // 0x3F4
