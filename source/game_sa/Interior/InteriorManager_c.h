@@ -65,6 +65,9 @@ public:
     auto GetInteriorIds() const { return m_InteriorIds | rng::views::take(m_InteriorCount); }
     auto GetObjects() const { return m_Objects | rng::views::take(m_ObjectCount); }
     auto GetEnEx() const { return m_EnEx; }
+
+    auto GetLastTimePickupsGenerated() const { return m_TimeLastPickupsGenerated; }
+
 private:
     Interior_c               m_Interiors[8]{};               // 0x0
     TList_c<Interior_c>      m_InteriorPool{};               // 0x3CA0

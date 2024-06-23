@@ -156,7 +156,7 @@ public:
     int32                                                         m_ID{};                  // 0x8
     InteriorGroup_c*                                              m_Group{};               // 0xC
     int32                                                         m_AreaCode{};            // 0x10
-    tEffectInterior*                                              m_Box{};                 // 0x14
+    tEffectInterior*                                              m_Props{};               // 0x14
     RwMatrix                                                      m_Mat{};                 // 0x18
     float                                                         m_DistSq{};              // 0x58
     TList_c<FurnitureEntity_c>                                    m_FurnitureEntityList{}; // 0x5C

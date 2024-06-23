@@ -115,7 +115,7 @@ bool InteriorManager_c::Update() {
             }
             const auto& fxPos = ifx.Entity->GetPosition();
 
-            i->m_Box      = ifx.Effects[k];
+            i->m_Props    = ifx.Effects[k];
             i->m_ID       = (uint32)(fxPos.x * fxPos.y * fxPos.z) + ifx.FxIds[k];
             i->m_AreaCode = ifx.Entity->m_nAreaCode;
             i->m_Group    = grp;
