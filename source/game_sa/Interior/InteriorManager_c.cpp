@@ -14,7 +14,7 @@ void InteriorManager_c::InjectHooks() {
     RH_ScopedInstall(PruneVisibleEffects, 0x598A60);
     RH_ScopedInstall(Exit, 0x598010);
     RH_ScopedInstall(GetVisibleEffects, 0x598D80, { .reversed = false });
-    RH_ScopedInstall(IsInteriorEffectVisible, 0x598690, { .reversed = false });
+    RH_ScopedInstall(IsInteriorEffectVisible, 0x598690);
     RH_ScopedInstall(GetPedsInterior, 0x598620);
     RH_ScopedInstall(ReturnInteriorToPool, 0x5984B0);
     RH_ScopedInstall(GetInteriorFromPool, 0x5984A0);
@@ -241,28 +241,28 @@ int32 InteriorManager_c::GetVisibleEffects(InteriorEffectInfo_t* intFxInfos, uin
     }
 
     int16 objCount{};
-    std::array<CEntity*, 2048> objs;
-    CWorld::FindObjectsInRange(TheCamera.GetPosition(), 100.f, false, &objCount, (int16)objs.size(), objs.data(), true, false, false, false, false);
+    std::array<CEntity*, 2048> entitiesInRange; // `CBuilding*`
+    CWorld::FindObjectsInRange(TheCamera.GetPosition(), 100.f, false, &objCount, (int16)entitiesInRange.size(), entitiesInRange.data(), true, false, false, false, false);
 
     size_t numIntFxInfo{};
-    for (auto& obj : objs | rng::views::take(objCount)) {
-        if (!obj->m_pRwObject || !obj->IsInCurrentAreaOrBarberShopInterior()) {
+    for (auto& e : entitiesInRange | rng::views::take(objCount)) {
+        if (!e->m_pRwObject || !e->IsInCurrentAreaOrBarberShopInterior()) {
             continue;
         }
 
-        const auto mi = obj->GetModelInfo();
+        const auto mi = e->GetModelInfo();
         for (size_t i = 0; i < mi->m_n2dfxCount; i++) {
             const auto ifx = C2dEffect::DynCast<C2dEffectInterior>(mi->Get2dEffect((int32)i));
 
             // We only care about visible interior effects
-            if (!ifx || !IsInteriorEffectVisible(ifx, obj)) {
+            if (!ifx || !IsInteriorEffectVisible(ifx, e)) {
                 continue;
             }
 
             // Check if effect was already stored
             if (numIntFxInfo != 0) {
                 if (rng::none_of(intFxInfos, intFxInfos + numIntFxInfo, [&](const InteriorEffectInfo_t& ifxi) {
-                    return ifxi.Entity == obj && ifxi.Effects[0]->m_groupId == ifx->m_groupId;
+                    return ifxi.Entity == e && ifxi.Effects[0]->m_groupId == ifx->m_groupId;
                 })) {
                     continue;
                 }
@@ -270,7 +270,7 @@ int32 InteriorManager_c::GetVisibleEffects(InteriorEffectInfo_t* intFxInfos, uin
 
             // Store the effect
             intFxInfos[numIntFxInfo++] = {
-                .Entity   = obj,
+                .Entity   = e,
                 .NumFx    = 1,
                 .Effects  = { ifx },
                 .FxIds    = { i },
@@ -292,8 +292,26 @@ end:
 }
 
 // 0x598690
-int32 InteriorManager_c::IsInteriorEffectVisible(C2dEffectInterior* effect, CEntity* entity) {
-    return plugin::CallMethodAndReturn<int32, 0x598690, InteriorManager_c*, C2dEffectInterior*, CEntity*>(this, effect, entity);
+bool InteriorManager_c::IsInteriorEffectVisible(C2dEffectInterior* effect, CEntity* entity) {
+    // Create bounding box for the object
+    const auto& ebb = entity->GetColModel()->GetBoundingBox();
+    const auto& ebbMin = ebb.m_vecMin,
+                ebbMax = ebb.m_vecMax;
+    CBoundingBox bb{ CVector{FLT_MAX}, CVector{FLT_MIN} };
+    const auto StretchTo = [&bb, m = entity->GetMatrix()](CVector pt) {
+        bb.StretchToPoint(m.TransformPoint(pt));
+    };
+    StretchTo({ebbMin.x, ebbMin.y, ebbMin.z});
+    StretchTo({ebbMin.x, ebbMax.y, ebbMin.z});
+    StretchTo({ebbMax.x, ebbMax.y, ebbMin.z});
+    StretchTo({ebbMax.x, ebbMin.y, ebbMin.z});
+    StretchTo({ebbMin.x, ebbMin.y, ebbMax.z});
+    StretchTo({ebbMin.x, ebbMax.y, ebbMax.z});
+    StretchTo({ebbMax.x, ebbMax.y, ebbMax.z});
+    StretchTo({ebbMax.x, ebbMin.y, ebbMax.z});
+    return bb.IsPointWithin(TheCamera.GetPosition())
+        || bb.IsPointInside(FindPlayerPed(0)->GetPosition())
+        || bb.IsPointInside(FindPlayerPed(1)->GetPosition());
 }
 
 // 0x598620
@@ -351,13 +369,13 @@ int32 InteriorManager_c::FindStealableObjectId(int32 interiorId, int32 modelId, 
 }
 
 // 0x5982B0
-bool InteriorManager_c::HasInteriorHadStealDataSetup(Interior_c* interior) {
+bool InteriorManager_c::HasInteriorHadStealDataSetup(Interior_c* interior) const {
     return m_InteriorCount && notsa::contains(GetInteriorIds(), interior->m_interiorId);
 }
 
 // 0x598280
-int8 InteriorManager_c::IsGroupActive(int32 groupType) {
-    return rng::any_of(m_InteriorGroupList, [&](InteriorGroup_c& g) {
+int8 InteriorManager_c::IsGroupActive(int32 groupType) const {
+    return rng::any_of(m_InteriorGroupList, [&](const InteriorGroup_c& g) {
         return g.m_groupType == groupType;
     });
 }
@@ -374,7 +392,7 @@ InteriorGroup_c* InteriorManager_c::GetPedsInteriorGroup(const CPed* ped) {
 
 // 0x598180
 void InteriorManager_c::SetEntryExitPtr(CEntryExit* enex) {
-    if ((enex->m_pLink ? enex->m_pLink : enex)->m_nArea == eAreaCodes::AREA_CODE_NORMAL_WORLD) {
+    if (enex->GetLinkedOrThis()->m_nArea == eAreaCodes::AREA_CODE_NORMAL_WORLD) {
         return;
     }
     if (enex->m_recEntrance == m_EnExRect) {

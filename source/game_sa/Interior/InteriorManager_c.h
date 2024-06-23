@@ -22,7 +22,7 @@ public:
 
     void PruneVisibleEffects(InteriorEffectInfo_t* pInteriorEffectInfos, size_t numInfos, size_t reqdNumInfos, float maxDist);
     int32 GetVisibleEffects(InteriorEffectInfo_t* effectInfo, uint32 totalEffects);
-    int32 IsInteriorEffectVisible(C2dEffectInterior* effect, CEntity* entity);
+    bool IsInteriorEffectVisible(C2dEffectInterior* effect, CEntity* entity);
 
     /*!
     * @addr 0x5984B0
