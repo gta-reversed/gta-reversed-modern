@@ -18,7 +18,7 @@ void Interior_c::InjectHooks() {
     RH_ScopedInstall(IsPtInside, 0x5913E0);
     RH_ScopedInstall(CalcMatrix, 0x5914D0);
     RH_ScopedInstall(AddGotoPt, 0x591D20);
-    RH_ScopedInstall(AddInteriorInfo, 0x591E40, { .reversed = false });
+    RH_ScopedInstall(AddInteriorInfo, 0x591E40);
     RH_ScopedInstall(AddPickups, 0x591F90);
     RH_ScopedInstall(CalcExitPts, 0x5924A0, { .reversed = false });
     RH_ScopedInstall(IsVisible, 0x5929F0, { .reversed = false });
@@ -315,8 +315,34 @@ void Interior_c::AddGotoPt(int32 tileX, int32 tileY, float offsetX, float offset
 }
 
 // 0x591E40
-bool Interior_c::AddInteriorInfo(int32 actionType, float offsetX, float offsetY, int32 direction, CEntity* entityIgnoredCollision) {
-    return plugin::CallMethodAndReturn<bool, 0x591E40, Interior_c*, int32, float, float, int32, CEntity*>(this, actionType, offsetX, offsetY, direction, entityIgnoredCollision);
+bool Interior_c::AddInteriorInfo(eInteriorInfoTypeS32 actionType, float offsetX, float offsetY, int32 direction, CEntity* entityIgnoredCollision) {
+    if (m_NumIntInfo >= std::size(m_IntInfos)) {
+        return false;
+    }
+
+    CVector pos = GetTileCentre(offsetX, offsetY);
+    pos.z += 0.8f;
+
+    CVector dir{};
+    if (direction != -1) {
+        switch (direction) {
+        case 3: dir.x = -1.0; break;
+        case 1: dir.x = 1.0; break;
+        case 2: dir.y = 1.0; break;
+        case 0: dir.y = -1.0; break;
+        }
+        RwV3dTransformVector(&dir, &dir, &m_Mat);
+    }
+
+    m_IntInfos[m_NumIntInfo++] = {
+        .Type                   = actionType,
+        .IsInUse                = false,
+        .Pos                    = pos,
+        .Dir                    = dir,
+        .EntityIgnoredCollision = entityIgnoredCollision
+    };
+
+    return true;
 }
 
 // 0x591F90

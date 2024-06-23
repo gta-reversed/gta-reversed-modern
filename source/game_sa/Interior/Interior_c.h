@@ -91,7 +91,7 @@ public:
     void CalcMatrix(const CVector& pos);
     void AddGotoPt(int32 tileX, int32 tileY, float offsetX, float offsetY);
     void CalcExitPts();
-    bool AddInteriorInfo(int32 actionType, float offsetX, float offsetY, int32 direction, CEntity* entityIgnoredCollision);
+    bool AddInteriorInfo(eInteriorInfoTypeS32 actionType, float offsetX, float offsetY, int32 direction, CEntity* entityIgnoredCollision);
     void AddPickups();
     bool IsVisible();
     auto GetDoorNodeAddress() const { return m_DoorAddr; }
