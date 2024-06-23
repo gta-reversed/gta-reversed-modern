@@ -325,7 +325,7 @@ void Interior_c::AddPickups() {
 
                 // NOTSA: Originally 3 - [-15, 0]
                 const auto ammo = CGeneral::GetRandomNumberInRange(3, 18);
-                CPickups::GenerateNewOne_WeaponType(pointsIn, weapon, PICKUP_ONCE, ammo, false, false);
+                CPickups::GenerateNewOne_WeaponType(pointsIn, weapon, PICKUP_ONCE, ammo, false, nullptr);
             } else {
                 // NOTSA: Originally 10 - [-40, 0]
                 const auto amount = CGeneral::GetRandomNumberInRange(10, 50);
