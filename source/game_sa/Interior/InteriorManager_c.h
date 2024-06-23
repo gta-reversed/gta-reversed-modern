@@ -20,7 +20,7 @@ public:
     static void AddSameGroupEffectInfos(InteriorEffectInfo_t* intFxInfo, int32 a2);
     static bool AreAnimsLoaded(int32 animBlock);
 
-    void PruneVisibleEffects(InteriorEffectInfo_t* pInteriorEffectInfos, int32 numInfos, int32 reqdNumInfos, float maxDis);
+    void PruneVisibleEffects(InteriorEffectInfo_t* pInteriorEffectInfos, size_t numInfos, size_t reqdNumInfos, float maxDist);
     int32 GetVisibleEffects(InteriorEffectInfo_t* effectInfo, int32 totalEffects);
     int32 IsInteriorEffectVisible(C2dEffect* effect, CEntity* entity);
 

@@ -11,7 +11,7 @@ void InteriorManager_c::InjectHooks() {
 
     RH_ScopedGlobalInstall(AddSameGroupEffectInfos, 0x598430, { .reversed = false });
     RH_ScopedGlobalInstall(AreAnimsLoaded, 0x5980F0);
-    RH_ScopedInstall(PruneVisibleEffects, 0x598A60, { .reversed = false });
+    RH_ScopedInstall(PruneVisibleEffects, 0x598A60);
     RH_ScopedInstall(Exit, 0x598010);
     RH_ScopedInstall(GetVisibleEffects, 0x598D80, { .reversed = false });
     RH_ScopedInstall(IsInteriorEffectVisible, 0x598690, { .reversed = false });
@@ -71,7 +71,7 @@ bool InteriorManager_c::Update() {
     const auto visibleIntFx = visibleIntFxBuf | rng::views::take(numVisibleIntFx);
 
     const auto IsFxAssociatedWithGroup = [](InteriorEffectInfo_t& fx, InteriorGroup_c& g) {
-        return fx.entity == g.GetEntity() && fx.effects[0]->m_groupId == g.GetId();
+        return fx.Entity == g.GetEntity() && fx.Effects[0]->m_groupId == g.GetId();
     };
 
     // Remove interiors that are associated with effects that aren't visible anymore
@@ -79,7 +79,7 @@ bool InteriorManager_c::Update() {
         auto& g = *it;
         it++; // `RemoveItem` below invalidates the iterator, so increment here
         if (rng::none_of(visibleIntFx, [&](InteriorEffectInfo_t& fx) {
-            return IsFxAssociatedWithGroup(fx, g) && !fx.culled;
+            return IsFxAssociatedWithGroup(fx, g) && !fx.IsCulled;
         })) {
             g.Exit();
             m_InteriorGroupList.RemoveItem(&g);
@@ -90,7 +90,7 @@ bool InteriorManager_c::Update() {
     bool hasAddedAnyInteriors{};
     for (auto& intFx : visibleIntFx) {
         //> 0x599071 - Not visible?
-        if (intFx.culled) {
+        if (intFx.IsCulled) {
             continue;
         }
 
@@ -102,24 +102,24 @@ bool InteriorManager_c::Update() {
         //> 0x5990B8 - Make an interior group for this effect
         const auto grp = m_InteriorGroupPool.RemoveHead();
         assert(grp);
-        grp->Init(intFx.entity, intFx.effects[0]->m_groupId);
+        grp->Init(intFx.Entity, intFx.Effects[0]->m_groupId);
         grp->m_enex = m_EnEx;
         m_InteriorGroupList.AddItem(grp);
 
         //> 0x59910C - Create interiors for it
-        for (auto k = 0u; k < intFx.numFx; k++) {
+        for (auto k = 0u; k < intFx.NumFx; k++) {
             const auto i = m_InteriorPool.RemoveHead();
             if (!i) { // No more interiors to allocate
                 break;
             }
-            const auto& fxPos = intFx.entity->GetPosition();
+            const auto& fxPos = intFx.Entity->GetPosition();
 
-            i->m_box        = intFx.effects[k];
-            i->m_interiorId = (uint32)(fxPos.x * fxPos.y * fxPos.z) + intFx.fxIds[k];
-            i->m_areaCode   = intFx.entity->m_nAreaCode;
+            i->m_box        = intFx.Effects[k];
+            i->m_interiorId = (uint32)(fxPos.x * fxPos.y * fxPos.z) + intFx.FxIds[k];
+            i->m_areaCode   = intFx.Entity->m_nAreaCode;
             i->m_pGroup     = grp;
 
-            i->Init(intFx.effects[k]->m_pos);
+            i->Init(intFx.Effects[k]->m_pos);
             grp->AddInterior(i);
 
             hasAddedAnyInteriors = true;
@@ -139,27 +139,66 @@ bool InteriorManager_c::Update() {
 }
 
 // 0x598A60
-void InteriorManager_c::PruneVisibleEffects(InteriorEffectInfo_t* pInteriorEffectInfos, int32 numInfos, int32 reqdNumInfos, float maxDis) {
-    plugin::CallMethod<0x598A60, InteriorManager_c*, InteriorEffectInfo_t*, int32, int32, float>(this, pInteriorEffectInfos, numInfos, reqdNumInfos, maxDis);
+void InteriorManager_c::PruneVisibleEffects(InteriorEffectInfo_t* pIntFxInfos, size_t numInfos, size_t maxVisibleFxCount, float maxDist) {
+    const std::span intFxInfos{pIntFxInfos, (size_t)numInfos};
+
+    // Check if there's anything to cull at all (More fxs visible than allowed)
+    if (rng::count(
+        intFxInfos,
+        0u,
+        [](const InteriorEffectInfo_t& intFxInfo) { return intFxInfo.NumFx; }
+    ) <= maxVisibleFxCount) {
+        return;
+    }
+
+    //> 0x598AA3 - Calculate distances to camera
+    for (auto& intFxInfo : intFxInfos) {
+        intFxInfo.DistSq = sq(10'000.f);
+        for (size_t k = intFxInfo.NumFx; k-->0;) {
+            const auto fx = intFxInfo.Effects[k];
+
+            intFxInfo.DistSq = std::min(
+                intFxInfo.DistSq,
+                CVector2D::DistSqr(intFxInfo.Entity->GetMatrix().TransformPoint(fx->m_pos), TheCamera.GetPosition2D())
+            );
+        }
+    }
+
+    //> 0x598B6E - Sort by distance to camera
+    rng::sort(
+        intFxInfos,
+        {},
+        [](const InteriorEffectInfo_t& intFxInfo) { return intFxInfo.DistSq; }
+    );
+
+    //> 0x598D4E - Cull excess effects
+    size_t n{};
+    for (auto& intFxInfo : intFxInfos) {
+        if (intFxInfo.NumFx + n > maxVisibleFxCount || intFxInfo.DistSq > sq(maxDist)) {
+            intFxInfo.IsCulled = true;
+        } else {
+            n += intFxInfo.NumFx;
+        }
+    }
 }
 
 // 0x598430
 void InteriorManager_c::AddSameGroupEffectInfos(InteriorEffectInfo_t* intFxInfo, int32 a2) {
-    const auto mi = intFxInfo->entity->GetModelInfo();
+    const auto mi = intFxInfo->Entity->GetModelInfo();
     for (size_t i = 0; i < mi->m_n2dfxCount; i++) {
-        if (intFxInfo->numFx >= std::size(intFxInfo->effects)) {
+        if (intFxInfo->NumFx >= std::size(intFxInfo->Effects)) {
             return; // NOTE/BUGFIX: It's really pointless to keep going at this point
         }
-        if (i == intFxInfo->fxIds[0]) {
+        if (i == intFxInfo->FxIds[0]) {
             continue;
         }
         const auto fx = C2dEffect::DynCast<C2dEffectInterior>(mi->Get2dEffect(i));
-        if (!fx || intFxInfo->effects[0]->m_groupId != fx->m_groupId) {
+        if (!fx || intFxInfo->Effects[0]->m_groupId != fx->m_groupId) {
             continue;
         }
-        const auto j = intFxInfo->numFx++;
-        intFxInfo->effects[j] = fx;
-        intFxInfo->fxIds[j] = i;
+        const auto j = intFxInfo->NumFx++;
+        intFxInfo->Effects[j] = fx;
+        intFxInfo->FxIds[j] = i;
     }
 }
 
