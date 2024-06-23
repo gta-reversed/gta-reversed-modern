@@ -28,7 +28,6 @@ void InteriorManager_c::InjectHooks() {
     RH_ScopedInstall(SetEntryExitPtr, 0x598180);
     RH_ScopedInstall(GetBoundingBox, 0x598090);
     RH_ScopedInstall(ActivatePeds, 0x598080);
-    RH_ScopedInstall(inlined_prune_visible_effects, 0x598070, { .reversed = false });
     RH_ScopedInstall(Update, 0x598F50);
     RH_ScopedInstall(Init, 0x5C0500);
 }
@@ -185,7 +184,7 @@ void InteriorManager_c::PruneVisibleEffects(InteriorEffectInfo_t* pIntFxInfos, s
 
 // 0x598430
 void InteriorManager_c::AddSameGroupEffectInfos(InteriorEffectInfo_t* ifxi, int32 a2) {
-    if (ifxi->NumFx + 1 >= ifxi->Effects.size()) {
+    if (ifxi->NumFx + 1 >= ifxi->Effects.size()) { // NOTSA
         return;
     }
 
@@ -204,7 +203,7 @@ void InteriorManager_c::AddSameGroupEffectInfos(InteriorEffectInfo_t* ifxi, int3
         ifxi->Effects[j] = fx;
         ifxi->FxIds[j]   = i;
 
-        if (ifxi->NumFx >= ifxi->Effects.size()) {
+        if (ifxi->NumFx >= ifxi->Effects.size()) { // Moved down here
             return;
         }
     }
@@ -235,7 +234,7 @@ void InteriorManager_c::Exit() {
 }
 
 // 0x598D80
-int32 InteriorManager_c::GetVisibleEffects(InteriorEffectInfo_t* intFxInfos, uint32 maxNumIntFxInfo) {
+size_t InteriorManager_c::GetVisibleEffects(InteriorEffectInfo_t* intFxInfos, uint32 maxNumIntFxInfo) {
     if (!maxNumIntFxInfo) {
         return 0;
     }

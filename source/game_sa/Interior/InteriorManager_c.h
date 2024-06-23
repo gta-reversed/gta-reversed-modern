@@ -21,7 +21,7 @@ public:
     static bool AreAnimsLoaded(int32 animBlock);
 
     void PruneVisibleEffects(InteriorEffectInfo_t* pInteriorEffectInfos, size_t numInfos, size_t reqdNumInfos, float maxDist);
-    int32 GetVisibleEffects(InteriorEffectInfo_t* effectInfo, uint32 totalEffects);
+    size_t GetVisibleEffects(InteriorEffectInfo_t* effectInfo, uint32 totalEffects);
     bool IsInteriorEffectVisible(C2dEffectInterior* effect, CEntity* entity);
 
     /*!
@@ -54,8 +54,8 @@ public:
     void SetStealableObjectStolen(CEntity* entity, uint8 a3);
     int32 FindStealableObjectId(CEntity* entity) const;
     int32 FindStealableObjectId(int32 interiorId, int32 modelId, CVector point) const;
-    bool HasInteriorHadStealDataSetup(Interior_c* interior);
-    int8 IsGroupActive(int32 group);
+    bool HasInteriorHadStealDataSetup(Interior_c* interior) const;
+    int8 IsGroupActive(int32 group) const;
     InteriorGroup_c* GetPedsInteriorGroup(const CPed* ped);
     void SetEntryExitPtr(CEntryExit* exit);
     bool GetBoundingBox(FurnitureEntity_c* entity, CVector* pos);
@@ -63,8 +63,6 @@ public:
 
     auto GetInteriorIds() const { return m_InteriorIds | rng::views::take(m_InteriorCount); }
     auto GetObjects() const { return m_Objects | rng::views::take(m_ObjectCount); }
-
-    void inlined_prune_visible_effects(bool prune) { m_IsActive = prune; } // 0x598070
 
 private:
     Interior_c               m_Interiors[8]{};               // 0x0
