@@ -25,26 +25,31 @@ struct GoToPt_t {
 VALIDATE_SIZE(GoToPt_t, 0x10);
 
 enum class eInteriorType {
-    SHOP       = 0x0,
-    OFFICE     = 0x1,
-    LOUNGE     = 0x2,
-    BEDROOM    = 0x3,
-    KITCHEN    = 0x4,
-    BATHROOM   = 0x5,
-    OFFLICENSE = 0x6,
-    HOTELROOM  = 0x7,
-    MISC       = 0x8,
+    SHOP       = 0,
+    OFFICE     = 1,
+    LOUNGE     = 2,
+    BEDROOM    = 3,
+    KITCHEN    = 4,
+    BATHROOM   = 5,
+    OFFLICENSE = 6,
+    HOTELROOM  = 7,
+    MISC       = 8,
+    TESTROOM   = 99, // NOTE: This isn't included in `NUM`
 
     //
     // Add new above this line
     //
-    NUM,
-    TESTROOM = 99, 
+    NUM = 9,
 };
 using eInteriorTypeS32 = notsa::WEnumS32<eInteriorType>;
 using eInteriorTypeS8 = notsa::WEnumS8<eInteriorType>;
 
 class Interior_c : public ListItem_c<Interior_c> {
+    static constexpr size_t NUM_TILES_PER_AXIS = 30;
+    static constexpr size_t NUM_TILES = sq(NUM_TILES_PER_AXIS);
+
+    template<std::integral T>
+    using Tiles = T[NUM_TILES_PER_AXIS][NUM_TILES_PER_AXIS]; //notsa::mdarray<uint8, NUM_TILES_PER_AXIS, NUM_TILES_PER_AXIS>;
 public:
     static void InjectHooks();
 
@@ -55,14 +60,26 @@ public:
     void Exit();
     void Furnish();
     void UnFurnish();
+
+    /*!
+     * @brief Get corners of a furniture's bounding box
+     * @param fe The furniture to get the bb of
+     * @param corners The 4 corners of the the bounding box (counter-clockwise, from top left): top left, bottom left, bottom right, top right
+     * @return 
+    */
+    bool GetBoundingBox(FurnitureEntity_c* fe, CVector(&corners)[4]);
+    void FindBoundingBox(
+        int32 x,     int32 y,
+        int32* minX, int32* maxX,
+        int32* minY, int32* maxY,
+        Tiles<int32>* tileInfo
+    );
     void AddGotoPt(int32 a, int32 b, float a3, float a4);
     void CalcExitPts();
     bool AddInteriorInfo(int32 actionType, float offsetX, float offsetY, int32 direction, CEntity* entityIgnoredCollision);
     bool IsPtInside(const CVector& pt, CVector bias = {});
     void AddPickups();
-    void FindBoundingBox(int32, int32, int32*, int32*, int32*, int32*, int32*);
     bool IsVisible();
-    bool GetBoundingBox(FurnitureEntity_c* entity, CVector* a3);
     void CalcMatrix(const CVector& pos);
     auto GetDoorNodeAddress() const { return m_DoorAddr; }
 
@@ -136,25 +153,25 @@ public:
     bool FindEmptyTiles(int32 a3, int32 a4, int32* arg8, int32* a5);
 
 public:
-    int32                      m_ID{};                  // 0x8
-    InteriorGroup_c*           m_Group{};               // 0xC
-    int32                      m_AreaCode{};            // 0x10
-    tEffectInterior*           m_Box{};                 // 0x14
-    RwMatrix                   m_Mat{};                 // 0x18
-    float                      m_DistSq{};              // 0x58
-    TList_c<FurnitureEntity_c> m_FurnitureEntityList{}; // 0x5C
-    uint8                      m_Tiles[900]{};          // 0x68
-    CNodeAddress               m_ExitAddr{};            // 0x3EC
-    CNodeAddress               m_DoorAddr{};            // 0x3F0
-    CVector                    m_ExitPos{};             // 0x3F4
-    CVector                    m_DoorPos{};             // 0x400
-    int8                       m_NumGoToPts{};          // 0x40C
-    int8                       m_NumIntInfo{};          // 0x40D
-    GoToPt_t                   m_GoToPts[16]{};         // 0x410
-    GoToPt_t                   m_ExitPts[8]{};          // 0x510
-    InteriorInfo_t             m_IntInfos[16]{};        // 0x590
-    int8                       m_ShopSubType{};         // 0x790
-    int8                       m_StyleA{};              // 0x791
-    int8                       m_StyleB{};              // 0x792
+    int32                                                         m_ID{};                  // 0x8
+    InteriorGroup_c*                                              m_Group{};               // 0xC
+    int32                                                         m_AreaCode{};            // 0x10
+    tEffectInterior*                                              m_Box{};                 // 0x14
+    RwMatrix                                                      m_Mat{};                 // 0x18
+    float                                                         m_DistSq{};              // 0x58
+    TList_c<FurnitureEntity_c>                                    m_FurnitureEntityList{}; // 0x5C
+    Tiles<uint8>                                                  m_Tiles{};               // 0x68
+    CNodeAddress                                                  m_ExitAddr{};            // 0x3EC
+    CNodeAddress                                                  m_DoorAddr{};            // 0x3F0
+    CVector                                                       m_ExitPos{};             // 0x3F4
+    CVector                                                       m_DoorPos{};             // 0x400
+    int8                                                          m_NumGoToPts{};          // 0x40C
+    int8                                                          m_NumIntInfo{};          // 0x40D
+    GoToPt_t                                                      m_GoToPts[16]{};         // 0x410
+    GoToPt_t                                                      m_ExitPts[8]{};          // 0x510
+    InteriorInfo_t                                                m_IntInfos[16]{};        // 0x590
+    int8                                                          m_ShopSubType{};         // 0x790
+    int8                                                          m_StyleA{};              // 0x791
+    int8                                                          m_StyleB{};              // 0x792
 };
 VALIDATE_SIZE(Interior_c, 0x794);

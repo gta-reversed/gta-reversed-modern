@@ -432,11 +432,11 @@ void InteriorManager_c::SetEntryExitPtr(CEntryExit* enex) {
 }
 
 // 0x598090
-bool InteriorManager_c::GetBoundingBox(FurnitureEntity_c* entity, CVector* pos) {
+bool InteriorManager_c::GetBoundingBox(FurnitureEntity_c* entity, CVector(&corners)[4]) {
     for (auto& grp : m_InteriorGroupList) {
         for (const auto i : grp.GetInteriors()) {
             if (i) {
-                return i->GetBoundingBox(entity, pos);
+                return i->GetBoundingBox(entity, corners);
             }
         }
     }

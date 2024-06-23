@@ -13,7 +13,7 @@ void Interior_c::InjectHooks() {
     RH_ScopedInstall(Exit, 0x592230);
     RH_ScopedInstall(Furnish, 0x591590);
     RH_ScopedInstall(UnFurnish, 0x5915D0);
-    RH_ScopedInstall(GetBoundingBox, 0x593DB0, { .reversed = false });
+    RH_ScopedInstall(GetBoundingBox, 0x593DB0);
     RH_ScopedInstall(PlaceObject, 0x5934E0, { .reversed = false });
     RH_ScopedInstall(IsPtInside, 0x5913E0, { .reversed = false });
     RH_ScopedInstall(CalcMatrix, 0x5914D0, { .reversed = false });
@@ -172,6 +172,53 @@ void Interior_c::UnFurnish() {
     }
 }
 
+// 0x593DB0
+bool Interior_c::GetBoundingBox(FurnitureEntity_c* fe, CVector(&corners)[4]) {
+    switch (m_Box->m_IntType) {
+    case eInteriorType::LOUNGE:
+    case eInteriorType::BEDROOM:
+    case eInteriorType::KITCHEN:
+    case eInteriorType::BATHROOM:
+    case eInteriorType::HOTELROOM:
+    case eInteriorType::MISC:
+    case eInteriorType::TESTROOM:
+        return false;
+    }
+
+    // Calculate bounding box
+    int32 tileMinX = fe->TileX, tileMaxX = fe->TileX,
+          tileMinY = fe->TileY, tileMaxY = fe->TileY;
+    Tiles<int32> tiles{};
+    tiles[fe->TileX][fe->TileY] = 1; // TODO: Is this correct, or it's the other way around (eg y, x)?
+    FindBoundingBox(
+        (int32)fe->TileX, (int32)fe->TileY,
+        &tileMinX, &tileMaxX,
+        &tileMinY, &tileMaxY,
+        &tiles
+    );
+
+    // Calculate corners as world positions
+    const auto nr = CPedGeometryAnalyser::ms_fPedNominalRadius;
+    const auto minX = (float)tileMinX - 0.5f - nr, maxX = (float)tileMaxX + 0.5f + nr,
+               minY = (float)tileMinY - 0.5f - nr, maxY = (float)tileMaxY + 0.5f + nr;
+    GetTileCentre(minX, maxY, &corners[0]); // top left
+    GetTileCentre(minX, minY, &corners[1]); // bottom left
+    GetTileCentre(maxX, minY, &corners[2]); // bottom right
+    GetTileCentre(maxX, maxY, &corners[3]); // top right
+
+    return true;
+}
+
+// 0x5922C0
+void Interior_c::FindBoundingBox(
+    int32 x,     int32 y,
+    int32* minX, int32* maxX,
+    int32* minY, int32* maxY,
+    Tiles<int32>* tileInfo
+) {
+    plugin::CallMethod<0x5922C0, Interior_c*, int32, int32, int32*, int32*, int32*, int32*, int32*>(this, x,y, minX, maxX, minY, maxY, &(*tileInfo)[0][0]);
+}
+
 // 0x591D20
 void Interior_c::AddGotoPt(int32 a, int32 b, float a3, float a4) {
     plugin::CallMethod<0x591D20, Interior_c*, int32, int32, float, float>(this, a, b, a3, a4);
@@ -187,11 +234,6 @@ void Interior_c::AddPickups() {
     plugin::CallMethod<0x591F90, Interior_c*>(this);
 }
 
-// 0x5922C0
-void Interior_c::FindBoundingBox(int32 a1, int32 a2, int32* a3, int32* a4, int32* a5, int32* a6, int32* a7) {
-    plugin::CallMethod<0x5922C0, Interior_c*, int32, int32, int32*, int32*, int32*, int32*, int32*>(this, a1, a2, a3, a4, a5, a6, a7);
-}
-
 // 0x5924A0
 void Interior_c::CalcExitPts() {
     plugin::CallMethod<0x5924A0, Interior_c*>(this);
@@ -201,12 +243,6 @@ void Interior_c::CalcExitPts() {
 bool Interior_c::IsVisible() {
     return plugin::CallMethodAndReturn<bool, 0x5929F0, Interior_c*>(this);
 }
-
-// 0x593DB0
-bool Interior_c::GetBoundingBox(FurnitureEntity_c* entity, CVector* a3) {
-    return plugin::CallMethodAndReturn<bool, 0x593DB0, Interior_c*, FurnitureEntity_c*, CVector*>(this, entity, a3);
-}
-
 
 // 0x5913E0
 bool Interior_c::IsPtInside(const CVector& pt, CVector bias) {
