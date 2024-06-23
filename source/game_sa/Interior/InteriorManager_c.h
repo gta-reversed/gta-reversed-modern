@@ -55,6 +55,7 @@ public:
     int32 FindStealableObjectId(CEntity* entity) const;
     int32 FindStealableObjectId(int32 interiorId, int32 modelId, CVector point) const;
     bool HasInteriorHadStealDataSetup(Interior_c* interior) const;
+    void SetupInteriorStealData(Interior_c* interior); // notsa
     int8 IsGroupActive(int32 group) const;
     InteriorGroup_c* GetPedsInteriorGroup(const CPed* ped);
     void SetEntryExitPtr(CEntryExit* exit);
@@ -63,7 +64,7 @@ public:
 
     auto GetInteriorIds() const { return m_InteriorIds | rng::views::take(m_InteriorCount); }
     auto GetObjects() const { return m_Objects | rng::views::take(m_ObjectCount); }
-
+    auto GetEnEx() const { return m_EnEx; }
 private:
     Interior_c               m_Interiors[8]{};               // 0x0
     TList_c<Interior_c>      m_InteriorPool{};               // 0x3CA0

@@ -115,10 +115,10 @@ bool InteriorManager_c::Update() {
             }
             const auto& fxPos = ifx.Entity->GetPosition();
 
-            i->m_box        = ifx.Effects[k];
-            i->m_interiorId = (uint32)(fxPos.x * fxPos.y * fxPos.z) + ifx.FxIds[k];
-            i->m_areaCode   = ifx.Entity->m_nAreaCode;
-            i->m_pGroup     = grp;
+            i->m_Box      = ifx.Effects[k];
+            i->m_ID       = (uint32)(fxPos.x * fxPos.y * fxPos.z) + ifx.FxIds[k];
+            i->m_AreaCode = ifx.Entity->m_nAreaCode;
+            i->m_Group    = grp;
 
             i->Init(ifx.Effects[k]->m_pos);
             grp->AddInterior(i);
@@ -382,7 +382,18 @@ int32 InteriorManager_c::FindStealableObjectId(int32 interiorId, int32 modelId, 
 
 // 0x5982B0
 bool InteriorManager_c::HasInteriorHadStealDataSetup(Interior_c* interior) const {
-    return m_InteriorCount && notsa::contains(GetInteriorIds(), interior->m_interiorId);
+    return m_InteriorCount && notsa::contains(GetInteriorIds(), interior->m_ID);
+}
+
+// notsa
+void InteriorManager_c::SetupInteriorStealData(Interior_c* interior) {
+    if (!HasInteriorHadStealDataSetup(interior)) {
+        if (m_InteriorCount < std::size(m_InteriorIds)) {
+            m_InteriorIds[m_InteriorCount++] = interior->m_ID;
+        } else {
+            NOTSA_LOG_WARN("Can't set up steal data for interior: out of memory");
+        }
+    }
 }
 
 // 0x598280
