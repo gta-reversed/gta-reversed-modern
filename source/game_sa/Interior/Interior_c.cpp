@@ -20,7 +20,7 @@ void Interior_c::InjectHooks() {
     RH_ScopedInstall(CalcMatrix, 0x5914D0, { .reversed = false });
     RH_ScopedInstall(AddGotoPt, 0x591D20, { .reversed = false });
     RH_ScopedInstall(AddInteriorInfo, 0x591E40, { .reversed = false });
-    RH_ScopedInstall(AddPickups, 0x591F90, { .reversed = false });
+    RH_ScopedInstall(AddPickups, 0x591F90);
     RH_ScopedInstall(CalcExitPts, 0x5924A0, { .reversed = false });
     RH_ScopedInstall(IsVisible, 0x5929F0, { .reversed = false });
     
@@ -88,7 +88,7 @@ void Interior_c::InjectHooks() {
     RH_ScopedInstall(GetNumEmptyTiles, 0x591920, { .reversed = false });
     RH_ScopedInstall(FindEmptyTiles, 0x591C50, { .reversed = false });
     RH_ScopedInstall(GetRandomTile, 0x591B20, { .reversed = false });
-    RH_ScopedInstall(GetTileCentre, 0x591BD0, { .reversed = false });    
+    RH_ScopedInstall(GetTileCentre_OG, 0x591BD0);
 }
 
 // 0x593BF0
@@ -201,10 +201,10 @@ bool Interior_c::GetBoundingBox(FurnitureEntity_c* fe, CVector(&corners)[4]) {
     const auto nr = CPedGeometryAnalyser::ms_fPedNominalRadius;
     const auto minX = (float)tileMinX - 0.5f - nr, maxX = (float)tileMaxX + 0.5f + nr,
                minY = (float)tileMinY - 0.5f - nr, maxY = (float)tileMaxY + 0.5f + nr;
-    GetTileCentre(minX, maxY, &corners[0]); // top left
-    GetTileCentre(minX, minY, &corners[1]); // bottom left
-    GetTileCentre(maxX, minY, &corners[2]); // bottom right
-    GetTileCentre(maxX, maxY, &corners[3]); // top right
+    corners[0] = GetTileCentre(minX, maxY); // top left
+    corners[1] = GetTileCentre(minX, minY); // bottom left
+    corners[2] = GetTileCentre(maxX, minY); // bottom right
+    corners[3] = GetTileCentre(maxX, maxY); // top right
 
     return true;
 }
@@ -287,42 +287,49 @@ void Interior_c::AddPickups() {
     }
 
     for (auto i = 0u; i < 100u; i++) {
-        const auto rndW = CGeneral::GetRandomNumberInRange(m_Props->m_width - 1u);
-        const auto rndD = CGeneral::GetRandomNumberInRange(m_Props->m_depth - 1u);
+        const auto tileX = CGeneral::GetRandomNumberInRange(m_Props->m_width - 1u);
+        const auto tileY = CGeneral::GetRandomNumberInRange(m_Props->m_depth - 1u);
 
-        // unnecessary check:
-        // if (rndW < m_Props->m_width && rndD < m_Props->m_depth && rndW >= 0 && rndD >= 0)
+        switch (GetTileStatus(tileX, tileY)) {
+        case eTileSate::STATE_0:
+        case eTileSate::STATE_3:
+        case eTileSate::STATE_4:
+            break;
+        default:
+            continue;
+        }
 
-        const auto& tile = m_Tiles[rndW][rndD];
-        if (notsa::contains({ 0Ui8, 3Ui8, 4Ui8 }, tile)) { // TODO: enum
-            CVector pointsIn{};
-            GetTileCentre(static_cast<float>(rndD), static_cast<float>(rndW), &pointsIn);
+        const auto pickupPos = GetTileCentre(static_cast<float>(tileY), static_cast<float>(tileX));
 
-            if (CGeneral::RandomBool(25.0f)) {
-                pointsIn.z += 0.5f;
-
-                const auto weapon = [&] {
+        if (CGeneral::RandomBool(25.0f)) {
+            CPickups::GenerateNewOne_WeaponType(
+                pickupPos + CVector{0.f, 0.f, 0.5f},
+                [&] {
                     const auto chance = CGeneral::GetRandomNumberInRange(0.0f, 100.0f);
-
-                    if (chance >= 40.0f) { // 60%
-                        if (chance >= 80.0f) { // 20%
-                            return (chance >= 90.0f) ? WEAPON_SHOTGUN : WEAPON_KNIFE; // 10% : 20%
-                        } else { // 20%
-                            return WEAPON_PISTOL;
-                        }
-                    } else { // 40%
-                        return WEAPON_BASEBALLBAT;
+                    if (chance < 40.f) {
+                        return WEAPON_BASEBALLBAT; // 40%
+                    } else if (chance < 80.f) {
+                        return WEAPON_PISTOL; // 80%
+                    } else if (chance < 90.f) {
+                        return WEAPON_KNIFE; // 90%
+                    } else {
+                        return WEAPON_SHOTGUN; // 10%
                     }
-                }();
-
-                // NOTSA: Originally 3 - [-15, 0]
-                const auto ammo = CGeneral::GetRandomNumberInRange(3, 18);
-                CPickups::GenerateNewOne_WeaponType(pointsIn, weapon, PICKUP_ONCE, ammo, false, false);
-            } else {
-                // NOTSA: Originally 10 - [-40, 0]
-                const auto amount = CGeneral::GetRandomNumberInRange(10, 50);
-                CPickups::GenerateNewOne(pointsIn, ModelIndices::MI_MONEY, PICKUP_MONEY, amount, false, false);
-            }
+                }(),
+                PICKUP_ONCE,
+                CGeneral::GetRandomNumberInRange(3, 18),
+                false,
+                false
+            );
+        } else {
+            CPickups::GenerateNewOne(
+                pickupPos,
+                ModelIndices::MI_MONEY,
+                PICKUP_MONEY,
+                CGeneral::GetRandomNumberInRange(10, 50),
+                false,
+                false
+            );
         }
     }
 }
@@ -572,8 +579,19 @@ int32 Interior_c::GetRandomTile(int32 a2, int32* a3, int32* a4) {
 }
 
 // 0x591BD0
-CVector* Interior_c::GetTileCentre(float offsetX, float offsetY, CVector* pointsIn) {
-    return plugin::CallMethodAndReturn<CVector*, 0x591BD0, Interior_c*, float, float, CVector*>(this, offsetX, offsetY, pointsIn);
+void Interior_c::GetTileCentre_OG(float offsetX, float offsetY, CVector* outPos) const {
+    *outPos = GetTileCentre(offsetX, offsetY);
+}
+
+// Based on 0x591BD0
+CVector Interior_c::GetTileCentre(float offsetX, float offsetY) const {
+    CVector pos{
+        offsetX + 0.5f - (float)m_Props->m_width * 0.5f,
+        offsetY + 0.5f - (float)m_Props->m_depth * 0.5f,
+        0.f            - (float)m_Props->m_height * 0.5f
+    };
+    RwV3dTransformPoint(&pos, &pos, &m_Mat);
+    return pos;
 }
 
 // 0x591C50

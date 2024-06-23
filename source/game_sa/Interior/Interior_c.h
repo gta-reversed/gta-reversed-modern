@@ -162,7 +162,8 @@ public:
     eTileSate GetTileStatus(int32 x, int32 y) const;
     int32 GetNumEmptyTiles(int32 a2, int32 a3, int32 a4, int32 a5);
     int32 GetRandomTile(int32 a2, int32* a3, int32* a4);
-    CVector* GetTileCentre(float offsetX, float offsetY, CVector* pointsIn);
+    void GetTileCentre_OG(float offsetX, float offsetY, CVector* outPos) const;
+    CVector GetTileCentre(float offsetX, float offsetY) const;
     bool FindEmptyTiles(int32 a3, int32 a4, int32* arg8, int32* a5);
 
 public:
