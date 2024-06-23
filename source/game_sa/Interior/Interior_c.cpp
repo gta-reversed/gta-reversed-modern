@@ -15,8 +15,7 @@ void Interior_c::InjectHooks() {
     RH_ScopedInstall(UnFurnish, 0x5915D0);
     RH_ScopedInstall(GetBoundingBox, 0x593DB0);
     RH_ScopedInstall(FindBoundingBox, 0x5922C0);
-    RH_ScopedInstall(PlaceObject, 0x5934E0, { .reversed = false });
-    RH_ScopedInstall(IsPtInside, 0x5913E0, { .reversed = false });
+    RH_ScopedInstall(IsPtInside, 0x5913E0);
     RH_ScopedInstall(CalcMatrix, 0x5914D0, { .reversed = false });
     RH_ScopedInstall(AddGotoPt, 0x591D20, { .reversed = false });
     RH_ScopedInstall(AddInteriorInfo, 0x591E40, { .reversed = false });
@@ -72,10 +71,11 @@ void Interior_c::InjectHooks() {
     //
     // Furniture
     //
-    RH_ScopedInstall(GetFurnitureEntity, 0x5913B0, { .reversed = false });
     RH_ScopedInstall(PlaceFurniture, 0x592AA0, { .reversed = false });
     RH_ScopedInstall(PlaceFurnitureOnWall, 0x593120, { .reversed = false });
     RH_ScopedInstall(PlaceFurnitureInCorner, 0x593340, { .reversed = false });
+    RH_ScopedInstall(GetFurnitureEntity, 0x5913B0, { .reversed = false });
+    RH_ScopedInstall(PlaceObject, 0x5934E0, { .reversed = false });
 
     //
     // Tiles
@@ -270,6 +270,16 @@ void Interior_c::FindBoundingBox(
     }
 }
 
+// 0x5913E0
+bool Interior_c::IsPtInside(const CVector& pt, CVector bias) {
+    const auto x = pt.x - m_Mat.pos.x;
+    const auto y = pt.y - m_Mat.pos.y;
+    const auto z = pt.z - m_Mat.pos.z;
+    return m_Props->m_width * 0.5f + bias.x >= std::fabs(m_Mat.right.x * x + m_Mat.right.y * y + m_Mat.right.z * z)
+        && m_Props->m_depth * 0.5f + bias.y >= std::fabs(m_Mat.up.x * x + m_Mat.up.y * y + m_Mat.up.z * z)
+        && m_Props->m_height * 0.5f + bias.z >= std::fabs(m_Mat.at.x * x + m_Mat.at.y * y + m_Mat.at.z * z);
+}
+
 // 0x591D20
 void Interior_c::AddGotoPt(int32 a, int32 b, float a3, float a4) {
     plugin::CallMethod<0x591D20, Interior_c*, int32, int32, float, float>(this, a, b, a3, a4);
@@ -342,11 +352,6 @@ void Interior_c::CalcExitPts() {
 // 0x5929F0
 bool Interior_c::IsVisible() {
     return plugin::CallMethodAndReturn<bool, 0x5929F0, Interior_c*>(this);
-}
-
-// 0x5913E0
-bool Interior_c::IsPtInside(const CVector& pt, CVector bias) {
-    return plugin::CallMethodAndReturn<bool, 0x5913E0, Interior_c*, const CVector&, CVector&>(this, pt, bias);
 }
 
 // 0x5914D0
