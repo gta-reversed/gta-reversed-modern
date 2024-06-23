@@ -1115,7 +1115,142 @@ bool CTheScripts::IsVehicleStopped(CVehicle* veh) {
 
 // 0x5D4FD0
 bool CTheScripts::Load() {
-    return plugin::CallAndReturn<bool, 0x5D4FD0>();
+    Init();
+
+    const auto length = LoadDataFromWorkBuffer<uint32>();
+    if (length > 51'200) {
+        const auto numParts = (length - 51'201) / 51'200 + 1;
+        const auto remainder = length - 51'200 * numParts;
+
+        for (auto i = 0u; i < numParts; i++) {
+            CGenericGameStorage::LoadDataFromWorkBuffer(ScriptSpace.data(), 51'200);
+        }
+        CGenericGameStorage::LoadDataFromWorkBuffer(ScriptSpace.data(), remainder);
+    } else {
+        CGenericGameStorage::LoadDataFromWorkBuffer(ScriptSpace.data(), length);
+    }
+
+    for (auto& sfb : ScriptsForBrains.m_aScriptForBrains) {
+        LoadDataFromWorkBuffer(sfb);
+    }
+
+    LoadDataFromWorkBuffer(OnAMissionFlag);
+    LoadDataFromWorkBuffer(LastMissionPassedTime);
+
+    for (auto& bswap : BuildingSwapArray) {
+        auto v1 = LoadDataFromWorkBuffer<uint32>(), v2 = LoadDataFromWorkBuffer<uint32>(); // TODO
+        LoadDataFromWorkBuffer(bswap.m_nNewModelIndex);
+        LoadDataFromWorkBuffer(bswap.m_nOldModelIndex);
+
+        switch (v1) {
+        case 0:
+            bswap.m_pCBuilding = nullptr;
+            break;
+        case 1:
+            --v2;
+            break;
+        case 2:
+            bswap.m_pCBuilding = GetBuildingPool()->GetAt(--v2);
+            break;
+        default:
+            NOTSA_UNREACHABLE();
+        }
+
+        if (auto* b = bswap.m_pCBuilding) {
+            CWorld::Remove(b);
+            b->ReplaceWithNewModel(bswap.m_nNewModelIndex);
+            CWorld::Add(b);
+        }
+    }
+
+    for (auto& is : InvisibilitySettingArray) {
+        auto v1 = LoadDataFromWorkBuffer<uint32>(), v2 = LoadDataFromWorkBuffer<uint32>(); // TODO
+
+        is = nullptr; // clear beforehand
+        switch (v1) {
+        case 0:
+            // set to nullptr, already done
+            break;
+        case 1:
+            --v2;
+            break;
+        case 2:
+            if (auto* obj = GetBuildingPool()->GetAt(--v2)) {
+                is                   = obj;
+                is->m_bUsesCollision = false;
+                is->m_bIsVisible     = false;
+            }
+            break;
+        case 3:
+            if (auto* obj = GetObjectPool()->GetAt(--v2)) {
+                is                   = obj;
+                is->m_bUsesCollision = false;
+                is->m_bIsVisible     = false;
+            }
+            break;
+        case 4:
+            if (auto* obj = GetDummyPool()->GetAt(--v2)) {
+                is                   = obj;
+                is->m_bUsesCollision = false;
+                is->m_bIsVisible     = false;
+            }
+            break;
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }
+
+    for (auto& veh : VehicleModelsBlockedByScript) {
+        LoadDataFromWorkBuffer(veh);
+    }
+
+    for (auto& lod : ScriptConnectLodsObjects) {
+        LoadDataFromWorkBuffer(lod);
+    }
+
+    for (auto& ag : ScriptAttachedAnimGroups) {
+        LoadDataFromWorkBuffer(ag);
+
+        if (ag.m_nModelID != MODEL_INVALID) {
+            ScriptAttachAnimGroupToCharModel(ag.m_nModelID, ag.m_IfpName);
+        }
+    }
+
+    LoadDataFromWorkBuffer(bUsingAMultiScriptFile);
+    LoadDataFromWorkBuffer(bPlayerHasMetDebbieHarry);
+
+    {
+        // Ignored
+        uint32 foo32{}, foo16{};
+        LoadMultipleDataFromWorkBuffer<16>(&foo32, &foo32, &foo16, &foo16, &foo32);
+    }
+
+    // Unused
+    // auto j = 0u;
+    // for (auto* s = pActiveScripts; s; s->m_pNext)
+    //     j++;
+
+    auto numScripts = LoadDataFromWorkBuffer<uint32>();
+    for (auto i = 0u; i < numScripts; i++) {
+        auto* script = StartNewScript((uint8*)LoadDataFromWorkBuffer<uint16>());
+        {
+            const auto prev = script->m_pPrev, next = script->m_pNext;
+            LoadDataFromWorkBuffer(*script);
+            script->m_pPrev = prev;
+            script->m_pNext = next;
+        }
+        script->SetCurrentIp(&ScriptSpace[LoadDataFromWorkBuffer<uint32>()]);
+
+        for (auto& stk : script->m_IPStack) {
+            if (const auto ip = LoadDataFromWorkBuffer<uint32>()) {
+                stk = &ScriptSpace[ip];
+            } else {
+                stk = nullptr;
+            }
+        }
+    }
+
+    return true;
 }
 
 // 0x5D4C40

@@ -464,13 +464,13 @@ public:
     static uint32 AddScriptSearchLight(CVector start, CEntity* entity, CVector target, float targetRadius, float baseRadius);
     static uint32 AddScriptSphere(uint32 id, CVector posn, float radius);
 
-    static void   AddToBuildingSwapArray(CBuilding* building, int32 oldModelId, int32 newModelId);
-    static void   AddToInvisibilitySwapArray(CEntity* entity, bool bVisible);
-    static void   AddToListOfConnectedLodObjects(CObject* obj1, CObject* obj2);
-    static void   AddToListOfSpecialAnimGroupsAttachedToCharModels(int32 modelId, Const char* ifpName);
-    static void   AddToSwitchJumpTable(int32 switchValue, int32 switchLabelLocalAddress);
-    static void   AddToVehicleModelsBlockedByScript(eModelID modelIndex);
-    static void   AddToWaitingForScriptBrainArray(CEntity* entity, int16 arg2);
+    static void AddToBuildingSwapArray(CBuilding* building, int32 oldModelId, int32 newModelId);
+    static void AddToInvisibilitySwapArray(CEntity* entity, bool bVisible);
+    static void AddToListOfConnectedLodObjects(CObject* obj1, CObject* obj2);
+    static void AddToListOfSpecialAnimGroupsAttachedToCharModels(int32 modelId, Const char* ifpName);
+    static void AddToSwitchJumpTable(int32 switchValue, int32 switchLabelLocalAddress);
+    static void AddToVehicleModelsBlockedByScript(eModelID modelIndex);
+    static void AddToWaitingForScriptBrainArray(CEntity* entity, int16 arg2);
 
     static void AttachSearchlightToSearchlightObject(int32 searchLightId, CObject* tower, CObject* housing, CObject* bulb, CVector offset);
     static bool CheckStreamedScriptVersion(RwStream* stream, char* arg2);
@@ -552,13 +552,11 @@ public:
     template<typename ChunkT = tSCMChunkHeader>
         requires std::is_base_of_v<tSCMChunkHeader, ChunkT>
     static const ChunkT* GetSCMChunk() {
-        // This is a sanity check assuming vanilla SCMs. Vanilla SCMs have 6 chunks.
-        //
         // A SCM file can have any amount of header chunks before the main script,
         // under these conditions:
         //
-        // 1. Vanilla EXE expects at least 6 chunks to be available. Having less than that
-        // might crash the game.
+        // 1. Vanilla EXE expects at least 2 chunks to be available. Having less than that
+        // will crash the game.
         //
         // 2. The last chunk must set the main script offset as next chunk offset. So virtual
         // machine will just jump through all chunks to the main script.
