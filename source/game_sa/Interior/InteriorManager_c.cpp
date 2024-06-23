@@ -88,38 +88,40 @@ bool InteriorManager_c::Update() {
     }
 
     bool hasAddedAnyInteriors{};
-    for (auto& intFx : visibleIntFx) {
+    for (auto& ifx : visibleIntFx) {
         //> 0x599071 - Not visible?
-        if (intFx.IsCulled) {
+        if (ifx.IsCulled) {
             continue;
         }
 
         //> 0x59909F - Check if there's an existing interior group for this effect
-        if (rng::any_of(m_InteriorGroupList, [&](InteriorGroup_c& g) { return IsFxAssociatedWithGroup(intFx, g); })) {
+        if (rng::any_of(m_InteriorGroupList, [&](InteriorGroup_c& g) {
+            return IsFxAssociatedWithGroup(ifx, g);
+        })) {
             continue;
         }
 
         //> 0x5990B8 - Make an interior group for this effect
         const auto grp = m_InteriorGroupPool.RemoveHead();
         assert(grp);
-        grp->Init(intFx.Entity, intFx.Effects[0]->m_groupId);
-        grp->m_enex = m_EnEx;
+        grp->Init(ifx.Entity, ifx.Effects[0]->m_groupId);
+        grp->m_EnEx = m_EnEx;
         m_InteriorGroupList.AddItem(grp);
 
         //> 0x59910C - Create interiors for it
-        for (auto k = 0u; k < intFx.NumFx; k++) {
+        for (auto k = 0u; k < ifx.NumFx; k++) {
             const auto i = m_InteriorPool.RemoveHead();
             if (!i) { // No more interiors to allocate
                 break;
             }
-            const auto& fxPos = intFx.Entity->GetPosition();
+            const auto& fxPos = ifx.Entity->GetPosition();
 
-            i->m_box        = intFx.Effects[k];
-            i->m_interiorId = (uint32)(fxPos.x * fxPos.y * fxPos.z) + intFx.FxIds[k];
-            i->m_areaCode   = intFx.Entity->m_nAreaCode;
+            i->m_box        = ifx.Effects[k];
+            i->m_interiorId = (uint32)(fxPos.x * fxPos.y * fxPos.z) + ifx.FxIds[k];
+            i->m_areaCode   = ifx.Entity->m_nAreaCode;
             i->m_pGroup     = grp;
 
-            i->Init(intFx.Effects[k]->m_pos);
+            i->Init(ifx.Effects[k]->m_pos);
             grp->AddInterior(i);
 
             hasAddedAnyInteriors = true;
@@ -143,7 +145,7 @@ void InteriorManager_c::PruneVisibleEffects(InteriorEffectInfo_t* pIntFxInfos, s
     const std::span intFxInfos{pIntFxInfos, (size_t)numInfos};
 
     // Check if there's anything to cull at all (More fxs visible than allowed)
-    if (rng::count(
+    if ((size_t)rng::count(
         intFxInfos,
         0u,
         [](const InteriorEffectInfo_t& intFxInfo) { return intFxInfo.NumFx; }
@@ -156,7 +158,6 @@ void InteriorManager_c::PruneVisibleEffects(InteriorEffectInfo_t* pIntFxInfos, s
         intFxInfo.DistSq = sq(10'000.f);
         for (size_t k = intFxInfo.NumFx; k-->0;) {
             const auto fx = intFxInfo.Effects[k];
-
             intFxInfo.DistSq = std::min(
                 intFxInfo.DistSq,
                 CVector2D::DistSqr(intFxInfo.Entity->GetMatrix().TransformPoint(fx->m_pos), TheCamera.GetPosition2D())
@@ -173,32 +174,39 @@ void InteriorManager_c::PruneVisibleEffects(InteriorEffectInfo_t* pIntFxInfos, s
 
     //> 0x598D4E - Cull excess effects
     size_t n{};
-    for (auto& intFxInfo : intFxInfos) {
-        if (intFxInfo.NumFx + n > maxVisibleFxCount || intFxInfo.DistSq > sq(maxDist)) {
-            intFxInfo.IsCulled = true;
+    for (auto& ifxi : intFxInfos) {
+        if (ifxi.NumFx + n > maxVisibleFxCount || ifxi.DistSq > sq(maxDist)) {
+            ifxi.IsCulled = true;
         } else {
-            n += intFxInfo.NumFx;
+            n += ifxi.NumFx;
         }
     }
 }
 
 // 0x598430
-void InteriorManager_c::AddSameGroupEffectInfos(InteriorEffectInfo_t* intFxInfo, int32 a2) {
-    const auto mi = intFxInfo->Entity->GetModelInfo();
+void InteriorManager_c::AddSameGroupEffectInfos(InteriorEffectInfo_t* ifxi, int32 a2) {
+    if (ifxi->NumFx + 1 >= ifxi->Effects.size()) {
+        return;
+    }
+
+    const auto mi = ifxi->Entity->GetModelInfo();
     for (size_t i = 0; i < mi->m_n2dfxCount; i++) {
-        if (intFxInfo->NumFx >= std::size(intFxInfo->Effects)) {
-            return; // NOTE/BUGFIX: It's really pointless to keep going at this point
-        }
-        if (i == intFxInfo->FxIds[0]) {
+        if (i == ifxi->FxIds[0]) { // Already stored
             continue;
         }
+
         const auto fx = C2dEffect::DynCast<C2dEffectInterior>(mi->Get2dEffect(i));
-        if (!fx || intFxInfo->Effects[0]->m_groupId != fx->m_groupId) {
+        if (!fx || ifxi->Effects[0]->m_groupId != fx->m_groupId) {
             continue;
         }
-        const auto j = intFxInfo->NumFx++;
-        intFxInfo->Effects[j] = fx;
-        intFxInfo->FxIds[j] = i;
+
+        const auto j     = ifxi->NumFx++;
+        ifxi->Effects[j] = fx;
+        ifxi->FxIds[j]   = i;
+
+        if (ifxi->NumFx >= ifxi->Effects.size()) {
+            return;
+        }
     }
 }
 
@@ -227,13 +235,65 @@ void InteriorManager_c::Exit() {
 }
 
 // 0x598D80
-int32 InteriorManager_c::GetVisibleEffects(InteriorEffectInfo_t* effectInfo, int32 totalEffects) {
-    return plugin::CallMethodAndReturn<int32, 0x598D80, InteriorManager_c*, InteriorEffectInfo_t*, int32>(this, effectInfo, totalEffects);
+int32 InteriorManager_c::GetVisibleEffects(InteriorEffectInfo_t* intFxInfos, uint32 maxNumIntFxInfo) {
+    if (!maxNumIntFxInfo) {
+        return 0;
+    }
+
+    int16 objCount{};
+    std::array<CEntity*, 2048> objs;
+    CWorld::FindObjectsInRange(TheCamera.GetPosition(), 100.f, false, &objCount, (int16)objs.size(), objs.data(), true, false, false, false, false);
+
+    size_t numIntFxInfo{};
+    for (auto& obj : objs | rng::views::take(objCount)) {
+        if (!obj->m_pRwObject || !obj->IsInCurrentAreaOrBarberShopInterior()) {
+            continue;
+        }
+
+        const auto mi = obj->GetModelInfo();
+        for (size_t i = 0; i < mi->m_n2dfxCount; i++) {
+            const auto ifx = C2dEffect::DynCast<C2dEffectInterior>(mi->Get2dEffect((int32)i));
+
+            // We only care about visible interior effects
+            if (!ifx || !IsInteriorEffectVisible(ifx, obj)) {
+                continue;
+            }
+
+            // Check if effect was already stored
+            if (numIntFxInfo != 0) {
+                if (rng::none_of(intFxInfos, intFxInfos + numIntFxInfo, [&](const InteriorEffectInfo_t& ifxi) {
+                    return ifxi.Entity == obj && ifxi.Effects[0]->m_groupId == ifx->m_groupId;
+                })) {
+                    continue;
+                }
+            }
+
+            // Store the effect
+            intFxInfos[numIntFxInfo++] = {
+                .Entity   = obj,
+                .NumFx    = 1,
+                .Effects  = { ifx },
+                .FxIds    = { i },
+                .IsCulled = false,
+            };
+
+            if (numIntFxInfo >= maxNumIntFxInfo) {
+                goto end; // bugfix: Stop looping if can't store more
+            }
+        }
+    }
+end:
+
+    for (size_t i = numIntFxInfo; i --> 0;) {
+        AddSameGroupEffectInfos(&intFxInfos[i], maxNumIntFxInfo);
+    }
+
+    return numIntFxInfo;
 }
 
 // 0x598690
-int32 InteriorManager_c::IsInteriorEffectVisible(C2dEffect* effect, CEntity* entity) {
-    return plugin::CallMethodAndReturn<int32, 0x598690, InteriorManager_c*, C2dEffect*, CEntity*>(this, effect, entity);
+int32 InteriorManager_c::IsInteriorEffectVisible(C2dEffectInterior* effect, CEntity* entity) {
+    return plugin::CallMethodAndReturn<int32, 0x598690, InteriorManager_c*, C2dEffectInterior*, CEntity*>(this, effect, entity);
 }
 
 // 0x598620
