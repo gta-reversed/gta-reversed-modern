@@ -7,6 +7,7 @@
 class CEntity;
 
 enum class eInteriorInfoType {
+    UNK_0 = 0,
     UNK_1 = 1,
     UNK_2 = 2,
     UNK_3 = 3,

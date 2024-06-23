@@ -213,7 +213,7 @@ struct tEffectInterior {
     int8  m_noGoWidth[3];
     int8  m_noGoDepth[3];
     uint8 m_seed;
-    uint8 m_status;
+    uint8 m_status; // AKA wealth
     float m_rot;
 };
 VALIDATE_SIZE(tEffectInterior, 0x34 - 0x10);

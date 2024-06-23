@@ -315,7 +315,7 @@ void Interior_c::AddGotoPt(int32 tileX, int32 tileY, float offsetX, float offset
 }
 
 // 0x591E40
-bool Interior_c::AddInteriorInfo(eInteriorInfoTypeS32 actionType, float offsetX, float offsetY, int32 direction, CEntity* entityIgnoredCollision) {
+bool Interior_c::AddInteriorInfo(eInteriorInfoTypeS32 infoType, float offsetX, float offsetY, int32 direction, CEntity* entityIgnoredCollision) {
     if (m_NumIntInfo >= std::size(m_IntInfos)) {
         return false;
     }
@@ -335,7 +335,7 @@ bool Interior_c::AddInteriorInfo(eInteriorInfoTypeS32 actionType, float offsetX,
     }
 
     m_IntInfos[m_NumIntInfo++] = {
-        .Type                   = actionType,
+        .Type                   = infoType,
         .IsInUse                = false,
         .Pos                    = pos,
         .Dir                    = dir,
@@ -382,16 +382,16 @@ void Interior_c::AddPickups() {
                     }
                 }(),
                 PICKUP_ONCE,
-                CGeneral::GetRandomNumberInRange(3, 18),
+                CGeneral::GetRandomNumberInRange<uint32>(3, 18),
                 false,
-                false
+                nullptr
             );
         } else {
             CPickups::GenerateNewOne(
                 pickupPos,
                 ModelIndices::MI_MONEY,
                 PICKUP_MONEY,
-                CGeneral::GetRandomNumberInRange(10, 50),
+                CGeneral::GetRandomNumberInRange<uint32>(10, 50),
                 false,
                 false
             );
@@ -417,20 +417,66 @@ bool Interior_c::IsVisible() {
 
 // 0x593FC0
 void Interior_c::FurnishBedroom() {
-    plugin::CallMethod<0x593FC0, Interior_c*>(this);
+    return plugin::CallMethod<0x593FC0, Interior_c*>(this);
+
+    /** 
+     * So far so good, but incomplete. Not tested.
+     **
+    m_StyleA = g_furnitureMan.GetRandomId(eInteriorGroupId::BEDROOM, eInteriorSubGroupId::BEDROOM_TABLES, m_Props->m_status);
+
+    SetTilesStatus(0, 2, 2, 2, eTileStatus::STATE_7);
+
+    int32 bedPos;
+    eWallS32 bedWall;
+    const auto bedObj = PlaceFurnitureOnWall(
+        eInteriorGroupId::BEDROOM,
+        eInteriorSubGroupId::BEDROOM_BEDS,
+        -1,
+        0.f,
+        1,
+        eWall::NA,
+        -1,
+        0,
+        &bedWall,
+        &bedPos
+    );
+    if (bedObj && PlaceFurnitureOnWall(
+        eInteriorGroupId::BEDROOM,
+        eInteriorSubGroupId::BEDROOM_TABLES,
+        m_StyleA,
+        0.f,
+        0,
+        bedWall,
+        bedPos - 1
+    )) {
+        const auto MarkPlacedFurniture = [&](eInteriorInfoType iit, int32 x, int32 y, int32 offX, int32 offY, int32 dir) {
+            AddInteriorInfo(iit, (float)offX, (float)offY, dir, bedObj);
+            SetTilesStatus(x, y, 1, 1, eTileStatus::STATE_2);
+        };
+        switch (bedWall) {
+        case eWall::Y_A: MarkPlacedFurniture(eInteriorInfoType::UNK_4, 2,                    bedPos + 2,           1,                    bedPos + 2,           0); break; // 0x594186
+        case eWall::Y_B: MarkPlacedFurniture(eInteriorInfoType::UNK_3, m_Props->m_width - 3, bedPos + 2,           m_Props->m_width - 2, bedPos + 2,           0); break; // 0x5941AE
+        case eWall::X_B: MarkPlacedFurniture(eInteriorInfoType::UNK_3, bedPos + 2,           2,                    bedPos + 2,           1,                    3); break; // 0x594200
+        case eWall::X_A: MarkPlacedFurniture(eInteriorInfoType::UNK_4, bedPos + 2,           m_Props->m_depth - 3, bedPos + 2,           m_Props->m_depth - 2, 3); break; // 0x5941D2
+        }
+    }
+
+    PlaceFurnitureOnWall(eInteriorGroupId::BEDROOM, eInteriorSubGroupId::BEDROOM_WARDROBES, m_StyleA);
+    PlaceFurnitureOnWall(eInteriorGroupId::BEDROOM, eInteriorSubGroupId::BEDROOM_DRAWERS, m_StyleA);
+    */
 }
 
 // 0x593F10
-void Interior_c::Bedroom_AddTableItem(int32 interior, int32 subGroup, int32 wallId, int32 x, int32 y, int32 d) {
+void Interior_c::Bedroom_AddTableItem(eInteriorGroupIdS32 groupId, eInteriorSubGroupIdS32 subGroupId, eWall wall, int32 x, int32 y, int32 d) {
     float oX = (float)x, oY = (float)y;
-    if (wallId == 0 || wallId == 2) {
+    if (wall == eWall::X_A || wall == eWall::X_B) {
         oX += 0.5f;
-    } else if (wallId == 1 || wallId == 3) {
+    } else if (wall == eWall::Y_A || wall == eWall::Y_B) {
         oY += 0.5f;
     }
     PlaceObject(
         true,
-        g_furnitureMan.GetFurniture(interior, subGroup, -1, m_Props->m_status),
+        g_furnitureMan.GetFurniture(groupId, subGroupId, -1, m_Props->m_status),
         oX + 0.5f, oY + 0.5f, 0.5f,
         (float)d * 90.f
     );
@@ -578,10 +624,38 @@ void Interior_c::PlaceFurniture(Furniture_c* a1, int32 a2, int32 a3, float a4, i
 }
 
 // 0x593120
-void Interior_c::PlaceFurnitureOnWall(int32 furnitureGroupId, int32 furnitureSubgroupId, int32 furnitureId, float a5, int32 a6, int32 a7, int32 a8, int32 a9, int32* a10,
-    int32* a11, int32* a12, int32* a13, int32* a14, int32* a15) {
-    plugin::CallMethod<0x593120, Interior_c*, int32, int32, int32, float, int32, int32, int32, int32, int32*, int32*, int32*, int32*, int32*, int32*>(
-        this, furnitureGroupId, furnitureSubgroupId, furnitureId, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+CObject* Interior_c::PlaceFurnitureOnWall(
+    eInteriorGroupIdS32 interior,
+    eInteriorSubGroupId subGroup,
+    int32               type,
+    float               z,
+    int32               heightInfo,
+    eWallS32            wallId,
+    int32               pos,
+    int32               offset,
+    eWallS32*           outWall,
+    int32*              outPos,
+    int32*              x,
+    int32*              y,
+    int32*              w,
+    int32*              d
+) {
+    return plugin::CallMethodAndReturn<CObject*, 0x593120>(
+        interior,
+        subGroup,
+        type,
+        z,
+        heightInfo,
+        wallId,
+        pos,
+        offset,
+        outWall,
+        outPos,
+        x,
+        y,
+        w,
+        d
+    );
 }
 
 // 0x593340
@@ -612,7 +686,7 @@ int8 Interior_c::CheckTilesEmpty(int32 a1, int32 a2, int32 a3, int32 a4, uint8 a
 }
 
 // 0x591700
-void Interior_c::SetTilesStatus(int32 x, int32 y, int32 w, int32 d, int32 status, bool force) {
+void Interior_c::SetTilesStatus(int32 x, int32 y, int32 w, int32 d, eTileStatusS32 status, bool force) {
     plugin::CallMethod<0x591700>(this, x, y, w, d, status, force);
 }
 
@@ -629,7 +703,7 @@ void Interior_c::SetCornerTiles(int32 a4, int32 a3, int32 a5, uint8 a6) {
 }
 
 // 0x5918E0
-Interior_c::eTileStatus Interior_c::GetTileStatus(int32 x, int32 y) const {
+Interior_c::eTileStatusS32 Interior_c::GetTileStatus(int32 x, int32 y) const {
     assert(m_Props->m_width < NUM_TILES_PER_AXIS);
     if (x < 0 || x >= m_Props->m_width) {
         return eTileStatus::STATE_1;
