@@ -331,6 +331,14 @@ enum {
     MAX_NUM_SUPPRESSED_VEHICLE_MODELS           = 40,
 };
 
+enum class ScriptSavedObjectType : uint32 {
+    NONE = 0,
+    NOP = 1, // ?
+    BUILDING = 2,
+    OBJECT = 3,
+    DUMMY = 4,
+};
+
 static constexpr uint32 SCRIPT_VAR_TIMERA = 32, SCRIPT_VAR_TIMERB = 33;
 
 static constexpr uint32 MISSION_SCRIPT_SIZE = 69000;
@@ -494,8 +502,8 @@ public:
     static bool IsPointWithinSearchLight(const CVector& pointPosn, int32 index);
     static bool IsVehicleStopped(CVehicle* veh);
 
-    static bool Load();
-    static bool Save();
+    static void Load();
+    static void Save();
 
     static void MoveSearchLightBetweenTwoPoints(int32 index, float x1, float y1, float z1, float x2, float y2, float z2, float pathSpeed);
     static void MoveSearchLightToEntity(int32 index, CEntity* entity, float pathSpeed);

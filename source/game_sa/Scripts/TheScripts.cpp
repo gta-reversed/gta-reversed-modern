@@ -72,8 +72,8 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(IsPedStopped, 0x486110);
     RH_ScopedInstall(IsPlayerOnAMission, 0x464D50);
     RH_ScopedInstall(IsVehicleStopped, 0x4861F0);
-    RH_ScopedInstall(Load, 0x5D4FD0, {.reversed=false});
-    RH_ScopedInstall(Save, 0x5D4C40, {.reversed=false});
+    RH_ScopedInstall(Load, 0x5D4FD0);
+    RH_ScopedInstall(Save, 0x5D4C40);
     RH_ScopedInstall(WipeLocalVariableMemoryForMissionScript, 0x464BB0);
     RH_ScopedInstall(HasCarModelBeenSuppressed, 0x46A810);
     RH_ScopedInstall(HasVehicleModelBeenBlockedByScript, 0x46A890);
@@ -1114,20 +1114,20 @@ bool CTheScripts::IsVehicleStopped(CVehicle* veh) {
 }
 
 // 0x5D4FD0
-bool CTheScripts::Load() {
+void CTheScripts::Load() {
     Init();
 
-    const auto length = LoadDataFromWorkBuffer<uint32>();
-    if (length > 51'200) {
-        const auto numParts = (length - 51'201) / 51'200 + 1;
-        const auto remainder = length - 51'200 * numParts;
+    const auto globalVarsLen = LoadDataFromWorkBuffer<uint32>();
+    if (globalVarsLen > 51'200) {
+        const auto numParts = (globalVarsLen - 51'201) / 51'200 + 1;
+        const auto remainder = globalVarsLen - 51'200 * numParts;
 
         for (auto i = 0u; i < numParts; i++) {
             CGenericGameStorage::LoadDataFromWorkBuffer(ScriptSpace.data(), 51'200);
         }
         CGenericGameStorage::LoadDataFromWorkBuffer(ScriptSpace.data(), remainder);
     } else {
-        CGenericGameStorage::LoadDataFromWorkBuffer(ScriptSpace.data(), length);
+        CGenericGameStorage::LoadDataFromWorkBuffer(ScriptSpace.data(), globalVarsLen);
     }
 
     for (auto& sfb : ScriptsForBrains.m_aScriptForBrains) {
@@ -1138,19 +1138,18 @@ bool CTheScripts::Load() {
     LoadDataFromWorkBuffer(LastMissionPassedTime);
 
     for (auto& bswap : BuildingSwapArray) {
-        auto v1 = LoadDataFromWorkBuffer<uint32>(), v2 = LoadDataFromWorkBuffer<uint32>(); // TODO
+        const auto type    = LoadDataFromWorkBuffer<ScriptSavedObjectType>();
+        const auto poolRef = LoadDataFromWorkBuffer<uint32>() - 1;
         LoadDataFromWorkBuffer(bswap.m_nNewModelIndex);
         LoadDataFromWorkBuffer(bswap.m_nOldModelIndex);
 
-        switch (v1) {
-        case 0:
-            bswap.m_pCBuilding = nullptr;
+        bswap.m_pCBuilding = nullptr;
+        switch (type) {
+        case ScriptSavedObjectType::NONE:
+        case ScriptSavedObjectType::NOP:
             break;
-        case 1:
-            --v2;
-            break;
-        case 2:
-            bswap.m_pCBuilding = GetBuildingPool()->GetAt(--v2);
+        case ScriptSavedObjectType::BUILDING:
+            bswap.m_pCBuilding = GetBuildingPool()->GetAt(poolRef);
             break;
         default:
             NOTSA_UNREACHABLE();
@@ -1164,32 +1163,31 @@ bool CTheScripts::Load() {
     }
 
     for (auto& is : InvisibilitySettingArray) {
-        auto v1 = LoadDataFromWorkBuffer<uint32>(), v2 = LoadDataFromWorkBuffer<uint32>(); // TODO
+        const auto type    = LoadDataFromWorkBuffer<ScriptSavedObjectType>();
+        const auto poolRef = LoadDataFromWorkBuffer<uint32>() - 1;
 
         is = nullptr; // clear beforehand
-        switch (v1) {
-        case 0:
+        switch (type) {
+        case ScriptSavedObjectType::NONE:
+        case ScriptSavedObjectType::NOP:
             // set to nullptr, already done
             break;
-        case 1:
-            --v2;
-            break;
-        case 2:
-            if (auto* obj = GetBuildingPool()->GetAt(--v2)) {
+        case ScriptSavedObjectType::BUILDING:
+            if (auto* obj = GetBuildingPool()->GetAt(poolRef)) {
                 is                   = obj;
                 is->m_bUsesCollision = false;
                 is->m_bIsVisible     = false;
             }
             break;
-        case 3:
-            if (auto* obj = GetObjectPool()->GetAt(--v2)) {
+        case ScriptSavedObjectType::OBJECT:
+            if (auto* obj = GetObjectPool()->GetAt(poolRef)) {
                 is                   = obj;
                 is->m_bUsesCollision = false;
                 is->m_bIsVisible     = false;
             }
             break;
-        case 4:
-            if (auto* obj = GetDummyPool()->GetAt(--v2)) {
+        case ScriptSavedObjectType::DUMMY:
+            if (auto* obj = GetDummyPool()->GetAt(poolRef)) {
                 is                   = obj;
                 is->m_bUsesCollision = false;
                 is->m_bIsVisible     = false;
@@ -1221,8 +1219,11 @@ bool CTheScripts::Load() {
 
     {
         // Ignored
-        uint32 foo32{}, foo16{};
-        LoadMultipleDataFromWorkBuffer<16>(&foo32, &foo32, &foo16, &foo16, &foo32);
+        LoadDataFromWorkBuffer<uint32>(); // MainScriptSize
+        LoadDataFromWorkBuffer<uint32>(); // LargestMissionScriptSize
+        LoadDataFromWorkBuffer<uint16>(); // NumberOfMissionScripts
+        LoadDataFromWorkBuffer<uint16>(); // NumberOfExclusiveMissionScripts
+        LoadDataFromWorkBuffer<uint32>(); // LargestNumberOfMissionScriptLocalVariables
     }
 
     // Unused
@@ -1249,13 +1250,116 @@ bool CTheScripts::Load() {
             }
         }
     }
-
-    return true;
 }
 
 // 0x5D4C40
-bool CTheScripts::Save() {
-    return plugin::CallAndReturn<bool, 0x5D4C40>();
+void CTheScripts::Save() {
+    const auto globalVarsLen = GetSCMChunk<tSCMGlobalVarChunk>()->m_NextChunkOffset;
+    if (globalVarsLen > 51'200) {
+        const auto numParts  = (globalVarsLen - 51'201) / 51'200 + 1;
+        const auto remainder = globalVarsLen - 51'200 * numParts;
+
+        for (auto i = 0u; i < numParts; i++) {
+            CGenericGameStorage::SaveDataToWorkBuffer(ScriptSpace.data(), 51'200);
+        }
+        CGenericGameStorage::SaveDataToWorkBuffer(ScriptSpace.data(), remainder);
+    } else {
+        CGenericGameStorage::SaveDataToWorkBuffer(ScriptSpace.data(), globalVarsLen);
+    }
+
+    for (auto& sfb : ScriptsForBrains.m_aScriptForBrains) {
+        CGenericGameStorage::SaveDataToWorkBuffer(sfb);
+    }
+
+    CGenericGameStorage::SaveDataToWorkBuffer(OnAMissionFlag);
+    CGenericGameStorage::SaveDataToWorkBuffer(LastMissionPassedTime);
+
+    for (auto& bswap : BuildingSwapArray) {
+        if (auto* b = bswap.m_pCBuilding) {
+            CGenericGameStorage::SaveDataToWorkBuffer(ScriptSavedObjectType::BUILDING);
+
+            // Add 1 to the index because 0 is considered invalid and index can be 0.
+            CGenericGameStorage::SaveDataToWorkBuffer(GetBuildingPool()->GetIndex(b) + 1);
+        } else {
+            CGenericGameStorage::SaveDataToWorkBuffer(ScriptSavedObjectType::NONE);
+            CGenericGameStorage::SaveDataToWorkBuffer(0);
+        }
+
+        CGenericGameStorage::SaveDataToWorkBuffer(bswap.m_nNewModelIndex);
+        CGenericGameStorage::SaveDataToWorkBuffer(bswap.m_nOldModelIndex);
+    }
+
+    for (auto& is : InvisibilitySettingArray) {
+        if (!is) {
+            continue;
+        }
+
+        switch (is->GetType()) {
+        case ENTITY_TYPE_NOTHING:
+            CGenericGameStorage::SaveDataToWorkBuffer(ScriptSavedObjectType::NONE);
+            CGenericGameStorage::SaveDataToWorkBuffer(0);
+            break;
+        case ENTITY_TYPE_BUILDING:
+            CGenericGameStorage::SaveDataToWorkBuffer(ScriptSavedObjectType::BUILDING);
+            CGenericGameStorage::SaveDataToWorkBuffer(GetBuildingPool()->GetIndex(is->AsBuilding()) + 1);
+            break;
+        case ENTITY_TYPE_OBJECT:
+            CGenericGameStorage::SaveDataToWorkBuffer(ScriptSavedObjectType::OBJECT);
+            CGenericGameStorage::SaveDataToWorkBuffer(GetObjectPool()->GetIndex(is->AsObject()) + 1);
+            break;
+        case ENTITY_TYPE_DUMMY:
+            CGenericGameStorage::SaveDataToWorkBuffer(ScriptSavedObjectType::DUMMY);
+            CGenericGameStorage::SaveDataToWorkBuffer(GetDummyPool()->GetIndex(is->AsDummy()) + 1);
+            break;
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }
+
+    for (auto& veh : VehicleModelsBlockedByScript) {
+        CGenericGameStorage::SaveDataToWorkBuffer(veh);
+    }
+
+    for (auto& lod : ScriptConnectLodsObjects) {
+        CGenericGameStorage::SaveDataToWorkBuffer(lod);
+    }
+
+    for (auto& ag : ScriptAttachedAnimGroups) {
+        CGenericGameStorage::SaveDataToWorkBuffer(ag);
+    }
+
+    CGenericGameStorage::SaveDataToWorkBuffer(bUsingAMultiScriptFile);
+    CGenericGameStorage::SaveDataToWorkBuffer(bPlayerHasMetDebbieHarry); // ?
+
+    CGenericGameStorage::SaveDataToWorkBuffer(MainScriptSize);
+    CGenericGameStorage::SaveDataToWorkBuffer(LargestMissionScriptSize);
+    CGenericGameStorage::SaveDataToWorkBuffer(NumberOfMissionScripts);
+    CGenericGameStorage::SaveDataToWorkBuffer(NumberOfExclusiveMissionScripts);
+    CGenericGameStorage::SaveDataToWorkBuffer(LargestNumberOfMissionScriptLocalVariables);
+
+    auto numNonExternalScripts = 0u;
+    auto* lastScript           = pActiveScripts;
+    for (auto* s = pActiveScripts; s; s = s->m_pNext) {
+        if (!s->m_bIsExternal && s->m_nExternalType == -1) {
+            numNonExternalScripts++;
+            lastScript = s;
+        }
+    }
+    CGenericGameStorage::SaveDataToWorkBuffer(numNonExternalScripts);
+
+    for (auto* s = lastScript; s; s = s->m_pPrev) {
+        if (s->m_bIsExternal || s->m_nExternalType != -1) {
+            continue;
+        }
+
+        CGenericGameStorage::SaveDataToWorkBuffer((int16)GetScriptIndexFromPointer(s));
+        CGenericGameStorage::SaveDataToWorkBuffer(*s);
+        CGenericGameStorage::SaveDataToWorkBuffer((uint32)(s->m_IP - ScriptSpace.data()));
+
+        for (auto& stk : s->m_IPStack) {
+            CGenericGameStorage::SaveDataToWorkBuffer((uint32)(stk ? stk - ScriptSpace.data() : 0));
+        }
+    }
 }
 
 // 0x464BB0
