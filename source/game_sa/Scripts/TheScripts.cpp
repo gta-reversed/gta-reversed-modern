@@ -99,6 +99,7 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(ScriptAttachAnimGroupToCharModel, 0x474800);
     RH_ScopedInstall(UseSwitchJumpTable, 0x4703C0);
     RH_ScopedInstall(AttachSearchlightToSearchlightObject, 0x4934F0);
+    RH_ScopedInstall(CheckStreamedScriptVersion, 0x464FF0);
 }
 
 // 0x468D50
@@ -541,6 +542,11 @@ void CTheScripts::AttachSearchlightToSearchlightObject(int32 searchLightId, CObj
     ReplaceEntity(sl.m_Tower, tower);
     ReplaceEntity(sl.m_Housing, housing);
     ReplaceEntity(sl.m_Bulb, bulb);
+}
+
+// 0x464FF0
+bool CTheScripts::CheckStreamedScriptVersion(RwStream* stream, char* filename) {
+    return true;
 }
 
 // 0x4866C0

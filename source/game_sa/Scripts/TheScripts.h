@@ -473,7 +473,7 @@ public:
     static void   AddToWaitingForScriptBrainArray(CEntity* entity, int16 arg2);
 
     static void AttachSearchlightToSearchlightObject(int32 searchLightId, CObject* tower, CObject* housing, CObject* bulb, CVector offset);
-    static char CheckStreamedScriptVersion(RwStream* stream, char* arg2);
+    static bool CheckStreamedScriptVersion(RwStream* stream, char* arg2);
     static void CleanUpThisObject(CObject* obj);
     static void CleanUpThisPed(CPed* ped);
     static void CleanUpThisVehicle(CVehicle* vehicle);
