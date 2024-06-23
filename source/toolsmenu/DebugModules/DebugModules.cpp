@@ -96,7 +96,7 @@ void DebugModules::CreateModules() {
     Add<ParticleDebugModule>();
     Add<TextDebugModule>();
     Add<notsa::debugmodules::CheckpointsDebugModule>();
-    Add<notsa::debugmodules::Interior>();
+    Add<notsa::debugmodules::InteriorDebugModule>();
 
     // Stuff that is present in multiple menus
     Add<TimeCycleDebugModule>(); // Visualization + Extra

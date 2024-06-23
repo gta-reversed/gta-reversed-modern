@@ -6,7 +6,9 @@
 #include "InteriorObject.h"
 #include "InteriorEffectInfo_t.h"
 
-#include "InteriorDebugModule.h"
+namespace notsa::debugmodules {
+    class InteriorDebugModule;
+};
 
 class InteriorManager_c {
 public:
@@ -71,7 +73,7 @@ public:
     auto GetLastTimePickupsGenerated() const { return m_TimeLastPickupsGenerated; }
 
 private:
-    friend class notsa::debugmodules::Interior;
+    friend class notsa::debugmodules::InteriorDebugModule;
 
     Interior_c               m_Interiors[8]{};               // 0x0
     TList_c<Interior_c>      m_InteriorPool{};               // 0x3CA0

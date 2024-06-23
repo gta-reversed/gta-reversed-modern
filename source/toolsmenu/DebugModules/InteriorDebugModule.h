@@ -2,17 +2,25 @@
 
 #include "DebugModule.h"
 
+class Interior_c;
+
 namespace notsa {
 namespace debugmodules {
-class Interior final : public DebugModule {
+class InteriorDebugModule final : public DebugModule {
 public:
     void RenderWindow() override;
     void RenderMenuEntry() override;
-    // There's also `void Update()`, but you'll rarely need that one
+
+private:
+    void RenderSelectorTab();
+    void RenderPropsTab();
 
 private:
     bool m_IsOpen{}; // Main window's state
     bool m_ShowClosest{};
+    bool m_UsePlayersInt{true};
+    int  m_SelectedIntIdx{};
+    Interior_c* m_Int{};
 };
 }; // namespace debugmodules
 }; // namespace notsa
