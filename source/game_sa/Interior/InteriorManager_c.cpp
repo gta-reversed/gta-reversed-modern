@@ -13,7 +13,7 @@ void InteriorManager_c::InjectHooks() {
     RH_ScopedGlobalInstall(AreAnimsLoaded, 0x5980F0);
     RH_ScopedInstall(PruneVisibleEffects, 0x598A60);
     RH_ScopedInstall(Exit, 0x598010);
-    RH_ScopedInstall(GetVisibleEffects, 0x598D80, { .reversed = false });
+    RH_ScopedInstall(GetVisibleEffects, 0x598D80);
     RH_ScopedInstall(IsInteriorEffectVisible, 0x598690);
     RH_ScopedInstall(GetPedsInterior, 0x598620);
     RH_ScopedInstall(ReturnInteriorToPool, 0x5984B0);
