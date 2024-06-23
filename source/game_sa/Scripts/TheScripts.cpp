@@ -96,6 +96,8 @@ void CTheScripts::InjectHooks() {
     // RH_ScopedInstall(RenderTheScriptDebugLines, 0x0);
     RH_ScopedInstall(RenderAllSearchLights, 0x493E30);
     RH_ScopedInstall(ScriptConnectLodsFunction, 0x470A20);
+    RH_ScopedInstall(ScriptAttachAnimGroupToCharModel, 0x474800);
+    RH_ScopedInstall(UseSwitchJumpTable, 0x4703C0);
 }
 
 // 0x468D50
@@ -877,7 +879,7 @@ void CTheScripts::ReinitialiseSwitchStatementData() {
     NumberOfEntriesStillToReadForSwitch = 0;
     ValueToCheckInSwitchStatement       = 0;
     SwitchDefaultExists                 = false;
-    SwitchDefaultAddress                = nullptr;
+    SwitchDefaultAddress                = 0;
     NumberOfEntriesInSwitchTable        = 0;
 }
 
@@ -1330,6 +1332,42 @@ void CTheScripts::UndoEntityInvisibilitySettings() {
     }
 }
 
+// 0x4703C0
+void CTheScripts::UseSwitchJumpTable(int32& switchLabelAddress) {
+    switchLabelAddress = 0x0;
+
+    const auto CheckEntryAndJump = [&](tScriptSwitchCase* swtch) {
+        if (swtch && ValueToCheckInSwitchStatement != swtch->m_nSwitchValue) {
+            return false;
+        }
+
+        switchLabelAddress = swtch ? swtch->m_nSwitchLabelAddress : SwitchDefaultAddress;
+        ReinitialiseSwitchStatementData();
+        return true;
+    };
+
+    auto ptr1 = 0u;
+    auto ptr2 = NumberOfEntriesInSwitchTable - 1u;
+    while (ptr2 - ptr1 > 1) {
+        const auto idx = (ptr1 + ptr2) / 2;
+        if (CheckEntryAndJump(&SwitchJumpTable[idx])) {
+            return;
+        }
+
+        if (ValueToCheckInSwitchStatement <= SwitchJumpTable[idx].m_nSwitchValue) {
+            ptr2 = idx;
+        } else {
+            ptr1 = idx;
+        }
+    }
+
+    if (CheckEntryAndJump(&SwitchJumpTable[ptr2]) || CheckEntryAndJump(&SwitchJumpTable[ptr1])) {
+        return;
+    }
+
+    CheckEntryAndJump(nullptr); // Jump to the default case
+}
+
 // 0x4646D0
 void CTheScripts::PrintListSizes() {
     auto active{ 0u }, idle{ 0u };
@@ -1691,6 +1729,17 @@ void CTheScripts::RenderAllSearchLights() {
             1.0f
         );
     }
+}
+
+// 0x474800
+bool CTheScripts::ScriptAttachAnimGroupToCharModel(int32 modelId, const char* ifpName) {
+    auto* mi = CModelInfo::GetModelInfo(modelId);
+    if (mi->GetAnimFileIndex() == CAnimManager::GetAnimationBlockIndex(ifpName)) {
+        return false;
+    }
+    mi->SetAnimFile(ifpName);
+    mi->ConvertAnimFileIndex();
+    return true;
 }
 
 // 0x470A20

@@ -397,7 +397,7 @@ public:
     static inline uint16& NumberOfScriptCheckpoints = *reinterpret_cast<uint16*>(0xA44068);
 
     static inline bool& DbgFlag = *reinterpret_cast<bool*>(0x859CF8);
-    static inline void*& SwitchDefaultAddress = *reinterpret_cast<void**>(0xA43F54);
+    static inline int32& SwitchDefaultAddress = *reinterpret_cast<int32*>(0xA43F54);
     static inline bool& SwitchDefaultExists = *reinterpret_cast<bool*>(0xA43F58);
     static inline int32& ValueToCheckInSwitchStatement = *reinterpret_cast<int32*>(0xA43F5C);
     static inline int16& CardStackPosition = *reinterpret_cast<int16*>(0xA44210);
@@ -517,7 +517,7 @@ public:
     static void RemoveThisPed(CPed* ped);
 
     static void RenderAllSearchLights();
-    static bool ScriptAttachAnimGroupToCharModel(int32 modelId, char* ifpName); // 0x474800
+    static bool ScriptAttachAnimGroupToCharModel(int32 modelId, const char* ifpName);
     static void ScriptConnectLodsFunction(int32 objectHandle1, int32 objectHandle2);
     static void ScriptDebugCircle2D(float x, float y, float width, float height, CRGBA color);
     static CRunningScript* StartNewScript(uint8* startIP);
@@ -525,7 +525,7 @@ public:
     static void StartTestScript();
     static void UndoBuildingSwaps();
     static void UndoEntityInvisibilitySettings();
-    static void UseSwitchJumpTable(int32* pSwitchLabelAddress);
+    static void UseSwitchJumpTable(int32& switchLabelAddress);
     static void WipeLocalVariableMemoryForMissionScript();
 
     static bool HasCarModelBeenSuppressed(eModelID carModelId);
