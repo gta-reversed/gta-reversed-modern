@@ -16,7 +16,7 @@ void Interior_c::InjectHooks() {
     RH_ScopedInstall(GetBoundingBox, 0x593DB0);
     RH_ScopedInstall(FindBoundingBox, 0x5922C0);
     RH_ScopedInstall(IsPtInside, 0x5913E0);
-    RH_ScopedInstall(CalcMatrix, 0x5914D0, { .reversed = false });
+    RH_ScopedInstall(CalcMatrix, 0x5914D0);
     RH_ScopedInstall(AddGotoPt, 0x591D20, { .reversed = false });
     RH_ScopedInstall(AddInteriorInfo, 0x591E40, { .reversed = false });
     RH_ScopedInstall(AddPickups, 0x591F90);
@@ -280,6 +280,15 @@ bool Interior_c::IsPtInside(const CVector& pt, CVector bias) {
         && m_Props->m_height * 0.5f + bias.z >= std::fabs(m_Mat.at.x * x + m_Mat.at.y * y + m_Mat.at.z * z);
 }
 
+// 0x5914D0
+void Interior_c::CalcMatrix(const CVector& pos) {
+    RwMatrixSetIdentity(&m_Mat);
+    RwV3d axis{0.f, 0.f, 1.f};
+    RwMatrixRotate(&m_Mat, &axis, m_Props->m_rot, rwCOMBINEREPLACE); // Apply rotation
+    RwMatrixTranslate(&m_Mat, &pos, rwCOMBINEPOSTCONCAT); // Apply translation
+    RwMatrixMultiply(&m_Mat, &m_Mat, RwFrameGetMatrix(RpAtomicGetFrame(m_Group->GetEntity()->m_pRwAtomic))); // Multiply by entity's matrix
+}
+
 // 0x591D20
 void Interior_c::AddGotoPt(int32 a, int32 b, float a3, float a4) {
     plugin::CallMethod<0x591D20, Interior_c*, int32, int32, float, float>(this, a, b, a3, a4);
@@ -352,11 +361,6 @@ void Interior_c::CalcExitPts() {
 // 0x5929F0
 bool Interior_c::IsVisible() {
     return plugin::CallMethodAndReturn<bool, 0x5929F0, Interior_c*>(this);
-}
-
-// 0x5914D0
-void Interior_c::CalcMatrix(const CVector& pos) {
-    plugin::CallMethod<0x5914D0, Interior_c*>(this, &pos);
 }
 
 //
