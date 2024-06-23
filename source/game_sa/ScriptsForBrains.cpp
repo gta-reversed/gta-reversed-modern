@@ -58,9 +58,9 @@ bool CScriptsForBrains::IsObjectWithinBrainActivationRange(CObject* entity, cons
     NOTSA_UNREACHABLE();
 }
 
-int16 CScriptsForBrains::GetIndexOfScriptBrainWithThisName(const char* name, int8 attachType) {
+int16 CScriptsForBrains::GetIndexOfScriptBrainWithThisName(const char* name, int8 type) {
     const auto it = rng::find_if(m_aScriptForBrains, [=](tScriptForBrains& script) {
-        return script.m_TypeOfBrain == attachType && !_stricmp(script.m_ScriptName, name);
+        return script.m_TypeOfBrain == type && !_stricmp(script.m_ScriptName, name);
     });
     return it != m_aScriptForBrains.end()
         ? rng::distance(m_aScriptForBrains.begin(), it)

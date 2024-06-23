@@ -41,7 +41,7 @@ public:
 
     void CheckIfNewEntityNeedsScript(CEntity* entity, int8 attachType, void* unused);
 
-    int16 GetIndexOfScriptBrainWithThisName(const char* name, int8 attachType);
+    int16 GetIndexOfScriptBrainWithThisName(const char* name, int8 type);
 
     bool HasAttractorScriptBrainWithThisNameLoaded(const char* name);
     bool IsObjectWithinBrainActivationRange(CObject* entity, const CVector& point);

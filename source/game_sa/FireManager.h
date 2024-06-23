@@ -58,7 +58,11 @@ public:
     CFire& GetRandomFire();
 
     // NOTSA
-    CFire& Get(size_t idx) { return m_aFires[idx]; }
+    CFire& Get(size_t idx)
+    {
+        assert(m_aFires[idx].IsActive());
+        return m_aFires[idx];
+    }
     auto GetIndexOf(const CFire* fire) const { return std::distance(m_aFires.data(), fire); }
 private:
     friend void InjectHooksMain();

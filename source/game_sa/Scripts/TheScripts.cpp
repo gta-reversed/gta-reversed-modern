@@ -811,7 +811,7 @@ int32 CTheScripts::GetActualScriptThingIndex(int32 ref, eScriptThingType type) {
         }
         break;
     case SCRIPT_THING_FIRE:
-        if (const auto& f = gFireManager.Get(idx); f.createdByScript && f.m_nScriptReferenceIndex == id) {
+        if (const auto& f = gFireManager.Get(idx); f.IsScript() && f.m_nScriptReferenceIndex == id) {
             return idx;
         }
         break;
@@ -1971,7 +1971,7 @@ void CTheScripts::RenderAllSearchLights() {
         }
 
         const auto origin = [&] {
-            if (auto e = light.m_AttachedEntity; e || (e = light.m_Bulb, e)) {
+            if (auto e = notsa::coalesce(light.m_AttachedEntity, light.m_Bulb)) {
                 return e->GetMatrix().TransformVector(light.m_Origin) + e->GetPosition();
             }
 
