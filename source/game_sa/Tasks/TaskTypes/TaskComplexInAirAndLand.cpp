@@ -10,13 +10,13 @@
 #include "PedClothesDesc.h"
 
 void CTaskComplexInAirAndLand::InjectHooks() {
-    RH_ScopedClass(CTaskComplexInAirAndLand);
+    RH_ScopedVirtualClass(CTaskComplexInAirAndLand, 0x8704AC, 11);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x678C80);
-    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x67CC30);
-    RH_ScopedVirtualInstall(CreateNextSubTask, 0x67CCB0);
-    RH_ScopedVirtualInstall(ControlSubTask, 0x67D230);
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x67CC30);
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x67CCB0);
+    RH_ScopedVMTInstall(ControlSubTask, 0x67D230);
 }
 
 CTaskComplexInAirAndLand* CTaskComplexInAirAndLand::Constructor(bool bUsingJumpGlide, bool bUsingFallGlide) {
@@ -33,24 +33,11 @@ CTaskComplexInAirAndLand::CTaskComplexInAirAndLand(bool bUsingJumpGlide, bool bU
 
 // 0x67CC30
 CTask* CTaskComplexInAirAndLand::CreateFirstSubTask(CPed* ped) {
-    return CreateFirstSubTask_Reversed(ped);
+    return new CTaskSimpleInAir(m_bUsingJumpGlide, m_bUsingFallGlide, false);
 }
 
 // 0x67CCB0
 CTask* CTaskComplexInAirAndLand::CreateNextSubTask(CPed* ped) {
-    return CreateNextSubTask_Reversed(ped);
-}
-
-// 0x67D230
-CTask* CTaskComplexInAirAndLand::ControlSubTask(CPed* ped) {
-    return ControlSubTask_Reversed(ped);
-}
-
-CTask* CTaskComplexInAirAndLand::CreateFirstSubTask_Reversed(CPed* ped) {
-    return new CTaskSimpleInAir(m_bUsingJumpGlide, m_bUsingFallGlide, false);
-}
-
-CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped) {
     switch (m_pSubTask->GetTaskType()) {
     case TASK_SIMPLE_GET_UP:
     case TASK_SIMPLE_LAND:
@@ -63,14 +50,14 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped) {
 
         if (m_bUsingFallGlide) {
             if (subTask->m_pAnim) {
-                subTask->m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
-                subTask->m_pAnim->m_fBlendDelta = -8.0F;
+                subTask->m_pAnim->m_Flags |= ANIMATION_IS_BLEND_AUTO_REMOVE;
+                subTask->m_pAnim->m_BlendDelta = -8.0F;
                 subTask->m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
                 subTask->m_pAnim = nullptr;
             }
 
             return new CTaskSimpleLand(ped->m_vecMoveSpeed.z < -0.1F ? ANIM_ID_KO_SKID_BACK : (AnimationId)-1);
-        } else if (subTask->m_pAnim && subTask->m_pAnim->m_nAnimId == ANIM_ID_FALL_FALL) {
+        } else if (subTask->m_pAnim && subTask->m_pAnim->m_AnimId == ANIM_ID_FALL_FALL) {
             CTask* newTask;
 
             if (subTask->m_fMinZSpeed < -0.4F)
@@ -92,7 +79,7 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped) {
 
             if (!ped->IsPlayer())
                 landAnimId = ANIM_ID_FALL_LAND;
-            else if (subTask->m_pAnim && subTask->m_pAnim->m_nAnimId == ANIM_ID_IDLE_HBHB_1)
+            else if (subTask->m_pAnim && subTask->m_pAnim->m_AnimId == ANIM_ID_IDLE_HBHB_1)
                 landAnimId = ANIM_ID_IDLE_TIRED;
             else {
                 auto pad = ped->AsPlayer()->GetPadFromPlayer();
@@ -120,7 +107,8 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped) {
     }
 }
 
-CTask* CTaskComplexInAirAndLand::ControlSubTask_Reversed(CPed* ped) {
+// 0x67D230
+CTask* CTaskComplexInAirAndLand::ControlSubTask(CPed* ped) {
     if (!m_bUsingFallGlide && m_pSubTask && m_pSubTask->GetTaskType() == TASK_SIMPLE_IN_AIR) {
         auto subTask = reinterpret_cast<CTaskSimpleInAir*>(m_pSubTask);
 

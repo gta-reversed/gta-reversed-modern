@@ -35,8 +35,8 @@ void CPlayerPed::InjectHooks() {
     RH_ScopedInstall(SetWantedLevelNoDrop, 0x609F30);
     RH_ScopedInstall(CheatWantedLevel, 0x609F50);
     RH_ScopedInstall(DoStuffToGoOnFire, 0x60A020);
-    RH_ScopedVirtualInstall(Load, 0x5D46E0, { .reversed = false });
-    RH_ScopedVirtualInstall(Save, 0x5D57E0, { .reversed = false });
+    RH_ScopedVMTInstall(Load, 0x5D46E0, { .reversed = false });
+    RH_ScopedVMTInstall(Save, 0x5D57E0, { .reversed = false });
     RH_ScopedInstall(DeactivatePlayerPed, 0x609520);
     RH_ScopedInstall(ReactivatePlayerPed, 0x609540);
     RH_ScopedInstall(GetPadFromPlayer, 0x609560);
@@ -90,8 +90,9 @@ VALIDATE_SIZE(WorkBufferSaveData, 132u + 4u);
 
 // calls of LoadDataFromWorkBuffer are optimized
 // todo: fix
+
 // 0x5D46E0
-bool CPlayerPed::Load_Reversed() {
+bool CPlayerPed::Load() {
     return plugin::CallMethodAndReturn<bool, 0x5D46E0, CPlayerPed*>(this);
 
     CPed::Load();
@@ -111,8 +112,9 @@ bool CPlayerPed::Load_Reversed() {
 
 // calls of SaveDataToWorkBuffer are optimized
 // todo: fix
+
 // 0x5D57E0
-bool CPlayerPed::Save_Reversed() {
+bool CPlayerPed::Save() {
     return plugin::CallMethodAndReturn<bool, 0x5D57E0>(this);
 
     WorkBufferSaveData saveData{};
@@ -263,11 +265,11 @@ void CPlayerPed::ReApplyMoveAnims() {
         if (CAnimBlendAssociation* anim = RpAnimBlendClumpGetAssociation(m_pRwClump, id)) {
             if (anim->GetHashKey() != CAnimManager::GetAnimAssociation(m_nAnimGroup, id)->GetHashKey()) {
                 CAnimBlendAssociation* addedAnim = CAnimManager::AddAnimation(m_pRwClump, m_nAnimGroup, id);
-                addedAnim->m_fBlendDelta = anim->m_fBlendDelta;
-                addedAnim->m_fBlendAmount = anim->m_fBlendAmount;
+                addedAnim->m_BlendDelta = anim->m_BlendDelta;
+                addedAnim->m_BlendAmount = anim->m_BlendAmount;
 
-                anim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
-                anim->m_fBlendDelta = -1000.0f;
+                anim->m_Flags |= ANIMATION_IS_BLEND_AUTO_REMOVE;
+                anim->m_BlendDelta = -1000.0f;
             }
         }
     }
@@ -455,9 +457,8 @@ void CPlayerPed::Busted() {
 }
 
 // 0x41BE60
-uint32 CPlayerPed::GetWantedLevel() {
-    CWanted* wanted = GetWanted();
-    if (wanted) {
+uint32 CPlayerPed::GetWantedLevel() const {
+    if (const auto* wanted = GetWanted()) {
         return wanted->m_nWantedLevel;
     }
 
@@ -755,7 +756,7 @@ void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
 
 
     if (auto anim = RpAnimBlendClumpGetAssociation(m_pRwClump, ANIM_ID_FIRE))
-        anim->m_nFlags |= ANIMATION_STARTED & ANIMATION_UNLOCK_LAST_FRAME;
+        anim->m_Flags |= ANIMATION_IS_PLAYING & ANIMATION_IS_FINISH_AUTO_REMOVE;
 
     TheCamera.ClearPlayerWeaponMode();
 }
@@ -764,7 +765,7 @@ void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
 bool LOSBlockedBetweenPeds(CEntity* entity1, CEntity* entity2) {
     CVector origin{};
     if (entity1->IsPed()) {
-        entity1->AsPed()->GetBonePosition(origin, ePedBones::BONE_NECK, false);
+        entity1->AsPed()->GetBonePosition(origin, eBoneTag::BONE_NECK, false);
         if (entity1->AsPed()->bIsDucking)
             origin.z += 0.35f;
     } else {
@@ -773,7 +774,7 @@ bool LOSBlockedBetweenPeds(CEntity* entity1, CEntity* entity2) {
 
     CVector target{};
     if (entity2->IsPed())
-        entity1->AsPed()->GetBonePosition(target, ePedBones::BONE_NECK, false);
+        entity1->AsPed()->GetBonePosition(target, eBoneTag::BONE_NECK, false);
     else
         target = entity1->GetPosition();
 
@@ -1033,13 +1034,13 @@ void CPlayerPed::ProcessControl() {
         if (GetActiveWeapon().m_Type == WEAPON_MINIGUN) {
             auto weaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_MINIGUN, eWeaponSkill::STD);
             if (m_pIntelligence->GetTaskUseGun()) {
-                auto animAssoc = m_pIntelligence->GetTaskUseGun()->m_pAnim;
-                if (animAssoc && animAssoc->m_fCurrentTime - animAssoc->m_fTimeStep < weaponInfo->m_fAnimLoopEnd) {
+                auto animAssoc = m_pIntelligence->GetTaskUseGun()->m_Anim;
+                if (animAssoc && animAssoc->m_CurrentTime - animAssoc->m_TimeStep < weaponInfo->m_fAnimLoopEnd) {
                     if (m_pPlayerData->m_fGunSpinSpeed < 0.45f) {
                         m_pPlayerData->m_fGunSpinSpeed += CTimer::GetTimeStep() * 0.025f;
                         m_pPlayerData->m_fGunSpinSpeed = std::min(m_pPlayerData->m_fGunSpinSpeed, 0.45f);
                     }
-                    if (pad->GetWeapon(this) && GetActiveWeapon().m_TotalAmmo > 0 && animAssoc->m_fCurrentTime >= weaponInfo->m_fAnimLoopStart) 
+                    if (pad->GetWeapon(this) && GetActiveWeapon().m_TotalAmmo > 0 && animAssoc->m_CurrentTime >= weaponInfo->m_fAnimLoopStart) 
                         m_weaponAudio.AddAudioEvent(AE_WEAPON_FIRE_MINIGUN_AMMO);
                     else 
                         m_weaponAudio.AddAudioEvent(AE_WEAPON_FIRE_MINIGUN_NO_AMMO);
@@ -1078,7 +1079,7 @@ void CPlayerPed::ProcessControl() {
                     m_pPlayerData->m_vecTargetBoneOffset.x = 0.2f;
                 }
                 effectPos = m_pPlayerData->m_vecTargetBoneOffset;
-                targetPed->GetTransformedBonePosition(effectPos, static_cast<ePedBones>(m_pPlayerData->m_nTargetBone), false);
+                targetPed->GetTransformedBonePosition(effectPos, static_cast<eBoneTag>(m_pPlayerData->m_nTargetBone), false);
                 bool targetIsInVehicle = false;
                 if (markColor > 0.0f) {
                     if (!targetPed->bInVehicle && targetPed->m_nMoveState != PEDMOVE_STILL) {
@@ -1259,12 +1260,4 @@ void CPlayerPed::ProcessControl() {
     }
     if (!bInVehicle && GetLightingTotal() <= 0.05f && !CEntryExitManager::WeAreInInteriorTransition())
         Say(338);
-}
-
-bool CPlayerPed::Load() {
-    return CPlayerPed::Load_Reversed();
-}
-
-bool CPlayerPed::Save() {
-    return CPlayerPed::Save_Reversed();
 }

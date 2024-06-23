@@ -69,7 +69,7 @@ inline struct FastLoaderConfig {
         }
 
         // Actually load the game (By simulating the user going in the menu and doing it)
-        FrontEndMenuManager.SimulateGameLoad(false, slot - 1);
+        FrontEndMenuManager.SimulateGameLoad(false, slot);
 
         return true;
     }

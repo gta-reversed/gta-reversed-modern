@@ -107,7 +107,7 @@ inline T Read(CRunningScript* S) {
     // This check here also means that all other branches must either return by-value or a pointer (not a refernce)
     if constexpr (std::is_reference_v<T>) {
         const auto ptr = Read<std::remove_reference_t<T>*>(S);
-        assert(ptr);
+        assert(ptr); // This assert is usually hit if the implementation defines an argument with a different type than the original. Eg.: `CVehicle&` instead of `CPed&`.
         return *ptr;
     } else if constexpr (std::is_same_v<Y, CVector>) {
         return { Read<float>(S), Read<float>(S), Read<float>(S) };

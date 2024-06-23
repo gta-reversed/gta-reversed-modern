@@ -110,8 +110,9 @@ void PedDebugModule::ProcessPed(PedInfo& pi) {
         return; // Too distant
     }
 
-    SetNextWindowPos(CVector2D{ pi.posScreen });
-    SetNextWindowSize(CVector2D{ 600, 400 } / remap(depth, 0.f, 100.f, 1.f, 4.f));
+    SetNextWindowPos({ pi.posScreen.x, pi.posScreen.y });
+    const auto size = CVector2D{ 600, 400 } / remap(depth, 0.f, 100.f, 1.f, 4.f);
+    SetNextWindowSize({size.x, size.y});
     //SetNextWindowSize({ 600, 400 }, ImGuiCond_FirstUseEver);
 
     // Format a title with a custom ID that should hopefully match only this ped
@@ -158,7 +159,7 @@ void PedDebugModule::RenderWindow() {
                 .posWorld = ped.GetPosition()
             };
 
-            if (!CalcScreenCoors(ped.GetBonePosition(BONE_HEAD) + ped.GetRightVector() * 0.5f, &pi.posScreen)) {
+            if (!CalcScreenCoors(ped.GetBonePosition(BONE_HEAD) + ped.GetRightVector() * 0.5f, pi.posScreen)) {
                 DEV_LOG("Failed to calculate on-screen coords of ped");
                 return std::nullopt;
             }

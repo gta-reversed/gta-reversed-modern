@@ -73,7 +73,7 @@ void CPathFind::InjectHooks() {
     //RH_ScopedInstall(Find2NodesForCarCreation, 0x452090);
     //RH_ScopedInstall(TestCoorsCloseness, 0x452000);
     //RH_ScopedInstall(FindNextNodeWandering, 0x451B70);
-    RH_ScopedInstall(DoPathSearch, 0x4515D0);
+    RH_ScopedInstall(DoPathSearch, 0x4515D0, {.reversed = false}); // Sometimes breaks `CTaskComplexFollowNodeRoute::ComputePathNodes` - To repro just walk around in groove st. 
     //RH_ScopedInstall(FindParkingNodeInArea, 0x4513F0);
     RH_ScopedInstall(FindLinkBetweenNodes, 0x451350);
     RH_ScopedInstall(ReturnInteriorNodeIndex, 0x451300);
@@ -128,7 +128,7 @@ void CPathFind::Init() {
         m_aUnused[i] = nullptr;    // BUG: Out of array bounds write, same as in original code
     }
 
-    rng::fill(m_interiorIDs, 0xFF);
+    rng::fill(m_interiorIDs, (uint32)-1);
 }
 
 // 0x44E4E0
@@ -489,7 +489,7 @@ void CPathFind::ComputeRoute(uint8 nodeType, const CVector& vecStart, const CVec
 }
 
 void CPathFind::SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, float fYMax, bool value) {
-    const auto areaRect = CRect{ {fXMax, fYMax}, {fXMin, fYMin} };
+    const auto areaRect = CRect{ {fXMin, fYMax}, {fXMax, fYMin} };
 
     for (auto areaId = 0u; areaId < NUM_PATH_MAP_AREAS; areaId++) {
         if (!IsAreaLoaded(areaId)) {
@@ -809,7 +809,7 @@ void CPathFind::StartNewInterior(int32 interiorNum) {
 
     // BUG: Possible endless loop if 8 interiors are loaded i think
     NewInteriorSlot = 0;
-    while (m_interiorIDs[NewInteriorSlot] != -1) {
+    while (m_interiorIDs[NewInteriorSlot] != (uint32)-1) {
         NewInteriorSlot++;
         assert(NewInteriorSlot < 8);
     }
@@ -951,7 +951,7 @@ CNodeAddress CPathFind::FindNodeClosestToCoorsFavourDirection(CVector pos, ePath
                 continue;
             }
 
-            const auto score = dotScore - (dir.Dot(dirToNodeUN) - 1.f) * 20.f;
+            const auto score = dotScore - (dir.Dot(CVector2D{ dirToNodeUN }.Normalized()) - 1.f) * 20.f;
             if (score <= scoreOfClosest) {
                 scoreOfClosest = score;
                 closest = node.GetAddress();
@@ -1179,9 +1179,8 @@ float CPathFind::FindYCoorsForRegion(size_t y) {
 // 0x44DED0
 void CPathFind::AddInteriorLink(int32 intNodeA, int32 intNodeB) {
     const auto AddLink = [](int32 intIdx, int32 linkTo) {
-        // NOTE: Original code compared >= 0, but it's most likely -1.. If anything goes bad use `>= 0`
         const auto it = rng::find(ConnectsToGiven[intIdx], -1); 
-        assert(*it >= 0);
+        assert(!(*it >= 0)); // NOTE: Original code did a `while (*it >= 0), if anything goes bad use `>= 0` for `rng::find`
         *it = linkTo;
     };
     AddLink(intNodeA, intNodeB);

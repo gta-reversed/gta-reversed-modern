@@ -87,11 +87,6 @@ bool IsForegroundApp() {
     return ForegroundApp;
 }
 
-// 0x746480
-char** CommandLineToArgv(char* cmdLine, int* argCount) {
-    return plugin::CallAndReturn<char**, 0x746480, char*, int*>(cmdLine, argCount);
-}
-
 // Code from winmain, 0x748DCF
 bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
     if (RsGlobal.quit || FrontEndMenuManager.m_bStartGameLoading) {
@@ -262,7 +257,7 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
 
 // Code from winmain, 0x7489FB
 void MainLoop(INT nCmdShow, MSG& Msg) {
-    bool bNewGameFirstTime = false;
+    bool isNewGameFirstTime = true;
     while (true) {
         RwInitialized = true;
 
@@ -290,7 +285,7 @@ void MainLoop(INT nCmdShow, MSG& Msg) {
             CGame::ShutDownForRestart();
             CGame::InitialiseWhenRestarting();
             FrontEndMenuManager.m_bLoadingData = false;
-        } else if (bNewGameFirstTime) {
+        } else if (isNewGameFirstTime) {
             CTimer::Stop();
             ChangeGameStateTo(
                 FrontEndMenuManager.m_nGameState != 1
@@ -304,7 +299,7 @@ void MainLoop(INT nCmdShow, MSG& Msg) {
             CGame::InitialiseWhenRestarting();
         }
 
-        bNewGameFirstTime = false;
+        isNewGameFirstTime = false;
         FrontEndMenuManager.m_nGameState = 0;
         FrontEndMenuManager.m_bStartGameLoading = false;
     }
@@ -327,9 +322,8 @@ INT WINAPI NOTSA_WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdL
         return false;
     }
 
-    cmdLine = GetCommandLine();
-    int argc;
-    char** argv = CommandLineToArgv(cmdLine, &argc);
+    char** argv = __argv;
+    int    argc = __argc;
     for (int i = 0; i < argc; i++) {
         RsEventHandler(rsPREINITCOMMANDLINE, argv[i]);
     }
@@ -422,7 +416,6 @@ void InjectWinMainStuff() {
 
     RH_ScopedGlobalInstall(IsForegroundApp, 0x746060);
     RH_ScopedGlobalInstall(IsAlreadyRunning, 0x7468E0);
-    RH_ScopedGlobalInstall(CommandLineToArgv, 0x746480, { .reversed = false });
 
     // Unhooking these 2 after the game has started will do nothing
     RH_ScopedGlobalInstall(NOTSA_WinMain, 0x748710, {.locked = true});

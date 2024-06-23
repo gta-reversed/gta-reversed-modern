@@ -31,6 +31,9 @@
 #include "TaskSimpleStandStill.h"
 
 #include "EventCopCarBeingStolen.h"
+#include "EventLeaderQuitEnteringCarAsDriver.h"
+#include "EventLeaderExitedCarAsDriver.h"
+#include "EventLeaderEnteredCarAsDriver.h"
 
 void CTaskComplexEnterCar::InjectHooks() {
     RH_ScopedVirtualClass(CTaskComplexEnterCar, 0x86e6f0, 12);
@@ -125,6 +128,7 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
         case TASK_COMPLEX_FALL_AND_GET_UP:
         case TASK_SIMPLE_BIKE_PICK_UP:
         case TASK_SIMPLE_CAR_SHUFFLE:
+        case TASK_NONE:
             return C(TASK_FINISHED);
         default:
             NOTSA_UNREACHABLE("SubTaskType = {}", tt);
@@ -137,8 +141,14 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
 
     // These are likely some functions inlined from `CCarEnterExit`
     const auto CanUseTargetDoor = [this]() {
+        // actually U32 == Component
         return (m_Car->IsDoorReadyU32(m_TargetDoor) || m_Car->IsDoorFullyOpenU32(m_TargetDoor))
             || (!m_Car->IsDoorMissingU32(m_TargetDoor) && !m_Car->IsDoorFullyOpenU32(m_TargetDoor) && !m_Car->IsDoorClosedU32(m_TargetDoor));
+    };
+    const auto OpenCarDoor = [this]() {
+        if (m_Car->IsAutomobile()) {
+            m_Car->AsAutomobile()->GetDamageManager().SetDoorOpen_Component((tComponent)m_TargetDoor);
+        };
     };
 
     switch (const auto tt = m_pSubTask->GetTaskType()) {
@@ -179,8 +189,15 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
     }
     case TASK_SIMPLE_CAR_ALIGN: // 0x63F2C1
         return CreateNextSubTask_AfterSimpleCarAlign(ped);
+    case TASK_SIMPLE_CAR_OPEN_LOCKED_DOOR_FROM_OUTSIDE: { // 0x63ED58
+        // This does not make sense, i have no idea why R* put it here
+        if (m_Car && m_CruiseSpeed >= 0.f) {
+            m_Car->m_autoPilot.m_nCruiseSpeed = (uint32)m_CruiseSpeed;
+        }
+        return C(TASK_SIMPLE_STAND_STILL);
+    }
     case TASK_SIMPLE_CAR_OPEN_DOOR_FROM_OUTSIDE:
-    case TASK_SIMPLE_BIKE_PICK_UP: // 0x63EE0D
+    case TASK_SIMPLE_BIKE_PICK_UP: { // 0x63EE0D
         if (m_Car->GetMoveSpeed().SquaredMagnitude2D() > sq(ped->IsPlayer() ? 0.2f : 0.1f)) { // 0x63EDAB
             ped->m_bUsesCollision = true;
             return C(ped->IsPlayer() ? TASK_FINISHED : TASK_COMPLEX_FALL_AND_GET_UP);
@@ -209,9 +226,7 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
                 }
 
                 if (m_bQuitAfterDraggingPedOut) {
-                    if (m_Car->IsAutomobile()) {
-                        m_Car->AsAutomobile()->m_damageManager.SetDoorOpen((eDoors)m_TargetDoor);
-                    }
+                    OpenCarDoor();
                     return C(TASK_FINISHED);
                 }
             }
@@ -222,11 +237,12 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
             return C(TASK_FINISHED);
         }
         return C(TASK_SIMPLE_CAR_GET_IN);
+    }
     case TASK_SIMPLE_CAR_CLOSE_DOOR_FROM_INSIDE: { // 0x63F69A
         if (!m_Car || !CCarEnterExit::IsVehicleHealthy(m_Car) || !CCarEnterExit::IsPedHealthy(ped)) { // 0x63F69A
             return C(TASK_FINISHED);
         }
-        if (!m_bAsDriver || m_TargetDoor != 0) {
+        if (!m_bAsDriver || m_TargetDoor != 8) {
             return C(m_bAsDriver ? TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER : TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER);
         }
         if (const auto drvr = m_Car->m_pDriver) {
@@ -252,7 +268,7 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
                     const auto pad = CPad::GetPad();
                     if (pad->GetAccelerate() >= 255.f || pad->GetBrake() >= 255.f) {
                         if (CCarEnterExit::CarHasDoorToClose(m_Car, m_TargetDoor)) {
-                            m_Car->AsAutomobile()->m_damageManager.SetDoorClosed((eDoors)m_TargetDoor);
+                            OpenCarDoor();
                         }
                         bDontCloseDoors = true;
                     }
@@ -265,7 +281,7 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
         }
 
         if (!m_bAsDriver) {
-            return  C(TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER);
+            return C(TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER);
         }
 
         if (m_TargetDoor != 8 || !m_Car->IsAutomobile() || m_Car->m_pHandlingData->m_bTandemSeats) {
@@ -305,6 +321,8 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
     }
     case TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER:
         return C(TASK_FINISHED);
+    case TASK_NONE:
+        return C(TASK_FINISHED);
     case TASK_SIMPLE_CAR_QUICK_DRAG_PED_OUT: { // 0x63F2ED
         CCarEnterExit::MakeUndraggedPassengerPedsLeaveCar(m_Car, m_DraggedPed, ped);
         return C(TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER);
@@ -316,6 +334,8 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
         m_bQuitAfterDraggingPedOut = false;
         return C(m_DraggedPed ? TASK_SIMPLE_WAIT_UNTIL_PED_OUT_CAR : TASK_FINISHED);
     }
+    case TASK_COMPLEX_FALL_AND_GET_UP:
+        return C(TASK_FINISHED);
     default:
         NOTSA_UNREACHABLE("SubTaskType = {}", tt);
     }
@@ -483,7 +503,7 @@ CTask* CTaskComplexEnterCar::CreateFirstSubTask(CPed* ped) {
 
     if (   !m_Car || m_Car->m_pFire
         || !CCarEnterExit::IsVehicleHealthy(m_Car) || !CCarEnterExit::IsPedHealthy(ped)
-        || !m_bAsDriver && !m_Car->m_nNumPassengers
+        || !m_bAsDriver && !m_Car->m_nMaxPassengers                                         // Wants to enter as passenger, but there are no passenger seats
         || m_Car->IsTrain() && m_Car->AsTrain()->trainFlags.bNotOnARailRoad
     ) {
         return C(TASK_FINISHED);
@@ -491,7 +511,7 @@ CTask* CTaskComplexEnterCar::CreateFirstSubTask(CPed* ped) {
 
     if (m_bAsDriver && !m_bQuitAfterDraggingPedOut && !m_bQuitAfterOpeningDoor) {
         if (const auto pedGrp = ped->GetGroup()) {
-            if (pedGrp->GetMembership().IsLeader(ped)) {
+            if (pedGrp->GetMembership().IsLeader(ped)) { // 0x643B15
                 pedGrp->GetIntelligence().AddEvent(CEventGroupEvent{ ped, new CEventLeaderEnteredCarAsDriver{ m_Car } });
             }
         }
@@ -674,9 +694,9 @@ CTask* CTaskComplexEnterCar::CreateSubTask(eTaskType taskType, CPed* ped) {
         if (m_Car) {
             CTaskSimpleCarSetPedOut::PositionPedOutOfCollision(ped, m_Car, m_TargetDoor);
 
-            assert(m_Car->m_nNumGettingIn < m_NumGettingInSet);
+            assert(m_Car->m_nNumGettingIn >= m_NumGettingInSet);
             m_Car->m_nNumGettingIn -= m_NumGettingInSet;
-            m_NumGettingInSet       = false;
+            m_NumGettingInSet       = 0;
 
             m_Car->ClearGettingInFlags(m_DoorFlagsSet);
             m_DoorFlagsSet = 0;
@@ -690,7 +710,7 @@ CTask* CTaskComplexEnterCar::CreateSubTask(eTaskType taskType, CPed* ped) {
         return new CTaskComplexFallAndGetUp{ IsTargetDoorOnTheLeft() ? ANIM_ID_KO_SPIN_L : ANIM_ID_KO_SPIN_R, ANIM_GROUP_DEFAULT, 2000 };
     }
     case TASK_NONE:
-        return new CTaskSimpleLeaveGroup{}; // 0x63E0F8 - NOTE/TODO: Weird
+        return new CTaskSimpleNone{}; // 0x63E0F8 - NOTE/TODO: Weird
     case TASK_SIMPLE_STAND_STILL:
         return new CTaskSimpleStandStill{}; // 0x63E0CE
     default:

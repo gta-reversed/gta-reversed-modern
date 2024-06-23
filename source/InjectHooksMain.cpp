@@ -97,6 +97,8 @@
 #include "Buoyancy.h"
 #include "CreepingFire.h"
 #include "Restart.h"
+#include "SetPiece.h"
+#include "SetPieces.h"
 #include "BulletInfo.h"
 #include "Explosion.h"
 #include "C_PcSave.h"
@@ -208,11 +210,13 @@
 #include "TaskSimpleUseGun.h"
 #include "TaskSimpleGangDriveBy.h"
 #include "TaskComplexObserveTrafficLightsAndAchieveHeading.h"
+#include "Interior/TaskInteriorGoToInfo.h"
 #include "TaskSimpleInAir.h"
 #include "TaskComplexHitPedWithCar.h"
 #include "TaskSimplePlayerOnFoot.h"
 #include "TaskComplexStealCar.h"
 #include "TaskComplexFollowPedFootsteps.h"
+#include "Interior/TaskInteriorSitAtDesk.h"
 #include "TaskComplexFollowLeaderAnyMeans.h"
 #include "TaskSimpleFightingControl.h"
 #include "TaskComplexGetUpAndStandStill.h"
@@ -238,6 +242,7 @@
 #include "TaskSimpleLand.h"
 #include "TaskSimpleJetPack.h"
 #include "TaskSimpleSitIdle.h"
+#include "Interior/TaskInteriorUseInfo.h"
 #include "TaskSimpleSetStayInSamePlace.h"
 #include "TaskSimpleJump.h"
 #include "TaskSimpleFall.h"
@@ -248,18 +253,24 @@
 #include "TaskComplexWanderStandard.h"
 #include "TaskComplexSunbathe.h"
 #include "TaskComplexEnterCar.h"
+#include "Interior/TaskInteriorBeInShop.h"
 #include "TaskSimpleTogglePedThreatScanner.h"
 #include "TaskComplexUseGoggles.h"
+#include "TaskComplexUseEffectRunning.h"
+#include "TaskComplexUseEffectSprinting.h"
 #include "TaskComplexCrossRoadLookAndAchieveHeading.h"
 #include "TaskComplexGoToPointAndStandStill.h"
 #include "TaskSimpleAchieveHeading.h"
+#include "TaskComplexWalkAlongsidePed.h"
 #include "TaskSimpleCarGoToPointNearDoorUntilDoorNotInUse.h"
+#include "Interior/TaskInteriorBeInOffice.h"
 #include "TaskSimpleGiveCPR.h"
 #include "TaskSimpleCarSetPedInAsPassenger.h"
 #include "TaskComplexDriveFireTruck.h"
 #include "TaskSimpleSwim.h"
 #include "TaskComplexWalkRoundObject.h"
 #include "TaskSimplePause.h"
+#include "TaskSimpleHurtPedWithCar.h"
 #include "TaskComplexPassObject.h"
 #include "TaskComplexEnterCarAsPassenger.h"
 #include "TaskComplexEnterCarAsDriver.h"
@@ -270,7 +281,9 @@
 #include "TaskSimpleThrowProjectile.h"
 #include "TaskSimpleGoToPoint.h"
 #include "TaskComplexWanderMedic.h"
+#include "TaskComplexEvasiveDiveAndGetUp.h"
 #include "TaskComplexMoveBackAndJump.h"
+#include "TaskComplexSeekEntityAiming.h"
 #include "TaskSimpleCarDriveTimed.h"
 #include "TaskComplexKillPedOnFootStealth.h"
 #include "TaskComplexDriveWander.h"
@@ -283,7 +296,9 @@
 #include "TaskComplexWanderProstitute.h"
 #include "TaskComplexWalkRoundBuildingAttempt.h"
 #include "TaskSimpleLookAbout.h"
+#include "TaskComplexEvasiveDiveAndGetUp.h"
 #include "TaskComplexPartnerGreet.h"
+#include "Interior/TaskInteriorShopKeeper.h"
 #include "TaskComplexWaitForDryWeather.h"
 #include "TaskSimpleShakeFist.h"
 #include "TaskComplexFleeShooting.h"
@@ -292,6 +307,7 @@
 #include "TaskComplexLeaveCarAndFlee.h"
 #include "TaskComplexLeaveCarAndWander.h"
 #include "TaskComplexMedicTreatInjuredPed.h"
+#include "TaskComplexDiveFromAttachedEntityAndGetUp.h"
 #include "SeekEntity/TaskComplexSeekEntityRadiusAngleOffset.h"
 #include "SeekEntity/TaskComplexSeekEntityXYOffset.h"
 #include "SeekEntity/TaskComplexSeekEntityStandard.h"
@@ -352,6 +368,8 @@
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
 #include "TaskComplexEnterAnyCarAsDriver.h"
+#include "TaskSimpleSetKindaStayInSamePlace.h"
+#include "TaskSimpleSetCharIgnoreWeaponRangeFlag.h"
 #include "TaskComplexCarDriveMission.h"
 #include "TaskComplexLeaveAnyCar.h"
 #include "TaskSimpleLeaveGroup.h"
@@ -427,6 +445,12 @@
 #include "Interior/TaskInteriorBeInHouse.h"
 #include "Tasks/TaskTypes/TaskComplexKillPedOnFootArmed.h"
 #include "Tasks/TaskTypes/TaskSimpleWaitUntilLeaderAreaCodesMatch.h"
+#include "Tasks/TaskTypes/TaskComplexUseClosestFreeScriptedAttractor.h"
+#include "Tasks/TaskTypes/TaskComplexUseClosestFreeScriptedAttractorRun.h"
+#include "Tasks/TaskTypes/TaskComplexUseClosestFreeScriptedAttractorSprint.h"
+
+// Interior Tasks
+#include "Tasks/TaskTypes/Interior/TaskInteriorUseInfo.h"
 #include "TaskComplexSmartFleePoint.h"
 
 #include "EventSeenPanickedPed.h"
@@ -437,6 +461,23 @@
 #include "EventEscalator.h"
 #include "EventCopCarBeingStolen.h"
 #include "EventDanger.h"
+#include "EventSeenCop.h"
+#include "EventScriptedAttractor.h"
+#include "EventStuckInAir.h"
+#include "EventDontJoinPlayerGroup.h"
+#include "EventNewGangMember.h"
+#include "EventAcquaintancePedHate.h"
+#include "EventAcquaintancePedHateBadlyLit.h"
+#include "EventPedCollisionWithPed.h"
+#include "EventPedCollisionWithPlayer.h"
+#include "EventPlayerCollisionWithPed.h"
+#include "EventObjectCollision.h"
+#include "EventBuildingCollision.h"
+#include "EventLeaderEnteredCarAsDriver.h"
+#include "EventLeaderExitedCarAsDriver.h"
+#include "EventLeaderQuitEnteringCarAsDriver.h"
+#include "EventAreaCodes.h"
+#include "EventLeaderEntryExit.h"
 
 #include "Plugins/BreakablePlugin/BreakablePlugin.h"
 
@@ -518,6 +559,8 @@ void InjectHooksMain() {
     CClothes::InjectHooks();
     CBulletInfo::InjectHooks();
     CRestart::InjectHooks();
+    CSetPiece::InjectHooks();
+    CSetPieces::InjectHooks();
     CCopPed::InjectHooks();
     CDamageManager::InjectHooks();
     CCreepingFire::InjectHooks();
@@ -629,7 +672,6 @@ void InjectHooksMain() {
     CPostEffects::InjectHooks();
     CIniFile::InjectHooks();
     CStencilShadowObject::InjectHooks();
-    CStencilShadowObjects::InjectHooks();
     CStencilShadows::InjectHooks();
     CFont::InjectHooks();
     CGameLogic::InjectHooks();
@@ -692,11 +734,15 @@ void InjectHooksMain() {
     CLocalisation::InjectHooks();
     CSimpleVariablesSaveStructure::InjectHooks();
     CPedGeometryAnalyser::InjectHooks();
+
     NodeNamePlugin::InjectHooks();
     JPegPlugin::InjectHooks();
     PipelinePlugin::InjectHooks();
+    RpAnimBlendPlugin::InjectHooks();
     CCollisionPlugin::InjectHooks();
     BreakablePlugin::InjectHooks();
+    RtAnim::InjectHooks();
+
     CIplStore::InjectHooks();
     cHandlingDataMgr::InjectHooks();
     CLoadingScreen::InjectHooks();
@@ -809,18 +855,25 @@ void InjectHooksMain() {
 
     const auto Tasks = []() {
         const auto Interior = [] {
-        CTaskInteriorBeInHouse::InjectHooks();
-        // CTaskInteriorBeInOffice::InjectHooks();
-        // CTaskInteriorBeInShop::InjectHooks();
-        // CTaskInteriorGoToInfo::InjectHooks();
+            CTaskInteriorBeInHouse::InjectHooks();
+            CTaskInteriorBeInOffice::InjectHooks();
+            CTaskInteriorBeInShop::InjectHooks();
+            CTaskInteriorGoToInfo::InjectHooks();
         // CTaskInteriorLieInBed::InjectHooks();
-        // CTaskInteriorShopKeeper::InjectHooks();
-        // CTaskInteriorSitAtDesk::InjectHooks();
+            CTaskInteriorShopKeeper::InjectHooks();
+            CTaskInteriorSitAtDesk::InjectHooks();
         // CTaskInteriorSitInChair::InjectHooks();
-        // CTaskInteriorUseInfo::InjectHooks();
+            CTaskInteriorUseInfo::InjectHooks();
         };
 
+        CTaskComplexUseClosestFreeScriptedAttractorRun::InjectHooks();
+        CTaskComplexUseClosestFreeScriptedAttractorSprint::InjectHooks();
+        CTaskComplexUseClosestFreeScriptedAttractor::InjectHooks();
+
+        CTaskSimpleChoking::InjectHooks();
+        CTaskComplexEvasiveDiveAndGetUp::InjectHooks();
         CTaskSimpleLeaveGroup::InjectHooks();
+        CTaskComplexDiveFromAttachedEntityAndGetUp::InjectHooks();
         CTaskGangHasslePed::InjectHooks();
         CTaskGangHassleVehicle::InjectHooks();
         CTaskGoToVehicleAndLean::InjectHooks();
@@ -895,14 +948,20 @@ void InjectHooksMain() {
         CTaskComplexRoadRage::InjectHooks();
         // CTaskComplexScreamInCarThenLeave::InjectHooks();
         CTaskComplexSeekCoverUntilTargetDead::InjectHooks();
+
         // CTaskComplexSeekEntity<CEntitySeekPosCalculator>::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculatorDriving>::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculatorEntitySurface>::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculatorStandard>::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculatorVehicleId>::InjectHooks();
+
         CTaskComplexSeekEntityRadiusAngleOffset::InjectHooks();
         CTaskComplexSeekEntityStandard::InjectHooks();
         CTaskComplexSeekEntityXYOffset::InjectHooks();
+        CTaskComplexSeekEntityAiming::InjectHooks();
+        //CTaskComplexSeekEntityXYOffset::InjectHooks();
+        CTaskComplexSeekEntity<CEntitySeekPosCalculatorXYOffset>::InjectHooks();
+
         // CTaskComplexSeekEntityAiming::InjectHooks();
         CTaskComplexSeekEntityAnyMeansXYOffset::InjectHooks();
         // CTaskComplexShuffleSeats::InjectHooks();
@@ -919,9 +978,9 @@ void InjectHooksMain() {
         // CTaskComplexUseClosestFreeScriptedAttractor::InjectHooks();
         // CTaskComplexUseClosestFreeScriptedAttractorRun::InjectHooks();
         // CTaskComplexUseClosestFreeScriptedAttractorSprint::InjectHooks();
-        // CTaskComplexUseEffect::InjectHooks();
-        // CTaskComplexUseEffectRunning::InjectHooks();
-        // CTaskComplexUseEffectSprinting::InjectHooks();
+        CTaskComplexUseEffect::InjectHooks();
+        CTaskComplexUseEffectRunning::InjectHooks();
+        CTaskComplexUseEffectSprinting::InjectHooks();
         // CTaskComplexUseEntryExit::InjectHooks();
         // CTaskComplexUsePairedAttractor::InjectHooks();
         CTaskComplexUseScriptedBrain::InjectHooks();
@@ -930,7 +989,7 @@ void InjectHooksMain() {
         CTaskComplexWaitForBus::InjectHooks();
         CTaskComplexWaitForBackup::InjectHooks();
         CTaskComplexWaitForDryWeather::InjectHooks();
-        // CTaskComplexWalkAlongsidePed::InjectHooks();
+        CTaskComplexWalkAlongsidePed::InjectHooks();
         CTaskComplexWalkRoundBuildingAttempt::InjectHooks();
         CTaskComplexWalkRoundFire::InjectHooks();
         CTaskComplexWanderFlee::InjectHooks();
@@ -986,7 +1045,7 @@ void InjectHooksMain() {
         CTaskSimpleHitFromLeft::InjectHooks();
         CTaskSimpleHitFromRight::InjectHooks();
         CTaskSimpleHitWall::InjectHooks();
-        // CTaskSimpleHurtPedWithCar::InjectHooks();
+        CTaskSimpleHurtPedWithCar::InjectHooks();
         // CTaskSimpleKillPedWithCar::InjectHooks();
         CTaskSimpleLookAbout::InjectHooks();
         // CTaskSimpleOnEscalator::InjectHooks();
@@ -996,8 +1055,8 @@ void InjectHooksMain() {
         CTaskSimpleRunTimedAnim::InjectHooks();
         CTaskSimpleSay::InjectHooks();
         CTaskSimpleSetCharDecisionMaker::InjectHooks();
-        // CTaskSimpleSetCharIgnoreWeaponRangeFlag::InjectHooks();
-        // CTaskSimpleSetKindaStayInSamePlace::InjectHooks();
+        CTaskSimpleSetCharIgnoreWeaponRangeFlag::InjectHooks();
+        CTaskSimpleSetKindaStayInSamePlace::InjectHooks();
         CTaskSimpleSetPedAsAutoDriver::InjectHooks();
         CTaskSimpleShakeFist::InjectHooks();
         CTaskSimpleSitDown::InjectHooks();
@@ -1043,7 +1102,7 @@ void InjectHooksMain() {
         CTaskSimpleDie__InjectHooks();
         CTaskSimpleDuck::InjectHooks();
         CTaskComplexPolicePursuit::InjectHooks();
-        // CTaskSimpleFacial::InjectHooks();
+        CTaskSimpleFacial::InjectHooks();
         CTaskComplexCopInCar::InjectHooks();
         CTaskComplexFacial::InjectHooks();
         CTaskComplexInAirAndLand::InjectHooks();
@@ -1071,7 +1130,7 @@ void InjectHooksMain() {
         CTaskComplexUseGoggles::InjectHooks();
         // CTaskComplexCrossRoadLookAndAchieveHeading::InjectHooks();
         CTaskComplexGoToPointAndStandStill::InjectHooks();
-        // CTaskSimpleAchieveHeading::InjectHooks();
+        CTaskSimpleAchieveHeading::InjectHooks();
         CTaskSimpleGiveCPR::InjectHooks();
         // CTaskSimpleCarSetPedInAsPassenger::InjectHooks();
         CTaskComplexDriveFireTruck::InjectHooks();
@@ -1094,8 +1153,7 @@ void InjectHooksMain() {
         // CTaskComplexWanderCriminal::InjectHooks();
         // CTaskComplexWanderProstitute::InjectHooks();
         CTaskComplexPartnerGreet::InjectHooks();
-        // CTaskComplexWalkRoundCar::InjectHooks();
-        // CTaskSimpleDuck::InjectHooks();
+        CTaskComplexWalkRoundCar::InjectHooks();
         CTaskComplexMedicTreatInjuredPed::InjectHooks();
         CTaskSimplePlayHandSignalAnim::InjectHooks();
         CTaskComplexCarDrive::InjectHooks();
@@ -1284,7 +1342,7 @@ void InjectHooksMain() {
     };
 
     const auto Animation = []() {
-        //CAnimBlendAssocGroup::InjectHooks();
+        CAnimBlendAssocGroup::InjectHooks();
         CAnimBlendAssociation::InjectHooks();
         CAnimBlendClumpData::InjectHooks();
         CAnimBlendHierarchy::InjectHooks();
@@ -1303,12 +1361,6 @@ void InjectHooksMain() {
     Vehicle();
     Interior();
     Scripts();
-
-    if (CommandLine::unhookAll)
-        ReversibleHooks::GetRootCategory().SetAllItemsEnabled(false);
-
-    if (!CommandLine::unhookSome.empty() || !CommandLine::unhookExcept.empty())
-        NOTSA_LOG_WARN("Command line arguments --unhook and --unhook-except are unimplemented!");
 }
 
 void InjectHooksMain(HMODULE hThisDLL) {

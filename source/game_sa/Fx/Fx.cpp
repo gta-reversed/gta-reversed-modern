@@ -325,7 +325,7 @@ void RenderBegin(RwRaster* newRaster, RwMatrix* transform, uint32 transformRende
     g_fx.m_nVerticesCount2 = 0;
     g_fx.m_pRasterToRender = newRaster;
     g_fx.m_nTransformRenderFlags = transformRenderFlags;
-    g_fx.m_pVerts = aTempBufferVertices;
+    g_fx.m_pVerts = TempBufferVertices.m_3d;
 
     // And maybe update raster on RW if the same isnt already set...
     RwRaster* currRaster{};
@@ -391,7 +391,7 @@ void RenderAddTri(CVector pos1, CVector pos2, CVector pos3, RwTexCoords coord1, 
     g_fx.m_nVerticesCount2 += 3;
     g_fx.m_nVerticesCount++;
 
-    if (g_fx.m_nVerticesCount2 >= TOTAL_TEMP_BUFFER_VERTICES - 3 || g_fx.m_nVerticesCount >= TOTAL_TEMP_BUFFER_INDICES - 1) {
+    if (g_fx.m_nVerticesCount2 >= TOTAL_TEMP_BUFFER_3DVERTICES - 3 || g_fx.m_nVerticesCount >= TOTAL_TEMP_BUFFER_INDICES - 1) {
         RenderEnd(); // Render vertices to free up vertex buffer
     }
 }
@@ -401,12 +401,12 @@ void RenderEnd() {
     if (!g_fx.m_nVerticesCount)
         return;
 
-    if (RwIm3DTransform(aTempBufferVertices, 3 * g_fx.m_nVerticesCount, g_fx.m_pTransformLTM, g_fx.m_nTransformRenderFlags)) {
+    if (RwIm3DTransform(TempBufferVertices.m_3d, 3 * g_fx.m_nVerticesCount, g_fx.m_pTransformLTM, g_fx.m_nTransformRenderFlags)) {
         RwIm3DRenderPrimitive(rwPRIMTYPETRILIST);
         RwIm3DEnd();
     }
 
-    g_fx.m_pVerts = aTempBufferVertices;
+    g_fx.m_pVerts = TempBufferVertices.m_3d;
     g_fx.m_nVerticesCount2 = 0;
     g_fx.m_nVerticesCount = 0;
 }

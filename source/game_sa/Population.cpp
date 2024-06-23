@@ -20,8 +20,8 @@
 #include <TaskTypes/TaskComplexFollowLeaderInFormation.h>
 #include <TaskTypes/TaskSimpleHoldEntity.h>
 
-#include <Events/EventAcquaintancePed.h>
 #include <Events/EventSexyPed.h>
+#include "Events/EventAcquaintancePedHate.h"
 
 //! Define this to have extra DEV_LOG's of CPopulation
 #define EXTRA_DEBUG_LOGS
@@ -1680,7 +1680,7 @@ int32 CPopulation::GeneratePedsAtAttractors(
                 }
             }
 
-            const auto effectPosWS = ent->GetMatrix() * effect->m_pos; // ws = world space
+            const auto effectPosWS = ent->GetMatrix().TransformPoint(effect->m_pos); // ws = world space
             if (!IsEffectInRadius(effectPosWS)) {
                 continue;
             }
