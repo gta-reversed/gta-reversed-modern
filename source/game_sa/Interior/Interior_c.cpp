@@ -392,8 +392,8 @@ void Interior_c::AddPickups() {
                 ModelIndices::MI_MONEY,
                 PICKUP_MONEY,
                 CGeneral::GetRandomNumberInRange<uint32>(10, 50),
-                false,
-                nullptr
+                0,
+                false
             );
         }
     }
