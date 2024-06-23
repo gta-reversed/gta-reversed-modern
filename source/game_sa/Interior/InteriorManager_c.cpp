@@ -9,7 +9,7 @@ void InteriorManager_c::InjectHooks() {
     RH_ScopedClass(InteriorManager_c);
     RH_ScopedCategory("Interior");
 
-    RH_ScopedGlobalInstall(AddSameGroupEffectInfos, 0x598430, { .reversed = false });
+    RH_ScopedGlobalInstall(AddSameGroupEffectInfos, 0x598430);
     RH_ScopedGlobalInstall(AreAnimsLoaded, 0x5980F0);
     RH_ScopedInstall(PruneVisibleEffects, 0x598A60);
     RH_ScopedInstall(Exit, 0x598010);
