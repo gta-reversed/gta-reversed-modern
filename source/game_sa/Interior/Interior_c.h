@@ -19,7 +19,7 @@ struct tEffectInterior;
 
 struct GoToPt_t {
     int8    TileX, TileY;
-    int8    LinkA, LinkB;
+    int8    Prev, Next;
     CVector Pos;
 };
 VALIDATE_SIZE(GoToPt_t, 0x10);

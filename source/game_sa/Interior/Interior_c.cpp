@@ -21,7 +21,7 @@ void Interior_c::InjectHooks() {
     RH_ScopedInstall(AddInteriorInfo, 0x591E40);
     RH_ScopedInstall(AddPickups, 0x591F90);
     RH_ScopedInstall(CalcExitPts, 0x5924A0, { .reversed = false });
-    RH_ScopedInstall(IsVisible, 0x5929F0, { .reversed = false });
+    RH_ScopedInstall(IsVisible, 0x5929F0);
     
     //
     // Bedroom
@@ -406,7 +406,9 @@ void Interior_c::CalcExitPts() {
 
 // 0x5929F0
 bool Interior_c::IsVisible() {
-    return plugin::CallMethodAndReturn<bool, 0x5929F0, Interior_c*>(this);
+    const auto& cp = TheCamera.GetPosition();
+    return IsPtInside(cp, {5.f, 5.f, 0.f})
+        || m_Props->m_door > 0 && CVector2D::DistSqr(cp, m_DoorPos) <= sq(10.f);
 }
 
 //
