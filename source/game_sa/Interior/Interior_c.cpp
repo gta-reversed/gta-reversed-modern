@@ -27,7 +27,7 @@ void Interior_c::InjectHooks() {
     // Bedroom
     //
     RH_ScopedInstall(FurnishBedroom, 0x593FC0, { .reversed = false });
-    RH_ScopedInstall(Bedroom_AddTableItem, 0x593F10, { .reversed = false });
+    RH_ScopedInstall(Bedroom_AddTableItem, 0x593F10);
 
     //
     // Kitchen
@@ -415,14 +415,25 @@ bool Interior_c::IsVisible() {
 // Bedroom
 //
 
-// 0x593F10
-CObject* Interior_c::Bedroom_AddTableItem(int32 a2, int32 a3, int32 a4, int32 a5, int32 a6, int32 a7) {
-    return plugin::CallMethodAndReturn<CObject*, 0x593F10, Interior_c*, int32, int32, int32, int32, int32, int32>(this, a2, a3, a4, a5, a6, a7);
-}
-
 // 0x593FC0
 void Interior_c::FurnishBedroom() {
     plugin::CallMethod<0x593FC0, Interior_c*>(this);
+}
+
+// 0x593F10
+void Interior_c::Bedroom_AddTableItem(int32 interior, int32 subGroup, int32 wallId, int32 x, int32 y, int32 d) {
+    float oX = (float)x, oY = (float)y;
+    if (wallId == 0 || wallId == 2) {
+        oX += 0.5f;
+    } else if (wallId == 1 || wallId == 3) {
+        oY += 0.5f;
+    }
+    PlaceObject(
+        true,
+        g_furnitureMan.GetFurniture(interior, subGroup, -1, m_Props->m_status),
+        oX + 0.5f, oY + 0.5f, 0.5f,
+        (float)d * 90.f
+    );
 }
 
 //

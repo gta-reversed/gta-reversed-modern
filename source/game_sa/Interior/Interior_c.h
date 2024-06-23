@@ -100,7 +100,7 @@ public:
     // Bedroom
     //
     void FurnishBedroom();
-    CObject* Bedroom_AddTableItem(int32 a2, int32 a3, int32 a4, int32 a5, int32 a6, int32 a7);
+    void Bedroom_AddTableItem(int32 interior, int32 subGroup, int32 wallId, int32 x, int32 y, int32 d);
 
     //
     // Kitchen
