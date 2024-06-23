@@ -23,6 +23,7 @@
 #include "SCMChunks.hpp"
 
 class CCheckpoint;
+enum class eCheckpointType : uint32;
 
 enum class eCrossHairType : uint32 {
     NONE,
@@ -458,7 +459,7 @@ public:
     static void UpdateObjectIndices();
     static void ReadMultiScriptFileOffsetsFromScript();
 
-    static uint32 AddScriptCheckpoint(CVector at, CVector pointTo, float radius, int32 type);
+    static uint32 AddScriptCheckpoint(CVector at, CVector pointTo, float radius, eCheckpointType type);
     static uint32 AddScriptEffectSystem(FxSystem_c* system);
     static uint32 AddScriptSearchLight(CVector start, CEntity* entity, CVector target, float targetRadius, float baseRadius);
     static uint32 AddScriptSphere(uint32 id, CVector posn, float radius);

@@ -95,7 +95,8 @@ void FxManager_c::DestroyFxSystem(FxSystem_c* system) {
     assert(system->m_SystemBP);
 
     for (auto i = 0; i < system->m_SystemBP->m_nNumPrims; i++) {
-        auto& particles = system->m_SystemBP->m_Prims[i]->m_Particles;
+        auto& prim      = system->m_SystemBP->m_Prims[i];
+        auto& particles = prim->m_Particles;
 
         Particle_c* particle = particles.GetHead();
         while (particle) {

@@ -297,24 +297,23 @@ void CTheScripts::ReadMultiScriptFileOffsetsFromScript() {
 
 // signature changed (CVector)
 // 0x4935A0
-uint32 CTheScripts::AddScriptCheckpoint(CVector at, CVector pointTo, float radius, int32 type) {
+uint32 CTheScripts::AddScriptCheckpoint(CVector at, CVector pointTo, float radius, eCheckpointType type) {
     const auto cp = rng::find_if(ScriptCheckpointArray, [](auto& cp) { return !cp.IsActive(); });
     assert(cp != ScriptCheckpointArray.end()); // In vanilla game does OOB access.
 
     cp->m_bUsed = true;
     const auto color = [&type]() -> CRGBA {
-        // TODO: Checkpoint types
         switch (type) {
-        case 0:
-        case 1:
-        case 2:
+        case eCheckpointType::TUBE:
+        case eCheckpointType::ENDTUBE:
+        case eCheckpointType::EMPTYTUBE:
             return { 255, 0, 0, 32 };
-        case 3:
-        case 4:
-        case 5:
-        case 6:
-        case 7:
-        case 8:
+        case eCheckpointType::TORUS:
+        case eCheckpointType::TORUS_NOFADE:
+        case eCheckpointType::TORUSROT:
+        case eCheckpointType::TORUSTHROUGH:
+        case eCheckpointType::TORUS_UPDOWN:
+        case eCheckpointType::TORUS_DOWN:
             return { 255, 0, 0, 96 };
         default:
             NOTSA_UNREACHABLE();
@@ -913,7 +912,7 @@ void CTheScripts::RemoveScriptCheckpoint(int32 scriptIndex) {
 
     auto& scp = ScriptCheckpointArray[i];
     if (const auto* cp = scp.m_Checkpoint) {
-        CCheckpoints::DeleteCP(cp->m_nIdentifier, cp->m_nType);
+        CCheckpoints::DeleteCP(cp->m_ID, cp->m_Type.get_underlying());
     }
     scp.m_bUsed = false;
     scp.m_nId = 0;
@@ -1668,7 +1667,7 @@ void CTheScripts::RenderAllSearchLights() {
 
         const auto origin = [&] {
             if (auto e = light.m_AttachedEntity; e || (e = light.m_Bulb, e)) {
-                return Multiply3x3(light.m_Origin, e->GetMatrix()) + e->GetPosition();
+                return e->GetMatrix().TransformVector(light.m_Origin) + e->GetPosition();
             }
 
             return light.m_Origin;
