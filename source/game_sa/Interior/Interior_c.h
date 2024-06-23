@@ -45,10 +45,23 @@ using eInteriorTypeS32 = notsa::WEnumS32<eInteriorType>;
 using eInteriorTypeS8 = notsa::WEnumS8<eInteriorType>;
 
 class Interior_c : public ListItem_c<Interior_c> {
+    enum class eTileSate : uint8 {
+        STATE_0 = 0,
+        STATE_1 = 1,
+        STATE_2 = 2,
+        STATE_3 = 3,
+        STATE_4 = 4,
+        STATE_5 = 5,
+        STATE_6 = 6,
+        STATE_7 = 7,
+        STATE_8 = 8,
+        STATE_9 = 9,
+    };
+
     static constexpr size_t NUM_TILES_PER_AXIS = 30;
     static constexpr size_t NUM_TILES = sq(NUM_TILES_PER_AXIS);
 
-    template<std::integral T>
+    template<typename T>
     using Tiles = T[NUM_TILES_PER_AXIS][NUM_TILES_PER_AXIS]; //notsa::mdarray<uint8, NUM_TILES_PER_AXIS, NUM_TILES_PER_AXIS>;
 public:
     static void InjectHooks();
@@ -70,9 +83,9 @@ public:
     bool GetBoundingBox(FurnitureEntity_c* fe, CVector(&corners)[4]);
     void FindBoundingBox(
         int32 x,     int32 y,
-        int32* minX, int32* maxX,
-        int32* minY, int32* maxY,
-        Tiles<int32>* tileInfo
+        int32& minX, int32& maxX,
+        int32& minY, int32& maxY,
+        Tiles<int32>& tileInfo
     );
     void AddGotoPt(int32 a, int32 b, float a3, float a4);
     void CalcExitPts();
@@ -144,7 +157,7 @@ public:
     //
     void ResetTiles();
     int8 CheckTilesEmpty(int32 a1, int32 a2, int32 a3, int32 a4, uint8 a5);
-    void SetTilesStatus(int32 a, int32 b, int32 a3, int32 a4, int32 a5, int8 a6);
+    void SetTilesStatus(int32 x, int32 y, int32 w, int32 d, int32 status, bool force);
     void SetCornerTiles(int32 a4, int32 a3, int32 a5, uint8 a6);
     int32 GetTileStatus(int32 x, int32 y);
     int32 GetNumEmptyTiles(int32 a2, int32 a3, int32 a4, int32 a5);
@@ -156,11 +169,11 @@ public:
     int32                                                         m_ID{};                  // 0x8
     InteriorGroup_c*                                              m_Group{};               // 0xC
     int32                                                         m_AreaCode{};            // 0x10
-    tEffectInterior*                                              m_Box{};                 // 0x14
+    tEffectInterior*                                              m_Props{};                 // 0x14
     RwMatrix                                                      m_Mat{};                 // 0x18
     float                                                         m_DistSq{};              // 0x58
     TList_c<FurnitureEntity_c>                                    m_FurnitureEntityList{}; // 0x5C
-    Tiles<uint8>                                                  m_Tiles{};               // 0x68
+    Tiles<eTileSate>                                              m_Tiles{};               // 0x68
     CNodeAddress                                                  m_ExitAddr{};            // 0x3EC
     CNodeAddress                                                  m_DoorAddr{};            // 0x3F0
     CVector                                                       m_ExitPos{};             // 0x3F4

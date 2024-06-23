@@ -14,13 +14,13 @@ void Interior_c::InjectHooks() {
     RH_ScopedInstall(Furnish, 0x591590);
     RH_ScopedInstall(UnFurnish, 0x5915D0);
     RH_ScopedInstall(GetBoundingBox, 0x593DB0);
+    RH_ScopedInstall(FindBoundingBox, 0x5922C0);
     RH_ScopedInstall(PlaceObject, 0x5934E0, { .reversed = false });
     RH_ScopedInstall(IsPtInside, 0x5913E0, { .reversed = false });
     RH_ScopedInstall(CalcMatrix, 0x5914D0, { .reversed = false });
     RH_ScopedInstall(AddGotoPt, 0x591D20, { .reversed = false });
     RH_ScopedInstall(AddInteriorInfo, 0x591E40, { .reversed = false });
     RH_ScopedInstall(AddPickups, 0x591F90, { .reversed = false });
-    RH_ScopedInstall(FindBoundingBox, 0x5922C0, { .reversed = false });
     RH_ScopedInstall(CalcExitPts, 0x5924A0, { .reversed = false });
     RH_ScopedInstall(IsVisible, 0x5929F0, { .reversed = false });
     
@@ -95,17 +95,17 @@ void Interior_c::InjectHooks() {
 bool Interior_c::Init(const CVector& pos) {
     CalcMatrix(pos);
     ResetTiles();
-    if (m_Box->m_IntType != eInteriorType::TESTROOM) {
+    if (m_Props->m_IntType != eInteriorType::TESTROOM) {
         const auto& pos = m_Group->GetEntity()->GetPosition();
         if (const auto e = g_interiorMan.GetEnEx()) {
             CGeneral::SetRandomSeed(
-                  m_Box->m_seed
+                  m_Props->m_seed
                 + (uint64)pos.x * (uint64)pos.y * (uint64)pos.z
                 + (uint64)e->GetEntranceRect().left * (uint64)e->GetEntranceRect().top * (uint64)e->m_fEntranceZ
             );
         } else {
             CGeneral::SetRandomSeed(
-                (uint64)(pos.x * pos.y * pos.z + (float)m_Box->m_seed)
+                (uint64)(pos.x * pos.y * pos.z + (float)m_Props->m_seed)
             );
         }
     }
@@ -114,7 +114,7 @@ bool Interior_c::Init(const CVector& pos) {
     Furnish();
     CalcExitPts();
     g_interiorMan.SetupInteriorStealData(this);
-    switch (m_Box->m_IntType) {
+    switch (m_Props->m_IntType) {
     case eInteriorType::BEDROOM:
     case eInteriorType::LOUNGE: {
         AddPickups();
@@ -136,12 +136,12 @@ void Interior_c::Exit() {
 
 // 0x591590
 void Interior_c::Furnish() {
-    switch (m_Box->m_IntType) {
+    switch (m_Props->m_IntType) {
     case eInteriorType::OFFICE:  FurnishOffice(); break;
     case eInteriorType::LOUNGE:  FurnishLounge(); break;
     case eInteriorType::BEDROOM: FurnishBedroom(); break;
     case eInteriorType::KITCHEN: FurnishKitchen(); break;
-    case eInteriorType::SHOP:    FurnishShop(m_Box->m_IntType); break;
+    case eInteriorType::SHOP:    FurnishShop(m_Props->m_IntType); break;
     }
 }
 
@@ -174,7 +174,7 @@ void Interior_c::UnFurnish() {
 
 // 0x593DB0
 bool Interior_c::GetBoundingBox(FurnitureEntity_c* fe, CVector(&corners)[4]) {
-    switch (m_Box->m_IntType) {
+    switch (m_Props->m_IntType) {
     case eInteriorType::LOUNGE:
     case eInteriorType::BEDROOM:
     case eInteriorType::KITCHEN:
@@ -192,9 +192,9 @@ bool Interior_c::GetBoundingBox(FurnitureEntity_c* fe, CVector(&corners)[4]) {
     tiles[fe->TileX][fe->TileY] = 1; // TODO: Is this correct, or it's the other way around (eg y, x)?
     FindBoundingBox(
         (int32)fe->TileX, (int32)fe->TileY,
-        &tileMinX, &tileMaxX,
-        &tileMinY, &tileMaxY,
-        &tiles
+        tileMinX, tileMaxX,
+        tileMinY, tileMaxY,
+        tiles
     );
 
     // Calculate corners as world positions
@@ -211,12 +211,71 @@ bool Interior_c::GetBoundingBox(FurnitureEntity_c* fe, CVector(&corners)[4]) {
 
 // 0x5922C0
 void Interior_c::FindBoundingBox(
-    int32 x,     int32 y,
-    int32* minX, int32* maxX,
-    int32* minY, int32* maxY,
-    Tiles<int32>* tileInfo
+    int32  posX, int32 posY,
+    int32& minX, int32& maxX,
+    int32& minY, int32& maxY,
+    Tiles<int32>& tilesVisited
 ) {
-    plugin::CallMethod<0x5922C0, Interior_c*, int32, int32, int32*, int32*, int32*, int32*, int32*>(this, x,y, minX, maxX, minY, maxY, &(*tileInfo)[0][0]);
+    // Depth-first search for all bounding box of connected tiles
+    for (int32 iterY = posY;;) {
+        const auto CheckTile = [&](int32 x, int32 y) {
+            assert(m_Props->m_width < NUM_TILES_PER_AXIS);
+            if (x < 0 || x > m_Props->m_width) {
+                return false;
+            }
+            assert(m_Props->m_depth < NUM_TILES_PER_AXIS);
+            if (y < 0 || y > m_Props->m_depth) {
+                return false;
+            }
+            if (m_Tiles[x][y] != eTileSate::STATE_5) {
+                return false;
+            }
+            if (std::exchange(tilesVisited[x][y], true)) { // Already checked?
+                return false;
+            }
+            FindBoundingBox(x, y, minX, maxX, minY, maxY, tilesVisited);
+            return true;
+        };
+
+        //> 0x5922DB - Check left side
+        if (const auto x = posX - 1; CheckTile(x, iterY)) {
+            minX = std::min(minX, x);
+        }
+
+        //> 0x59234C -  Check top (since we're going downwards)
+        if (const auto y = iterY + 1; CheckTile(posX, y)) {
+            maxY = std::max(maxY, y);
+        }
+
+        //> 0x5923BA -  Check right
+        if (const auto x = posX + 1; CheckTile(x, iterY)) {
+            maxX = std::max(maxX, x);
+        }
+
+        //
+        // Exit conditions
+        //
+
+        if (posX < 0 || posX >= m_Props->m_width) {
+            break;
+        }
+
+        iterY--;
+
+        if (iterY < 0 || iterY >= m_Props->m_depth) {
+            break;
+        }
+
+        if (m_Tiles[posX][iterY] != eTileSate::STATE_5) {
+            break;
+        }
+
+        if (std::exchange(tilesVisited[posX][iterY], true)) {
+            break;
+        }
+
+        minY = std::min(minY, iterY);
+    }
 }
 
 // 0x591D20
@@ -444,8 +503,8 @@ int8 Interior_c::CheckTilesEmpty(int32 a1, int32 a2, int32 a3, int32 a4, uint8 a
 }
 
 // 0x591700
-void Interior_c::SetTilesStatus(int32 a, int32 b, int32 a3, int32 a4, int32 a5, int8 a6) {
-    plugin::CallMethod<0x591700, Interior_c*, int32, int32, int32, int32, int32, int8>(this, a, b, a3, a4, a5, a6);
+void Interior_c::SetTilesStatus(int32 x, int32 y, int32 w, int32 d, int32 status, bool force) {
+    plugin::CallMethod<0x591700>(this, x, y, w, d, status, force);
 }
 
 // 0x5917C0

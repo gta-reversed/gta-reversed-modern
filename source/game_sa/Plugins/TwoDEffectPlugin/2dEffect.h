@@ -192,8 +192,8 @@ struct tEffectInterior {
 
     eInteriorTypeS8 m_IntType;
     int8  m_groupId;
-    uint8 m_width;
-    uint8 m_depth;
+    uint8 m_width; // max tiles on X axis
+    uint8 m_depth; // max tiles on Y axis
     uint8 m_height;
     int8  m_door;
     int8  m_lDoorStart;
