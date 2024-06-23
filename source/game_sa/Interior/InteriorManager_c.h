@@ -6,6 +6,8 @@
 #include "InteriorObject.h"
 #include "InteriorEffectInfo_t.h"
 
+#include "InteriorDebugModule.h"
+
 class InteriorManager_c {
 public:
     static void InjectHooks();
@@ -69,6 +71,8 @@ public:
     auto GetLastTimePickupsGenerated() const { return m_TimeLastPickupsGenerated; }
 
 private:
+    friend class notsa::debugmodules::Interior;
+
     Interior_c               m_Interiors[8]{};               // 0x0
     TList_c<Interior_c>      m_InteriorPool{};               // 0x3CA0
     InteriorGroup_c          m_InteriorGroups[8]{};          // 0x3CAC

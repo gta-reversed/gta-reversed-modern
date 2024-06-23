@@ -393,7 +393,7 @@ void Interior_c::AddPickups() {
                 PICKUP_MONEY,
                 CGeneral::GetRandomNumberInRange<uint32>(10, 50),
                 false,
-                false
+                nullptr
             );
         }
     }
