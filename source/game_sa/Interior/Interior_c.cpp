@@ -1,6 +1,7 @@
 #include "StdInc.h"
 #include "Interior_c.h"
 #include "./InteriorManager_c.h"
+#include "./FurnitureManager_c.h"
 
 void Interior_c::InjectHooks() {
     RH_ScopedClass(Interior_c);
@@ -11,7 +12,7 @@ void Interior_c::InjectHooks() {
     RH_ScopedInstall(Init, 0x593BF0);
     RH_ScopedInstall(Exit, 0x592230);
     RH_ScopedInstall(Furnish, 0x591590);
-    RH_ScopedInstall(UnFurnish, 0x5915D0, { .reversed = false });
+    RH_ScopedInstall(UnFurnish, 0x5915D0);
     RH_ScopedInstall(GetBoundingBox, 0x593DB0, { .reversed = false });
     RH_ScopedInstall(PlaceObject, 0x5934E0, { .reversed = false });
     RH_ScopedInstall(IsPtInside, 0x5913E0, { .reversed = false });
@@ -146,7 +147,29 @@ void Interior_c::Furnish() {
 
 // 0x5915D0
 void Interior_c::UnFurnish() {
-    plugin::CallMethod<0x5915D0, Interior_c*>(this);
+    const auto player = FindPlayerPed();
+    const auto entityHeldByPlayer = player
+        ? player->GetEntityThatThisPedIsHolding()
+        : nullptr;
+    const auto objHeldByPlayer = entityHeldByPlayer && entityHeldByPlayer->IsObject()
+        ? entityHeldByPlayer->AsObject()
+        : nullptr;
+    for (auto it = m_FurnitureEntityList.GetHead(); it;) {
+        const auto f = it;
+        it = it->m_pNext;
+
+        if (objHeldByPlayer == f->Entity && objHeldByPlayer->objectFlags.bIsLiftable) {
+            objHeldByPlayer->m_nObjectType = OBJECT_TEMPORARY;
+            objHeldByPlayer->m_nRemovalTime = CTimer::GetTimeInMS() + 99'999'999;
+        } else {
+            CWorld::Remove(f->Entity);
+            delete f->Entity;
+        }
+
+        f->Entity = nullptr;
+        m_FurnitureEntityList.RemoveItem(f);
+        g_furnitureMan.GetFurnitureList().RemoveItem(f);
+    }
 }
 
 // 0x591D20

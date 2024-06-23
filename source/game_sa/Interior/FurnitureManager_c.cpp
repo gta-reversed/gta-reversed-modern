@@ -22,7 +22,7 @@ bool FurnitureManager_c::Init() {
     g_currSubGroupId = 0;
     g_currFurnitureId = 0;
 
-    for (auto& i : m_FurnitureItem) {
+    for (auto& i : m_FurnitureEntities) {
         m_FurnitureList.AddItem(&i);
     }
     
@@ -116,7 +116,7 @@ int32 FurnitureManager_c::GetGroupId(const char* name) {
 int32 FurnitureManager_c::GetSubGroupId(const char* name) {
     static const auto subGroups = notsa::make_mapping<std::string_view, int32>({
         // IT_SHOP
-        {"SHOP_UNIT1_L",          0 },
+        { "SHOP_UNIT1_L",         0 },
         { "SHOP_UNIT1_R",         1 },
         { "SHOP_UNIT1_M",         2 },
         { "SHOP_UNIT2_L",         3 },

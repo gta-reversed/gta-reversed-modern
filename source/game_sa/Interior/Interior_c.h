@@ -136,25 +136,25 @@ public:
     bool FindEmptyTiles(int32 a3, int32 a4, int32* arg8, int32* a5);
 
 public:
-    int32            m_ID{};                  // 0x8
-    InteriorGroup_c* m_Group{};               // 0xC
-    int32            m_AreaCode{};            // 0x10
-    tEffectInterior* m_Box{};                 // 0x14
-    RwMatrix         m_Mat{};                 // 0x18
-    float            m_DistSq{};              // 0x58
-    TList_c<void>    m_FurnitureEntityList{}; // 0x5C - TODO: Figure out type
-    uint8            m_Tiles[900]{};          // 0x68
-    CNodeAddress     m_ExitAddr{};            // 0x3EC
-    CNodeAddress     m_DoorAddr{};            // 0x3F0
-    CVector          m_ExitPos{};             // 0x3F4
-    CVector          m_DoorPos{};             // 0x400
-    int8             m_NumGoToPts{};          // 0x40C
-    int8             m_NumIntInfo{};          // 0x40D
-    GoToPt_t         m_GoToPts[16]{};         // 0x410
-    GoToPt_t         m_ExitPts[8]{};          // 0x510
-    InteriorInfo_t   m_IntInfos[16]{};        // 0x590
-    int8             m_ShopSubType{};         // 0x790
-    int8             m_StyleA{};              // 0x791
-    int8             m_StyleB{};              // 0x792
+    int32                      m_ID{};                  // 0x8
+    InteriorGroup_c*           m_Group{};               // 0xC
+    int32                      m_AreaCode{};            // 0x10
+    tEffectInterior*           m_Box{};                 // 0x14
+    RwMatrix                   m_Mat{};                 // 0x18
+    float                      m_DistSq{};              // 0x58
+    TList_c<FurnitureEntity_c> m_FurnitureEntityList{}; // 0x5C
+    uint8                      m_Tiles[900]{};          // 0x68
+    CNodeAddress               m_ExitAddr{};            // 0x3EC
+    CNodeAddress               m_DoorAddr{};            // 0x3F0
+    CVector                    m_ExitPos{};             // 0x3F4
+    CVector                    m_DoorPos{};             // 0x400
+    int8                       m_NumGoToPts{};          // 0x40C
+    int8                       m_NumIntInfo{};          // 0x40D
+    GoToPt_t                   m_GoToPts[16]{};         // 0x410
+    GoToPt_t                   m_ExitPts[8]{};          // 0x510
+    InteriorInfo_t             m_IntInfos[16]{};        // 0x590
+    int8                       m_ShopSubType{};         // 0x790
+    int8                       m_StyleA{};              // 0x791
+    int8                       m_StyleB{};              // 0x792
 };
 VALIDATE_SIZE(Interior_c, 0x794);
