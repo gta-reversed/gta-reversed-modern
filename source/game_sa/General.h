@@ -153,4 +153,10 @@ namespace CGeneral { // More like `Math` (Or `Meth`, given how bad the code is, 
     inline auto RandomNodeHeading() {
         return (uint8)CGeneral::GetRandomNumberInRange(0, 8);
     }
+
+    /*
+    * @addr unk
+    * @brief Set the random seed
+    */
+    static void SetRandomSeed(uint32 s) { srand(s); }
 };
