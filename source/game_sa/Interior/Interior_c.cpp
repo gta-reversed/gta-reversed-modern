@@ -290,7 +290,49 @@ bool Interior_c::AddInteriorInfo(int32 actionType, float offsetX, float offsetY,
 
 // 0x591F90
 void Interior_c::AddPickups() {
-    plugin::CallMethod<0x591F90, Interior_c*>(this);
+    if (CTimer::GetTimeInMS() - g_interiorMan.GetLastTimePickupsGenerated() < 180'000) {
+        return;
+    }
+
+    for (auto i = 0u; i < 100u; i++) {
+        const auto rndW = CGeneral::GetRandomNumberInRange(m_Props->m_width - 1u);
+        const auto rndD = CGeneral::GetRandomNumberInRange(m_Props->m_depth - 1u);
+
+        // unnecessary check:
+        // if (rndW < m_Props->m_width && rndD < m_Props->m_depth && rndW >= 0 && rndD >= 0)
+
+        const auto& tile = m_Tiles[rndW][rndD];
+        if (notsa::contains({ 0Ui8, 3Ui8, 4Ui8 }, tile)) { // TODO: enum
+            CVector pointsIn{};
+            GetTileCentre(static_cast<float>(rndD), static_cast<float>(rndW), &pointsIn);
+
+            if (CGeneral::RandomBool(25.0f)) {
+                pointsIn.z += 0.5f;
+
+                const auto weapon = [&] {
+                    const auto chance = CGeneral::GetRandomNumberInRange(0.0f, 100.0f);
+
+                    if (chance >= 40.0f) { // 60%
+                        if (chance >= 80.0f) { // 20%
+                            return (chance >= 90.0f) ? WEAPON_SHOTGUN : WEAPON_KNIFE; // 10% : 20%
+                        } else { // 20%
+                            return WEAPON_PISTOL;
+                        }
+                    } else { // 40%
+                        return WEAPON_BASEBALLBAT;
+                    }
+                }();
+
+                // NOTSA: Originally 3 - [-15, 0]
+                const auto ammo = CGeneral::GetRandomNumberInRange(3, 18);
+                CPickups::GenerateNewOne_WeaponType(pointsIn, weapon, PICKUP_ONCE, ammo, false, false);
+            } else {
+                // NOTSA: Originally 10 - [-40, 0]
+                const auto amount = CGeneral::GetRandomNumberInRange(10, 50);
+                CPickups::GenerateNewOne(pointsIn, ModelIndices::MI_MONEY, PICKUP_MONEY, amount, false, false);
+            }
+        }
+    }
 }
 
 // 0x5924A0
