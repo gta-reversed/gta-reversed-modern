@@ -84,7 +84,7 @@ void Interior_c::InjectHooks() {
     RH_ScopedInstall(CheckTilesEmpty, 0x591680, { .reversed = false });
     RH_ScopedInstall(SetTilesStatus, 0x591700, { .reversed = false });
     RH_ScopedInstall(SetCornerTiles, 0x5917C0, { .reversed = false });
-    RH_ScopedInstall(GetTileStatus, 0x5918E0, { .reversed = false });
+    RH_ScopedInstall(GetTileStatus, 0x5918E0);
     RH_ScopedInstall(GetNumEmptyTiles, 0x591920, { .reversed = false });
     RH_ScopedInstall(FindEmptyTiles, 0x591C50, { .reversed = false });
     RH_ScopedInstall(GetRandomTile, 0x591B20, { .reversed = false });
@@ -219,15 +219,7 @@ void Interior_c::FindBoundingBox(
     // Depth-first search for all bounding box of connected tiles
     for (int32 iterY = posY;;) {
         const auto CheckTile = [&](int32 x, int32 y) {
-            assert(m_Props->m_width < NUM_TILES_PER_AXIS);
-            if (x < 0 || x > m_Props->m_width) {
-                return false;
-            }
-            assert(m_Props->m_depth < NUM_TILES_PER_AXIS);
-            if (y < 0 || y > m_Props->m_depth) {
-                return false;
-            }
-            if (m_Tiles[x][y] != eTileSate::STATE_5) {
+            if (GetTileStatus(x, y) != eTileSate::STATE_5) {
                 return false;
             }
             if (std::exchange(tilesVisited[x][y], true)) { // Already checked?
@@ -266,7 +258,7 @@ void Interior_c::FindBoundingBox(
             break;
         }
 
-        if (m_Tiles[posX][iterY] != eTileSate::STATE_5) {
+        if (GetTileStatus(posX, iterY) != eTileSate::STATE_5) {
             break;
         }
 
@@ -555,8 +547,18 @@ void Interior_c::SetCornerTiles(int32 a4, int32 a3, int32 a5, uint8 a6) {
 }
 
 // 0x5918E0
-int32 Interior_c::GetTileStatus(int32 x, int32 y) {
-    return plugin::CallMethodAndReturn<int32, 0x5918E0, Interior_c*, int32, int32>(this, x, y);
+Interior_c::eTileSate Interior_c::GetTileStatus(int32 x, int32 y) const {
+    assert(m_Props->m_width < NUM_TILES_PER_AXIS);
+    if (x < 0 || x >= m_Props->m_width) {
+        return eTileSate::STATE_1;
+    }
+
+    assert(m_Props->m_depth < NUM_TILES_PER_AXIS);
+    if (y < 0 || y >= m_Props->m_depth) {
+        return eTileSate::STATE_1;
+    }
+
+    return m_Tiles[x][y];
 }
 
 // 0x591920

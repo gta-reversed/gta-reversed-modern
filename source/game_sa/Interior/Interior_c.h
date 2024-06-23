@@ -159,7 +159,7 @@ public:
     int8 CheckTilesEmpty(int32 a1, int32 a2, int32 a3, int32 a4, uint8 a5);
     void SetTilesStatus(int32 x, int32 y, int32 w, int32 d, int32 status, bool force);
     void SetCornerTiles(int32 a4, int32 a3, int32 a5, uint8 a6);
-    int32 GetTileStatus(int32 x, int32 y);
+    eTileSate GetTileStatus(int32 x, int32 y) const;
     int32 GetNumEmptyTiles(int32 a2, int32 a3, int32 a4, int32 a5);
     int32 GetRandomTile(int32 a2, int32* a3, int32* a4);
     CVector* GetTileCentre(float offsetX, float offsetY, CVector* pointsIn);
