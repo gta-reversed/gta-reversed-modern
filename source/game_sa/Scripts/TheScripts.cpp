@@ -98,6 +98,7 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(ScriptConnectLodsFunction, 0x470A20);
     RH_ScopedInstall(ScriptAttachAnimGroupToCharModel, 0x474800);
     RH_ScopedInstall(UseSwitchJumpTable, 0x4703C0);
+    RH_ScopedInstall(AttachSearchlightToSearchlightObject, 0x4934F0);
 }
 
 // 0x468D50
@@ -519,6 +520,27 @@ void CTheScripts::AddToWaitingForScriptBrainArray(CEntity* entity, int16 special
     free->m_pEntity = entity;
     entity->RegisterReference(free->m_pEntity);
     free->m_ScriptBrainIndex = specialModelIndex;
+}
+
+// 0x4934F0
+void CTheScripts::AttachSearchlightToSearchlightObject(int32 searchLightId, CObject* tower, CObject* housing, CObject* bulb, CVector offset) {
+    const auto idx = GetActualScriptThingIndex(searchLightId, SCRIPT_THING_SEARCH_LIGHT);
+    if (idx < 0) {
+        return;
+    }
+
+    const auto ReplaceEntity = [](CEntity*& m, CEntity* p) {
+        CEntity::SafeCleanUpRef(m);
+        m = p;
+        CEntity::SafeRegisterRef(m);
+    };
+
+    auto& sl = ScriptSearchLightArray[idx];
+    sl.m_Origin = offset;
+    ReplaceEntity(sl.m_AttachedEntity, nullptr);
+    ReplaceEntity(sl.m_Tower, tower);
+    ReplaceEntity(sl.m_Housing, housing);
+    ReplaceEntity(sl.m_Bulb, bulb);
 }
 
 // 0x4866C0

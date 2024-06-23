@@ -472,7 +472,7 @@ public:
     static void   AddToVehicleModelsBlockedByScript(eModelID modelIndex);
     static void   AddToWaitingForScriptBrainArray(CEntity* entity, int16 arg2);
 
-    static void AttachSearchlightToSearchlightObject(int32 searchLightId, CObject* tower, CObject* housing, CObject* bulb, float offsetX, float offsetY, float offsetZ);
+    static void AttachSearchlightToSearchlightObject(int32 searchLightId, CObject* tower, CObject* housing, CObject* bulb, CVector offset);
     static char CheckStreamedScriptVersion(RwStream* stream, char* arg2);
     static void CleanUpThisObject(CObject* obj);
     static void CleanUpThisPed(CPed* ped);
@@ -491,7 +491,7 @@ public:
     static bool IsEntityWithinSearchLight(uint32 index, CEntity* entity);
     static bool IsPedStopped(CPed* ped);
     static bool IsPlayerOnAMission();
-    static bool IsPointWithinSearchLight(CVector* pointPosn, int32 index);
+    static bool IsPointWithinSearchLight(const CVector& pointPosn, int32 index);
     static bool IsVehicleStopped(CVehicle* veh);
 
     static bool Load();
