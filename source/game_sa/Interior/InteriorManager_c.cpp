@@ -292,7 +292,19 @@ end:
 
 // 0x598690
 bool InteriorManager_c::IsInteriorEffectVisible(C2dEffectInterior* effect, CEntity* entity) {
-    // Create bounding box for the object
+    const auto CheckPoint = [
+        ebb = &entity->GetColModel()->GetBoundingBox(),
+        mat = entity->GetMatrix()
+    ](CVector pt) {
+        return ebb->IsPointInside(mat.InverseTransformPoint(pt));
+    };
+    return CheckPoint(TheCamera.GetPosition())
+        || CheckPoint(FindPlayerPed(0)->GetPosition())
+        || CheckPoint(FindPlayerPed(1)->GetPosition());
+
+    /**
+     * Original horrifically complicated code:
+    \**
     const auto& ebb = entity->GetColModel()->GetBoundingBox();
     const auto& ebbMin = ebb.m_vecMin,
                 ebbMax = ebb.m_vecMax;
@@ -311,6 +323,7 @@ bool InteriorManager_c::IsInteriorEffectVisible(C2dEffectInterior* effect, CEnti
     return bb.IsPointWithin(TheCamera.GetPosition())
         || bb.IsPointInside(FindPlayerPed(0)->GetPosition())
         || bb.IsPointInside(FindPlayerPed(1)->GetPosition());
+    */
 }
 
 // 0x598620
