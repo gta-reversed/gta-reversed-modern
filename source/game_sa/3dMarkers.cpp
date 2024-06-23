@@ -384,7 +384,7 @@ void tDirectionArrow::Render(RpClump* clump) {
 }
 
 // Code from (beginning at): 0x7232BF
-void tUser3dMarker::Render(RpClump* clump) {
+void tUser3dMarker::Render(RpClump* clump) const {
     const auto frame = RpClumpGetFrame(clump);
 
     // Reset rotation

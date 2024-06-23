@@ -83,3 +83,10 @@ bool CBox::IsPointInside(const CVector& point) const {
         && point.y >= m_vecMin.y && point.y <= m_vecMax.y
         && point.z >= m_vecMin.z && point.z <= m_vecMax.z;
 }
+
+void CBox::StretchToPoint(const CVector& pt) {
+    for (size_t i = 0; i < 3; i++) {
+        m_vecMin[i] = std::min(m_vecMin[i], pt[i]);
+        m_vecMax[i] = std::max(m_vecMax[i], pt[i]);
+    }
+}
