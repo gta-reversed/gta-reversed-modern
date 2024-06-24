@@ -211,29 +211,52 @@ enum class eScriptSearchLightState : uint8 {
 };
 
 struct tScriptSearchlight {
-    bool     m_bUsed{true};
-    bool     m_bClipIfColliding{};
-    bool     m_bEnableShadow{};
+    bool m_bUsed{ true };
+    bool m_bClipIfColliding{};
+    bool m_bEnableShadow{};
     union {
         eScriptSearchLightState m_nCurrentState : 7;
-        bool  bIsUsed : 1; // ?
+        bool                    bIsUsed : 1; // ?
     } /* m_Flags */;
-    int16    m_nId{1};
-    CVector  m_Origin{};
-    CVector  m_Target{};
-    float    m_fTargetRadius{};
-    float    m_fBaseRadius{};
-    CVector  m_PathCoord1{};
-    CVector  m_PathCoord2{};
-    float    m_fPathSpeed{};
-    CEntity* m_AttachedEntity{};
-    CEntity* m_FollowingEntity{};
-    CEntity* m_Tower{};
-    CEntity* m_Housing{};
-    CEntity* m_Bulb{};
-    CVector  m_TargetSpot{};
-    CVector  vf64{};
-    CVector  vf70{};
+    int16        m_nId{ 1 };
+    CVector      m_Origin{};
+    CVector      m_Target{};
+    float        m_fTargetRadius{};
+    float        m_fBaseRadius{};
+    CVector      m_PathCoord1{};
+    CVector      m_PathCoord2{};
+    float        m_fPathSpeed{};
+    CEntity::Ref m_AttachedEntity{};
+    CEntity::Ref m_FollowingEntity{};
+    CEntity::Ref m_Tower{};
+    CEntity::Ref m_Housing{};
+    CEntity::Ref m_Bulb{};
+    CVector      m_TargetSpot{};
+    CVector      vf64{};
+    CVector      vf70{};
+
+    // NOTSA
+    void Clear() {
+        m_bUsed            = true;
+        m_bClipIfColliding = false;
+        m_bEnableShadow    = false;
+        m_nId              = 1;
+        m_Origin           = CVector{};
+        m_Target           = CVector{};
+        m_fTargetRadius    = 0.0f;
+        m_fBaseRadius      = 0.0f;
+        m_PathCoord1       = CVector{};
+        m_PathCoord2       = CVector{};
+        m_fPathSpeed       = 0.0f;
+        m_AttachedEntity   = nullptr;
+        m_FollowingEntity  = nullptr;
+        m_Tower            = nullptr;
+        m_Housing          = nullptr;
+        m_Bulb             = nullptr;
+        m_TargetSpot       = nullptr;
+        vf64               = CVector{};
+        vf70               = CVector{};
+    }
 
     //! Script thing ID
     auto GetId() { return m_nId; }
@@ -284,12 +307,15 @@ struct tStoredLine {
 VALIDATE_SIZE(tStoredLine, 0x20);
 
 struct tScriptBrainWaitEntity {
-    CEntity* m_pEntity;
-    int16    m_ScriptBrainIndex;
-    int16    field_6;
+    CEntity::Ref m_pEntity{};
+    int16        m_ScriptBrainIndex{ -1 };
+    int16        field_6{};
 
-    tScriptBrainWaitEntity() { // 0x468E12
-        m_pEntity          = nullptr;
+    tScriptBrainWaitEntity() = default; // 0x468E12
+
+    // NOTSA
+    void Clear() {
+        m_pEntity = nullptr;
         m_ScriptBrainIndex = -1;
     }
 };
@@ -344,8 +370,9 @@ static constexpr uint32 SCRIPT_VAR_TIMERA = 32, SCRIPT_VAR_TIMERB = 33;
 static constexpr uint32 MISSION_SCRIPT_SIZE = 69000;
 class CTheScripts {
 public:
-    static constexpr uint32 MAIN_SCRIPT_SIZE   = 200000;
-    static constexpr uint32 SCRIPT_SPACE_SIZE  = MAIN_SCRIPT_SIZE + MISSION_SCRIPT_SIZE;
+    static constexpr uint32 MAIN_SCRIPT_SIZE         = 200'000;
+    static constexpr uint32 SCRIPT_SPACE_SIZE        = MAIN_SCRIPT_SIZE + MISSION_SCRIPT_SIZE;
+    static constexpr uint32 MAX_SAVED_GVAR_PART_SIZE = 51'200;
 
     //! Lower `MAIN_SCRIPT_SIZE` is where MAIN.SCM is, remaining `MISSION_SCRIPT_SIZE` is for other loaded scripts.
     //static inline uint8(&ScriptSpace)[SCRIPT_SPACE_SIZE] = *(uint8(*)[SCRIPT_SPACE_SIZE])0xA49960;

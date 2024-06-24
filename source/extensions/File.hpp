@@ -5,7 +5,6 @@
 namespace notsa {
 // RAII-wrapper for CFileMgr files.
 class File {
-    FILESTREAM m_file{};
 public:
     File(const char* path, const char* mode) :
         m_file(CFileMgr::OpenFile(path, mode))
@@ -28,5 +27,8 @@ public:
     auto Tell() const { return CFileMgr::Tell(m_file); }
     auto GetErrorReadWrite() const { return CFileMgr::GetErrorReadWrite(m_file); }
     void SeekNextLine() { CFileMgr::SeekNextLine(m_file); }
+
+private:
+    FILESTREAM m_file{};
 };
 };

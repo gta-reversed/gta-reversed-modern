@@ -126,7 +126,7 @@ void CTheScripts::Init() {
     StuckCars.Init();
     ScriptsForBrains.Init();
     ScriptResourceManager.Initialise();
-    rng::fill(EntitiesWaitingForScriptBrain, tScriptBrainWaitEntity{});
+    rng::for_each(EntitiesWaitingForScriptBrain, &tScriptBrainWaitEntity::Clear);
 
     if (CGame::bMissionPackGame) {
         char scrFile[MAX_PATH]{};
@@ -215,7 +215,7 @@ void CTheScripts::Init() {
     InitialiseAllConnectLodObjects();
     InitialiseSpecialAnimGroupsAttachedToCharModels();
     rng::fill(ScriptEffectSystemArray, tScriptEffectSystem{});
-    rng::fill(ScriptSearchLightArray, tScriptSearchlight{});
+    rng::for_each(ScriptSearchLightArray, &tScriptSearchlight::Clear);
     NumberOfScriptSearchLights = 0;
     rng::fill(ScriptCheckpointArray, tScriptCheckpoint{});
     NumberOfScriptCheckpoints = 0;
@@ -376,7 +376,6 @@ uint32 CTheScripts::AddScriptSearchLight(CVector start, CEntity* entity, CVector
     ssl->m_fPathSpeed       = 0.0f;
 
     ssl->m_AttachedEntity = entity;
-    entity->RegisterReference(ssl->m_AttachedEntity);
 
     ++NumberOfScriptSearchLights;
     return CTheScripts::GetNewUniqueScriptThingIndex(idx, SCRIPT_THING_SEARCH_LIGHT);
@@ -519,7 +518,6 @@ void CTheScripts::AddToWaitingForScriptBrainArray(CEntity* entity, int16 special
     }
 
     free->m_pEntity = entity;
-    entity->RegisterReference(free->m_pEntity);
     free->m_ScriptBrainIndex = specialModelIndex;
 }
 
@@ -530,18 +528,12 @@ void CTheScripts::AttachSearchlightToSearchlightObject(int32 searchLightId, CObj
         return;
     }
 
-    const auto ReplaceEntity = [](CEntity*& m, CEntity* p) {
-        CEntity::SafeCleanUpRef(m);
-        m = p;
-        CEntity::SafeRegisterRef(m);
-    };
-
     auto& sl = ScriptSearchLightArray[idx];
     sl.m_Origin = offset;
-    ReplaceEntity(sl.m_AttachedEntity, nullptr);
-    ReplaceEntity(sl.m_Tower, tower);
-    ReplaceEntity(sl.m_Housing, housing);
-    ReplaceEntity(sl.m_Bulb, bulb);
+    sl.m_AttachedEntity = nullptr;
+    sl.m_Tower = tower;
+    sl.m_Housing = housing;
+    sl.m_Bulb = bulb;
 }
 
 // 0x464FF0
@@ -928,7 +920,7 @@ void CTheScripts::RemoveFromWaitingForScriptBrainArray(CEntity* entity, int16 mo
             continue;
         }
 
-        CEntity::ClearReference(bwe.m_pEntity);
+        bwe.m_pEntity = nullptr;
         bwe.m_ScriptBrainIndex = MODEL_INVALID;
     }
 }
@@ -965,19 +957,10 @@ void CTheScripts::RemoveScriptEffectSystem(int32 scriptIndex) {
 // 0x493160
 void CTheScripts::RemoveScriptSearchLight(int32 scriptIndex) {
     const auto i = GetActualScriptThingIndex(scriptIndex, eScriptThingType::SCRIPT_THING_SEARCH_LIGHT);
-    if (i == -1) {
-        return;
+    if (i != -1) {
+        ScriptSearchLightArray[i].Clear();
+        --NumberOfScriptSearchLights;
     }
-
-    auto& ssl = ScriptSearchLightArray[i];
-    CEntity::ClearReference(ssl.m_FollowingEntity);
-    CEntity::ClearReference(ssl.m_AttachedEntity);
-    CEntity::ClearReference(ssl.m_Tower);
-    CEntity::ClearReference(ssl.m_Housing);
-    CEntity::ClearReference(ssl.m_Bulb);
-    ssl = tScriptSearchlight{};
-
-    --NumberOfScriptSearchLights;
 }
 
 // 0x483BA0
@@ -1118,12 +1101,12 @@ void CTheScripts::Load() {
     Init();
 
     const auto globalVarsLen = LoadDataFromWorkBuffer<uint32>();
-    if (globalVarsLen > 51'200) {
-        const auto numParts = (globalVarsLen - 51'201) / 51'200 + 1;
-        const auto remainder = globalVarsLen - 51'200 * numParts;
+    if (globalVarsLen > MAX_SAVED_GVAR_PART_SIZE) {
+        const auto numParts  = (globalVarsLen - MAX_SAVED_GVAR_PART_SIZE - 1) / MAX_SAVED_GVAR_PART_SIZE + 1;
+        const auto remainder = globalVarsLen - MAX_SAVED_GVAR_PART_SIZE * numParts;
 
         for (auto i = 0u; i < numParts; i++) {
-            CGenericGameStorage::LoadDataFromWorkBuffer(ScriptSpace.data(), 51'200);
+            CGenericGameStorage::LoadDataFromWorkBuffer(ScriptSpace.data(), MAX_SAVED_GVAR_PART_SIZE);
         }
         CGenericGameStorage::LoadDataFromWorkBuffer(ScriptSpace.data(), remainder);
     } else {
@@ -1255,12 +1238,12 @@ void CTheScripts::Load() {
 // 0x5D4C40
 void CTheScripts::Save() {
     const auto globalVarsLen = GetSCMChunk<tSCMGlobalVarChunk>()->m_NextChunkOffset;
-    if (globalVarsLen > 51'200) {
-        const auto numParts  = (globalVarsLen - 51'201) / 51'200 + 1;
-        const auto remainder = globalVarsLen - 51'200 * numParts;
+    if (globalVarsLen > MAX_SAVED_GVAR_PART_SIZE) {
+        const auto numParts  = (globalVarsLen - MAX_SAVED_GVAR_PART_SIZE - 1) / MAX_SAVED_GVAR_PART_SIZE + 1;
+        const auto remainder = globalVarsLen - MAX_SAVED_GVAR_PART_SIZE * numParts;
 
         for (auto i = 0u; i < numParts; i++) {
-            CGenericGameStorage::SaveDataToWorkBuffer(ScriptSpace.data(), 51'200);
+            CGenericGameStorage::SaveDataToWorkBuffer(ScriptSpace.data(), MAX_SAVED_GVAR_PART_SIZE);
         }
         CGenericGameStorage::SaveDataToWorkBuffer(ScriptSpace.data(), remainder);
     } else {
@@ -1501,7 +1484,7 @@ void CTheScripts::ProcessAllSearchLights() {
             break;
         }
 
-        auto* bulb = light.m_Bulb;
+        CEntity* bulb = light.m_Bulb;
         if (!bulb) {
             continue;
         }
@@ -1971,7 +1954,7 @@ void CTheScripts::RenderAllSearchLights() {
         }
 
         const auto origin = [&] {
-            if (auto e = notsa::coalesce(light.m_AttachedEntity, light.m_Bulb)) {
+            if (auto e = notsa::coalesce(light.m_AttachedEntity.Get(), light.m_Bulb.Get())) {
                 return e->GetMatrix().TransformVector(light.m_Origin) + e->GetPosition();
             }
 
@@ -2002,6 +1985,7 @@ void CTheScripts::RenderAllSearchLights() {
 bool CTheScripts::ScriptAttachAnimGroupToCharModel(int32 modelId, const char* ifpName) {
     auto* mi = CModelInfo::GetModelInfo(modelId);
     if (mi->GetAnimFileIndex() == CAnimManager::GetAnimationBlockIndex(ifpName)) {
+        // Already attached?
         return false;
     }
     mi->SetAnimFile(ifpName);
