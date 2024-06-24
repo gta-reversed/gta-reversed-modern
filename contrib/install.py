@@ -1,4 +1,5 @@
 import os
+import winreg
 from tkinter import filedialog as tkFileDialog
 from pathlib import Path
 import zipfile
@@ -6,7 +7,12 @@ import ctypes
 import sys
 
 def set_env_var(name, value):
-    os.system(f"powershell [Environment]::SetEnvironmentVariable('{name}', '{value}', [EnvironmentVariableTarget]::User)")
+    try:
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, 'Environment', 0, winreg.KEY_ALL_ACCESS)
+    except WindowsError:
+        key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, 'Environment')
+    winreg.SetValueEx(key, name, 0, winreg.REG_SZ, str(value))
+    winreg.CloseKey(key)
 
 def main():
     if not ctypes.windll.shell32.IsUserAnAdmin():
