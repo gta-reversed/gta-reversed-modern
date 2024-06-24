@@ -17,10 +17,9 @@ def main():
     if git_repo_root.parts[-1] == 'contrib':
         git_repo_root = git_repo_root.parent
 
-    initialdir = os.environ['GTA_SA_DIR'] if 'GTA_SA_DIR' in os.environ else ''
     select = tkFileDialog.askopenfilename(
         title='Select the executable file from the GTA:SA installation directory',
-        filetypes=[("GTA:SA", ".exe")], initialdir=initialdir
+        filetypes=[("GTA:SA", ".exe")], initialdir=os.environ['GTA_SA_DIR'] if 'GTA_SA_DIR' in os.environ else ''
     )
     if not select:
         return input('You have not selected a file, we are leaving. Press Enter...')
