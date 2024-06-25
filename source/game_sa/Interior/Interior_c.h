@@ -125,7 +125,7 @@ public:
     //
     void FurnishLounge();
     void Lounge_AddTV(eWall wallId, int32 x, int32 y, int32 depth);
-    void Lounge_AddHifi(int32 wallId, int32 x, int32 y, int32 depth);
+    void Lounge_AddHifi(eWall wallId, int32 x, int32 y, int32 depth);
     void Lounge_AddChairInfo(int32 wallId, int32 pos, CEntity* entityIgnoredCollision);
     void Lounge_AddSofaInfo(int32 sitType, int32 offsetX, CEntity* entityIgnoredCollision);
 
@@ -195,7 +195,7 @@ public:
     inline float GetRotationOfWall(eWall wallId) {
         const auto wall = std::to_underlying(wallId);
         assert(wall >= 0 && wall < 4);
-        return static_cast<float>(wall % 4) * 90.0f + 45.0f;
+        return static_cast<float>(wall % 4) * 90.0f;
     }
 
 public:

@@ -39,8 +39,8 @@ void Interior_c::InjectHooks() {
     // Lounge
     //
     RH_ScopedInstall(FurnishLounge, 0x597740, { .reversed = false });
-    RH_ScopedInstall(Lounge_AddTV, 0x597240, { .reversed = false });
-    RH_ScopedInstall(Lounge_AddHifi, 0x597430, { .reversed = false });
+    RH_ScopedInstall(Lounge_AddTV, 0x597240);
+    RH_ScopedInstall(Lounge_AddHifi, 0x597430);
     RH_ScopedInstall(Lounge_AddChairInfo, 0x5974E0, { .reversed = false });
     RH_ScopedInstall(Lounge_AddSofaInfo, 0x5975C0, { .reversed = false });
 
@@ -539,17 +539,54 @@ void Interior_c::Lounge_AddTV(eWall wallId, int32 x, int32 y, int32 depth) {
         }
     }();
 
-    auto* furn = g_furnitureMan.GetFurniture(eInteriorGroupId::LOUNGE, eInteriorSubGroupId::LOUNGE_TVS, -1, m_Props->m_status);
-    PlaceObject(true, furn, x1, x2, 0.5f, GetRotationOfWall(wallId));
+    PlaceObject(
+        true,
+        g_furnitureMan.GetFurniture(eInteriorGroupId::LOUNGE, eInteriorSubGroupId::LOUNGE_TVS, -1, m_Props->m_status),
+        x1,
+        x2,
+        0.5f,
+        GetRotationOfWall(wallId) + 45.0f
+    );
 
-    const auto sg = CGeneral::RandomChoiceFromList({ eInteriorSubGroupId::LOUNGE_VIDEOS, eInteriorSubGroupId::LOUNGE_CONSOLES });
-    furn = g_furnitureMan.GetFurniture(eInteriorGroupId::LOUNGE, sg, -1, m_Props->m_status);
-    PlaceObject(true, furn, x2, x2, 0.5f, GetRotationOfWall(wallId));
+    PlaceObject(
+        true,
+        g_furnitureMan.GetFurniture(
+            eInteriorGroupId::LOUNGE,
+            CGeneral::RandomChoiceFromList({ eInteriorSubGroupId::LOUNGE_VIDEOS, eInteriorSubGroupId::LOUNGE_CONSOLES }),
+            -1,
+            m_Props->m_status
+        ),
+        x2,
+        x2,
+        0.5f,
+        GetRotationOfWall(wallId) + 45.0f
+    );
 }
 
 // 0x597430
-void Interior_c::Lounge_AddHifi(int32 wallId, int32 x, int32 y, int32 depth) {
-    return plugin::CallMethod<0x597430, Interior_c*, int32, int32, int32, int32>(this, wallId, x, y, depth);
+void Interior_c::Lounge_AddHifi(eWall wallId, int32 x, int32 y, int32 depth) {
+    auto fX = static_cast<float>(x), fY = static_cast<float>(y);
+    switch (wallId) {
+    case eWall::X_A:
+    case eWall::X_B:
+        fX += 0.5f;
+        break;
+    case eWall::Y_A:
+    case eWall::Y_B:
+        fY += 0.5f;
+        break;
+    default:
+        NOTSA_UNREACHABLE();
+    }
+
+    PlaceObject(
+        true,
+        g_furnitureMan.GetFurniture(eInteriorGroupId::LOUNGE, eInteriorSubGroupId::LOUNGE_HIFIS, -1, m_Props->m_status),
+        fX + 0.5f,
+        fY + 0.5f,
+        0.5f,
+        GetRotationOfWall(wallId)
+    );
 }
 
 // 0x5974E0
