@@ -674,7 +674,7 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* s, const IFPSectionHeader&
         const auto hier = &ms_aAnimations[ablock->FirstAnimIdx + animN];
 
         /** TAnimation - Each entry represents an in-game animation
-        * AnimName : NAME // 
+        * AnimName : NAME
         * AnimData : DGAN
         **/
 
@@ -794,14 +794,15 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* s, const IFPSectionHeader&
             const auto hasRotation    = hKFRM.IDFourCC[1] == 'R';
             const auto hasTranslation = hKFRM.IDFourCC[2] == 'T';
             const auto hasScale       = hKFRM.IDFourCC[3] == 'S';
+            
+            assert(hasRotation); // Rotation must always be present
 
             // Allocate frame data
-            seq->SetNumFrames(objInfo.NumFrames, hasRotation, isCompressed, nullptr);
+            seq->SetNumFrames(objInfo.NumFrames, hasTranslation, isCompressed, nullptr);
 
             // Read frame data from the stream
             for (size_t kfN = 0; kfN < objInfo.NumFrames; kfN++) {
                 const auto SetKF = [&](auto* kf) {
-                    kf->SetDeltaTime(RwStreamRead<float>(s));
                     kf->Rot = RwStreamRead<CQuaternion>(s).Conjugated();
                     if (hasTranslation) {
                         kf->Trans = RwStreamRead<CVector>(s);
@@ -809,6 +810,7 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* s, const IFPSectionHeader&
                             RwStreamSkip(s, sizeof(CVector)); // Scale ignored
                         }
                     }
+                    kf->SetDeltaTime(RwStreamRead<float>(s));
                 };
                 if (isCompressed) {
                     SetKF(seq->GetCKeyFrame(kfN));
@@ -818,6 +820,7 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* s, const IFPSectionHeader&
             }
 
         }
+
         if (!hier->m_bIsCompressed) {
             hier->RemoveQuaternionFlips();
             hier->CalcTotalTime();
