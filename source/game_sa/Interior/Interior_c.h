@@ -103,7 +103,7 @@ public:
     void CalcMatrix(const CVector& pos);
     void AddGotoPt(int32 tileX, int32 tileY, float offsetX, float offsetY);
     void CalcExitPts();
-    bool AddInteriorInfo(eInteriorInfoTypeS32 actionType, float offsetX, float offsetY, int32 direction, CEntity* entityIgnoredCollision);
+    bool AddInteriorInfo(eInteriorInfoTypeS32 actionType, float offsetX, float offsetY, eWall wall, CEntity* entityIgnoredCollision);
     void AddPickups();
     bool IsVisible();
     auto GetDoorNodeAddress() const { return m_DoorAddr; }
@@ -126,7 +126,7 @@ public:
     void FurnishLounge();
     void Lounge_AddTV(eWall wallId, int32 x, int32 y, int32 depth);
     void Lounge_AddHifi(eWall wallId, int32 x, int32 y, int32 depth);
-    void Lounge_AddChairInfo(int32 wallId, int32 pos, CEntity* entityIgnoredCollision);
+    void Lounge_AddChairInfo(eWall wallId, int32 pos, CEntity* entityIgnoredCollision);
     void Lounge_AddSofaInfo(int32 sitType, int32 offsetX, CEntity* entityIgnoredCollision);
 
     //
@@ -194,8 +194,20 @@ public:
 
     inline float GetRotationOfWall(eWall wallId) {
         const auto wall = std::to_underlying(wallId);
-        assert(wall >= 0 && wall < 4);
-        return static_cast<float>(wall % 4) * 90.0f;
+
+        // Euclidean modulus 4 with `x & 3`
+        return static_cast<float>(wall & 3) * 90.0f;
+    }
+
+    // Inlined in code `(wallId - 2) & 3`
+    inline eWall GetOpposingWall(eWall wallId) {
+        switch (wallId) {
+        case eWall::X_A: return eWall::X_B;
+        case eWall::Y_A: return eWall::Y_B;
+        case eWall::X_B: return eWall::X_A;
+        case eWall::Y_B: return eWall::Y_A;
+        default: NOTSA_UNREACHABLE();
+        }
     }
 
 public:

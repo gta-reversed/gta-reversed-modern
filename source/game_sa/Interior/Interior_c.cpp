@@ -41,7 +41,7 @@ void Interior_c::InjectHooks() {
     RH_ScopedInstall(FurnishLounge, 0x597740, { .reversed = false });
     RH_ScopedInstall(Lounge_AddTV, 0x597240);
     RH_ScopedInstall(Lounge_AddHifi, 0x597430);
-    RH_ScopedInstall(Lounge_AddChairInfo, 0x5974E0, { .reversed = false });
+    RH_ScopedInstall(Lounge_AddChairInfo, 0x5974E0);
     RH_ScopedInstall(Lounge_AddSofaInfo, 0x5975C0, { .reversed = false });
 
     //
@@ -315,7 +315,7 @@ void Interior_c::AddGotoPt(int32 tileX, int32 tileY, float offsetX, float offset
 }
 
 // 0x591E40
-bool Interior_c::AddInteriorInfo(eInteriorInfoTypeS32 infoType, float offsetX, float offsetY, int32 direction, CEntity* entityIgnoredCollision) {
+bool Interior_c::AddInteriorInfo(eInteriorInfoTypeS32 infoType, float offsetX, float offsetY, eWall wall, CEntity* entityIgnoredCollision) {
     if (m_NumIntInfo >= std::size(m_IntInfos)) {
         return false;
     }
@@ -324,12 +324,12 @@ bool Interior_c::AddInteriorInfo(eInteriorInfoTypeS32 infoType, float offsetX, f
     pos.z += 0.8f;
 
     CVector dir{};
-    if (direction != -1) {
-        switch (direction) {
-        case 3: dir.x = -1.0; break;
-        case 1: dir.x = 1.0; break;
-        case 2: dir.y = 1.0; break;
-        case 0: dir.y = -1.0; break;
+    if (wall != eWall::NA) {
+        switch (wall) {
+        case eWall::X_A: dir.y = -1.0; break;
+        case eWall::Y_A: dir.x = +1.0; break;
+        case eWall::X_B: dir.y = +1.0; break;
+        case eWall::Y_B: dir.x = -1.0; break;
         }
         RwV3dTransformVector(&dir, &dir, &m_Mat);
     }
@@ -513,27 +513,18 @@ void Interior_c::Lounge_AddTV(eWall wallId, int32 x, int32 y, int32 depth) {
 
     const auto&& [x1, y1, x2, y2] = [&] {
         switch (wallId) {
-        case eWall::X_A: {
-            const auto depth = static_cast<float>(m_Props->m_depth);
-
-            AddInteriorInfo(eInteriorInfoType::UNK_0, 1.0f, depth - 2.0f, -1, nullptr);
-            return std::make_tuple(0.5f, depth - 0.5f, 1.5f, depth - 0.5f);
-        }
+        case eWall::X_A:
+            AddInteriorInfo(eInteriorInfoType::UNK_0, 1.0f, m_Props->GetDepth() - 2.0f, eWall::NA, nullptr);
+            return std::make_tuple(0.5f, m_Props->GetDepth() - 0.5f, 1.5f, m_Props->GetDepth() - 0.5f);
         case eWall::Y_A:
-            AddInteriorInfo(eInteriorInfoType::UNK_0, 1.0f, 1.0f, -1, nullptr);
+            AddInteriorInfo(eInteriorInfoType::UNK_0, 1.0f, 1.0f, eWall::NA, nullptr);
             return std::make_tuple(0.5f, 0.5f, 0.5f, 1.5f);
-        case eWall::X_B: {
-            const auto width = static_cast<float>(m_Props->m_width);
-
-            AddInteriorInfo(eInteriorInfoType::UNK_0, width - 2.0f, 1.0f, -1, nullptr);
-            return std::make_tuple(width - 0.5f, 0.5f, width - 1.5f, 0.5f);
-        }
-        case eWall::Y_B: {
-            const auto depth = static_cast<float>(m_Props->m_depth), width = static_cast<float>(m_Props->m_width);
-
-            AddInteriorInfo(eInteriorInfoType::UNK_0, width - 2.0f, depth - 2.0f, -1, nullptr);
-            return std::make_tuple(width - 0.5f, depth - 0.5f, width - 0.5f, depth - 1.5f);
-        }
+        case eWall::X_B:
+            AddInteriorInfo(eInteriorInfoType::UNK_0, m_Props->GetWidth() - 2.0f, 1.0f, eWall::NA, nullptr);
+            return std::make_tuple(m_Props->GetWidth() - 0.5f, 0.5f, m_Props->GetWidth() - 1.5f, 0.5f);
+        case eWall::Y_B:
+            AddInteriorInfo(eInteriorInfoType::UNK_0, m_Props->GetWidth() - 2.0f, m_Props->GetDepth() - 2.0f, eWall::NA, nullptr);
+            return std::make_tuple(m_Props->GetWidth() - 0.5f, m_Props->GetDepth() - 0.5f, m_Props->GetWidth() - 0.5f, m_Props->GetDepth() - 1.5f);
         default:
             NOTSA_UNREACHABLE();
         }
@@ -590,8 +581,19 @@ void Interior_c::Lounge_AddHifi(eWall wallId, int32 x, int32 y, int32 depth) {
 }
 
 // 0x5974E0
-void Interior_c::Lounge_AddChairInfo(int32 wallId, int32 pos, CEntity* entityIgnoredCollision) {
-    plugin::CallMethod<0x5974E0, Interior_c*, int32, int32, CEntity*>(this, wallId, pos, entityIgnoredCollision);
+void Interior_c::Lounge_AddChairInfo(eWall wallId, int32 pos, CEntity* entityIgnoredCollision) {
+    const auto&& [x, y] = [&] {
+        const auto fPos = static_cast<float>(pos);
+        switch (wallId) {
+        case eWall::X_A: return std::pair(fPos + 0.5f,                m_Props->GetDepth() - 2.0f);
+        case eWall::X_B: return std::pair(fPos + 0.5f,                1.0f);
+        case eWall::Y_A: return std::pair(1.0f,                       fPos + 0.5f);
+        case eWall::Y_B: return std::pair(m_Props->GetWidth() - 2.0f, fPos + 0.5f);
+        default: NOTSA_UNREACHABLE();
+        }
+    }();
+
+    AddInteriorInfo(eInteriorInfoType::UNK_1, x, y, GetOpposingWall(wallId), entityIgnoredCollision);
 }
 
 // 0x5975C0
