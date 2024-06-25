@@ -449,11 +449,14 @@ void CCutsceneMgr::LoadCutsceneData_postload() {
 
     // Load animations for this cutscene
     {
+        NOTSA_LOG_TRACE("Loading anims for cutscene: ", ms_cutsceneName);
+
         const auto stream = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, "ANIM\\CUTS.IMG");
         const auto raii   = notsa::ScopeGuard{ [&] { RwStreamClose(stream, nullptr); } };
 
         char csIFPFile[1024];
         *std::format_to(csIFPFile, "{}.IFP", ms_cutsceneName) = 0;
+
         
         if (uint32 streamOffset, streamSz; ms_animLoaded = ms_pCutsceneDir->FindItem(csIFPFile, streamOffset, streamSz)) {
             CStreaming::MakeSpaceFor(streamSz * STREAMING_SECTOR_SIZE / 2); // Not sure why it's only half, but okay
@@ -465,8 +468,8 @@ void CCutsceneMgr::LoadCutsceneData_postload() {
             CAnimManager::LoadAnimFile(stream, 1, ms_aUncompressedCutsceneAnims.data());
 
             // Now create the anims in memory
-            assert(ms_cLoadAnimName.size() == ms_cLoadAnimName.size());
-            assert(std::size(ms_cLoadAnimName[0]) == std::size(ms_cLoadAnimName[0]));
+            assert(ms_cLoadAnimName.size() == ms_cLoadObjectName.size());
+            assert(std::size(ms_cLoadAnimName[0]) == std::size(ms_cLoadObjectName[0]));
             ms_cutsceneAssociations.CreateAssociations(
                 ms_cutsceneName,
                 ms_cLoadAnimName[0],
@@ -480,6 +483,8 @@ void CCutsceneMgr::LoadCutsceneData_postload() {
 
     // Load camera path splines for this cutscene
     {
+        NOTSA_LOG_TRACE("Loading camera paths for cutscene: ", ms_cutsceneName);
+
         const auto img  = CFileMgr::OpenFile("ANIM\\CUTS.IMG", "rb");
         const auto raii = notsa::ScopeGuard{ [&] { CFileMgr::CloseFile(img); } };
         
