@@ -585,24 +585,32 @@ struct IFPSectionHeader {
 
 //! @notsa - Helper
 auto CAnimManager::GetOrCreateAnimBlock(const char* name, uint32 numAnims) {
-    CAnimBlock* ablock;
-    if (ablock = GetAnimationBlock(name)) { // Block already exists
-        if (!ablock->NumAnims) {
-            ablock->NumAnims = numAnims;
-            ablock->FirstAnimIdx = ms_numAnimations;
+    CAnimBlock* ab;
+    if (ab = GetAnimationBlock(name)) { // Block already exists, initialize it if necessary
+        if (!ab->NumAnims) {
+            ab->NumAnims     = numAnims;
+            ab->FirstAnimIdx = ms_numAnimations;
+
+            NOTSA_LOG_TRACE(
+                "Initialized AnimBlock (Name: {}; NumAnims: {}; FirstAnimIdx: {}; GroupId: {})",
+                ab->Name, ab->NumAnims, ab->FirstAnimIdx, (int32)ab->GroupId
+            );
         }
     } else { // Create block
-        const auto id = ms_numAnimations++;
+        ab = &ms_aAnimBlocks[ms_numAnimBlocks++];
 
-        ablock = &ms_aAnimBlocks[id];
+        VERIFY(strncpy_s(ab->Name, name, MAX_ANIM_BLOCK_NAME) == 0);
+        ab->NumAnims     = numAnims;
+        ab->FirstAnimIdx = ms_numAnimations;
+        ab->GroupId      = GetFirstAssocGroup(ab->Name);
 
-        VERIFY(strncpy_s(ablock->Name, name, MAX_ANIM_BLOCK_NAME) == 0);
-        ablock->NumAnims = numAnims;
-        ablock->FirstAnimIdx = ms_numAnimations;
-        ablock->GroupId = GetFirstAssocGroup(ablock->Name);
+        NOTSA_LOG_TRACE(
+            "Created AnimBlock (Name: {}; NumAnims: {}; FirstAnimIdx: {}; GroupId: {})",
+            ab->Name, ab->NumAnims, ab->FirstAnimIdx, (int32)ab->GroupId
+        );
     }
-    ablock->IsLoaded = true;
-    return std::make_tuple(ablock, GetAnimationBlockIndex(ablock));
+    ab->IsLoaded = true;
+    return std::make_tuple(ab, GetAnimationBlockIndex(ab));
 }
 
 // 0x4D47F0
