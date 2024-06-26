@@ -164,10 +164,9 @@ void CCutsceneMgr::DeleteCutsceneData_overlay() {
     ms_iNumHiddenEntities = 0;
 
     // Destroy particle effects
-    for (auto& fx : ms_pParticleEffects | rngv::take(ms_iNumParticleEffects)) {
-        if (fx.m_pFxSystem) {
-            g_fxMan.DestroyFxSystem(fx.m_pFxSystem);
-            fx.m_pFxSystem = nullptr;
+    for (auto& prt : ms_pParticleEffects | rngv::take(ms_iNumParticleEffects)) {
+        if (const auto fx = std::exchange(prt.m_pFxSystem, nullptr)) {
+            g_fxMan.DestroyFxSystem(fx);
         }
     }
     ms_iNumParticleEffects = 0;
