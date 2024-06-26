@@ -3,14 +3,14 @@
 #include <concepts>
 
 //! Fixed point number (With implicit conversion to float)
-template<std::integral T, float CompressValue>
+template<std::integral T, float CompressValue, bool UseRoundingWhenConverting = false>
 class FixedFloat {
 public:
     //! Construct as 0
     constexpr FixedFloat() = default;
 
     //! Construct from an uncompressed value
-    constexpr FixedFloat(float v) : value(static_cast<T>(v * CompressValue)) {}
+    constexpr FixedFloat(float v) { Set(v, UseRoundingWhenConverting); }
 
     //! Construct from a pre-compressed value
     //! Be (very) careful when using this constructor, as mixing up this and the float version will cause bugs...
@@ -28,8 +28,10 @@ public:
 
     constexpr operator float() const { return static_cast<float>(value) / CompressValue; }
 
-    void  Set(float v, bool round) { value = round ? static_cast<T>(v * CompressValue + 0.5f) : static_cast<T>(v * CompressValue); }
-    //float Get(bool round) const { return round ? (float)v * CompressValue + 0.5f; }
+    //! Set the value (Use this if you want to set using rounding)
+    constexpr void Set(float v, bool round = UseRoundingWhenConverting) {
+        value = round ? static_cast<T>(v * CompressValue + 0.5f) : static_cast<T>(v * CompressValue);
+    }
 
     // Implementations of (basic) arithmetic ops. Necessary to avoid unnecessary int <=> float conversions
     // (That would otherwise occur when doing arithmetic between 2 FixedFloat instances)
