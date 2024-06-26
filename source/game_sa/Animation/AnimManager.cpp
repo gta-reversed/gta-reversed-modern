@@ -810,7 +810,7 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* s, const IFPSectionHeader&
                             RwStreamSkip(s, sizeof(CVector)); // Scale ignored
                         }
                     }
-                    kf->SetDeltaTime(RwStreamRead<float>(s));
+                    kf->DeltaTime = RwStreamRead<float>(s);
                 };
                 if (isCompressed) {
                     SetKF(seq->GetCKeyFrame(kfN));
