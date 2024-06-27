@@ -294,6 +294,7 @@ public:
 
     CBouncingPanel* CheckIfExistsGetFree(eCarNodes nodeIdx);
     CDoor& GetDoor(eDoors door) { return m_doors[(unsigned)door]; }
+    CDamageManager& GetDamageManager() { return m_damageManager; }
 
     void SetEngineState(bool state) {
         if (vehicleFlags.bEngineBroken)

@@ -30,6 +30,7 @@
 #include "./CloudsDebugModule.hpp"
 #include "./AudioZonesDebugModule.h"
 #include "./WeaponDebugModule.hpp"
+#include "./CheckpointsDebugModule.hpp"
 
 DebugModules::DebugModules(ImGuiContext* ctx) :
     m_ImCtx(ctx)
@@ -102,6 +103,7 @@ void DebugModules::CreateModules() {
     Add<notsa::debugmodules::WeaponDebugModule>();
     Add<ParticleDebugModule>();
     Add<TextDebugModule>();
+    Add<notsa::debugmodules::CheckpointsDebugModule>();
 
     // Stuff that is present in multiple menus
     Add<TimeCycleDebugModule>(); // Visualization + Extra
