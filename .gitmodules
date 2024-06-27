@@ -16,4 +16,4 @@
 	url = https://github.com/wolfpld/tracy.git
 [submodule "libs/json"]
 	path = libs/json
-	url = git@github.com:nlohmann/json.git
+	url = https://github.com/nlohmann/json.git
