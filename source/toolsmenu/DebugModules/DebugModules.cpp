@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include <fstream>
+
 #include "DebugModules.h"
 #include "imgui.h"
 
@@ -38,6 +40,13 @@ DebugModules::DebugModules(ImGuiContext* ctx) :
 void DebugModules::PreRenderUpdate() {
     for (auto& module : m_Modules) {
         module->Update();
+    }
+
+    // Handle DebugModule serialization
+    const auto now = time(nullptr);
+    if ((now - m_LastSerializationTime) >= MODULE_SERIALIZATION_INTERVAL) {
+        DoSerializeModules();
+        m_LastSerializationTime = now;
     }
 }
 
@@ -100,6 +109,9 @@ void DebugModules::CreateModules() {
     Add<COcclusionDebugModule>(); // Visualization + Extra
     Add<AudioZonesDebugModule>(); // Visualization + Extra
     Add<notsa::debugmodules::ImGui>(); // Stats + Extra
+
+    // Restore state of modules
+    DoDeserializeModules();
 }
 
 void DebugModules::RenderMenuBarInfo() {
@@ -117,4 +129,46 @@ void DebugModules::RenderMenuBarInfo() {
     ImGui::PushStyleColor(ImGuiCol_Text, { std::max(0.f, 1.f - FrameRateProg), std::min(1.f, FrameRateProg), 0.f, 1.f });
     ImGui::Text("%.1f FPS [%.2f ms]", io.Framerate, io.Framerate ? 1000.f / io.Framerate : 0.f); // Calculate frametime from framerate (to make the next less wobbly as the io.DeltaTime varies a lot otherwise)
     ImGui::PopStyleColor();
+}
+
+void DebugModules::DoSerializeModules() {
+    // Serialize all modules
+    json states{};
+    for (const auto& m : m_Modules) {
+        const auto id = m->GetID();
+        if (id.empty()) {
+            continue;
+        }
+        states[id] = m->Serialize();
+    }
+
+    // Save to file
+    std::ofstream outf{"DebugModules.json"};
+    outf << states;
+}
+
+void DebugModules::DoDeserializeModules() {
+    json states;
+
+    // Load from file
+    {
+        std::ifstream inf{"DebugModules.json"};
+        if (inf.fail()) {
+            return;
+        }
+        inf >> states;
+    }
+
+    // Deserialize all modules
+    for (const auto& m : m_Modules) {
+        const auto id = m->GetID();
+        if (id.empty()) {
+            continue;
+        }
+        const json& s = states[id];
+        if (s.is_null()) {
+            continue;
+        }
+        m->Deserialize(s);
+    }
 }

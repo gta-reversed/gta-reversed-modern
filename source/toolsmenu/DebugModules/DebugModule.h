@@ -7,12 +7,15 @@
 
 #include <imgui.h>
 #include "../Utility.h" // TODO Remove this and add it individually to all places this headear is included in
+#include "nlohmann/json.hpp"
+
+using json = nlohmann::json;
 
 class DebugModule {
 public:
     virtual ~DebugModule() = default;
 
-    //! Called once on imgui initalisation
+    //! Called once on ImGUI initialization
     virtual void OnImGuiInitialised(ImGuiContext* ctx) { /*nothing*/ }
     
     //! Called once every frame
@@ -26,6 +29,15 @@ public:
 
     //! Module's entry in the main menu should be rendered here
     virtual void RenderMenuEntry() = 0;
+
+    //! Serialize the state of this tool
+    virtual json Serialize() const { return {}; };
+
+    //! Restore state from serialization
+    virtual void Deserialize(const json&) { /*nothing*/ };
+
+    //! Get the ID of this module (Used for serialization)
+    virtual std::string_view GetID() const { return ""; }
 };
 
 //! Class representing a debug module with a single window
