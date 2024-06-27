@@ -189,6 +189,8 @@ public:
         return false;
     }
 #endif
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(CVector, x, y, z);
 };
 VALIDATE_SIZE(CVector, 0xC);
 
