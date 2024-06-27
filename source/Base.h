@@ -7,6 +7,9 @@
 #pragma once
 
 #include "app/app_debug.h"
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 #define PLUGIN_API
 

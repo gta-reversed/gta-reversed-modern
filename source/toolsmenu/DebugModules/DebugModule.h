@@ -7,9 +7,6 @@
 
 #include <imgui.h>
 #include "../Utility.h" // TODO Remove this and add it individually to all places this headear is included in
-#include "nlohmann/json.hpp"
-
-using json = nlohmann::json;
 
 class DebugModule {
 public:

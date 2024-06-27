@@ -119,8 +119,8 @@ void PedDebugModule::ProcessPed(PedInfo& pi) {
     char title[1024];
     *std::format_to(title, "Ped Debug###{}{}", (ptrdiff_t)(pi.ped), pi.ped->m_nRandomSeed) = 0; // Null terminate :D
 
-    if (m_autoCollapse) {
-        SetNextWindowCollapsed((pi.ped->GetPosition() - TheCamera.GetPosition()).SquaredMagnitude() >= sq(m_collapseToggleDist));
+    if (m_AutoCollapseEnabled) {
+        SetNextWindowCollapsed((pi.ped->GetPosition() - TheCamera.GetPosition()).SquaredMagnitude() >= sq(m_CollapseToggleDist));
     } else {
         SetNextWindowCollapsed(true, ImGuiCond_Once);
     }
@@ -137,7 +137,7 @@ void PedDebugModule::ProcessPed(PedInfo& pi) {
 
 // Gotta use this function because `Update` is outside a frame context
 void PedDebugModule::RenderWindow() {
-    if (!m_visible) {
+    if (!m_IsVisible) {
         return;
     }
 
@@ -164,7 +164,7 @@ void PedDebugModule::RenderWindow() {
                 return std::nullopt;
             }
                
-            if (pi.posScreen.z >= m_drawDist) { // posScreen.z == depth == distance from camera
+            if (pi.posScreen.z >= m_DrawDist) { // posScreen.z == depth == distance from camera
                 return std::nullopt;
             }
 
@@ -183,14 +183,14 @@ void PedDebugModule::RenderWindow() {
 
 void PedDebugModule::RenderMenuEntry() {
     notsa::ui::DoNestedMenuIL({ "Visualization", "Peds" }, [&] {
-        Checkbox("Enable", &m_visible);
+        Checkbox("Enable", &m_IsVisible);
 
-        const notsa::ui::ScopedDisable disable1{ !m_visible };
-        SliderFloat("Draw distance", &m_drawDist, 4.f, 300.f); // Realistically GTA won't generate peds even at 200 units
+        const notsa::ui::ScopedDisable disable1{ !m_IsVisible };
+        SliderFloat("Draw distance", &m_DrawDist, 4.f, 300.f); // Realistically GTA won't generate peds even at 200 units
 
-        Checkbox("Auto-Collapse", &m_autoCollapse);
+        Checkbox("Auto-Collapse", &m_AutoCollapseEnabled);
         SameLine();
-        const notsa::ui::ScopedDisable disable2{ !m_autoCollapse };
-        SliderFloat("Distance", &m_collapseToggleDist, 4.f, 300.f);
+        const notsa::ui::ScopedDisable disable2{ !m_AutoCollapseEnabled };
+        SliderFloat("Distance", &m_CollapseToggleDist, 4.f, 300.f);
     });
 }
