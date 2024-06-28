@@ -455,7 +455,6 @@ void CCutsceneMgr::LoadCutsceneData_postload() {
 
         char csIFPFile[1024];
         *std::format_to(csIFPFile, "{}.IFP", ms_cutsceneName) = 0;
-
         
         if (uint32 streamOffset, streamSz; ms_animLoaded = ms_pCutsceneDir->FindItem(csIFPFile, streamOffset, streamSz)) {
             CStreaming::MakeSpaceFor(streamSz * STREAMING_SECTOR_SIZE / 2); // Not sure why it's only half, but okay
