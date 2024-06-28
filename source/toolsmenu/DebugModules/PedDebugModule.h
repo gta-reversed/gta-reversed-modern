@@ -6,11 +6,8 @@ class PedDebugModule final : public DebugModule {
 public:
     void RenderWindow() override final;
     void RenderMenuEntry() override final;
-    json Serialize() const override { return *this; }
-    void Deserialize(const json& j) override { from_json(j, *this); }
-    std::string_view GetID() const { return "PedDebugModule"; }
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(PedDebugModule, m_CollapseToggleDist, m_DrawDist, m_IsVisible, m_AutoCollapseEnabled, m_IsOpen);
+    NOTSA_IMPLEMENT_DEBUG_MODULE_SERIALIZATION(PedDebugModule, m_CollapseToggleDist, m_DrawDist, m_IsVisible, m_AutoCollapseEnabled, m_IsOpen);
 
 private:
     void ProcessPed(struct PedInfo&);

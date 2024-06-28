@@ -6,11 +6,8 @@ class DarkelDebugModule final : public DebugModule {
 public:
     void RenderWindow() override final;
     void RenderMenuEntry() override final;
-    json Serialize() const override { return *this; }
-    void Deserialize(const json& j) override { from_json(j, *this); }
-    std::string_view GetID() const { return "DarkelDebugModule"; }
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(DarkelDebugModule, m_WeaponType, m_TimeLimit, m_NumKillsNeeded, m_ModelsToKill, m_ModelsToKill, m_StandardSoundAndMsg, m_IsHeadshotRequired);
+    NOTSA_IMPLEMENT_DEBUG_MODULE_SERIALIZATION(DarkelDebugModule, m_WeaponType, m_TimeLimit, m_NumKillsNeeded, m_ModelsToKill, m_ModelsToKill, m_StandardSoundAndMsg, m_IsHeadshotRequired);
 
 private:
     bool m_IsOpen{};

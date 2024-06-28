@@ -12,9 +12,11 @@ public:
     void RenderMenuEntry() override;
     void Update() override;
 
-    json Serialize() const override;
-    void Deserialize(const json&) override;
-    std::string_view GetID() const { return "TeleportDebugModule"; }
+    json Serialize() const final override { return *this; }
+    void Deserialize(const json& j) final override;
+    std::string_view GetID() const final { return "TeleportDebugModule"; }
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(TeleportDebugModule, m_IsOpen);
 
     static void TeleportTo(const CVector& pos, eAreaCodes areaCode = eAreaCodes::AREA_CODE_NORMAL_WORLD);
 
@@ -64,6 +66,4 @@ private:
 
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(InputData, Name, Search, Pos, AreaCode);
     } m_Input;
-
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(TeleportDebugModule, m_IsOpen, m_SavedLocations, m_FindGroundZ, m_PrevLocation);
 };

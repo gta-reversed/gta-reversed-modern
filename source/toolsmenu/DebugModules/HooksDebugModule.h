@@ -6,7 +6,7 @@ namespace ReversibleHooks {
 class HookCategory;
 };
 
-class HooksDebugModule : public DebugModule {
+class HooksDebugModule final : public DebugModule {
     enum class SlideSetterMode {
         NONE,
         SETTER, // This mode turns into either `TURN_OFF` OR `TURN_ON` as soon as it's possible
@@ -23,8 +23,8 @@ private:
     public:
         void Render();
 
-        json Serialize() const;
-        void Deserialize(const json& j);
+        friend void from_json(const json& j, HookFilter& m) { j.at("m_Input").get_to(m.m_Input); m.OnInputUpdate(); }
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE_ONLY_SERIALIZE(HookFilter, m_Input, m_IsCaseSensitive);
 
     private:
         void ClearFilters();
@@ -58,16 +58,14 @@ private:
         //! Filter of hook name
         //! If `nullopt` means there was no `::` (HOOKNAME_SEP) in the user input
         //! otherwise if there was, it contains whatever was after it (Which might be nothing - So the string is empty)
-        std::optional<std::string_view> m_HookFilter{};
+        std::optional<std::string_view> m_HookName{};
     };
 
 public:
     void RenderWindow() override final;
     void RenderMenuEntry() override final;
 
-    json Serialize() const override final;
-    void Deserialize(const json& j) override final;
-    std::string_view GetID() const final override { return "HooksDebugModule"; }
+    NOTSA_IMPLEMENT_DEBUG_MODULE_SERIALIZATION(HooksDebugModule, m_IsOpen, m_HookFilter);
 
 private:
     void RenderCategoryItems(ReversibleHooks::HookCategory& cat);

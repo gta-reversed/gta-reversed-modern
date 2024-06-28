@@ -38,16 +38,20 @@ DebugModules::DebugModules(ImGuiContext* ctx) :
     CreateModules();
 }
 
+DebugModules::~DebugModules() {
+    DoSerializeModules(); // NOTE/BUG: Currently practically never runs because GTA crashes before it :D
+}
+
 void DebugModules::PreRenderUpdate() {
     for (auto& module : m_Modules) {
         module->Update();
     }
 
     // Handle DebugModule serialization
-    const auto now = time(nullptr);
-    if ((now - m_LastSerializationTime) >= MODULE_SERIALIZATION_INTERVAL) {
+    const auto now = CTimer::GetTimeInMS();
+    if ((now - m_LastSerializationTimeMs) >= MODULE_SERIALIZATION_INTERVAL_MS) {
         DoSerializeModules();
-        m_LastSerializationTime = now;
+        m_LastSerializationTimeMs = now;
     }
 }
 

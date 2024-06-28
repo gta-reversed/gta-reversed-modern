@@ -37,6 +37,15 @@ public:
     virtual std::string_view GetID() const { return ""; }
 };
 
+//! You can use this macro for implementing the boilerplate needed for
+//! serialization support
+//! Example call: `NOTSA_IMPLEMENT_DEBUG_MODULE_SERIALIZATION(TeleportDebugModule, m_IsOpen);`
+#define NOTSA_IMPLEMENT_DEBUG_MODULE_SERIALIZATION(_cls, ...) \
+    json Serialize() const final override           { return *this; } \
+    void Deserialize(const json& j) final override  { from_json(j, *this); } \
+    std::string_view GetID() const final override   { return #_cls; }  \
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(_cls, __VA_ARGS__) \
+
 //! Class representing a debug module with a single window
 class DebugModuleSingleWindow : public DebugModule {
 public:

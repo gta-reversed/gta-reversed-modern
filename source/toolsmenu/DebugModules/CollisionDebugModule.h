@@ -8,11 +8,8 @@ public:
     void RenderMenuEntry() override final;
     void Render3D() override final;
     void RenderWindow() override final;
-    json Serialize() const override { return *this; }
-    void Deserialize(const json& j) override { from_json(j, *this); }
-    std::string_view GetID() const { return "CollisionDebugModule"; }
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(CollisionDebugModule, m_VisuEnabled, m_DrawBoxes, m_DrawLines, m_DrawSpheres, m_DrawTris, m_DrawBBs, m_DrawShdwTris, m_IsOpen);
+    NOTSA_IMPLEMENT_DEBUG_MODULE_SERIALIZATION(CollisionDebugModule, m_VisuEnabled, m_DrawBoxes, m_DrawLines, m_DrawSpheres, m_DrawTris, m_DrawBBs, m_DrawShdwTris, m_IsOpen);
 
 private:
     void DrawColModel(const CMatrix& matrix, const CColModel& cm);

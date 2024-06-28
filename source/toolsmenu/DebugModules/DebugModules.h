@@ -5,10 +5,11 @@
 #include "DebugModule.h"
 
 class DebugModules {
-    static constexpr time_t MODULE_SERIALIZATION_INTERVAL = 5; //!< How often to serialize the debug module states and save them to the disk
+    static constexpr time_t MODULE_SERIALIZATION_INTERVAL_MS = 5000; //!< How often to serialize the debug module states and save them to the disk
 
 public:
     DebugModules(ImGuiContext* ctx);
+    ~DebugModules();
 
     //! Pre-Render updates
     void PreRenderUpdate();
@@ -42,5 +43,5 @@ private:
 private:
     std::vector<std::unique_ptr<DebugModule>> m_Modules{};
     ImGuiContext*                             m_ImCtx{};
-    time_t                                    m_LastSerializationTime{};
+    time_t                                    m_LastSerializationTimeMs{};
 };

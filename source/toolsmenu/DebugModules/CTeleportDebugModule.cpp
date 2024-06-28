@@ -39,10 +39,6 @@ void TeleportDebugModule::Update() {
     ProcessShortcuts();
 }
 
-json TeleportDebugModule::Serialize() const {
-    return *this;
-}
-
 void TeleportDebugModule::Deserialize(const json& j) {
     from_json(j, *this);
     m_IsStateFromDeserialization = true;

@@ -8,11 +8,8 @@ public:
 
     void RenderWindow() override final;
     void RenderMenuEntry() override final;
-    json Serialize() const override { return *this; }
-    void Deserialize(const json& j) override { from_json(j, *this); }
-    std::string_view GetID() const { return "SpawnerDebugModule"; }
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(SpawnerDebugModule, m_IsOpen); // Good enough for now (Would need a refactor for other stuff....)
+    NOTSA_IMPLEMENT_DEBUG_MODULE_SERIALIZATION(SpawnerDebugModule, m_IsOpen); // Good enough for now (Would need a refactor for other stuff....)
 
 private:
     bool m_IsOpen{};

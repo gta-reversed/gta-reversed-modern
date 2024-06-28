@@ -23,7 +23,7 @@ using namespace ImGui;
 // Making all items visible again is done by `DoFilter`
 void HooksDebugModule::HookFilter::ClearFilters() {
     m_NamespaceTokens.clear(); // Clear only, so allocated memory is kept
-    m_HookFilter = {};
+    m_HookName = {};
 }
 
 // Are we filtering namespaces
@@ -33,7 +33,7 @@ bool HooksDebugModule::HookFilter::IsNamespaceFilterActive() {
 
 // If empty it won't filter anything
 bool HooksDebugModule::HookFilter::IsHookFilterEmpty() {
-    return m_HookFilter->empty();
+    return m_HookName->empty();
 }
 
 // Check if hook filter is present.
@@ -41,7 +41,7 @@ bool HooksDebugModule::HookFilter::IsHookFilterEmpty() {
 // in which case it wouldn't filter out anything.
 // Usually you want to use `IsHookFilterActive` which checks both.
 bool HooksDebugModule::HookFilter::IsHookFilterPresent() {
-    return m_HookFilter.has_value();
+    return m_HookName.has_value();
 }
 
 bool HooksDebugModule::HookFilter::IsHookFilterActive() {
@@ -101,7 +101,7 @@ auto HooksDebugModule::HookFilter::DoFilter_Internal(ReversibleHooks::HookCatego
         if (allowFilter && IsHookFilterActive()) {
             cat.m_anyItemsVisible = false;
             for (auto& i : cat.Items()) {
-                i->m_isVisible = StringContainsString(i->Name(), *m_HookFilter, m_IsCaseSensitive);
+                i->m_isVisible = StringContainsString(i->Name(), *m_HookName, m_IsCaseSensitive);
                 cat.m_anyItemsVisible |= i->m_isVisible;
             }
         } else { // Otherwise make sure all items are visible (if any)
@@ -242,6 +242,7 @@ void HooksDebugModule::HookFilter::OnInputUpdate() {
         return; // No filters
     }
 
+    // Extract namespace tokens and the hook name filter
     {
         const auto sepPos = inputsv.rfind(HOOKNAME_SEP);
 
@@ -252,12 +253,12 @@ void HooksDebugModule::HookFilter::OnInputUpdate() {
 
         // Second half (if any) contains the hook/function name filter
         if (sepPos != std::string_view::npos) {
-            m_HookFilter = inputsv.substr(sepPos + HOOKNAME_SEP.size());
+            m_HookName = inputsv.substr(sepPos + HOOKNAME_SEP.size());
         }
     }
 
     // In case user passes in a string with multiple `/` with nothing in-between we will have quite a few empty tokens.
-    //// We have have to remove all the leading empty tokens up until the last empty one.
+    // We have have to remove all the leading empty tokens up until the last empty one.
     while (m_NamespaceTokens.size() >= 2 && m_NamespaceTokens[0].empty() && m_NamespaceTokens[1].empty()) {
         m_NamespaceTokens.erase(m_NamespaceTokens.begin());
     }
@@ -275,13 +276,14 @@ void HooksDebugModule::HookFilter::OnInputUpdate() {
     if (IsRelativeToRootNamespace() && m_NamespaceTokens.size() == 1 && IsHookFilterActive()) {
         ClearFilters();
     }
+
+    DoFilter(RH::GetRootCategory());
 }
 
 void HooksDebugModule::HookFilter::Render() {
     PushItemWidth(GetWindowContentRegionMax().x - 10.f);
     if (InputText(" ", &m_Input)) {
         OnInputUpdate();
-        DoFilter(RH::GetRootCategory());
     }
     if (IsItemHovered()) {
         SetTooltip(
@@ -295,18 +297,6 @@ void HooksDebugModule::HookFilter::Render() {
     }
     PopItemWidth();
 }
-
-json HooksDebugModule::HookFilter::Serialize() const {
-    return {
-        {"Input", m_Input}
-    };
-}
-
-void HooksDebugModule::HookFilter::Deserialize(const json& j) {
-    m_Input = j["Input"];
-    OnInputUpdate();
-}
-
 template<typename T> 
 struct IDScope_Helper {
     IDScope_Helper(T id) { PushID(id); }
@@ -517,16 +507,4 @@ void HooksDebugModule::RenderMenuEntry() {
     notsa::ui::DoNestedMenuIL({ "Settings" }, [&] {
         ImGui::MenuItem("Hooks", nullptr, &m_IsOpen);
     });
-}
-
-json HooksDebugModule::Serialize() const {
-    return {
-        {"IsOpen", m_IsOpen},
-        {"HookFilter", m_HookFilter.Serialize()}
-    };
-}
-
-void HooksDebugModule::Deserialize(const json& j) {
-    m_IsOpen = j["IsOpen"];
-    m_HookFilter.Deserialize(j["HookFilter"]);
 }
