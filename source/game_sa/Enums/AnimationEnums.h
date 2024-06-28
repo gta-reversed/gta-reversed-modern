@@ -549,7 +549,6 @@ enum AnimationId : int32 {
     ANIM_ID_CAR_DOORLOCKED_LHS = 389,
     ANIM_ID_CAR_DOORLOCKED_RHS = 390,
 
-
     //
     // Add above
     //
