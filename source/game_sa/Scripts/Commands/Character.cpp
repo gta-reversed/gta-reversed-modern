@@ -1536,7 +1536,7 @@ void notsa::script::commands::character::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER(COMMAND_START_CHAR_FIRE, StartCharFire);
     REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_BLEEDING, SetCharBleeding);
     REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_VISIBLE, SetCharVisible);
-    REGISTER_COMMAND_HANDLER(COMMAND_REMOVE_CHAR_ELEGANTLY, RemoveCharElegantly);
+    //REGISTER_COMMAND_HANDLER(COMMAND_REMOVE_CHAR_ELEGANTLY, RemoveCharElegantly); // TODO(FIXME): It also needs the pool ref, regardless of whenever the ped was deleted from the pool or not, so taking a simple CPed* won't work...
     REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_STAY_IN_SAME_PLACE, SetCharStayInSamePlace);
     REGISTER_COMMAND_HANDLER(COMMAND_WARP_CHAR_FROM_CAR_TO_COORD, WarpCharFromCarToCoord);
     REGISTER_COMMAND_HANDLER(COMMAND_HAS_CHAR_SPOTTED_CHAR, HasCharSpottedChar);
