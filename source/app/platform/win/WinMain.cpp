@@ -328,6 +328,13 @@ INT WINAPI NOTSA_WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdL
         RsEventHandler(rsPREINITCOMMANDLINE, argv[i]);
     }
 
+    // Dirty fix for crash in crt when trying to free cmd line args
+    // Yeah we leak memory, but who cares
+    // Crash was in `uninitialize_allocated_io_buffers` (`C:\Program Files (x86)\Windows Kits\10\Source\<Win 10 SDK Version>\ucrt\internal\initialization.cpp`)
+    __argc  = 0;
+    __argv  = nullptr;
+    __wargv = nullptr;
+
     PSGLOBAL(window) = InitInstance(instance);
     if (!PSGLOBAL(window)) {
         return false;
