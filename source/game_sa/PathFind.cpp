@@ -488,6 +488,7 @@ void CPathFind::ComputeRoute(uint8 nodeType, const CVector& vecStart, const CVec
     plugin::CallMethod<0x452760>(this, nodeType, &vecStart, &vecEnd, &address, &nodeRoute);
 }
 
+// 0x44D960
 void CPathFind::SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, float fYMax, bool value) {
     const auto areaRect = CRect{ {fXMin, fYMax}, {fXMax, fYMin} };
 

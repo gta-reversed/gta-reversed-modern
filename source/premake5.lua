@@ -1,4 +1,4 @@
-project "gta_reversed"
+project "gta_sa_modern"
     cppdialect "C++latest"         -- C++23
     kind "SharedLib"
     targetname "gta_reversed"

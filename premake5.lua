@@ -27,7 +27,8 @@ end
     The Solution
 --]]
 
-solution "gta_reversed"
+workspace "gta_reversed"
+    startproject "gta_sa_modern"
     configurations { "Release", "Debug" }
 
     location(_OPTIONS["outdir"])
@@ -72,6 +73,13 @@ solution "gta_reversed"
     }
 
     include "source/"
+    local gta_exe = os.getenv("GTA_SA_EXE")
+    if gta_exe ~= nil and os.isfile(gta_exe) then
+        debugcommand "$(GTA_SA_EXE)"
+    else
+        debugcommand "$(GTA_SA_DIR)/gta_sa.exe"
+    end
+    debugdir "$(GTA_SA_DIR)"
 
     group "Dependencies"
         defines { "WIN32", "_WINDOWS" }
