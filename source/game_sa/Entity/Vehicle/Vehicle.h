@@ -92,24 +92,26 @@ enum eVehicleOverrideLightsState {
 };
 
 enum eCarPiece {
-    CAR_PIECE_DEFAULT = 0,
-    CAR_PIECE_BONNET,
-    CAR_PIECE_BOOT,
-    CAR_PIECE_BUMP_FRONT,
-    CAR_PIECE_BUMP_REAR,
-    CAR_PIECE_DOOR_LF,
-    CAR_PIECE_DOOR_RF,
-    CAR_PIECE_DOOR_LR,
-    CAR_PIECE_DOOR_RR,
-    CAR_PIECE_WING_LF,
-    CAR_PIECE_WING_RF,
-    CAR_PIECE_WING_LR,
-    CAR_PIECE_WING_RR,
-    CAR_PIECE_WHEEL_LF, // front wheel for 2 wheel bike
-    CAR_PIECE_WHEEL_RF,
-    CAR_PIECE_WHEEL_RL, // rear wheel for 2 wheel bike
-    CAR_PIECE_WHEEL_RR,
-    CAR_PIECE_WINDSCREEN = 19,
+    CAR_PIECE_DEFAULT     = 0,
+    CAR_PIECE_BONNET      = 1,
+    CAR_PIECE_BOOT        = 2,
+    CAR_PIECE_BUMP_FRONT  = 3,
+    CAR_PIECE_BUMP_REAR   = 4,
+    CAR_PIECE_DOOR_LF     = 5,
+    CAR_PIECE_DOOR_RF     = 6,
+    CAR_PIECE_DOOR_LR     = 7,
+    CAR_PIECE_DOOR_RR     = 8,
+    CAR_PIECE_WING_LF     = 9,
+    CAR_PIECE_WING_RF     = 10,
+    CAR_PIECE_WING_LR     = 11,
+    CAR_PIECE_WING_RR     = 12,
+    CAR_PIECE_WHEEL_LF    = 13, // front wheel for 2 wheel bike
+    CAR_PIECE_WHEEL_RF    = 14,
+    CAR_PIECE_WHEEL_RL    = 15, // rear wheel for 2 wheel bike
+    CAR_PIECE_WHEEL_RR    = 16,
+    CAR_PIECE_BIKEWHEEL_F = 17,
+    CAR_PIECE_BIKEWHEEL_R = 18,
+    CAR_PIECE_WINDSCREEN  = 19,
 };
 constexpr inline eCarPiece eCarPiece_WheelPieces[]{ CAR_PIECE_WHEEL_LF, CAR_PIECE_WHEEL_RF, CAR_PIECE_WHEEL_RL, CAR_PIECE_WHEEL_RR };
 
