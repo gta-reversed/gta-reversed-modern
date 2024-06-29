@@ -89,7 +89,7 @@ void CPlantMgr::InjectHooks() {
     RH_ScopedInstall(_ProcessEntryCollisionDataSections_AddLocTris, 0x5DC8B0);
     RH_ScopedInstall(_ProcessEntryCollisionDataSections_RemoveLocTris, 0x5DBF20);
     RH_ScopedInstall(_UpdateLocTris, 0x5DCF00);
-    //RH_ScopedGlobalInstall(LoadModels, 0x5DD220); // uses `__usecall`, can't hook
+    //RH_ScopedGlobalInstall(LoadModels, 0x5DD220); // uses `__usercall`, can't hook
 
     // Do not uncomment!
     // RH_ScopedInstall(_CalcDistanceSqrToEntity, 0x5DBE40, {.reversed = false}); <-- bad call conv.
