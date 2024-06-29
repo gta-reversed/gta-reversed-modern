@@ -14,6 +14,8 @@ option(SPDLOG_ENABLE_PCH "" ON)
 option(SPDLOG_USE_STD_FORMAT "" ON)
 add_subdirectory(spdlog EXCLUDE_FROM_ALL)
 
+add_subdirectory(json EXCLUDE_FROM_ALL)
+
 #############################################################################################
 ############# create the imgui project
 #############################################################################################

@@ -7,6 +7,10 @@
 #pragma once
 
 #include "app/app_debug.h"
+#include <rw/rwplcore.h>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 #define PLUGIN_API
 
@@ -192,3 +196,5 @@ void SAFE_RELEASE(T*& ptr) { // DirectX stuff `Release()`
 #define _SWSTRING_STATIC(id) my_ws##id
 #define _SWSTRING_STATIC_FROM(id, src) for (size_t i = 0; i < strlen(src); i++) my_ws##id[i] = src[i]
 #define _SWSTRING_STATIC_TO(id, dst) for (size_t i = 0; i < wcslen(my_ws##id); i++) dst[i] = static_cast<char>(my_ws##id[i])
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(RwRGBAReal, red, blue, green, alpha);

@@ -30,7 +30,7 @@ function(supress_deps_warnings targets)
         )
     endforeach()
 endfunction()
-supress_deps_warnings(ogg imgui vorbisfile spdlog)
+supress_deps_warnings(ogg imgui vorbisfile spdlog nlohmann_json)
 
 set_target_properties(${RE_PROJECT_LIB_NAME}
     PROPERTIES
@@ -71,6 +71,7 @@ target_link_libraries(${RE_PROJECT_LIB_NAME} PRIVATE
     strmiids
     dsound
     d3d9
+    nlohmann_json
 )
 
 if(WIN32) 
