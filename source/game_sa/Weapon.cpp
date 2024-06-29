@@ -45,7 +45,7 @@ void CWeapon::InjectHooks() {
     RH_ScopedInstall(GenerateDamageEvent, 0x73A530);
     RH_ScopedInstall(FireInstantHitFromCar2, 0x73CBA0);
     RH_ScopedInstall(Update, 0x73DB40);
-    RH_ScopedInstall(SetUpPelletCol, 0x73C710, { .reversed = false });
+    RH_ScopedInstall(SetUpPelletCol, 0x73C710);
     RH_ScopedInstall(FireAreaEffect, 0x73E800);
     RH_ScopedInstall(FireInstantHitFromCar, 0x73EC40, { .reversed = false });
     RH_ScopedInstall(FireFromCar, 0x73FA20);
@@ -501,12 +501,13 @@ void CWeapon::DoBulletImpact(CEntity* firedBy, CEntity* victim, const CVector& s
 
         const auto DoBulletHitFx = [&] {
             if (incrementalHit <= 0) {
-                if ((endPoint - startPoint).Dot(hitCP.m_vecNormal) < 0.f) { // Normal is opposite to that of the bullet's direction
+                const auto angle = (endPoint - startPoint).Normalized().Dot(hitCP.m_vecNormal);
+                if (angle < 0.f) { // Normal is opposite to that of the bullet's direction
                     AudioEngine.ReportBulletHit(
                         victim,
                         hitCP.m_nSurfaceTypeB,
                         hitCP.m_vecPoint,
-                        RWRAD2DEG((float)std::asin(-incrementalHit))
+                        RWRAD2DEG(std::asin(-angle))
                     );
                 }
             }
@@ -845,8 +846,92 @@ bool CWeapon::TakePhotograph(CEntity* owner, CVector* point) {
 }
 
 // 0x73C710
-void CWeapon::SetUpPelletCol(int32 numPellets, CEntity* owner, CEntity* victim, CVector& point, CColPoint& colPoint, CMatrix& outMatrix) {
-    plugin::CallMethod<0x73C710, CWeapon*, int32, CEntity*, CEntity*, CVector&, CColPoint&, CMatrix&>(this, numPellets, owner, victim, point, colPoint, outMatrix);
+void CWeapon::SetUpPelletCol(int32 numPellets, CEntity* owner, CEntity* victim, CVector& point, CColPoint& colPoint, CMatrix& outMat) {
+    constexpr int32 MAX_NUM_PELLETS = 15;
+
+    assert(numPellets <= MAX_NUM_PELLETS);
+
+    auto* const cm = &ms_PelletTestCol;
+    if (!cm->GetData()) {
+        cm->AllocateData(0, 0, MAX_NUM_PELLETS, 0, 0, false);
+        cm->GetBoundingSphere().Set(1.f, {0.f, 0.f, 0.f});
+        cm->m_nColSlot = 0;
+    }
+    auto* const cd = ms_PelletTestCol.GetData();
+
+    auto hitDir = (colPoint.m_vecPoint - point);
+    const float depth = hitDir.NormaliseAndMag() * CWorld::fWeaponSpreadRate * 1.3f;
+
+    //> 0x73C806 - Create pellet lines
+    cd->m_nNumLines = (uint8)numPellets;
+    const auto lines = cd->GetLines();
+    lines[0].Set(
+        { 0.f, -depth, 0.f },
+        { 0.f,  depth, 0.f }
+    );
+    for (int32 i = 1; i < numPellets; i++) {
+        const auto angle  = CGeneral::GetRandomNumberInRange(-PI, PI);
+        const auto spread = CGeneral::GetRandomNumberInRange(0.f, depth * 0.8f);
+
+        const auto oX = std::cos(angle) * spread;
+        const auto oZ = std::sin(angle) * spread;
+
+        lines[i].Set(
+            { oX, -depth * 2.f, oZ },
+            { oX,  depth * 2.f, oZ }
+        );
+    }
+
+    //> 0x73C923 -  Calculate bounding volumes
+    cm->GetBoundingBox().Set(
+        { -depth, -depth * 2.f, -depth },
+        {  depth,  depth * 2.f,  depth }
+    );
+    cm->GetBoundingSphere().Set(
+        depth * 2.5f,
+        {0.f, 0.f, 0.f}
+    );
+
+    const auto CalculateMatrixRotation = [&](CVector fwd, CVector zaxis) {
+        const auto r = zaxis.Cross(fwd).Normalized();
+        outMat.GetForward() = fwd;
+        outMat.GetRight()   = r;
+        outMat.GetUp()      = r.Cross(fwd);
+    };
+
+    if (victim->IsBuilding()) { // 0x73C98E
+        const auto& n = colPoint.m_vecNormal;
+        CalculateMatrixRotation(
+            -n,
+            std::abs(n.z) >= 0.9f
+                ? CVector{0.f, 1.f, 0.f}
+                : CVector{1.f, 0.f, 0.f}
+        );
+
+    } else  if (std::abs(hitDir.z) <= 0.9f) { // 0x73CA4C
+        CalculateMatrixRotation(
+            hitDir,
+            {0.f, 0.f, 1.f}
+        );
+    } else if (!owner->IsPed()) { // 0x73CA59
+        CalculateMatrixRotation(
+            hitDir,
+            {1.f, 0.f, 0.f}
+        );
+    } else { // 0x73CA5B
+        CalculateMatrixRotation(
+            hitDir,
+            owner->GetForward()
+        );
+    }
+
+    // 0x73CAFF
+    outMat.GetPosition() = colPoint.m_vecPoint;
+
+    // 0x73CB1A
+    if (!victim->IsBuilding()) {
+        outMat.GetPosition() -= colPoint.m_vecNormal.ProjectOnToNormal(outMat.GetForward()) * depth;
+    }
 }
 
 // 0x73CBA0
