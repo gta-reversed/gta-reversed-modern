@@ -1,7 +1,10 @@
 #include "StdInc.h"
 #include "TaskSimpleFight.h"
+#include "TaskSimpleGetUp.h"
 #include <Events/EventVehicleDamage.h>
 #include <Fx/Fx.h>
+
+constexpr static int32 AE_DOUBLE_HIT_DELAYS_MS[]{ 300, 400, 500 }; // 0x8D2E3C
 
 void CTaskSimpleFight::InjectHooks() {
     RH_ScopedVirtualClass(CTaskSimpleFight, 0x86d684, 9);
@@ -20,7 +23,7 @@ void CTaskSimpleFight::InjectHooks() {
     RH_ScopedInstall(FindTargetOnGround, 0x61D6F0, { .reversed = false });
     RH_ScopedInstall(FightHitObj, 0x61D400);
     RH_ScopedInstall(FightHitCar, 0x61D0B0);
-    RH_ScopedInstall(FightHitPed, 0x61CBA0, { .reversed = false });
+    RH_ScopedInstall(FightHitPed, 0x61CBA0);
     RH_ScopedInstall(SetPlayerMoveAnim, 0x61C9B0, { .reversed = false });
     RH_ScopedInstall(FightStrike, 0x6240B0, { .reversed = false });
     RH_ScopedInstall(GetAvailableComboSet, 0x61C7F0, { .reversed = false });
@@ -327,6 +330,11 @@ void CTaskSimpleFight::LoadMeleeData() {
     CFileMgr::CloseFile(file);
 }
 
+// 0x61C650
+bool CTaskSimpleFight::BeHitWhileBlocking(CPed* ped, CPed* attacker, eMeleeCombo atkCombo, eMeleeMove atkMove) {
+    return false;
+}
+
 // 0x5BD3B0
 eAudioEvents CTaskSimpleFight::GetHitSound(int32 hitSound) {
     switch (hitSound) {
@@ -508,8 +516,99 @@ void CTaskSimpleFight::FightHitCar(CPed* attacker, CVehicle* victim, CVector& hi
 }
 
 // 0x61CBA0
-CPed* CTaskSimpleFight::FightHitPed(CPed * creator, CPed * victim, CVector & hitPt, CVector & hitDelta, int16 hitPieceType) {
-    return plugin::CallMethodAndReturn<CPed *, 0x61CBA0, CTaskSimpleFight*, CPed *, CPed *, CVector &, CVector &, int16>(this, creator, victim, hitPt, hitDelta, hitPieceType);
+CPed* CTaskSimpleFight::FightHitPed(CPed * attacker, CPed * victim, CVector & hitPt, CVector & hitDelta, int16 hitPieceType) {
+    if (victim->IsPlayer()) {
+        if (victim->GetTaskManager().GetActiveTaskAs<CTaskSimpleGetUp>()) {
+            return nullptr;
+        }
+    }
+
+    auto* const combo = &GetCurrentComboData();
+
+    const auto AddAudioEventForMove = [&](int32 delay) {
+        attacker->m_pedAudio.AddAudioEvent(combo->AltHitSound[+m_CurrentMove], -9.f, 1.f, victim, 0, 0, delay);
+    };
+
+    // 0x61CC04
+    if (const auto victimTaskFight = victim->GetIntelligence()->GetTaskFighting()) {
+        if (victimTaskFight->BeHitWhileBlocking(victim, attacker, m_ComboSet, m_CurrentMove)) {
+            AddAudioEventForMove(0);
+            if (m_ComboSet == eMeleeCombo::UNARMED_2 && m_CurrentMove <= eMeleeMove::ATTACK3) {
+                AddAudioEventForMove(AE_DOUBLE_HIT_DELAYS_MS[+m_CurrentMove]);
+            }
+            return nullptr;
+        }
+    }
+
+    const auto victimHitSide = CPedGeometryAnalyser::ComputePedHitSide(*victim, *attacker);
+    const auto atkrWeaponType = attacker->GetActiveWeapon().GetType();
+    const auto hasDamagedVictim = CWeapon::GenerateDamageEvent(
+        victim,
+        attacker,
+        atkrWeaponType,
+        (uint32)GetStrikeDamage(attacker),
+        (ePedPieceTypes)hitPieceType,
+        victimHitSide
+    );
+
+    if (atkrWeaponType == WEAPON_CHAINSAW) { // 0x61CD5C
+        attacker->m_weaponAudio.AddAudioEvent(AE_WEAPON_CHAINSAW_CUTTING);
+    }
+
+    if (victimHitSide == 0 && (m_ComboSet != eMeleeCombo::UNARMED_2 || m_CurrentMove > eMeleeMove::ATTACK3)) {
+        if (m_ComboSet == eMeleeCombo::UNARMED_4 && m_CurrentMove == eMeleeMove::ATTACK2) { // 0x61CDEC
+            AddAudioEventForMove(AE_DOUBLE_HIT_DELAYS_MS[+m_CurrentMove]);
+            AddAudioEventForMove(AE_DOUBLE_HIT_DELAYS_MS[+m_CurrentMove] * 28 / 10); // * 2.8f (I'm lazy to cast it)
+        } else { // 0x61CE48
+            AddAudioEventForMove(0);
+        }
+    } else {
+        AddAudioEventForMove(0);
+        if (m_ComboSet == eMeleeCombo::UNARMED_2 && m_CurrentMove <= eMeleeMove::ATTACK3) {
+            AddAudioEventForMove(AE_DOUBLE_HIT_DELAYS_MS[+m_CurrentMove]);
+        }
+    }
+
+    if (attacker->IsPlayer()) { // 0x61CEA6
+        attacker->Say(89);
+    }
+
+    GetEventGlobalGroup()->Add(CEventSoundQuiet{attacker, 55.f, (uint32)-1, {0.f, 0.f, 0.f}}); // 0x61CEEE
+
+    // 0x61CF0E - Add blood fx 
+    if ([&]{
+        switch (m_ComboSet) {
+        case eMeleeCombo::BBALLBAT:
+        case eMeleeCombo::KNIFE:
+        case eMeleeCombo::GOLFCLUB:
+        case eMeleeCombo::SWORD:
+        case eMeleeCombo::CHAINSAW:
+            return true;  // Technically there was a small chance for this to be false, but most likely unintentionally
+        }
+        if (m_ComboSet == eMeleeCombo::UNARMED_1 && m_CurrentMove == eMeleeMove::MOVING) {
+            return false;
+        }
+        return CGeneral::RandomBool(100.f - victim->m_fHealth);
+    }()) {
+        const auto AddBloodFx = [&](CVector dir, uint32 amnt) {
+            g_fx.AddBlood(hitPt, dir, amnt, victim->m_fContactSurfaceBrightness);
+        };
+        const auto fxDir = victim->IsAlive()
+            ? (attacker->GetPosition() - victim->GetPosition()).Normalized()
+            : CVector{0.f, 0.f, 2.f};
+        switch (m_ComboSet) {
+        case eMeleeCombo::BBALLBAT:
+        case eMeleeCombo::KNIFE:
+        case eMeleeCombo::GOLFCLUB:
+        case eMeleeCombo::SWORD:
+        case eMeleeCombo::CHAINSAW: AddBloodFx(victim->IsAlive() ? fxDir * 1.5f : fxDir, 16); break;
+        default:                    AddBloodFx(fxDir, 8); break;
+        }
+    }
+
+    return hasDamagedVictim
+        ? victim
+        : nullptr;
 }
 
 // 0x6240B0

@@ -138,7 +138,7 @@ public:
 
     static void LoadMeleeData();
 
-    void BeHitWhileBlocking(CPed* ped1, CPed* ped2, int8, int8);
+    bool BeHitWhileBlocking(CPed* ped, CPed* attacker, eMeleeCombo atkCombo, eMeleeMove atkMove);
     void ChooseAttackAI(CPed* ped);
     void ChooseAttackPlayer(CPed* ped);
     bool FindTargetOnGround(CPed* ped);
