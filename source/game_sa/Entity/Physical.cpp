@@ -1673,7 +1673,7 @@ bool CPhysical::ApplyFriction(float fFriction, CColPoint& colPoint)
     CVector vecMoveDirection = vecSpeedDifference / fMoveSpeedMagnitude;
 
     CVector worldCOM = GetMatrix().TransformVector(m_vecCentreOfMass);
-    float fCollisionMass = -GetMass(vecDistanceToPointFromThis - worldCOM, vecMoveDirection);
+    float fCollisionMass = -GetMass(vecDistanceToPointFromThis - worldCOM, vecMoveDirection) * fMoveSpeedMagnitude;
     fCollisionMass = std::max(fCollisionMass, -fFriction);
 
     ApplyFrictionForce(vecMoveDirection * fCollisionMass, vecDistanceToPointFromThis);
