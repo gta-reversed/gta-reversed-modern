@@ -27,6 +27,10 @@ struct WEnum {
     //! Get the underlaying value
     constexpr StoreAs get_underlying() const { return m_Value; }
 
+    //! Convert to underlaying type
+    friend constexpr auto operator+(WEnum e) {
+        return e.get_underlying();
+    }
 
 public:
     StoreAs m_Value;
@@ -43,6 +47,12 @@ template<typename E>
 using WEnumS16 = WEnum<E, std::int16_t>;
 
 template<typename E>
+//! Use unary operator + instead of ugly `static_cast` for enum (class) for casting to underlaying type
+template <typename T>
+    requires std::is_enum_v<T>
+inline constexpr auto operator+(T e) noexcept {
+    return static_cast<std::underlying_type_t<T>>(e);
+}
 using WEnumU32 = WEnum<E, std::uint32_t>;
 template<typename E>
 using WEnumS32 = WEnum<E, std::int32_t>;
