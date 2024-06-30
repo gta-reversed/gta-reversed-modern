@@ -1,5 +1,6 @@
 #include "StdInc.h"
 #include "TaskSimpleFight.h"
+#include <Fx/Fx.h>
 
 void CTaskSimpleFight::InjectHooks() {
     RH_ScopedVirtualClass(CTaskSimpleFight, 0x86d684, 9);
@@ -403,8 +404,44 @@ bool CTaskSimpleFight::ControlFight(CEntity * newTarget,  eMeleeCommandS8 comman
 }
 
 // 0x61D400
-void CTaskSimpleFight::FightHitObj(CPed* attacker, CObject* victim, CVector& hitPt, CVector& hitDelta, int16 hitPieceType, uint8 hitSurfaceType) {
-    plugin::CallMethodAndReturn<void, 0x61D400, CTaskSimpleFight*, CPed *, CObject *, CVector &, CVector &, int16, uint8>(this, attacker, victim, hitPt, hitDelta, hitPieceType, hitSurfaceType);
+void CTaskSimpleFight::FightHitObj(CPed* attacker, CObject* victim, CVector& hitPt, CVector& hitDir, int16 hitPieceType, uint8 hitSurfaceType) {
+    if (   victim->m_nColDamageEffect < 200
+        && !victim->physicalFlags.bDisableCollisionForce
+        && victim->m_pObjectInfo->m_fColDamageMultiplier < 99.9f
+    ) {
+        if (victim->IsStatic() && victim->m_pObjectInfo->m_fUprootLimit <= 0.f) {
+            victim->SetIsStatic(false);
+            victim->AddToMovingList();
+        }
+        if (!victim->IsStatic()) {
+            victim->ApplyForce(
+                hitDir * (victim->physicalFlags.bMakeMassTwiceAsBig ? -0.1f : -0.5f),
+                hitPt - victim->GetPosition(),
+                true
+            );
+        }
+    }
+
+    victim->ObjectDamage(
+        GetStrikeDamage(attacker) * 10.f,
+        &hitPt,
+        &hitDir,
+        attacker,
+        attacker->GetActiveWeapon().GetType()
+    );
+
+    if (attacker->GetActiveWeapon().GetType() == WEAPON_CHAINSAW) {
+        attacker->m_weaponAudio.AddAudioEvent(AE_WEAPON_CHAINSAW_CUTTING);
+    }
+    
+    attacker->m_pedAudio.AddAudioEvent(
+        GetCurrentComboData().HitSound[+m_CurrentMove],
+        0.f,
+        1.f,
+        victim,
+        hitSurfaceType
+    );
+    g_fx.AddPunchImpact(hitPt, hitDir, 4);
 }
 
 // 0x61D0B0
