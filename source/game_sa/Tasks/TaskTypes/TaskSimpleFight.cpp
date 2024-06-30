@@ -1,5 +1,6 @@
 #include "StdInc.h"
 #include "TaskSimpleFight.h"
+#include <Events/EventVehicleDamage.h>
 #include <Fx/Fx.h>
 
 void CTaskSimpleFight::InjectHooks() {
@@ -17,7 +18,7 @@ void CTaskSimpleFight::InjectHooks() {
     RH_ScopedGlobalInstall(GetHitLevel, 0x5BD360);
     RH_ScopedInstall(GetComboAnimGroupID, 0x4ABDA0);
     RH_ScopedInstall(FindTargetOnGround, 0x61D6F0, { .reversed = false });
-    RH_ScopedInstall(FightHitObj, 0x61D400, { .reversed = false });
+    RH_ScopedInstall(FightHitObj, 0x61D400);
     RH_ScopedInstall(FightHitCar, 0x61D0B0);
     RH_ScopedInstall(FightHitPed, 0x61CBA0, { .reversed = false });
     RH_ScopedInstall(SetPlayerMoveAnim, 0x61C9B0, { .reversed = false });
@@ -432,8 +433,7 @@ void CTaskSimpleFight::FightHitObj(CPed* attacker, CObject* victim, CVector& hit
 
     if (attacker->GetActiveWeapon().GetType() == WEAPON_CHAINSAW) {
         attacker->m_weaponAudio.AddAudioEvent(AE_WEAPON_CHAINSAW_CUTTING);
-    }
-    
+    } 
     attacker->m_pedAudio.AddAudioEvent(
         GetCurrentComboData().HitSound[+m_CurrentMove],
         0.f,
