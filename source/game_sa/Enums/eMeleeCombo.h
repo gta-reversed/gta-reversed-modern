@@ -27,6 +27,7 @@ enum class eMeleeCombo : int8 {
     // Add above
     //
     NUM,
+    NUM_SETS = +PISTOL_WHIP - +UNARMED_1 + 1
 };
 NOTSA_WENUM_DEFS_FOR(eMeleeCombo);
 

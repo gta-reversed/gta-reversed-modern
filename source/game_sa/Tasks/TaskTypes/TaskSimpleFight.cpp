@@ -11,7 +11,7 @@ void CTaskSimpleFight::InjectHooks() {
     RH_ScopedGlobalInstall(GetComboType, 0x61DB30);
     RH_ScopedGlobalInstall(FinishMeleeAnimCB, 0x61DAE0);
     RH_ScopedGlobalInstall(FightSetUpCol, 0x61D5F0);
-    RH_ScopedGlobalInstall(LoadMeleeData, 0x5BEDC0, { .reversed = false });
+    RH_ScopedGlobalInstall(LoadMeleeData, 0x5BEDC0);
     RH_ScopedGlobalInstall(GetHitSound, 0x5BD3B0);
     RH_ScopedGlobalInstall(GetHitLevel, 0x5BD360);
     RH_ScopedInstall(GetComboAnimGroupID, 0x4ABDA0);
@@ -120,7 +120,209 @@ void CTaskSimpleFight::FinishMeleeAnimCB(CAnimBlendAssociation* anim, void* data
 
 // 0x5BEDC0
 void CTaskSimpleFight::LoadMeleeData() {
-    return plugin::CallAndReturn<void, 0x5BEDC0>();
+    for (auto& cs : m_aComboData) {
+        cs.AnimGroup       = ANIM_GROUP_MELEE_1;
+        cs.GroupRange      = 1.5f;
+        cs.GroundLoopStart = 0.f;
+        cs.BlockLoopStart  = 100.f;
+        cs.BlockLoopEnd    = 100.f;
+        cs.Flags           = 0;
+        rng::fill(cs.FireTime, 100.f);
+        rng::fill(cs.ComboTime, 100.f);
+        rng::fill(cs.Radius, 1.f);
+        rng::fill(cs.HitLevel, eMeleeHitLevel::NUM);
+        rng::fill(cs.Damage, 0);
+        rng::fill(cs.HitSound, AE_UNDEFINED); // Originally 0
+        rng::fill(cs.AltHitSound, AE_UNDEFINED); // Originally 0
+    }
+
+    rng::fill(m_aHitOffset, CVector{0.f, 0.75f, 0.f});
+
+    // Sections
+    enum {
+        SNONE,
+        SCOMBO,
+        SLEVELS,
+    } section = SNONE;
+
+    // Combo section fields
+    enum {
+        FNONE      = 0x0,
+        FANIMGROUP = 0x1,
+        FRANGES    = 0x2,
+        FATTACK1   = 0x3,
+        FATTACK2   = 0x4,
+        FATTACK3   = 0x5,
+        FAGROUND   = 0x6,
+        FAMOVING   = 0x7,
+        FABLOCK    = 0x8,
+        FFLAGS     = 0x9,
+    };
+    int32 field = FNONE;
+
+    char fname[32];
+    const auto CheckFieldIs = [&fname](const char* expected) {
+        if (strcmp(fname, expected) != 0) {
+            NOTSA_LOG_ERR("Expected field {} got {}", expected, fname);
+        }
+    };
+
+    size_t comboN = 0;
+    size_t levelN = 0;
+
+    const auto file = CFileMgr::OpenFile("DATA\\melee.dat", "rb");
+    for (;;) {
+        const auto line = CFileLoader::LoadLine(file);
+        if (!line) {
+            break;
+        }
+        if (!line[0] || line[0] == '#') {
+            continue;
+        }
+        const auto LineStartsWith = [line]<size_t N>(const char (&with)[N]) {
+            return strncmp(line, with, N - 1) == 0;
+        };
+        if (LineStartsWith("END_MELEE_DATA")) { // End of file
+            break;
+        }
+        if (section == SNONE) {
+            if (LineStartsWith("START_COMBO")) {
+                section = SCOMBO;
+            } else if (LineStartsWith("START_LEVELS")) {
+                section = SLEVELS;
+            }
+            continue;
+        }
+        if (LineStartsWith("END_COMBO")) { // Yes, `END_COMBO` is used for `START_LEVELS` too!
+            if (section == SCOMBO) {
+                comboN++;
+                field = 0;
+            }
+            section = SNONE;
+            continue;
+        }
+        if (section == SLEVELS) {
+            NOTSA_LOG_TRACE("Reading offsets for level {}", levelN);
+
+            auto* const o = &m_aHitOffset[levelN++];
+
+            VERIFY(sscanf_s(
+                line,
+                "%s %f %f %f",
+                SCANF_S_STR(fname), &o->x, &o->y, &o->z
+            ) == 4);
+
+        } else if (section == SCOMBO) { // Not that it could be something else at this point
+            auto* const c = &m_aComboData[comboN];
+
+            switch (++field) {
+            case FANIMGROUP: {
+                char animGroupName[32]{};
+
+                VERIFY(sscanf_s(
+                    line,
+                    "%s %s",
+                    SCANF_S_STR(fname), SCANF_S_STR(animGroupName)
+                ) == 2);
+                CheckFieldIs("ANIMGROUP");
+
+                c->AnimGroup = CAnimManager::GetAnimationGroupIdByName(animGroupName);
+                assert(c->AnimGroup != AssocGroupId::ANIM_GROUP_DEFAULT);
+
+                break;
+            }
+            case FRANGES: {
+                VERIFY(sscanf_s(
+                    line,
+                    "%s %f",
+                    SCANF_S_STR(fname), &c->GroupRange
+                ) == 2);
+                CheckFieldIs("RANGES");
+
+                break;
+            }
+            case FATTACK1:
+            case FATTACK2:
+            case FATTACK3:
+            case FAGROUND:
+            case FAMOVING: {
+                // In the same order as they appear in the file:
+                float hit;
+                float chain;
+                float radius;
+                char  hitLevelName[32]{};
+                int32 damage;
+                int32 hitSound;
+                int32 hitAltSound;
+                float groundLoop = 0.f; // Optional
+
+                VERIFY(sscanf_s(
+                    line,
+                    "%s %f %f %f %s %d %d %d %f",
+                    SCANF_S_STR(fname), &hit, &chain, &radius, SCANF_S_STR(hitLevelName), &damage, &hitSound, &hitAltSound, &groundLoop
+                ) >= 8);
+
+                int32 lvl;
+                switch (field) {
+                case FATTACK1: CheckFieldIs("ATTACK1"); lvl = 0; break;
+                case FATTACK2: CheckFieldIs("ATTACK2"); lvl = 1; break;
+                case FATTACK3: CheckFieldIs("ATTACK3"); lvl = 2; break;
+                case FAGROUND: CheckFieldIs("AGROUND"); lvl = 3; break;
+                case FAMOVING: CheckFieldIs("AMOVING"); lvl = 4; break;
+                default:       NOTSA_UNREACHABLE();
+                }
+
+                c->FireTime[lvl]    = hit / 30.f;
+                c->Radius[lvl]      = radius;
+                c->ComboTime[lvl]   = chain / 30.f;
+                c->HitLevel[lvl]    = GetHitLevel(hitLevelName);
+                c->Damage[lvl]      = (uint8)damage;
+                c->HitSound[lvl]    = GetHitSound(hitSound);
+                c->AltHitSound[lvl] = GetHitSound(hitAltSound);
+                if (groundLoop > 0.f) {
+                    c->GroundLoopStart = groundLoop / 30.f;
+                }
+
+                break;
+            }
+            case FABLOCK: {
+                float loopStart;
+                float loopEnd;
+
+                VERIFY(sscanf_s(
+                    line,
+                    "%s %f %f",
+                    SCANF_S_STR(fname), &loopStart, &loopEnd
+                ) == 3);
+                CheckFieldIs("ABLOCK");
+
+                c->BlockLoopStart = loopStart / 30.f;
+                c->BlockLoopEnd   = loopEnd / 30.f;
+
+                break;
+            }
+            case FFLAGS: {
+                uint32 flags;
+
+                VERIFY(sscanf_s(
+                    line,
+                    "%s %x",
+                    SCANF_S_STR(fname), &flags
+                ) == 2);
+                CheckFieldIs("FLAGS");
+
+                c->Flags = flags;
+
+                break;
+            }
+            default:
+                NOTSA_UNREACHABLE("Invalid field {}", field);
+            }
+        } else {
+            NOTSA_UNREACHABLE("Invalid section {}", (int32)section);
+        }
+    }
+    CFileMgr::CloseFile(file);
 }
 
 // 0x5BD3B0

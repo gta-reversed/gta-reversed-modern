@@ -75,18 +75,18 @@ struct tMeleeComboSet {
     template<typename T>
     using MeleeMoveInfo = std::array<T, +eMeleeMove::NUM>;
 
-    AssocGroupId                AnimGroup;
-    float                       GroupRange;
-    MeleeMoveInfo<float>        FireTime;
-    MeleeMoveInfo<float>        ComboTime;
-    MeleeMoveInfo<float>        Radius;
-    float                       GroundLoopStart;
-    float                       BlockLoopStart;
-    float                       BlockLoopEnd;
-    MeleeMoveInfo<uint8>        HitLevel;
-    MeleeMoveInfo<uint8>        Damage;
-    MeleeMoveInfo<eAudioEvents> HitSound;
-    MeleeMoveInfo<eAudioEvents> AltHitSound;
+    AssocGroupId                    AnimGroup;
+    float                           GroupRange;
+    MeleeMoveInfo<float>            FireTime;
+    MeleeMoveInfo<float>            ComboTime;
+    MeleeMoveInfo<float>            Radius;
+    float                           GroundLoopStart;
+    float                           BlockLoopStart;
+    float                           BlockLoopEnd;
+    MeleeMoveInfo<eMeleeHitLevelS8> HitLevel;
+    MeleeMoveInfo<uint8>            Damage;
+    MeleeMoveInfo<eAudioEvents>     HitSound;
+    MeleeMoveInfo<eAudioEvents>     AltHitSound;
     union {
         struct {
             // Moves available (?)
@@ -118,7 +118,7 @@ VALIDATE_SIZE(tMeleeComboSet, 0x88);
 
 class NOTSA_EXPORT_VTABLE CTaskSimpleFight final : public CTaskSimple {
 public:
-    static inline auto& m_aComboData      = StaticRef<std::array<tMeleeComboSet, 13>>(0xC170D0);
+    static inline auto& m_aComboData      = StaticRef<std::array<tMeleeComboSet, +eMeleeCombo::NUM_SETS>>(0xC170D0);
     static inline auto& m_aHitOffset      = StaticRef<std::array<CVector, 7>>(0xC177D0);
     static inline auto& m_sStrikeColModel = StaticRef<CColModel>(0xC17824);
     static inline auto& m_sStrikeColData  = StaticRef<CCollisionData>(0xC17854);
