@@ -18,7 +18,7 @@ void CTaskSimpleFight::InjectHooks() {
     RH_ScopedInstall(GetComboAnimGroupID, 0x4ABDA0);
     RH_ScopedInstall(FindTargetOnGround, 0x61D6F0, { .reversed = false });
     RH_ScopedInstall(FightHitObj, 0x61D400, { .reversed = false });
-    RH_ScopedInstall(FightHitCar, 0x61D0B0, { .reversed = false });
+    RH_ScopedInstall(FightHitCar, 0x61D0B0);
     RH_ScopedInstall(FightHitPed, 0x61CBA0, { .reversed = false });
     RH_ScopedInstall(SetPlayerMoveAnim, 0x61C9B0, { .reversed = false });
     RH_ScopedInstall(FightStrike, 0x6240B0, { .reversed = false });
@@ -445,8 +445,66 @@ void CTaskSimpleFight::FightHitObj(CPed* attacker, CObject* victim, CVector& hit
 }
 
 // 0x61D0B0
-void CTaskSimpleFight::FightHitCar(CPed * creator, CVehicle * victim, CVector & hitPt, CVector & hitDelta, int16 hitPieceType, uint8 hitSurfaceType) {
-    return plugin::CallMethodAndReturn<void, 0x61D0B0, CTaskSimpleFight*, CPed *, CVehicle *, CVector &, CVector &, int16, uint8>(this, creator, victim, hitPt, hitDelta, hitPieceType, hitSurfaceType);
+void CTaskSimpleFight::FightHitCar(CPed* attacker, CVehicle* victim, CVector& hitPt, CVector& hitDir, int16 hitPieceType, uint8 hitSurfaceType) {
+    const auto attackerWeaponType = attacker->GetActiveWeapon().GetType();
+
+    const auto strikeDmg         = GetStrikeDamage(attacker);
+    const auto originalVehHealth = victim->m_fHealth;
+
+    const auto DoVehicleDamage = [&](float dmgFactor) {
+        victim->VehicleDamage(
+            victim->m_pHandlingData->m_fMass * strikeDmg * dmgFactor,
+            (eVehicleCollisionComponent)hitPieceType,
+            attacker,
+            &hitPt,
+            &hitDir,
+            attackerWeaponType
+        );
+    };
+
+    if (attackerWeaponType == WEAPON_CHAINSAW) { // 0x61D112
+        g_fx.AddSparks(
+            hitPt,
+            CVector{*RwMatrixGetAt(&attacker->GetBoneMatrix(BONE_R_HAND))},
+            5.f,
+            32,
+            CVector{0.f, 0.f, 0.f},
+            eSparkType::SPARK_PARTICLE_SPARK,
+            0.3f,
+            1.f
+        );
+        DoVehicleDamage(0.00075f);
+    } else {
+        DoVehicleDamage(0.01f);
+    }
+
+    CCrime::ReportCrime(CRIME_HIT_CAR, victim, attacker);
+
+    victim->ForEachOccupant([&](CPed* p) {
+        p->GetEventGroup().Add(CEventVehicleDamageWeapon{
+            victim,
+            attacker,
+            WEAPON_BASEBALLBAT
+        });
+    });
+
+    if (victim->m_fHealth < originalVehHealth) {
+        victim->m_nLastWeaponDamageType = attackerWeaponType;
+        victim->m_pLastDamageEntity = attacker;
+        CEntity::RegisterReference(victim->m_pLastDamageEntity);
+    }
+
+    if (attacker->GetActiveWeapon().GetType() == WEAPON_CHAINSAW) {
+        attacker->m_weaponAudio.AddAudioEvent(AE_WEAPON_CHAINSAW_CUTTING);
+    } 
+    attacker->m_pedAudio.AddAudioEvent(
+        GetCurrentComboData().HitSound[+m_CurrentMove],
+        0.f,
+        1.f,
+        victim,
+        hitSurfaceType
+    );
+    g_fx.AddPunchImpact(hitPt, hitDir, 4);
 }
 
 // 0x61CBA0
