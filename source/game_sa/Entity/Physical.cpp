@@ -407,8 +407,6 @@ void CPhysical::ProcessCollision() {
                         automobile->m_fWheelsSuspensionCompression[2] = 1.0f;
                         break;
                     case VEHICLE_TYPE_AUTOMOBILE:
-                        break;
-                    default:
                         rng::fill(automobile->m_fWheelsSuspensionCompression, 1.0f);
                         break;
                     }
@@ -1108,7 +1106,7 @@ bool CPhysical::ApplySpringCollision(float fSuspensionForceLevel, CVector& direc
         fTimeStep = 3.0f;
 
     fSpringForceDampingLimit = fSpringStress * m_fMass * fSuspensionForceLevel * 0.016f * fTimeStep * fSuspensionBias;
-    ApplyForce((-fSpringForceDampingLimit) * direction, collisionPoint, true);
+    ApplyForce(-fSpringForceDampingLimit * direction, collisionPoint, true);
     return true;
 }
 
@@ -1160,8 +1158,8 @@ bool CPhysical::ApplySpringDampening(float fDampingForce, float fSpringForceDamp
         else
             fDampingSpeed = -fCollisionPointSpeedDotProduct;
 
-    const CVector center = GetMatrix().TransformVector(m_vecCentreOfMass);
-    const CVector distance = collisionPoint - center;
+    CVector center = GetMatrix().TransformVector(m_vecCentreOfMass);
+    CVector distance = collisionPoint - center;
     float fSpringForceDamping = GetMass(distance, direction) * fDampingSpeed;
     fSpringForceDampingLimit = fabs(fSpringForceDampingLimit) * DAMPING_LIMIT_OF_SPRING_FORCE;
     if (fSpringForceDamping > fSpringForceDampingLimit)
