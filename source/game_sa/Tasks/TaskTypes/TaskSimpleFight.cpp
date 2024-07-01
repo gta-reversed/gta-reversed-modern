@@ -24,7 +24,7 @@ void CTaskSimpleFight::InjectHooks() {
     RH_ScopedInstall(FightHitObj, 0x61D400);
     RH_ScopedInstall(FightHitCar, 0x61D0B0);
     RH_ScopedInstall(FightHitPed, 0x61CBA0);
-    RH_ScopedInstall(SetPlayerMoveAnim, 0x61C9B0, { .reversed = false });
+    RH_ScopedInstall(SetPlayerMoveAnim, 0x61C9B0);
     RH_ScopedInstall(FightStrike, 0x6240B0, { .reversed = false });
     RH_ScopedInstall(GetAvailableComboSet, 0x61C7F0, { .reversed = false });
     RH_ScopedInstall(ControlFight, 0x61C5E0);
@@ -400,8 +400,64 @@ bool CTaskSimpleFight::FindTargetOnGround(CPed * ped) {
 }
 
 // 0x61C9B0
-void CTaskSimpleFight::SetPlayerMoveAnim(CPlayerPed * player) {
-    return plugin::CallMethodAndReturn<void, 0x61C9B0, CTaskSimpleFight*, CPlayerPed *>(this, player);
+void CTaskSimpleFight::SetPlayerMoveAnim(CPlayerPed* player) {
+    auto* const currMov = &player->m_pPlayerData->m_vecFightMovement;
+
+    // If not moving anymore, blend out all anims
+    if (   m_NextCmd == eMeleeCommand::IDLE && m_ComboSet == eMeleeCombo::IDLE
+        || currMov->SquaredMagnitude() <= sq(0.1f)
+    ) {
+        const auto BlendOutAnim = [&](AnimationId animId) {
+            if (auto* const a = RpAnimBlendClumpGetAssociation(player->m_pRwClump, ANIM_ID_FIGHTSH_FWD)) {
+                a->SetBlendDelta(-8.f);
+            }
+        };
+        BlendOutAnim(ANIM_ID_FIGHTSH_FWD);
+        BlendOutAnim(ANIM_ID_FIGHTSH_LEFT);
+        BlendOutAnim(ANIM_ID_FIGHTSH_BWD);
+        BlendOutAnim(ANIM_ID_FIGHTSH_RIGHT);
+
+        m_ComboSet = eMeleeCombo::IDLE;
+        m_LastCmd  = eMeleeCommand::IDLE;
+        m_NextCmd  = eMeleeCommand::IDLE;
+
+        return;
+    }
+
+    const auto UpdateFightAnims = [&](AnimationId toBlendOutAnimId, AnimationId toBlendInAnimId, float toBlendInBlendDelta) {
+        if (auto* const a = RpAnimBlendClumpGetAssociation(player->m_pRwClump, toBlendOutAnimId)) {
+            a->SetBlendDelta(0.f);
+        }
+        auto* toBlendIn = RpAnimBlendClumpGetAssociation(player->m_pRwClump, toBlendInAnimId);
+        if (!toBlendIn) {
+            toBlendIn = CAnimManager::AddAnimation(player->m_pRwClump, ANIM_GROUP_DEFAULT, toBlendInAnimId);
+        }
+        toBlendIn->SetBlendDelta(toBlendInBlendDelta);
+    };
+
+    // 0x61CA7C - Calculate blend values for the movement vector
+    const auto blends = *currMov / (std::abs(currMov->x) + std::abs(currMov->y));
+
+    // 0x61CA92 - Process left/right movement (x axis)
+    if (blends.x != 0.f) {
+        if (blends.x < 0.f) {
+            UpdateFightAnims(ANIM_ID_FIGHTSH_RIGHT, ANIM_ID_FIGHTSH_LEFT, std::abs(blends.x));
+        } else {
+            UpdateFightAnims(ANIM_ID_FIGHTSH_LEFT, ANIM_ID_FIGHTSH_RIGHT, std::abs(blends.x));
+        }
+    }
+
+    // 0x61CB06 - Process forward/backward movement (y axis)
+    if (blends.y != 0.f) {
+        if (blends.y > 0.f) {
+            UpdateFightAnims(ANIM_ID_FIGHTSH_FWD, ANIM_ID_FIGHTSH_BWD, std::abs(blends.y));
+        } else {
+            UpdateFightAnims(ANIM_ID_FIGHTSH_BWD, ANIM_ID_FIGHTSH_FWD, std::abs(blends.y));
+        }
+    }
+
+    m_ComboSet = eMeleeCombo::IDLE;
+    m_LastCmd  = std::exchange(m_NextCmd, eMeleeCommand::IDLE);
 }
 
 // 0x61C5E0
