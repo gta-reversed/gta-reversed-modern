@@ -34,7 +34,7 @@ void CTaskSimpleFight::InjectHooks() {
     RH_ScopedInstall(GetRange, 0x61C1C0);
     RH_ScopedVMTInstall(Clone, 0x622E40);
     RH_ScopedVMTInstall(GetTaskType, 0x61C520);
-    RH_ScopedVMTInstall(MakeAbortable, 0x6239F0, { .reversed = false });
+    RH_ScopedVMTInstall(MakeAbortable, 0x6239F0);
     RH_ScopedVMTInstall(ProcessPed, 0x629920, { .reversed = false });
 }
 
@@ -69,7 +69,51 @@ CTaskSimpleFight::~CTaskSimpleFight() {
 
 // 0x6239F0
 bool CTaskSimpleFight::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return plugin::CallMethodAndReturn<bool, 0x6239F0>(this, ped, priority, event);
+    switch (priority) {
+    case ABORT_PRIORITY_URGENT:
+    case ABORT_PRIORITY_IMMEDIATE: {
+        if (event && (event->GetEventPriority() < 32 || event->GetEventPriority() == 60)) {
+            return false;
+        }
+
+        if (m_Anim) {
+            if (priority == ABORT_PRIORITY_IMMEDIATE) {
+                m_Anim->SetBlendDelta(-1000.f);
+            }
+            m_Anim->SetDefaultDeleteCallback();
+        }
+
+        if (m_IdleAnim) {
+            m_IdleAnim->SetDefaultDeleteCallback();
+            if (m_IdleAnim->GetBlendAmount() > 0.f && m_IdleAnim->GetBlendDelta() >= 0.f) {
+                CAnimManager::BlendAnimation(
+                    ped->m_pRwClump,
+                    ped->m_nAnimGroup,
+                    ANIM_ID_IDLE,
+                    priority == ABORT_PRIORITY_IMMEDIATE
+                        ? 1000.f
+                        : 16.f
+                );
+            }
+            m_IdleAnim = nullptr;
+        }
+
+        if (ped && ped->IsPlayer()) {
+            ped->m_pPlayerData->m_vecFightMovement = {0.f, 0.f};
+            SetPlayerMoveAnim(ped->AsPlayer());
+        }
+
+        m_IsFinished = true;
+
+        return true;
+    }
+    case ABORT_PRIORITY_LEISURE: {
+        m_NextCmd = eMeleeCommand::END_SLOW;
+        return false;
+    }
+    default:
+        NOTSA_UNREACHABLE();
+    }
 }
 
 // 0x629920

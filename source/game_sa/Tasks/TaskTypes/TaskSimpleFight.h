@@ -32,7 +32,7 @@ NOTSA_WENUM_DEFS_FOR(eMeleeMove);
 enum class eMeleeCommand : int8 {
     NONE           = -1,
     IDLE           = 0,
-    END_SLOW       = 1,
+    END_SLOW       = 1, //!< Used when `MakeAbortable` is called with `LEISURE` priority
     BLOCK          = 2,
     MOVE_FWD       = 3,
     MOVE_LEFT      = 4,
