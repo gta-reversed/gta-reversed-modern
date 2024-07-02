@@ -26,7 +26,7 @@ void CTaskSimpleFight::InjectHooks() {
     RH_ScopedInstall(FightHitPed, 0x61CBA0);
     RH_ScopedInstall(SetPlayerMoveAnim, 0x61C9B0);
     RH_ScopedInstall(FightStrike, 0x6240B0, { .reversed = false });
-    RH_ScopedInstall(GetAvailableComboSet, 0x61C7F0, { .reversed = false });
+    RH_ScopedInstall(GetAvailableComboSet, 0x61C7F0);
     RH_ScopedInstall(ControlFight, 0x61C5E0);
     RH_ScopedInstall(IsHitComboSet, 0x4ABDF0);
     RH_ScopedInstall(IsComboSet, 0x4ABDC0);
@@ -697,7 +697,87 @@ void CTaskSimpleFight::FightSetUpCol(float radius) {
 
 // 0x61C7F0
 eMeleeCombo CTaskSimpleFight::GetAvailableComboSet(CPed* ped, eMeleeCommandS8 nextCmd) {
-    return plugin::CallMethodAndReturn<eMeleeCombo, 0x61C7F0, CTaskSimpleFight*, CPed *,  eMeleeCommandS8>(this, ped, nextCmd);
+    if (nextCmd == eMeleeCommand::NONE) {
+        if (m_RequiredAnimGroup != ANIM_GROUP_MELEE_1) {
+            if (!m_AreAnimsReferenced) {
+                auto* const animBlock = CAnimManager::GetAnimationBlock(m_RequiredAnimGroup);
+                assert(animBlock); // Original code handled this, but I don't think the way they handle it makes *any* sense
+                if (!animBlock->IsLoaded) {
+                    CAnimManager::AddAnimBlockRef(animBlock);
+                    m_AreAnimsReferenced = true;
+                }
+            
+            }
+        }
+        return eMeleeCombo::IDLE;
+    }
+
+    if (!IsMeleeCommandAttack(nextCmd)) {
+        switch (nextCmd) {
+        case eMeleeCommand::BLOCK:
+        case eMeleeCommand::IDLE:
+            break;
+        default:
+            return eMeleeCombo::IDLE;
+        }
+    }
+
+    eMeleeCombo ret = ped->GetActiveWeapon().GetWeaponInfo().m_nBaseCombo;
+    switch (nextCmd) {
+    case eMeleeCommand::ATTACK_2: {
+        ret = (eMeleeCombo)ped->m_nFightingStyle;
+        break;
+    }
+    case eMeleeCommand::BLOCK:
+    case eMeleeCommand::IDLE: {
+        if (ret != eMeleeCombo::UNARMED_1) {
+            break;
+        }
+        ret = (eMeleeCombo)ped->m_nFightingStyle;
+        [[fallthrough]];
+    }
+    default: {
+        if (nextCmd == eMeleeCommand::IDLE && !GetComboData(ret).OwnIdle) {
+            return eMeleeCombo::UNARMED_1;
+        }
+        break;
+    }
+    }
+
+    // Make sure anims for this combo are loaded
+
+    const auto newAnimGroup = GetComboData(ret).AnimGroup;
+
+    // `ANIM_GROUP_MELEE_1` is referenced by default, so it's always loaded as long as an instance of this class exists
+    if (newAnimGroup == ANIM_GROUP_MELEE_1 || newAnimGroup == m_RequiredAnimGroup) {
+        return ret;
+    }
+
+    // Unload old
+    const auto oldAnimGroup = std::exchange(m_RequiredAnimGroup, newAnimGroup);
+    CAnimManager::StreamAnimBlock(
+        CAnimManager::GetAnimationBlock(oldAnimGroup),
+        false,
+        m_AreAnimsReferenced
+    );
+
+    // Load new
+    CAnimManager::StreamAnimBlock(
+        CAnimManager::GetAnimationBlock(m_RequiredAnimGroup),
+        true,
+        m_AreAnimsReferenced
+    );
+
+    // If loaded successfully...
+    if (m_AreAnimsReferenced) {
+        return ret;
+    }
+
+    // If not, we wait a little more
+    if (IsMeleeCommandAttack(m_NextCmd)) {
+        m_NextCmd = eMeleeCommand::ATTACK_1;
+    }
+    return eMeleeCombo::UNARMED_1;
 }
 
 // 0x4ABDF0

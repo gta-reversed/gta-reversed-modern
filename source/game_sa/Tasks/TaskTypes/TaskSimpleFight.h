@@ -30,6 +30,7 @@ enum class eMeleeMove : int32  { // AKA eMeleeAttack
 NOTSA_WENUM_DEFS_FOR(eMeleeMove);
 
 enum class eMeleeCommand : int8 {
+    NONE           = -1,
     IDLE           = 0,
     END_SLOW       = 1,
     BLOCK          = 2,
@@ -52,6 +53,18 @@ enum class eMeleeCommand : int8 {
     STEALTH_KILL   = 19,
 };
 NOTSA_WENUM_DEFS_FOR(eMeleeCommand);
+
+inline bool IsMeleeCommandAttack(eMeleeCommand cmd) {
+    switch (cmd) {
+    case eMeleeCommand::ATTACK_1:
+    case eMeleeCommand::ATTACK_2:
+    case eMeleeCommand::ATTACK_3:
+    case eMeleeCommand::ATTACK_4:
+        return true;
+    }
+    return false;
+
+}
 
 enum class eMeleeHitLevel : int32 {
     NONE        = -1,
@@ -150,11 +163,12 @@ public:
     eMeleeCommand FightStrike(CPed* ped, CVector& posn);
     void          FightSetUpCol(float radius);
 
-    auto&        GetCurrentComboData() const { return m_aComboData[MeleeCombo2MeleeDataIdx(m_ComboSet)]; }
+    static auto& GetComboData(eMeleeCombo c) { return m_aComboData[MeleeCombo2MeleeDataIdx(c)]; }
+    auto&        GetCurrentComboData() const { return GetComboData(m_ComboSet); }
     auto         GetCurrentComboSet() const { return m_ComboSet; }
     bool         IsComboSet() const;
     bool         IsHitComboSet() const;
-    eMeleeCombo  GetAvailableComboSet(CPed* eMeleeCommand, eMeleeCommandS8 nextCmd);
+    eMeleeCombo  GetAvailableComboSet(CPed* ped, eMeleeCommandS8 nextCmd);
     AssocGroupId GetComboAnimGroupID() const;
 
     static eMeleeCombo    GetComboType(const char* comboName);
