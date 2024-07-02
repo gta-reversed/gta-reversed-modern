@@ -63,7 +63,7 @@ enum eEntityAltCollision : uint16 {
 
 class NOTSA_EXPORT_VTABLE CPhysical : public CEntity {
 public:
-    float  field_38;
+    float  m_fPrevDistFromCam;
     uint32 m_nLastCollisionTime;
     union {
         struct {
