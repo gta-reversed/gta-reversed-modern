@@ -247,6 +247,9 @@ public:
     auto GetCollidingEntities() const { return std::span{ m_apCollidedEntities, m_nNumEntitiesCollided }; }
 
     const auto& GetBoundingBox() { return GetColModel()->m_boundBox; }
+
+// NOTSA
+    void UnstuckAndReposition();
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
