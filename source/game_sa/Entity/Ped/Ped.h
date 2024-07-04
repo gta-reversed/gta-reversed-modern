@@ -22,6 +22,7 @@
 #include "AnimBlendAssociation.h"
 #include "Fire.h"
 #include "PedGroups.h"
+#include "PedStats.h"
 
 #include "AnimationEnums.h"
 #include "eWeaponType.h"
