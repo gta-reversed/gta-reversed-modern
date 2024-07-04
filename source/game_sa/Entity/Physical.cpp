@@ -193,23 +193,20 @@ void CPhysical::Remove()
         return;
     }
 
-    CEntryInfoNode* entryInfoNode = m_pCollisionList.m_node;
-    while (entryInfoNode) {
-        CEntryInfoNode* nextEntryInfoNode = entryInfoNode->GetNext();
-        entryInfoNode->m_doubleLinkList->DeleteNode(entryInfoNode->m_doubleLink);
-        m_pCollisionList.DeleteNode(entryInfoNode);
-
-        entryInfoNode = nextEntryInfoNode;
+    CEntryInfoNode *node{}, *next{};
+    for (node = m_pCollisionList.m_node; node; node = next) {
+        next = node->m_next;
+        node->m_doubleLinkList->DeleteNode(node->m_doubleLink);
+        m_pCollisionList.DeleteNode(node);
     }
 }
 
 // 0x5449B0
 CRect CPhysical::GetBoundRect()
 {
-    CVector boundCentre;
-    CEntity::GetBoundCentre(&boundCentre);
-    const float fRadius = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundRadius();
-    return CRect(boundCentre.x - fRadius, boundCentre.y - fRadius, boundCentre.x + fRadius, boundCentre.y + fRadius);
+    CVector center = GetBoundCentre();
+    float radius = GetColModel()->GetBoundRadius();
+    return CRect(center.x-radius, center.y-radius, center.x+radius, center.y+radius);
 }
 
 // 0x5485E0
@@ -223,21 +220,21 @@ void CPhysical::ProcessControl()
     m_bIsInSafePosition = false;
     m_bHasContacted = false;
 
-    if (m_nStatus != STATUS_SIMPLE)
+    if (m_nStatus == STATUS_SIMPLE)
+        return;
+
+    physicalFlags.b31 = false;
+    physicalFlags.bOnSolidSurface = false;
+    m_nNumEntitiesCollided = 0;
+    m_nPieceType = 0;
+    m_fDamageIntensity = 0.0f;
+    CEntity::SafeCleanUpRef(m_pDamageEntity);
+    m_pDamageEntity = nullptr;
+    ApplyFriction();
+    if (!m_pAttachedTo || physicalFlags.bInfiniteMass)
     {
-        physicalFlags.b31 = false;
-        physicalFlags.bOnSolidSurface = false;
-        m_nNumEntitiesCollided = 0;
-        m_nPieceType = 0;
-        m_fDamageIntensity = 0.0f;
-        CEntity::SafeCleanUpRef(m_pDamageEntity);
-        m_pDamageEntity = nullptr;
-        ApplyFriction();
-        if (!m_pAttachedTo || physicalFlags.bInfiniteMass)
-        {
-            ApplyGravity();
-            ApplyAirResistance();
-        }
+        ApplyGravity();
+        ApplyAirResistance();
     }
 }
 
@@ -252,189 +249,193 @@ void CPhysical::ProcessCollision() {
     m_fMovingSpeed = 0.0f;
     physicalFlags.bProcessingShift = false;
     physicalFlags.bSkipLineCol = false;
-    if (m_bUsesCollision && !physicalFlags.bDisableSimpleCollision) {
-        if (m_nStatus == STATUS_SIMPLE) {
-            if (CheckCollision_SimpleCar() && m_nStatus == STATUS_SIMPLE) {
-                m_nStatus = STATUS_PHYSICS;
-                if (IsVehicle())
-                    CCarCtrl::SwitchVehicleToRealPhysics(vehicle);
-            }
-            UnstuckAndReposition();
-            return;
-        }
+    if (!m_bUsesCollision || physicalFlags.bDisableSimpleCollision)
+    {
+        UnstuckAndReposition();
+        return;
+    }
 
-        if (m_nStatus == STATUS_GHOST) {
-            CColPoint* wheelsColPoints = nullptr;
-            float* pfWheelsSuspensionCompression = nullptr;
-            CVector* wheelsCollisionPositions = nullptr;
-            switch (vehicle->m_nVehicleSubType) {
-            case VEHICLE_TYPE_AUTOMOBILE:
-                rng::fill(automobile->m_apWheelCollisionEntity, nullptr);
-
-                // TODO: Use std::array<> for these local variables
-                wheelsColPoints = automobile->m_wheelColPoint.data();
-                pfWheelsSuspensionCompression = automobile->m_fWheelsSuspensionCompression.data();
-                wheelsCollisionPositions = automobile->m_vWheelCollisionPos.data();
-                break;
-            default:
-                rng::fill(bike->m_aGroundPhysicalPtrs, nullptr);
-                wheelsColPoints = bike->m_aWheelColPoints;
-                pfWheelsSuspensionCompression = bike->m_aWheelRatios;
-                wheelsCollisionPositions = bike->m_aGroundOffsets;
-                break;
-            }
-
-            CCollisionData* colData = GetColModel()->m_pColData;
-            for (int32 collisionIndex = 0; ; collisionIndex++) {
-                int32 colLinesCount = colData->m_nNumLines;
-                if (colData->bUsesDisks)
-                    colLinesCount = 0;
-
-                if (collisionIndex >= colLinesCount) {
-                    m_bIsStuck = false;
-                    m_bIsInSafePosition = true;
-                    m_vecMoveSpeed.Set(0.0f, 0.0f, 0.0f);
-                    m_matrix->ForceUpVector(CVector(0.0f, 0.0f, 1.0f));
-                    GetPosition().z = CCarCtrl::FindGhostRoadHeight(vehicle) + vehicle->GetHeightAboveRoad();
-                    ApplySpeed();
-                    m_matrix->Reorthogonalise();
-                    RemoveAndAdd();
-                    vehicle->vehicleFlags.bVehicleColProcessed = true;
-                    return;
-                }
-
-                CColPoint* wheelColPoint = &wheelsColPoints[collisionIndex];
-                CColLine* colLine = &colData->m_pLines[collisionIndex];
-                CVector vecColLinePosStart = m_matrix->TransformPoint(colLine->m_vecStart);
-                CVector vecColLinePosEnd = m_matrix->TransformPoint(colLine->m_vecEnd);
-                wheelColPoint->m_vecNormal = CVector(0.0f, 0.0f, 1.0f);
-                wheelColPoint->m_nSurfaceTypeA = SURFACE_WHEELBASE;
-                wheelColPoint->m_nSurfaceTypeB = SURFACE_TARMAC;
-                wheelColPoint->m_fDepth = 0.0f;
-                float fGhostRoadHeight = CCarCtrl::FindGhostRoadHeight(vehicle);
-                if (fGhostRoadHeight <= vecColLinePosStart.z) {
-                    if (fGhostRoadHeight > vecColLinePosEnd.z) {
-                        float fWheelSuspensionCompression = (vecColLinePosStart.z - fGhostRoadHeight) / (vecColLinePosStart.z - vecColLinePosEnd.z);
-                        pfWheelsSuspensionCompression[collisionIndex] = fWheelSuspensionCompression;
-                        wheelColPoint->m_vecPoint = (vecColLinePosEnd - vecColLinePosStart) * fWheelSuspensionCompression + vecColLinePosStart;
-                    }
-                    else {
-                        pfWheelsSuspensionCompression[collisionIndex] = 1.0f;
-                        wheelColPoint->m_vecPoint = vecColLinePosEnd;
-                    }
-                }
-                else {
-                    pfWheelsSuspensionCompression[collisionIndex] = 0.0f;
-                    wheelColPoint->m_vecPoint = vecColLinePosStart;
-                }
-                wheelsCollisionPositions[collisionIndex] = wheelColPoint->m_vecPoint - GetPosition();
+    if (m_nStatus == STATUS_SIMPLE) {
+        if (CheckCollision_SimpleCar() && m_nStatus == STATUS_SIMPLE) {
+            m_nStatus = STATUS_PHYSICS;
+            if (IsVehicle()) {
+                CCarCtrl::SwitchVehicleToRealPhysics(vehicle);
             }
         }
-        CVector vecOldMoveSpeed = m_vecMoveSpeed;
-        float fOldTimeStep = CTimer::GetTimeStep();
-        float fOldElasticity = m_fElasticity;
-        CMatrix oldEntityMatrix(*m_matrix);
-        bool bProcessCollisionBeforeSettingTimeStep = false;
-        bool bUnknown = false;
-        uint8 collisionSteps = SpecialEntityCalcCollisionSteps(bProcessCollisionBeforeSettingTimeStep, bUnknown);
-        float fStep = fOldTimeStep / collisionSteps;
-        if (bProcessCollisionBeforeSettingTimeStep)
-        {
-            ApplySpeed();
-            m_matrix->Reorthogonalise();
-            physicalFlags.bProcessingShift = false;
-            physicalFlags.bSkipLineCol = false;
-            physicalFlags.b17 = true;
-            bool bOldUsesCollision = m_bUsesCollision;
-            m_bUsesCollision = false;
-            if (!CheckCollision())
-            {
-                physicalFlags.b17 = false;
-                m_bUsesCollision = bOldUsesCollision;
-                if (IsVehicle())
-                    vehicle->vehicleFlags.bVehicleColProcessed = true;
+        UnstuckAndReposition();
+        return;
+    }
 
-                physicalFlags.bProcessCollisionEvenIfStationary = false;
-                physicalFlags.bSkipLineCol = false;
-                m_fElasticity = fOldElasticity;
-                m_fMovingSpeed = DistanceBetweenPoints(oldEntityMatrix.GetPosition(), GetPosition());
-                UnstuckAndReposition();
+    if (m_nStatus == STATUS_GHOST) {
+        CColPoint* wheelsColPoints = nullptr;
+        float* pfWheelsSuspensionCompression = nullptr;
+        CVector* wheelsCollisionPositions = nullptr;
+        switch (vehicle->m_nVehicleSubType) {
+        case VEHICLE_TYPE_AUTOMOBILE:
+            rng::fill(automobile->m_apWheelCollisionEntity, nullptr);
+
+            // TODO: Use std::array<> for these local variables
+            wheelsColPoints = automobile->m_wheelColPoint.data();
+            pfWheelsSuspensionCompression = automobile->m_fWheelsSuspensionCompression.data();
+            wheelsCollisionPositions = automobile->m_vWheelCollisionPos.data();
+            break;
+        default:
+            rng::fill(bike->m_aGroundPhysicalPtrs, nullptr);
+            wheelsColPoints = bike->m_aWheelColPoints;
+            pfWheelsSuspensionCompression = bike->m_aWheelRatios;
+            wheelsCollisionPositions = bike->m_aGroundOffsets;
+            break;
+        }
+
+        CCollisionData* colData = GetColModel()->m_pColData;
+        for (int32 collisionIndex = 0; ; collisionIndex++) {
+            int32 colLinesCount = colData->m_nNumLines;
+            if (colData->bUsesDisks)
+                colLinesCount = 0;
+
+            if (collisionIndex >= colLinesCount) {
+                m_bIsStuck = false;
+                m_bIsInSafePosition = true;
+                m_vecMoveSpeed.Set(0.0f, 0.0f, 0.0f);
+                m_matrix->ForceUpVector(CVector(0.0f, 0.0f, 1.0f));
+                GetPosition().z = CCarCtrl::FindGhostRoadHeight(vehicle) + vehicle->GetHeightAboveRoad();
+                ApplySpeed();
+                m_matrix->Reorthogonalise();
+                RemoveAndAdd();
+                vehicle->vehicleFlags.bVehicleColProcessed = true;
                 return;
             }
-            m_bUsesCollision = bOldUsesCollision;
-            physicalFlags.b17 = false;
-            *static_cast<CMatrix*>(m_matrix) = oldEntityMatrix;
-            m_vecMoveSpeed = vecOldMoveSpeed;
-            if (IsVehicle() && vehicle->vehicleFlags.bIsLawEnforcer)
-                m_fElasticity *= HIGHSPEED_ELASTICITY_MULT_COPCAR;
-        }
 
-        CPed* ped = this->AsPed();
-        if (collisionSteps > 1u)
-        {
-            for (uint8 stepIndex = 1; stepIndex < collisionSteps; stepIndex++)
-            {
-                CTimer::UpdateTimeStep(stepIndex * fStep);
-                ApplySpeed();
-                bool bCheckCollision = CheckCollision();
-                if (IsPed() && m_vecMoveSpeed.z == 0.0f && !ped->bWasStanding && ped->bIsStanding) {
-                    oldEntityMatrix.GetPosition().z = GetPosition().z;
+            CColPoint* wheelColPoint = &wheelsColPoints[collisionIndex];
+            CColLine* colLine = &colData->m_pLines[collisionIndex];
+            CVector vecColLinePosStart = m_matrix->TransformPoint(colLine->m_vecStart);
+            CVector vecColLinePosEnd = m_matrix->TransformPoint(colLine->m_vecEnd);
+            wheelColPoint->m_vecNormal = CVector(0.0f, 0.0f, 1.0f);
+            wheelColPoint->m_nSurfaceTypeA = SURFACE_WHEELBASE;
+            wheelColPoint->m_nSurfaceTypeB = SURFACE_TARMAC;
+            wheelColPoint->m_fDepth = 0.0f;
+            float fGhostRoadHeight = CCarCtrl::FindGhostRoadHeight(vehicle);
+            if (fGhostRoadHeight <= vecColLinePosStart.z) {
+                if (fGhostRoadHeight > vecColLinePosEnd.z) {
+                    float fWheelSuspensionCompression = (vecColLinePosStart.z - fGhostRoadHeight) / (vecColLinePosStart.z - vecColLinePosEnd.z);
+                    pfWheelsSuspensionCompression[collisionIndex] = fWheelSuspensionCompression;
+                    wheelColPoint->m_vecPoint = (vecColLinePosEnd - vecColLinePosStart) * fWheelSuspensionCompression + vecColLinePosStart;
                 }
-                *static_cast<CMatrix*>(m_matrix) = oldEntityMatrix;
-                CTimer::UpdateTimeStep(fOldTimeStep);
-                if (bCheckCollision) {
-                    m_fElasticity = fOldElasticity;
-                    return;
-                }
-                if (IsVehicle()) {
-                    switch (vehicle->m_nVehicleType) {
-                    case VEHICLE_TYPE_BIKE:
-                        rng::fill(bike->m_aWheelRatios, 1.0f);
-                        break;
-                    case VEHICLE_TYPE_TRAILER:
-                        // BUG: maybe there should be a 4 wheel here?
-                        automobile->m_fWheelsSuspensionCompression[CAR_WHEEL_FRONT_LEFT]  = 1.0f;
-                        automobile->m_fWheelsSuspensionCompression[CAR_WHEEL_REAR_LEFT]   = 1.0f;
-                        automobile->m_fWheelsSuspensionCompression[CAR_WHEEL_FRONT_RIGHT] = 1.0f;
-                        break;
-                    case VEHICLE_TYPE_AUTOMOBILE:
-                        rng::fill(automobile->m_fWheelsSuspensionCompression, 1.0f);
-                        break;
-                    }
+                else {
+                    pfWheelsSuspensionCompression[collisionIndex] = 1.0f;
+                    wheelColPoint->m_vecPoint = vecColLinePosEnd;
                 }
             }
+            else {
+                pfWheelsSuspensionCompression[collisionIndex] = 0.0f;
+                wheelColPoint->m_vecPoint = vecColLinePosStart;
+            }
+            wheelsCollisionPositions[collisionIndex] = wheelColPoint->m_vecPoint - GetPosition();
         }
-
+    }
+    CVector vecOldMoveSpeed = m_vecMoveSpeed;
+    float fOldTimeStep = CTimer::GetTimeStep();
+    float fOldElasticity = m_fElasticity;
+    CMatrix oldEntityMatrix(*m_matrix);
+    bool bProcessCollisionBeforeSettingTimeStep = false;
+    bool bUnknown = false;
+    uint8 collisionSteps = SpecialEntityCalcCollisionSteps(bProcessCollisionBeforeSettingTimeStep, bUnknown);
+    float fStep = fOldTimeStep / collisionSteps;
+    if (bProcessCollisionBeforeSettingTimeStep)
+    {
         ApplySpeed();
         m_matrix->Reorthogonalise();
         physicalFlags.bProcessingShift = false;
         physicalFlags.bSkipLineCol = false;
-        if (  !m_vecMoveSpeed.IsZero() || !m_vecTurnSpeed.IsZero()
-            || physicalFlags.bProcessCollisionEvenIfStationary
-            || m_nStatus == STATUS_PLAYER
-            || IsVehicle() && vehicle->vehicleFlags.bIsCarParkVehicle
-            || IsPed() && (ped->IsPlayer() || ped->bTestForBlockedPositions|| !ped->bIsStanding))
+        physicalFlags.b17 = true;
+        bool bOldUsesCollision = m_bUsesCollision;
+        m_bUsesCollision = false;
+        if (!CheckCollision())
         {
+            physicalFlags.b17 = false;
+            m_bUsesCollision = bOldUsesCollision;
             if (IsVehicle())
                 vehicle->vehicleFlags.bVehicleColProcessed = true;
 
-            if (CheckCollision()) {
-                *static_cast<CMatrix*>(m_matrix) = oldEntityMatrix;
+            physicalFlags.bProcessCollisionEvenIfStationary = false;
+            physicalFlags.bSkipLineCol = false;
+            m_fElasticity = fOldElasticity;
+            m_fMovingSpeed = DistanceBetweenPoints(oldEntityMatrix.GetPosition(), GetPosition());
+            UnstuckAndReposition();
+            return;
+        }
+        m_bUsesCollision = bOldUsesCollision;
+        physicalFlags.b17 = false;
+        *static_cast<CMatrix*>(m_matrix) = oldEntityMatrix;
+        m_vecMoveSpeed = vecOldMoveSpeed;
+        if (IsVehicle() && vehicle->vehicleFlags.bIsLawEnforcer) {
+            m_fElasticity *= HIGHSPEED_ELASTICITY_MULT_COPCAR;
+        }
+    }
+
+    CPed* ped = this->AsPed();
+    if (collisionSteps > 1u)
+    {
+        for (uint8 stepIndex = 1; stepIndex < collisionSteps; stepIndex++)
+        {
+            CTimer::UpdateTimeStep(stepIndex * fStep);
+            ApplySpeed();
+            bool bCheckCollision = CheckCollision();
+            if (IsPed() && m_vecMoveSpeed.z == 0.0f && !ped->bWasStanding && ped->bIsStanding) {
+                oldEntityMatrix.GetPosition().z = GetPosition().z;
+            }
+            *static_cast<CMatrix*>(m_matrix) = oldEntityMatrix;
+            CTimer::UpdateTimeStep(fOldTimeStep);
+            if (bCheckCollision) {
                 m_fElasticity = fOldElasticity;
                 return;
             }
+            if (IsVehicle()) {
+                switch (vehicle->m_nVehicleType) {
+                case VEHICLE_TYPE_BIKE:
+                    rng::fill(bike->m_aWheelRatios, 1.0f);
+                    break;
+                case VEHICLE_TYPE_TRAILER:
+                    // BUG: maybe there should be a 4 wheel here?
+                    automobile->m_fWheelsSuspensionCompression[CAR_WHEEL_FRONT_LEFT]  = 1.0f;
+                    automobile->m_fWheelsSuspensionCompression[CAR_WHEEL_REAR_LEFT]   = 1.0f;
+                    automobile->m_fWheelsSuspensionCompression[CAR_WHEEL_FRONT_RIGHT] = 1.0f;
+                    break;
+                case VEHICLE_TYPE_AUTOMOBILE:
+                    rng::fill(automobile->m_fWheelsSuspensionCompression, 1.0f);
+                    break;
+                }
+            }
         }
-        else if (IsPed()) {
-            ped->bIsStanding = true;
-        }
-        physicalFlags.bProcessCollisionEvenIfStationary = false;
-        physicalFlags.bSkipLineCol = false;
-        m_fElasticity = fOldElasticity;
-        m_fMovingSpeed = DistanceBetweenPoints(oldEntityMatrix.GetPosition(), GetPosition());
-        UnstuckAndReposition();
-        return;
     }
+
+    ApplySpeed();
+    m_matrix->Reorthogonalise();
+    physicalFlags.bProcessingShift = physicalFlags.bSkipLineCol = false;
+    if (  !m_vecMoveSpeed.IsZero() || !m_vecTurnSpeed.IsZero()
+        || physicalFlags.bProcessCollisionEvenIfStationary
+        || m_nStatus == STATUS_PLAYER
+        || IsVehicle() && vehicle->vehicleFlags.bIsCarParkVehicle
+        || IsPed() && (ped->IsPlayer() || ped->bTestForBlockedPositions|| !ped->bIsStanding))
+    {
+        if (IsVehicle())
+            vehicle->vehicleFlags.bVehicleColProcessed = true;
+
+        if (CheckCollision()) {
+            *static_cast<CMatrix*>(m_matrix) = oldEntityMatrix;
+            m_fElasticity = fOldElasticity;
+            return;
+        }
+    }
+    else if (IsPed()) {
+        ped->bIsStanding = true;
+    }
+    physicalFlags.bProcessCollisionEvenIfStationary = false;
+    physicalFlags.bSkipLineCol = false;
+    m_fElasticity = fOldElasticity;
+    m_fMovingSpeed = DistanceBetweenPoints(oldEntityMatrix.GetPosition(), GetPosition());
     UnstuckAndReposition();
+    return;
 }
 
 // 0x54DB10
@@ -1641,161 +1642,23 @@ bool CPhysical::ApplyFriction(float fFriction, CColPoint& colPoint)
 }
 
 // 0x545980
-bool CPhysical::ApplyFriction(CPhysical* entity, float fFriction, CColPoint& colPoint)
-{
+bool CPhysical::ApplyFriction(CPhysical* entity, float fFriction, CColPoint& colPoint) {
     if (physicalFlags.bDisableTurnForce && entity->physicalFlags.bDisableTurnForce)
-    {
-        float fThisSpeedDotProduct = DotProduct(&m_vecMoveSpeed, &colPoint.m_vecNormal);
-        float fEntitySpeedDotProduct = DotProduct(&entity->m_vecMoveSpeed, &colPoint.m_vecNormal);
+        return ApplyFrictionInternal(entity, fFriction, colPoint, false, false);
 
-        CVector vecThisSpeedDifference = m_vecMoveSpeed - (fThisSpeedDotProduct * colPoint.m_vecNormal);
-        CVector vecEntitySpeedDifference = entity->m_vecMoveSpeed - (fEntitySpeedDotProduct * colPoint.m_vecNormal);
-
-        float fThisSpeedMagnitude = vecThisSpeedDifference.Magnitude();
-        float fEntitySpeedMagnitude = vecEntitySpeedDifference.Magnitude();
-
-        float fEntityMass = entity->m_fMass;
-        float fThisMass = m_fMass;
-
-        CVector vecMoveDirection = vecThisSpeedDifference / fThisSpeedMagnitude;
-        float fSpeed = (fEntityMass * fEntitySpeedMagnitude + fThisMass * fThisSpeedMagnitude) / (fEntityMass + fThisMass);
-        if (fThisSpeedMagnitude > fSpeed) {
-            float fThisSpeed = fThisMass * (fSpeed - fThisSpeedMagnitude);
-            float fEntitySpeed = fEntityMass * (fSpeed - fEntitySpeedMagnitude);
-            float fFrictionTimeStep = -(CTimer::GetTimeStep() * fFriction);
-            fThisSpeed = std::max(fThisSpeed, fFrictionTimeStep);
-
-            ApplyFrictionMoveForce(vecMoveDirection * fThisSpeed);
-            entity->ApplyFrictionMoveForce(vecMoveDirection * fEntitySpeed);
-            return true;
-        }
-        return false;
-    }
-
-    if (physicalFlags.bDisableTurnForce)
-    {
+    if (physicalFlags.bDisableTurnForce) {
         if (entity->IsVehicle())
             return false;
 
-        CVector vecDistanceToPoint = colPoint.m_vecPoint - entity->GetPosition();
-        CVector vecEntitySpeed = entity->GetSpeed(vecDistanceToPoint);
-
-        float fThisSpeedDotProduct = DotProduct(&m_vecMoveSpeed, &colPoint.m_vecNormal);
-        float fEntitySpeedDotProduct = DotProduct(&vecEntitySpeed, &colPoint.m_vecNormal);
-
-        CVector vecThisSpeedDifference = m_vecMoveSpeed - (fThisSpeedDotProduct * colPoint.m_vecNormal);
-        CVector vecEntitySpeedDifference = vecEntitySpeed - (fEntitySpeedDotProduct * colPoint.m_vecNormal);
-
-        float fThisSpeedMagnitude = vecThisSpeedDifference.Magnitude();
-        float fEntitySpeedMagnitude = vecEntitySpeedDifference.Magnitude();
-
-        CVector vecMoveDirection = vecThisSpeedDifference * (1.0f / fThisSpeedMagnitude);
-        CVector vecEntityCentreOfMassMultiplied = entity->GetMatrix().TransformVector(entity->m_vecCentreOfMass);
-        CVector vecEntityDifference = vecDistanceToPoint - vecEntityCentreOfMassMultiplied;
-        float fEntityCollisionMass = entity->GetMass(vecEntityDifference, vecMoveDirection);
-        float fThisMass = m_fMass;
-        float fSpeed = (fEntitySpeedMagnitude * fEntityCollisionMass + fThisMass * fThisSpeedMagnitude) / (fEntityCollisionMass + fThisMass);
-        if (fThisSpeedMagnitude > fSpeed) {
-            float fThisSpeed = fThisMass * (fSpeed - fThisSpeedMagnitude);
-            float fEntitySpeed = fEntityCollisionMass * (fSpeed - fEntitySpeedMagnitude);
-            float fFrictionTimeStep = CTimer::GetTimeStep() * fFriction;
-            fThisSpeed = std::max(fThisSpeed, -fFrictionTimeStep);
-            fEntitySpeed = std::min(fEntitySpeed, fFrictionTimeStep);
-
-            ApplyFrictionMoveForce(vecMoveDirection * fThisSpeed);
-            if (!entity->physicalFlags.bDisableCollisionForce)
-            {
-                entity->ApplyFrictionForce(vecMoveDirection * fEntitySpeed, vecDistanceToPoint);
-                return true;
-            }
-            return true;
-        }
-        return false;
+        return ApplyFrictionInternal(entity, fFriction, colPoint, false, true);
     }
-
     if (!entity->physicalFlags.bDisableTurnForce)
-    {
-        CVector vecDistanceToPointFromThis = colPoint.m_vecPoint - GetPosition();
-        CVector vecThisSpeed = GetSpeed(vecDistanceToPointFromThis);
-
-        CVector vecDistanceToPoint = colPoint.m_vecPoint - entity->GetPosition();
-        CVector vecEntitySpeed = entity->GetSpeed(vecDistanceToPoint);
-
-        float fThisSpeedDotProduct = DotProduct(&vecThisSpeed, &colPoint.m_vecNormal);
-        float fEntitySpeedDotProduct = DotProduct(&vecEntitySpeed, &colPoint.m_vecNormal);
-        if (fabs(fThisSpeedDotProduct) < 0.1414f)
-            fFriction = 0.05f * fFriction;
-
-        CVector vecThisSpeedDifference = vecThisSpeed - (fThisSpeedDotProduct * colPoint.m_vecNormal);
-        CVector vecEntitySpeedDifference = vecEntitySpeed - (fEntitySpeedDotProduct * colPoint.m_vecNormal);
-
-        float fThisSpeedMagnitude = vecThisSpeedDifference.Magnitude();
-        float fEntitySpeedMagnitude = vecEntitySpeedDifference.Magnitude();
-
-        CVector vecMoveDirection = vecThisSpeedDifference * (1.0f / fThisSpeedMagnitude);
-        CVector vecThisCentreOfMassMultiplied = GetMatrix().TransformVector(m_vecCentreOfMass);
-        CVector vecThisDifference = vecDistanceToPointFromThis - vecThisCentreOfMassMultiplied;
-        float fThisCollisionMass = GetMass(vecThisDifference, vecMoveDirection);
-
-        CVector vecEntityCentreOfMassMultiplied = entity->GetMatrix().TransformVector(entity->m_vecCentreOfMass);
-        CVector vecEntityDifference = vecDistanceToPoint - vecEntityCentreOfMassMultiplied;
-        float fEntityCollisionMass = entity->GetMass(vecEntityDifference, vecMoveDirection);
-        float fSpeed = (fEntitySpeedMagnitude * fEntityCollisionMass + fThisCollisionMass * fThisSpeedMagnitude) / (fEntityCollisionMass + fThisCollisionMass);
-        if (fThisSpeedMagnitude > fSpeed) {
-            float fThisSpeed = fThisCollisionMass * (fSpeed - fThisSpeedMagnitude);
-            float fEntitySpeed = fEntityCollisionMass * (fSpeed - fEntitySpeedMagnitude);
-            fThisSpeed = std::max(fThisSpeed, -fFriction);
-            fEntitySpeed = std::min(fEntitySpeed, fFriction);
-
-            if (!physicalFlags.bDisableCollisionForce)
-                ApplyFrictionForce(vecMoveDirection * fThisSpeed, vecDistanceToPointFromThis);
-
-            if (!entity->physicalFlags.bDisableCollisionForce)
-                entity->ApplyFrictionForce(vecMoveDirection * fEntitySpeed, vecDistanceToPoint);
-
-            return true;
-        }
-        return false;
-    }
+        return ApplyFrictionInternal(entity, fFriction, colPoint, true, true);
 
     if (IsVehicle())
         return false;
 
-    CVector vecDistanceToPointFromThis = colPoint.m_vecPoint - GetPosition();
-    CVector vecThisSpeed = GetSpeed(vecDistanceToPointFromThis);
-
-    float fThisSpeedDotProduct = DotProduct(&vecThisSpeed, &colPoint.m_vecNormal);
-    float fEntitySpeedDotProduct = DotProduct(&entity->m_vecMoveSpeed, &colPoint.m_vecNormal);
-
-    CVector vecThisSpeedDifference = vecThisSpeed - (fThisSpeedDotProduct * colPoint.m_vecNormal);
-    CVector vecEntitySpeedDifference = entity->m_vecMoveSpeed - (fEntitySpeedDotProduct * colPoint.m_vecNormal);
-
-    float fThisSpeedMagnitude = vecThisSpeedDifference.Magnitude();
-    float fEntitySpeedMagnitude = vecEntitySpeedDifference.Magnitude();
-
-    CVector vecMoveDirection = vecThisSpeedDifference * (1.0f / fThisSpeedMagnitude);
-
-    CVector vecThisCentreOfMassMultiplied = GetMatrix().TransformVector(m_vecCentreOfMass);
-
-    CVector vecThisDifference = vecDistanceToPointFromThis - vecThisCentreOfMassMultiplied;
-    float fEntityMass = entity->m_fMass;
-    float fThisCollisionMass = GetMass(vecThisDifference, vecMoveDirection);
-    float fSpeed = (fEntityMass * fEntitySpeedMagnitude + fThisCollisionMass * fThisSpeedMagnitude) / (fEntityMass + fThisCollisionMass);
-    if (fThisSpeedMagnitude > fSpeed) {
-        float fThisSpeed = (fSpeed - fThisSpeedMagnitude) * fThisCollisionMass;
-        float fEntitySpeed = (fSpeed - fEntitySpeedMagnitude) * fEntityMass;
-        float fFrictionTimeStep = CTimer::GetTimeStep() * fFriction;
-
-        fThisSpeed = std::max(fThisSpeed, -fFrictionTimeStep);
-        fEntitySpeed = std::min(fEntitySpeed, fFrictionTimeStep);
-            
-        if (!physicalFlags.bDisableCollisionForce)
-            ApplyFrictionForce(vecMoveDirection * fThisSpeed, vecDistanceToPointFromThis);
-
-        entity->ApplyFrictionMoveForce(vecMoveDirection * fEntitySpeed);
-        return true;
-    }
-    return false;
+    return ApplyFrictionInternal(entity, fFriction, colPoint, true, false);
 }
 
 // 0x546670
@@ -2375,8 +2238,7 @@ void CPhysical::ApplyFriction()
     {
         const CVector& vecPosition = GetPosition();
         float fSphereRadius = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundRadius();
-        CColPoint colPoint;
-        colPoint.m_vecPoint = CVector(vecPosition.x, vecPosition.y, vecPosition.z - fSphereRadius);
+        CColPoint colPoint(CVector(vecPosition.x, vecPosition.y, vecPosition.z - fSphereRadius));
         colPoint.m_vecNormal = CVector(0.0f, 0.0f, 1.0f);
 
         ApplyFriction(CTimer::GetTimeStep() * 0.001f, colPoint);
@@ -2392,7 +2254,8 @@ void CPhysical::ApplyFriction()
     if (IsVehicle() && vehicle->IsBike()
         && !physicalFlags.b32 && m_nStatus == STATUS_ABANDONED
         && fabs(GetUp().z) < 0.707f
-        && 0.05f * 0.05f > m_vecMoveSpeed.SquaredMagnitude() && 0.01f * 0.01f > m_vecTurnSpeed.SquaredMagnitude())
+        && m_vecMoveSpeed.SquaredMagnitude() < 0.0025f
+        && m_vecTurnSpeed.SquaredMagnitude() < 0.0001f)
     {
         m_vecMoveSpeed *= pow(0.5f, CTimer::GetTimeStep());
     }
@@ -4051,29 +3914,24 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
             m_bHasContacted = true;
         }
     }
-    else
-    {
-        assert(entity);
-        if (entity->m_bHasContacted)
-        {
-            assert(physicalEntity);
-            CVector vecOldFrictionMoveSpeed = physicalEntity->m_vecFrictionMoveSpeed;
-            CVector vecOldFrictionTurnSpeed = physicalEntity->m_vecFrictionTurnSpeed;
-            physicalEntity->ResetFrictionTurnSpeed();
-            physicalEntity->ResetFrictionMoveSpeed();
-            entity->m_bHasContacted = false;
+    else if (entity->m_bHasContacted) {
+        assert(physicalEntity);
+        CVector vecOldFrictionMoveSpeed = physicalEntity->m_vecFrictionMoveSpeed;
+        CVector vecOldFrictionTurnSpeed = physicalEntity->m_vecFrictionTurnSpeed;
+        physicalEntity->ResetFrictionTurnSpeed();
+        physicalEntity->ResetFrictionMoveSpeed();
+        entity->m_bHasContacted = false;
 
-            processCollision();
-            if (!entity->m_bHasContacted)
-            {
-                physicalEntity->m_vecFrictionMoveSpeed = vecOldFrictionMoveSpeed;
-                physicalEntity->m_vecFrictionTurnSpeed = vecOldFrictionTurnSpeed;
-                entity->m_bHasContacted = true;
-            }
+        processCollision();
+        if (!entity->m_bHasContacted)
+        {
+            physicalEntity->m_vecFrictionMoveSpeed = vecOldFrictionMoveSpeed;
+            physicalEntity->m_vecFrictionTurnSpeed = vecOldFrictionTurnSpeed;
+            entity->m_bHasContacted = true;
         }
-        else {
-            processCollision();
-        }
+    }
+    else {
+        processCollision();
     }
 
     if (entity->m_nStatus == STATUS_SIMPLE)
@@ -4251,4 +4109,42 @@ void CPhysical::UnstuckAndReposition() {
     m_bIsStuck = false;
     m_bIsInSafePosition = true;
     RemoveAndAdd();
+}
+
+// NOTSA
+bool CPhysical::ApplyFrictionInternal(CPhysical* entity, float fFriction, CColPoint& colPoint, bool isThisVehicle, bool isEntityVehicle) {
+    CVector moveSpeed1 = isThisVehicle ? GetSpeed(colPoint.m_vecPoint - GetPosition()) : m_vecMoveSpeed;
+    CVector moveSpeed2 = isEntityVehicle ? entity->GetSpeed(colPoint.m_vecPoint - entity->GetPosition()) : entity->m_vecMoveSpeed;
+
+    float speedDot1 = moveSpeed1.Dot(colPoint.m_vecNormal); //DotProduct(&moveSpeed1, &colPoint.m_vecNormal);
+    float speedDot2 = moveSpeed2.Dot(colPoint.m_vecNormal); //DotProduct(&moveSpeed2, &colPoint.m_vecNormal);
+
+    CVector speedDiff1 = moveSpeed1 - (speedDot1 * colPoint.m_vecNormal);
+    CVector speedDiff2 = moveSpeed2 - (speedDot2 * colPoint.m_vecNormal);
+
+    float speedMag1 = speedDiff1.Magnitude();
+    float speedMag2 = speedDiff2.Magnitude();
+
+    float mass1 = isThisVehicle ? GetMass(colPoint.m_vecPoint - GetMatrix().TransformVector(m_vecCentreOfMass), speedDiff1) : m_fMass;
+    float mass2 = isEntityVehicle ? entity->GetMass(colPoint.m_vecPoint - entity->GetMatrix().TransformVector(entity->m_vecCentreOfMass), speedDiff1) : entity->m_fMass;
+
+    float combinedSpeed = (mass2 * speedMag2 + mass1 * speedMag1) / (mass2 + mass1);
+    if (speedMag1 <= combinedSpeed)
+        return false;
+
+    float speed1 = mass1 * (combinedSpeed - speedMag1);
+    float speed2 = mass2 * (combinedSpeed - speedMag2);
+
+    float frictionStep = CTimer::GetTimeStep() * fFriction;
+    speed1 = std::max(speed1, -frictionStep);
+    speed2 = std::min(speed2, frictionStep);
+
+    CVector moveDirection = speedDiff1 / speedMag1;
+    if (!physicalFlags.bDisableCollisionForce)
+        ApplyFrictionForce(moveDirection * speed1, colPoint.m_vecPoint - GetPosition());
+
+    if (!entity->physicalFlags.bDisableCollisionForce)
+        entity->ApplyFrictionForce(moveDirection * speed2, colPoint.m_vecPoint - entity->GetPosition());
+
+    return true;
 }

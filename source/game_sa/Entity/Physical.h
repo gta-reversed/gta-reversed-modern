@@ -250,6 +250,7 @@ public:
 
 // NOTSA
     void UnstuckAndReposition();
+    bool ApplyFrictionInternal(CPhysical*, float, CColPoint&, bool, bool);
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
