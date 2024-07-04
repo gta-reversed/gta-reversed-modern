@@ -186,6 +186,9 @@ public:
     void        StartAnim(CPed* ped, int32);
 
 private:
+    void BlendOutIdleAnim(CPed* ped, float blendDelta);
+
+private:
     friend void InjectHooksMain();
     static void InjectHooks();
 

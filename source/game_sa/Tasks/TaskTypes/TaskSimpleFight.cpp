@@ -84,18 +84,12 @@ bool CTaskSimpleFight::MakeAbortable(CPed* ped, eAbortPriority priority, const C
         }
 
         if (m_IdleAnim) {
-            m_IdleAnim->SetDefaultDeleteCallback();
-            if (m_IdleAnim->GetBlendAmount() > 0.f && m_IdleAnim->GetBlendDelta() >= 0.f) {
-                CAnimManager::BlendAnimation(
-                    ped->m_pRwClump,
-                    ped->m_nAnimGroup,
-                    ANIM_ID_IDLE,
-                    priority == ABORT_PRIORITY_IMMEDIATE
-                        ? 1000.f
-                        : 16.f
-                );
-            }
-            m_IdleAnim = nullptr;
+            BlendOutIdleAnim(
+                ped,
+                priority == ABORT_PRIORITY_IMMEDIATE
+                    ? 1000.f
+                    : 16.f
+            );
         }
 
         if (ped && ped->IsPlayer()) {
@@ -118,7 +112,114 @@ bool CTaskSimpleFight::MakeAbortable(CPed* ped, eAbortPriority priority, const C
 
 // 0x629920
 bool CTaskSimpleFight::ProcessPed(CPed * ped) {
-    return plugin::CallMethodAndReturn<bool, 0x629920, CTaskSimpleFight*, CPed *>(this, ped);
+    if (!m_IsFinished) {
+        // 0x629997
+        if (m_ComboSet != eMeleeCombo::IDLE && m_IsInControl) {
+            m_IdleCounter = 0;
+        } else {
+            m_IdleCounter += (uint32)CTimer::GetTimeStepInMS();
+        }
+
+        if (!m_IsInControl) {
+            switch (m_NextCmd) {
+            case eMeleeCommand::NONE:
+            case eMeleeCommand::IDLE:
+                return false;
+            }
+            if (m_Anim && m_Anim->GetAnimId() == ANIM_ID_FIGHT2IDLE) {
+                return false;
+            }
+        }
+
+        if ([&]{
+            switch (m_NextCmd) {
+            case eMeleeCommand::END_SLOW:
+            case eMeleeCommand::END_QUICK:
+            case eMeleeCommand::END_RUNAWAY:
+            case eMeleeCommand::END_SPRINTAWAY: {
+                m_IsFinished = true;
+                return true;
+            }
+            }
+            if (m_Anim || (ped->m_nMoveState > PEDMOVE_WALK && ped->IsPlayer())) {
+                return true;
+            }
+            return false;
+        }()) {
+            // 0x629B9B
+            if (m_RequiredAnimGroup != ANIM_GROUP_MELEE_1 && !m_AreAnimsReferenced) {
+                (void)GetAvailableComboSet(ped, eMeleeCommand::NONE); // Calling this to have it load the anims
+            }
+
+            // 0x629BB2
+            if (m_Anim) {
+                const auto* const combo = &GetCurrentComboData();
+
+                const auto atime = m_Anim->GetCurrentTime();
+                const auto tstep = CTimer::GetTimeStep();
+
+                if (ped->GetActiveWeapon().GetType() == WEAPON_CHAINSAW) {
+                    ped->m_weaponAudio.AddAudioEvent(AE_WEAPON_CHAINSAW_ACTIVE);
+                }
+
+                if (m_ComboSet > eMeleeCombo::END) {
+                    if (m_LastCmd == eMeleeCommand::BLOCK) {
+                        if (m_NextCmd == eMeleeCommand::BLOCK) { // 0x629D1A - Check if anim will need to be looped the next frame
+                            if (m_Anim->IsPlaying()) {
+                                const auto CheckTime = [&](float t) {
+                                    return atime < combo->BlockLoopStart && atime + tstep >= combo->BlockLoopStart;
+                                };
+                                if (CheckTime(combo->BlockLoopStart) || CheckTime(combo->BlockLoopEnd)) {
+                                    m_Anim->SetFlag(ANIMATION_IS_PLAYING, false);
+                                    m_Anim->SetCurrentTime(combo->BlockLoopStart);
+                                }
+                            }
+                        } else { // 0x629D73
+                            if (!m_Anim->IsPlaying() && m_Anim->GetBlendAmount() > 0.f && m_Anim->GetBlendDelta() >= 0.f) {
+                                m_Anim->SetBlendDelta(-4.f);
+                            }
+                            if (m_NextCmd >= eMeleeCommand::ATTACK_1) {
+                                std::exchange(m_Anim, nullptr)->SetDefaultDeleteCallback();
+                            }
+                        }
+
+                        if (m_NextCmd == eMeleeCommand::BLOCK) {
+                            m_NextCmd = eMeleeCommand::IDLE;
+                        }
+                    } else if (m_Anim->GetBlendAmount() > 0.9f && m_Anim->GetBlendDelta() >= 0.f) { // 0x629DF8
+                        const auto fireAnimTime = combo->FireTime[+m_CurrentMove];
+                        if (atime <= fireAnimTime || atime - tstep >= fireAnimTime) { // 0x629E1D
+                            if (atime >= combo->ComboTime[+m_CurrentMove] && IsMeleeCommandAttack(m_NextCmd)) {
+                                if (m_CurrentMove <= eMeleeMove::ATTACK3) {
+                                    m_ComboSet = GetAvailableComboSet(ped, m_NextCmd);
+                                }
+                            }
+                        } else {
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (m_IdleAnim) {
+        BlendOutIdleAnim(ped, 8.f);
+    }
+    return true;
+}
+
+// notsa
+void CTaskSimpleFight::BlendOutIdleAnim(CPed* ped, float blendDelta) {
+    m_IdleAnim->SetDefaultDeleteCallback();
+    if (m_IdleAnim->GetBlendAmount() > 0.f && m_IdleAnim->GetBlendDelta() >= 0.f) {
+        CAnimManager::BlendAnimation(
+            ped->m_pRwClump,
+            ped->m_nAnimGroup,
+            ANIM_ID_IDLE,
+            blendDelta
+        );
+    }
+    m_IdleAnim = nullptr;
 }
 
 // 0x61DB30
