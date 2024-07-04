@@ -809,11 +809,10 @@ void CPhysical::ApplyGravity()
 // 0x5430A0
 void CPhysical::ApplyFrictionMoveForce(CVector moveForce)
 {
-    if (!physicalFlags.bInfiniteMass && !physicalFlags.bDisableMoveForce)
-    {
-        if (physicalFlags.bDisableZ)
+    if (!physicalFlags.bInfiniteMass && !physicalFlags.bDisableMoveForce) {
+        if (physicalFlags.bDisableZ) {
             moveForce.z = 0.0f;
-
+        }
         m_vecFrictionMoveSpeed += moveForce / m_fMass;
     }
 }
@@ -969,7 +968,7 @@ bool CPhysical::ApplyCollision(CEntity* entity, CColPoint& colPoint, float& dama
         {
             CVector worldCOM = GetMatrix().TransformVector(m_vecCentreOfMass);
             CVector vecDifference = vecDistanceToPoint - worldCOM;
-            float fCollisionMass = GetMass(vecDifference, vecMoveDirection);
+            float fCollisionMass = GetTurnTorque(vecDifference, vecMoveDirection);
 
             damageIntensity = -((m_fElasticity + 1.0f) * fCollisionMass * fSpeedDotProduct);
 
@@ -1029,7 +1028,7 @@ bool CPhysical::ApplySoftCollision(CEntity* entity, CColPoint& colPoint, float& 
         worldCOM = CVector(0.0f, 0.0f, 0.0f);
 
     CVector vecDifference = vecDistanceToPointFromThis - worldCOM;
-    float fCollisionMass = GetMass(vecDifference, vecMoveDirection);
+    float fCollisionMass = GetTurnTorque(vecDifference, vecMoveDirection);
 
     if (!IsVehicle() || vehicle->m_nVehicleSubType // todo: m_nVehicleSubType
         || colPoint.m_nPieceTypeA < 13u || colPoint.m_nPieceTypeA > 16u)
@@ -1132,7 +1131,7 @@ bool CPhysical::ApplySpringDampening(float fDampingForce, float fSpringForceDamp
 
     CVector center = GetMatrix().TransformVector(m_vecCentreOfMass);
     CVector distance = collisionPoint - center;
-    float fSpringForceDamping = GetMass(distance, direction) * fDampingSpeed;
+    float fSpringForceDamping = GetTurnTorque(distance, direction) * fDampingSpeed;
     fSpringForceDampingLimit = fabs(fSpringForceDampingLimit) * DAMPING_LIMIT_OF_SPRING_FORCE;
     if (fSpringForceDamping > fSpringForceDampingLimit)
         fSpringForceDamping = fSpringForceDampingLimit;
@@ -1446,7 +1445,7 @@ bool CPhysical::ApplyCollisionAlt(CPhysical* entity, CColPoint& colPoint, float&
         worldCOM = CVector(0.0f, 0.0f, 0.0f);
 
     CVector vecDifference = vecDistanceToPointFromThis - worldCOM;
-    float fCollisionMass = GetMass(vecDifference, vecMoveDirection);
+    float fCollisionMass = GetTurnTorque(vecDifference, vecMoveDirection);
 
     uint16 entityAltCol = ALT_ENITY_COL_DEFAULT;
     float fMoveSpeedLimit = CTimer::GetTimeStep() * 0.008f;
@@ -1612,7 +1611,7 @@ bool CPhysical::ApplyFriction(float fFriction, CColPoint& colPoint)
 
     CVector worldCOM = GetMatrix().TransformVector(m_vecCentreOfMass);
     CVector vecDifference = vecDistanceToPointFromThis - worldCOM;
-    float fCollisionMass = -GetMass(vecDifference, vecMoveDirection) * fMoveSpeedMagnitude;
+    float fCollisionMass = -GetTurnTorque(vecDifference, vecMoveDirection) * fMoveSpeedMagnitude;
     fCollisionMass = std::max(fCollisionMass, -fFriction);
 
     ApplyFrictionForce(vecMoveDirection * fCollisionMass, vecDistanceToPointFromThis);
@@ -1643,22 +1642,68 @@ bool CPhysical::ApplyFriction(float fFriction, CColPoint& colPoint)
 
 // 0x545980
 bool CPhysical::ApplyFriction(CPhysical* entity, float fFriction, CColPoint& colPoint) {
+    const auto DoApplyFriction = [&](bool isThisVehicle, bool isEntityVehicle) {
+        const auto GetMoveForce = [&colPoint](CPhysical* p, bool isVehicle) {
+            const auto velocity = isVehicle
+                ? p->GetSpeed(colPoint.m_vecPoint - p->GetPosition())
+                : p->m_vecMoveSpeed;
+            return velocity - velocity.ProjectOnToNormal(colPoint.m_vecNormal);
+        };
+
+        const auto moveForceA    = GetMoveForce(this, isThisVehicle);
+        const auto moveForceMagA = moveForceA.Magnitude();
+
+        const auto moveForceB = GetMoveForce(entity, isEntityVehicle);
+        const auto moveForceMagB = moveForceB.Magnitude();
+
+        const auto GetMoveTorque = [&colPoint](CPhysical* p, bool isVehicle, const CVector& turnForce) {
+            return isVehicle
+                ? p->GetTurnTorque(colPoint.m_vecPoint - p->GetMatrix().TransformVector(p->m_vecCentreOfMass), turnForce)
+                : p->m_fMass;
+        };
+        const auto turnTorqueA = GetMoveTorque(this, isThisVehicle, moveForceA);
+        const auto turnTorqueB = GetMoveTorque(entity, isEntityVehicle, moveForceB);
+
+        const auto avgTurnTorque = (turnTorqueA * moveForceMagA + turnTorqueB * moveForceMagB) / (turnTorqueA + turnTorqueB);
+        if (moveForceMagA <= avgTurnTorque) {
+            return false;
+        }
+
+        const auto DoApplyFrictionForce = [
+            &colPoint,
+            avgTurnTorque,
+            frictionStep    = CTimer::GetTimeStep() * fFriction,
+            moveForceNormal = moveForceA / moveForceMagA
+        ](CPhysical* p, float turnTorque, float moveForceMag) {
+            if (!p->physicalFlags.bDisableCollisionForce) {
+                p->ApplyFrictionForce(
+                    moveForceNormal * std::max(frictionStep, turnTorque * (avgTurnTorque - moveForceMag)),
+                    colPoint.m_vecPoint - p->GetPosition()
+                );
+            }
+        };
+        DoApplyFrictionForce(this, turnTorqueA, moveForceMagA);
+        DoApplyFrictionForce(entity, turnTorqueB, moveForceMagB);
+
+        return true;
+    };
+
     if (physicalFlags.bDisableTurnForce && entity->physicalFlags.bDisableTurnForce)
-        return ApplyFrictionInternal(entity, fFriction, colPoint, false, false);
+        return DoApplyFriction(false, false);
 
     if (physicalFlags.bDisableTurnForce) {
         if (entity->IsVehicle())
             return false;
 
-        return ApplyFrictionInternal(entity, fFriction, colPoint, false, true);
+        return DoApplyFriction(false, true);
     }
     if (!entity->physicalFlags.bDisableTurnForce)
-        return ApplyFrictionInternal(entity, fFriction, colPoint, true, true);
+        return DoApplyFriction(true, true);
 
     if (IsVehicle())
         return false;
 
-    return ApplyFrictionInternal(entity, fFriction, colPoint, true, false);
+    return DoApplyFriction(true, false);
 }
 
 // 0x546670
@@ -2412,7 +2457,7 @@ bool CPhysical::ApplyCollision(CEntity* theEntity, CColPoint& colPoint, float& t
                 else
                 {
                     CVector vecThisDifference = vecDistanceToPointFromThis - vecThisCentreOfMassMultiplied;
-                    float fThisCollisionMass = GetMass(vecThisDifference, colPoint.m_vecNormal);
+                    float fThisCollisionMass = GetTurnTorque(vecThisDifference, colPoint.m_vecNormal);
                     if (!m_bHasHitWall)
                         thisDamageIntensity = -((m_fElasticity + 1.0f) * fThisCollisionMass * fThisSpeedDotProduct);
                     else
@@ -2929,7 +2974,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* physical, CColPoint& colPoint, flo
         else
         {
             CVector vecThisDifference = (vecDistanceToPointFromThis - vecThisCentreOfMassMultiplied);
-            float fThisCollisionMass = GetMass(vecThisDifference, colPoint.m_vecNormal);
+            float fThisCollisionMass = GetTurnTorque(vecThisDifference, colPoint.m_vecNormal);
             if (!m_bHasHitWall)
                 thisDamageIntensity = -((m_fElasticity + 1.0f) * fThisCollisionMass * fThisSpeedDotProduct);
             else
@@ -4109,42 +4154,4 @@ void CPhysical::UnstuckAndReposition() {
     m_bIsStuck = false;
     m_bIsInSafePosition = true;
     RemoveAndAdd();
-}
-
-// NOTSA
-bool CPhysical::ApplyFrictionInternal(CPhysical* entity, float fFriction, CColPoint& colPoint, bool isThisVehicle, bool isEntityVehicle) {
-    CVector moveSpeed1 = isThisVehicle ? GetSpeed(colPoint.m_vecPoint - GetPosition()) : m_vecMoveSpeed;
-    CVector moveSpeed2 = isEntityVehicle ? entity->GetSpeed(colPoint.m_vecPoint - entity->GetPosition()) : entity->m_vecMoveSpeed;
-
-    float speedDot1 = moveSpeed1.Dot(colPoint.m_vecNormal); //DotProduct(&moveSpeed1, &colPoint.m_vecNormal);
-    float speedDot2 = moveSpeed2.Dot(colPoint.m_vecNormal); //DotProduct(&moveSpeed2, &colPoint.m_vecNormal);
-
-    CVector speedDiff1 = moveSpeed1 - (speedDot1 * colPoint.m_vecNormal);
-    CVector speedDiff2 = moveSpeed2 - (speedDot2 * colPoint.m_vecNormal);
-
-    float speedMag1 = speedDiff1.Magnitude();
-    float speedMag2 = speedDiff2.Magnitude();
-
-    float mass1 = isThisVehicle ? GetMass(colPoint.m_vecPoint - GetMatrix().TransformVector(m_vecCentreOfMass), speedDiff1) : m_fMass;
-    float mass2 = isEntityVehicle ? entity->GetMass(colPoint.m_vecPoint - entity->GetMatrix().TransformVector(entity->m_vecCentreOfMass), speedDiff1) : entity->m_fMass;
-
-    float combinedSpeed = (mass2 * speedMag2 + mass1 * speedMag1) / (mass2 + mass1);
-    if (speedMag1 <= combinedSpeed)
-        return false;
-
-    float speed1 = mass1 * (combinedSpeed - speedMag1);
-    float speed2 = mass2 * (combinedSpeed - speedMag2);
-
-    float frictionStep = CTimer::GetTimeStep() * fFriction;
-    speed1 = std::max(speed1, -frictionStep);
-    speed2 = std::min(speed2, frictionStep);
-
-    CVector moveDirection = speedDiff1 / speedMag1;
-    if (!physicalFlags.bDisableCollisionForce)
-        ApplyFrictionForce(moveDirection * speed1, colPoint.m_vecPoint - GetPosition());
-
-    if (!entity->physicalFlags.bDisableCollisionForce)
-        entity->ApplyFrictionForce(moveDirection * speed2, colPoint.m_vecPoint - entity->GetPosition());
-
-    return true;
 }
