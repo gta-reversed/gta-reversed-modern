@@ -80,19 +80,23 @@ CTask* CPedAttractor::GetTaskForPed(CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x5EC500, CPedAttractor*>(this);
 }
 
-// 0x5EB5B0
-uint32 CPedAttractor::GetTailOfQueue() {
-    return plugin::CallMethodAndReturn<uint32, 0x5EB5B0, CPedAttractor*>(this);
-}
-
 // 0x5EB550
 int32 CPedAttractor::GetQueueSlot(const CPed*) {
     return plugin::CallMethodAndReturn<int32, 0x5EB550, CPedAttractor*>(this);
 }
 
 // 0x5EB590
-CPed* CPedAttractor::GetHeadOfQueue() {
-    return plugin::CallMethodAndReturn<CPed*, 0x5EB590, CPedAttractor*>(this);
+CPed* CPedAttractor::GetHeadOfQueue() const {
+    return m_ArrivedPeds.empty()
+        ? nullptr
+        : m_ArrivedPeds.front();
+}
+
+// 0x5EB5B0
+CPed* CPedAttractor::GetTailOfQueue() const {
+    return m_ArrivedPeds.empty()
+        ? nullptr
+        : m_ArrivedPeds.back();
 }
 
 int32 CPedAttractor::ComputeFreeSlot() {

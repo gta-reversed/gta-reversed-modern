@@ -44,7 +44,7 @@ public:
     bool IsPedRegisteredWithEffect(CPed* ped, const C2dEffectPedAttractor* fx, const CEntity* entity, const SArray<CPedAttractor*>& attractors);
 
     CPedAttractor* FindAssociatedAttractor(const C2dEffectPedAttractor* fx, const CEntity* entity, const SArray<CPedAttractor*>& attractors);
-    bool HasQueueTailArrivedAtSlot(const C2dEffectPedAttractor* fx, const CEntity* entity);
+    bool HasQueueTailArrivedAtSlot(const C2dEffectBase* fx, const CEntity* entity);
     bool HasEmptySlot(const C2dEffectPedAttractor* fx, const CEntity* entity);
 
     CPed* GetPedUsingEffect(const C2dEffectPedAttractor* fx, const CEntity* entity, const SArray<CPedAttractor*>& attractors);
@@ -63,7 +63,7 @@ public:
 
     static bool IsApproachable(C2dEffectPedAttractor* fx, const CMatrix& mat, int32 unused, CPed* ped);
 private:
-    auto& GetArrayOfType(ePedAttractorType t);
+    auto& GetAttractorsOfType(ePedAttractorType t);
 };
 VALIDATE_SIZE(CPedAttractorManager, 0xA0);
 

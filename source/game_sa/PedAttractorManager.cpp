@@ -1,6 +1,8 @@
 #include "StdInc.h"
 
 #include "PedAttractorManager.h"
+#include <TaskTypes/TaskComplexUseAttractor.h>
+#include <TaskTypes/TaskComplexWaitAtAttractor.h>
 
 #include "PedAttractor.h"
 
@@ -33,7 +35,7 @@ void CPedAttractorManager::InjectHooks() {
     RH_ScopedOverloadedInstall(IsPedRegisteredWithEffect, "Effect", 0x5EBD70, bool(CPedAttractorManager::*)(CPed*, const C2dEffectPedAttractor*, const CEntity*));
     RH_ScopedOverloadedInstall(IsPedRegisteredWithEffect, "Internal", 0x5EB690, bool(CPedAttractorManager::*)(CPed*, const C2dEffectPedAttractor*, const CEntity*, const SArray<CPedAttractor*>&));
     RH_ScopedInstall(FindAssociatedAttractor, 0x5EB6F0);
-    RH_ScopedInstall(HasQueueTailArrivedAtSlot, 0x5EBBA0, { .reversed = false });
+    RH_ScopedInstall(HasQueueTailArrivedAtSlot, 0x5EBBA0);
     RH_ScopedInstall(HasEmptySlot, 0x5EBB00, { .reversed = false });
     // RH_ScopedOverloadedInstall(GetPedUsingEffect, "Internal", 0x5EB740, void*(CPedAttractorManager::*)(const C2dEffectPedAttractor*, const CEntity*, const SArray<CPedAttractor*>&));
     // RH_ScopedOverloadedInstall(GetPedUsingEffect, "", 0x5EBE50, void*(CPedAttractorManager::*)(const C2dEffectPedAttractor*, const CEntity*));
@@ -55,7 +57,7 @@ CPedAttractorManager* GetPedAttractorManager() {
 }
 
 // notsa
-auto& CPedAttractorManager::GetArrayOfType(ePedAttractorType t) {
+auto& CPedAttractorManager::GetAttractorsOfType(ePedAttractorType t) {
     switch (t) {
     case PED_ATTRACTOR_ATM:            return m_ATMs;
     case PED_ATTRACTOR_SEAT:           return m_Seats;
@@ -87,7 +89,7 @@ bool CPedAttractorManager::BroadcastArrival(CPed* ped, CPedAttractor* attractor,
 bool CPedAttractorManager::BroadcastArrival(CPed* ped, CPedAttractor* attractor) {
     return attractor
         && IsPedRegisteredWithEffect(ped)
-        && BroadcastArrival(ped, attractor, GetArrayOfType(attractor->GetType()));
+        && BroadcastArrival(ped, attractor, GetAttractorsOfType(attractor->GetType()));
 }
 
 // 0x5EC660
@@ -110,7 +112,7 @@ bool CPedAttractorManager::BroadcastDeparture(CPed* ped, CPedAttractor* attracto
 bool CPedAttractorManager::BroadcastDeparture(CPed* ped, CPedAttractor* attractor) {
     return attractor
         && IsPedRegisteredWithEffect(ped)
-        && BroadcastDeparture(ped, attractor, GetArrayOfType(attractor->GetType()));
+        && BroadcastDeparture(ped, attractor, GetAttractorsOfType(attractor->GetType()));
 }
 
 // 0x5EC740
@@ -133,7 +135,7 @@ bool CPedAttractorManager::DeRegisterPed(CPed* ped, CPedAttractor* attractor, SA
 bool CPedAttractorManager::DeRegisterPed(CPed* ped, CPedAttractor* attractor) {
     return attractor
         && IsPedRegisteredWithEffect(ped)
-        && DeRegisterPed(ped, attractor, GetArrayOfType(attractor->GetType()));
+        && DeRegisterPed(ped, attractor, GetAttractorsOfType(attractor->GetType()));
 }
 
 // 0x5EB5F0
@@ -150,7 +152,7 @@ bool CPedAttractorManager::RemoveEffect(const C2dEffectPedAttractor* fx, const S
 // 0x5EBA30
 // all xrefs are dead functions
 bool CPedAttractorManager::RemoveEffect(const C2dEffectPedAttractor* fx) {
-    return RemoveEffect(fx, GetArrayOfType(fx->m_nAttractorType));
+    return RemoveEffect(fx, GetAttractorsOfType(fx->m_nAttractorType));
 }
 
 // 0x5EB640
@@ -206,8 +208,25 @@ CPedAttractor* CPedAttractorManager::FindAssociatedAttractor(const C2dEffectPedA
 }
 
 // 0x5EBBA0
-bool CPedAttractorManager::HasQueueTailArrivedAtSlot(const C2dEffectPedAttractor* fx, const CEntity* entity) {
-    return plugin::CallMethodAndReturn<bool, 0x5EBBA0, CPedAttractorManager*, const C2dEffectPedAttractor*, const CEntity*>(this, fx, entity);
+bool CPedAttractorManager::HasQueueTailArrivedAtSlot(const C2dEffectBase* baseFx, const CEntity* entity) {
+    const auto* const fx = C2dEffect::DynCast<const C2dEffectPedAttractor>(baseFx);
+    if (!fx) {
+        return false;
+    }
+    const auto* const attractor = FindAssociatedAttractor(fx, entity, GetAttractorsOfType(fx->m_nAttractorType));
+    if (!attractor) {
+        return true;
+    }
+    const auto* const pedAtQueueTail = attractor->GetTailOfQueue();
+    if (!pedAtQueueTail) {
+        return true;
+    }
+    if (attractor->GetHeadOfQueue() == attractor->GetTailOfQueue()) { // Queue has 1 ped only
+        return pedAtQueueTail->GetTaskManager().Find<CTaskComplexUseAttractor>(true) != nullptr;
+    }
+    const auto* const tWaitAtAttractor = pedAtQueueTail->GetTaskManager().Find<CTaskComplexWaitAtAttractor>(true);
+    return tWaitAtAttractor
+        && tWaitAtAttractor->m_slot == attractor->GetSizeOfQueue() - 1;
 }
 
 // 0x5EBB00

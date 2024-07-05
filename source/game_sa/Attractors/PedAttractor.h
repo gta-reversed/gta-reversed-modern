@@ -14,7 +14,7 @@ public:
     C2dEffectPedAttractor* m_Fx;
     CEntity*               m_Entity;
     SArray<CPed*>          m_AttractPeds;
-    SArray<CPed*>          m_ArrivedPeds;
+    SArray<CPed*>          m_ArrivedPeds; // AKA queue
     SArray<CPedTaskPair>   m_PedTaskPairs;
     int32                  m_MaxNumPeds;
     float                  m_Spacing;
@@ -54,10 +54,11 @@ public:
     virtual bool IsAtHeadOfQueue(CPed* ped);
 
     CTask* GetTaskForPed(CPed* ped);
-    uint32 GetTailOfQueue();
     int32 GetQueueSlot(const CPed*);
     size_t GetNoOfRegisteredPeds() const { return m_AttractPeds.size() + m_ArrivedPeds.size(); }
-    CPed* GetHeadOfQueue(); // Replace with `GetArrivedPeds().begin()`
+    CPed* GetHeadOfQueue() const;
+    CPed* GetTailOfQueue() const;
+    size_t GetSizeOfQueue() const { return m_ArrivedPeds.size(); }
 
     // 0x
     int32 ComputeFreeSlot();

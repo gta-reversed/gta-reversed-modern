@@ -23,6 +23,8 @@ public:
     auto begin() const { return _First; }
     auto end() const { return _Last; }
     auto empty() const { return size() == 0; }
+    auto front() const { return *_First; }
+    auto back() const { return *(_Last - 1); }
 
     void erase(T* iter) {
         assert(iter >= _First && iter < _Last);
