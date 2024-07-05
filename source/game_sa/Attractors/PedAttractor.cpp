@@ -67,8 +67,8 @@ bool CPedAttractor::DeRegisterPed(CPed* ped) {
 }
 
 // 0x5EB4C0
-bool CPedAttractor::IsRegisteredWithPed(const CPed* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x5EB4C0, CPedAttractor*, const CPed*>(this, ped);
+bool CPedAttractor::IsRegisteredWithPed(const CPed* ped) const {
+    return plugin::CallMethodAndReturn<bool, 0x5EB4C0, const CPedAttractor*, const CPed*>(this, ped);
 }
 
 // 0x5EB530

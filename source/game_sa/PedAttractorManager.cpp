@@ -39,8 +39,8 @@ void CPedAttractorManager::InjectHooks() {
     RH_ScopedInstall(HasEmptySlot, 0x5EBB00);
     RH_ScopedOverloadedInstall(GetPedUsingEffect, "Internal", 0x5EB740, CPed*(CPedAttractorManager::*)(const C2dEffectPedAttractor*, const CEntity*, const SArray<CPedAttractor*>&));
     RH_ScopedOverloadedInstall(GetPedUsingEffect, "", 0x5EBE50, CPed*(CPedAttractorManager::*)(const C2dEffectPedAttractor*, const CEntity*));
-    // RH_ScopedOverloadedInstall(GetRelevantAttractor, "Internal", 0x5EB7B0, void*(CPedAttractorManager::*)(const CPed*, const C2dEffectPedAttractor*, const CEntity*, const SArray<CPedAttractor*>&));
-    // RH_ScopedOverloadedInstall(GetRelevantAttractor, "", 0x5EBF50, void*(CPedAttractorManager::*)(const CPed*, const C2dEffectPedAttractor*, const CEntity*));
+    RH_ScopedOverloadedInstall(GetRelevantAttractor, "Internal", 0x5EB7B0, const CPedAttractor*(CPedAttractorManager::*)(const CPed*, const C2dEffectPedAttractor*, const CEntity*, const SArray<CPedAttractor*>&));
+    RH_ScopedOverloadedInstall(GetRelevantAttractor, "", 0x5EBF50, const CPedAttractor*(CPedAttractorManager::*)(const CPed*, const C2dEffectPedAttractor*, const CEntity*));
     RH_ScopedInstall(ComputeEffectPos, 0x5E96C0);
     RH_ScopedInstall(ComputeEffectUseDir, 0x5E96E0, { .reversed = false });
     RH_ScopedInstall(ComputeEffectQueueDir, 0x5E9730, { .reversed = false });
@@ -162,6 +162,11 @@ bool CPedAttractorManager::IsPedRegistered(CPed* ped, const SArray<CPedAttractor
     });
 }
 
+// 0x5EB690
+bool CPedAttractorManager::IsPedRegisteredWithEffect(CPed* ped, const C2dEffectPedAttractor* fx, const CEntity* entity, const SArray<CPedAttractor*>& attractors) {
+    return GetRelevantAttractor(ped, fx, entity, attractors) != nullptr; // NOTSA: Using `GetRelevantAttractor` instead of duplicate code
+}
+
 // 0x5EBCB0
 bool CPedAttractorManager::IsPedRegisteredWithEffect(CPed* ped) {
     return IsPedRegistered(ped, m_Seats)
@@ -188,13 +193,6 @@ bool CPedAttractorManager::IsPedRegisteredWithEffect(CPed* ped, const C2dEffectP
         || IsPedRegisteredWithEffect(ped, fx, entity, m_Scripted)
         || IsPedRegisteredWithEffect(ped, fx, entity, m_Parks)
         || IsPedRegisteredWithEffect(ped, fx, entity, m_Steps);
-}
-
-// 0x5EB690
-bool CPedAttractorManager::IsPedRegisteredWithEffect(CPed* ped, const C2dEffectPedAttractor* fx, const CEntity* entity, const SArray<CPedAttractor*>& attractors) {
-    return rng::any_of(attractors, [ped, fx, entity](CPedAttractor* a) {
-        return a->GetEffect() == fx && a->GetEntity() == entity && a->IsRegisteredWithPed(ped);
-    });
 }
 
 // 0x5EB6F0
@@ -259,12 +257,33 @@ CPed* CPedAttractorManager::GetPedUsingEffect(const C2dEffectPedAttractor* fx, c
 
 // 0x5EB7B0
 const CPedAttractor* CPedAttractorManager::GetRelevantAttractor(const CPed* ped, const C2dEffectPedAttractor* fx, const CEntity* entity, const SArray<CPedAttractor*>& attractors) {
-    return plugin::CallMethodAndReturn<const CPedAttractor*, 0x5EB7B0, CPedAttractorManager*, const CPed*, const C2dEffectPedAttractor*, const CEntity*, const SArray<CPedAttractor*>&>(this, ped, fx, entity, attractors);
+    for (const auto* const a : attractors) {
+        if (a->GetEffect() == fx && a->GetEntity() == entity && a->IsRegisteredWithPed(ped)) {
+            return a;
+        }
+    }
+    return nullptr;
 }
 
 // 0x5EBF50
-const CPedAttractor* CPedAttractorManager::GetRelevantAttractor(const CPed* ped, const C2dEffectBase* fx, const CEntity* entity) {
-    return plugin::CallMethodAndReturn<const CPedAttractor*, 0x5EBF50, CPedAttractorManager*, const CPed*, const C2dEffectBase*, const CEntity*>(this, ped, fx, entity);
+const CPedAttractor* CPedAttractorManager::GetRelevantAttractor(const CPed* ped, const C2dEffectPedAttractor* fx, const CEntity* entity) {
+    for (const auto* const attractors : {
+        &m_Seats,
+        &m_ATMs,
+        &m_Stops,
+        &m_Pizzas,
+        &m_Shelters,
+        &m_TriggerScripts,
+        &m_LookAts,
+        &m_Scripted,
+        &m_Parks,
+        &m_Steps
+    }) {
+        if (const auto* const attractor = GetRelevantAttractor(ped, fx, entity, *attractors)) {
+            return attractor;
+        }
+    }
+    return nullptr;
 }
 
 // 0x5E96C0

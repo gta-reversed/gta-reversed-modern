@@ -49,7 +49,7 @@ public:
     bool RegisterPed(CPed* ped);
     bool DeRegisterPed(CPed* ped);
 
-    bool IsRegisteredWithPed(const CPed* ped);
+    bool IsRegisteredWithPed(const CPed* ped) const;
 
     virtual bool IsAtHeadOfQueue(CPed* ped);
 
