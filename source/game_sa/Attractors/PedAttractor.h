@@ -47,7 +47,7 @@ public:
 
     void SetTaskForPed(CPed* ped, CTask* task);
     bool RegisterPed(CPed* ped);
-    void DeRegisterPed(CPed* ped);
+    bool DeRegisterPed(CPed* ped);
 
     bool IsRegisteredWithPed(const CPed* ped);
 
@@ -57,20 +57,20 @@ public:
     uint32 GetTailOfQueue();
     int32 GetQueueSlot(const CPed*);
     size_t GetNoOfRegisteredPeds() const { return m_AttractPeds.size() + m_ArrivedPeds.size(); }
-    void* GetHeadOfQueue();
+    CPed* GetHeadOfQueue(); // Replace with `GetArrivedPeds().begin()`
 
     // 0x
     int32 ComputeFreeSlot();
     float ComputeDeltaPos() const;
     float ComputeDeltaHeading() const;
 
-    void ComputeAttractTime(int32 unused, bool time1_or_time2, float& outTime) const;
+    void ComputeAttractTime(int32 slotIdx, bool hasArrived, float& outTime) const;
 
     virtual void ComputeAttractPos(int32 pedId, CVector& outPos);
     virtual void ComputeAttractHeading(int32 bQueue, float& heading);
     virtual void BroadcastDeparture(CPed* ped);
 
-    void BroadcastArrival(CPed* ped);
+    bool BroadcastArrival(CPed* ped);
     void AbortPedTasks();
 
     auto& GetAttractPeds() { return m_AttractPeds; }

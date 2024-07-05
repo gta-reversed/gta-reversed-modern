@@ -150,8 +150,8 @@ void CPedAttractor::BroadcastDeparture(CPed* ped) {
 }
 
 // 0x5EEF80
-void CPedAttractor::BroadcastArrival(CPed* ped) {
-    plugin::CallMethod<0x5EEF80, CPedAttractor*, CPed*>(this, ped);
+bool CPedAttractor::BroadcastArrival(CPed* ped) {
+    return plugin::CallMethodAndReturn<bool, 0x5EEF80, CPedAttractor*, CPed*>(this, ped);
 }
 
 // 0x5EAF60
