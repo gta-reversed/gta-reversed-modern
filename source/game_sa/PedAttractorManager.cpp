@@ -26,7 +26,7 @@ void CPedAttractorManager::InjectHooks() {
     RH_ScopedOverloadedInstall(BroadcastDeparture, "", 0x5EC980, bool(CPedAttractorManager::*)(CPed*, CPedAttractor*));
     RH_ScopedOverloadedInstall(DeRegisterPed, "Internal", 0x5EC740, bool(CPedAttractorManager::*)(CPed*, CPedAttractor*, SArray<CPedAttractor*>&));
     RH_ScopedOverloadedInstall(DeRegisterPed, "", 0x5EC850, bool(CPedAttractorManager::*)(CPed*, CPedAttractor*));
-    RH_ScopedOverloadedInstall(RemoveEffect, "Internal", 0x5EB5F0, bool(CPedAttractorManager::*)(const C2dEffect* fx, const SArray<CPedAttractor*>& array));
+    RH_ScopedOverloadedInstall(RemoveEffect, "Internal", 0x5EB5F0, bool(CPedAttractorManager::*)(const C2dEffect* fx, const SArray<CPedAttractor*>& attractors));
     RH_ScopedOverloadedInstall(RemoveEffect, "", 0x5EBA30, bool(CPedAttractorManager::*)(const C2dEffect* fx));
     RH_ScopedInstall(IsPedRegistered, 0x5EB640);
     RH_ScopedOverloadedInstall(IsPedRegisteredWithEffect, "Ped", 0x5EBCB0, bool(CPedAttractorManager::*)(CPed*));
@@ -77,9 +77,9 @@ void CPedAttractorManager::RestoreStuffFromMem() {
 }
 
 // 0x5EF920
-bool CPedAttractorManager::BroadcastArrival(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& array) {
+bool CPedAttractorManager::BroadcastArrival(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& attractors) {
     return attractor
-        && rng::contains(array, attractor)
+        && rng::contains(attractors, attractor)
         && attractor->BroadcastArrival(ped);
 }
 
@@ -91,17 +91,17 @@ bool CPedAttractorManager::BroadcastArrival(CPed* ped, CPedAttractor* attractor)
 }
 
 // 0x5EC660
-bool CPedAttractorManager::BroadcastDeparture(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& array) {
+bool CPedAttractorManager::BroadcastDeparture(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& attractors) {
     if (!attractor) {
         return false;
     }
-    const auto it = rng::find(array, attractor);
-    if (it == array.end()) {
+    const auto it = rng::find(attractors, attractor);
+    if (it == attractors.end()) {
         return false;
     }
     attractor->BroadcastDeparture(ped);
     if (!attractor->GetNoOfRegisteredPeds()) {
-        array.erase(it);
+        attractors.erase(it);
     }
     return true;
 }
@@ -189,13 +189,13 @@ bool CPedAttractorManager::IsPedRegisteredWithEffect(CPed* ped, const C2dEffect*
 }
 
 // 0x5EB690
-bool CPedAttractorManager::IsPedRegisteredWithEffect(CPed* ped, const C2dEffect* fx, const CEntity* entity, const SArray<CPedAttractor*>& array) {
-    return plugin::CallMethodAndReturn<bool, 0x5EB690, CPedAttractorManager*, CPed*, const C2dEffect*, const CEntity*, const SArray<CPedAttractor*>&>(this, ped, fx, entity, array);
+bool CPedAttractorManager::IsPedRegisteredWithEffect(CPed* ped, const C2dEffect* fx, const CEntity* entity, const SArray<CPedAttractor*>& attractors) {
+    return plugin::CallMethodAndReturn<bool, 0x5EB690, CPedAttractorManager*, CPed*, const C2dEffect*, const CEntity*, const SArray<CPedAttractor*>&>(this, ped, fx, entity, attractors);
 }
 
 // 0x5EB6F0
-CPedAttractor* CPedAttractorManager::FindAssociatedAttractor(const C2dEffect* fx, const CEntity* entity, const SArray<CPedAttractor*>& array) {
-    return plugin::CallMethodAndReturn<CPedAttractor*, 0x5EB6F0>(this, fx, entity, &array);
+CPedAttractor* CPedAttractorManager::FindAssociatedAttractor(const C2dEffect* fx, const CEntity* entity, const SArray<CPedAttractor*>& attractors) {
+    return plugin::CallMethodAndReturn<CPedAttractor*, 0x5EB6F0>(this, fx, entity, &attractors);
 }
 
 // 0x5EBBA0
@@ -209,8 +209,8 @@ bool CPedAttractorManager::HasEmptySlot(const C2dEffect* fx, const CEntity* enti
 }
 
 // 0x5EB740
-CPed* CPedAttractorManager::GetPedUsingEffect(const C2dEffect* fx, const CEntity* entity, const SArray<CPedAttractor*>& array) {
-    return plugin::CallMethodAndReturn<CPed*, 0x5EB740, CPedAttractorManager*, const C2dEffect*, const CEntity*, const SArray<CPedAttractor*>&>(this, fx, entity, array);
+CPed* CPedAttractorManager::GetPedUsingEffect(const C2dEffect* fx, const CEntity* entity, const SArray<CPedAttractor*>& attractors) {
+    return plugin::CallMethodAndReturn<CPed*, 0x5EB740, CPedAttractorManager*, const C2dEffect*, const CEntity*, const SArray<CPedAttractor*>&>(this, fx, entity, attractors);
 }
 
 // 0x5EBE50
@@ -219,8 +219,8 @@ CPed* CPedAttractorManager::GetPedUsingEffect(const C2dEffect* fx, const CEntity
 }
 
 // 0x5EB7B0
-const CPedAttractor* CPedAttractorManager::GetRelevantAttractor(const CPed* ped, const C2dEffect* fx, const CEntity* entity, const SArray<CPedAttractor*>& array) {
-    return plugin::CallMethodAndReturn<const CPedAttractor*, 0x5EB7B0, CPedAttractorManager*, const CPed*, const C2dEffect*, const CEntity*, const SArray<CPedAttractor*>&>(this, ped, fx, entity, array);
+const CPedAttractor* CPedAttractorManager::GetRelevantAttractor(const CPed* ped, const C2dEffect* fx, const CEntity* entity, const SArray<CPedAttractor*>& attractors) {
+    return plugin::CallMethodAndReturn<const CPedAttractor*, 0x5EB7B0, CPedAttractorManager*, const CPed*, const C2dEffect*, const CEntity*, const SArray<CPedAttractor*>&>(this, ped, fx, entity, attractors);
 }
 
 // 0x5EBF50
@@ -249,7 +249,7 @@ void CPedAttractorManager::ComputeEffectForwardDir(const C2dEffect* fx, const CM
 }
 
 // 0x5EF980
-void CPedAttractorManager::RegisterPed(CPed* ped, C2dEffect*, CEntity*, int32, SArray<CPedAttractor*>& array) {
+void CPedAttractorManager::RegisterPed(CPed* ped, C2dEffect*, CEntity*, int32, SArray<CPedAttractor*>& attractors) {
     assert(false);
 }
 
