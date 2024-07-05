@@ -45,7 +45,7 @@ public:
 
     CPedAttractor* FindAssociatedAttractor(const C2dEffectPedAttractor* fx, const CEntity* entity, const SArray<CPedAttractor*>& attractors);
     bool HasQueueTailArrivedAtSlot(const C2dEffectBase* fx, const CEntity* entity);
-    bool HasEmptySlot(const C2dEffectPedAttractor* fx, const CEntity* entity);
+    bool HasEmptySlot(const C2dEffectBase* baseFx, const CEntity* entity);
 
     CPed* GetPedUsingEffect(const C2dEffectPedAttractor* fx, const CEntity* entity, const SArray<CPedAttractor*>& attractors);
     CPed* GetPedUsingEffect(const C2dEffectPedAttractor* fx, const CEntity* entity = nullptr);

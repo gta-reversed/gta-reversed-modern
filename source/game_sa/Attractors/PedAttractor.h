@@ -16,7 +16,7 @@ public:
     SArray<CPed*>          m_AttractPeds;
     SArray<CPed*>          m_ArrivedPeds; // AKA queue
     SArray<CPedTaskPair>   m_PedTaskPairs;
-    int32                  m_MaxNumPeds;
+    int32                  m_MaxNumPeds; //!< Maximum number of registered peds (ArrivedPeds + AttractPeds, see `GetNoOfRegisteredPeds()`)
     float                  m_Spacing;
     float                  m_AchieveQueueTime;
     float                  m_AchieveQueueShuffleTime;
@@ -59,6 +59,7 @@ public:
     CPed* GetHeadOfQueue() const;
     CPed* GetTailOfQueue() const;
     size_t GetSizeOfQueue() const { return m_ArrivedPeds.size(); }
+    bool HasEmptySlot() const { return GetNoOfRegisteredPeds() < m_MaxNumPeds; }
 
     // 0x
     int32 ComputeFreeSlot();
