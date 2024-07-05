@@ -28,7 +28,7 @@ void CPedAttractorManager::InjectHooks() {
     RH_ScopedOverloadedInstall(DeRegisterPed, "", 0x5EC850, bool(CPedAttractorManager::*)(CPed*, CPedAttractor*));
     // RH_ScopedOverloadedInstall(RemoveEffect, "array", 0x5EB5F0, void(CPedAttractorManager::*)(const C2dEffect* effect, const SArray<CPedAttractor*>& array));
     // RH_ScopedOverloadedInstall(RemoveEffect, "", 0x5EBA30, void(CPedAttractorManager::*)(const C2dEffect* effect));
-    RH_ScopedInstall(IsPedRegistered, 0x5EB640, { .reversed = false });
+    RH_ScopedInstall(IsPedRegistered, 0x5EB640);
     RH_ScopedOverloadedInstall(IsPedRegisteredWithEffect, "ped", 0x5EBCB0, bool(CPedAttractorManager::*)(CPed*));
     RH_ScopedOverloadedInstall(IsPedRegisteredWithEffect, "+effect", 0x5EBD70, bool(CPedAttractorManager::*)(CPed*, const C2dEffect*, const CEntity*));
     // RH_ScopedOverloadedInstall(IsPedRegisteredWithEffect, "+array", 0x5EB690, bool(CPedAttractorManager::*)(CPed*, const C2dEffect*, const CEntity*, const SArray<CPedAttractor*>&));
@@ -153,11 +153,9 @@ bool CPedAttractorManager::DeRegisterPed(CPed* ped, CPedAttractor* attractor) {
     if (!attractor) {
         return false;
     }
-
     if (!IsPedRegisteredWithEffect(ped)) {
         return false;
     }
-
     switch (attractor->GetType()) {
     case PED_ATTRACTOR_ATM:            return DeRegisterPed(ped, attractor, m_ATMs);
     case PED_ATTRACTOR_SEAT:           return DeRegisterPed(ped, attractor, m_Seats);
@@ -184,8 +182,10 @@ void CPedAttractorManager::RemoveEffect(const C2dEffect* effect) {
 }
 
 // 0x5EB640
-bool CPedAttractorManager::IsPedRegistered(CPed* ped, const SArray<CPedAttractor*>& array) {
-    return plugin::CallMethodAndReturn<bool, 0x5EB640, CPedAttractorManager*, CPed*, const SArray<CPedAttractor*>&>(this, ped, array);
+bool CPedAttractorManager::IsPedRegistered(CPed* ped, const SArray<CPedAttractor*>& attractors) {
+    return rng::any_of(attractors, [ped](CPedAttractor* a) {
+        return a->IsRegisteredWithPed(ped);
+    });
 }
 
 // 0x5EBCB0
@@ -213,7 +213,7 @@ bool CPedAttractorManager::IsPedRegisteredWithEffect(CPed* ped, const C2dEffect*
         || IsPedRegisteredWithEffect(ped, effect, entity, m_LookAts)
         || IsPedRegisteredWithEffect(ped, effect, entity, m_Scripted)
         || IsPedRegisteredWithEffect(ped, effect, entity, m_Parks)
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_Steps) != 0;
+        || IsPedRegisteredWithEffect(ped, effect, entity, m_Steps);
 }
 
 // 0x5EB690
