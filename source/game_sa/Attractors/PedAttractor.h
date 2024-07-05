@@ -16,7 +16,7 @@ public:
     SArray<CPed*>          m_AttractPeds;
     SArray<CPed*>          m_ArrivedPeds; // AKA queue
     SArray<CPedTaskPair>   m_PedTaskPairs;
-    int32                  m_MaxNumPeds; //!< Maximum number of registered peds (ArrivedPeds + AttractPeds, see `GetNoOfRegisteredPeds()`)
+    size_t                 m_MaxNumPeds; //!< Maximum number of registered peds (ArrivedPeds + AttractPeds, see `GetNoOfRegisteredPeds()`)
     float                  m_Spacing;
     float                  m_AchieveQueueTime;
     float                  m_AchieveQueueShuffleTime;

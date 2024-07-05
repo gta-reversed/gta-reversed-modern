@@ -37,8 +37,8 @@ void CPedAttractorManager::InjectHooks() {
     RH_ScopedInstall(FindAssociatedAttractor, 0x5EB6F0);
     RH_ScopedInstall(HasQueueTailArrivedAtSlot, 0x5EBBA0);
     RH_ScopedInstall(HasEmptySlot, 0x5EBB00);
-    // RH_ScopedOverloadedInstall(GetPedUsingEffect, "Internal", 0x5EB740, void*(CPedAttractorManager::*)(const C2dEffectPedAttractor*, const CEntity*, const SArray<CPedAttractor*>&));
-    // RH_ScopedOverloadedInstall(GetPedUsingEffect, "", 0x5EBE50, void*(CPedAttractorManager::*)(const C2dEffectPedAttractor*, const CEntity*));
+    RH_ScopedOverloadedInstall(GetPedUsingEffect, "Internal", 0x5EB740, CPed*(CPedAttractorManager::*)(const C2dEffectPedAttractor*, const CEntity*, const SArray<CPedAttractor*>&));
+    RH_ScopedOverloadedInstall(GetPedUsingEffect, "", 0x5EBE50, CPed*(CPedAttractorManager::*)(const C2dEffectPedAttractor*, const CEntity*));
     // RH_ScopedOverloadedInstall(GetRelevantAttractor, "Internal", 0x5EB7B0, void*(CPedAttractorManager::*)(const CPed*, const C2dEffectPedAttractor*, const CEntity*, const SArray<CPedAttractor*>&));
     // RH_ScopedOverloadedInstall(GetRelevantAttractor, "", 0x5EBF50, void*(CPedAttractorManager::*)(const CPed*, const C2dEffectPedAttractor*, const CEntity*));
     RH_ScopedInstall(ComputeEffectPos, 0x5E96C0);
@@ -141,7 +141,7 @@ bool CPedAttractorManager::DeRegisterPed(CPed* ped, CPedAttractor* attractor) {
 // 0x5EB5F0
 // all xrefs are dead functions
 bool CPedAttractorManager::RemoveEffect(const C2dEffectPedAttractor* fx, const SArray<CPedAttractor*>& attractors) {
-    for (auto& a : attractors) {
+    for (auto* const a : attractors) {
         if (a->GetEffect() == fx) {
             a->AbortPedTasks();
         }
@@ -199,7 +199,7 @@ bool CPedAttractorManager::IsPedRegisteredWithEffect(CPed* ped, const C2dEffectP
 
 // 0x5EB6F0
 CPedAttractor* CPedAttractorManager::FindAssociatedAttractor(const C2dEffectPedAttractor* fx, const CEntity* entity, const SArray<CPedAttractor*>& attractors) {
-    for (auto& a : attractors) {
+    for (auto* const a : attractors) {
         if (a->GetEffect() == fx && a->GetEntity() == entity) {
             return a;
         }
@@ -244,12 +244,17 @@ bool CPedAttractorManager::HasEmptySlot(const C2dEffectBase* baseFx, const CEnti
 
 // 0x5EB740
 CPed* CPedAttractorManager::GetPedUsingEffect(const C2dEffectPedAttractor* fx, const CEntity* entity, const SArray<CPedAttractor*>& attractors) {
-    return plugin::CallMethodAndReturn<CPed*, 0x5EB740, CPedAttractorManager*, const C2dEffectPedAttractor*, const CEntity*, const SArray<CPedAttractor*>&>(this, fx, entity, attractors);
+    for (const auto* const a : attractors) {
+        if (a->GetEffect() == fx && a->GetEntity() == entity) {
+            return a->GetHeadOfQueue();
+        }
+    }
+    return nullptr;
 }
 
 // 0x5EBE50
 CPed* CPedAttractorManager::GetPedUsingEffect(const C2dEffectPedAttractor* fx, const CEntity* entity) {
-    return plugin::CallMethodAndReturn<CPed*, 0x5EBE50, CPedAttractorManager*, const C2dEffectPedAttractor*, const CEntity*>(this, fx, entity);
+    return GetPedUsingEffect(fx, entity, GetAttractorsOfType(fx->m_nAttractorType));
 }
 
 // 0x5EB7B0
