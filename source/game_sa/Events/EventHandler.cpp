@@ -570,7 +570,7 @@ void CEventHandler::ComputeAttractorResponse(CEventAttractor* e, CTask* tactive,
     if (e->m_taskId == TASK_NONE) {
         m_EventResponseTask = nullptr;
     } else if (e->m_taskId == TASK_COMPLEX_USE_EFFECT) {
-        if (GetPedAttractorManager()->HasEmptySlot(e->m_2dEffect, e->m_entity)) { // inverted
+        if (GetPedAttractorManager()->HasEmptySlot(C2dEffect::Cast<C2dEffectPedAttractor>(e->m_2dEffect), e->m_entity)) { // inverted
             m_EventResponseTask = new CTaskComplexUseEffect{e->m_2dEffect, e->m_entity};
         }
     }

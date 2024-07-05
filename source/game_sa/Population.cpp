@@ -1453,7 +1453,7 @@ bool CPopulation::AddPedAtAttractor(eModelID modelIndex, C2dEffect* attractor, C
         return false;
     }
 
-    if (!GetPedAttractorManager()->HasQueueTailArrivedAtSlot(attractor, entity)) {
+    if (!GetPedAttractorManager()->HasQueueTailArrivedAtSlot(C2dEffect::Cast<C2dEffectPedAttractor>(attractor), entity)) {
         return false;
     }
 

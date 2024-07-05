@@ -7,7 +7,7 @@ class CEntity;
 
 class NOTSA_EXPORT_VTABLE CEventAttractor : public CEventEditableResponse {
 public:
-    C2dEffect* m_2dEffect;
+    C2dEffect* m_2dEffect; // todo: change type to `C2dEffectPedAttractor*`
     CEntity*   m_entity;
     bool       m_bAvoidLookingAtAttractor;
 

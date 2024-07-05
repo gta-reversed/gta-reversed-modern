@@ -183,7 +183,8 @@ public:
     static void  PlaceMallPedsAsStationaryGroup(const CVector& posn);
     static void  PlaceCouple(ePedType pedType1, eModelID modelIndex1, ePedType pedType2, eModelID modelIndex2, CVector placeAt);
     // Creates ped at attractor. decisionMakerType can be set to -1
-    static bool  AddPedAtAttractor(eModelID modelIndex, C2dEffect* attractor, CVector posn, CEntity* entity, int32 decisionMakerType);
+    // TODO: Change type of `attractor` to `C2dEffectPedAttractor*`
+    static bool  AddPedAtAttractor(eModelID modelIndex, C2dEffect* attractor, CVector posn, CEntity* entity, int32 decisionMakerType); 
     static float FindDistanceToNearestPedOfType(ePedType pedType, CVector posn);
     static float FindDistanceToNearestPed(CVector pos);
     static eModelID PickGangCar(eGangID forGang);

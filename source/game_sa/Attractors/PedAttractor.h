@@ -76,6 +76,7 @@ public:
     auto& GetAttractPeds() { return m_AttractPeds; }
     auto& GetArrivedPeds() { return m_ArrivedPeds; }
     auto  GetEffect() const { return m_Fx; }
+    auto GetEntity() const { return m_Entity; }
 };
 
 VALIDATE_SIZE(CPedAttractor, 0x8C);
