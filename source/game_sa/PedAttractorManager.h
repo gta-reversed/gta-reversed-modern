@@ -35,33 +35,33 @@ public:
     bool DeRegisterPed(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& array);
     bool DeRegisterPed(CPed* ped, CPedAttractor* attractor);
 
-    bool RemoveEffect(const C2dEffect* effect, const SArray<CPedAttractor*>& array);
-    bool RemoveEffect(const C2dEffect* effect);
+    bool RemoveEffect(const C2dEffectPedAttractor* fx, const SArray<CPedAttractor*>& array);
+    bool RemoveEffect(const C2dEffectPedAttractor* fx);
 
     bool IsPedRegistered(CPed* ped, const SArray<CPedAttractor*>& array);
     bool IsPedRegisteredWithEffect(CPed* ped);
-    bool IsPedRegisteredWithEffect(CPed* ped, const C2dEffect* effect, const CEntity* entity);
-    bool IsPedRegisteredWithEffect(CPed* ped, const C2dEffect* effect, const CEntity* entity, const SArray<CPedAttractor*>& array);
+    bool IsPedRegisteredWithEffect(CPed* ped, const C2dEffect* fx, const CEntity* entity);
+    bool IsPedRegisteredWithEffect(CPed* ped, const C2dEffect* fx, const CEntity* entity, const SArray<CPedAttractor*>& array);
 
-    CPedAttractor* FindAssociatedAttractor(const C2dEffect* effect, const CEntity* entity, const SArray<CPedAttractor*>& array);
-    bool HasQueueTailArrivedAtSlot(const C2dEffect* effect, const CEntity* entity);
-    bool HasEmptySlot(const C2dEffect* effect, const CEntity* entity);
+    CPedAttractor* FindAssociatedAttractor(const C2dEffect* fx, const CEntity* entity, const SArray<CPedAttractor*>& array);
+    bool HasQueueTailArrivedAtSlot(const C2dEffect* fx, const CEntity* entity);
+    bool HasEmptySlot(const C2dEffect* fx, const CEntity* entity);
 
-    CPed* GetPedUsingEffect(const C2dEffect* effect, const CEntity* entity, const SArray<CPedAttractor*>& array);
-    CPed* GetPedUsingEffect(const C2dEffect* effect, const CEntity* entity = nullptr);
+    CPed* GetPedUsingEffect(const C2dEffect* fx, const CEntity* entity, const SArray<CPedAttractor*>& array);
+    CPed* GetPedUsingEffect(const C2dEffect* fx, const CEntity* entity = nullptr);
 
-    const CPedAttractor* GetRelevantAttractor(const CPed* ped, const C2dEffect* effect, const CEntity* entity, const SArray<CPedAttractor*>& array);
-    const CPedAttractor* GetRelevantAttractor(const CPed* ped, const C2dEffectBase* effect, const CEntity* entity);
+    const CPedAttractor* GetRelevantAttractor(const CPed* ped, const C2dEffect* fx, const CEntity* entity, const SArray<CPedAttractor*>& array);
+    const CPedAttractor* GetRelevantAttractor(const CPed* ped, const C2dEffectBase* fx, const CEntity* entity);
 
-    static void ComputeEffectPos(const C2dEffect* effect, const CMatrix& mat, CVector& vec);
-    static void ComputeEffectUseDir(const C2dEffect* effect, const CMatrix& mat, CVector& vec);
-    static void ComputeEffectQueueDir(const C2dEffect* effect, const CMatrix& mat, CVector& vec);
-    static void ComputeEffectForwardDir(const C2dEffect* effect, const CMatrix& mat, CVector& vec);
+    static void ComputeEffectPos(const C2dEffect* fx, const CMatrix& mat, CVector& vec);
+    static void ComputeEffectUseDir(const C2dEffect* fx, const CMatrix& mat, CVector& vec);
+    static void ComputeEffectQueueDir(const C2dEffect* fx, const CMatrix& mat, CVector& vec);
+    static void ComputeEffectForwardDir(const C2dEffect* fx, const CMatrix& mat, CVector& vec);
 
     void RegisterPed(CPed* ped, C2dEffect*, CEntity*, int32, SArray<CPedAttractor*>& array);
     CPedAttractor* RegisterPedWithAttractor(CPed* ped, C2dEffectBase* fx, CEntity* entity, eMoveState ms);
 
-    static bool IsApproachable(C2dEffect* effect, const CMatrix& mat, int32 unused, CPed* ped);
+    static bool IsApproachable(C2dEffect* fx, const CMatrix& mat, int32 unused, CPed* ped);
 private:
     auto& GetArrayOfType(ePedAttractorType t);
 };

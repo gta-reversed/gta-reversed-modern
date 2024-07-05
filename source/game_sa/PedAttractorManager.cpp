@@ -26,8 +26,8 @@ void CPedAttractorManager::InjectHooks() {
     RH_ScopedOverloadedInstall(BroadcastDeparture, "", 0x5EC980, bool(CPedAttractorManager::*)(CPed*, CPedAttractor*));
     RH_ScopedOverloadedInstall(DeRegisterPed, "Internal", 0x5EC740, bool(CPedAttractorManager::*)(CPed*, CPedAttractor*, SArray<CPedAttractor*>&));
     RH_ScopedOverloadedInstall(DeRegisterPed, "", 0x5EC850, bool(CPedAttractorManager::*)(CPed*, CPedAttractor*));
-    // RH_ScopedOverloadedInstall(RemoveEffect, "Internal", 0x5EB5F0, bool(CPedAttractorManager::*)(const C2dEffect* effect, const SArray<CPedAttractor*>& array));
-    // RH_ScopedOverloadedInstall(RemoveEffect, "", 0x5EBA30, bool(CPedAttractorManager::*)(const C2dEffect* effect));
+    RH_ScopedOverloadedInstall(RemoveEffect, "Internal", 0x5EB5F0, bool(CPedAttractorManager::*)(const C2dEffect* fx, const SArray<CPedAttractor*>& array));
+    RH_ScopedOverloadedInstall(RemoveEffect, "", 0x5EBA30, bool(CPedAttractorManager::*)(const C2dEffect* fx));
     RH_ScopedInstall(IsPedRegistered, 0x5EB640);
     RH_ScopedOverloadedInstall(IsPedRegisteredWithEffect, "Ped", 0x5EBCB0, bool(CPedAttractorManager::*)(CPed*));
     RH_ScopedOverloadedInstall(IsPedRegisteredWithEffect, "Effect", 0x5EBD70, bool(CPedAttractorManager::*)(CPed*, const C2dEffect*, const CEntity*));
@@ -137,13 +137,20 @@ bool CPedAttractorManager::DeRegisterPed(CPed* ped, CPedAttractor* attractor) {
 }
 
 // 0x5EB5F0
-bool CPedAttractorManager::RemoveEffect(const C2dEffect* effect, const SArray<CPedAttractor*>& array) {
-    return plugin::CallMethodAndReturn<bool, 0x5EB5F0, CPedAttractorManager*, const C2dEffect*, const SArray<CPedAttractor*>&>(this, effect, array);
+// all xrefs are dead functions
+bool CPedAttractorManager::RemoveEffect(const C2dEffectPedAttractor* fx, const SArray<CPedAttractor*>& attractors) {
+    for (auto& a : attractors) {
+        if (a->GetEffect() == fx) {
+            a->AbortPedTasks();
+        }
+    }
+    return false;
 }
 
 // 0x5EBA30
-bool CPedAttractorManager::RemoveEffect(const C2dEffect* effect) {
-    return plugin::CallMethodAndReturn<bool, 0x5EBA30, CPedAttractorManager*, const C2dEffect*>(this, effect);
+// all xrefs are dead functions
+bool CPedAttractorManager::RemoveEffect(const C2dEffectPedAttractor* fx) {
+    return RemoveEffect(fx, GetArrayOfType(fx->m_nAttractorType));
 }
 
 // 0x5EB640
@@ -168,76 +175,76 @@ bool CPedAttractorManager::IsPedRegisteredWithEffect(CPed* ped) {
 }
 
 // 0x5EBD70
-bool CPedAttractorManager::IsPedRegisteredWithEffect(CPed* ped, const C2dEffect* effect, const CEntity* entity) {
-    return IsPedRegisteredWithEffect(ped, effect, entity, m_Seats)
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_ATMs)
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_Stops)
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_Pizzas)
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_Shelters)
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_TriggerScripts)
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_LookAts)
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_Scripted)
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_Parks)
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_Steps);
+bool CPedAttractorManager::IsPedRegisteredWithEffect(CPed* ped, const C2dEffect* fx, const CEntity* entity) {
+    return IsPedRegisteredWithEffect(ped, fx, entity, m_Seats)
+        || IsPedRegisteredWithEffect(ped, fx, entity, m_ATMs)
+        || IsPedRegisteredWithEffect(ped, fx, entity, m_Stops)
+        || IsPedRegisteredWithEffect(ped, fx, entity, m_Pizzas)
+        || IsPedRegisteredWithEffect(ped, fx, entity, m_Shelters)
+        || IsPedRegisteredWithEffect(ped, fx, entity, m_TriggerScripts)
+        || IsPedRegisteredWithEffect(ped, fx, entity, m_LookAts)
+        || IsPedRegisteredWithEffect(ped, fx, entity, m_Scripted)
+        || IsPedRegisteredWithEffect(ped, fx, entity, m_Parks)
+        || IsPedRegisteredWithEffect(ped, fx, entity, m_Steps);
 }
 
 // 0x5EB690
-bool CPedAttractorManager::IsPedRegisteredWithEffect(CPed* ped, const C2dEffect* effect, const CEntity* entity, const SArray<CPedAttractor*>& array) {
-    return plugin::CallMethodAndReturn<bool, 0x5EB690, CPedAttractorManager*, CPed*, const C2dEffect*, const CEntity*, const SArray<CPedAttractor*>&>(this, ped, effect, entity, array);
+bool CPedAttractorManager::IsPedRegisteredWithEffect(CPed* ped, const C2dEffect* fx, const CEntity* entity, const SArray<CPedAttractor*>& array) {
+    return plugin::CallMethodAndReturn<bool, 0x5EB690, CPedAttractorManager*, CPed*, const C2dEffect*, const CEntity*, const SArray<CPedAttractor*>&>(this, ped, fx, entity, array);
 }
 
 // 0x5EB6F0
-CPedAttractor* CPedAttractorManager::FindAssociatedAttractor(const C2dEffect* effect, const CEntity* entity, const SArray<CPedAttractor*>& array) {
-    return plugin::CallMethodAndReturn<CPedAttractor*, 0x5EB6F0>(this, effect, entity, &array);
+CPedAttractor* CPedAttractorManager::FindAssociatedAttractor(const C2dEffect* fx, const CEntity* entity, const SArray<CPedAttractor*>& array) {
+    return plugin::CallMethodAndReturn<CPedAttractor*, 0x5EB6F0>(this, fx, entity, &array);
 }
 
 // 0x5EBBA0
-bool CPedAttractorManager::HasQueueTailArrivedAtSlot(const C2dEffect* effect, const CEntity* entity) {
-    return plugin::CallMethodAndReturn<bool, 0x5EBBA0, CPedAttractorManager*, const C2dEffect*, const CEntity*>(this, effect, entity);
+bool CPedAttractorManager::HasQueueTailArrivedAtSlot(const C2dEffect* fx, const CEntity* entity) {
+    return plugin::CallMethodAndReturn<bool, 0x5EBBA0, CPedAttractorManager*, const C2dEffect*, const CEntity*>(this, fx, entity);
 }
 
 // 0x5EBB00
-bool CPedAttractorManager::HasEmptySlot(const C2dEffect* effect, const CEntity* entity) {
-    return plugin::CallMethodAndReturn<bool, 0x5EBB00, CPedAttractorManager*, const C2dEffect*, const CEntity*>(this, effect, entity);
+bool CPedAttractorManager::HasEmptySlot(const C2dEffect* fx, const CEntity* entity) {
+    return plugin::CallMethodAndReturn<bool, 0x5EBB00, CPedAttractorManager*, const C2dEffect*, const CEntity*>(this, fx, entity);
 }
 
 // 0x5EB740
-CPed* CPedAttractorManager::GetPedUsingEffect(const C2dEffect* effect, const CEntity* entity, const SArray<CPedAttractor*>& array) {
-    return plugin::CallMethodAndReturn<CPed*, 0x5EB740, CPedAttractorManager*, const C2dEffect*, const CEntity*, const SArray<CPedAttractor*>&>(this, effect, entity, array);
+CPed* CPedAttractorManager::GetPedUsingEffect(const C2dEffect* fx, const CEntity* entity, const SArray<CPedAttractor*>& array) {
+    return plugin::CallMethodAndReturn<CPed*, 0x5EB740, CPedAttractorManager*, const C2dEffect*, const CEntity*, const SArray<CPedAttractor*>&>(this, fx, entity, array);
 }
 
 // 0x5EBE50
-CPed* CPedAttractorManager::GetPedUsingEffect(const C2dEffect* effect, const CEntity* entity) {
-    return plugin::CallMethodAndReturn<CPed*, 0x5EBE50, CPedAttractorManager*, const C2dEffect*, const CEntity*>(this, effect, entity);
+CPed* CPedAttractorManager::GetPedUsingEffect(const C2dEffect* fx, const CEntity* entity) {
+    return plugin::CallMethodAndReturn<CPed*, 0x5EBE50, CPedAttractorManager*, const C2dEffect*, const CEntity*>(this, fx, entity);
 }
 
 // 0x5EB7B0
-const CPedAttractor* CPedAttractorManager::GetRelevantAttractor(const CPed* ped, const C2dEffect* effect, const CEntity* entity, const SArray<CPedAttractor*>& array) {
-    return plugin::CallMethodAndReturn<const CPedAttractor*, 0x5EB7B0, CPedAttractorManager*, const CPed*, const C2dEffect*, const CEntity*, const SArray<CPedAttractor*>&>(this, ped, effect, entity, array);
+const CPedAttractor* CPedAttractorManager::GetRelevantAttractor(const CPed* ped, const C2dEffect* fx, const CEntity* entity, const SArray<CPedAttractor*>& array) {
+    return plugin::CallMethodAndReturn<const CPedAttractor*, 0x5EB7B0, CPedAttractorManager*, const CPed*, const C2dEffect*, const CEntity*, const SArray<CPedAttractor*>&>(this, ped, fx, entity, array);
 }
 
 // 0x5EBF50
-const CPedAttractor* CPedAttractorManager::GetRelevantAttractor(const CPed* ped, const C2dEffectBase* effect, const CEntity* entity) {
-    return plugin::CallMethodAndReturn<const CPedAttractor*, 0x5EBF50, CPedAttractorManager*, const CPed*, const C2dEffectBase*, const CEntity*>(this, ped, effect, entity);
+const CPedAttractor* CPedAttractorManager::GetRelevantAttractor(const CPed* ped, const C2dEffectBase* fx, const CEntity* entity) {
+    return plugin::CallMethodAndReturn<const CPedAttractor*, 0x5EBF50, CPedAttractorManager*, const CPed*, const C2dEffectBase*, const CEntity*>(this, ped, fx, entity);
 }
 
 // 0x5E96C0
-void CPedAttractorManager::ComputeEffectPos(const C2dEffect* effect, const CMatrix& mat, CVector& vec) {
-    vec.FromMultiply(mat, &effect->m_pos);
+void CPedAttractorManager::ComputeEffectPos(const C2dEffect* fx, const CMatrix& mat, CVector& vec) {
+    vec.FromMultiply(mat, &fx->m_pos);
 }
 
 // 0x5E96E0
-void CPedAttractorManager::ComputeEffectUseDir(const C2dEffect* effect, const CMatrix& mat, CVector& vec) {
+void CPedAttractorManager::ComputeEffectUseDir(const C2dEffect* fx, const CMatrix& mat, CVector& vec) {
     assert(false);
 }
 
 // 0x5E9730
-void CPedAttractorManager::ComputeEffectQueueDir(const C2dEffect* effect, const CMatrix& mat, CVector& vec) {
+void CPedAttractorManager::ComputeEffectQueueDir(const C2dEffect* fx, const CMatrix& mat, CVector& vec) {
     assert(false);
 }
 
 // 0x5E9780
-void CPedAttractorManager::ComputeEffectForwardDir(const C2dEffect* effect, const CMatrix& mat, CVector& vec) {
+void CPedAttractorManager::ComputeEffectForwardDir(const C2dEffect* fx, const CMatrix& mat, CVector& vec) {
     assert(false);
 }
 
@@ -252,6 +259,6 @@ CPedAttractor* CPedAttractorManager::RegisterPedWithAttractor(CPed* ped, C2dEffe
 }
 
 // 0x5EA220
-bool CPedAttractorManager::IsApproachable(C2dEffect* effect, const CMatrix& mat, int32 unused, CPed* ped) {
-    return plugin::CallAndReturn<bool, 0x5EA220, C2dEffect*, const CMatrix&, int32, CPed*>(effect, mat, unused, ped);
+bool CPedAttractorManager::IsApproachable(C2dEffect* fx, const CMatrix& mat, int32 unused, CPed* ped) {
+    return plugin::CallAndReturn<bool, 0x5EA220, C2dEffect*, const CMatrix&, int32, CPed*>(fx, mat, unused, ped);
 }

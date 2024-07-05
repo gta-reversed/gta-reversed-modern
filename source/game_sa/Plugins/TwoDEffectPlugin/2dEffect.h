@@ -260,6 +260,12 @@ public:
             : nullptr;
     }
 
+    template<std::derived_from<C2dEffectBase> T>
+    static T* Cast(C2dEffectBase* p) {
+        assert(p->m_type == T::Type);
+        return reinterpret_cast<T*>(p);
+    }
+
 public:
     static void InjectHooks();
 

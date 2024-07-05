@@ -61,8 +61,8 @@ bool CPedAttractor::RegisterPed(CPed* ped) {
 }
 
 // 0x5EC5B0
-void CPedAttractor::DeRegisterPed(CPed* ped) {
-    return plugin::CallMethod<0x5EC5B0, CPedAttractor*, CPed*>(this, ped);
+bool CPedAttractor::DeRegisterPed(CPed* ped) {
+    return plugin::CallMethodAndReturn<bool, 0x5EC5B0, CPedAttractor*, CPed*>(this, ped);
 }
 
 // 0x5EB4C0
@@ -91,8 +91,8 @@ int32 CPedAttractor::GetQueueSlot(const CPed*) {
 }
 
 // 0x5EB590
-void* CPedAttractor::GetHeadOfQueue() {
-    return plugin::CallMethodAndReturn<void*, 0x5EB590, CPedAttractor*>(this);
+CPed* CPedAttractor::GetHeadOfQueue() {
+    return plugin::CallMethodAndReturn<CPed*, 0x5EB590, CPedAttractor*>(this);
 }
 
 int32 CPedAttractor::ComputeFreeSlot() {

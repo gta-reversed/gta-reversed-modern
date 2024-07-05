@@ -11,24 +11,24 @@ class CTask;
 
 class NOTSA_EXPORT_VTABLE CPedAttractor {
 public:
-    C2dEffect*           m_Fx;
-    CEntity*             m_Entity;
-    SArray<CPed*>        m_AttractPeds;
-    SArray<CPed*>        m_ArrivedPeds;
-    SArray<CPedTaskPair> m_PedTaskPairs;
-    int32                m_MaxNumPeds;
-    float                m_Spacing;
-    float                m_AchieveQueueTime;
-    float                m_AchieveQueueShuffleTime;
-    float                m_ArriveRange;
-    float                m_HeadingRange;
-    float                m_DeltaPos;
-    float                m_DeltaHeading;
-    CVector              m_Pos;
-    CVector              m_QueueDir;
-    CVector              m_UseDir;
-    eMoveState           m_MoveState;
-    char                 m_ScriptName[8];
+    C2dEffectPedAttractor* m_Fx;
+    CEntity*               m_Entity;
+    SArray<CPed*>          m_AttractPeds;
+    SArray<CPed*>          m_ArrivedPeds;
+    SArray<CPedTaskPair>   m_PedTaskPairs;
+    int32                  m_MaxNumPeds;
+    float                  m_Spacing;
+    float                  m_AchieveQueueTime;
+    float                  m_AchieveQueueShuffleTime;
+    float                  m_ArriveRange;
+    float                  m_HeadingRange;
+    float                  m_DeltaPos;
+    float                  m_DeltaHeading;
+    CVector                m_Pos;
+    CVector                m_QueueDir;
+    CVector                m_UseDir;
+    eMoveState             m_MoveState;
+    char                   m_ScriptName[8];
 
     inline static SArray<CTask>& ms_tasks = *reinterpret_cast<SArray<CTask>*>(0xC0985C);
 
@@ -75,6 +75,7 @@ public:
 
     auto& GetAttractPeds() { return m_AttractPeds; }
     auto& GetArrivedPeds() { return m_ArrivedPeds; }
+    auto  GetEffect() const { return m_Fx; }
 };
 
 VALIDATE_SIZE(CPedAttractor, 0x8C);
