@@ -8,10 +8,10 @@
 
 template <typename T>
 struct SArray /* : public std::vector<T> */ {
-    /* allocator<_Ty>*/ void* allocator; // MSVC 6.0 STL vector
-    /* iterator      */ T*    _First;    // ptr to array
-    /* iterator      */ T*    _Last;     // ptr to past the last active element
-    /* iterator      */ T*    _End;      // ptr to end of array
+    /* allocator<_Ty>*/ void* allocator{}; // MSVC 6.0 STL vector
+    /* iterator      */ T*    _First{};    // ptr to array
+    /* iterator      */ T*    _Last{};     // ptr to past the last active element
+    /* iterator      */ T*    _End{};      // ptr to end of array
 public:
     SArray() = default;
     SArray(SArray const&) {}

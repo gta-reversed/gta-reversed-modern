@@ -22,10 +22,10 @@ void CPedAttractorManager::InjectHooks() {
     RH_ScopedInstall(RestoreStuffFromMem, 0x5EF710);
     RH_ScopedOverloadedInstall(BroadcastArrival, "array", 0x5EF920, void(CPedAttractorManager::*)(CPed*, CPedAttractor*, SArray<CPedAttractor*>&));
     RH_ScopedOverloadedInstall(BroadcastArrival, "", 0x5EFE20, void(CPedAttractorManager::*)(CPed*, CPedAttractor*));
-    RH_ScopedOverloadedInstall(BroadcastDeparture, "array", 0x5EC660, void(CPedAttractorManager::*)(CPed*, CPedAttractor*, SArray<CPedAttractor*>&));
-    RH_ScopedOverloadedInstall(BroadcastDeparture, "", 0x5EC980, void(CPedAttractorManager::*)(CPed*, CPedAttractor*));
-    // RH_ScopedOverloadedInstall(DeRegisterPed, "array", 0x5EC740, void(CPedAttractorManager::*)(CPed*, CPedAttractor*, SArray<CPedAttractor*>&));
-    RH_ScopedOverloadedInstall(DeRegisterPed, "", 0x5EC850, void(CPedAttractorManager::*)(CPed*, CPedAttractor*));
+    RH_ScopedOverloadedInstall(BroadcastDeparture, "array", 0x5EC660, bool(CPedAttractorManager::*)(CPed*, CPedAttractor*, SArray<CPedAttractor*>&));
+    RH_ScopedOverloadedInstall(BroadcastDeparture, "", 0x5EC980, bool(CPedAttractorManager::*)(CPed*, CPedAttractor*));
+    RH_ScopedOverloadedInstall(DeRegisterPed, "array", 0x5EC740, bool(CPedAttractorManager::*)(CPed*, CPedAttractor*, SArray<CPedAttractor*>&));
+    RH_ScopedOverloadedInstall(DeRegisterPed, "", 0x5EC850, bool(CPedAttractorManager::*)(CPed*, CPedAttractor*));
     // RH_ScopedOverloadedInstall(RemoveEffect, "array", 0x5EB5F0, void(CPedAttractorManager::*)(const C2dEffect* effect, const SArray<CPedAttractor*>& array));
     // RH_ScopedOverloadedInstall(RemoveEffect, "", 0x5EBA30, void(CPedAttractorManager::*)(const C2dEffect* effect));
     RH_ScopedInstall(IsPedRegistered, 0x5EB640, { .reversed = false });
@@ -75,11 +75,9 @@ void CPedAttractorManager::BroadcastArrival(CPed* ped, CPedAttractor* attractor)
     if (!attractor) {
         return;
     }
-
     if (!IsPedRegisteredWithEffect(ped)) {
         return;
     }
-
     switch (attractor->GetType()) {
     case PED_ATTRACTOR_ATM:            return BroadcastArrival(ped, attractor, m_ATMs);
     case PED_ATTRACTOR_SEAT:           return BroadcastArrival(ped, attractor, m_Seats); // ?
@@ -91,35 +89,34 @@ void CPedAttractorManager::BroadcastArrival(CPed* ped, CPedAttractor* attractor)
     case PED_ATTRACTOR_SCRIPTED:       return BroadcastArrival(ped, attractor, m_Scripted);
     case PED_ATTRACTOR_PARK:           return BroadcastArrival(ped, attractor, m_Parks);
     case PED_ATTRACTOR_STEP:           return BroadcastArrival(ped, attractor, m_Steps);
-    default:                           return;
+    default:                           NOTSA_UNREACHABLE();
     }
 }
 
 // 0x5EC660
-void CPedAttractorManager::BroadcastDeparture(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& array) {
+bool CPedAttractorManager::BroadcastDeparture(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& array) {
     if (!attractor) {
-        return;
+        return false;
     }
     const auto it = rng::find(array, attractor);
     if (it == array.end()) {
-        return;
+        return false;
     }
     attractor->BroadcastDeparture(ped);
-    if (attractor->GetArrivedPeds().empty() && attractor->GetAttractPeds().empty()) {
+    if (!attractor->GetNoOfRegisteredPeds()) {
         array.erase(it);
     }
+    return true;
 }
 
 // 0x5EC980
-void CPedAttractorManager::BroadcastDeparture(CPed* ped, CPedAttractor* attractor) {
+bool CPedAttractorManager::BroadcastDeparture(CPed* ped, CPedAttractor* attractor) {
     if (!attractor) {
-        return;
+        return false;
     }
-
     if (!IsPedRegisteredWithEffect(ped)) {
-        return;
+        return false;
     }
-
     switch (attractor->GetType()) {
     case PED_ATTRACTOR_ATM:            return BroadcastDeparture(ped, attractor, m_ATMs);
     case PED_ATTRACTOR_SEAT:           return BroadcastDeparture(ped, attractor, m_Seats);
@@ -131,28 +128,39 @@ void CPedAttractorManager::BroadcastDeparture(CPed* ped, CPedAttractor* attracto
     case PED_ATTRACTOR_SCRIPTED:       return BroadcastDeparture(ped, attractor, m_Scripted);
     case PED_ATTRACTOR_PARK:           return BroadcastDeparture(ped, attractor, m_Parks);
     case PED_ATTRACTOR_STEP:           return BroadcastDeparture(ped, attractor, m_Steps);
-    default:                           return;
+    default:                           NOTSA_UNREACHABLE();
     }
 }
 
 // 0x5EC740
-void CPedAttractorManager::DeRegisterPed(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& array) {
-    plugin::CallMethod<0x5EC740, CPedAttractorManager*, CPed*, CPedAttractor*, SArray<CPedAttractor*>&>(this, ped, attractor, array);
+bool CPedAttractorManager::DeRegisterPed(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& attractors) {
+    if (!attractor) {
+        return false;
+    }
+    const auto it = rng::find(attractors, attractor);
+    if (it == attractors.end()) {
+        return false;
+    }
+    attractor->DeRegisterPed(ped);
+    if (!attractor->GetNoOfRegisteredPeds()) {
+        attractors.erase(it);
+    }
+    return true;
 }
 
 // 0x5EC850
-void CPedAttractorManager::DeRegisterPed(CPed* ped, CPedAttractor* attractor) {
+bool CPedAttractorManager::DeRegisterPed(CPed* ped, CPedAttractor* attractor) {
     if (!attractor) {
-        return;
+        return false;
     }
 
     if (!IsPedRegisteredWithEffect(ped)) {
-        return;
+        return false;
     }
 
     switch (attractor->GetType()) {
     case PED_ATTRACTOR_ATM:            return DeRegisterPed(ped, attractor, m_ATMs);
-    case PED_ATTRACTOR_SEAT:           return DeRegisterPed(ped, attractor, m_Seats); // ?
+    case PED_ATTRACTOR_SEAT:           return DeRegisterPed(ped, attractor, m_Seats);
     case PED_ATTRACTOR_STOP:           return DeRegisterPed(ped, attractor, m_Stops);
     case PED_ATTRACTOR_PIZZA:          return DeRegisterPed(ped, attractor, m_Pizzas);
     case PED_ATTRACTOR_SHELTER:        return DeRegisterPed(ped, attractor, m_Shelters);
@@ -161,7 +169,7 @@ void CPedAttractorManager::DeRegisterPed(CPed* ped, CPedAttractor* attractor) {
     case PED_ATTRACTOR_SCRIPTED:       return DeRegisterPed(ped, attractor, m_Scripted);
     case PED_ATTRACTOR_PARK:           return DeRegisterPed(ped, attractor, m_Parks);
     case PED_ATTRACTOR_STEP:           return DeRegisterPed(ped, attractor, m_Steps);
-    default:                           return;
+    default:                           NOTSA_UNREACHABLE();
     }
 }
 

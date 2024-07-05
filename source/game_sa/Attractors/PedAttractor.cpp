@@ -17,9 +17,9 @@ void CPedAttractor::InjectHooks() {
     RH_ScopedInstall(GetTaskForPed, 0x5EC500, { .reversed = false });
     RH_ScopedInstall(GetTailOfQueue, 0x5EB5B0, { .reversed = false });
     RH_ScopedInstall(GetQueueSlot, 0x5EB550, { .reversed = false });
-    RH_ScopedInstall(GetNoOfRegisteredPeds, 0x5EAF10, { .reversed = false });
+    //RH_ScopedInstall(GetNoOfRegisteredPeds, 0x5EAF10, { .reversed = false }); // Adress incorrect
     RH_ScopedInstall(GetHeadOfQueue, 0x5EB590, { .reversed = false });
-    RH_ScopedInstall(ComputeFreeSlot, 0x0, { .reversed = false });
+    //RH_ScopedInstall(ComputeFreeSlot, 0x0, { .reversed = false });
     RH_ScopedInstall(ComputeDeltaPos, 0x5E9600);
     RH_ScopedInstall(ComputeDeltaHeading, 0x5E9640);
     RH_ScopedInstall(ComputeAttractTime, 0x5E95E0);
@@ -88,11 +88,6 @@ uint32 CPedAttractor::GetTailOfQueue() {
 // 0x5EB550
 int32 CPedAttractor::GetQueueSlot(const CPed*) {
     return plugin::CallMethodAndReturn<int32, 0x5EB550, CPedAttractor*>(this);
-}
-
-// 0x5EAF10
-bool CPedAttractor::GetNoOfRegisteredPeds() {
-    return plugin::CallMethodAndReturn<bool, 0x5EAF10, CPedAttractor*>(this);
 }
 
 // 0x5EB590

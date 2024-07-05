@@ -29,11 +29,11 @@ public:
     void BroadcastArrival(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& array);
     void BroadcastArrival(CPed* ped, CPedAttractor* attractor);
 
-    void BroadcastDeparture(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& array);
-    void BroadcastDeparture(CPed* ped, CPedAttractor* attractor);
+    bool BroadcastDeparture(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& array);
+    bool BroadcastDeparture(CPed* ped, CPedAttractor* attractor);
 
-    void DeRegisterPed(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& array);
-    void DeRegisterPed(CPed* ped, CPedAttractor* attractor);
+    bool DeRegisterPed(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& array);
+    bool DeRegisterPed(CPed* ped, CPedAttractor* attractor);
 
     void RemoveEffect(const C2dEffect* effect, const SArray<CPedAttractor*>& array);
     void RemoveEffect(const C2dEffect* effect);

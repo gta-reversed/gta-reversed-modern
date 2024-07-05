@@ -56,7 +56,7 @@ public:
     CTask* GetTaskForPed(CPed* ped);
     uint32 GetTailOfQueue();
     int32 GetQueueSlot(const CPed*);
-    bool GetNoOfRegisteredPeds();
+    size_t GetNoOfRegisteredPeds() const { return m_AttractPeds.size() + m_ArrivedPeds.size(); }
     void* GetHeadOfQueue();
 
     // 0x
