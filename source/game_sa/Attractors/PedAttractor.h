@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Plugins\TwoDEffectPlugin\2dEffect.h"
+#include "PedTaskPair.h"
 #include "SArray.h"
+#include <Enums/eMoveState.h>
 
 class CEntity;
 class CPed;
@@ -9,23 +11,24 @@ class CTask;
 
 class NOTSA_EXPORT_VTABLE CPedAttractor {
 public:
-    C2dEffect*    m_pEffect;
-    CEntity*      m_pEntity;
-    SArray<CPed>  field_C;
-    SArray<CPed>  m_pedQueue;
-    SArray<CTask> m_pedTasks;
-    int32         field_3C;
-    float         queueMp;
-    float         time1;
-    float         time2;
-    char          field_4C[8];
-    float         m_fRange;
-    float         m_fDeltaHeading;
-    CVector       m_vecAttractorPosn;
-    CVector       m_vecQueueDir;
-    CVector       m_vecUseDir;
-    int32         field_80;
-    char          m_szScriptName[8];
+    C2dEffect*           m_Fx;
+    CEntity*             m_Entity;
+    SArray<CPed*>        m_AttractPeds;
+    SArray<CPed*>        m_ArrivedPeds;
+    SArray<CPedTaskPair> m_PedTaskPairs;
+    int32                m_MaxNumPeds;
+    float                m_Spacing;
+    float                m_AchieveQueueTime;
+    float                m_AchieveQueueShuffleTime;
+    float                m_ArriveRange;
+    float                m_HeadingRange;
+    float                m_DeltaPos;
+    float                m_DeltaHeading;
+    CVector              m_Pos;
+    CVector              m_QueueDir;
+    CVector              m_UseDir;
+    eMoveState           m_MoveState;
+    char                 m_ScriptName[8];
 
     inline static SArray<CTask>& ms_tasks = *reinterpret_cast<SArray<CTask>*>(0xC0985C);
 
@@ -69,6 +72,9 @@ public:
 
     void BroadcastArrival(CPed* ped);
     void AbortPedTasks();
+
+    auto& GetAttractPeds() { return m_AttractPeds; }
+    auto& GetArrivedPeds() { return m_ArrivedPeds; }
 };
 
 VALIDATE_SIZE(CPedAttractor, 0x8C);

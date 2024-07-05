@@ -8,7 +8,16 @@ class CEntity;
 class CPed;
 
 class CPedAttractorManager {
-    SArray<CPedAttractor*> m_Attractors[13];
+    SArray<CPedAttractor*> m_Seats; // These 2 are swapped (in contrast to the enum).... All others follow the order of `ePedAttractorType`!
+    SArray<CPedAttractor*> m_ATMs;  //
+    SArray<CPedAttractor*> m_Stops;
+    SArray<CPedAttractor*> m_Pizzas;
+    SArray<CPedAttractor*> m_Shelters;
+    SArray<CPedAttractor*> m_TriggerScripts;
+    SArray<CPedAttractor*> m_LookAts;
+    SArray<CPedAttractor*> m_Scripted;
+    SArray<CPedAttractor*> m_Parks;
+    SArray<CPedAttractor*> m_Steps;
 
 public:
     static void InjectHooks();
@@ -54,7 +63,6 @@ public:
 
     static bool IsApproachable(C2dEffect* effect, const CMatrix& mat, int32 unused, CPed* ped);
 };
-
-VALIDATE_SIZE(CPedAttractorManager, 0xD0);
+VALIDATE_SIZE(CPedAttractorManager, 0xA0);
 
 CPedAttractorManager* GetPedAttractorManager();

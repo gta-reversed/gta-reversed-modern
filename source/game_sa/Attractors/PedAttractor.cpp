@@ -107,27 +107,27 @@ int32 CPedAttractor::ComputeFreeSlot() {
 
 // 0x5E9600
 float CPedAttractor::ComputeDeltaPos() const {
-    return CGeneral::GetRandomNumberInRange(-m_fRange, m_fRange);
+    return CGeneral::GetRandomNumberInRange(-m_DeltaPos, m_DeltaPos);
 }
 
 // 0x5E9640
 float CPedAttractor::ComputeDeltaHeading() const {
-    return CGeneral::GetRandomNumberInRange(-m_fDeltaHeading, m_fDeltaHeading);
+    return CGeneral::GetRandomNumberInRange(-m_DeltaHeading, m_DeltaHeading);
 }
 
 // inlined
 // 0x5E95E0
 void CPedAttractor::ComputeAttractTime(int32 unused, bool time1_or_time2, float& outTime) const {
     if (time1_or_time2)
-        outTime = time2;
+        outTime = m_AchieveQueueShuffleTime;
     else
-        outTime = time1;
+        outTime = m_AchieveQueueTime;
 }
 
 // 0x5EA110
 void CPedAttractor::ComputeAttractPos(int32 pedId, CVector& outPos) {
-    if (m_pEffect) {
-        outPos = m_vecAttractorPosn - queueMp * (float)pedId * m_vecQueueDir;
+    if (m_Fx) {
+        outPos = m_Pos - m_Spacing * (float)pedId * m_QueueDir;
 
         if (pedId) {
             outPos.x += ComputeDeltaPos();
@@ -139,11 +139,11 @@ void CPedAttractor::ComputeAttractPos(int32 pedId, CVector& outPos) {
 // bQueue - bad name?
 // 0x5EA1C0
 void CPedAttractor::ComputeAttractHeading(int32 bQueue, float& heading) {
-    if (m_pEffect) {
+    if (m_Fx) {
         if (bQueue)
-            m_vecUseDir = m_vecQueueDir;
+            m_UseDir = m_QueueDir;
 
-        heading = CGeneral::GetRadianAngleBetweenPoints(m_vecUseDir.x, m_vecUseDir.y, 0.0f, 0.0f);
+        heading = CGeneral::GetRadianAngleBetweenPoints(m_UseDir.x, m_UseDir.y, 0.0f, 0.0f);
         if (bQueue)
             heading += CPedAttractor::ComputeDeltaHeading();
     }

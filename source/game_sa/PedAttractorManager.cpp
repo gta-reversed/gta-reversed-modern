@@ -15,17 +15,14 @@
 #include "PedParkAttractor.h"
 #include "PedStepAttractor.h"
 
-CPedAttractorManager* GetPedAttractorManager() {
-    return plugin::CallAndReturn<CPedAttractorManager*, 0x5EE190>();
-}
-
 void CPedAttractorManager::InjectHooks() {
     RH_ScopedClass(CPedAttractorManager);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedOverloadedInstall(BroadcastArrival, "array", 0x5EF920, void(CPedAttractorManager::*)(CPed*, CPedAttractor*, SArray<CPedAttractor*>&));
+    RH_ScopedInstall(RestoreStuffFromMem, 0x5EF710);
+    RH_ScopedOverloadedInstall(BroadcastArrival, "array", 0x5EF920, void(CPedAttractorManager::*)(CPed*, CPedAttractor*, SArray<CPedAttractor*>&));
     RH_ScopedOverloadedInstall(BroadcastArrival, "", 0x5EFE20, void(CPedAttractorManager::*)(CPed*, CPedAttractor*));
-    // RH_ScopedOverloadedInstall(BroadcastDeparture, "array", 0x5EC660, void(CPedAttractorManager::*)(CPed*, CPedAttractor*, SArray<CPedAttractor*>&));
+    RH_ScopedOverloadedInstall(BroadcastDeparture, "array", 0x5EC660, void(CPedAttractorManager::*)(CPed*, CPedAttractor*, SArray<CPedAttractor*>&));
     RH_ScopedOverloadedInstall(BroadcastDeparture, "", 0x5EC980, void(CPedAttractorManager::*)(CPed*, CPedAttractor*));
     // RH_ScopedOverloadedInstall(DeRegisterPed, "array", 0x5EC740, void(CPedAttractorManager::*)(CPed*, CPedAttractor*, SArray<CPedAttractor*>&));
     RH_ScopedOverloadedInstall(DeRegisterPed, "", 0x5EC850, void(CPedAttractorManager::*)(CPed*, CPedAttractor*));
@@ -49,65 +46,91 @@ void CPedAttractorManager::InjectHooks() {
     RH_ScopedInstall(RegisterPed, 0x5EF980, { .reversed = false });
     RH_ScopedInstall(RegisterPedWithAttractor, 0x5EFCA0, { .reversed = false });
     RH_ScopedInstall(IsApproachable, 0x5EA220, { .reversed = false });
+    RH_ScopedGlobalInstall(GetPedAttractorManager, 0x5EE190);
+}
+
+CPedAttractorManager* GetPedAttractorManager() {
+    static CPedAttractorManager p; // NOTSA: They used `new`.. Uh, and also (BUG): they never freed the pointer originally xD
+    return &p;
 }
 
 // 0x? 0x5EF710 ?
 void CPedAttractorManager::RestoreStuffFromMem() {
-    assert(false);
+    NOTSA_UNREACHABLE("Unused function");
 }
 
 // 0x5EF920
 void CPedAttractorManager::BroadcastArrival(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& array) {
-    plugin::CallMethod<0x5EF920, CPedAttractorManager*, CPed*, CPedAttractor*, SArray<CPedAttractor*>&>(this, ped, attractor, array);
+    if (!attractor) {
+        return;
+    }
+    if (!rng::contains(array, attractor)) {
+        return;
+    }
+    attractor->BroadcastArrival(ped);
 }
 
 // 0x5EFE20
 void CPedAttractorManager::BroadcastArrival(CPed* ped, CPedAttractor* attractor) {
-    if (!attractor)
+    if (!attractor) {
         return;
+    }
 
-    if (!IsPedRegisteredWithEffect(ped))
+    if (!IsPedRegisteredWithEffect(ped)) {
         return;
+    }
 
     switch (attractor->GetType()) {
-    case PED_ATTRACTOR_ATM:            return BroadcastArrival(ped, attractor, m_Attractors[1]);
-    case PED_ATTRACTOR_SEAT:           return BroadcastArrival(ped, attractor, m_Attractors[0]); // ?
-    case PED_ATTRACTOR_STOP:           return BroadcastArrival(ped, attractor, m_Attractors[2]);
-    case PED_ATTRACTOR_PIZZA:          return BroadcastArrival(ped, attractor, m_Attractors[3]);
-    case PED_ATTRACTOR_SHELTER:        return BroadcastArrival(ped, attractor, m_Attractors[4]);
-    case PED_ATTRACTOR_TRIGGER_SCRIPT: return BroadcastArrival(ped, attractor, m_Attractors[5]);
-    case PED_ATTRACTOR_LOOK_AT:        return BroadcastArrival(ped, attractor, m_Attractors[6]);
-    case PED_ATTRACTOR_SCRIPTED:       return BroadcastArrival(ped, attractor, m_Attractors[7]);
-    case PED_ATTRACTOR_PARK:           return BroadcastArrival(ped, attractor, m_Attractors[8]);
-    case PED_ATTRACTOR_STEP:           return BroadcastArrival(ped, attractor, m_Attractors[9]);
+    case PED_ATTRACTOR_ATM:            return BroadcastArrival(ped, attractor, m_ATMs);
+    case PED_ATTRACTOR_SEAT:           return BroadcastArrival(ped, attractor, m_Seats); // ?
+    case PED_ATTRACTOR_STOP:           return BroadcastArrival(ped, attractor, m_Stops);
+    case PED_ATTRACTOR_PIZZA:          return BroadcastArrival(ped, attractor, m_Pizzas);
+    case PED_ATTRACTOR_SHELTER:        return BroadcastArrival(ped, attractor, m_Shelters);
+    case PED_ATTRACTOR_TRIGGER_SCRIPT: return BroadcastArrival(ped, attractor, m_TriggerScripts);
+    case PED_ATTRACTOR_LOOK_AT:        return BroadcastArrival(ped, attractor, m_LookAts);
+    case PED_ATTRACTOR_SCRIPTED:       return BroadcastArrival(ped, attractor, m_Scripted);
+    case PED_ATTRACTOR_PARK:           return BroadcastArrival(ped, attractor, m_Parks);
+    case PED_ATTRACTOR_STEP:           return BroadcastArrival(ped, attractor, m_Steps);
     default:                           return;
     }
 }
 
 // 0x5EC660
 void CPedAttractorManager::BroadcastDeparture(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& array) {
-    plugin::CallMethod<0x5EC660, CPedAttractorManager*, CPed*, CPedAttractor*, SArray<CPedAttractor*>&>(this, ped, attractor, array);
+    if (!attractor) {
+        return;
+    }
+    const auto it = rng::find(array, attractor);
+    if (it == array.end()) {
+        return;
+    }
+    attractor->BroadcastDeparture(ped);
+    if (attractor->GetArrivedPeds().empty() && attractor->GetAttractPeds().empty()) {
+        array.erase(it);
+    }
 }
 
 // 0x5EC980
 void CPedAttractorManager::BroadcastDeparture(CPed* ped, CPedAttractor* attractor) {
-    if (!attractor)
+    if (!attractor) {
         return;
+    }
 
-    if (!IsPedRegisteredWithEffect(ped))
+    if (!IsPedRegisteredWithEffect(ped)) {
         return;
+    }
 
     switch (attractor->GetType()) {
-    case PED_ATTRACTOR_ATM:            return BroadcastDeparture(ped, attractor, m_Attractors[1]);
-    case PED_ATTRACTOR_SEAT:           return BroadcastDeparture(ped, attractor, m_Attractors[0]); // ?
-    case PED_ATTRACTOR_STOP:           return BroadcastDeparture(ped, attractor, m_Attractors[2]);
-    case PED_ATTRACTOR_PIZZA:          return BroadcastDeparture(ped, attractor, m_Attractors[3]);
-    case PED_ATTRACTOR_SHELTER:        return BroadcastDeparture(ped, attractor, m_Attractors[4]);
-    case PED_ATTRACTOR_TRIGGER_SCRIPT: return BroadcastDeparture(ped, attractor, m_Attractors[5]);
-    case PED_ATTRACTOR_LOOK_AT:        return BroadcastDeparture(ped, attractor, m_Attractors[6]);
-    case PED_ATTRACTOR_SCRIPTED:       return BroadcastDeparture(ped, attractor, m_Attractors[7]);
-    case PED_ATTRACTOR_PARK:           return BroadcastDeparture(ped, attractor, m_Attractors[8]);
-    case PED_ATTRACTOR_STEP:           return BroadcastDeparture(ped, attractor, m_Attractors[9]);
+    case PED_ATTRACTOR_ATM:            return BroadcastDeparture(ped, attractor, m_ATMs);
+    case PED_ATTRACTOR_SEAT:           return BroadcastDeparture(ped, attractor, m_Seats);
+    case PED_ATTRACTOR_STOP:           return BroadcastDeparture(ped, attractor, m_Stops);
+    case PED_ATTRACTOR_PIZZA:          return BroadcastDeparture(ped, attractor, m_Pizzas);
+    case PED_ATTRACTOR_SHELTER:        return BroadcastDeparture(ped, attractor, m_Shelters);
+    case PED_ATTRACTOR_TRIGGER_SCRIPT: return BroadcastDeparture(ped, attractor, m_TriggerScripts);
+    case PED_ATTRACTOR_LOOK_AT:        return BroadcastDeparture(ped, attractor, m_LookAts);
+    case PED_ATTRACTOR_SCRIPTED:       return BroadcastDeparture(ped, attractor, m_Scripted);
+    case PED_ATTRACTOR_PARK:           return BroadcastDeparture(ped, attractor, m_Parks);
+    case PED_ATTRACTOR_STEP:           return BroadcastDeparture(ped, attractor, m_Steps);
     default:                           return;
     }
 }
@@ -119,23 +142,25 @@ void CPedAttractorManager::DeRegisterPed(CPed* ped, CPedAttractor* attractor, SA
 
 // 0x5EC850
 void CPedAttractorManager::DeRegisterPed(CPed* ped, CPedAttractor* attractor) {
-    if (!attractor)
+    if (!attractor) {
         return;
+    }
 
-    if (!IsPedRegisteredWithEffect(ped))
+    if (!IsPedRegisteredWithEffect(ped)) {
         return;
+    }
 
     switch (attractor->GetType()) {
-    case PED_ATTRACTOR_ATM:            return DeRegisterPed(ped, attractor, m_Attractors[1]);
-    case PED_ATTRACTOR_SEAT:           return DeRegisterPed(ped, attractor, m_Attractors[0]); // ?
-    case PED_ATTRACTOR_STOP:           return DeRegisterPed(ped, attractor, m_Attractors[2]);
-    case PED_ATTRACTOR_PIZZA:          return DeRegisterPed(ped, attractor, m_Attractors[3]);
-    case PED_ATTRACTOR_SHELTER:        return DeRegisterPed(ped, attractor, m_Attractors[4]);
-    case PED_ATTRACTOR_TRIGGER_SCRIPT: return DeRegisterPed(ped, attractor, m_Attractors[5]);
-    case PED_ATTRACTOR_LOOK_AT:        return DeRegisterPed(ped, attractor, m_Attractors[6]);
-    case PED_ATTRACTOR_SCRIPTED:       return DeRegisterPed(ped, attractor, m_Attractors[7]);
-    case PED_ATTRACTOR_PARK:           return DeRegisterPed(ped, attractor, m_Attractors[8]);
-    case PED_ATTRACTOR_STEP:           return DeRegisterPed(ped, attractor, m_Attractors[9]);
+    case PED_ATTRACTOR_ATM:            return DeRegisterPed(ped, attractor, m_ATMs);
+    case PED_ATTRACTOR_SEAT:           return DeRegisterPed(ped, attractor, m_Seats); // ?
+    case PED_ATTRACTOR_STOP:           return DeRegisterPed(ped, attractor, m_Stops);
+    case PED_ATTRACTOR_PIZZA:          return DeRegisterPed(ped, attractor, m_Pizzas);
+    case PED_ATTRACTOR_SHELTER:        return DeRegisterPed(ped, attractor, m_Shelters);
+    case PED_ATTRACTOR_TRIGGER_SCRIPT: return DeRegisterPed(ped, attractor, m_TriggerScripts);
+    case PED_ATTRACTOR_LOOK_AT:        return DeRegisterPed(ped, attractor, m_LookAts);
+    case PED_ATTRACTOR_SCRIPTED:       return DeRegisterPed(ped, attractor, m_Scripted);
+    case PED_ATTRACTOR_PARK:           return DeRegisterPed(ped, attractor, m_Parks);
+    case PED_ATTRACTOR_STEP:           return DeRegisterPed(ped, attractor, m_Steps);
     default:                           return;
     }
 }
@@ -157,30 +182,30 @@ bool CPedAttractorManager::IsPedRegistered(CPed* ped, const SArray<CPedAttractor
 
 // 0x5EBCB0
 bool CPedAttractorManager::IsPedRegisteredWithEffect(CPed* ped) {
-    return IsPedRegistered(ped, m_Attractors[0])
-        || IsPedRegistered(ped, m_Attractors[1])
-        || IsPedRegistered(ped, m_Attractors[2])
-        || IsPedRegistered(ped, m_Attractors[3])
-        || IsPedRegistered(ped, m_Attractors[4])
-        || IsPedRegistered(ped, m_Attractors[5])
-        || IsPedRegistered(ped, m_Attractors[6])
-        || IsPedRegistered(ped, m_Attractors[7])
-        || IsPedRegistered(ped, m_Attractors[8])
-        || IsPedRegistered(ped, m_Attractors[9]);
+    return IsPedRegistered(ped, m_Seats)
+        || IsPedRegistered(ped, m_ATMs)
+        || IsPedRegistered(ped, m_Stops)
+        || IsPedRegistered(ped, m_Pizzas)
+        || IsPedRegistered(ped, m_Shelters)
+        || IsPedRegistered(ped, m_TriggerScripts)
+        || IsPedRegistered(ped, m_LookAts)
+        || IsPedRegistered(ped, m_Scripted)
+        || IsPedRegistered(ped, m_Parks)
+        || IsPedRegistered(ped, m_Steps);
 }
 
 // 0x5EBD70
 bool CPedAttractorManager::IsPedRegisteredWithEffect(CPed* ped, const C2dEffect* effect, const CEntity* entity) {
-    return IsPedRegisteredWithEffect(ped, effect, entity, m_Attractors[0])
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_Attractors[1])
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_Attractors[2])
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_Attractors[3])
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_Attractors[4])
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_Attractors[5])
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_Attractors[6])
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_Attractors[7])
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_Attractors[8])
-        || IsPedRegisteredWithEffect(ped, effect, entity, m_Attractors[9]) != 0;
+    return IsPedRegisteredWithEffect(ped, effect, entity, m_Seats)
+        || IsPedRegisteredWithEffect(ped, effect, entity, m_ATMs)
+        || IsPedRegisteredWithEffect(ped, effect, entity, m_Stops)
+        || IsPedRegisteredWithEffect(ped, effect, entity, m_Pizzas)
+        || IsPedRegisteredWithEffect(ped, effect, entity, m_Shelters)
+        || IsPedRegisteredWithEffect(ped, effect, entity, m_TriggerScripts)
+        || IsPedRegisteredWithEffect(ped, effect, entity, m_LookAts)
+        || IsPedRegisteredWithEffect(ped, effect, entity, m_Scripted)
+        || IsPedRegisteredWithEffect(ped, effect, entity, m_Parks)
+        || IsPedRegisteredWithEffect(ped, effect, entity, m_Steps) != 0;
 }
 
 // 0x5EB690
