@@ -6,6 +6,7 @@
 */
 #pragma once
 
+#include <Base.h>
 #include "eLevelName.h"
 #include "ePedRace.h"
 #include "ePedStats.h"
