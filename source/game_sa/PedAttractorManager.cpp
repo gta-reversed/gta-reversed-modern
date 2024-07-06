@@ -307,7 +307,7 @@ void CPedAttractorManager::ComputeEffectForwardDir(const C2dEffectPedAttractor* 
 }
 
 // 0x5EF980
-void CPedAttractorManager::RegisterPed(CPed* ped, C2dEffectPedAttractor*, CEntity*, int32, SArray<CPedAttractor*>& attractors) {
+void CPedAttractorManager::RegisterPed(CPed* ped, C2dEffectPedAttractor* fx, CEntity* entity, eMoveState moveState, const SArray<CPedAttractor*>& attractors) {
     assert(false);
 }
 

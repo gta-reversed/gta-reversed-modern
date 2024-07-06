@@ -59,7 +59,7 @@ public:
     static void ComputeEffectQueueDir(const C2dEffectPedAttractor* fx, const CMatrix& mat, CVector& vec);
     static void ComputeEffectForwardDir(const C2dEffectPedAttractor* fx, const CMatrix& mat, CVector& vec);
 
-    void RegisterPed(CPed* ped, C2dEffectPedAttractor*, CEntity*, int32, SArray<CPedAttractor*>& attractors);
+    void           RegisterPed(CPed* ped, C2dEffectPedAttractor* fx, CEntity* entity, eMoveState moveState, const SArray<CPedAttractor*>& attractors);
     CPedAttractor* RegisterPedWithAttractor(CPed* ped, C2dEffectBase* fx, CEntity* entity, eMoveState ms);
 
     static bool IsApproachable(C2dEffectPedAttractor* fx, const CMatrix& mat, int32 unused, CPed* ped);
