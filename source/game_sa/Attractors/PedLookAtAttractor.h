@@ -2,7 +2,7 @@
 
 #include "PedAttractor.h"
 
-class NOTSA_EXPORT_VTABLE CPedLookAtAttractor : public CPedAttractor {
+class NOTSA_EXPORT_VTABLE CPedLookAtAttractor final : public CPedAttractor {
 public:
     static constexpr auto Type = PED_ATTRACTOR_LOOK_AT;
 

@@ -2,7 +2,7 @@
 
 #include "PedAttractor.h"
 
-class NOTSA_EXPORT_VTABLE CPedStopAttractor : public CPedAttractor {
+class NOTSA_EXPORT_VTABLE CPedStopAttractor final : public CPedAttractor {
 public:
     static constexpr auto Type = PED_ATTRACTOR_STOP;
 

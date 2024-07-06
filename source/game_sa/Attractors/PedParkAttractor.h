@@ -2,7 +2,7 @@
 
 #include "PedAttractor.h"
 
-class NOTSA_EXPORT_VTABLE CPedParkAttractor : public CPedAttractor {
+class NOTSA_EXPORT_VTABLE CPedParkAttractor final : public CPedAttractor {
 public:
     static constexpr auto Type = PED_ATTRACTOR_PARK;
 

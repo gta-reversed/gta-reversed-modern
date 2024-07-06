@@ -2,7 +2,7 @@
 
 #include "PedAttractor.h"
 
-class NOTSA_EXPORT_VTABLE CPedTriggerScriptAttractor : public CPedAttractor {
+class NOTSA_EXPORT_VTABLE CPedTriggerScriptAttractor final : public CPedAttractor {
 public:
     static constexpr auto Type = PED_ATTRACTOR_TRIGGER_SCRIPT;
 
