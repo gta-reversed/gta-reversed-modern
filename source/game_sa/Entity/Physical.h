@@ -237,7 +237,7 @@ public:
     void ResetFrictionMoveSpeed() { m_vecFrictionMoveSpeed = CVector(); }
     void ResetFrictionTurnSpeed() { m_vecFrictionTurnSpeed = CVector(); }
 
-    [[nodiscard]] float GetMass(const CVector& pos, const CVector& dir) const {
+    [[nodiscard]] float GetTurnTorque(const CVector& pos, const CVector& dir) const {
         return 1.0f / (CrossProduct(pos, dir).SquaredMagnitude() / m_fTurnMass + 1.0f / m_fMass);
     }
 
@@ -250,7 +250,6 @@ public:
 
 // NOTSA
     void UnstuckAndReposition();
-    bool ApplyFrictionInternal(CPhysical*, float, CColPoint&, bool, bool);
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
