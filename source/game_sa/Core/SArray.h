@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <Base.h>
+
 template <typename T>
 struct SArray /* : public std::vector<T> */ {
     /* allocator<_Ty>*/ void* allocator{}; // MSVC 6.0 STL vector

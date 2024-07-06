@@ -6,6 +6,7 @@
 */
 #pragma once
 
+#include <Base.h>
 #include "RenderWare.h"
 #include "ColModel.h"
 #include "KeyGen.h"

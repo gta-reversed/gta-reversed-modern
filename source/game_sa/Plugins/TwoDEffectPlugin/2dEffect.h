@@ -262,7 +262,7 @@ public:
 
     template<std::derived_from<C2dEffectBase> To, std::derived_from<C2dEffectBase> From>
     static To* Cast(From* p) {
-        assert(p->m_type == To::Type);
+        assert(!p || p->m_type == To::Type);
         return reinterpret_cast<To*>(p);
     }
 
