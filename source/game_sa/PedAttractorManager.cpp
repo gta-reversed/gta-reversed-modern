@@ -62,7 +62,7 @@ void CPedAttractorManager::RestoreStuffFromMem() {
 
 // 0x5EFE20
 bool CPedAttractorManager::BroadcastArrival(CPed* ped, CPedAttractor* attractor) {
-    return attractor && IsPedRegisteredWithEffect(ped) && VisitAttractorsOfType(attractor->GetType(), [&]<typename T>(auto&& attractors) {
+    return attractor && IsPedRegisteredWithEffect(ped) && VisitAttractorsOfType(attractor->GetType(), [&](auto&& attractors) {
         return BroadcastArrival(ped, attractor, attractors);
     });
 }
@@ -125,11 +125,9 @@ CPedAttractor* CPedAttractorManager::FindAssociatedAttractor(const C2dEffectPedA
 }
 
 // 0x5EBBA0
-bool CPedAttractorManager::HasQueueTailArrivedAtSlot(const C2dEffectBase* baseFx, const CEntity* entity) {
-    const auto* const fx = C2dEffect::DynCast<const C2dEffectPedAttractor>(baseFx);
-    if (!fx) {
-        return false;
-    }
+bool CPedAttractorManager::HasQueueTailArrivedAtSlot(const C2dEffectPedAttractor* fx, const CEntity* entity) {
+    assert(fx->m_type == EFFECT_ATTRACTOR); // NOTE: Original function just returned `false`
+
     const auto* const attractor = FindAssociatedAttractor(fx, entity);
     if (!attractor) {
         return true;
@@ -147,16 +145,11 @@ bool CPedAttractorManager::HasQueueTailArrivedAtSlot(const C2dEffectBase* baseFx
 }
 
 // 0x5EBB00
-bool CPedAttractorManager::HasEmptySlot(const C2dEffectBase* baseFx, const CEntity* entity) {
-    const auto* const fx = C2dEffect::DynCast<const C2dEffectPedAttractor>(baseFx);
-    if (!fx) {
-        return false;
-    }
+bool CPedAttractorManager::HasEmptySlot(const C2dEffectPedAttractor* fx, const CEntity* entity) {
+    assert(fx->m_type == EFFECT_ATTRACTOR); // NOTE: Original function just returned `false`
+
     const auto* const attractor = FindAssociatedAttractor(fx, entity);
-    if (!attractor) {
-        return true;
-    }
-    return attractor->HasEmptySlot();
+    return !attractor || attractor->HasEmptySlot();
 }
 
 // 0x5EBE50
@@ -189,11 +182,9 @@ const CPedAttractor* CPedAttractorManager::GetRelevantAttractor(const CPed* ped,
 }
 
 // 0x5EFCA0
-CPedAttractor* CPedAttractorManager::RegisterPedWithAttractor(CPed* ped, C2dEffectBase* baseFx, CEntity* entity, eMoveState ms) {
-    auto* const fx = C2dEffect::DynCast<C2dEffectPedAttractor>(baseFx);
-    if (!fx) {
-        return nullptr;
-    }
+CPedAttractor* CPedAttractorManager::RegisterPedWithAttractor(CPed* ped, C2dEffectPedAttractor* fx, CEntity* entity, eMoveState ms) {
+    assert(fx->m_type == EFFECT_ATTRACTOR); // NOTE: Original function just returned `false`
+
     if (CScripted2dEffects::GetIndex(fx) < 0 && !CEventAttractor::IsEffectActive(entity, fx)) {
         return nullptr;
     }

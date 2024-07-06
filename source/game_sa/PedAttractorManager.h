@@ -127,8 +127,8 @@ public:
     }
     CPedAttractor* FindAssociatedAttractor(const C2dEffectPedAttractor* fx, const CEntity* entity);
 
-    bool HasQueueTailArrivedAtSlot(const C2dEffectBase* fx, const CEntity* entity);
-    bool HasEmptySlot(const C2dEffectBase* baseFx, const CEntity* entity);
+    bool HasQueueTailArrivedAtSlot(const C2dEffectPedAttractor* fx, const CEntity* entity);
+    bool HasEmptySlot(const C2dEffectPedAttractor* fx, const CEntity* entity);
 
     // 0x5EB740
     template<std::derived_from<CPedAttractor> T>
@@ -166,7 +166,7 @@ public:
         return a;
         
     }
-    CPedAttractor* RegisterPedWithAttractor(CPed* ped, C2dEffectBase* baseFx, CEntity* entity, eMoveState ms);
+    CPedAttractor* RegisterPedWithAttractor(CPed* ped, C2dEffectPedAttractor* fx, CEntity* entity, eMoveState ms);
 
 
     // 0x5E96C0
