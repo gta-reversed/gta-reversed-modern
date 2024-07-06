@@ -3,9 +3,8 @@
 #include "PedAttractorManager.h"
 #include <TaskTypes/TaskComplexUseAttractor.h>
 #include <TaskTypes/TaskComplexWaitAtAttractor.h>
-
+#include "Scripted2dEffects.h"
 #include "PedAttractor.h"
-
 #include "PedAtmAttractor.h"
 #include "PedSeatAttractor.h"
 #include "PedStopAttractor.h"
@@ -22,32 +21,32 @@ void CPedAttractorManager::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(RestoreStuffFromMem, 0x5EF710);
-    RH_ScopedOverloadedInstall(BroadcastArrival, "Internal", 0x5EF920, bool(CPedAttractorManager::*)(CPed*, CPedAttractor*, SArray<CPedAttractor*>&));
+    //RH_ScopedInstall(BroadcastArrival<CPedAttractor>, 0x5EF920); // Can't hook this because template function will (probably) be wrong
     RH_ScopedOverloadedInstall(BroadcastArrival, "", 0x5EFE20, bool(CPedAttractorManager::*)(CPed*, CPedAttractor*));
-    RH_ScopedOverloadedInstall(BroadcastDeparture, "Internal", 0x5EC660, bool(CPedAttractorManager::*)(CPed*, CPedAttractor*, SArray<CPedAttractor*>&));
+    //RH_ScopedInstall(BroadcastDeparture<CPedAttractor>, 0x5EC660); // Can't hook this because template function will (probably) be wrong
     RH_ScopedOverloadedInstall(BroadcastDeparture, "", 0x5EC980, bool(CPedAttractorManager::*)(CPed*, CPedAttractor*));
-    RH_ScopedOverloadedInstall(DeRegisterPed, "Internal", 0x5EC740, bool(CPedAttractorManager::*)(CPed*, CPedAttractor*, SArray<CPedAttractor*>&));
+    //RH_ScopedInstall(DeRegisterPed<CPedAttractor>, 0x5EC740); // Can't hook this because template function will (probably) be wrong
     RH_ScopedOverloadedInstall(DeRegisterPed, "", 0x5EC850, bool(CPedAttractorManager::*)(CPed*, CPedAttractor*));
-    RH_ScopedOverloadedInstall(RemoveEffect, "Internal", 0x5EB5F0, bool(CPedAttractorManager::*)(const C2dEffectPedAttractor* fx, const SArray<CPedAttractor*>& attractors));
+    //RH_ScopedInstall(RemoveEffect<CPedAttractor>, 0x5EB5F0); // Can't hook this because template function will (probably) be wrong
     RH_ScopedOverloadedInstall(RemoveEffect, "", 0x5EBA30, bool(CPedAttractorManager::*)(const C2dEffectPedAttractor* fx));
-    RH_ScopedInstall(IsPedRegistered, 0x5EB640);
+    //RH_ScopedInstall(IsPedRegistered<CPedAttractor>, 0x5EB640); // Can't hook this because template function will (probably) be wrong
     RH_ScopedOverloadedInstall(IsPedRegisteredWithEffect, "Ped", 0x5EBCB0, bool(CPedAttractorManager::*)(CPed*));
     RH_ScopedOverloadedInstall(IsPedRegisteredWithEffect, "Effect", 0x5EBD70, bool(CPedAttractorManager::*)(CPed*, const C2dEffectPedAttractor*, const CEntity*));
-    RH_ScopedOverloadedInstall(IsPedRegisteredWithEffect, "Internal", 0x5EB690, bool(CPedAttractorManager::*)(CPed*, const C2dEffectPedAttractor*, const CEntity*, const SArray<CPedAttractor*>&));
-    RH_ScopedInstall(FindAssociatedAttractor, 0x5EB6F0);
+    //RH_ScopedInstall(IsPedRegisteredWithEffect<CPedAttractor>, 0x5EB690); // Can't hook this because template function will (probably) be wrong
+    //RH_ScopedInstall(FindAssociatedAttractor<CPedAttractor>, 0x5EB6F0); // Can't hook this because template function will (probably) be wrong
     RH_ScopedInstall(HasQueueTailArrivedAtSlot, 0x5EBBA0);
     RH_ScopedInstall(HasEmptySlot, 0x5EBB00);
-    RH_ScopedOverloadedInstall(GetPedUsingEffect, "Internal", 0x5EB740, CPed*(CPedAttractorManager::*)(const C2dEffectPedAttractor*, const CEntity*, const SArray<CPedAttractor*>&));
+    //RH_ScopedInstall(GetPedUsingEffect<CPedAttractor>, 0x5EB740);
     RH_ScopedOverloadedInstall(GetPedUsingEffect, "", 0x5EBE50, CPed*(CPedAttractorManager::*)(const C2dEffectPedAttractor*, const CEntity*));
-    RH_ScopedOverloadedInstall(GetRelevantAttractor, "Internal", 0x5EB7B0, const CPedAttractor*(CPedAttractorManager::*)(const CPed*, const C2dEffectPedAttractor*, const CEntity*, const SArray<CPedAttractor*>&));
+    //RH_ScopedInstall(GetRelevantAttractor<CPedAttractor>, 0x5EB7B0);
     RH_ScopedOverloadedInstall(GetRelevantAttractor, "", 0x5EBF50, const CPedAttractor*(CPedAttractorManager::*)(const CPed*, const C2dEffectPedAttractor*, const CEntity*));
-    RH_ScopedInstall(ComputeEffectPos, 0x5E96C0);
-    RH_ScopedInstall(ComputeEffectUseDir, 0x5E96E0);
-    RH_ScopedInstall(ComputeEffectQueueDir, 0x5E9730);
-    RH_ScopedInstall(ComputeEffectForwardDir, 0x5E9780);
-    RH_ScopedInstall(RegisterPed, 0x5EF980, { .reversed = false });
-    RH_ScopedInstall(RegisterPedWithAttractor, 0x5EFCA0, { .reversed = false });
-    RH_ScopedInstall(IsApproachable, 0x5EA220, { .reversed = false });
+    //RH_ScopedInstall(ComputeEffectPos, 0x5E96C0); // Different signature, cant hook
+    //RH_ScopedInstall(ComputeEffectUseDir, 0x5E96E0); // Different signature, cant hook
+    //RH_ScopedInstall(ComputeEffectQueueDir, 0x5E9730); // Different signature, cant hook
+    //RH_ScopedInstall(ComputeEffectForwardDir, 0x5E9780); // Different signature, cant hook
+    //RH_ScopedInstall(RegisterPed<CPedAttractor>, 0x5EF980); // Can't hook this because template function will (probably) be wrong
+    RH_ScopedInstall(RegisterPedWithAttractor, 0x5EFCA0);
+    RH_ScopedInstall(IsApproachable, 0x5EA220);
     RH_ScopedGlobalInstall(GetPedAttractorManager, 0x5EE190);
 }
 
@@ -56,115 +55,38 @@ CPedAttractorManager* GetPedAttractorManager() {
     return &p;
 }
 
-// notsa
-auto& CPedAttractorManager::GetAttractorsOfType(ePedAttractorType t) {
-    switch (t) {
-    case PED_ATTRACTOR_ATM:            return m_ATMs;
-    case PED_ATTRACTOR_SEAT:           return m_Seats;
-    case PED_ATTRACTOR_STOP:           return m_Stops;
-    case PED_ATTRACTOR_PIZZA:          return m_Pizzas;
-    case PED_ATTRACTOR_SHELTER:        return m_Shelters;
-    case PED_ATTRACTOR_TRIGGER_SCRIPT: return m_TriggerScripts;
-    case PED_ATTRACTOR_LOOK_AT:        return m_LookAts;
-    case PED_ATTRACTOR_SCRIPTED:       return m_Scripted;
-    case PED_ATTRACTOR_PARK:           return m_Parks;
-    case PED_ATTRACTOR_STEP:           return m_Steps;
-    default:                           NOTSA_UNREACHABLE();
-    }    
-}
-
 // 0x? 0x5EF710 ?
 void CPedAttractorManager::RestoreStuffFromMem() {
     NOTSA_UNREACHABLE("Unused function");
 }
 
-// 0x5EF920
-bool CPedAttractorManager::BroadcastArrival(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& attractors) {
-    return attractor
-        && rng::contains(attractors, attractor)
-        && attractor->BroadcastArrival(ped);
-}
-
 // 0x5EFE20
 bool CPedAttractorManager::BroadcastArrival(CPed* ped, CPedAttractor* attractor) {
-    return attractor
-        && IsPedRegisteredWithEffect(ped)
-        && BroadcastArrival(ped, attractor, GetAttractorsOfType(attractor->GetType()));
-}
-
-// 0x5EC660
-bool CPedAttractorManager::BroadcastDeparture(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& attractors) {
-    if (!attractor) {
-        return false;
-    }
-    const auto it = rng::find(attractors, attractor);
-    if (it == attractors.end()) {
-        return false;
-    }
-    attractor->BroadcastDeparture(ped);
-    if (!attractor->GetNoOfRegisteredPeds()) {
-        attractors.erase(it);
-    }
-    return true;
+    return attractor && IsPedRegisteredWithEffect(ped) && VisitAttractorsOfType(attractor->GetType(), [&]<typename T>(auto&& attractors) {
+        return BroadcastArrival(ped, attractor, attractors);
+    });
 }
 
 // 0x5EC980
 bool CPedAttractorManager::BroadcastDeparture(CPed* ped, CPedAttractor* attractor) {
-    return attractor
-        && IsPedRegisteredWithEffect(ped)
-        && BroadcastDeparture(ped, attractor, GetAttractorsOfType(attractor->GetType()));
-}
-
-// 0x5EC740
-bool CPedAttractorManager::DeRegisterPed(CPed* ped, CPedAttractor* attractor, SArray<CPedAttractor*>& attractors) {
-    if (!attractor) {
-        return false;
-    }
-    const auto it = rng::find(attractors, attractor);
-    if (it == attractors.end()) {
-        return false;
-    }
-    attractor->DeRegisterPed(ped);
-    if (!attractor->GetNoOfRegisteredPeds()) {
-        attractors.erase(it);
-    }
-    return true;
+    return attractor && IsPedRegisteredWithEffect(ped) && VisitAttractorsOfType(attractor->GetType(), [&](auto&& attractors) {
+        return BroadcastDeparture(ped, attractor, attractors);
+    });
 }
 
 // 0x5EC850
 bool CPedAttractorManager::DeRegisterPed(CPed* ped, CPedAttractor* attractor) {
-    return attractor
-        && IsPedRegisteredWithEffect(ped)
-        && DeRegisterPed(ped, attractor, GetAttractorsOfType(attractor->GetType()));
-}
-
-// 0x5EB5F0
-// all xrefs are dead functions
-bool CPedAttractorManager::RemoveEffect(const C2dEffectPedAttractor* fx, const SArray<CPedAttractor*>& attractors) {
-    for (auto* const a : attractors) {
-        if (a->GetEffect() == fx) {
-            a->AbortPedTasks();
-        }
-    }
-    return false;
+    return attractor && IsPedRegisteredWithEffect(ped) && VisitAttractorsOfType(attractor->GetType(), [&](auto&& attractors) {
+        return DeRegisterPed(ped, attractor, attractors);
+    });
 }
 
 // 0x5EBA30
 // all xrefs are dead functions
 bool CPedAttractorManager::RemoveEffect(const C2dEffectPedAttractor* fx) {
-    return RemoveEffect(fx, GetAttractorsOfType(fx->m_nAttractorType));
-}
-
-// 0x5EB640
-bool CPedAttractorManager::IsPedRegistered(CPed* ped, const SArray<CPedAttractor*>& attractors) {
-    return rng::any_of(attractors, [ped](CPedAttractor* a) {
-        return a->IsRegisteredWithPed(ped);
+    return VisitAttractorsOfType(fx->m_nAttractorType, [&](auto&& attractors) {
+        return RemoveEffect(fx, attractors);
     });
-}
-
-// 0x5EB690
-bool CPedAttractorManager::IsPedRegisteredWithEffect(CPed* ped, const C2dEffectPedAttractor* fx, const CEntity* entity, const SArray<CPedAttractor*>& attractors) {
-    return GetRelevantAttractor(ped, fx, entity, attractors) != nullptr; // NOTSA: Using `GetRelevantAttractor` instead of duplicate code
 }
 
 // 0x5EBCB0
@@ -195,14 +117,11 @@ bool CPedAttractorManager::IsPedRegisteredWithEffect(CPed* ped, const C2dEffectP
         || IsPedRegisteredWithEffect(ped, fx, entity, m_Steps);
 }
 
-// 0x5EB6F0
-CPedAttractor* CPedAttractorManager::FindAssociatedAttractor(const C2dEffectPedAttractor* fx, const CEntity* entity, const SArray<CPedAttractor*>& attractors) {
-    for (auto* const a : attractors) {
-        if (a->GetEffect() == fx && a->GetEntity() == entity) {
-            return a;
-        }
-    }
-    return nullptr;
+// notsa
+CPedAttractor* CPedAttractorManager::FindAssociatedAttractor(const C2dEffectPedAttractor* fx, const CEntity* entity) {
+    return VisitAttractorsOfType(fx->m_nAttractorType, [&](auto&& attractors) {
+        return notsa::Cast<CPedAttractor>(FindAssociatedAttractor(fx, entity, attractors));
+    });
 }
 
 // 0x5EBBA0
@@ -211,7 +130,7 @@ bool CPedAttractorManager::HasQueueTailArrivedAtSlot(const C2dEffectBase* baseFx
     if (!fx) {
         return false;
     }
-    const auto* const attractor = FindAssociatedAttractor(fx, entity, GetAttractorsOfType(fx->m_nAttractorType));
+    const auto* const attractor = FindAssociatedAttractor(fx, entity);
     if (!attractor) {
         return true;
     }
@@ -233,90 +152,70 @@ bool CPedAttractorManager::HasEmptySlot(const C2dEffectBase* baseFx, const CEnti
     if (!fx) {
         return false;
     }
-    const auto* const attractor = FindAssociatedAttractor(fx, entity, GetAttractorsOfType(fx->m_nAttractorType));
+    const auto* const attractor = FindAssociatedAttractor(fx, entity);
     if (!attractor) {
         return true;
     }
     return attractor->HasEmptySlot();
 }
 
-// 0x5EB740
-CPed* CPedAttractorManager::GetPedUsingEffect(const C2dEffectPedAttractor* fx, const CEntity* entity, const SArray<CPedAttractor*>& attractors) {
-    for (const auto* const a : attractors) {
-        if (a->GetEffect() == fx && a->GetEntity() == entity) {
-            return a->GetHeadOfQueue();
-        }
-    }
-    return nullptr;
-}
-
 // 0x5EBE50
 CPed* CPedAttractorManager::GetPedUsingEffect(const C2dEffectPedAttractor* fx, const CEntity* entity) {
-    return GetPedUsingEffect(fx, entity, GetAttractorsOfType(fx->m_nAttractorType));
-}
-
-// 0x5EB7B0
-const CPedAttractor* CPedAttractorManager::GetRelevantAttractor(const CPed* ped, const C2dEffectPedAttractor* fx, const CEntity* entity, const SArray<CPedAttractor*>& attractors) {
-    for (const auto* const a : attractors) {
-        if (a->GetEffect() == fx && a->GetEntity() == entity && a->IsRegisteredWithPed(ped)) {
-            return a;
-        }
-    }
-    return nullptr;
+    return VisitAttractorsOfType(fx->m_nAttractorType, [&](auto&& attractors) {
+        return GetPedUsingEffect(fx, entity, attractors);
+    });
 }
 
 // 0x5EBF50
 const CPedAttractor* CPedAttractorManager::GetRelevantAttractor(const CPed* ped, const C2dEffectPedAttractor* fx, const CEntity* entity) {
-    for (const auto* const attractors : {
-        &m_Seats,
-        &m_ATMs,
-        &m_Stops,
-        &m_Pizzas,
-        &m_Shelters,
-        &m_TriggerScripts,
-        &m_LookAts,
-        &m_Scripted,
-        &m_Parks,
-        &m_Steps
-    }) {
-        if (const auto* const attractor = GetRelevantAttractor(ped, fx, entity, *attractors)) {
-            return attractor;
-        }
+    const auto SearchIn = [this, ped, fx, entity](auto&& attractors) {
+        return GetRelevantAttractor(ped, fx, entity, attractors);
+    };
+    const CPedAttractor* p;
+    if (   (p = SearchIn(m_Seats))
+        || (p = SearchIn(m_ATMs))
+        || (p = SearchIn(m_Stops))
+        || (p = SearchIn(m_Pizzas))
+        || (p = SearchIn(m_Shelters))
+        || (p = SearchIn(m_TriggerScripts))
+        || (p = SearchIn(m_LookAts))
+        || (p = SearchIn(m_Scripted))
+        || (p = SearchIn(m_Parks))
+        || (p = SearchIn(m_Steps))
+    ) {
+        return p;
     }
     return nullptr;
 }
 
-// 0x5E96C0
-void CPedAttractorManager::ComputeEffectPos(const C2dEffectPedAttractor* fx, const CMatrix& mat, CVector& vec) {
-    vec = mat.TransformPoint(fx->m_pos);
-}
-
-// 0x5E96E0
-void CPedAttractorManager::ComputeEffectUseDir(const C2dEffectPedAttractor* fx, const CMatrix& mat, CVector& vec) {
-    vec = mat.TransformVector(fx->m_vecUseDir);
-}
-
-// 0x5E9730
-void CPedAttractorManager::ComputeEffectQueueDir(const C2dEffectPedAttractor* fx, const CMatrix& mat, CVector& vec) {
-    vec = mat.TransformVector(fx->m_vecQueueDir);
-}
-
-// 0x5E9780
-void CPedAttractorManager::ComputeEffectForwardDir(const C2dEffectPedAttractor* fx, const CMatrix& mat, CVector& vec) {
-    vec = mat.TransformVector(fx->m_vecForwardDir);
-}
-
-// 0x5EF980
-void CPedAttractorManager::RegisterPed(CPed* ped, C2dEffectPedAttractor* fx, CEntity* entity, eMoveState moveState, const SArray<CPedAttractor*>& attractors) {
-    assert(false);
-}
-
 // 0x5EFCA0
-CPedAttractor* CPedAttractorManager::RegisterPedWithAttractor(CPed* ped, C2dEffectBase* fx, CEntity* entity, eMoveState ms) {
-    return plugin::CallMethodAndReturn<CPedAttractor*, 0x5EFCA0>(this, ped, fx, entity, ms);
+CPedAttractor* CPedAttractorManager::RegisterPedWithAttractor(CPed* ped, C2dEffectBase* baseFx, CEntity* entity, eMoveState ms) {
+    auto* const fx = C2dEffect::DynCast<C2dEffectPedAttractor>(baseFx);
+    if (!fx) {
+        return nullptr;
+    }
+    if (CScripted2dEffects::GetIndex(fx) < 0 && !CEventAttractor::IsEffectActive(entity, fx)) {
+        return nullptr;
+    }
+    if (IsPedRegisteredWithEffect(ped, fx, entity)) {
+        return nullptr;
+    }
+    return VisitAttractorsOfType(fx->m_nAttractorType, [&](auto&& attractors) {
+        return notsa::Cast<CPedAttractor>(RegisterPed(ped, fx, entity, ms, attractors));
+    });
 }
 
 // 0x5EA220
-bool CPedAttractorManager::IsApproachable(C2dEffectPedAttractor* fx, const CMatrix& mat, int32 unused, CPed* ped) {
-    return plugin::CallAndReturn<bool, 0x5EA220, C2dEffectPedAttractor*, const CMatrix&, int32, CPed*>(fx, mat, unused, ped);
+bool CPedAttractorManager::IsApproachable(C2dEffectPedAttractor* fx, const CMatrix& mat, int32 slot, CPed* ped) {
+    const CVector pedPos = ped->GetPosition();
+
+    if (fx->m_nAttractorType == PED_ATTRACTOR_SHELTER) {
+        return CWorld::GetIsLineOfSightClear(pedPos, ComputeEffectPos(fx, mat), true, false, false, false);
+    }
+
+    const auto fxPos = ComputeEffectPos(fx, mat);
+    const auto fxFwd = ComputeEffectForwardDir(fx, mat);
+    return (pedPos - fxPos).Dot(fxFwd) > 0.f // note: combined the 2 dot products here
+        && CVector2D::DistSqr(pedPos, fxPos) >= sq(0.5f)
+        && CPedGeometryAnalyser::IsWanderPathClear(pedPos, fxPos, 2.f, 0) == CPedGeometryAnalyser::WanderPathClearness::CLEAR;
 }

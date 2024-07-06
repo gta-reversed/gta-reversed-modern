@@ -6,8 +6,8 @@ void CPedAttractor::InjectHooks() {
     RH_ScopedVirtualClass(CPedAttractor, 0x86C538, 6);
     RH_ScopedCategory("Attractors");
 
-    //RH_ScopedInstall(Constructor, 0x5EDFB0, { .reversed = false });
-    //RH_ScopedInstall(Destructor, 0x5EC410, { .reversed = false });
+    RH_ScopedInstall(Constructor, 0x5EDFB0);
+    RH_ScopedInstall(Destructor, 0x5EC410);
 
     RH_ScopedInstall(SetTaskForPed, 0x5EECA0, { .reversed = false });
     RH_ScopedInstall(RegisterPed, 0x5EEE30, { .reversed = false });
@@ -16,7 +16,7 @@ void CPedAttractor::InjectHooks() {
     RH_ScopedInstall(IsAtHeadOfQueue, 0x5EB530, { .reversed = false });
     RH_ScopedInstall(GetTaskForPed, 0x5EC500, { .reversed = false });
     RH_ScopedInstall(GetQueueSlot, 0x5EB550, { .reversed = false });
-    //RH_ScopedInstall(GetNoOfRegisteredPeds, 0xdeadbeef, { .reversed = false }); // Adress incorrect
+    //RH_ScopedInstall(GetNoOfRegisteredPeds, 0xdeadbeef, { .reversed = false }); // Address incorrect
     RH_ScopedInstall(GetHeadOfQueue, 0x5EB590);
     RH_ScopedInstall(GetTailOfQueue, 0x5EB5B0);
     RH_ScopedInstall(HasEmptySlot, 0x5EAF10);
@@ -42,13 +42,43 @@ void CPedAttractor::operator delete(void* object) {
 }
 
 // 0x5EDFB0
-CPedAttractor::CPedAttractor(C2dEffect* effect, CEntity* entity, int32 a3, int32 a4, float a5, float time2, float time1, float a8, float a9, float range, float a11, float a12) {
-    plugin::CallMethod<0x5EDFB0, CPedAttractor*, C2dEffect*, CEntity*, int32, int32, float, float, float, float, float, float, float, float>(this, effect, entity, a3, a4, a5, time2, time1, a8, a9, range, a11, a12);
+CPedAttractor::CPedAttractor(
+    C2dEffectPedAttractor* fx,
+    CEntity*               entity,
+    eMoveState             moveState,
+    size_t                 maxNoOfPeds,
+    float                  spacing,
+    float                  achieveQueueTime,
+    float                  achieveQueueShuffleTime,
+    float                  arriveRange,
+    float                  headingRange,
+    float                  deltaPos,
+    float                  deltaHeading
+) :
+    m_Fx{fx},
+    m_Entity{entity},
+    m_MoveState{moveState},
+    m_MaxNumPeds{maxNoOfPeds},
+    m_Spacing{spacing},
+    m_AchieveQueueTime{achieveQueueTime},
+    m_AchieveQueueShuffleTime{achieveQueueShuffleTime},
+    m_ArriveRange{arriveRange},
+    m_HeadingRange{headingRange},
+    m_DeltaPos{deltaPos},
+    m_DeltaHeading{deltaHeading}
+{
+    const CMatrix mat = entity
+        ? entity->GetMatrix()
+        : CMatrix::Unity();
+    m_Pos             = CPedAttractorManager::ComputeEffectPos(fx, mat);
+    m_QueueDir        = CPedAttractorManager::ComputeEffectQueueDir(fx, mat);
+    m_UseDir          = CPedAttractorManager::ComputeEffectUseDir(fx, mat);
+
+    strcpy_s(m_ScriptName, fx->m_szScriptName);
 }
 
-// 0x5EC410
-CPedAttractor::~CPedAttractor() {
-    plugin::CallMethod<0x5EC410, CPedAttractor*>(this);
+void CPedAttractor::Shutdown() {
+    ms_tasks.clear();
 }
 
 // 0x5EECA0
