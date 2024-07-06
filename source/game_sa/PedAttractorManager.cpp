@@ -42,9 +42,9 @@ void CPedAttractorManager::InjectHooks() {
     RH_ScopedOverloadedInstall(GetRelevantAttractor, "Internal", 0x5EB7B0, const CPedAttractor*(CPedAttractorManager::*)(const CPed*, const C2dEffectPedAttractor*, const CEntity*, const SArray<CPedAttractor*>&));
     RH_ScopedOverloadedInstall(GetRelevantAttractor, "", 0x5EBF50, const CPedAttractor*(CPedAttractorManager::*)(const CPed*, const C2dEffectPedAttractor*, const CEntity*));
     RH_ScopedInstall(ComputeEffectPos, 0x5E96C0);
-    RH_ScopedInstall(ComputeEffectUseDir, 0x5E96E0, { .reversed = false });
-    RH_ScopedInstall(ComputeEffectQueueDir, 0x5E9730, { .reversed = false });
-    RH_ScopedInstall(ComputeEffectForwardDir, 0x5E9780, { .reversed = false });
+    RH_ScopedInstall(ComputeEffectUseDir, 0x5E96E0);
+    RH_ScopedInstall(ComputeEffectQueueDir, 0x5E9730);
+    RH_ScopedInstall(ComputeEffectForwardDir, 0x5E9780);
     RH_ScopedInstall(RegisterPed, 0x5EF980, { .reversed = false });
     RH_ScopedInstall(RegisterPedWithAttractor, 0x5EFCA0, { .reversed = false });
     RH_ScopedInstall(IsApproachable, 0x5EA220, { .reversed = false });
@@ -288,22 +288,22 @@ const CPedAttractor* CPedAttractorManager::GetRelevantAttractor(const CPed* ped,
 
 // 0x5E96C0
 void CPedAttractorManager::ComputeEffectPos(const C2dEffectPedAttractor* fx, const CMatrix& mat, CVector& vec) {
-    vec.FromMultiply(mat, &fx->m_pos);
+    vec = mat.TransformPoint(fx->m_pos);
 }
 
 // 0x5E96E0
 void CPedAttractorManager::ComputeEffectUseDir(const C2dEffectPedAttractor* fx, const CMatrix& mat, CVector& vec) {
-    assert(false);
+    vec = mat.TransformVector(fx->m_vecUseDir);
 }
 
 // 0x5E9730
 void CPedAttractorManager::ComputeEffectQueueDir(const C2dEffectPedAttractor* fx, const CMatrix& mat, CVector& vec) {
-    assert(false);
+    vec = mat.TransformVector(fx->m_vecQueueDir);
 }
 
 // 0x5E9780
 void CPedAttractorManager::ComputeEffectForwardDir(const C2dEffectPedAttractor* fx, const CMatrix& mat, CVector& vec) {
-    assert(false);
+    vec = mat.TransformVector(fx->m_vecForwardDir);
 }
 
 // 0x5EF980
