@@ -97,15 +97,14 @@ void FxManager_c::DestroyFxSystem(FxSystem_c* system) {
     for (auto i = 0; i < system->m_SystemBP->m_nNumPrims; i++) {
         auto& prim      = system->m_SystemBP->m_Prims[i];
         auto& particles = prim->m_Particles;
+        for (Particle_c* it = particles.GetHead(); it;) {
+            auto* const prt = it;
+            it = particles.GetNext(it); // Iterator will be invalidated, so get next here immediately
 
-        Particle_c* particle = particles.GetHead();
-        while (particle) {
-            auto* next = particles.GetNext(particle);
-            if (particle->m_System == system) {
-                prim->m_Particles.RemoveItem(particle); // TODO: Pre-cache next here, because if the item is removed it corrupts the iterator
-                m_FxEmitterParticles.AddItem(particle);
+            if (prt->m_System == system) {
+                prim->m_Particles.RemoveItem(prt);
+                m_FxEmitterParticles.AddItem(prt);
             }
-            particle = next;
         }
     }
 

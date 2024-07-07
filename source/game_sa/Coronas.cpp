@@ -123,7 +123,11 @@ void CCoronas::Init() {
 // Terminates coronas
 // 0x6FAB00
 void CCoronas::Shutdown() {
-    rng::for_each(gpCoronaTexture, RwTextureDestroy);
+    for (auto& t : gpCoronaTexture) {
+        if (t) {
+            RwTextureDestroy(std::exchange(t, nullptr));
+        }
+    }
 }
 
 // Updates coronas

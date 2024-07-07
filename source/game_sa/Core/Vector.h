@@ -209,6 +209,8 @@ public:
     static inline float DistSqr(CVector a, CVector b) {
         return (a - b).SquaredMagnitude();
     }
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(CVector, x, y, z);
 };
 VALIDATE_SIZE(CVector, 0xC);
 
