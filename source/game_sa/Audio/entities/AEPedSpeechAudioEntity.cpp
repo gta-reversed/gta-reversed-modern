@@ -4,27 +4,7 @@
 #include "AEAudioUtility.h"
 #include "PedClothesDesc.h"
 #include <AEAudioHardware.h>
-
-int16& CAEPedSpeechAudioEntity::s_nCJWellDressed = *(int16*)0xB613D0;
-int16& CAEPedSpeechAudioEntity::s_nCJFat = *(int16*)0xB613D4;
-int16& CAEPedSpeechAudioEntity::s_nCJGangBanging = *(int16*)0xB613D8;
-int32& CAEPedSpeechAudioEntity::s_nCJBasicMood = *(int32*)0xB613DC;
-int32& CAEPedSpeechAudioEntity::s_nCJMoodOverrideTime = *(int32*)0xB613E0;
-bool& CAEPedSpeechAudioEntity::s_bForceAudible = *(bool*)0xB613E4;
-bool& CAEPedSpeechAudioEntity::s_bAPlayerSpeaking = *(bool*)0xB613E5;
-bool& CAEPedSpeechAudioEntity::s_bAllSpeechDisabled = *(bool*)0xB613E6;
-int16& CAEPedSpeechAudioEntity::s_ConversationLength = *(int16*)0xB613E8;
-int16 (&CAEPedSpeechAudioEntity::s_Conversation)[8] = *(int16(*)[8])0xB613EC;
-bool& CAEPedSpeechAudioEntity::s_bPlayerConversationHappening = *(bool*)0xB613FC;
-bool& CAEPedSpeechAudioEntity::s_bPedConversationHappening = *(bool*)0xB613FD;
-CPed*& CAEPedSpeechAudioEntity::s_pPlayerConversationPed = *(CPed**)0xB61400;
-int16& CAEPedSpeechAudioEntity::s_pConversationPedSlot2 = *(int16*)0xB61404;
-int16& CAEPedSpeechAudioEntity::s_pConversationPedSlot1 = *(int16*)0xB61408;
-CPed*& CAEPedSpeechAudioEntity::s_pConversationPed2 = *(CPed**)0xB6140C;
-CPed*& CAEPedSpeechAudioEntity::s_pConversationPed1 = *(CPed**)0xB61410;
-int16& CAEPedSpeechAudioEntity::s_NextSpeechSlot = *(int16*)0xB61414;
-static inline auto& gGlobalSpeechContextNextPlayTime = *reinterpret_cast<std::array<uint32, 360>*>(0xB61670);
-static inline auto& gSpeechContextLookup = *reinterpret_cast<notsa::mdarray<int16, 8, 360>*>(0x8C6A68);
+#include <Audio/eSoundBankSlot.h>
 
 void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedVirtualClass(CAEPedSpeechAudioEntity, 0x85F310, 8);
@@ -36,11 +16,11 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(GetNextMoodToUse, 0x4E4700);
     RH_ScopedInstall(GetVoiceForMood, 0x4E4760);
     RH_ScopedInstall(CanWePlayScriptedSpeech, 0x4E4950);
-    RH_ScopedInstall(GetSpeechContextVolumeOffset, 0x4E4AE0, { .reversed = false });
+    RH_ScopedInstall(GetSpeechContextVolumeOffset, 0x4E4AE0);
     RH_ScopedInstall(RequestPedConversation, 0x4E50E0, { .reversed = false });
     RH_ScopedInstall(ReleasePedConversation, 0x4E52A0, { .reversed = false });
     RH_ScopedInstall(GetCurrentCJMood, 0x4E53B0, { .reversed = false });
-    RH_ScopedInstall(StaticInitialise, 0x5B98C0, { .reversed = true });
+    RH_ScopedInstall(StaticInitialise, 0x5B98C0);
     RH_ScopedInstall(GetSpecificSpeechContext, 0x4E4470, { .reversed = false });
     RH_ScopedInstall(Service, 0x4E3710, { .reversed = false });
     RH_ScopedInstall(Reset, 0x4E37B0);
@@ -52,17 +32,17 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(GetAudioPedType, 0x4E3C60);
     RH_ScopedInstall(GetVoice, 0x4E3CD0, { .reversed = false });
     RH_ScopedInstall(DisableAllPedSpeech, 0x4E3EB0);
-    RH_ScopedInstall(IsGlobalContextPain, 0x4E44F0, { .reversed = true });
+    RH_ScopedInstall(IsGlobalContextPain, 0x4E44F0);
     RH_ScopedInstall(SetCJMood, 0x4E3ED0, { .reversed = false });
     RH_ScopedInstall(EnableAllPedSpeech, 0x4E3EC0);
-    RH_ScopedInstall(IsCJDressedInForGangSpeech, 0x4E4270, { .reversed = true });
+    RH_ScopedInstall(IsCJDressedInForGangSpeech, 0x4E4270);
     RH_ScopedInstall(GetSexForSpecialPed, 0x4E4260);
-    RH_ScopedInstall(IsGlobalContextImportantForWidescreen, 0x4E46B0, { .reversed = true });
+    RH_ScopedInstall(IsGlobalContextImportantForWidescreen, 0x4E46B0);
     RH_ScopedInstall(GetRepeatTime, 0x4E47E0, { .reversed = false });
-    RH_ScopedInstall(LoadAndPlaySpeech, 0x4E4840, { .reversed = false });
-    RH_ScopedInstall(GetNumSlotsPlayingContext, 0x4E49B0, { .reversed = true });
-    RH_ScopedInstall(GetNextPlayTime, 0x4E49E0, { .reversed = true });
-    RH_ScopedInstall(SetNextPlayTime, 0x4E4A20, { .reversed = true });
+    RH_ScopedInstall(LoadAndPlaySpeech, 0x4E4840);
+    RH_ScopedInstall(GetNumSlotsPlayingContext, 0x4E49B0);
+    RH_ScopedInstall(GetNextPlayTime, 0x4E49E0);
+    RH_ScopedInstall(SetNextPlayTime, 0x4E4A20);
     RH_ScopedInstall(DisablePedSpeech, 0x4E56D0);
     RH_ScopedInstall(DisablePedSpeechForScriptSpeech, 0x4E5700);
     RH_ScopedInstall(CanPedSayGlobalContext, 0x4E5730, { .reversed = false });
@@ -73,12 +53,12 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(Initialise, 0x4E68D0, { .reversed = false });
     RH_ScopedInstall(CanPedHoldConversation, 0x4E69E0, { .reversed = false });
     RH_ScopedInstall(IsGlobalContextImportantForStreaming, 0x4E4510, { .reversed = false });
-    RH_ScopedInstall(EnablePedSpeech, 0x4E3F70, { .reversed = false });
-    RH_ScopedInstall(EnablePedSpeechForScriptSpeech, 0x4E3F90, { .reversed = false });
+    RH_ScopedInstall(EnablePedSpeech, 0x4E3F70);
+    RH_ScopedInstall(EnablePedSpeechForScriptSpeech, 0x4E3F90);
     RH_ScopedInstall(StopCurrentSpeech, 0x4E3FB0, { .reversed = false });
     RH_ScopedInstall(GetSoundAndBankIDsForScriptedSpeech, 0x4E4400, { .reversed = false });
     RH_ScopedInstall(GetSexFromModel, 0x4E4200, { .reversed = false });
-    RH_ScopedInstall(GetPedTalking, 0x4E3F50, { .reversed = false });
+    RH_ScopedInstall(GetPedTalking, 0x4E3F50);
     RH_ScopedInstall(GetVoiceAndTypeForSpecialPed, 0x4E4170, { .reversed = false });
     RH_ScopedVMTInstall(UpdateParameters, 0x4E3520, { .reversed = false });
     RH_ScopedVMTInstall(AddScriptSayEvent, 0x4E4F70, { .reversed = false });
@@ -90,24 +70,8 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedVMTInstall(IsPedFemaleForAudio, 0x4E4150);
 }
 
-// 0x4E4F10
-CAEPedSpeechAudioEntity::CAEPedSpeechAudioEntity() : CAEAudioEntity() {
-    f90                         = false;
-    m_nVoiceType                = 0;
-    m_bTalking                  = false;
-    m_bSpeechDisabled           = false;
-    m_bSpeechForScriptsDisabled = false;
-    m_pSound                    = nullptr;
-    m_nSoundId                  = -1;
-    m_nBankId                   = -1;
-    m_nPedSpeechSlotIndex       = -1;
-    m_fVoiceVolume              = -100.0f;
-    m_nCurrentPhraseId          = -1;
-}
-
 // 0x4E4600
 bool __stdcall CAEPedSpeechAudioEntity::IsGlobalContextImportantForInterupting(int16 globalCtx) {
-    // return plugin::CallAndReturn<int8, 0x4E4600, int16>(a1);
     switch (globalCtx) {
     case 13:
     case 15:
@@ -126,17 +90,13 @@ bool CAEPedSpeechAudioEntity::IsGlobalContextUberImportant(int16 globalCtx) {
 }
 
 // 0x4E4700
-int16 __stdcall CAEPedSpeechAudioEntity::GetNextMoodToUse(int16 lastMood) {
+int16 __stdcall CAEPedSpeechAudioEntity::GetNextMoodToUse(eCJMood lastMood) {
     switch (lastMood) {
-    case 0:
-    case 7:
-        return 1;
-    case 6:
-        return 0;
-    case 8:
-        return 4;
-    default:
-        return 5;
+    case MOOD_AG:
+    case MOOD_PR: return MOOD_AR;
+    case MOOD_PG: return MOOD_AG;
+    case MOOD_WG: return MOOD_CG;
+    default:      return MOOD_CR;
     }
 }
 
@@ -150,20 +110,30 @@ int32 __stdcall CAEPedSpeechAudioEntity::GetVoiceForMood(int16 mood) {
 
 // 0x4E4950
 int16 CAEPedSpeechAudioEntity::CanWePlayScriptedSpeech() {
-    for (auto i = 0; i < 5; i++) {
-        const auto slot = (s_NextSpeechSlot + i) % 5;
-        if (s_PedSpeechSlots[slot].m_nState)
-            continue;
-
-        s_NextSpeechSlot = slot;
-        return slot;
+    for (auto i = 0; i < PED_TYPE_SPC; i++) {
+        const auto slot = (s_NextSpeechSlot + i) % PED_TYPE_SPC;
+        if (s_PedSpeechSlots[slot].Status == CAEPedSpeechSlot::eStatus::FREE) {
+            s_NextSpeechSlot = slot;
+            return slot;
+        }
     }
     return -1;
 }
 
 // 0x4E4AE0
-float CAEPedSpeechAudioEntity::GetSpeechContextVolumeOffset(int16 a1) {
-    return plugin::CallAndReturn<float, 0x4E4AE0, int16>(a1);
+float CAEPedSpeechAudioEntity::GetSpeechContextVolumeOffset(eGlobalSpeechContextS16 gctx) {
+    const auto CalculateStrainVolumeOffset = [](float base) {
+        const auto t = std::clamp(CStats::GetStatValue(STAT_FAT) - CStats::GetStatValue(STAT_MUSCLE), -1.f, 1.f);
+        return (t + 1.f) * 0.5f * base + base;
+    };
+    switch (gctx) {
+    case GCTX_STOMACH_RUMBLE:        return -6.f; // 0x4E4CBB
+    case GCTX_BREATHING:             return -12.f; // 0x4E4CC7
+    case GCTX_PAIN_CJ_STRAIN:        return CalculateStrainVolumeOffset(-18.f); // 0x4E4B08
+    case GCTX_PAIN_CJ_STRAIN_EXHALE: return CalculateStrainVolumeOffset(-21.f); // 0x4E4BE2
+    case GCTX_PAIN_CJ_DROWNING:      return 3.f; // 0x4E4CBE
+    default:                         return 0.f; // 0x4E4CD0
+    }
 }
 
 // 0x4E50E0
@@ -183,8 +153,8 @@ int16 CAEPedSpeechAudioEntity::GetCurrentCJMood() {
 
 // 0x5B98C0
 void CAEPedSpeechAudioEntity::StaticInitialise() {
-    rng::for_each(s_PedSpeechSlots, &tSpeechSlot::Reset);
-    rng::for_each(s_PhraseMemory, &tPhraseMemory::Reset);
+    rng::fill(s_PedSpeechSlots, CAEPedSpeechSlot{});
+    rng::fill(s_PhraseMemory, tPhraseMemory{});
     s_NextSpeechSlot = 0;
     Reset();
     s_pConversationPed1 = s_pConversationPed2 = nullptr;
@@ -230,12 +200,12 @@ bool CAEPedSpeechAudioEntity::RequestPlayerConversation(CPed* ped) {
     if (s_bAllSpeechDisabled)
         return false;
 
-    if (ped->m_pedSpeech.m_bSpeechForScriptsDisabled || ped->m_pedSpeech.m_bSpeechDisabled) {
+    if (ped->m_pedSpeech.m_IsSpeechForScriptsDisabled || ped->m_pedSpeech.m_IsSpeechDisabled) {
         return false;
     }
 
     const auto player = FindPlayerPed();
-    if (!player || player->m_pedSpeech.m_bSpeechDisabled || player->m_pedSpeech.m_bSpeechForScriptsDisabled) {
+    if (!player || player->m_pedSpeech.m_IsSpeechDisabled || player->m_pedSpeech.m_IsSpeechForScriptsDisabled) {
         return false;
     }
 
@@ -294,7 +264,7 @@ void CAEPedSpeechAudioEntity::DisableAllPedSpeech() {
 
 // 0x4E44F0
 bool CAEPedSpeechAudioEntity::IsGlobalContextPain(int16 globalCtx) {
-    return globalCtx > 339 && globalCtx < 359;
+    return GCTX_PAIN_START < globalCtx && globalCtx < GCTX_PAIN_END;
 }
 
 // 0x4E3ED0
@@ -310,8 +280,8 @@ void CAEPedSpeechAudioEntity::EnableAllPedSpeech() {
 // 0x4E4270
 bool CAEPedSpeechAudioEntity::IsCJDressedInForGangSpeech() {
     static constexpr struct {
-        eClothesTexturePart clothesPart;
-        const char* textureName;
+        eClothesTexturePart ClothesPart;
+        const char*         TexName;
     } GANG_SPEECH_CLOTHES[] = {
         { CLOTHES_TEXTURE_TORSO,   "hoodyagreen" },
         { CLOTHES_TEXTURE_TORSO,   "shirtbgang"  },
@@ -330,14 +300,16 @@ bool CAEPedSpeechAudioEntity::IsCJDressedInForGangSpeech() {
         { CLOTHES_TEXTURE_GLASSES, "bandblack3"  },
     };
 
-    if (!FindPlayerPed(PED_TYPE_PLAYER1))
+    if (!FindPlayerPed(PED_TYPE_PLAYER1)) {
         return false;
+    }
 
-    if (CGameLogic::FindCityClosestToPoint(FindPlayerCoors()) != LEVEL_NAME_LOS_SANTOS)
+    if (CGameLogic::FindCityClosestToPoint(FindPlayerCoors()) != LEVEL_NAME_LOS_SANTOS) {
         return false;
+    }
 
     return rng::any_of(GANG_SPEECH_CLOTHES, [pcd = FindPlayerPed()->GetClothesDesc()](auto& gc) {
-        return pcd->m_anTextureKeys[gc.clothesPart] == CKeyGen::GetUppercaseKey(gc.textureName);
+        return pcd->m_anTextureKeys[gc.ClothesPart] == CKeyGen::GetUppercaseKey(gc.TexName);
     });
 }
 
@@ -349,7 +321,7 @@ int8 CAEPedSpeechAudioEntity::GetSexForSpecialPed(uint32 a1) {
 // Methods
 // 0x4E46B0
 bool CAEPedSpeechAudioEntity::IsGlobalContextImportantForWidescreen(int16 globalCtx) {
-    return notsa::contains<int>({4, 2}, m_nVoiceType) || notsa::contains<int>({13, 15, 116}, globalCtx);
+    return notsa::contains<int>({4, 2}, m_PedAudioType) || notsa::contains<int>({13, 15, 116}, globalCtx);
 }
 
 // 0x4E47E0
@@ -359,45 +331,48 @@ int32 CAEPedSpeechAudioEntity::GetRepeatTime(int16 a1) {
 
 // 0x4E4840
 void CAEPedSpeechAudioEntity::LoadAndPlaySpeech(uint32 offset) {
-    //plugin::CallMethod<0x4E4840>(this, offset);
-    auto& currSpeech = GetCurrentPedSpeech();
-    if (currSpeech.m_nState != 0 && currSpeech.m_nState != 4)
+    auto& s = GetSpeech();
+    switch (s.Status) {
+    case CAEPedSpeechSlot::eStatus::FREE:
+    case CAEPedSpeechSlot::eStatus::RESERVED:
+        break;
+    default:
         return;
+    }
 
-    AEAudioHardware.LoadSound(m_nBankId, m_nSoundId, m_nPedSpeechSlotIndex + 20); // TODO: Helper
-    currSpeech.m_nState = 1;
-    currSpeech.m_nBankId = m_nBankId;
-    currSpeech.m_nSoundId = m_nSoundId;
-    currSpeech.m_PedSpeechAE = this;
-    currSpeech.m_nTime = CTimer::GetTimeInMS() + offset;
-    currSpeech.m_nVoiceType = m_nVoiceType;
-    currSpeech.m_nPhraseId = m_nCurrentPhraseId;
-    // byte_B61C50[28 * m_nPedSpeechSlotIndex] = field_9C;
+    AEAudioHardware.LoadSound(m_BankID, m_SoundID, SND_BANK_SLOT_SPEECH1 + m_PedSpeechSlotID); // TODO: Helper
+    s.Status            = CAEPedSpeechSlot::eStatus::LOADING;
+    s.SoundBankID       = m_BankID;
+    s.SoundID           = m_SoundID;
+    s.AudioEntity       = this;
+    s.StartPlaybackTime = CTimer::GetTimeInMS() + offset;
+    s.PedAudioType      = m_PedAudioType;
+    s.GCtx              = m_LastGCtx;
+    s.ForceAudible      = m_IsForcedAudible;
 }
 
 // 0x4E49B0
 int32 CAEPedSpeechAudioEntity::GetNumSlotsPlayingContext(int16 context) {
-    return rng::count_if(s_PedSpeechSlots, [&](tSpeechSlot& speech) {
-        return speech.m_nState && speech.m_nPhraseId == context;
+    return rng::count_if(s_PedSpeechSlots, [&](CAEPedSpeechSlot& speech) {
+        return speech.Status != CAEPedSpeechSlot::eStatus::FREE && speech.GCtx == context;
     });
 }
 
 // 0x4E49E0
 uint32 CAEPedSpeechAudioEntity::GetNextPlayTime(int16 globalCtx) {
-    if (globalCtx > 359) // todo: const
+    if (globalCtx >= GCTX_NUM) {
         return 0;
-
-    if (IsGlobalContextPain(globalCtx))
-        return field_B4[globalCtx - 340];
-
-    return gGlobalSpeechContextNextPlayTime[globalCtx];
+    }
+    return IsGlobalContextPain(globalCtx)
+        ? m_NextTimeCanSayPain[globalCtx - GCTX_PAIN_START + 1]
+        : gGlobalSpeechContextNextPlayTime[globalCtx];
 }
 
 // 0x4E4A20
 void CAEPedSpeechAudioEntity::SetNextPlayTime(int16 globalCtx) {
     // plugin::CallMethod<0x4E4A20>(this, globalCtx);
 
-    if (globalCtx > 359)
+    if (globalCtx >= GCTX_NUM)
         return;
 
     for (auto& lookup : gSpeechContextLookup) {
@@ -410,7 +385,7 @@ void CAEPedSpeechAudioEntity::SetNextPlayTime(int16 globalCtx) {
         const auto playTime = lookup[6] + CAEAudioUtility::GetRandomNumberInRange(1, 1000);
         auto& ctxNextPlayTime = [&]() -> uint32& {
             if (IsGlobalContextPain(globalCtx))
-                return field_B4[globalCtx - 340];
+                return m_NextTimeCanSayPain[globalCtx - 340];
             else
                 return gGlobalSpeechContextNextPlayTime[globalCtx];
         }() = CTimer::GetTimeInMS() + playTime;
@@ -420,8 +395,8 @@ void CAEPedSpeechAudioEntity::SetNextPlayTime(int16 globalCtx) {
 
 // 0x4E56D0
 void CAEPedSpeechAudioEntity::DisablePedSpeech(int16 a1) {
-    if (f90) {
-        m_bSpeechDisabled = true;
+    if (m_IsInitialized) {
+        m_IsSpeechDisabled = true;
         if (a1)
             StopCurrentSpeech();
     }
@@ -429,8 +404,8 @@ void CAEPedSpeechAudioEntity::DisablePedSpeech(int16 a1) {
 
 // 0x4E5700
 void CAEPedSpeechAudioEntity::DisablePedSpeechForScriptSpeech(int16 a1) {
-    if (f90) {
-        m_bSpeechForScriptsDisabled = true;
+    if (m_IsInitialized) {
+        m_IsSpeechForScriptsDisabled = true;
         if (a1)
             StopCurrentSpeech();
     }
@@ -443,18 +418,22 @@ int8 CAEPedSpeechAudioEntity::CanPedSayGlobalContext(int16 a2) {
 
 // 0x4E58C0
 int8 CAEPedSpeechAudioEntity::GetVoiceAndTypeFromModel(eModelID modelId) {
-    CPedModelInfo* info = CModelInfo::GetModelInfo(modelId)->AsPedModelInfoPtr();
-    if (info->m_nPedAudioType < 0 || info->m_nPedAudioType >= 6)
+    auto* const mi = CModelInfo::GetModelInfo(modelId)->AsPedModelInfoPtr();
+    if (mi->m_nPedAudioType < 0 || mi->m_nPedAudioType >= 6) {
         return 0;
+    }
 
-    if (info->m_nPedAudioType == 5) // PED_TYPE_SPC, see GetAudioPedType
-        return GetVoiceAndTypeForSpecialPed(info->m_nKey);
+    if (mi->m_nPedAudioType == PED_TYPE_SPC) {
+        return GetVoiceAndTypeForSpecialPed(mi->m_nKey);
+    }
 
-    m_nVoiceId = info->m_nVoiceId;
-    if (m_nVoiceId < 0)
+    m_VoiceID = mi->m_nVoiceId;
+    if (m_VoiceID == PED_TYPE_UNK) {
         return 0;
+    }
 
-    info->IncrementVoice();
+    mi->IncrementVoice();
+
     return 1;
 }
 
@@ -490,14 +469,14 @@ bool CAEPedSpeechAudioEntity::IsGlobalContextImportantForStreaming(int16 a1) {
 
 // 0x4E3F70
 void CAEPedSpeechAudioEntity::EnablePedSpeech() {
-    if (f90)
-        m_bSpeechDisabled = false;
+    if (m_IsInitialized)
+        m_IsSpeechDisabled = false;
 }
 
 // 0x4E3F90
 void CAEPedSpeechAudioEntity::EnablePedSpeechForScriptSpeech() {
-    if (f90)
-        m_bSpeechForScriptsDisabled = false;
+    if (m_IsInitialized)
+        m_IsSpeechForScriptsDisabled = false;
 }
 
 // 0x4E3FB0
@@ -517,7 +496,7 @@ int8 CAEPedSpeechAudioEntity::GetSexFromModel(int32 a1) {
 
 // 0x4E3F50
 bool CAEPedSpeechAudioEntity::GetPedTalking() {
-    return f90 && m_bTalking;
+    return m_IsInitialized && m_IsPlayingSpeech;
 }
 
 // 0x4E4170
@@ -547,48 +526,38 @@ void CAEPedSpeechAudioEntity::PlayLoadedSound() {
 
 // 0x4E4120
 int16 CAEPedSpeechAudioEntity::GetAllocatedVoice() {
-    return m_nVoiceId;
+    return m_VoiceID;
 }
 
 // 0x4E5800
 bool CAEPedSpeechAudioEntity::WillPedChatAboutTopic(int16 topic) {
     switch (topic) {
-    case 0:
-        return CanPedSayGlobalContext(48);
-    case 1:
-        return CanPedSayGlobalContext(49);
-    case 2:
-        return CanPedSayGlobalContext(50);
-    case 3:
-        return CanPedSayGlobalContext(51);
-    case 4:
-        return CanPedSayGlobalContext(52);
-    case 5:
-        return CanPedSayGlobalContext(53);
-    case 6:
-        return CanPedSayGlobalContext(54);
-    case 7:
-        return CanPedSayGlobalContext(55);
+    case 0:  return CanPedSayGlobalContext(48);
+    case 1:  return CanPedSayGlobalContext(49);
+    case 2:  return CanPedSayGlobalContext(50);
+    case 3:  return CanPedSayGlobalContext(51);
+    case 4:  return CanPedSayGlobalContext(52);
+    case 5:  return CanPedSayGlobalContext(53);
+    case 6:  return CanPedSayGlobalContext(54);
+    case 7:  return CanPedSayGlobalContext(55);
     case 8:
-    case 9:
-        return true;
-    default:
-        return false;
+    case 9:  return true;
+    default: return false;
     }
 }
 
 // 0x4E4130
 int16 CAEPedSpeechAudioEntity::GetPedType() {
-    if (f90)
-        return m_nVoiceType;
+    if (m_IsInitialized)
+        return m_PedAudioType;
     else
         return -1;
 }
 
 // 0x4E4150
 bool CAEPedSpeechAudioEntity::IsPedFemaleForAudio() {
-    if (f90)
-        return m_nVoiceGender;
+    if (m_IsInitialized)
+        return m_IsFemale;
     else
         return false;
 }

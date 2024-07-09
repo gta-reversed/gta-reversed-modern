@@ -9,22 +9,20 @@ CAEPedlessSpeechAudioEntity::CAEPedlessSpeechAudioEntity() : CAEPedSpeechAudioEn
 
 // 0x4E4E10
 void CAEPedlessSpeechAudioEntity::Initialise() {
-    m_pEntity                  = nullptr;
-    m_Entity                   = nullptr;
-    m_pSound                   = nullptr;
-    m_fVoiceVolume             = -100.0f;
-    m_nCurrentPhraseId         = -1;
-    m_bTalking                 = false;
-    m_bSpeechDisabled          = false;
-    m_bSpeechForScriptsDisabled= false;
-    m_nVocalEnableFlag         = 0;
-    field_9C                   = 0;
-    m_nVoiceGender             = 0;
-    m_nVoiceType               = 4;
-    f90                        = true;
-
-    memset(field_B4, 0, sizeof(field_B4));
-
+    m_pEntity                    = nullptr;
+    m_Entity                     = nullptr;
+    m_Sound                      = nullptr;
+    m_EventVolume                = -100.0f;
+    m_LastGCtx                   = GCTX_UNK;
+    m_IsPlayingSpeech            = false;
+    m_IsSpeechDisabled           = false;
+    m_IsSpeechForScriptsDisabled = false;
+    m_IsFrontend                 = 0;
+    m_IsForcedAudible            = 0;
+    m_IsFemale                   = 0;
+    m_PedAudioType               = PED_TYPE_GFD;
+    m_IsInitialized              = true;
+    m_NextTimeCanSayPain.fill(0);
 }
 
 // 0x4E4E80

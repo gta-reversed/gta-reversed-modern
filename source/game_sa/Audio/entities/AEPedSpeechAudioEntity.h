@@ -6,122 +6,134 @@
 */
 #pragma once
 
-#include "AEAudioEntity.h"
-#include "AESound.h"
-#include "eGlobalSpeechContext.h"
+#include <Audio/entities/AEAudioEntity.h>
+#include <Audio/AESound.h>
+#include <Audio/eGlobalSpeechContext.h>
+#include <Audio/eSoundBank.h>
 
 enum eAudioPedType : int16 {
+    PED_TYPE_UNK    = -1,
     PED_TYPE_GEN    = 0,
     PED_TYPE_EMG    = 1,
     PED_TYPE_PLAYER = 2,
     PED_TYPE_GANG   = 3,
     PED_TYPE_GFD    = 4,
-    PED_TYPE_SPC    = 5
+    PED_TYPE_SPC    = 5,
+
+    //
+    // Add above
+    //
+    PED_TYPE_NUM // = 6
 };
+
+enum eCJMood : int32 {
+    MOOD_AG = 0,
+    MOOD_AR = 1,
+    MOOD_CD = 2,
+    MOOD_CF = 3,
+    MOOD_CG = 4,
+    MOOD_CR = 5,
+    MOOD_PG = 6,
+    MOOD_PR = 7,
+    MOOD_WG = 8,
+    MOOD_WR = 9,
+
+    //
+    // Add above
+    //
+    MOOD_END // = 10
+};
+
 
 class CAEPedSpeechAudioEntity;
 
-struct tSpeechSlot {
-    uint16 m_nState;
-    uint16 field_02;
-    CAEPedSpeechAudioEntity* m_PedSpeechAE;
-    uint32 field_08;
-    uint16 m_nSoundId;
-    uint16 m_nBankId;
-    uint32 m_nTime;
-    uint16 m_nPhraseId;
-    uint16 m_nVoiceType;
-    uint8 field_18;
-    uint8 field_19;
-    uint8 field_1A;
-    uint8 field_1B;
+struct CAEPedSpeechSlot {
+    enum class eStatus : int16 {
+        FREE      = 0,
+        LOADING   = 1,
+        WAITING   = 2,
+        REQUESTED = 3,
+        RESERVED  = 4,
+        PLAYING   = 5,
+    };
 
-    void Reset() {
-        m_PedSpeechAE = nullptr;
-        m_nState = field_08 = m_nTime = 0;
-        m_nSoundId = m_nBankId = m_nPhraseId = m_nVoiceType = -1;
-        field_19 = field_1A = field_18 = 0;
-    }
+    eStatus                  Status{};
+    CAEPedSpeechAudioEntity* AudioEntity{};
+    CAESound*                Sound{};
+    int16                    SoundID{ -1 };
+    eSoundBankS16            SoundBankID{ SND_BANK_UNK };
+    uint32                   StartPlaybackTime{};
+    eGlobalSpeechContextS16  GCtx{ GCTX_UNK };
+    eAudioPedType            PedAudioType{ PED_TYPE_UNK };
+    bool                     ForceAudible{};
+    bool                     IsReservedForPedConversation{};
+    bool                     IsReservedForPlayerConversation{};
 };
-VALIDATE_SIZE(tSpeechSlot, 0x1C);
+VALIDATE_SIZE(CAEPedSpeechSlot, 0x1C);
 
 struct tPhraseMemory {
-    int16 m_nSoundId{-1};
-    int16 m_nBankId{-1};
-
-    void Reset() {
-        m_nSoundId = m_nBankId = -1;
-    }
+    int16         SoundID{ -1 };
+    eSoundBankS16 BankID{ SND_BANK_UNK };
 };
 VALIDATE_SIZE(tPhraseMemory, 0x04);
 
 class NOTSA_EXPORT_VTABLE CAEPedSpeechAudioEntity : public CAEAudioEntity {
 public:
-    char      field_7C[20];
-    bool      f90;
-    char      field_91;
-    int16     m_nVoiceType;
-    int16     m_nVoiceId;
-    int16     m_nVoiceGender;
-    bool      m_bTalking;
-    bool      m_bSpeechDisabled;
-    bool      m_bSpeechForScriptsDisabled;
-    int8      m_nVocalEnableFlag;
-    char      field_9C;
-    char      field_9D;
-    char      field_9E;
-    char      field_9F;
-    CAESound* m_pSound;
-    int16     m_nSoundId;
-    int16     m_nBankId;
-    int16     m_nPedSpeechSlotIndex;
-    int16     field_AA;
-    float     m_fVoiceVolume;
-    int16     m_nCurrentPhraseId;
-    int16     field_B2;
-    uint32    field_B4[19];
+    std::array<CAESound*, 5>                                m_Sounds{};
+    bool                                                    m_IsInitialized{};
+    eAudioPedType                                           m_PedAudioType{};
+    int16                                                   m_VoiceID{};
+    int16                                                   m_IsFemale{};
+    bool                                                    m_IsPlayingSpeech{};
+    bool                                                    m_IsSpeechDisabled{};
+    bool                                                    m_IsSpeechForScriptsDisabled{};
+    bool                                                    m_IsFrontend{};
+    bool                                                    m_IsForcedAudible{};
+    CAESound*                                               m_Sound{};
+    int16                                                   m_SoundID{ -1 };
+    eSoundBankS16                                           m_BankID{ SND_BANK_UNK };
+    int16                                                   m_PedSpeechSlotID{ -1 };
+    float                                                   m_EventVolume{ -100.f };
+    eGlobalSpeechContextS16                                 m_LastGCtx{ GCTX_UNK };
+    std::array<uint32, GCTX_PAIN_END - GCTX_PAIN_START - 1> m_NextTimeCanSayPain{};
 
 public:
-    static int16& s_nCJWellDressed;
-    static int16& s_nCJFat;
-    static int16& s_nCJGangBanging;
-    static int32& s_nCJBasicMood;
-    static int32& s_nCJMoodOverrideTime;
-    static bool& s_bForceAudible;
-    static bool& s_bAPlayerSpeaking;
-    static bool& s_bAllSpeechDisabled;
-    static int16& s_ConversationLength;
-    static int16 (&s_Conversation)[8];
-    static bool& s_bPlayerConversationHappening;
-    static bool& s_bPedConversationHappening;
-    static CPed*& s_pPlayerConversationPed;
+    static inline auto& s_nCJWellDressed                 = StaticRef<int16>(0xB613D0);
+    static inline auto& s_nCJFat                         = StaticRef<int16>(0xB613D4);
+    static inline auto& s_nCJGangBanging                 = StaticRef<int16>(0xB613D8);
+    static inline auto& s_nCJBasicMood                   = StaticRef<int32>(0xB613DC);
+    static inline auto& s_nCJMoodOverrideTime            = StaticRef<int32>(0xB613E0);
+    static inline auto& s_bForceAudible                  = StaticRef<bool>(0xB613E4);
+    static inline auto& s_bAPlayerSpeaking               = StaticRef<bool>(0xB613E5);
+    static inline auto& s_bAllSpeechDisabled             = StaticRef<bool>(0xB613E6);
+    static inline auto& s_ConversationLength             = StaticRef<int16>(0xB613E8);
+    static inline auto& s_Conversation                   = StaticRef<std::array<int16, 8>>(0xB613EC);
+    static inline auto& s_bPlayerConversationHappening   = StaticRef<bool>(0xB613FC);
+    static inline auto& s_bPedConversationHappening      = StaticRef<bool>(0xB613FD);
+    static inline auto& s_pPlayerConversationPed         = StaticRef<CPed*>(0xB61400);
+    static inline auto& s_pConversationPedSlot2          = StaticRef<int16>(0xB61404);
+    static inline auto& s_pConversationPedSlot1          = StaticRef<int16>(0xB61408);
+    static inline auto& s_pConversationPed2              = StaticRef<CPed*>(0xB6140C);
+    static inline auto& s_pConversationPed1              = StaticRef<CPed*>(0xB61410);
+    static inline auto& s_NextSpeechSlot                 = StaticRef<int16>(0xB61414);
 
-    static CPed*& s_pConversationPed1;
-    static int16& s_pConversationPedSlot1;
-
-    static CPed*& s_pConversationPed2;
-    static int16& s_pConversationPedSlot2;
-
-    static int16& s_NextSpeechSlot;
-
-    static constexpr auto PHRASE_MEMORY_COUNT = 150;
-    static inline auto& s_PhraseMemory = *reinterpret_cast<std::array<tPhraseMemory, PHRASE_MEMORY_COUNT>*>(0xB61418);
-
-    static constexpr auto NUM_PED_SPEECH_SLOTS = 6;
-    static inline auto& s_PedSpeechSlots = *reinterpret_cast<std::array<tSpeechSlot, NUM_PED_SPEECH_SLOTS>*>(0xB61C38);
+    static inline auto& s_PhraseMemory                   = StaticRef<std::array<tPhraseMemory, 150>>(0xB61418);
+    static inline auto& s_PedSpeechSlots                 = StaticRef<std::array<CAEPedSpeechSlot, PED_TYPE_NUM>>(0xB61C38);
+    static inline auto& gGlobalSpeechContextNextPlayTime = StaticRef<std::array<uint32, GCTX_NUM>>(0xB61670); // PAIN (GCTX_PAIN_START -> GCTX_PAIN_END) is ignored, and `m_NextTimeCanSayPain` is used instead
+    static inline auto& gSpeechContextLookup             = StaticRef<notsa::mdarray<int16, 8, GCTX_NUM>>(0x8C6A68);
 
 public:
     static void InjectHooks();
 
-    CAEPedSpeechAudioEntity();
+    CAEPedSpeechAudioEntity() = default;
     ~CAEPedSpeechAudioEntity() = default;
 
     static bool __stdcall IsGlobalContextImportantForInterupting(int16 globalCtx); // typo: Interrupting
     static bool IsGlobalContextUberImportant(int16 globalCtx);
-    static int16 __stdcall GetNextMoodToUse(int16 lastMood);
+    static int16 __stdcall GetNextMoodToUse(eCJMood lastMood);
     static int32 __stdcall GetVoiceForMood(int16 mood);
     static int16 CanWePlayScriptedSpeech();
-    static float GetSpeechContextVolumeOffset(int16 a1);
+    static float GetSpeechContextVolumeOffset(eGlobalSpeechContextS16 gctx);
     static int8 RequestPedConversation(CPed* ped1, CPed* ped2);
     static void ReleasePedConversation();
     static int16 GetCurrentCJMood();
@@ -181,9 +193,8 @@ private:
 
 
     // NOTSA
-    tSpeechSlot& GetCurrentPedSpeech() {
-        assert(m_nPedSpeechSlotIndex >= 0 && (size_t)(m_nPedSpeechSlotIndex) < std::size(s_PedSpeechSlots));
-        return s_PedSpeechSlots[m_nPedSpeechSlotIndex];
+    CAEPedSpeechSlot& GetSpeech() const {
+        return s_PedSpeechSlots[m_PedSpeechSlotID];
     }
 };
 

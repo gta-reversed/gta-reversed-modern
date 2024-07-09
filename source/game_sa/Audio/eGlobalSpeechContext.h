@@ -4,7 +4,7 @@
 
 // TODO: Make this an enum class
 enum eGlobalSpeechContext : int32 {
-    GCTX_UNKNOWN                        = -1,
+    GCTX_UNK                        = -1,
     GCTX_NO_SPEECH                      = 0, // 0x0
     GCTX_ABUSE_GANG_BALLAS              = 1, // 0x1
     GCTX_ABUSE_GANG_LSV                 = 2, // 0x2
@@ -344,6 +344,7 @@ enum eGlobalSpeechContext : int32 {
     GCTX_SINGING                        = 336, // 0x150
     GCTX_STOMACH_RUMBLE                 = 337, // 0x151
     GCTX_BREATHING                      = 338, // 0x152
+
     GCTX_PAIN_START                     = 339, // 0x153
     GCTX_PAIN_COUGH                     = 340, // 0x154
     GCTX_PAIN_DEATH_DROWN               = 341, // 0x155
@@ -365,6 +366,10 @@ enum eGlobalSpeechContext : int32 {
     GCTX_PAIN_CJ_DROWNING               = 357, // 0x165
     GCTX_PAIN_CJ_HIGH_FALL              = 358, // 0x166
     GCTX_PAIN_END                       = 359, // 0x167
-    GCTX_END                            = 360, // 0x168
+
+    //
+    // Add above
+    //
+    GCTX_NUM, // 360 = 0x168
 };
 NOTSA_WENUM_DEFS_FOR(eGlobalSpeechContext)

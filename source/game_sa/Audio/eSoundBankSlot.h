@@ -3,7 +3,7 @@
 #include <extensions/WEnum.hpp>
 
 enum eSoundBankSlot : int32 {
-    SND_BANK_UNK                       = -1,
+    SND_BANK_SLOT_UNK                 = -1,
     SND_BANK_SLOT_FRONTEND_GAME       = 0, // 0x0
     SND_BANK_SLOT_FRONTEND_MENU       = 1, // 0x1
     SND_BANK_SLOT_COLLISIONS          = 2, // 0x2
@@ -24,12 +24,14 @@ enum eSoundBankSlot : int32 {
     SND_BANK_SLOT_HORN_AND_SIREN      = 17, // 0x11
     SND_BANK_SLOT_COP_HELI            = 18, // 0x12
     SND_BANK_SLOT_VEHICLE_GEN         = 19, // 0x13
+
     SND_BANK_SLOT_SPEECH1             = 20, // 0x14
     SND_BANK_SLOT_SPEECH2             = 21, // 0x15
     SND_BANK_SLOT_SPEECH3             = 22, // 0x16
     SND_BANK_SLOT_SPEECH4             = 23, // 0x17
     SND_BANK_SLOT_SPEECH5             = 24, // 0x18
     SND_BANK_SLOT_SPEECH6             = 25, // 0x19
+
     SND_BANK_SLOT_MISSION1            = 26, // 0x1A
     SND_BANK_SLOT_MISSION2            = 27, // 0x1B
     SND_BANK_SLOT_MISSION3            = 28, // 0x1C
