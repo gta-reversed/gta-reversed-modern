@@ -8,6 +8,7 @@
 
 #include "AEAudioEntity.h"
 #include "AESound.h"
+#include "eGlobalSpeechContext.h"
 
 enum eAudioPedType : int16 {
     PED_TYPE_GEN    = 0,
