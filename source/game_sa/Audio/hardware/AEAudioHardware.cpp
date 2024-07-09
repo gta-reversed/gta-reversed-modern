@@ -261,7 +261,7 @@ int16 CAEAudioHardware::AllocateChannels(uint16 numChannels) {
     m_anNumChannelsInSlot[slot] = numChannels;
     m_nNumAvailableChannels    -= numChannels;
 
-    return slot;
+    return (int16)slot;
 }
 
 // 0x4D94A0
