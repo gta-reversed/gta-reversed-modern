@@ -830,7 +830,6 @@ void CTaskSimpleUseGun::StartAnim(CPed* ped) {
         if (tDuck && tDuck->StopFireGun()) {
             return;
         }
-        
         m_Anim = CAnimManager::BlendAnimation( // 0x6251DC
             ped->m_pRwClump,
             CTaskSimpleFight::m_aComboData[12].m_nAnimGroup,
