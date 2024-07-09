@@ -69,10 +69,9 @@ bool CTaskSimpleArrestPed::ProcessPed(CPed* ped) {
         return false;
 
     if (m_Assoc) {
-        CVector point{};
-        if (m_Ped) {
-            m_Ped->GetBonePosition(point, BONE_SPINE1, false);
-        }
+        const auto point = m_Ped
+            ? m_Ped->GetBonePosition(BONE_SPINE1, false)
+            : CVector{};
         const auto& pedPos = ped->GetPosition();
         auto angle = CGeneral::GetRadianAngleBetweenPoints(point.x, point.y, pedPos.x, pedPos.y);
         ped->m_fAimingRotation = angle;

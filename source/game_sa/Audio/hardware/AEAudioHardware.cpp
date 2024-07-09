@@ -119,7 +119,7 @@ bool CAEAudioHardware::Initialise() {
         AESmoothFadeThread.m_nNumAvailableBuffers = 48;
         field_4 = 0;
     } else {
-        m_nNumChannels = std::min(freeHw3DAllBuffers, 64u) - 7;
+        m_nNumChannels = (uint16)std::min(freeHw3DAllBuffers, 64u) - 7;
         field_4 = 1;
         AESmoothFadeThread.m_nNumAvailableBuffers = 7;
     }

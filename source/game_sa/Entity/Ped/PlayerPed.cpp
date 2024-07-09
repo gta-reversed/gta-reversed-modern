@@ -765,18 +765,16 @@ void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
 bool LOSBlockedBetweenPeds(CEntity* entity1, CEntity* entity2) {
     CVector origin{};
     if (entity1->IsPed()) {
-        entity1->AsPed()->GetBonePosition(origin, eBoneTag::BONE_NECK, false);
+        origin = entity1->AsPed()->GetBonePosition(eBoneTag::BONE_NECK, false);
         if (entity1->AsPed()->bIsDucking)
             origin.z += 0.35f;
     } else {
         origin = entity1->GetPosition();
     }
 
-    CVector target{};
-    if (entity2->IsPed())
-        entity1->AsPed()->GetBonePosition(target, eBoneTag::BONE_NECK, false);
-    else
-        target = entity1->GetPosition();
+    const auto target = entity2->IsPed()
+        ? entity1->AsPed()->GetBonePosition(eBoneTag::BONE_NECK, false)
+        : entity1->GetPosition();
 
     CColPoint colPoint;
     CEntity* hitEntity;
