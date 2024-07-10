@@ -148,8 +148,8 @@ public:
     static int16 GetSpecificSpeechContext(eGlobalSpeechContext gCtx, eAudioPedType pedAudioType);
     static void Service();
     static void Reset();
-    static int8 ReservePedConversationSpeechSlots();
-    static int8 ReservePlayerConversationSpeechSlot();
+    static bool ReservePedConversationSpeechSlots();
+    static bool ReservePlayerConversationSpeechSlot();
     static bool RequestPlayerConversation(CPed* ped);
     static void ReleasePlayerConversation();
     static void SetUpConversation();

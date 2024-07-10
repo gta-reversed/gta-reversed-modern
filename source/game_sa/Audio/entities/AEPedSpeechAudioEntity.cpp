@@ -27,7 +27,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(ReservePedConversationSpeechSlots, 0x4E37F0);
     RH_ScopedInstall(ReservePlayerConversationSpeechSlot, 0x4E3870);
     RH_ScopedInstall(RequestPlayerConversation, 0x4E38C0);
-    RH_ScopedInstall(ReleasePlayerConversation, 0x4E3960, { .reversed = false });
+    RH_ScopedInstall(ReleasePlayerConversation, 0x4E3960);
     RH_ScopedInstall(SetUpConversation, 0x4E3A00, { .reversed = false });
     RH_ScopedInstall(GetAudioPedType, 0x4E3C60);
     RH_ScopedInstall(GetVoice, 0x4E3CD0, { .reversed = false });
@@ -181,7 +181,7 @@ void CAEPedSpeechAudioEntity::ReleasePedConversation() {
         default:
             ss.AudioEntity->StopCurrentSpeech();
         }
-        ss        = CAEPedSpeechSlot{}; // Reset slot
+        ss       = {}; // Reset slot
         slotID   = -1;
         convoPed = nullptr;
     };
@@ -391,6 +391,8 @@ bool CAEPedSpeechAudioEntity::ReservePedConversationSpeechSlots() {
     };
     SetupSlot(s_pConversationPedSlot1 = slotA);
     SetupSlot(s_pConversationPedSlot2 = slotB);
+
+    return true;
 }
 
 // 0x4E3870
@@ -403,6 +405,8 @@ bool CAEPedSpeechAudioEntity::ReservePlayerConversationSpeechSlot() {
     auto* const ss                      = &s_PedSpeechSlots[slot];
     ss->Status                          = CAEPedSpeechSlot::eStatus::RESERVED;
     ss->IsReservedForPlayerConversation = true;
+
+    return true;
 }
 
 // 0x4E38C0
@@ -436,7 +440,23 @@ bool CAEPedSpeechAudioEntity::RequestPlayerConversation(CPed* ped) {
 
 // 0x4E3960
 void CAEPedSpeechAudioEntity::ReleasePlayerConversation() {
-    plugin::Call<0x4E3960>();
+    if (!s_bPlayerConversationHappening) {
+        return;
+    }
+    s_bPlayerConversationHappening = false;
+    if (s_pConversationPedSlot1 < 0) {
+        return;
+    }
+    auto* const ss = &s_PedSpeechSlots[s_pConversationPedSlot1];
+    switch (ss->Status) {
+    case CAEPedSpeechSlot::eStatus::FREE:
+    case CAEPedSpeechSlot::eStatus::RESERVED: {
+        *ss = {};
+    }
+    }
+    s_PedSpeechSlots[s_pConversationPedSlot1] = {};
+    s_pConversationPedSlot1                   = -1;
+    s_pPlayerConversationPed                  = nullptr;
 }
 
 // 0x4E3A00
