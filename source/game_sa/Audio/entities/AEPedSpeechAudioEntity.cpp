@@ -22,7 +22,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(GetCurrentCJMood, 0x4E53B0, { .reversed = false });
     RH_ScopedInstall(StaticInitialise, 0x5B98C0);
     RH_ScopedInstall(GetSpecificSpeechContext, 0x4E4470);
-    RH_ScopedInstall(Service, 0x4E3710, { .reversed = false });
+    RH_ScopedInstall(Service, 0x4E3710);
     RH_ScopedInstall(Reset, 0x4E37B0);
     RH_ScopedInstall(ReservePedConversationSpeechSlots, 0x4E37F0, { .reversed = false });
     RH_ScopedInstall(ReservePlayerConversationSpeechSlot, 0x4E3870, { .reversed = false });
@@ -173,15 +173,15 @@ void CAEPedSpeechAudioEntity::ReleasePedConversation() {
     }
 
     const auto ReleaseConversationFromSlot = [](CPed*& convoPed, auto& slotID) {
-        auto& s = s_PedSpeechSlots[slotID];
-        switch (s.Status) {
+        auto& ss = s_PedSpeechSlots[slotID];
+        switch (ss.Status) {
         case CAEPedSpeechSlot::eStatus::FREE:
         case CAEPedSpeechSlot::eStatus::RESERVED:
             break;
         default:
-            s.AudioEntity->StopCurrentSpeech();
+            ss.AudioEntity->StopCurrentSpeech();
         }
-        s        = CAEPedSpeechSlot{}; // Reset slot
+        ss        = CAEPedSpeechSlot{}; // Reset slot
         slotID   = -1;
         convoPed = nullptr;
     };
@@ -231,7 +231,32 @@ int16 CAEPedSpeechAudioEntity::GetSpecificSpeechContext(eGlobalSpeechContext gCt
 
 // 0x4E3710
 void CAEPedSpeechAudioEntity::Service() {
-    plugin::Call<0x4E3710>();
+    s_bForceAudible = false;
+    for (auto&& [i, ss] : notsa::enumerate(s_PedSpeechSlots)) {
+        // Waiting for sound to load, and has loaded?
+        if (ss.Status == CAEPedSpeechSlot::eStatus::LOADING && AEAudioHardware.IsSoundLoaded(ss.SoundBankID, ss.SoundID, SND_BANK_SLOT_SPEECH1 + i)) {
+            ss.Status = CAEPedSpeechSlot::eStatus::WAITING;
+        }
+
+        // Sound is now loaded, waiting to be played
+        if (ss.Status == CAEPedSpeechSlot::eStatus::WAITING) {
+            if (ss.StartPlaybackTime >= CTimer::GetTimeInMS()) {
+                if (const auto ae = ss.AudioEntity) {
+                    ae->PlayLoadedSound();
+                } else {
+                    ss.Status = CAEPedSpeechSlot::eStatus::FREE;
+                }
+            }
+        }
+
+        // `PlayLoadedSound` above might've modified the status, must check it again (can't use switch for whole code)
+        switch (ss.Status) {
+        case CAEPedSpeechSlot::eStatus::REQUESTED:
+        case CAEPedSpeechSlot::eStatus::PLAYING: {
+            s_bForceAudible |= ss.ForceAudible;
+        }
+        }
+    }
 }
 
 // 0x4E37B0
