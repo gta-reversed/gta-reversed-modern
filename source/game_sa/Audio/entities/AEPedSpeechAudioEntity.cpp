@@ -21,7 +21,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(ReleasePedConversation, 0x4E52A0);
     RH_ScopedInstall(GetCurrentCJMood, 0x4E53B0, { .reversed = false });
     RH_ScopedInstall(StaticInitialise, 0x5B98C0);
-    RH_ScopedInstall(GetSpecificSpeechContext, 0x4E4470, { .reversed = false });
+    RH_ScopedInstall(GetSpecificSpeechContext, 0x4E4470);
     RH_ScopedInstall(Service, 0x4E3710, { .reversed = false });
     RH_ScopedInstall(Reset, 0x4E37B0);
     RH_ScopedInstall(ReservePedConversationSpeechSlots, 0x4E37F0, { .reversed = false });
@@ -213,8 +213,20 @@ void CAEPedSpeechAudioEntity::StaticInitialise() {
 }
 
 // 0x4E4470
-int16 CAEPedSpeechAudioEntity::GetSpecificSpeechContext(int16 a1, int16 voiceType) {
-    return plugin::CallAndReturn<int16, 0x4E4470, int16, int16>(a1, voiceType);
+int16 CAEPedSpeechAudioEntity::GetSpecificSpeechContext(eGlobalSpeechContext gCtx, eAudioPedType pedAudioType) {
+    assert(gCtx > GCTX_UNK);             // notsa
+    assert(gCtx < GCTX_NUM);             // OG: return -1; (silent error)
+    assert(pedAudioType < PED_TYPE_NUM); // OG: return -1; (silent error)
+
+    for (int32 i = 0; ; i++) { // NOTE/BUG: No `i` check at all? (Eg.: i < gSpeechContextLookup.size()?)
+        const auto& contexts = gSpeechContextLookup[i];
+        if (contexts[0] == GCTX_UNK) {
+            break;
+        } else if (contexts[0] == gCtx) {
+            return contexts[pedAudioType + 1];
+        }
+    }
+    return -1;
 }
 
 // 0x4E3710

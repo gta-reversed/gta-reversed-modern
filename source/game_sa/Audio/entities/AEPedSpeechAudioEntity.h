@@ -120,7 +120,7 @@ public:
     static inline auto& s_PhraseMemory                   = StaticRef<std::array<tPhraseMemory, 150>>(0xB61418);
     static inline auto& s_PedSpeechSlots                 = StaticRef<std::array<CAEPedSpeechSlot, PED_TYPE_NUM>>(0xB61C38);
     static inline auto& gGlobalSpeechContextNextPlayTime = StaticRef<std::array<uint32, GCTX_NUM>>(0xB61670); // PAIN (GCTX_PAIN_START -> GCTX_PAIN_END) is ignored, and `m_NextTimeCanSayPain` is used instead
-    static inline auto& gSpeechContextLookup             = StaticRef<notsa::mdarray<int16, 8, GCTX_NUM>>(0x8C6A68);
+    static inline auto& gSpeechContextLookup             = StaticRef<notsa::mdarray<int16, GCTX_NUM, 8>>(0x8C6A68);
 
 public:
     static void InjectHooks();
@@ -138,7 +138,7 @@ public:
     static void ReleasePedConversation();
     static int16 GetCurrentCJMood();
     static void StaticInitialise();
-    static int16 GetSpecificSpeechContext(int16, int16 voiceType);
+    static int16 GetSpecificSpeechContext(eGlobalSpeechContext gCtx, eAudioPedType pedAudioType);
     static void Service();
     static void Reset();
     static int8 ReservePedConversationSpeechSlots();
