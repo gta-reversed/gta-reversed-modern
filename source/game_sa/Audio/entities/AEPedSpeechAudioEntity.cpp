@@ -25,7 +25,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(Service, 0x4E3710);
     RH_ScopedInstall(Reset, 0x4E37B0);
     RH_ScopedInstall(ReservePedConversationSpeechSlots, 0x4E37F0);
-    RH_ScopedInstall(ReservePlayerConversationSpeechSlot, 0x4E3870, { .reversed = false });
+    RH_ScopedInstall(ReservePlayerConversationSpeechSlot, 0x4E3870);
     RH_ScopedInstall(RequestPlayerConversation, 0x4E38C0);
     RH_ScopedInstall(ReleasePlayerConversation, 0x4E3960, { .reversed = false });
     RH_ScopedInstall(SetUpConversation, 0x4E3A00, { .reversed = false });
@@ -374,20 +374,11 @@ void CAEPedSpeechAudioEntity::Reset() {
 }
 
 // 0x4E37F0
-int8 CAEPedSpeechAudioEntity::ReservePedConversationSpeechSlots() {
-    auto FindFreeSlot = [
-        i = 0
-    ]() mutable {
-        for (; i < s_PedSpeechSlots.size(); i++) {
-            if (s_PedSpeechSlots[i].Status == CAEPedSpeechSlot::eStatus::FREE) {
-                return i;
-            }
-        }
-        return -1;
-    };
-
-    const auto slotA = FindFreeSlot(),
-               slotB = FindFreeSlot();
+bool CAEPedSpeechAudioEntity::ReservePedConversationSpeechSlots() {
+    // Originally they had a loop here that continued (small optimzation)
+    // But I don't care ;) Logic stays the same tho, as it's single threaded.
+    const auto slotA = GetFreeSpeechSlot(),
+               slotB = GetFreeSpeechSlot();
 
     if (slotA == -1 || slotB == -1) {
         return false;
@@ -403,14 +394,22 @@ int8 CAEPedSpeechAudioEntity::ReservePedConversationSpeechSlots() {
 }
 
 // 0x4E3870
-int8 CAEPedSpeechAudioEntity::ReservePlayerConversationSpeechSlot() {
-    return plugin::CallAndReturn<int8, 0x4E3870>();
+bool CAEPedSpeechAudioEntity::ReservePlayerConversationSpeechSlot() {
+    const auto slot = GetFreeSpeechSlot();
+    if (slot == -1) {
+        return false;
+    }
+    s_pConversationPedSlot1             = slot;
+    auto* const ss                      = &s_PedSpeechSlots[slot];
+    ss->Status                          = CAEPedSpeechSlot::eStatus::RESERVED;
+    ss->IsReservedForPlayerConversation = true;
 }
 
 // 0x4E38C0
 bool CAEPedSpeechAudioEntity::RequestPlayerConversation(CPed* ped) {
-    if (s_bAllSpeechDisabled)
+    if (s_bAllSpeechDisabled) {
         return false;
+    }
 
     if (ped->m_pedSpeech.m_IsSpeechForScriptsDisabled || ped->m_pedSpeech.m_IsSpeechDisabled) {
         return false;
@@ -424,13 +423,14 @@ bool CAEPedSpeechAudioEntity::RequestPlayerConversation(CPed* ped) {
     if (   s_bPedConversationHappening
         || s_bPlayerConversationHappening
         || ped->GetPedTalking()
-        || !CAEPedSpeechAudioEntity::ReservePlayerConversationSpeechSlot()
+        || !ReservePlayerConversationSpeechSlot()
     ) {
         return false;
     }
 
-    s_pPlayerConversationPed = ped;
+    s_pPlayerConversationPed       = ped;
     s_bPlayerConversationHappening = true;
+
     return true;
 }
 
@@ -772,6 +772,15 @@ bool CAEPedSpeechAudioEntity::IsPedFemaleForAudio() {
         return m_IsFemale;
     else
         return false;
+}
+
+int32 CAEPedSpeechAudioEntity::GetFreeSpeechSlot() {
+    for (auto&& [i, ss] : notsa::enumerate(s_PedSpeechSlots)) {
+        if (ss.Status == CAEPedSpeechSlot::eStatus::FREE) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 // 0x4E4F10

@@ -104,7 +104,7 @@ public:
     std::array<uint32, GCTX_PAIN_END - GCTX_PAIN_START - 1> m_NextTimeCanSayPain{};
 
 public:
-    static inline auto& s_nCJMoodOverrideTime = StaticRef<uint32>(0xB613E0);   //!< Until when the override is active in [TimeMS]
+    static inline auto& s_nCJMoodOverrideTime = StaticRef<uint32>(0xB613E0);  //!< Until when the override is active in [TimeMS]
     static inline auto& s_nCJWellDressed      = StaticRef<int16>(0xB613D0);   //!< Override as CJ being well dressed (-1 => ignore, 0/1 => false/true)
     static inline auto& s_nCJFat              = StaticRef<int16>(0xB613D4);   //!< Override as CJ being fat (-1 => ignore, 0/1 => false/true)
     static inline auto& s_nCJGangBanging      = StaticRef<int16>(0xB613D8);   //!< Override as CJ being with his group (gang) (-1 => ignore, 0/1 => false/true)
@@ -196,6 +196,9 @@ public:
     virtual bool WillPedChatAboutTopic(int16 topic);
     virtual int16 GetPedType();
     virtual bool IsPedFemaleForAudio();
+
+private:
+    static int32 GetFreeSpeechSlot();
 
 private:
     CAEPedSpeechAudioEntity* Constructor();
