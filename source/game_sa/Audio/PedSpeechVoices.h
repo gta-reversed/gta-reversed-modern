@@ -1,7 +1,7 @@
 #pragma once
 
 /*!
- * @brief Generic voices
+ * @brief Generic voices (For `PED_TYPE_GEN`)
  */
 enum eGenSpeechVoices : int16 {
     VOICE_GEN_BBDYG1  = 0,   // 0x0
@@ -217,7 +217,7 @@ enum eGenSpeechVoices : int16 {
 };
 
 /*!
- * @brief Emergency voices
+ * @brief Emergency voices (For `PED_TYPE_EMG`)
  */
 enum eEmgSpeechVoices : int16 {
     VOICE_EMG_ARMY1   = 0,  // 0x0
@@ -270,7 +270,7 @@ enum eEmgSpeechVoices : int16 {
 };
 
 /*!
- * @brief Player voices
+ * @brief Player voices (For `PED_TYPE_PLAYER`)
  */
 enum ePlySpeechVoices : int16 {
     VOICE_PLY_AG  = 0,  // 0x0
@@ -297,7 +297,7 @@ enum ePlySpeechVoices : int16 {
 };
 
 /*!
- * @brief Gang voices
+ * @brief Gang voices (For `PED_TYPE_GANG`)
  */
 enum eGngSpeechVoices : int16 {
     VOICE_GNG_BALLAS1  = 0,  // 0x0
@@ -356,7 +356,7 @@ enum eGngSpeechVoices : int16 {
 };
 
 /*!
- * @brief Girlfriend voices
+ * @brief Girlfriend voices (For `PED_TYPE_GFD`)
  */
 enum eGfdSpeechVoices : int16 {
     VOICE_GFD_BARBARA  = 0,  // 0x0
@@ -384,10 +384,11 @@ enum eGfdSpeechVoices : int16 {
  * @brief Pain voices
  */
 enum ePainSpeechVoices : int16 {
-    VOICE_PAIN_CARL   = 0, // 0x0
-    VOICE_PAIN_FEMALE = 1, // 0x1
-    VOICE_PAIN_MALE   = 2, // 0x2
-    VOICE_PAIN_END    = 3, // 0x3
+    VOICE_PAIN_NON_BINARY = -1,
+    VOICE_PAIN_CARL       = 0, // 0x0
+    VOICE_PAIN_FEMALE     = 1, // 0x1
+    VOICE_PAIN_MALE       = 2, // 0x2
+    VOICE_PAIN_END        = 3, // 0x3
 };
  
 /*! 

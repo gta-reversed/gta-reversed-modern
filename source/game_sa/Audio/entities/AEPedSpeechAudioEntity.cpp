@@ -19,7 +19,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(GetSpeechContextVolumeOffset, 0x4E4AE0);
     RH_ScopedInstall(RequestPedConversation, 0x4E50E0);
     RH_ScopedInstall(ReleasePedConversation, 0x4E52A0);
-    RH_ScopedInstall(GetCurrentCJMood, 0x4E53B0, { .reversed = false });
+    RH_ScopedInstall(GetCurrentCJMood, 0x4E53B0);
     RH_ScopedInstall(StaticInitialise, 0x5B98C0);
     RH_ScopedInstall(GetSpecificSpeechContext, 0x4E4470);
     RH_ScopedInstall(Service, 0x4E3710);
@@ -193,23 +193,129 @@ void CAEPedSpeechAudioEntity::ReleasePedConversation() {
 
 // 0x4E53B0
 int16 CAEPedSpeechAudioEntity::GetCurrentCJMood() {
-    return plugin::CallAndReturn<int16, 0x4E53B0>();
+    const auto* const plyr = FindPlayerPed();
+    if (!plyr) {
+        return MOOD_CR;
+    }
+
+    const auto isMoodOverrideActive = s_nCJMoodOverrideTime >= CTimer::GetTimeInMS();
+    
+    const auto CheckCJIsWellDressed = [&] { // 0x4E53DF
+        if (isMoodOverrideActive && s_nCJWellDressed != -1) {
+            return s_nCJWellDressed != 0;
+        }
+        return CStats::GetStatValue(STAT_CLOTHES_RESPECT) >= 650.f
+            && CStats::GetStatValue(STAT_FASHION_BUDGET) >= 10'000.f;
+    };
+
+    const auto CheckCJIsGangBanging = [&] { // 0x4E5440
+        if (isMoodOverrideActive && s_nCJGangBanging != -1) {
+            return s_nCJGangBanging != 0;
+        }
+        if (IsCJDressedInForGangSpeech()) {
+            return true;
+        }
+        auto& plyrGrp = plyr->GetPlayerGroup();
+        if (plyrGrp.GetMembership().CountMembersExcludingLeader() <= 1) {
+            return true;
+        }
+        const auto& mem = plyrGrp.GetMembership().GetMembers().front(); // The one-and-only member (This isnt the same as `GetMember(0)`!!!)
+        if (mem.m_nPedType == PED_TYPE_GANG2) {
+            return true;
+        }
+        auto& memSpeech = mem.m_pedSpeech;
+        return memSpeech.m_PedAudioType == PED_TYPE_GANG
+            && notsa::contains({ VOICE_GNG_RYDER, VOICE_GNG_SWEET, VOICE_GNG_SMOKE }, (eGngSpeechVoices)memSpeech.m_VoiceID);
+    };
+
+    const auto CheckCJIsFat = [&] { // 0x4E54E0
+        if (isMoodOverrideActive && s_nCJFat != -1) {
+            return s_nCJFat != 0;
+        }
+        return CStats::GetStatValue(STAT_FAT) >= 600.f
+            && CStats::GetStatValue(STAT_FAT) - 200.f > CStats::GetStatValue(STAT_MUSCLE);
+    };
+
+    const auto DeriveMood = [&](eCJMood basicMood) { // 0x4E55CC
+        if (isMoodOverrideActive && s_nCJBasicMood != MOOD_UNK) { // 0x4E5592
+            basicMood = s_nCJBasicMood;
+        }
+        switch (basicMood) {
+        case MOOD_AR:
+            return CheckCJIsFat()
+                ? MOOD_AR
+                : MOOD_AG;
+        case MOOD_CR: {
+            if (CheckCJIsGangBanging()) {
+                return MOOD_CG;
+            }
+            if (CheckCJIsFat()) {
+                return MOOD_CF;
+            }
+            return CheckCJIsWellDressed()
+                ? MOOD_CD
+                : MOOD_CR;
+        }
+        case MOOD_PR:
+            return CheckCJIsGangBanging()
+                ? MOOD_PG
+                : MOOD_PR;
+        case MOOD_WR:
+            return CheckCJIsGangBanging()
+                ? MOOD_WG
+                : MOOD_WR;
+        default:
+            return MOOD_CR;
+        }
+    };
+
+    if (FindPlayerWanted()->GetWantedLevel() > 3) { // 0x4E5537
+        return DeriveMood(MOOD_PR);
+    }
+
+    if (FindPlayerWanted()->GetWantedLevel() > 1) { // 0x4E554B
+        return DeriveMood(MOOD_AR);
+    }
+
+    if (CTheScripts::LastMissionPassedTime == -1) { // 0x4E555C
+        if (CTimer::GetTimeInMS() >= CTheScripts::LastMissionPassedTime) {
+            return CTimer::GetTimeInMS() < CTheScripts::LastMissionPassedTime + 180'000
+                ? DeriveMood(MOOD_WR)
+                : DeriveMood(MOOD_CR);
+        } else {
+            CTheScripts::LastMissionPassedTime = CTimer::GetTimeInMS();
+        }
+    }
+
+    return DeriveMood(MOOD_CR); // 0x4E5579
 }
 
 // 0x5B98C0
 void CAEPedSpeechAudioEntity::StaticInitialise() {
     rng::fill(s_PedSpeechSlots, CAEPedSpeechSlot{});
     rng::fill(s_PhraseMemory, tPhraseMemory{});
-    s_NextSpeechSlot = 0;
+
     Reset();
-    s_pConversationPed1 = s_pConversationPed2 = nullptr;
-    s_pConversationPedSlot1 = s_pConversationPedSlot2 = 0;
-    s_pPlayerConversationPed = nullptr;
-    s_bPedConversationHappening = s_bPlayerConversationHappening = false;
+
+    s_pConversationPed1            = nullptr;
+    s_pConversationPed2            = nullptr;
+    s_pConversationPedSlot1        = 0;
+    s_pConversationPedSlot2        = 0;
+    s_pPlayerConversationPed       = nullptr;
+    s_bPedConversationHappening    = false;
+    s_bPlayerConversationHappening = false;
     rng::fill(s_Conversation, -1);
-    s_nCJBasicMood = s_nCJGangBanging = s_nCJFat = s_nCJWellDressed = -1;
-    s_NextSpeechSlot = s_nCJMoodOverrideTime = 0;
-    s_bAllSpeechDisabled = s_bAPlayerSpeaking = s_bForceAudible = 0;
+
+    s_nCJBasicMood        = MOOD_UNK;
+    s_nCJGangBanging      = -1;
+    s_nCJFat              = -1;
+    s_nCJWellDressed      = -1;
+    s_nCJMoodOverrideTime = 0;
+
+    s_NextSpeechSlot     = 0;
+    s_bAllSpeechDisabled = false;
+    s_bAPlayerSpeaking   = false;
+    s_bForceAudible      = false;
 }
 
 // 0x4E4470

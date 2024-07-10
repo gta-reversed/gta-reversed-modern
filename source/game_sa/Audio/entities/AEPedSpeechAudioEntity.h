@@ -10,15 +10,16 @@
 #include <Audio/AESound.h>
 #include <Audio/eGlobalSpeechContext.h>
 #include <Audio/eSoundBank.h>
+#include <Audio/PedSpeechVoices.h>
 
 enum eAudioPedType : int16 {
-    PED_TYPE_UNK    = -1,
+    PED_TYPE_UNK    = -1, // notsa
     PED_TYPE_GEN    = 0,
     PED_TYPE_EMG    = 1,
     PED_TYPE_PLAYER = 2,
     PED_TYPE_GANG   = 3,
     PED_TYPE_GFD    = 4,
-    PED_TYPE_SPC    = 5,
+    PED_TYPE_SPC    = 5, // SPC => Special (?)
 
     //
     // Add above
@@ -27,14 +28,19 @@ enum eAudioPedType : int16 {
 };
 
 enum eCJMood : int32 {
+    MOOD_UNK = -1, // notsa
+
     MOOD_AG = 0,
     MOOD_AR = 1,
+
     MOOD_CD = 2,
-    MOOD_CF = 3,
-    MOOD_CG = 4,
+    MOOD_CF = 3, //!< CJ Is fat (?)
+    MOOD_CG = 4, //!< CJ Gang banging (?)
     MOOD_CR = 5,
+
     MOOD_PG = 6,
     MOOD_PR = 7,
+
     MOOD_WG = 8,
     MOOD_WR = 9,
 
@@ -82,7 +88,7 @@ public:
     std::array<CAESound*, 5>                                m_Sounds{};
     bool                                                    m_IsInitialized{};
     eAudioPedType                                           m_PedAudioType{};
-    int16                                                   m_VoiceID{};
+    ePedSpeechVoice                                         m_VoiceID{};  //!< Exact enum to use depends on `m_PedAudioType` (See `PedSpeechVoices.h`)
     int16                                                   m_IsFemale{};
     bool                                                    m_IsPlayingSpeech{};
     bool                                                    m_IsSpeechDisabled{};
@@ -98,11 +104,12 @@ public:
     std::array<uint32, GCTX_PAIN_END - GCTX_PAIN_START - 1> m_NextTimeCanSayPain{};
 
 public:
-    static inline auto& s_nCJWellDressed                 = StaticRef<int16>(0xB613D0);
-    static inline auto& s_nCJFat                         = StaticRef<int16>(0xB613D4);
-    static inline auto& s_nCJGangBanging                 = StaticRef<int16>(0xB613D8);
-    static inline auto& s_nCJBasicMood                   = StaticRef<int32>(0xB613DC);
-    static inline auto& s_nCJMoodOverrideTime            = StaticRef<int32>(0xB613E0);
+    static inline auto& s_nCJMoodOverrideTime = StaticRef<uint32>(0xB613E0);   //!< Until when the override is active in [TimeMS]
+    static inline auto& s_nCJWellDressed      = StaticRef<int16>(0xB613D0);   //!< Override as CJ being well dressed (-1 => ignore, 0/1 => false/true)
+    static inline auto& s_nCJFat              = StaticRef<int16>(0xB613D4);   //!< Override as CJ being fat (-1 => ignore, 0/1 => false/true)
+    static inline auto& s_nCJGangBanging      = StaticRef<int16>(0xB613D8);   //!< Override as CJ being with his group (gang) (-1 => ignore, 0/1 => false/true)
+    static inline auto& s_nCJBasicMood        = StaticRef<eCJMood>(0xB613DC); //!< Override the basic mood that is used to calculate the current mood (-1 => ignore, 0/1 => false/true)
+
     static inline auto& s_bForceAudible                  = StaticRef<bool>(0xB613E4);
     static inline auto& s_bAPlayerSpeaking               = StaticRef<bool>(0xB613E5);
     static inline auto& s_bAllSpeechDisabled             = StaticRef<bool>(0xB613E6);
