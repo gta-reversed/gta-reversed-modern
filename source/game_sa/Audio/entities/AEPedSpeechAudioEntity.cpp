@@ -18,7 +18,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(CanWePlayScriptedSpeech, 0x4E4950);
     RH_ScopedInstall(GetSpeechContextVolumeOffset, 0x4E4AE0);
     RH_ScopedInstall(RequestPedConversation, 0x4E50E0);
-    RH_ScopedInstall(ReleasePedConversation, 0x4E52A0, { .reversed = false });
+    RH_ScopedInstall(ReleasePedConversation, 0x4E52A0);
     RH_ScopedInstall(GetCurrentCJMood, 0x4E53B0, { .reversed = false });
     RH_ScopedInstall(StaticInitialise, 0x5B98C0);
     RH_ScopedInstall(GetSpecificSpeechContext, 0x4E4470, { .reversed = false });
@@ -165,7 +165,30 @@ bool CAEPedSpeechAudioEntity::RequestPedConversation(CPed* pedA, CPed* pedB) {
 
 // 0x4E52A0
 void CAEPedSpeechAudioEntity::ReleasePedConversation() {
-    plugin::Call<0x4E52A0>();
+    if (!s_bPedConversationHappening) {
+        return;
+    }
+    if (s_pConversationPedSlot1 == -1 || s_pConversationPedSlot2 == -1) {
+        return;
+    }
+
+    const auto ReleaseConversationFromSlot = [](CPed*& convoPed, auto& slotID) {
+        auto& s = s_PedSpeechSlots[slotID];
+        switch (s.Status) {
+        case CAEPedSpeechSlot::eStatus::FREE:
+        case CAEPedSpeechSlot::eStatus::RESERVED:
+            break;
+        default:
+            s.AudioEntity->StopCurrentSpeech();
+        }
+        s        = CAEPedSpeechSlot{}; // Reset slot
+        slotID   = -1;
+        convoPed = nullptr;
+    };
+    ReleaseConversationFromSlot(s_pConversationPed1, s_pConversationPedSlot1);
+    ReleaseConversationFromSlot(s_pConversationPed2, s_pConversationPedSlot2);
+
+    s_bPedConversationHappening = false;
 }
 
 // 0x4E53B0
