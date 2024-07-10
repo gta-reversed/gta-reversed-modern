@@ -134,7 +134,7 @@ public:
     static int32 __stdcall GetVoiceForMood(int16 mood);
     static int16 CanWePlayScriptedSpeech();
     static float GetSpeechContextVolumeOffset(eGlobalSpeechContextS16 gctx);
-    static int8 RequestPedConversation(CPed* ped1, CPed* ped2);
+    static bool RequestPedConversation(CPed* pedA, CPed* pedB);
     static void ReleasePedConversation();
     static int16 GetCurrentCJMood();
     static void StaticInitialise();
@@ -178,6 +178,8 @@ public:
     int8 GetSexFromModel(int32);
     bool GetPedTalking();
     int8 GetVoiceAndTypeForSpecialPed(uint32 modelNameHash);
+
+    bool IsAllSpeechDisabled() const noexcept { return m_IsSpeechDisabled || m_IsSpeechForScriptsDisabled; }
 
     void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
     virtual void AddScriptSayEvent(int32, int32, uint8, uint8, uint8);

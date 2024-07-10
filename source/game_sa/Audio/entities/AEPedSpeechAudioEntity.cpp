@@ -17,7 +17,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(GetVoiceForMood, 0x4E4760);
     RH_ScopedInstall(CanWePlayScriptedSpeech, 0x4E4950);
     RH_ScopedInstall(GetSpeechContextVolumeOffset, 0x4E4AE0);
-    RH_ScopedInstall(RequestPedConversation, 0x4E50E0, { .reversed = false });
+    RH_ScopedInstall(RequestPedConversation, 0x4E50E0);
     RH_ScopedInstall(ReleasePedConversation, 0x4E52A0, { .reversed = false });
     RH_ScopedInstall(GetCurrentCJMood, 0x4E53B0, { .reversed = false });
     RH_ScopedInstall(StaticInitialise, 0x5B98C0);
@@ -137,8 +137,30 @@ float CAEPedSpeechAudioEntity::GetSpeechContextVolumeOffset(eGlobalSpeechContext
 }
 
 // 0x4E50E0
-int8 CAEPedSpeechAudioEntity::RequestPedConversation(CPed* ped1, CPed* ped2) {
-    return plugin::CallAndReturn<int8, 0x4E50E0, CPed*, CPed*>(ped1, ped2);
+bool CAEPedSpeechAudioEntity::RequestPedConversation(CPed* pedA, CPed* pedB) {
+    if (s_bAllSpeechDisabled || s_bPedConversationHappening || s_bPlayerConversationHappening) {
+        return false;
+    }
+    if (pedA->m_pedSpeech.GetAllocatedVoice() == pedB->m_pedSpeech.GetAllocatedVoice()) {
+        return false;
+    }
+    const auto CheckCanPedTalk = [](CPed* p) {
+        return !p->m_pedSpeech.IsAllSpeechDisabled()
+            && p->CanPedHoldConversation()
+            && !p->GetPedTalking()
+            && CVector::DistSqr(TheCamera.GetPosition(), p->GetPosition()) <= sq(40.f);
+    };
+    if (!CheckCanPedTalk(pedA) || !CheckCanPedTalk(pedB)) {
+        return false;
+    }
+    if (!ReservePedConversationSpeechSlots()) {
+        return false;
+    }
+    s_bPedConversationHappening = true;
+    s_pConversationPed1         = pedA;
+    s_pConversationPed2         = pedB;
+    SetUpConversation();
+    return true;
 }
 
 // 0x4E52A0
