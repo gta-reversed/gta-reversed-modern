@@ -24,7 +24,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(GetSpecificSpeechContext, 0x4E4470);
     RH_ScopedInstall(Service, 0x4E3710);
     RH_ScopedInstall(Reset, 0x4E37B0);
-    RH_ScopedInstall(ReservePedConversationSpeechSlots, 0x4E37F0, { .reversed = false });
+    RH_ScopedInstall(ReservePedConversationSpeechSlots, 0x4E37F0);
     RH_ScopedInstall(ReservePlayerConversationSpeechSlot, 0x4E3870, { .reversed = false });
     RH_ScopedInstall(RequestPlayerConversation, 0x4E38C0);
     RH_ScopedInstall(ReleasePlayerConversation, 0x4E3960, { .reversed = false });
@@ -375,7 +375,31 @@ void CAEPedSpeechAudioEntity::Reset() {
 
 // 0x4E37F0
 int8 CAEPedSpeechAudioEntity::ReservePedConversationSpeechSlots() {
-    return plugin::CallAndReturn<int8, 0x4E37F0>();
+    auto FindFreeSlot = [
+        i = 0
+    ]() mutable {
+        for (; i < s_PedSpeechSlots.size(); i++) {
+            if (s_PedSpeechSlots[i].Status == CAEPedSpeechSlot::eStatus::FREE) {
+                return i;
+            }
+        }
+        return -1;
+    };
+
+    const auto slotA = FindFreeSlot(),
+               slotB = FindFreeSlot();
+
+    if (slotA == -1 || slotB == -1) {
+        return false;
+    }
+
+    const auto SetupSlot = [](int32 slot) {
+        auto* const ss                   = &s_PedSpeechSlots[slot];
+        ss->Status                       = CAEPedSpeechSlot::eStatus::RESERVED;
+        ss->IsReservedForPedConversation = true;
+    };
+    SetupSlot(s_pConversationPedSlot1 = slotA);
+    SetupSlot(s_pConversationPedSlot2 = slotB);
 }
 
 // 0x4E3870
