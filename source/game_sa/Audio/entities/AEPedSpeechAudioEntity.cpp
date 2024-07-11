@@ -33,7 +33,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(GetVoice, 0x4E3CD0);
     RH_ScopedInstall(DisableAllPedSpeech, 0x4E3EB0);
     RH_ScopedInstall(IsGlobalContextPain, 0x4E44F0);
-    RH_ScopedInstall(SetCJMood, 0x4E3ED0, { .reversed = false });
+    RH_ScopedInstall(SetCJMood, 0x4E3ED0);
     RH_ScopedInstall(EnableAllPedSpeech, 0x4E3EC0);
     RH_ScopedInstall(IsCJDressedInForGangSpeech, 0x4E4270);
     RH_ScopedInstall(GetSexForSpecialPed, 0x4E4260);
@@ -579,8 +579,20 @@ bool CAEPedSpeechAudioEntity::IsGlobalContextPain(int16 globalCtx) {
 }
 
 // 0x4E3ED0
-void CAEPedSpeechAudioEntity::SetCJMood(int16 a1, uint32 a2, int16 a3, int16 a4, int16 a5) {
-    plugin::Call<0x4E3ED0, int16, uint32, int16, int16, int16>(a1, a2, a3, a4, a5);
+void CAEPedSpeechAudioEntity::SetCJMood(eCJMood basicMood, uint32 overrideTimeMS, int16 isGangBanging, int16 isFat, int16 isWellDressed) {
+    s_nCJMoodOverrideTime = CTimer::GetTimeInMS() + overrideTimeMS;
+    s_nCJBasicMood  = [=]{
+        switch (basicMood) {
+        case MOOD_AR:
+        case MOOD_CR:
+        case MOOD_PR:
+        case MOOD_WR: return basicMood;
+        default:      return MOOD_UNK;
+        }
+    }();
+    s_nCJGangBanging = isGangBanging;
+    s_nCJFat         = isFat;
+    s_nCJWellDressed = isWellDressed;
 }
 
 // 0x4E3EC0

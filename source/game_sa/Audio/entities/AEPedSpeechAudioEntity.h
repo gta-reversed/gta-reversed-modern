@@ -13,7 +13,7 @@
 #include <Audio/PedSpeechVoices.h>
 #include <Audio/ePedAudioType.h>
 
-enum eCJMood : int32 {
+enum eCJMood : int16 {
     MOOD_UNK = -1, // notsa
 
     MOOD_AG = 0,
@@ -35,7 +35,6 @@ enum eCJMood : int32 {
     //
     MOOD_END // = 10
 };
-
 
 class CAEPedSpeechAudioEntity;
 
@@ -142,10 +141,20 @@ public:
     static void ReleasePlayerConversation();
     static void SetUpConversation();
     static eAudioPedType GetAudioPedType(const char* name);
-    static ePedSpeechVoiceS32 GetVoice(const char* name, eAudioPedTypeS16 type);
+    static ePedSpeechVoiceS16 GetVoice(const char* name, eAudioPedTypeS16 type);
     static void DisableAllPedSpeech();
     bool        IsGlobalContextPain(int16 globalCtx);
-    static void SetCJMood(int16, uint32, int16, int16, int16);
+
+    /*!
+     * @addr 0x4E3ED0
+     * @brief Set mood override for CJ
+     * @param basicMood Use `-1` to not override
+     * @param overrideTimeMS
+     * @param isGangBanging Use `-1` to not override
+     * @param isFat Use `-1` to not override
+     * @param isWellDressed Use `-1` to not override
+     */
+    static void SetCJMood(eCJMood basicMood, uint32 overrideTimeMS, int16 isGangBanging = -1, int16 isFat = -1, int16 isWellDressed = -1);
     static void EnableAllPedSpeech();
     static bool IsCJDressedInForGangSpeech();
     int8        GetSexForSpecialPed(uint32 a1);
