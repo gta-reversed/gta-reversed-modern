@@ -113,8 +113,10 @@ public:
     static inline auto& s_bForceAudible                  = StaticRef<bool>(0xB613E4);
     static inline auto& s_bAPlayerSpeaking               = StaticRef<bool>(0xB613E5);
     static inline auto& s_bAllSpeechDisabled             = StaticRef<bool>(0xB613E6);
+
     static inline auto& s_ConversationLength             = StaticRef<int16>(0xB613E8);
-    static inline auto& s_Conversation                   = StaticRef<std::array<int16, 8>>(0xB613EC);
+    static inline auto& s_Conversation                   = StaticRef<std::array<eGlobalSpeechContextS16, 8>>(0xB613EC);
+
     static inline auto& s_bPlayerConversationHappening   = StaticRef<bool>(0xB613FC);
     static inline auto& s_bPedConversationHappening      = StaticRef<bool>(0xB613FD);
     static inline auto& s_pPlayerConversationPed         = StaticRef<CPed*>(0xB61400);

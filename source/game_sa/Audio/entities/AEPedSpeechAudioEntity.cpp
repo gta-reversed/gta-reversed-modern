@@ -28,7 +28,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(ReservePlayerConversationSpeechSlot, 0x4E3870);
     RH_ScopedInstall(RequestPlayerConversation, 0x4E38C0);
     RH_ScopedInstall(ReleasePlayerConversation, 0x4E3960);
-    RH_ScopedInstall(SetUpConversation, 0x4E3A00, { .reversed = false });
+    RH_ScopedInstall(SetUpConversation, 0x4E3A00);
     RH_ScopedInstall(GetAudioPedType, 0x4E3C60);
     RH_ScopedInstall(GetVoice, 0x4E3CD0, { .reversed = false });
     RH_ScopedInstall(DisableAllPedSpeech, 0x4E3EB0);
@@ -304,7 +304,7 @@ void CAEPedSpeechAudioEntity::StaticInitialise() {
     s_pPlayerConversationPed       = nullptr;
     s_bPedConversationHappening    = false;
     s_bPlayerConversationHappening = false;
-    rng::fill(s_Conversation, -1);
+    rng::fill(s_Conversation, GCTX_UNK);
 
     s_nCJBasicMood        = MOOD_UNK;
     s_nCJGangBanging      = -1;
@@ -461,7 +461,60 @@ void CAEPedSpeechAudioEntity::ReleasePlayerConversation() {
 
 // 0x4E3A00
 void CAEPedSpeechAudioEntity::SetUpConversation() {
-    plugin::Call<0x4E3A00>();
+    rng::fill(s_Conversation, GCTX_NO_SPEECH);
+
+    auto PushConvo = [i = 0](eGlobalSpeechContext gctx) mutable {
+        s_Conversation[i++] = gctx;
+    };
+
+    const auto PushConvoForPeds = [&](eGlobalSpeechContext ifFemale, eGlobalSpeechContext ifMale) {
+        const auto PushConvoForPed = [&](const CPed* p) {
+            switch (p->m_nPedType) {
+            case PED_TYPE_PROSTITUTE:
+            case PED_TYPE_CIVFEMALE: PushConvo(ifFemale); break;
+            default:                 PushConvo(ifMale);   break;
+            }
+        };
+        PushConvoForPed(s_pConversationPed2); // yes, ped 2, then ped 1
+        PushConvoForPed(s_pConversationPed1);
+    };
+
+    // Greeting
+    PushConvoForPeds(GCTX_PCONV_GREET_FEM, GCTX_PCONV_GREET_MALE);
+
+    // Other stuff
+    const auto r = CAEAudioUtility::GetRandomNumberInRange(1, 10);
+    if (r <= 8) { // Combined cases 1, -> 4 + 5, -> 8
+        const auto hasInitialState = r <= 4;
+
+        s_ConversationLength = hasInitialState ? 3 : 2;
+
+        if (hasInitialState) { // For cases 1 -> 4 only
+            const auto isGood = CGeneral::DoCoinFlip();
+            PushConvo(isGood ?  GCTX_PCONV_STATE_GOOD :  GCTX_PCONV_STATE_BAD);
+            PushConvo(isGood ?  GCTX_PCONV_AGREE_GOOD :  GCTX_PCONV_AGREE_BAD);
+        }
+
+        // A question
+        PushConvo(GCTX_PCONV_QUESTION);
+
+        // Whenever they agree with the answer (?)
+        switch (CAEAudioUtility::GetRandomNumberInRange(0, 2)) {
+        case 0: PushConvo(GCTX_PCONV_AGREE_GOOD); break;
+        case 1: PushConvo(GCTX_PCONV_AGREE_BAD);  break;
+        case 2: PushConvo(GCTX_PCONV_ANS_NO);     break;
+        }
+
+        // Part away (?)
+        PushConvoForPeds(GCTX_PCONV_PART_FEM, GCTX_PCONV_PART_MALE);
+    } else if (r <= 10) { // cases 9, 10
+        s_ConversationLength = 1;
+
+        PushConvo(CGeneral::DoCoinFlip() ?  GCTX_PCONV_STATE_GOOD :  GCTX_PCONV_STATE_BAD);
+        PushConvo(GCTX_PCONV_DISMISS);
+    } else {
+        NOTSA_UNREACHABLE();
+    }
 }
 
 // 0x4E3C60
