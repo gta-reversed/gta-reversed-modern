@@ -518,23 +518,16 @@ void CAEPedSpeechAudioEntity::SetUpConversation() {
 }
 
 // 0x4E3C60
-int16 CAEPedSpeechAudioEntity::GetAudioPedType(Const char* name) {
-    static constexpr const char* aAudioPedTypeNames[] = { // 0x8C8108
-        "PED_TYPE_GEN",
-        "PED_TYPE_EMG",
-        "PED_TYPE_PLAYER",
-        "PED_TYPE_GANG",
-        "PED_TYPE_GFD",
-        "PED_TYPE_SPC"
-    };
-
-    for (int16 index = 0; const auto& pedName : aAudioPedTypeNames) {
-        if (!strcmp(name, pedName)) {
-            return index;
-        }
-        index++;
-    }
-    return -1;
+int16 CAEPedSpeechAudioEntity::GetAudioPedType(const char* name) {
+    static const auto mapping = notsa::make_mapping<std::string_view, eAudioPedType>({
+        {"PED_TYPE_GEN",    PED_TYPE_GEN   },
+        {"PED_TYPE_EMG",    PED_TYPE_EMG   },
+        {"PED_TYPE_PLAYER", PED_TYPE_PLAYER},
+        {"PED_TYPE_GANG",   PED_TYPE_GANG  },
+        {"PED_TYPE_GFD",    PED_TYPE_GFD   },
+        {"PED_TYPE_SPC",    PED_TYPE_SPC   },
+    });
+    return notsa::find_value_or(mapping, name, PED_TYPE_UNK);
 }
 
 // 0x4E3CD0
