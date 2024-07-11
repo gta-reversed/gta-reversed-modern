@@ -396,4 +396,5 @@ enum ePainSpeechVoices : int16 {
  * @brief `eGenSpeechVoices`, `eEmgSpeechVoices`, `ePlySpeechVoices`,
  * @brief `eGngSpeechVoices`, `eGfdSpeechVoices`, `ePainSpeechVoices` 
  */
-using ePedSpeechVoice = int16;
+using ePedSpeechVoiceS16 = int16;
+using ePedSpeechVoiceS32 = int32;

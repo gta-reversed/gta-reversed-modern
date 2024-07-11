@@ -11,21 +11,7 @@
 #include <Audio/eGlobalSpeechContext.h>
 #include <Audio/eSoundBank.h>
 #include <Audio/PedSpeechVoices.h>
-
-enum eAudioPedType : int16 {
-    PED_TYPE_UNK    = -1, // notsa
-    PED_TYPE_GEN    = 0,
-    PED_TYPE_EMG    = 1,
-    PED_TYPE_PLAYER = 2,
-    PED_TYPE_GANG   = 3,
-    PED_TYPE_GFD    = 4,
-    PED_TYPE_SPC    = 5, // SPC => Special (?)
-
-    //
-    // Add above
-    //
-    PED_TYPE_NUM // = 6
-};
+#include <Audio/ePedAudioType.h>
 
 enum eCJMood : int32 {
     MOOD_UNK = -1, // notsa
@@ -88,7 +74,7 @@ public:
     std::array<CAESound*, 5>                                m_Sounds{};
     bool                                                    m_IsInitialized{};
     eAudioPedType                                           m_PedAudioType{};
-    ePedSpeechVoice                                         m_VoiceID{};  //!< Exact enum to use depends on `m_PedAudioType` (See `PedSpeechVoices.h`)
+    ePedSpeechVoiceS16                                      m_VoiceID{};  //!< Exact enum to use depends on `m_PedAudioType` (See `PedSpeechVoices.h`)
     int16                                                   m_IsFemale{};
     bool                                                    m_IsPlayingSpeech{};
     bool                                                    m_IsSpeechDisabled{};
@@ -155,8 +141,8 @@ public:
     static bool RequestPlayerConversation(CPed* ped);
     static void ReleasePlayerConversation();
     static void SetUpConversation();
-    static int16 GetAudioPedType(Const char* name);
-    static int32 GetVoice(char* name, int16 type);
+    static eAudioPedType GetAudioPedType(const char* name);
+    static ePedSpeechVoiceS32 GetVoice(const char* name, eAudioPedTypeS16 type);
     static void DisableAllPedSpeech();
     bool        IsGlobalContextPain(int16 globalCtx);
     static void SetCJMood(int16, uint32, int16, int16, int16);
