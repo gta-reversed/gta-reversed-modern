@@ -80,11 +80,11 @@ void CPlayerPed::InjectHooks() {
 }
 
 struct WorkBufferSaveData {
-    uint32          saveSize = sizeof(WorkBufferSaveData); // Never read, but written
-    uint32          chaosLevel{};
-    uint32          wantedLevel{};
-    CPedClothesDesc clothesDesc{};
-    uint32          chosenWeapon{};
+    uint32          SaveSize = sizeof(WorkBufferSaveData); // Never read, but written
+    uint32          ChaosLevel{};
+    uint32          WantedLevel{};
+    CPedClothesDesc ClothesDesc{};
+    uint32          ChosenWeapon{};
 };
 VALIDATE_SIZE(WorkBufferSaveData, 132u + 4u);
 
@@ -97,15 +97,16 @@ bool CPlayerPed::Load() {
 
     CPed::Load();
 
-    WorkBufferSaveData savedData{};
-    CGenericGameStorage::LoadDataFromWorkBuffer(&savedData, sizeof(WorkBufferSaveData));
+    WorkBufferSaveData sd{};
+    CGenericGameStorage::LoadDataFromWorkBuffer(&sd, sizeof(WorkBufferSaveData));
+    assert(sd.SaveSize == sizeof(sd));
 
     CWanted* wanted = m_pPlayerData->m_pWanted;
-    wanted->m_nChaosLevel = savedData.chaosLevel;
-    wanted->m_nWantedLevel= savedData.wantedLevel;
+    wanted->m_nChaosLevel = sd.ChaosLevel;
+    wanted->m_nWantedLevel= sd.WantedLevel;
 
-    m_pPlayerData->m_nChosenWeapon   = savedData.chosenWeapon;
-    m_pPlayerData->m_pPedClothesDesc = &savedData.clothesDesc;
+    m_pPlayerData->m_nChosenWeapon   = sd.ChosenWeapon;
+    *m_pPlayerData->m_pPedClothesDesc = sd.ClothesDesc;
 
     return true;
 }
@@ -120,11 +121,10 @@ bool CPlayerPed::Save() {
     WorkBufferSaveData saveData{};
 
     CWanted* wanted = m_pPlayerData->m_pWanted;
-    saveData.chaosLevel = wanted->m_nChaosLevel;
-    saveData.wantedLevel = wanted->m_nWantedLevel;
-
-    saveData.chosenWeapon = m_pPlayerData->m_nChosenWeapon;
-    saveData.clothesDesc  = m_pPlayerData->m_pPedClothesDesc;
+    saveData.ChaosLevel = wanted->m_nChaosLevel;
+    saveData.WantedLevel = wanted->m_nWantedLevel;
+    saveData.ChosenWeapon = m_pPlayerData->m_nChosenWeapon;
+    saveData.ClothesDesc  = *m_pPlayerData->m_pPedClothesDesc;
 
     CGenericGameStorage::SaveDataToWorkBuffer(&saveData, sizeof(WorkBufferSaveData));
 
