@@ -3,8 +3,8 @@
 #include <extensions/WEnum.hpp>
 
 // TODO: Make this an enum class
-enum eGlobalSpeechContext : int32 {
-    GCTX_UNK                        = -1,
+enum eGlobalSpeechContext : int16 {
+    GCTX_UNK                            = -1,
     GCTX_NO_SPEECH                      = 0, // 0x0
     GCTX_ABUSE_GANG_BALLAS              = 1, // 0x1
     GCTX_ABUSE_GANG_LSV                 = 2, // 0x2
@@ -367,9 +367,11 @@ enum eGlobalSpeechContext : int32 {
     GCTX_PAIN_CJ_HIGH_FALL              = 358, // 0x166
     GCTX_PAIN_END                       = 359, // 0x167
 
+
     //
     // Add above
     //
-    GCTX_NUM, // 360 = 0x168
+    GCTX_END, // 360 = 0x168
+    GCTX_NUM = GCTX_END, 
 };
 NOTSA_WENUM_DEFS_FOR(eGlobalSpeechContext)

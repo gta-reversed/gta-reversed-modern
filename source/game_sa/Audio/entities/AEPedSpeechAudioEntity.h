@@ -68,6 +68,23 @@ struct tPhraseMemory {
 };
 VALIDATE_SIZE(tPhraseMemory, 0x04);
 
+
+/*!
+ * @brief Holds context info entries
+ * @detail This is just a made up structure, they just used a huge multi-dim array...
+ * @detail But it doesn't make a whole lot of sense why they stored the index in
+ * @detail the array (GCtx) and did a search, when the index matches the array index
+ * @detail perhaps they meant to make this configurable (to be loaded from a file?)
+ * @detail but gave up on it? 
+ */
+struct tSpeechContextInfo {
+    eGlobalSpeechContext                               GCtx;                  //!< The global context this entry is for
+    std::array<eGlobalSpeechContext, PED_TYPE_NUM - 1> SpecificSpeechContext; //!< Speech specific context / per type
+    int16                                              RepeatTime;            //!< Not sure
+    int16                                              Zero;                  //!< Not sure, but *always zero*
+};
+VALIDATE_SIZE(tSpeechContextInfo, sizeof(int16) * 8);
+
 class NOTSA_EXPORT_VTABLE CAEPedSpeechAudioEntity : public CAEAudioEntity {
 public:
     std::array<CAESound*, 5>                                m_Sounds{};
@@ -114,9 +131,9 @@ public:
     static inline auto& s_PhraseMemory                   = StaticRef<std::array<tPhraseMemory, 150>>(0xB61418);
     static inline auto& s_PedSpeechSlots                 = StaticRef<std::array<CAEPedSpeechSlot, PED_TYPE_NUM>>(0xB61C38);
     static inline auto& gGlobalSpeechContextNextPlayTime = StaticRef<std::array<uint32, GCTX_NUM>>(0xB61670); // PAIN (GCTX_PAIN_START -> GCTX_PAIN_END) is ignored, and `m_NextTimeCanSayPain` is used instead
-    static inline auto& gSpeechContextLookup             = StaticRef<notsa::mdarray<int16, GCTX_NUM, 8>>(0x8C6A68);
 
 public:
+    static const tSpeechContextInfo* GetSpeechContextInfo(eGlobalSpeechContext gCtx);
     static void InjectHooks();
 
     CAEPedSpeechAudioEntity() = default;
@@ -159,12 +176,12 @@ public:
     static bool IsCJDressedInForGangSpeech();
     int8        GetSexForSpecialPed(uint32 a1);
 
-    bool IsGlobalContextImportantForWidescreen(int16 globalCtx);
-    int32 GetRepeatTime(int16 a1);
+    bool IsGlobalContextImportantForWidescreen(eGlobalSpeechContext gCtx);
+    int16 GetRepeatTime(eGlobalSpeechContext gCtx);
     void LoadAndPlaySpeech(uint32 offset);
     int32 GetNumSlotsPlayingContext(int16 context);
-    uint32 GetNextPlayTime(int16 globalCtx);
-    void SetNextPlayTime(int16 globalCtx);
+    uint32 GetNextPlayTime(eGlobalSpeechContext gCtx);
+    void SetNextPlayTime(eGlobalSpeechContext gCtx);
     void DisablePedSpeech(int16 a1);
     void DisablePedSpeechForScriptSpeech(int16 a1);
     int8 CanPedSayGlobalContext(int16 a2);
@@ -196,13 +213,14 @@ public:
 
 private:
     static int32 GetFreeSpeechSlot();
+    uint32& GetNextPlayTimeRef(eGlobalSpeechContext gCtx);
 
 private:
     CAEPedSpeechAudioEntity* Constructor();
 
 
     // NOTSA
-    CAEPedSpeechSlot& GetSpeech() const {
+    CAEPedSpeechSlot& GetMySpeechSlot() const {
         return s_PedSpeechSlots[m_PedSpeechSlotID];
     }
 };

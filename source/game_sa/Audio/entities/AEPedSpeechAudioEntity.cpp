@@ -6,6 +6,372 @@
 #include <AEAudioHardware.h>
 #include <Audio/eSoundBankSlot.h>
 
+// Data from @ 0x8C6A68
+// TIP: Disable word-wrap when viewing this array... :D
+static constexpr std::array<tSpeechContextInfo, GCTX_NUM> gSpeechContextLookup{{
+    // GCtx                                PED_TYPE_GEN                  PED_TYPE_EMG                  PED_TYPE_PLAYER               PED_TYPE_GANG                 PED_TYPE_GFD                     RepeatTime Zero
+    {GCTX_NO_SPEECH,                      {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ABUSE_GANG_BALLAS,              {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_PHYS,          GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ABUSE_GANG_LSV,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_CLOTHES,       GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ABUSE_GANG_VLA,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_HAIR,          GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ABUSE_GANG_FAMILIES,            {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_CAR,           GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ABUSE_TRIAD,                    {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ABUSE_MAFIA,                    {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ABUSE_RIFA,                     {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ABUSE_DA_NANG,                  {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ACCEPT_DATE_CALL,               {GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_CRASH,               GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ACCEPT_DATE_REQUEST,            {GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_DRIVEBY_BURN_RUBBER, GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_AFTER_SEX,                      {GCTX_UNK,                     GCTX_UNK,                     GCTX_NO_SPEECH,               GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_APOLOGY,                        {GCTX_UNK,                     GCTX_UNK,                     GCTX_ABUSE_GANG_BALLAS,       GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ARREST,                         {GCTX_UNK,                     GCTX_BLOCKED,                 GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ARREST_CRIM,                    {GCTX_UNK,                     GCTX_BOOZE_RECEIVE,           GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ARRESTED,                       {GCTX_FOLLOW_CONSTANT,         GCTX_UNK,                     GCTX_ABUSE_GANG_LSV,          GCTX_NO_SPEECH,               GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ATTACK_BY_PLAYER_LIKE,          {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_SHOES,         GCTX_UNK,                     }, 5000,       0 },
+    {GCTX_ATTACK_GANG_BALLAS,             {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_SMELL,         GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ATTACK_GANG_LSV,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_GAMB_BJ_SPLIT,           GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ATTACK_GANG_VLA,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_GAMB_CASINO_WIN,         GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ATTACK_PLAYER,                  {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CRASH_GENERIC,           GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_BAR_CHAT,                       {GCTX_BAR_CHAT,                GCTX_UNK,                     GCTX_UNK,                     GCTX_ABUSE_GANG_LSV,          GCTX_UNK,                     }, 20000,      0 },
+    {GCTX_BLOCKED,                        {GCTX_ABUSE_GANG_VLA,          GCTX_BOOZE_REQUEST,           GCTX_UNK,                     GCTX_ABUSE_GANG_VLA,          GCTX_GAMB_BJ_HIT,             }, 7000,       0 },
+    {GCTX_BOOZE_RECEIVE,                  {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_ABUSE_GANG_FAMILIES,     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_BOOZE_REQUEST,                  {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_ABUSE_TRIAD,             GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_BUM_BACK_OFF,                   {GCTX_EYEING_PED_THREAT,       GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_BUM_BACK_OFF_2,                 {GCTX_EYEING_PLAYER,           GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_BUM_LATCH,                      {GCTX_FIGHT,                   GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_BUMP,                           {GCTX_ABUSE_GANG_FAMILIES,     GCTX_BUM_BACK_OFF,            GCTX_UNK,                     GCTX_ABUSE_MAFIA,             GCTX_NO_SPEECH,               }, 7000,       0 },
+    {GCTX_CAR_CRASH,                      {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_TATTOO,        GCTX_ABUSE_GANG_BALLAS,       }, 7000,       0 },
+    {GCTX_CAR_DRIVEBY_BURN_RUBBER,        {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_EYEING_PED_THREAT,       GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CAR_DRIVEBY_TOO_FAST,           {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_EYEING_PLAYER,           GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CAR_FAST,                       {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_WEATHER,       GCTX_ABUSE_GANG_LSV,          }, 7000,       0 },
+    {GCTX_CAR_FIRE,                       {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_IGNORED,            GCTX_ABUSE_GANG_VLA,          }, 7000,       0 },
+    {GCTX_CAR_FLIPPED,                    {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_CAR,           GCTX_ABUSE_GANG_FAMILIES,     }, 7000,       0 },
+    {GCTX_CAR_GET_IN,                     {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_FIGHT,                   GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CAR_HIT_PED,                    {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_CLOTHES,       GCTX_ABUSE_TRIAD,             }, 7000,       0 },
+    {GCTX_CAR_JUMP,                       {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_HAIR,          GCTX_ABUSE_MAFIA,             }, 7000,       0 },
+    {GCTX_CAR_POLICE_PURSUIT,             {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_PHYS,          GCTX_ABUSE_RIFA,              }, 15000,      0 },
+    {GCTX_CAR_SLOW,                       {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_WEATHER,       GCTX_ABUSE_DA_NANG,           }, 7000,       0 },
+    {GCTX_CAR_WAIT_FOR_ME,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_SHOES,         GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CAR_SINGALONG,                  {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CB_CHAT,                        {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 20000,      0 },
+    {GCTX_CHASE_FOOT,                     {GCTX_UNK,                     GCTX_BUM_BACK_OFF_2,          GCTX_UNK,                     GCTX_ABUSE_DA_NANG,           GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CHASED,                         {GCTX_UNK,                     GCTX_UNK,                     GCTX_ABUSE_GANG_VLA,          GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CHAT,                           {GCTX_BLOCKED,                 GCTX_ABUSE_GANG_VLA,          GCTX_UNK,                     GCTX_ACCEPT_DATE_CALL,        GCTX_GAMB_BJ_LOSE,            }, 15000,      0 },
+    {GCTX_COFFEE_ACCEPT,                  {GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_SINGALONG,           GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_COFFEE_DECLINE,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_CB_CHAT,                 GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CONV_DISL_CAR,                  {GCTX_DANCE_IMPR_NOT,          GCTX_UNK,                     GCTX_UNK,                     GCTX_CRIMINAL_PLEAD,          GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CONV_DISL_CLOTHES,              {GCTX_BOOZE_RECEIVE,           GCTX_UNK,                     GCTX_UNK,                     GCTX_DANCE_IMPR_HIGH,         GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CONV_DISL_HAIR,                 {GCTX_DANCE_IMPR_HIGH,         GCTX_UNK,                     GCTX_UNK,                     GCTX_GAMB_CASINO_LOSE,        GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CONV_DISL_PHYS,                 {GCTX_BOOZE_REQUEST,           GCTX_UNK,                     GCTX_UNK,                     GCTX_GANGBANG_NO,             GCTX_GAMB_BJ_STAY,            }, 7000,       0 },
+    {GCTX_CONV_DISL_SHOES,                {GCTX_BUM_BACK_OFF,            GCTX_UNK,                     GCTX_UNK,                     GCTX_DANCE_IMPR_LOW,          GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CONV_DISL_SMELL,                {GCTX_CONV_LIKE_CLOTHES,       GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CONV_DISL_TATTOO,               {GCTX_CONV_LIKE_HAIR,          GCTX_UNK,                     GCTX_UNK,                     GCTX_GAMB_CONGRATS,           GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CONV_DISL_WEATHER,              {GCTX_CONV_LIKE_PHYS,          GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CONV_IGNORED,                   {GCTX_ABUSE_TRIAD,             GCTX_UNK,                     GCTX_UNK,                     GCTX_ACCEPT_DATE_REQUEST,     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CONV_LIKE_CAR,                  {GCTX_DODGE,                   GCTX_UNK,                     GCTX_UNK,                     GCTX_DANCE_IMPR_MED,          GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CONV_LIKE_CLOTHES,              {GCTX_BUM_BACK_OFF_2,          GCTX_UNK,                     GCTX_UNK,                     GCTX_DANCE_IMPR_NOT,          GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CONV_LIKE_HAIR,                 {GCTX_DANCE_IMPR_LOW,          GCTX_UNK,                     GCTX_UNK,                     GCTX_GAMB_ROUL_CHAT,          GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CONV_LIKE_PHYS,                 {GCTX_BUM_LATCH,               GCTX_UNK,                     GCTX_UNK,                     GCTX_GANGBANG_YES,            GCTX_GAMB_BJ_WIN,             }, 7000,       0 },
+    {GCTX_CONV_LIKE_SHOES,                {GCTX_BUMP,                    GCTX_UNK,                     GCTX_UNK,                     GCTX_DODGE,                   GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CONV_LIKE_SMELL,                {GCTX_CONV_LIKE_SHOES,         GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CONV_LIKE_TATTOO,               {GCTX_CONV_LIKE_SMELL,         GCTX_UNK,                     GCTX_UNK,                     GCTX_GAMB_SLOT_WIN,           GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CONV_LIKE_WEATHER,              {GCTX_CONV_LIKE_TATTOO,        GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_COVER_ME,                       {GCTX_UNK,                     GCTX_ABUSE_GANG_FAMILIES,     GCTX_UNK,                     GCTX_AFTER_SEX,               GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CRASH_BIKE,                     {GCTX_CONV_LIKE_WEATHER,       GCTX_CAR_DRIVEBY_TOO_FAST,    GCTX_UNK,                     GCTX_APOLOGY,                 GCTX_GAMB_BJ_STICK,           }, 7000,       0 },
+    {GCTX_CRASH_CAR,                      {GCTX_ABUSE_MAFIA,             GCTX_ARREST_CRIM,             GCTX_ABUSE_GANG_FAMILIES,     GCTX_ARREST,                  GCTX_GAMB_BJ_DOUBLE,          }, 7000,       0 },
+    {GCTX_CRASH_GENERIC,                  {GCTX_ABUSE_RIFA,              GCTX_ARRESTED,                GCTX_ABUSE_TRIAD,             GCTX_ARREST_CRIM,             GCTX_GAMB_BJ_SPLIT,           }, 7000,       0 },
+    {GCTX_CRIMINAL_PLEAD,                 {GCTX_DRUG_AGGRESSIVE_HIGH,    GCTX_UNK,                     GCTX_UNK,                     GCTX_ARRESTED,                GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_DANCE_IMPR_HIGH,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_DANCE_IMPR_LOW,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_DANCE_IMPR_MED,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_DANCE_IMPR_NOT,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_DODGE,                          {GCTX_ACCEPT_DATE_CALL,        GCTX_ABUSE_MAFIA,             GCTX_UNK,                     GCTX_ATTACK_BY_PLAYER_LIKE,   GCTX_ACCEPT_DATE_REQUEST,     }, 7000,       0 },
+    {GCTX_DRUG_AGGRESSIVE_HIGH,           {GCTX_DRUGGED_CHAT,            GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_DRUG_AGGRESSIVE_LOW,            {GCTX_DRUGGED_IGNORE,          GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_DRUG_DEALER_DISLIKE,            {GCTX_UNK,                     GCTX_UNK,                     GCTX_ABUSE_MAFIA,             GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_DRUG_DEALER_HATE,               {GCTX_UNK,                     GCTX_UNK,                     GCTX_CRIMINAL_PLEAD,          GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_DRUG_REASONABLE_HIGH,           {GCTX_DRUGS_BUY,               GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_DRUG_REASONABLE_LOW,            {GCTX_DRUGS_SELL,              GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_DRUGGED_CHAT,                   {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_FOLLOW_ARRIVE,           GCTX_UNK,                     }, 20000,      0 },
+    {GCTX_DRUGGED_IGNORE,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_FOLLOW_CONSTANT,         GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_DRUGS_BUY,                      {GCTX_COVER_ME,                GCTX_UNK,                     GCTX_UNK,                     GCTX_CHAT,                    GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_DRUGS_SELL,                     {GCTX_DUCK,                    GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_DUCK,                           {GCTX_UNK,                     GCTX_ABUSE_RIFA,              GCTX_UNK,                     GCTX_ATTACK_GANG_LSV,         GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_EYEING_PED,                     {GCTX_DANCE_IMPR_MED,          GCTX_UNK,                     GCTX_UNK,                     GCTX_ATTACK_PLAYER,           GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_EYEING_PED_THREAT,              {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_BAR_CHAT,                GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_EYEING_PLAYER,                  {GCTX_CAR_CRASH,               GCTX_UNK,                     GCTX_UNK,                     GCTX_GENERIC_HI_MALE,         GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_FIGHT,                          {GCTX_ACCEPT_DATE_REQUEST,     GCTX_ABUSE_DA_NANG,           GCTX_ABUSE_RIFA,              GCTX_BLOCKED,                 GCTX_AFTER_SEX,               }, 7000,       0 },
+    {GCTX_FOLLOW_ARRIVE,                  {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_FOLLOW_REPLY,            GCTX_UNK,                     }, 15000,      0 },
+    {GCTX_FOLLOW_CONSTANT,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_GAMB_BJ_HIT,             GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_FOLLOW_REPLY,                   {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_GAMB_BJ_LOSE,            GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GAMB_BJ_HIT,                    {GCTX_CAR_DRIVEBY_BURN_RUBBER, GCTX_UNK,                     GCTX_CAR_GET_IN,              GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GAMB_BJ_LOSE,                   {GCTX_CAR_DRIVEBY_TOO_FAST,    GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GAMB_BJ_STAY,                   {GCTX_CAR_FAST,                GCTX_UNK,                     GCTX_CAR_JUMP,                GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GAMB_BJ_WIN,                    {GCTX_CAR_FIRE,                GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GAMB_BJ_STICK,                  {GCTX_CAR_FAST,                GCTX_UNK,                     GCTX_CAR_JUMP,                GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GAMB_BJ_DOUBLE,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_FLIPPED,             GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GAMB_BJ_SPLIT,                  {GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_HIT_PED,             GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GAMB_CASINO_WIN,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_SLOW,                GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GAMB_CASINO_LOSE,               {GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_POLICE_PURSUIT,      GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GAMB_CONGRATS,                  {GCTX_CAR_FLIPPED,             GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GAMB_ROUL_CHAT,                 {GCTX_CAR_GET_IN,              GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 20000,      0 },
+    {GCTX_GAMB_SLOT_WIN,                  {GCTX_CAR_HIT_PED,             GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GANG_FULL,                      {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_GAMB_BJ_STAY,            GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GANGBANG_NO,                    {GCTX_UNK,                     GCTX_UNK,                     GCTX_BOOZE_REQUEST,           GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GANGBANG_YES,                   {GCTX_UNK,                     GCTX_UNK,                     GCTX_BUM_BACK_OFF,            GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GENERIC_HI_MALE,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_CHAT,                    GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GENERIC_HI_FEMALE,              {GCTX_UNK,                     GCTX_UNK,                     GCTX_CHASED,                  GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GENERIC_INSULT_MALE,            {GCTX_UNK,                     GCTX_UNK,                     GCTX_COFFEE_DECLINE,          GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GENERIC_INSULT_FEMALE,          {GCTX_UNK,                     GCTX_UNK,                     GCTX_COFFEE_ACCEPT,           GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GIVING_HEAD,                    {GCTX_DRUG_AGGRESSIVE_LOW,     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GOOD_CITIZEN,                   {GCTX_UNK,                     GCTX_BUM_LATCH,               GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GUN_COOL,                       {GCTX_AFTER_SEX,               GCTX_BUMP,                    GCTX_UNK,                     GCTX_BOOZE_REQUEST,           GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GUN_RUN,                        {GCTX_CAR_JUMP,                GCTX_ATTACK_BY_PLAYER_LIKE,   GCTX_UNK,                     GCTX_COFFEE_ACCEPT,           GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_HAVING_SEX,                     {GCTX_DRUG_DEALER_DISLIKE,     GCTX_UNK,                     GCTX_DUCK,                    GCTX_UNK,                     GCTX_UNK,                     }, 2500,       0 },
+    {GCTX_HAVING_SEX_MUFFLED,             {GCTX_UNK,                     GCTX_UNK,                     GCTX_EYEING_PED,              GCTX_UNK,                     GCTX_UNK,                     }, 2500,       0 },
+    {GCTX_JACKED_GENERIC,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_ACCEPT_DATE_CALL,        GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_JACKED_CAR,                     {GCTX_APOLOGY,                 GCTX_UNK,                     GCTX_ABUSE_DA_NANG,           GCTX_BUM_BACK_OFF,            GCTX_COVER_ME,                }, 1000,       0 },
+    {GCTX_JACKED_ON_STREET,               {GCTX_ARREST,                  GCTX_UNK,                     GCTX_UNK,                     GCTX_BUM_BACK_OFF_2,          GCTX_CRASH_BIKE,              }, 1000,       0 },
+    {GCTX_JACKING_BIKE,                   {GCTX_ARREST_CRIM,             GCTX_ACCEPT_DATE_CALL,        GCTX_ACCEPT_DATE_REQUEST,     GCTX_BUMP,                    GCTX_GAMB_CASINO_WIN,         }, 1000,       0 },
+    {GCTX_JACKING_CAR_FEM,                {GCTX_EYEING_PED,              GCTX_ACCEPT_DATE_CALL,        GCTX_BUM_BACK_OFF_2,          GCTX_BUM_LATCH,               GCTX_GAMB_CASINO_WIN,         }, 1000,       0 },
+    {GCTX_JACKING_CAR_MALE,               {GCTX_EYEING_PED,              GCTX_ACCEPT_DATE_CALL,        GCTX_APOLOGY,                 GCTX_BUM_LATCH,               GCTX_GAMB_CASINO_WIN,         }, 1000,       0 },
+    {GCTX_JACKING_GENERIC,                {GCTX_ARREST_CRIM,             GCTX_ACCEPT_DATE_CALL,        GCTX_ARREST,                  GCTX_BUMP,                    GCTX_GAMB_CASINO_WIN,         }, 1000,       0 },
+    {GCTX_JOIN_GANG_NO,                   {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_GAMB_BJ_WIN,             GCTX_UNK,                     }, 1500,       0 },
+    {GCTX_JOIN_GANG_YES,                  {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_GAMB_BJ_STICK,           GCTX_UNK,                     }, 1500,       0 },
+    {GCTX_JOIN_ME_ASK,                    {GCTX_UNK,                     GCTX_UNK,                     GCTX_ARREST_CRIM,             GCTX_UNK,                     GCTX_UNK,                     }, 1000,       0 },
+    {GCTX_JOIN_ME_REJECTED,               {GCTX_UNK,                     GCTX_UNK,                     GCTX_ARRESTED,                GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_LIKE_CAR_REPLY,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_CLOTHES,       GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_LIKE_CLOTHES_REPLY,             {GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_HAIR,          GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_LIKE_DISMISS_FEMALE,            {GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_PHYS,          GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_LIKE_DISMISS_MALE,              {GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_SHOES,         GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_LIKE_DISMISS_REPLY,             {GCTX_ARRESTED,                GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUG_AGGRESSIVE_HIGH,    GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_LIKE_HAIR_REPLY,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_SMELL,         GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_LIKE_NEGATIVE_FEMALE,           {GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_TATTOO,        GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_LIKE_NEGATIVE_MALE,             {GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_WEATHER,       GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_LIKE_PHYS_REPLY,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_IGNORED,            GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_LIKE_SHOES_REPLY,               {GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_CAR,           GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_LIKE_SMELL_REPLY,               {GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_CLOTHES,       GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_LIKE_TATTOO_REPLY,              {GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_HAIR,          GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_MEET_GFRIEND_AGAIN_MAYBE,       {GCTX_UNK,                     GCTX_UNK,                     GCTX_EYEING_PED_THREAT,       GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_MEET_GFRIEND_AGAIN_NO,          {GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_PHYS,          GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_MEET_GFRIEND_AGAIN_YES,         {GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_SHOES,         GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_MOVE_IN,                        {GCTX_UNK,                     GCTX_ACCEPT_DATE_REQUEST,     GCTX_UNK,                     GCTX_CAR_CRASH,               GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_MUGGED,                         {GCTX_ATTACK_BY_PLAYER_LIKE,   GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_DRIVEBY_BURN_RUBBER, GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_MUGGING,                        {GCTX_FOLLOW_REPLY,            GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_DRIVEBY_TOO_FAST,    GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ORDER_ATTACK_MANY,              {GCTX_UNK,                     GCTX_UNK,                     GCTX_ATTACK_BY_PLAYER_LIKE,   GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ORDER_ATTACK_SINGLE,            {GCTX_UNK,                     GCTX_UNK,                     GCTX_ATTACK_GANG_BALLAS,      GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ORDER_DISBAND_MANY,             {GCTX_UNK,                     GCTX_UNK,                     GCTX_DANCE_IMPR_HIGH,         GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ORDER_DISBAND_ONE,              {GCTX_UNK,                     GCTX_UNK,                     GCTX_DANCE_IMPR_LOW,          GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ORDER_FOLLOW_FAR_MANY,          {GCTX_UNK,                     GCTX_UNK,                     GCTX_DANCE_IMPR_MED,          GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ORDER_FOLLOW_FAR_ONE,           {GCTX_UNK,                     GCTX_UNK,                     GCTX_DANCE_IMPR_NOT,          GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ORDER_FOLLOW_NEAR_MANY,         {GCTX_UNK,                     GCTX_UNK,                     GCTX_DODGE,                   GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ORDER_FOLLOW_NEAR_ONE,          {GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUG_AGGRESSIVE_HIGH,    GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ORDER_FOLLOW_VNEAR_MANY,        {GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUG_AGGRESSIVE_LOW,     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ORDER_FOLLOW_VNEAR_ONE,         {GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUG_DEALER_DISLIKE,     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ORDER_KEEP_UP_MANY,             {GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUG_DEALER_HATE,        GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ORDER_KEEP_UP_ONE,              {GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUG_REASONABLE_HIGH,    GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ORDER_WAIT_MANY,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUG_REASONABLE_LOW,     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ORDER_WAIT_ONE,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUGGED_CHAT,            GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_PCONV_AGREE_BAD,                {GCTX_CAR_POLICE_PURSUIT,      GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUG_AGGRESSIVE_LOW,     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_PCONV_AGREE_GOOD,               {GCTX_CAR_SLOW,                GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUG_DEALER_DISLIKE,     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_PCONV_ANS_NO,                   {GCTX_CAR_WAIT_FOR_ME,         GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUG_DEALER_HATE,        GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_PCONV_DISMISS,                  {GCTX_CAR_SINGALONG,           GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUG_REASONABLE_HIGH,    GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_PCONV_GREET_FEM,                {GCTX_CB_CHAT,                 GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUG_REASONABLE_LOW,     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_PCONV_GREET_MALE,               {GCTX_CHASE_FOOT,              GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUGGED_CHAT,            GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_PCONV_PART_FEM,                 {GCTX_CHASED,                  GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUGGED_IGNORE,          GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_PCONV_PART_MALE,                {GCTX_CHAT,                    GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_SMELL,         GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_PCONV_QUESTION,                 {GCTX_COFFEE_ACCEPT,           GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUGS_BUY,               GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_PCONV_STATE_BAD,                {GCTX_COFFEE_DECLINE,          GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUGS_SELL,              GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_PCONV_STATE_GOOD,               {GCTX_CONV_DISL_CAR,           GCTX_UNK,                     GCTX_UNK,                     GCTX_DUCK,                    GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_PICKUP_CASH,                    {GCTX_UNK,                     GCTX_UNK,                     GCTX_ATTACK_GANG_LSV,         GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_POLICE_BOAT,                    {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_GIVING_HEAD,             }, 10000,      0 },
+    {GCTX_POLICE_HELICOPTER,              {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_GOOD_CITIZEN,            }, 10000,      0 },
+    {GCTX_POLICE_OVERBOARD,               {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_GUN_COOL,                }, 10000,      0 },
+    {GCTX_PULL_GUN,                       {GCTX_UNK,                     GCTX_UNK,                     GCTX_ATTACK_GANG_VLA,         GCTX_UNK,                     GCTX_UNK,                     }, 20000,      0 },
+    {GCTX_ROPE,                           {GCTX_UNK,                     GCTX_CAR_FIRE,                GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_RUN_FROM_FIGHT,                 {GCTX_CONV_DISL_CLOTHES,       GCTX_UNK,                     GCTX_UNK,                     GCTX_EYEING_PED,              GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SAVED,                          {GCTX_ATTACK_GANG_LSV,         GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_FIRE,                GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SEARCH,                         {GCTX_UNK,                     GCTX_BAR_CHAT,                GCTX_UNK,                     GCTX_CAR_FLIPPED,             GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SHOCKED,                        {GCTX_ATTACK_GANG_VLA,         GCTX_APOLOGY,                 GCTX_UNK,                     GCTX_CAR_GET_IN,              GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SHOOT,                          {GCTX_UNK,                     GCTX_UNK,                     GCTX_ATTACK_PLAYER,           GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SHOOT_BALLAS,                   {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_TATTOO,        GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SHOOT_GENERIC,                  {GCTX_UNK,                     GCTX_ARREST,                  GCTX_UNK,                     GCTX_CAR_JUMP,                GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SHOOT_LSV,                      {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_COVER_ME,                GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SHOOT_VLA,                      {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_GAMB_BJ_DOUBLE,          GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SHOOT_FAMILIES,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_HIT_PED,             GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SHOP_BROWSE,                    {GCTX_CONV_DISL_HAIR,          GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SHOP_BUY,                       {GCTX_CONV_DISL_PHYS,          GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SHOP_SELL,                      {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUGS_SELL,              }, 7000,       0 },
+    {GCTX_SHOP_LEAVE,                     {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_FOLLOW_ARRIVE,           }, 7000,       0 },
+    {GCTX_SOLICIT,                        {GCTX_DRUG_DEALER_HATE,        GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SOLICIT_GEN_NO,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_WEATHER,       GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SOLICIT_GEN_YES,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_COVER_ME,                GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SOLICIT_PRO_NO,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_BUM_LATCH,               GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SOLICIT_PRO_YES,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_BOOZE_RECEIVE,           GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SOLICIT_THANKS,                 {GCTX_DRUG_REASONABLE_HIGH,    GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SOLICIT_UNREASONABLE,           {GCTX_DRUG_REASONABLE_LOW,     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SOLO,                           {GCTX_UNK,                     GCTX_CAR_CRASH,               GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SPLIFF_RECEIVE,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_POLICE_PURSUIT,      GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SPLIFF_REQUEST,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_SLOW,                GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_STEALTH_ALERT_SOUND,            {GCTX_ABUSE_GANG_LSV,          GCTX_ABUSE_GANG_LSV,          GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_STEALTH_ALERT_SIGHT,            {GCTX_ABUSE_GANG_BALLAS,       GCTX_ABUSE_GANG_BALLAS,       GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_STEALTH_ALERT_GENERIC,          {GCTX_NO_SPEECH,               GCTX_NO_SPEECH,               GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_STEALTH_DEF_SIGHTING,           {GCTX_ABUSE_DA_NANG,           GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_STEALTH_NOTHING_THERE,          {GCTX_UNK,                     GCTX_AFTER_SEX,               GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SURROUNDED,                     {GCTX_UNK,                     GCTX_ATTACK_GANG_VLA,         GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_TARGET,                         {GCTX_UNK,                     GCTX_ATTACK_PLAYER,           GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_TAKE_TURF_LAS_COLINAS,          {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_TAKE_TURF_LOS_FLORES,           {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_TAKE_TURF_EAST_BEACH,           {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_TAKE_TURF_EAST_LS,              {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_TAKE_TURF_JEFFERSON,            {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_TAKE_TURF_GLEN_PARK,            {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_TAKE_TURF_IDLEWOOD,             {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_TAKE_TURF_GANTON,               {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_TAKE_TURF_LITTLE_MEXICO,        {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_TAKE_TURF_WILLOWFIELD,          {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_TAKE_TURF_PLAYA_DEL_SEVILLE,    {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_TAKE_TURF_TEMPLE,               {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_TAXI_BAIL,                      {GCTX_CONV_DISL_SHOES,         GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_TAXI_HAIL,                      {GCTX_CONV_DISL_SMELL,         GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_WAIT_FOR_ME,         GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_TAXI_HIT_PED,                   {GCTX_CONV_DISL_TATTOO,        GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_TAXI_START,                     {GCTX_CONV_DISL_WEATHER,       GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_TAXI_SUCCESS,                   {GCTX_CONV_IGNORED,            GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_TAXI_TIP,                       {GCTX_CONV_LIKE_CAR,           GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_TRAPPED,                        {GCTX_ATTACK_PLAYER,           GCTX_UNK,                     GCTX_UNK,                     GCTX_CB_CHAT,                 GCTX_UNK,                     }, 3500,       0 },
+    {GCTX_VALET_BAD,                      {GCTX_CRASH_CAR,               GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_VALET_GOOD,                     {GCTX_CRASH_GENERIC,           GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_VALET_PARK_CAR,                 {GCTX_CRIMINAL_PLEAD,          GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_VAN,                            {GCTX_UNK,                     GCTX_ATTACK_GANG_BALLAS,      GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_VICTIM,                         {GCTX_UNK,                     GCTX_ATTACK_GANG_LSV,         GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_WEATHER_DISL_REPLY,             {GCTX_UNK,                     GCTX_UNK,                     GCTX_CRASH_CAR,               GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_WEATHER_LIKE_REPLY,             {GCTX_UNK,                     GCTX_UNK,                     GCTX_CRASH_GENERIC,           GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_WHERE_YOU_FROM_NEG,             {GCTX_UNK,                     GCTX_UNK,                     GCTX_GENERIC_HI_MALE,         GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_WHERE_YOU_FROM_POS,             {GCTX_UNK,                     GCTX_UNK,                     GCTX_BUMP,                    GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SPANKED,                        {GCTX_UNK,                     GCTX_UNK,                     GCTX_FOLLOW_CONSTANT,         GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SPANKING,                       {GCTX_UNK,                     GCTX_UNK,                     GCTX_FOLLOW_REPLY,            GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_SPANKING_MUFFLED,               {GCTX_UNK,                     GCTX_UNK,                     GCTX_GAMB_BJ_HIT,             GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GREETING_GFRIEND,               {GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_CAR,           GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_PARTING_GFRIEND,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_TATTOO,        GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_UH_HUH,                         {GCTX_UNK,                     GCTX_UNK,                     GCTX_CRASH_BIKE,              GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CLEAR_ATTACHED_PEDS,            {GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_WAIT_FOR_ME,         GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_AGREE_TO_DO_DRIVEBY,            {GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_FAST,                GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_AGREE_TO_LET_DRIVE,             {GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_FIRE,                GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_MICHELLE_TAKE_CAR,              {GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_SMELL,         GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ACCEPT_SEX,                     {GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_DRIVEBY_TOO_FAST,    GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_DECLINE_SEX,                    {GCTX_UNK,                     GCTX_UNK,                     GCTX_CHASE_FOOT,              GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GIVE_NUMBER_YES,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUGS_SELL,              GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GIVE_NUMBER_NO,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUGS_BUY,               GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_WHERE_YOU_FROM,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CHASE_FOOT,              GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GANGBANG,                       {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_BOOZE_RECEIVE,           GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_WHERE_YOU_FROM_POS_REPLY,       {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CHASED,                  GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_DRIVE_THROUGH_TAUNT,            {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_ATTACK_GANG_BALLAS,      GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ATTACK_CAR,                     {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_ABUSE_GANG_BALLAS,       GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_TIP_CAR,                        {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_SINGALONG,           GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CHASE_CAR,                      {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_ABUSE_RIFA,              GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_ENEMY_GANG_WASTED,              {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_ATTACK_GANG_VLA,         GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_PLAYER_WASTED,                  {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_FAST,                GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_CHASE,                          {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GFRIEND_REQ_DATE_DESPERATE,     {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_HAIR,          }, 7000,       0 },
+    {GCTX_GFRIEND_REQ_DATE_NORMAL,        {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_PHYS,          }, 7000,       0 },
+    {GCTX_GFRIEND_REQ_MEAL_DESPERATE,     {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_TATTOO,        }, 7000,       0 },
+    {GCTX_GFRIEND_REQ_MEAL_NORMAL,        {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_WEATHER,       }, 7000,       0 },
+    {GCTX_GFRIEND_REQ_DRIVE_DESPERATE,    {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_SHOES,         }, 7000,       0 },
+    {GCTX_GFRIEND_REQ_DRIVE_NORMAL,       {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_SMELL,         }, 7000,       0 },
+    {GCTX_GFRIEND_REQ_DANCE_DESPERATE,    {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_CAR,           }, 7000,       0 },
+    {GCTX_GFRIEND_REQ_DANCE_NORMAL,       {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_DISL_CLOTHES,       }, 7000,       0 },
+    {GCTX_GFRIEND_REQ_SEX_DESPERATE,      {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_IGNORED,            }, 7000,       0 },
+    {GCTX_GFRIEND_REQ_SEX_NORMAL,         {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_CAR,           }, 7000,       0 },
+    {GCTX_GFRIEND_BORED_1,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_APOLOGY,                 }, 7000,       0 },
+    {GCTX_GFRIEND_BORED_2,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_ARREST,                  }, 7000,       0 },
+    {GCTX_GFRIEND_STORY,                  {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_SHOES,         }, 7000,       0 },
+    {GCTX_GFRIEND_LIKE_MEAL_DEST,         {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_POLICE_PURSUIT,      }, 7000,       0 },
+    {GCTX_GFRIEND_LIKE_CLUB_DEST,         {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_HIT_PED,             }, 7000,       0 },
+    {GCTX_GFRIEND_OFFER_DANCE,            {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CHASE_FOOT,              }, 7000,       0 },
+    {GCTX_GFRIEND_ENJOYED_MEAL_HIGH,      {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_BOOZE_REQUEST,           }, 7000,       0 },
+    {GCTX_GFRIEND_ENJOYED_EVENT_LOW,      {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_BOOZE_RECEIVE,           }, 7000,       0 },
+    {GCTX_GFRIEND_ENJOYED_CLUB_HIGH,      {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_BLOCKED,                 }, 7000,       0 },
+    {GCTX_GFRIEND_TAKE_HOME_HAPPY,        {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_TATTOO,        }, 7000,       0 },
+    {GCTX_GFRIEND_TAKE_HOME_ANGRY,        {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_SMELL,         }, 7000,       0 },
+    {GCTX_GFRIEND_COFFEE,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_ATTACK_GANG_VLA,         }, 7000,       0 },
+    {GCTX_GFRIEND_MOAN,                   {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_WAIT_FOR_ME,         }, 7000,       0 },
+    {GCTX_GFRIEND_MOAN_MUFFLED,           {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_SINGALONG,           }, 7000,       0 },
+    {GCTX_GFRIEND_HEAD,                   {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_CRASH,               }, 7000,       0 },
+    {GCTX_GFRIEND_CLIMAX_HIGH,            {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_ATTACK_BY_PLAYER_LIKE,   }, 7000,       0 },
+    {GCTX_GFRIEND_CLIMAX_HIGH_MUFFLED,    {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_ATTACK_GANG_BALLAS,      }, 7000,       0 },
+    {GCTX_GFRIEND_CLIMAX_LOW,             {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_ATTACK_GANG_LSV,         }, 7000,       0 },
+    {GCTX_GFRIEND_SEX_GOOD,               {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_HAIR,          }, 7000,       0 },
+    {GCTX_GFRIEND_SEX_GOOD_MUFFLED,       {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_PHYS,          }, 7000,       0 },
+    {GCTX_GFRIEND_SEX_BAD,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CONV_LIKE_CLOTHES,       }, 7000,       0 },
+    {GCTX_GFRIEND_MEET_AGAIN,             {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_SLOW,                }, 7000,       0 },
+    {GCTX_GFRIEND_JEALOUS,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_FIRE,                }, 7000,       0 },
+    {GCTX_GFRIEND_JEALOUS_REPLY,          {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_FLIPPED,             }, 7000,       0 },
+    {GCTX_GFRIEND_GOODBYE_HAPPY,          {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_BUMP,                    }, 7000,       0 },
+    {GCTX_GFRIEND_GOODBYE_ANGRY,          {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_BUM_LATCH,               }, 7000,       0 },
+    {GCTX_GFRIEND_LEFT_BEHIND,            {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_GET_IN,              }, 7000,       0 },
+    {GCTX_GFRIEND_HELLO,                  {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_DRIVEBY_BURN_RUBBER, }, 7000,       0 },
+    {GCTX_GFRIEND_GOODBYE,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_BUM_BACK_OFF_2,          }, 7000,       0 },
+    {GCTX_GFRIEND_PICKUP_LOCATION,        {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GFRIEND_PARK_UP,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CHAT,                    }, 7000,       0 },
+    {GCTX_GFRIEND_PARK_LOCATION_HATE,     {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CHASED,                  }, 7000,       0 },
+    {GCTX_GFRIEND_GIFT_LIKE,              {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_BUM_BACK_OFF,            }, 7000,       0 },
+    {GCTX_GFRIEND_CHANGE_RADIO_FAVE,      {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_ARRESTED,                }, 7000,       0 },
+    {GCTX_GFRIEND_CHANGE_RADIO_BACK,      {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_ARREST_CRIM,             }, 7000,       0 },
+    {GCTX_GFRIEND_DO_A_DRIVEBY,           {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_GAMB_CASINO_LOSE,        }, 7000,       0 },
+    {GCTX_GFRIEND_START_A_FIGHT,          {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_GAMB_CONGRATS,           }, 7000,       0 },
+    {GCTX_GFRIEND_REJECT_DATE,            {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_COFFEE_DECLINE,          }, 7000,       0 },
+    {GCTX_GFRIEND_REQUEST_TO_DRIVE_CAR,   {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_GENERIC_HI_FEMALE,       }, 7000,       0 },
+    {GCTX_GFRIEND_DROP_PLAYER_DRIVE_AWAY, {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_GENERIC_HI_MALE,         }, 7000,       0 },
+    {GCTX_GFRIEND_DISLIKE_CURRENT_ZONE,   {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_ATTACK_PLAYER,           }, 7000,       0 },
+    {GCTX_GFRIEND_LIKE_CURRENT_ZONE,      {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_JUMP,                }, 7000,       0 },
+    {GCTX_GFRIEND_HIT_BY_PLAYER_WARNING,  {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_DRIVEBY_TOO_FAST,    }, 7000,       0 },
+    {GCTX_GFRIEND_DUMP_PLAYER_LIVE,       {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_BAR_CHAT,                }, 7000,       0 },
+    {GCTX_GFRIEND_DUMP_PLAYER_PHONE,      {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_GFRIEND_SEX_APPEAL_TOO_LOW,     {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUGGED_CHAT,            }, 7000,       0 },
+    {GCTX_GFRIEND_PHYSIQUE_CRITIQUE,      {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUG_REASONABLE_HIGH,    }, 7000,       0 },
+    {GCTX_GFRIEND_INTRO,                  {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CAR_FAST,                }, 7000,       0 },
+    {GCTX_GFRIEND_NEG_RESPONSE,           {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_CB_CHAT,                 }, 7000,       0 },
+    {GCTX_GFRIEND_POS_RESPONSE,           {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_COFFEE_ACCEPT,           }, 7000,       0 },
+    {GCTX_BOXING_CHEER,                   {GCTX_FOLLOW_ARRIVE,           GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_BOUGHT_ENOUGH,                  {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_GUN_RUN,                 }, 2000,       0 },
+    {GCTX_GIVE_PRODUCT,                   {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUGS_SELL,              }, 2000,       0 },
+    {GCTX_NO_MONEY,                       {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_DUCK,                    }, 2000,       0 },
+    {GCTX_PLAYER_SICK,                    {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_HAVING_SEX,              }, 7000,       0 },
+    {GCTX_REMOVE_TATTOO,                  {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_FOLLOW_REPLY,            }, 3000,       0 },
+    {GCTX_SHOP_CLOSED,                    {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_HAVING_SEX_MUFFLED,      }, 7000,       0 },
+    {GCTX_SHOW_CHANGINGROOM,              {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_JACKED_CAR,              }, 3000,       0 },
+    {GCTX_SHOP_CHAT,                      {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_EYEING_PED_THREAT,       }, 15000,      0 },
+    {GCTX_TAKE_A_SEAT,                    {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_FIGHT,                   }, 7000,       0 },
+    {GCTX_THANKS_FOR_CUSTOM,              {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_FOLLOW_ARRIVE,           }, 7000,       0 },
+    {GCTX_WELCOME_TO_SHOP,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_JACKED_GENERIC,          }, 7000,       0 },
+    {GCTX_WHAT_WANT,                      {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_FOLLOW_CONSTANT,         }, 2000,       0 },
+    {GCTX_PHOTO_CARL,                     {GCTX_UNK,                     GCTX_UNK,                     GCTX_EYEING_PLAYER,           GCTX_UNK,                     GCTX_UNK,                     }, 4000,       0 },
+    {GCTX_PHOTO_CHEESE,                   {GCTX_UNK,                     GCTX_UNK,                     GCTX_FIGHT,                   GCTX_UNK,                     GCTX_UNK,                     }, 4000,       0 },
+    {GCTX_SINGING,                        {GCTX_UNK,                     GCTX_UNK,                     GCTX_FOLLOW_ARRIVE,           GCTX_UNK,                     GCTX_UNK,                     }, 30000,      0 },
+    {GCTX_STOMACH_RUMBLE,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_GAMB_BJ_STAY,            GCTX_UNK,                     GCTX_UNK,                     }, 5000,       0 },
+    {GCTX_BREATHING,                      {GCTX_UNK,                     GCTX_UNK,                     GCTX_DRUGGED_IGNORE,          GCTX_UNK,                     GCTX_UNK,                     }, 4000,       0 },
+    {GCTX_PAIN_COUGH,                     {GCTX_ARRESTED,                GCTX_ARRESTED,                GCTX_ABUSE_GANG_BALLAS,       GCTX_ARRESTED,                GCTX_ARRESTED,                }, 3000,       0 },
+    {GCTX_PAIN_DEATH_DROWN,               {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_PAIN_DEATH_HIGH,                {GCTX_ATTACK_BY_PLAYER_LIKE,   GCTX_ATTACK_BY_PLAYER_LIKE,   GCTX_ABUSE_GANG_LSV,          GCTX_ATTACK_BY_PLAYER_LIKE,   GCTX_ATTACK_BY_PLAYER_LIKE,   }, 2000,       0 },
+    {GCTX_PAIN_DEATH_LOW,                 {GCTX_ATTACK_GANG_BALLAS,      GCTX_ATTACK_GANG_BALLAS,      GCTX_ABUSE_GANG_LSV,          GCTX_ATTACK_GANG_BALLAS,      GCTX_ATTACK_GANG_BALLAS,      }, 2000,       0 },
+    {GCTX_PAIN_HIGH,                      {GCTX_ATTACK_GANG_LSV,         GCTX_ATTACK_GANG_LSV,         GCTX_ABUSE_RIFA,              GCTX_ATTACK_GANG_LSV,         GCTX_ATTACK_GANG_LSV,         }, 2000,       0 },
+    {GCTX_PAIN_LOW,                       {GCTX_ATTACK_GANG_LSV,         GCTX_ATTACK_GANG_LSV,         GCTX_ABUSE_DA_NANG,           GCTX_ATTACK_GANG_LSV,         GCTX_ATTACK_GANG_LSV,         }, 2000,       0 },
+    {GCTX_PAIN_ON_FIRE,                   {GCTX_ATTACK_GANG_VLA,         GCTX_ATTACK_GANG_VLA,         GCTX_ABUSE_MAFIA,             GCTX_ATTACK_GANG_VLA,         GCTX_ATTACK_GANG_VLA,         }, 100 ,       0 },
+    {GCTX_PAIN_PANIC,                     {GCTX_ATTACK_PLAYER,           GCTX_ATTACK_PLAYER,           GCTX_UNK,                     GCTX_ATTACK_PLAYER,           GCTX_ATTACK_PLAYER,           }, 8000,       0 },
+    {GCTX_PAIN_SPRAYED,                   {GCTX_BAR_CHAT,                GCTX_BAR_CHAT,                GCTX_UNK,                     GCTX_BAR_CHAT,                GCTX_BAR_CHAT,                }, 2000,       0 },
+    {GCTX_PAIN_CJ_BOXING,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_NO_SPEECH,               GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_PAIN_CJ_GRUNT,                  {GCTX_UNK,                     GCTX_UNK,                     GCTX_ABUSE_GANG_FAMILIES,     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_PAIN_CJ_PUKE,                   {GCTX_UNK,                     GCTX_UNK,                     GCTX_AFTER_SEX,               GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_PAIN_CJ_PANT_IN,                {GCTX_UNK,                     GCTX_UNK,                     GCTX_ACCEPT_DATE_CALL,        GCTX_UNK,                     GCTX_UNK,                     }, 1000,       0 },
+    {GCTX_PAIN_CJ_PANT_OUT,               {GCTX_UNK,                     GCTX_UNK,                     GCTX_ACCEPT_DATE_REQUEST,     GCTX_UNK,                     GCTX_UNK,                     }, 1000,       0 },
+    {GCTX_PAIN_CJ_STRAIN,                 {GCTX_UNK,                     GCTX_UNK,                     GCTX_APOLOGY,                 GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_PAIN_CJ_STRAIN_EXHALE,          {GCTX_UNK,                     GCTX_UNK,                     GCTX_ARREST,                  GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_PAIN_CJ_SWIM_GASP,              {GCTX_UNK,                     GCTX_UNK,                     GCTX_ARREST_CRIM,             GCTX_UNK,                     GCTX_UNK,                     }, 10000,      0 },
+    {GCTX_PAIN_CJ_DROWNING,               {GCTX_UNK,                     GCTX_UNK,                     GCTX_ABUSE_GANG_VLA,          GCTX_UNK,                     GCTX_UNK,                     }, 2000,       0 },
+    {GCTX_PAIN_CJ_HIGH_FALL,              {GCTX_UNK,                     GCTX_UNK,                     GCTX_ABUSE_TRIAD,             GCTX_UNK,                     GCTX_UNK,                     }, 3000,       0 },
+    {GCTX_END,                            {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 7000,       0 },
+    {GCTX_UNK,                            {GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     GCTX_UNK,                     }, 65535,      0 },
+}};
+
 void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedVirtualClass(CAEPedSpeechAudioEntity, 0x85F310, 8);
     RH_ScopedCategory("Audio/Entities");
@@ -323,14 +689,10 @@ int16 CAEPedSpeechAudioEntity::GetSpecificSpeechContext(eGlobalSpeechContext gCt
     assert(gCtx > GCTX_UNK);             // notsa
     assert(gCtx < GCTX_NUM);             // OG: return -1; (silent error)
     assert(pedAudioType < PED_TYPE_NUM); // OG: return -1; (silent error)
+    assert(pedAudioType >= 0);           // notsa
 
-    for (int32 i = 0; ; i++) { // NOTE/BUG: No `i` check at all? (Eg.: i < gSpeechContextLookup.size()?)
-        const auto& contexts = gSpeechContextLookup[i];
-        if (contexts[0] == GCTX_UNK) {
-            break;
-        } else if (contexts[0] == gCtx) {
-            return contexts[pedAudioType + 1];
-        }
+    if (const auto* const ctxi = GetSpeechContextInfo(gCtx)) {
+        return ctxi->SpecificSpeechContext[pedAudioType];
     }
     return -1;
 }
@@ -641,21 +1003,36 @@ int8 CAEPedSpeechAudioEntity::GetSexForSpecialPed(uint32 a1) {
     return 1;
 }
 
-// Methods
 // 0x4E46B0
-bool CAEPedSpeechAudioEntity::IsGlobalContextImportantForWidescreen(int16 globalCtx) {
-    return notsa::contains<int>({4, 2}, m_PedAudioType) || notsa::contains<int>({13, 15, 116}, globalCtx);
+bool CAEPedSpeechAudioEntity::IsGlobalContextImportantForWidescreen(int16 gCtx) {
+    switch (m_PedAudioType) {
+    case PED_TYPE_GFD:
+    case PED_TYPE_PLAYER:
+        return true;
+    }
+    switch (gCtx) {
+    case GCTX_ARREST:
+    case GCTX_ARRESTED:
+    case GCTX_HAVING_SEX:
+        return true;
+    }
+    return false;
 }
 
 // 0x4E47E0
-int32 CAEPedSpeechAudioEntity::GetRepeatTime(int16 a1) {
-    return plugin::CallMethodAndReturn<int32, 0x4E47E0, CAEPedSpeechAudioEntity*, int16>(this, a1);
+int16 CAEPedSpeechAudioEntity::GetRepeatTime(eGlobalSpeechContext gCtx) {
+    assert(gCtx < GCTX_NUM); // OG: return 0
+
+    if (const auto* const ctxi = GetSpeechContextInfo(gCtx)) {
+        return ctxi->RepeatTime;
+    }
+    return 0;
 }
 
 // 0x4E4840
-void CAEPedSpeechAudioEntity::LoadAndPlaySpeech(uint32 offset) {
-    auto& s = GetSpeech();
-    switch (s.Status) {
+void CAEPedSpeechAudioEntity::LoadAndPlaySpeech(uint32 playbackTimeOffsetMS) {
+    auto& ss = GetMySpeechSlot();
+    switch (ss.Status) {
     case CAEPedSpeechSlot::eStatus::FREE:
     case CAEPedSpeechSlot::eStatus::RESERVED:
         break;
@@ -664,14 +1041,14 @@ void CAEPedSpeechAudioEntity::LoadAndPlaySpeech(uint32 offset) {
     }
 
     AEAudioHardware.LoadSound(m_BankID, m_SoundID, SND_BANK_SLOT_SPEECH1 + m_PedSpeechSlotID); // TODO: Helper
-    s.Status            = CAEPedSpeechSlot::eStatus::LOADING;
-    s.SoundBankID       = m_BankID;
-    s.SoundID           = m_SoundID;
-    s.AudioEntity       = this;
-    s.StartPlaybackTime = CTimer::GetTimeInMS() + offset;
-    s.PedAudioType      = m_PedAudioType;
-    s.GCtx              = m_LastGCtx;
-    s.ForceAudible      = m_IsForcedAudible;
+    ss.Status            = CAEPedSpeechSlot::eStatus::LOADING;
+    ss.SoundBankID       = m_BankID;
+    ss.SoundID           = m_SoundID;
+    ss.AudioEntity       = this;
+    ss.StartPlaybackTime = CTimer::GetTimeInMS() + playbackTimeOffsetMS;
+    ss.PedAudioType      = m_PedAudioType;
+    ss.GCtx              = m_LastGCtx;
+    ss.ForceAudible      = m_IsForcedAudible;
 }
 
 // 0x4E49B0
@@ -682,37 +1059,18 @@ int32 CAEPedSpeechAudioEntity::GetNumSlotsPlayingContext(int16 context) {
 }
 
 // 0x4E49E0
-uint32 CAEPedSpeechAudioEntity::GetNextPlayTime(int16 globalCtx) {
-    if (globalCtx >= GCTX_NUM) {
-        return 0;
-    }
-    return IsGlobalContextPain(globalCtx)
-        ? m_NextTimeCanSayPain[globalCtx - GCTX_PAIN_START + 1]
-        : gGlobalSpeechContextNextPlayTime[globalCtx];
+uint32 CAEPedSpeechAudioEntity::GetNextPlayTime(eGlobalSpeechContext gCtx) {
+    assert(gCtx < GCTX_NUM); // OG: `return 0;`
+
+    return GetNextPlayTimeRef(gCtx);
 }
 
 // 0x4E4A20
-void CAEPedSpeechAudioEntity::SetNextPlayTime(int16 globalCtx) {
-    // plugin::CallMethod<0x4E4A20>(this, globalCtx);
+void CAEPedSpeechAudioEntity::SetNextPlayTime(eGlobalSpeechContext gCtx) {
+    assert(gCtx < GCTX_NUM); // OG: `return;`
 
-    if (globalCtx >= GCTX_NUM)
-        return;
-
-    for (auto& lookup : gSpeechContextLookup) {
-        if (lookup[0] == -1)
-            break;
-
-        if (lookup[0] != globalCtx)
-            continue;
-
-        const auto playTime = lookup[6] + CAEAudioUtility::GetRandomNumberInRange(1, 1000);
-        auto& ctxNextPlayTime = [&]() -> uint32& {
-            if (IsGlobalContextPain(globalCtx))
-                return m_NextTimeCanSayPain[globalCtx - 340];
-            else
-                return gGlobalSpeechContextNextPlayTime[globalCtx];
-        }() = CTimer::GetTimeInMS() + playTime;
-        return;
+    if (const auto* const ctxi = GetSpeechContextInfo(gCtx)) {
+        GetNextPlayTimeRef(gCtx) = CTimer::GetTimeInMS() + ctxi->RepeatTime + CAEAudioUtility::GetRandomNumberInRange(1, 1000);
     }
 }
 
@@ -742,7 +1100,7 @@ int8 CAEPedSpeechAudioEntity::CanPedSayGlobalContext(int16 a2) {
 // 0x4E58C0
 int8 CAEPedSpeechAudioEntity::GetVoiceAndTypeFromModel(eModelID modelId) {
     auto* const mi = CModelInfo::GetModelInfo(modelId)->AsPedModelInfoPtr();
-    if (mi->m_nPedAudioType < 0 || mi->m_nPedAudioType >= 6) {
+    if (mi->m_nPedAudioType < 0 || mi->m_nPedAudioType >= PED_TYPE_NUM) {
         return 0;
     }
 
@@ -751,7 +1109,7 @@ int8 CAEPedSpeechAudioEntity::GetVoiceAndTypeFromModel(eModelID modelId) {
     }
 
     m_VoiceID = mi->m_nVoiceId;
-    if (m_VoiceID == PED_TYPE_UNK) {
+    if (m_VoiceID == -1) {
         return 0;
     }
 
@@ -894,10 +1252,21 @@ int32 CAEPedSpeechAudioEntity::GetFreeSpeechSlot() {
     return -1;
 }
 
+uint32& CAEPedSpeechAudioEntity::GetNextPlayTimeRef(eGlobalSpeechContext gCtx) {
+    return IsGlobalContextPain(gCtx)
+        ? m_NextTimeCanSayPain[gCtx - GCTX_PAIN_START + 1]
+        : gGlobalSpeechContextNextPlayTime[gCtx];
+}
+
 // 0x4E4F10
 CAEPedSpeechAudioEntity* CAEPedSpeechAudioEntity::Constructor() {
     this->CAEPedSpeechAudioEntity::CAEPedSpeechAudioEntity();
     return this;
 }
 
-// 0x4E3520// 0x4E4F70// 0x4E5670// 0x4E5CD0// 0x4E4120// 0x4E5800// 0x4E4130// 0x4E4150
+// notsa
+const tSpeechContextInfo* CAEPedSpeechAudioEntity::GetSpeechContextInfo(eGlobalSpeechContext gCtx) {
+    const auto& e = gSpeechContextLookup[gCtx];
+    assert(e.GCtx == gCtx); // If ever triggered we'll need to use a for loop and search for `GCtx` manually
+    return &e;
+}
