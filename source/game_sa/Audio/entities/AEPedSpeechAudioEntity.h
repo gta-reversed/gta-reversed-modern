@@ -241,8 +241,11 @@ private:
     }
 
     // NOTSA
-    CAEPedSpeechSlot& GetCurrentSpeech() const {
-        return s_PedSpeechSlots[m_PedSpeechSlotID];
+    CAEPedSpeechSlot* GetCurrentSpeech() const {
+        assert(!m_IsPlayingSpeech || m_PedSpeechSlotID != -1);
+        return m_IsPlayingSpeech
+            ? &s_PedSpeechSlots[m_PedSpeechSlotID]
+            : nullptr;
     }
 };
 

@@ -5,6 +5,7 @@
 #include "PedClothesDesc.h"
 #include <AEAudioHardware.h>
 #include <Audio/eSoundBankSlot.h>
+#include <Tasks/TaskTypes/TaskComplexFacial.h>
 
 // clang-format off
 
@@ -1337,7 +1338,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(IsGlobalContextImportantForStreaming, 0x4E4510);
     RH_ScopedInstall(EnablePedSpeech, 0x4E3F70);
     RH_ScopedInstall(EnablePedSpeechForScriptSpeech, 0x4E3F90);
-    RH_ScopedInstall(StopCurrentSpeech, 0x4E3FB0, { .reversed = false });
+    RH_ScopedInstall(StopCurrentSpeech, 0x4E3FB0);
     RH_ScopedInstall(GetSoundAndBankIDsForScriptedSpeech, 0x4E4400, { .reversed = false });
     RH_ScopedInstall(GetSexFromModel, 0x4E4200, { .reversed = false });
     RH_ScopedInstall(GetPedTalking, 0x4E3F50);
@@ -1619,7 +1620,7 @@ eSpecificSpeechContext CAEPedSpeechAudioEntity::GetSpecificSpeechContext(eGlobal
 }
 
 // 0x4E3710
-void CAEPedSpeechAudioEntity::Service() {
+void CAEPedSpeechAudioEntity::Service() { // static
     s_bForceAudible = false;
     for (auto&& [i, ss] : notsa::enumerate(s_PedSpeechSlots)) {
         // Waiting for sound to load, and has loaded?
@@ -1667,8 +1668,8 @@ bool CAEPedSpeechAudioEntity::ReservePedConversationSpeechSlots() {
 
     const auto SetupSlot = [](int32 slot) {
         auto* const ss                   = &s_PedSpeechSlots[slot];
-        ss->Status                       = CAEPedSpeechSlot::eStatus::RESERVED;
         ss->IsReservedForPedConversation = true;
+        ss->Status                       = CAEPedSpeechSlot::eStatus::RESERVED;
     };
     SetupSlot(s_pConversationPedSlot1 = slotA);
     SetupSlot(s_pConversationPedSlot2 = slotB);
@@ -1975,8 +1976,8 @@ int16 CAEPedSpeechAudioEntity::GetRepeatTime(eGlobalSpeechContext gCtx) {
 
 // 0x4E4840
 void CAEPedSpeechAudioEntity::LoadAndPlaySpeech(uint32 playbackTimeOffsetMS) {
-    auto& ss = GetCurrentSpeech();
-    switch (ss.Status) {
+    auto* const speech = GetCurrentSpeech();
+    switch (speech->Status) {
     case CAEPedSpeechSlot::eStatus::FREE:
     case CAEPedSpeechSlot::eStatus::RESERVED:
         break;
@@ -1984,15 +1985,17 @@ void CAEPedSpeechAudioEntity::LoadAndPlaySpeech(uint32 playbackTimeOffsetMS) {
         return;
     }
 
-    AEAudioHardware.LoadSound(m_BankID, m_SoundID, SND_BANK_SLOT_SPEECH1 + m_PedSpeechSlotID); // TODO: Helper
-    ss.Status            = CAEPedSpeechSlot::eStatus::LOADING;
-    ss.SoundBankID       = m_BankID;
-    ss.SoundID           = m_SoundID;
-    ss.AudioEntity       = this;
-    ss.StartPlaybackTime = CTimer::GetTimeInMS() + playbackTimeOffsetMS;
-    ss.PedAudioType      = m_PedAudioType;
-    ss.GCtx              = m_LastGCtx;
-    ss.ForceAudible      = m_IsForcedAudible;
+    AEAudioHardware.LoadSound(m_BankID, m_SoundID, SND_BANK_SLOT_SPEECH1 + m_PedSpeechSlotID);
+    *speech = CAEPedSpeechSlot{
+        .Status            = CAEPedSpeechSlot::eStatus::LOADING,
+        .AudioEntity       = this,
+        .SoundID           = m_SoundID,
+        .SoundBankID       = m_BankID,
+        .StartPlaybackTime = CTimer::GetTimeInMS() + playbackTimeOffsetMS,
+        .GCtx              = m_LastGCtx,
+        .PedAudioType      = m_PedAudioType,
+        .ForceAudible      = m_IsForcedAudible,
+    };
 }
 
 // 0x4E49B0
@@ -2201,8 +2204,10 @@ int16 CAEPedSpeechAudioEntity::AddSayEvent(eAudioEvents audioEvent, eGlobalSpeec
         return IsGlobalContextPain(c) || IsGlobalContextImportantForInterupting(c);
     };
     if (IsContextImportant(gCtx)) {
-        if (m_IsPlayingSpeech && IsContextImportant(GetCurrentSpeech().GCtx)) {
-            return -1;
+        if (const auto* const speech = GetCurrentSpeech()) {
+            if (IsContextImportant(speech->GCtx)) {
+                return -1;
+            }
         }
         StopCurrentSpeech();
     }
@@ -2342,7 +2347,35 @@ void CAEPedSpeechAudioEntity::EnablePedSpeechForScriptSpeech() {
 
 // 0x4E3FB0
 void CAEPedSpeechAudioEntity::StopCurrentSpeech() {
-    plugin::CallMethod<0x4E3FB0, CAEPedSpeechAudioEntity*>(this);
+    if (!m_IsInitialized || !m_IsPlayingSpeech) {
+        return;
+    }
+
+    if (auto* const tFacial = CTask::Cast<CTaskComplexFacial>(m_pEntity->AsPed()->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_FACIAL_COMPLEX))) {
+        tFacial->StopAll();
+    }
+
+    auto* const speech = GetCurrentSpeech();
+
+    if (speech->Status == CAEPedSpeechSlot::eStatus::PLAYING) {
+        if (auto* const s = std::exchange(m_Sound, nullptr)) {
+            s->StopSoundAndForget();
+        }
+    }
+
+    *speech = CAEPedSpeechSlot{
+        .Status = speech->IsReservedForPedConversation || speech->IsReservedForPlayerConversation
+            ? CAEPedSpeechSlot::eStatus::RESERVED
+            : CAEPedSpeechSlot::eStatus::FREE,
+        .IsReservedForPedConversation    = speech->IsReservedForPedConversation,
+        .IsReservedForPlayerConversation = speech->IsReservedForPlayerConversation,
+    };
+
+    m_IsPlayingSpeech = false;
+    if (m_PedAudioType == PED_TYPE_PLAYER) {
+        s_bAPlayerSpeaking = false;
+    }
+    m_PedSpeechSlotID = -1;
 }
 
 // 0x4E4400
