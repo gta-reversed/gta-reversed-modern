@@ -152,7 +152,9 @@ enum eSoundBank : int16 {
     SND_BANK_PAIN_A_CARL                       = 144, // 0x90
     SND_BANK_PAIN_A_FEMALE                     = 145, // 0x91
     SND_BANK_PAIN_A_MALE                       = 146, // 0x92
-    SND_BANK_SCRIPT_SCANNER_AREAS              = 147, // 0x93
+
+    SND_BANK_SCRIPT_FIRST                      = 147, // NOTSA
+    SND_BANK_SCRIPT_SCANNER_AREAS              = SND_BANK_SCRIPT_FIRST, // 0x93
     SND_BANK_SCRIPT_SCANNER_COLOURS            = 148, // 0x94
     SND_BANK_SCRIPT_SCANNER_DIRECTIONS         = 149, // 0x95
     SND_BANK_SCRIPT_SCANNER_INSTRUCTIONS       = 150, // 0x96

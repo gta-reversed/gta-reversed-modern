@@ -28,7 +28,7 @@ public:
     static uint32    ConvertFromBytesToMS(uint32 lengthInBytes, uint32 frequency, uint16 frequencyMult);
     static uint32    ConvertFromMSToBytes(uint32 a, uint32 frequency, uint16 frequencyMult);
 
-    static bool      GetBankAndSoundFromScriptSlotAudioEvent(int32& slot, int32& outBank, int32& outSound, int32 a4);
+    static bool      GetBankAndSoundFromScriptSlotAudioEvent(const eAudioEvents& ae, eSoundBankS32& outBankID, int32& outSoundID, int32 slot);
     static float     GetPiecewiseLinear(float x, int16 dataCount, float (*data)[2]);
     static uint64    GetCurrentTimeInMS();
 

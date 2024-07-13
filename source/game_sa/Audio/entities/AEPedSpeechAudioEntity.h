@@ -212,7 +212,7 @@ public:
     void EnablePedSpeech();
     void EnablePedSpeechForScriptSpeech();
     void StopCurrentSpeech();
-    int8 GetSoundAndBankIDsForScriptedSpeech(int32 a2);
+    bool GetSoundAndBankIDsForScriptedSpeech(eAudioEvents ae);
     bool GetSexFromModel(eModelID model);
     bool GetPedTalking();
     int8 GetVoiceAndTypeForSpecialPed(uint32 modelNameHash);

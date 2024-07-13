@@ -1339,7 +1339,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(EnablePedSpeech, 0x4E3F70);
     RH_ScopedInstall(EnablePedSpeechForScriptSpeech, 0x4E3F90);
     RH_ScopedInstall(StopCurrentSpeech, 0x4E3FB0);
-    RH_ScopedInstall(GetSoundAndBankIDsForScriptedSpeech, 0x4E4400, { .reversed = false });
+    RH_ScopedInstall(GetSoundAndBankIDsForScriptedSpeech, 0x4E4400);
     RH_ScopedInstall(GetSexFromModel, 0x4E4200, { .reversed = false });
     RH_ScopedInstall(GetPedTalking, 0x4E3F50);
     RH_ScopedInstall(GetVoiceAndTypeForSpecialPed, 0x4E4170, { .reversed = false });
@@ -2379,8 +2379,19 @@ void CAEPedSpeechAudioEntity::StopCurrentSpeech() {
 }
 
 // 0x4E4400
-int8 CAEPedSpeechAudioEntity::GetSoundAndBankIDsForScriptedSpeech(int32 a2) {
-    return plugin::CallMethodAndReturn<int8, 0x4E4400, CAEPedSpeechAudioEntity*, int32>(this, a2);
+bool CAEPedSpeechAudioEntity::GetSoundAndBankIDsForScriptedSpeech(eAudioEvents ae) {
+    int32         soundID;
+    eSoundBankS32 bankID;
+    CAEAudioUtility::GetBankAndSoundFromScriptSlotAudioEvent(ae, bankID, soundID, -1);
+    if (soundID < 0 || bankID < 0) {
+        m_BankID  = SND_BANK_UNK;
+        m_SoundID = -1;
+        return false;
+    } else {
+        m_BankID  = bankID;
+        m_SoundID = soundID;
+        return true;
+    }
 }
 
 // 0x4E4200
