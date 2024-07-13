@@ -1,5 +1,6 @@
 #pragma once
 #include "eRadioID.h"
+#include <General.h>
 
 class CVehicle;
 
@@ -7,8 +8,18 @@ class CAEAudioUtility {
 public:
     static void      StaticInitialise();
 
-    static int32     GetRandomNumberInRange(const int32 min, const int32 max);
-    static float     GetRandomNumberInRange(float a, float b);
+    template<std::integral T>
+    static T GetRandomNumberInRange(T min, T max) {
+        // This and CGeneral differs in that this function returns a number [min, max + 1], while
+        // the other [min, max]. To solve this we do `max + 1`
+        return CGeneral::GetRandomNumberInRange<T>(min, max + 1);
+    }
+
+    template<typename T>
+        requires std::is_floating_point_v<T>
+    static T GetRandomNumberInRange(T min, T max) {
+        return CGeneral::GetRandomNumberInRange<T>(min, max);
+    }
 
     static CVehicle* FindVehicleOfPlayer();
     static bool      ResolveProbability(float prob);
