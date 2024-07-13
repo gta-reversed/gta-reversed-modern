@@ -12,6 +12,9 @@
 #include <Audio/PedSpeechContexts.h>
 #include <Audio/PedSpeechVoices.h>
 #include <Audio/ePedAudioType.h>
+#include <Enums/eModelID.h>
+
+class CPed;
 
 enum eCJMood : int16 {
     MOOD_UNK = -1, // notsa
@@ -89,7 +92,7 @@ VALIDATE_SIZE(tGlobalSpeechContextInfo, sizeof(int16) * 8);
  * @details See `eGenSpeechContexts`, `eEmgSpeechContexts`, `ePlySpeechContexts`, `eGngSpeechContexts`, `eGfdSpeechContexts`
  */
 struct tSpecificSpeechContextInfo {
-    int16 FirstSoundID, LastSoundID;
+    int16 FirstSoundID{-1}, LastSoundID{-1};
 };
 VALIDATE_SIZE(tSpecificSpeechContextInfo, sizeof(int16) * 2);
 
@@ -136,6 +139,7 @@ public:
     static inline auto& s_pConversationPed1              = StaticRef<CPed*>(0xB61410);
     static inline auto& s_NextSpeechSlot                 = StaticRef<int16>(0xB61414);
 
+    //! A least-recently-used (FILO) cache of phrases used
     static inline auto& s_PhraseMemory                   = StaticRef<std::array<tPhraseMemory, 150>>(0xB61418);
     static inline auto& s_PedSpeechSlots                 = StaticRef<std::array<CAEPedSpeechSlot, PED_TYPE_NUM>>(0xB61C38);
     static inline auto& gGlobalSpeechContextNextPlayTime = StaticRef<std::array<uint32, CTX_GLOBAL_NUM>>(0xB61670); // PAIN (CTX_GLOBAL_PAIN_START -> CTX_GLOBAL_PAIN_END) is ignored, and `m_NextTimeCanSayPain` is used instead
@@ -146,8 +150,8 @@ public:
     CAEPedSpeechAudioEntity() = default;
     ~CAEPedSpeechAudioEntity() = default;
 
-    static bool __stdcall IsGlobalContextImportantForInterupting(int16 globalCtx); // typo: Interrupting
-    static bool IsGlobalContextUberImportant(int16 globalCtx);
+    static bool __stdcall IsGlobalContextImportantForInterupting(int16 gCtx); // typo: Interrupting
+    static bool IsGlobalContextUberImportant(int16 gCtx);
     static int16 __stdcall GetNextMoodToUse(eCJMood lastMood);
     static int32 __stdcall GetVoiceForMood(int16 mood);
     static int16 CanWePlayScriptedSpeech();
@@ -156,7 +160,7 @@ public:
     static void ReleasePedConversation();
     static int16 GetCurrentCJMood();
     static void StaticInitialise();
-    static int16 GetSpecificSpeechContext(eGlobalSpeechContext gCtx, eAudioPedType pedAudioType);
+    static eSpecificSpeechContext GetSpecificSpeechContext(eGlobalSpeechContext gCtx, eAudioPedType pedAudioType);
     static void Service();
     static void Reset();
     static bool ReservePedConversationSpeechSlots();
@@ -167,10 +171,10 @@ public:
     static eAudioPedType GetAudioPedType(const char* name);
     static ePedSpeechVoiceS16 GetVoice(const char* name, eAudioPedTypeS16 type);
     static void DisableAllPedSpeech();
-    static const tGlobalSpeechContextInfo* GeGlobalSpeechContextInfo(eGlobalSpeechContext gCtx);
-
-
-    bool        IsGlobalContextPain(int16 globalCtx);
+    static bool __stdcall IsGlobalContextPain(eGlobalSpeechContext gCtx);
+    static const tGlobalSpeechContextInfo* GetGlobalSpeechContextInfo(eGlobalSpeechContext gCtx);
+    static const tSpecificSpeechContextInfo* GetSpecificSpeechContextInfo(eSpecificSpeechContext sCtx, eGlobalSpeechContext gCtx, eAudioPedType pt, ePedSpeechVoiceS16 voice);
+    static eSoundBank GetVoiceSoundBank(eGlobalSpeechContext gCtx, eAudioPedType pt, ePedSpeechVoiceS16 voice);
 
     /*!
      * @addr 0x4E3ED0
@@ -194,9 +198,9 @@ public:
     void SetNextPlayTime(eGlobalSpeechContext gCtx);
     void DisablePedSpeech(int16 a1);
     void DisablePedSpeechForScriptSpeech(int16 a1);
-    int8 CanPedSayGlobalContext(int16 a2);
+    bool CanPedSayGlobalContext(eGlobalSpeechContext gCtx) const;
     int8 GetVoiceAndTypeFromModel(eModelID modelId);
-    int16 GetSoundAndBankIDs(int16 phraseId, int16* a3);
+    int16 GetSoundAndBankIDs(eGlobalSpeechContext gCtx, eSpecificSpeechContext& outSpecificSpeechContext);
     bool CanWePlayGlobalSpeechContext(int16 a2);
     int16 AddSayEvent(eAudioEvents audioEvent, int16 phraseId, uint32 a4, float a5, uint8 a6, uint8 a7, uint8 a8);
     void Initialise(CEntity* ped);
@@ -209,6 +213,7 @@ public:
     int8 GetSexFromModel(int32);
     bool GetPedTalking();
     int8 GetVoiceAndTypeForSpecialPed(uint32 modelNameHash);
+    ePainSpeechVoices GetPainVoice() const;
 
     bool IsAllSpeechDisabled() const noexcept { return m_IsSpeechDisabled || m_IsSpeechForScriptsDisabled; }
 
@@ -226,8 +231,11 @@ private:
     uint32& GetNextPlayTimeRef(eGlobalSpeechContext gCtx);
 
 private:
-    CAEPedSpeechAudioEntity* Constructor();
-
+    // 0x4E4F10
+    CAEPedSpeechAudioEntity* Constructor() {
+        this->CAEPedSpeechAudioEntity::CAEPedSpeechAudioEntity();
+        return this;
+    }
 
     // NOTSA
     CAEPedSpeechSlot& GetMySpeechSlot() const {

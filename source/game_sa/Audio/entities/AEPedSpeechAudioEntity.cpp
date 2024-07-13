@@ -1,5 +1,5 @@
 #include "StdInc.h"
-
+#include <bitset>
 #include "AEPedSpeechAudioEntity.h"
 #include "AEAudioUtility.h"
 #include "PedClothesDesc.h"
@@ -1276,7 +1276,16 @@ static constexpr std::array<eSoundBank, VOICE_GFD_END> gGfdSpeechVoiceToBankLook
     SND_BANK_SPC_FA_WMYCLOT,  // VOICE_GFD_WMYCLOT
     SND_BANK_SPC_FA_WMYPIZZ,  // VOICE_GFD_WMYPIZZ
 };
+
+// 0x8C64AC
+static constexpr std::array<eSoundBank, VOICE_PAIN_END> gPainVoiceToBankLookup = {
+    SND_BANK_PAIN_A_CARL,   // VOICE_PAIN_FEMALE
+    SND_BANK_PAIN_A_FEMALE, // VOICE_PAIN_MALE
+    SND_BANK_PAIN_A_MALE,   // VOICE_PAIN_END
 };
+};
+
+// clang-format on
 
 void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedVirtualClass(CAEPedSpeechAudioEntity, 0x85F310, 8);
@@ -1317,9 +1326,9 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(SetNextPlayTime, 0x4E4A20);
     RH_ScopedInstall(DisablePedSpeech, 0x4E56D0);
     RH_ScopedInstall(DisablePedSpeechForScriptSpeech, 0x4E5700);
-    RH_ScopedInstall(CanPedSayGlobalContext, 0x4E5730, { .reversed = false });
+    RH_ScopedInstall(CanPedSayGlobalContext, 0x4E5730);
     RH_ScopedInstall(GetVoiceAndTypeFromModel, 0x4E58C0);
-    RH_ScopedInstall(GetSoundAndBankIDs, 0x4E5920, { .reversed = false });
+    RH_ScopedInstall(GetSoundAndBankIDs, 0x4E5920);
     RH_ScopedInstall(CanWePlayGlobalSpeechContext, 0x4E5F10, { .reversed = false });
     RH_ScopedInstall(AddSayEvent, 0x4E6550, { .reversed = false });
     RH_ScopedInstall(Initialise, 0x4E68D0, { .reversed = false });
@@ -1343,8 +1352,8 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
 }
 
 // 0x4E4600
-bool __stdcall CAEPedSpeechAudioEntity::IsGlobalContextImportantForInterupting(int16 globalCtx) {
-    switch (globalCtx) {
+bool __stdcall CAEPedSpeechAudioEntity::IsGlobalContextImportantForInterupting(int16 gCtx) {
+    switch (gCtx) {
     case 13:
     case 15:
     case 125:
@@ -1357,7 +1366,7 @@ bool __stdcall CAEPedSpeechAudioEntity::IsGlobalContextImportantForInterupting(i
 }
 
 // 0x4E46F0 - unused
-bool CAEPedSpeechAudioEntity::IsGlobalContextUberImportant(int16 globalCtx) {
+bool CAEPedSpeechAudioEntity::IsGlobalContextUberImportant(int16 gCtx) {
     return false;
 }
 
@@ -1591,13 +1600,11 @@ void CAEPedSpeechAudioEntity::StaticInitialise() {
 }
 
 // 0x4E4470
-int16 CAEPedSpeechAudioEntity::GetSpecificSpeechContext(eGlobalSpeechContext gCtx, eAudioPedType pedAudioType) {
-    assert(gCtx > CTX_GLOBAL_UNK);       // notsa
-    assert(gCtx < CTX_GLOBAL_NUM);       // OG: return -1; (silent error)
-    assert(pedAudioType < PED_TYPE_NUM); // OG: return -1; (silent error)
-    assert(pedAudioType >= 0);           // notsa
-
-    if (const auto* const ctxi = GeGlobalSpeechContextInfo(gCtx)) {
+eSpecificSpeechContext CAEPedSpeechAudioEntity::GetSpecificSpeechContext(eGlobalSpeechContext gCtx, eAudioPedType pedAudioType) {
+    // Omitted useless `if`s
+    // NOTE: Original code allowed `PED_TYPE_SPC` as a valid ped type too... but that (technically) caused an out-of-bounds read...
+    //       We won't assert on that, because there are bounds check for the array (as we use std::array)
+    if (const auto* const ctxi = GetGlobalSpeechContextInfo(gCtx)) {
         return ctxi->SpecificSpeechContext[pedAudioType];
     }
     return -1;
@@ -1842,8 +1849,8 @@ void CAEPedSpeechAudioEntity::DisableAllPedSpeech() {
 }
 
 // 0x4E44F0
-bool CAEPedSpeechAudioEntity::IsGlobalContextPain(int16 globalCtx) {
-    return CTX_GLOBAL_PAIN_START < globalCtx && globalCtx < CTX_GLOBAL_PAIN_END;
+bool __stdcall CAEPedSpeechAudioEntity::IsGlobalContextPain(eGlobalSpeechContext gCtx) {
+    return CTX_GLOBAL_PAIN_START < gCtx && gCtx < CTX_GLOBAL_PAIN_END;
 }
 
 // 0x4E3ED0
@@ -1929,7 +1936,7 @@ bool CAEPedSpeechAudioEntity::IsGlobalContextImportantForWidescreen(eGlobalSpeec
 int16 CAEPedSpeechAudioEntity::GetRepeatTime(eGlobalSpeechContext gCtx) {
     assert(gCtx < CTX_GLOBAL_NUM); // OG: return 0
 
-    if (const auto* const ctxi = GeGlobalSpeechContextInfo(gCtx)) {
+    if (const auto* const ctxi = GetGlobalSpeechContextInfo(gCtx)) {
         return ctxi->RepeatTime;
     }
     return 0;
@@ -1975,7 +1982,7 @@ uint32 CAEPedSpeechAudioEntity::GetNextPlayTime(eGlobalSpeechContext gCtx) {
 void CAEPedSpeechAudioEntity::SetNextPlayTime(eGlobalSpeechContext gCtx) {
     assert(gCtx < CTX_GLOBAL_NUM); // OG: `return;`
 
-    if (const auto* const ctxi = GeGlobalSpeechContextInfo(gCtx)) {
+    if (const auto* const ctxi = GetGlobalSpeechContextInfo(gCtx)) {
         GetNextPlayTimeRef(gCtx) = CTimer::GetTimeInMS() + ctxi->RepeatTime + CAEAudioUtility::GetRandomNumberInRange(1, 1000);
     }
 }
@@ -1999,14 +2006,24 @@ void CAEPedSpeechAudioEntity::DisablePedSpeechForScriptSpeech(int16 a1) {
 }
 
 // 0x4E5730
-int8 CAEPedSpeechAudioEntity::CanPedSayGlobalContext(int16 a2) {
-    return plugin::CallMethodAndReturn<int8, 0x4E5730>(this, a2);
+bool CAEPedSpeechAudioEntity::CanPedSayGlobalContext(eGlobalSpeechContext gCtx) const {
+    if (!m_IsInitialized) {
+        return false;
+    }
+    const auto sCtx = GetSpecificSpeechContext(gCtx, m_PedAudioType);
+    if (sCtx == -1) {
+        return false;
+    }
+    if (const auto* const ctxi = GetSpecificSpeechContextInfo(sCtx, gCtx, m_PedAudioType, m_VoiceID)) {
+        return ctxi->FirstSoundID != -1;
+    }
+    return false;
 }
 
 // 0x4E58C0
 int8 CAEPedSpeechAudioEntity::GetVoiceAndTypeFromModel(eModelID modelId) {
     auto* const mi = CModelInfo::GetModelInfo(modelId)->AsPedModelInfoPtr();
-    if (mi->m_nPedAudioType < 0 || mi->m_nPedAudioType >= PED_TYPE_NUM) {
+    if (mi->m_nPedAudioType == -1 || mi->m_nPedAudioType >= PED_TYPE_NUM) {
         return 0;
     }
 
@@ -2025,8 +2042,70 @@ int8 CAEPedSpeechAudioEntity::GetVoiceAndTypeFromModel(eModelID modelId) {
 }
 
 // 0x4E5920
-int16 CAEPedSpeechAudioEntity::GetSoundAndBankIDs(int16 phraseId, int16* a3) {
-    return plugin::CallMethodAndReturn<int16, 0x4E5920, CAEPedSpeechAudioEntity*, int16, int16*>(this, phraseId, a3);
+int16 CAEPedSpeechAudioEntity::GetSoundAndBankIDs(eGlobalSpeechContext gCtx, eSpecificSpeechContext& outSpecificSpeechContext) {
+    // Left out some ifs error checking ifs as they aren't necessary (They're gonna get caught in debug anyways)
+
+    const auto sCtx = GetSpecificSpeechContext(gCtx, m_PedAudioType);
+    if (sCtx == -1) {
+        return -1;
+    }
+    outSpecificSpeechContext = sCtx;
+
+    const auto* const ctx = GetSpecificSpeechContextInfo(sCtx, gCtx, m_PedAudioType, m_VoiceID);
+    if (!ctx) {
+        return -1;
+    }
+
+    m_BankID = GetVoiceSoundBank(gCtx, m_PedAudioType, m_VoiceID);
+
+    if (ctx->FirstSoundID == -1) {
+        return -1;
+    }
+    assert(ctx->FirstSoundID <= ctx->LastSoundID);
+
+    const size_t numSounds = ctx->LastSoundID - ctx->FirstSoundID;
+    assert(numSounds > 0);
+
+    // Find sound ID to use
+    // If all possible sounds are in the PhraseMemory,
+    // the least recently used one will be picked
+    // NOTE: Below is a better version of what they did (without using an intermediary array)
+
+    const auto GetPhraseIndexInMemory = [this](int32 soundID) -> int16 {
+        for (auto&& [i, p] : notsa::enumerate(s_PhraseMemory)) {
+            if (p.SoundID == soundID && p.BankID == m_BankID) {
+                return i;
+            }
+        }
+        return -1;
+    };
+
+    int16      soundIDToUse    = -1;
+    int16      maxPhraseIMemdx = -1;
+    const auto rndOffset    = CAEAudioUtility::GetRandomNumberInRange(0u, numSounds);
+    for (size_t i = 0; i < std::min(20u, numSounds); i++) { // NOTE: Here you can tune the maximum tries (Default: 20)
+        const auto soundIDCurr  = ctx->FirstSoundID + (int16)(rndOffset + i) % (numSounds + 1);
+        const auto phraseMemIdx = GetPhraseIndexInMemory(soundIDCurr);
+
+        // Not in memory at all? Good, pick this!
+        if (phraseMemIdx == -1) {
+            soundIDToUse = soundIDCurr;
+            break;
+        }
+
+        // Maybe this was used a longer time ago than the previous one?
+        if (maxPhraseIMemdx < phraseMemIdx) {
+            soundIDToUse = soundIDCurr;
+            maxPhraseIMemdx = phraseMemIdx;
+        }
+    }
+    assert(soundIDToUse != -1);
+
+    // Insert into front of `s_PhraseMemory`
+    rng::shift_right(s_PhraseMemory, 1);
+    s_PhraseMemory[0] = {soundIDToUse, m_BankID};
+
+    return soundIDToUse - ctx->FirstSoundID;
 }
 
 // 0x4E5F10
@@ -2091,6 +2170,15 @@ int8 CAEPedSpeechAudioEntity::GetVoiceAndTypeForSpecialPed(uint32 modelNameHash)
     return plugin::CallMethodAndReturn<int8, 0x4E4170, CAEPedSpeechAudioEntity*, uint32>(this, modelNameHash);
 }
 
+ePainSpeechVoices CAEPedSpeechAudioEntity::GetPainVoice() const {
+    if (m_PedAudioType == PED_TYPE_PLAYER) {
+        return VOICE_PAIN_CARL;
+    }
+    return m_IsFemale
+        ? VOICE_PAIN_FEMALE
+        : VOICE_PAIN_MALE;
+}
+
 // 0x4E3520
 void CAEPedSpeechAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
     plugin::CallMethod<0x4E3520, CAEPedSpeechAudioEntity*, CAESound*, int16>(this, sound, curPlayPos);
@@ -2119,14 +2207,14 @@ int16 CAEPedSpeechAudioEntity::GetAllocatedVoice() {
 // 0x4E5800
 bool CAEPedSpeechAudioEntity::WillPedChatAboutTopic(int16 topic) {
     switch (topic) {
-    case 0:  return CanPedSayGlobalContext(48);
-    case 1:  return CanPedSayGlobalContext(49);
-    case 2:  return CanPedSayGlobalContext(50);
-    case 3:  return CanPedSayGlobalContext(51);
-    case 4:  return CanPedSayGlobalContext(52);
-    case 5:  return CanPedSayGlobalContext(53);
-    case 6:  return CanPedSayGlobalContext(54);
-    case 7:  return CanPedSayGlobalContext(55);
+    case 0:  return CanPedSayGlobalContext(CTX_GLOBAL_CONV_DISL_CAR);
+    case 1:  return CanPedSayGlobalContext(CTX_GLOBAL_CONV_DISL_CLOTHES);
+    case 2:  return CanPedSayGlobalContext(CTX_GLOBAL_CONV_DISL_HAIR);
+    case 3:  return CanPedSayGlobalContext(CTX_GLOBAL_CONV_DISL_PHYS);
+    case 4:  return CanPedSayGlobalContext(CTX_GLOBAL_CONV_DISL_SHOES);
+    case 5:  return CanPedSayGlobalContext(CTX_GLOBAL_CONV_DISL_SMELL);
+    case 6:  return CanPedSayGlobalContext(CTX_GLOBAL_CONV_DISL_TATTOO);
+    case 7:  return CanPedSayGlobalContext(CTX_GLOBAL_CONV_DISL_WEATHER);
     case 8:
     case 9:  return true;
     default: return false;
@@ -2135,18 +2223,16 @@ bool CAEPedSpeechAudioEntity::WillPedChatAboutTopic(int16 topic) {
 
 // 0x4E4130
 int16 CAEPedSpeechAudioEntity::GetPedType() {
-    if (m_IsInitialized)
-        return m_PedAudioType;
-    else
-        return -1;
+    return m_IsInitialized
+        ? m_PedAudioType
+        : PED_TYPE_UNK;
 }
 
 // 0x4E4150
 bool CAEPedSpeechAudioEntity::IsPedFemaleForAudio() {
-    if (m_IsInitialized)
-        return m_IsFemale;
-    else
-        return false;
+    return m_IsInitialized
+        ? m_IsFemale
+        : false;
 }
 
 int32 CAEPedSpeechAudioEntity::GetFreeSpeechSlot() {
@@ -2164,15 +2250,42 @@ uint32& CAEPedSpeechAudioEntity::GetNextPlayTimeRef(eGlobalSpeechContext gCtx) {
         : gGlobalSpeechContextNextPlayTime[gCtx];
 }
 
-// 0x4E4F10
-CAEPedSpeechAudioEntity* CAEPedSpeechAudioEntity::Constructor() {
-    this->CAEPedSpeechAudioEntity::CAEPedSpeechAudioEntity();
-    return this;
+// notsa
+const tGlobalSpeechContextInfo* CAEPedSpeechAudioEntity::GetGlobalSpeechContextInfo(eGlobalSpeechContext gCtx) {
+    // Must use a loop because there are a few skipped values (TODO: Though I guess we could fix this?)
+    for (const auto& e : gSpeechContextLookup) {
+        if (e.GCtx == gCtx) {
+            return &e;
+        }
+    }
+    return nullptr;
 }
 
 // notsa
-const tGlobalSpeechContextInfo* CAEPedSpeechAudioEntity::GeGlobalSpeechContextInfo(eGlobalSpeechContext gCtx) {
-    const auto& e = gSpeechContextLookup[gCtx];
-    assert(e.GCtx == gCtx); // If ever triggered we'll need to use a for loop and search for `GCtx` manually
-    return &e;
+const tSpecificSpeechContextInfo* CAEPedSpeechAudioEntity::GetSpecificSpeechContextInfo(eSpecificSpeechContext sCtx, eGlobalSpeechContext gCtx, eAudioPedType pt, ePedSpeechVoiceS16 voice) {
+    if (IsGlobalContextPain(gCtx)) {
+        return &gPainSpeechLookup[sCtx][voice];
+    }
+    switch (pt) {
+    case PED_TYPE_GEN:    return &gGenSpeechLookup[sCtx][voice];
+    case PED_TYPE_EMG:    return &gEmgSpeechLookup[sCtx][voice];
+    case PED_TYPE_PLAYER: return &gPlySpeechLookup[sCtx][voice];
+    case PED_TYPE_GANG:   return &gGngSpeechLookup[sCtx][voice];
+    case PED_TYPE_GFD:    return &gGfdSpeechLookup[sCtx][voice];
+    default:              return nullptr;
+    }
+}
+
+eSoundBank CAEPedSpeechAudioEntity::GetVoiceSoundBank(eGlobalSpeechContext gCtx, eAudioPedType pt, ePedSpeechVoiceS16 voice) {
+    if (IsGlobalContextPain(gCtx)) {
+        return gPainVoiceToBankLookup[voice];
+    }
+    switch (pt) {
+    case PED_TYPE_GEN:    return gGenSpeechVoiceToBankLookup[voice];
+    case PED_TYPE_EMG:    return gEmgSpeechVoiceToBankLookup[voice];
+    case PED_TYPE_PLAYER: return gPlySpeechVoiceToBankLookup[voice];
+    case PED_TYPE_GANG:   return gGngSpeechVoiceToBankLookup[voice];
+    case PED_TYPE_GFD:    return gGfdSpeechVoiceToBankLookup[voice];
+    default:              NOTSA_UNREACHABLE();
+    }
 }
