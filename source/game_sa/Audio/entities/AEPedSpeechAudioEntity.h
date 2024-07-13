@@ -80,12 +80,14 @@ VALIDATE_SIZE(tPhraseMemory, 0x04);
  * @details but gave up on it? 
  */
 struct tGlobalSpeechContextInfo {
-    eGlobalSpeechContext                                 GCtx;                  //!< The global context this entry is for
-    std::array<eSpecificSpeechContext, PED_TYPE_NUM - 1> SpecificSpeechContext; //!< Holds values from enums: `eGenSpeechContexts`, `eEmgSpeechContexts`, `ePlySpeechContexts`, `eGngSpeechContexts`, `eGfdSpeechContexts` (But nothing for the SPC ped type)
-    int16                                                RepeatTime;            //!< Not sure
-    int16                                                Zero;                  //!< Not sure, but *always zero*
+    eGlobalSpeechContext                                 GCtx;                           //!< The global context this entry is for
+    std::array<eSpecificSpeechContext, PED_TYPE_NUM - 1> SpecificSpeechContext;          //!< Holds values from enums: `eGenSpeechContexts`, `eEmgSpeechContexts`, `ePlySpeechContexts`, `eGngSpeechContexts`, `eGfdSpeechContexts` (But nothing for the SPC ped type)
+    int16                                                RepeatTime;                     //!< For how much time this context can't be played
+    int16                                                Zero;                           //!< Always zero
+    bool                                                 IsImportantForStreaming : 1;    //!< [NOTSA] (?)
+    bool                                                 IsImportantForInterrupting : 1; //!< [NOTSA] (?)
+    bool                                                 IsImportantForWidescreen : 1;   //!< [NOTSA] (?)
 };
-VALIDATE_SIZE(tGlobalSpeechContextInfo, sizeof(int16) * 8);
 
 /*!
  * @brief Holds per-type speech context info
@@ -151,7 +153,6 @@ public:
     CAEPedSpeechAudioEntity(CPed* ped) noexcept;
     ~CAEPedSpeechAudioEntity() = default;
 
-    static bool __stdcall IsGlobalContextImportantForInterupting(int16 gCtx); // typo: Interrupting
     static bool IsGlobalContextUberImportant(int16 gCtx);
     static int16 __stdcall GetNextMoodToUse(eCJMood lastMood);
     static int32 __stdcall GetVoiceForMood(int16 mood);
@@ -189,9 +190,11 @@ public:
     static void SetCJMood(eCJMood basicMood, uint32 overrideTimeMS, int16 isGangBanging = -1, int16 isFat = -1, int16 isWellDressed = -1);
     static void EnableAllPedSpeech();
     static bool IsCJDressedInForGangSpeech();
-    int8        GetSexForSpecialPed(uint32 a1);
+    static bool __stdcall IsGlobalContextImportantForInterupting(eGlobalSpeechContext gCtx); // typo: Interrupting
 
     bool IsGlobalContextImportantForWidescreen(eGlobalSpeechContext gCtx);
+    bool IsGlobalContextImportantForStreaming(eGlobalSpeechContext gCtx);
+    int8        GetSexForSpecialPed(uint32 a1);
     int16 GetRepeatTime(eGlobalSpeechContext gCtx);
     void LoadAndPlaySpeech(uint32 offset);
     int32 GetNumSlotsPlayingContext(int16 context);
@@ -206,7 +209,6 @@ public:
     int16 AddSayEvent(eAudioEvents audioEvent, eGlobalSpeechContext gCtx, uint32 startTimeDelay, float probability, bool overideSilence, bool isForceAudible, bool isFrontEnd);
     void Initialise(CEntity* ped);
     bool CanPedHoldConversation();
-    bool IsGlobalContextImportantForStreaming(int16 a1);
     void EnablePedSpeech();
     void EnablePedSpeechForScriptSpeech();
     void StopCurrentSpeech();
