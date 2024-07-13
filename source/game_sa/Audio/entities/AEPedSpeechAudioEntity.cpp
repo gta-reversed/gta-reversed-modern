@@ -1340,7 +1340,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(EnablePedSpeechForScriptSpeech, 0x4E3F90);
     RH_ScopedInstall(StopCurrentSpeech, 0x4E3FB0);
     RH_ScopedInstall(GetSoundAndBankIDsForScriptedSpeech, 0x4E4400);
-    RH_ScopedInstall(GetSexFromModel, 0x4E4200, { .reversed = false });
+    RH_ScopedInstall(GetSexFromModel, 0x4E4200);
     RH_ScopedInstall(GetPedTalking, 0x4E3F50);
     RH_ScopedInstall(GetVoiceAndTypeForSpecialPed, 0x4E4170, { .reversed = false });
     RH_ScopedVMTInstall(UpdateParameters, 0x4E3520, { .reversed = false });
