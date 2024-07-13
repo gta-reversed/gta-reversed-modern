@@ -384,11 +384,11 @@ enum eGfdSpeechVoices : int16 {
  * @brief Pain voices
  */
 enum ePainSpeechVoices : int16 {
-    VOICE_PAIN_NON_BINARY = -1,
-    VOICE_PAIN_CARL       = 0, // 0x0
-    VOICE_PAIN_FEMALE     = 1, // 0x1
-    VOICE_PAIN_MALE       = 2, // 0x2
-    VOICE_PAIN_END        = 3, // 0x3
+    VOICE_PAIN_NON_BINARY = -1, // notsa
+    VOICE_PAIN_CARL       = 0,  // 0x0
+    VOICE_PAIN_FEMALE     = 1,  // 0x1
+    VOICE_PAIN_MALE       = 2,  // 0x2
+    VOICE_PAIN_END        = 3,  // 0x3
 };
  
 /*! 

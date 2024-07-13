@@ -2,6 +2,10 @@
 
 #include <extensions/WEnum.hpp>
 
+/*!
+ * @brief Ped global speech contexts
+ * @brief These are translated to specific contexts based on the ped type (`eAudioPedType`)
+ */
 enum eGlobalSpeechContext : int16 {
     CTX_GLOBAL_UNK                            = -1,
     CTX_GLOBAL_NO_SPEECH                      = 0,   // 0x0
@@ -343,6 +347,7 @@ enum eGlobalSpeechContext : int16 {
     CTX_GLOBAL_SINGING                        = 336, // 0x150
     CTX_GLOBAL_STOMACH_RUMBLE                 = 337, // 0x151
     CTX_GLOBAL_BREATHING                      = 338, // 0x152
+
     CTX_GLOBAL_PAIN_START                     = 339, // 0x153
     CTX_GLOBAL_PAIN_COUGH                     = 340, // 0x154
     CTX_GLOBAL_PAIN_DEATH_DROWN               = 341, // 0x155
@@ -373,6 +378,9 @@ enum eGlobalSpeechContext : int16 {
 };
 NOTSA_WENUM_DEFS_FOR(eGlobalSpeechContext)
 
+/*!
+ * @brief General ped speech contexts
+ */
 enum eGenSpeechContexts : int16 {
     CTX_GEN_UNK                  = -1,
     CTX_GEN_ALERT_GENERIC        = 0,   // 0x0
@@ -481,6 +489,9 @@ enum eGenSpeechContexts : int16 {
     CTX_GEN_END                  = 103, // 0x67
 };
 
+/*!
+* @brief Emergency ped  speech contexts
+*/
 enum eEmgSpeechContexts : int16 {
     CTX_EMG_UNK             = -1,
     CTX_EMG_ALERT_GENERIC   = 0,  // 0x0
@@ -520,6 +531,9 @@ enum eEmgSpeechContexts : int16 {
     CTX_EMG_END             = 34, // 0x22
 };
 
+/*!
+* @brief Player ped speech contexts
+*/
 enum ePlySpeechContexts : int16 {
     CTX_PLY_UNK                         = -1,
     CTX_PLY_AFTER_SEX                   = 0,   // 0x0
@@ -636,6 +650,9 @@ enum ePlySpeechContexts : int16 {
     CTX_PLY_END                         = 111, // 0x6F
 };
 
+/*!
+* @brief Gang ped speech contexts
+*/
 enum eGngSpeechContexts : int16 {
     CTX_GNG_UNK                      = -1,
     CTX_GNG_ARRESTED                 = 0,   // 0x0
@@ -753,6 +770,9 @@ enum eGngSpeechContexts : int16 {
     CTX_GNG_END                      = 112, // 0x70
 };
 
+/*!
+* @brief Girlfriend ped speech contexts
+*/
 enum eGfdSpeechContexts : int16 {
     CTX_GFD_UNK                            = -1,
     CTX_GFD_BUMP                           = 0,   // 0x0
@@ -876,6 +896,43 @@ enum eGfdSpeechContexts : int16 {
     CTX_GFD_SHOW_CHANGINGROOM              = 118, // 0x76
     CTX_GFD_WELCOME_TO_SHOP                = 119, // 0x77
     CTX_GFD_END                            = 120, // 0x78
+};
+
+/*!
+* @brief Pain speech contexts (This isn't associated with a `eAudioPedType` directly)
+* @brief But, the contexts are grouped by ped/player
+* @brief I made this enum up, couldn't find any info about it, but it def. existed.
+*/
+enum ePainSpeechContexts : int16 {
+    CTX_PAIN_UNK              = -1,
+    CTX_PAIN_CJ_BOXING        = 0,  // 0x0
+    CTX_PAIN_CJ_COUGH         = 1,  // 0x1
+    CTX_PAIN_CJ_DEATH         = 2,  // 0x2
+    CTX_PAIN_CJ_DROWNING      = 3,  // 0x3
+    CTX_PAIN_CJ_GRUNT         = 4,  // 0x4
+    CTX_PAIN_CJ_HIGH_FALL     = 5,  // 0x5
+    CTX_PAIN_CJ_ON_FIRE       = 6,  // 0x6
+    CTX_PAIN_CJ_GENERIC_HIGH  = 7,  // 0x7
+    CTX_PAIN_CJ_GENERIC_LOW   = 8,  // 0x8
+    CTX_PAIN_CJ_PANT_IN       = 9,  // 0x9
+    CTX_PAIN_CJ_PANT_OUT      = 10, // 0x0A
+    CTX_PAIN_CJ_PUKE          = 11, // 0x0B
+    CTX_PAIN_CJ_STRAIN        = 12, // 0x0C
+    CTX_PAIN_CJ_STRAIN_EXHALE = 13, // 0x0D
+    CTX_PAIN_CJ_SWIM_GASP     = 14, // 0x0E
+
+    CTX_PAIN_PED_COUGH        = 15, // 0x0F
+    CTX_PAIN_PED_DEATH_HIGH   = 16, // 0x10
+    CTX_PAIN_PED_DEATH_LOW    = 17, // 0x11
+    CTX_PAIN_PED_GENRIC       = 18, // 0x12
+    CTX_PAIN_PED_ON_FIRE      = 19, // 0x13
+    CTX_PAIN_PED_PANIC        = 20, // 0x14
+    CTX_PAIN_PED_SPRAYED      = 21, // 0x15
+
+    //
+    // Add above
+    //
+    CTX_PAIN_END
 };
 
 using eSpecificSpeechContext = int16;

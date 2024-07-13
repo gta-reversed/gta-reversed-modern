@@ -6,6 +6,8 @@
 #include <AEAudioHardware.h>
 #include <Audio/eSoundBankSlot.h>
 
+// clang-format off
+
 //
 // Speech Info LUTs
 //
@@ -353,13 +355,14 @@ static constexpr std::array<tGlobalSpeechContextInfo, CTX_GLOBAL_NUM> gSpeechCon
     {CTX_GLOBAL_SINGING,                        {CTX_GEN_UNK,                  CTX_EMG_UNK,             CTX_PLY_SINGING,                     CTX_GNG_UNK,                      CTX_GFD_UNK,                            }, 30000,     0},
     {CTX_GLOBAL_STOMACH_RUMBLE,                 {CTX_GEN_UNK,                  CTX_EMG_UNK,             CTX_PLY_STOMACH_RUMBLE,              CTX_GNG_UNK,                      CTX_GFD_UNK,                            }, 5000,      0},
     {CTX_GLOBAL_BREATHING,                      {CTX_GEN_UNK,                  CTX_EMG_UNK,             CTX_PLY_BREATHING,                   CTX_GNG_UNK,                      CTX_GFD_UNK,                            }, 4000,      0},
+    // Skipped CTX_GLOBAL_PAIN_START
     {CTX_GLOBAL_PAIN_COUGH,                     {CTX_GEN_LIKE_DISMISS_REPLY,   CTX_EMG_CRASH_GENERIC,   CTX_PLY_APOLOGY,                     CTX_GNG_CRIMINAL_PLEAD,           CTX_GFD_GFRIEND_CHANGE_RADIO_FAVE,      }, 3000,      0},
     {CTX_GLOBAL_PAIN_DEATH_DROWN,               {CTX_GEN_UNK,                  CTX_EMG_UNK,             CTX_PLY_UNK,                         CTX_GNG_UNK,                      CTX_GFD_UNK,                            }, 7000,      0},
     {CTX_GLOBAL_PAIN_DEATH_HIGH,                {CTX_GEN_MUGGED,               CTX_EMG_GUN_RUN,         CTX_PLY_ARRESTED,                    CTX_GNG_DODGE,                    CTX_GFD_GFRIEND_CLIMAX_HIGH,            }, 2000,      0},
     {CTX_GLOBAL_PAIN_DEATH_LOW,                 {CTX_GEN_NOTHING_THERE,        CTX_EMG_VAN,             CTX_PLY_ARRESTED,                    CTX_GNG_DRIVE_THROUGH_TAUNT,      CTX_GFD_GFRIEND_CLIMAX_HIGH_MUFFLED,    }, 2000,      0},
     {CTX_GLOBAL_PAIN_HIGH,                      {CTX_GEN_SAVED,                CTX_EMG_VICTIM,          CTX_PLY_FIGHT,                       CTX_GNG_DUCK,                     CTX_GFD_GFRIEND_CLIMAX_LOW,             }, 2000,      0},
     {CTX_GLOBAL_PAIN_LOW,                       {CTX_GEN_SAVED,                CTX_EMG_VICTIM,          CTX_PLY_JACKED_CAR,                  CTX_GNG_DUCK,                     CTX_GFD_GFRIEND_CLIMAX_LOW,             }, 2000,      0},
-    {CTX_GLOBAL_PAIN_ON_FIRE,                   {CTX_GEN_SHOCKED,              CTX_EMG_SURROUNDED,      CTX_PLY_DRUG_DEALER_DISLIKE,         CTX_GNG_ENEMY_GANG_WASTED,        CTX_GFD_GFRIEND_COFFEE,                 }, 100 ,      0},
+    {CTX_GLOBAL_PAIN_ON_FIRE,                   {CTX_GEN_SHOCKED,              CTX_EMG_SURROUNDED,      CTX_PLY_DRUG_DEALER_DISLIKE,         CTX_GNG_ENEMY_GANG_WASTED,        CTX_GFD_GFRIEND_COFFEE,                 }, 100,       0},
     {CTX_GLOBAL_PAIN_PANIC,                     {CTX_GEN_TRAPPED,              CTX_EMG_TARGET,          CTX_PLY_UNK,                         CTX_GNG_EYEING_PED,               CTX_GFD_GFRIEND_DISLIKE_CURRENT_ZONE,   }, 8000,      0},
     {CTX_GLOBAL_PAIN_SPRAYED,                   {CTX_GEN_BAR_CHAT,             CTX_EMG_SEARCH,          CTX_PLY_UNK,                         CTX_GNG_EYEING_PED_THREAT,        CTX_GFD_GFRIEND_DUMP_PLAYER_LIVE,       }, 2000,      0},
     {CTX_GLOBAL_PAIN_CJ_BOXING,                 {CTX_GEN_UNK,                  CTX_EMG_UNK,             CTX_PLY_AFTER_SEX,                   CTX_GNG_UNK,                      CTX_GFD_UNK,                            }, 3000,      0},
@@ -372,8 +375,9 @@ static constexpr std::array<tGlobalSpeechContextInfo, CTX_GLOBAL_NUM> gSpeechCon
     {CTX_GLOBAL_PAIN_CJ_SWIM_GASP,              {CTX_GEN_UNK,                  CTX_EMG_UNK,             CTX_PLY_JOIN_ME_ASK,                 CTX_GNG_UNK,                      CTX_GFD_UNK,                            }, 10000,     0},
     {CTX_GLOBAL_PAIN_CJ_DROWNING,               {CTX_GEN_UNK,                  CTX_EMG_UNK,             CTX_PLY_CHASED,                      CTX_GNG_UNK,                      CTX_GFD_UNK,                            }, 2000,      0},
     {CTX_GLOBAL_PAIN_CJ_HIGH_FALL,              {CTX_GEN_UNK,                  CTX_EMG_UNK,             CTX_PLY_CRASH_GENERIC,               CTX_GNG_UNK,                      CTX_GFD_UNK,                            }, 3000,      0},
+    // Skipped CTX_GLOBAL_PAIN_END
     {CTX_GLOBAL_END,                            {CTX_GEN_UNK,                  CTX_EMG_UNK,             CTX_PLY_UNK,                         CTX_GNG_UNK,                      CTX_GFD_UNK,                            }, 7000,      0},
-    {CTX_GLOBAL_UNK,                            {CTX_GEN_UNK,                  CTX_EMG_UNK,             CTX_PLY_UNK,                         CTX_GNG_UNK,                      CTX_GFD_UNK,                            }, -1  ,      0},
+    {CTX_GLOBAL_UNK,                            {CTX_GEN_UNK,                  CTX_EMG_UNK,             CTX_PLY_UNK,                         CTX_GNG_UNK,                      CTX_GFD_UNK,                            }, -1,        0},
 }};
 
 // 0x8AF8A8
@@ -874,6 +878,33 @@ static constexpr notsa::mdarray<tSpecificSpeechContextInfo, CTX_GFD_END, VOICE_G
     {{{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {19, 22}, {12, 15}, {}, {}, {23, 26}, {5, 9}, {27, 31}}},
     {{{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {16, 19}, {}, {}, {}, {10, 13}, {}}},
     {{{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {27, 34}, {}, {}, {}, {19, 24}, {}}},
+}};
+
+// 0x8C64B8
+static constexpr notsa::mdarray<tSpecificSpeechContextInfo, CTX_PAIN_END, VOICE_PAIN_END> gPainSpeechLookup{{
+    // CARL       MALE        FEMALE
+    {{{0, 13},    {},         {}       }},
+    {{{14, 24},   {},         {}       }},
+    {{{25, 33},   {},         {}       }},
+    {{{34, 39},   {},         {}       }},
+    {{{40, 63},   {},         {}       }},
+    {{{64, 78},   {},         {}       }},
+    {{{79, 86},   {},         {}       }},
+    {{{87, 100},  {},         {}       }},
+    {{{101, 121}, {},         {}       }},
+    {{{122, 127}, {},         {}       }},
+    {{{128, 133}, {},         {}       }},
+    {{{134, 143}, {},         {}       }},
+    {{{144, 155}, {},         {}       }},
+    {{{156, 162}, {},         {}       }},
+    {{{163, 168}, {},         {}       }},
+    {{{},         {0, 24},    {0, 6}   }},
+    {{{},         {25, 35},   {7, 18}  }},
+    {{{},         {36, 45},   {19, 35} }},
+    {{{},         {46, 87},   {36, 68} }},
+    {{{},         {88, 102},  {69, 83} }},
+    {{{},         {103, 119}, {84, 94} }},
+    {{{},         {120, 130}, {95, 100}}},
 }};
 };
 
