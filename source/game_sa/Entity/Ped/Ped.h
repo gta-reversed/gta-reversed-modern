@@ -23,6 +23,7 @@
 #include "Fire.h"
 #include "PedGroups.h"
 
+#include <Audio/PedSpeechContexts.h>
 #include "AnimationEnums.h"
 #include "eWeaponType.h"
 #include "eWeaponSkill.h"
@@ -498,7 +499,7 @@ public:
     void EnablePedSpeechForScriptSpeech();
     bool CanPedHoldConversation();
     void SayScript(int32 arg0, uint8 arg1, uint8 arg2, uint8 arg3);
-    int16 Say(uint16 phraseId, uint32 offset = 0, float arg2 = 1.0f, uint8 arg3 = 0, uint8 arg4 = 0, uint8 arg5 = 0);
+    int16 Say(eGlobalSpeechContext gCtx, uint32 startTimeDelay = 0, float probability = 1.f, bool overrideSilence = false, bool isForceAudible = false, bool isFrontEnd = false);
     void RemoveBodyPart(ePedNode pedNode, char localDir);
     void SpawnFlyingComponent(int32 arg0, char arg1);
     uint8 DoesLOSBulletHitPed(CColPoint& colPoint);

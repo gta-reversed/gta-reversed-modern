@@ -186,7 +186,7 @@ bool CTaskSimpleSwim::ProcessPed(CPed* ped) {
         ped->AsPlayer()->HandlePlayerBreath(bDecreaseAir, fDecreaseAirMult);
         if (m_pPed && m_nSwimState != SWIM_UNDERWATER_SPRINTING) {
             if (CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) * 0.5f > ped->m_pPlayerData->m_fBreath) {
-                ped->Say(356);
+                ped->Say(CTX_GLOBAL_PAIN_CJ_SWIM_GASP);
             }
         }
         ped->SetMoveState(PEDMOVE_NONE);

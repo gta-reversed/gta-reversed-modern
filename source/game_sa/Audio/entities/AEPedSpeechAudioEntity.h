@@ -201,8 +201,8 @@ public:
     bool CanPedSayGlobalContext(eGlobalSpeechContext gCtx) const;
     int8 GetVoiceAndTypeFromModel(eModelID modelId);
     int16 GetSoundAndBankIDs(eGlobalSpeechContext gCtx, eSpecificSpeechContext& outSpecificSpeechContext);
-    bool CanWePlayGlobalSpeechContext(eGlobalSpeechContext gCtx);
-    int16 AddSayEvent(eAudioEvents audioEvent, int16 phraseId, uint32 a4, float a5, uint8 a6, uint8 a7, uint8 a8);
+    int16 CanWePlayGlobalSpeechContext(eGlobalSpeechContext gCtx);
+    int16 AddSayEvent(eAudioEvents audioEvent, eGlobalSpeechContext gCtx, uint32 startTimeDelay, float probability, bool overideSilence, bool isForceAudible, bool isFrontEnd);
     void Initialise(CEntity* ped);
     bool CanPedHoldConversation();
     bool IsGlobalContextImportantForStreaming(int16 a1);
@@ -227,7 +227,7 @@ public:
     virtual bool IsPedFemaleForAudio();
 
 private:
-    static int32 GetFreeSpeechSlot(size_t numSlotsToCheck = 5);
+    static int32 GetFreeSpeechSlot();
     uint32& GetNextPlayTimeRef(eGlobalSpeechContext gCtx);
 
 private:
@@ -238,7 +238,7 @@ private:
     }
 
     // NOTSA
-    CAEPedSpeechSlot& GetMySpeechSlot() const {
+    CAEPedSpeechSlot& GetCurrentSpeech() const {
         return s_PedSpeechSlots[m_PedSpeechSlotID];
     }
 };

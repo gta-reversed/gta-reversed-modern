@@ -1769,7 +1769,7 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
             }
             firedByPed->m_weaponAudio.AddAudioEvent(AE_WEAPON_FIRE);
             if (isPlayerFiring && targetEnt && targetEnt->IsPed() && m_Type != WEAPON_PISTOL_SILENCED) {
-                firedByPed->Say(182, 200); // 0x74280E
+                firedByPed->Say(CTX_GLOBAL_SHOOT, 200); // 0x74280E
             }
         }
 

@@ -655,7 +655,7 @@ void CGameLogic::Update() {
             } else if (ped->m_nPedState == PEDSTATE_ARRESTED) {
                 ped->ClearAdrenaline();
                 player.ArrestPlayer();
-                ped->Say(15, 2300, 1.0f, 1u, 1u);
+                ped->Say(CTX_GLOBAL_ARRESTED, 2300, 1.0f, 1u, 1u);
                 GameState = GAMELOGIC_STATE_BUSTED;
                 TimeOfLastEvent = CTimer::GetTimeInMS();
 

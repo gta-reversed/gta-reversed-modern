@@ -1414,8 +1414,8 @@ void RemoveCharFromCarMaintainPosition(CPed& ped, CVehicle& vehicle) {
 }
 
 // SET_CHAR_SAY_CONTEXT_IMPORTANT
-int16 SetCharSayContextImportant(CPed& ped, uint16 phraseId, uint8 arg3, uint8 arg4, uint8 arg5) {
-    return ped.Say(phraseId, 0u, 1.0f, arg3, arg4, arg5);
+int16 SetCharSayContextImportant(CPed& ped, uint16 phraseId, bool overrideSilence, bool isForceAudible, bool isFrontEnd) {
+    return ped.Say((eGlobalSpeechContext)phraseId, 0u, 1.0f, overrideSilence, isForceAudible, isFrontEnd);
 }
 
 // SET_CHAR_SAY_SCRIPT

@@ -1329,8 +1329,8 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(CanPedSayGlobalContext, 0x4E5730);
     RH_ScopedInstall(GetVoiceAndTypeFromModel, 0x4E58C0);
     RH_ScopedInstall(GetSoundAndBankIDs, 0x4E5920);
-    RH_ScopedInstall(CanWePlayGlobalSpeechContext, 0x4E5F10, { .reversed = false });
-    RH_ScopedInstall(AddSayEvent, 0x4E6550, { .reversed = false });
+    RH_ScopedInstall(CanWePlayGlobalSpeechContext, 0x4E5F10);
+    RH_ScopedInstall(AddSayEvent, 0x4E6550);
     RH_ScopedInstall(Initialise, 0x4E68D0, { .reversed = false });
     RH_ScopedInstall(CanPedHoldConversation, 0x4E69E0, { .reversed = false });
     RH_ScopedInstall(IsGlobalContextImportantForStreaming, 0x4E4510, { .reversed = false });
@@ -1650,8 +1650,8 @@ void CAEPedSpeechAudioEntity::Reset() {
 
 // 0x4E37F0
 bool CAEPedSpeechAudioEntity::ReservePedConversationSpeechSlots() {
-    const auto slotA = GetFreeSpeechSlot(5);
-    const auto slotB = GetFreeSpeechSlot(5);
+    const auto slotA = GetFreeSpeechSlot();
+    const auto slotB = GetFreeSpeechSlot();
 
     if (slotA == -1 || slotB == -1) {
         return false;
@@ -1670,7 +1670,7 @@ bool CAEPedSpeechAudioEntity::ReservePedConversationSpeechSlots() {
 
 // 0x4E3870
 bool CAEPedSpeechAudioEntity::ReservePlayerConversationSpeechSlot() {
-    const auto slot = GetFreeSpeechSlot(5);
+    const auto slot = GetFreeSpeechSlot();
     if (slot == -1) {
         return false;
     }
@@ -1942,7 +1942,7 @@ int16 CAEPedSpeechAudioEntity::GetRepeatTime(eGlobalSpeechContext gCtx) {
 
 // 0x4E4840
 void CAEPedSpeechAudioEntity::LoadAndPlaySpeech(uint32 playbackTimeOffsetMS) {
-    auto& ss = GetMySpeechSlot();
+    auto& ss = GetCurrentSpeech();
     switch (ss.Status) {
     case CAEPedSpeechSlot::eStatus::FREE:
     case CAEPedSpeechSlot::eStatus::RESERVED:
@@ -2082,7 +2082,7 @@ int16 CAEPedSpeechAudioEntity::GetSoundAndBankIDs(eGlobalSpeechContext gCtx, eSp
     int16      maxPhraseIMemdx = -1;
     const auto rndOffset    = CAEAudioUtility::GetRandomNumberInRange(0u, numSounds);
     for (size_t i = 0; i < std::min(20u, numSounds); i++) { // NOTE: Here you can tune the maximum tries (Default: 20)
-        const auto soundIDCurr  = ctx->FirstSoundID + (int16)(rndOffset + i) % (numSounds + 1);
+        const auto soundIDCurr  = ctx->FirstSoundID + (int16)((rndOffset + i) % (numSounds + 1));
         const auto phraseMemIdx = GetPhraseIndexInMemory(soundIDCurr);
 
         // Not in memory at all? Good, pick this!
@@ -2107,7 +2107,7 @@ int16 CAEPedSpeechAudioEntity::GetSoundAndBankIDs(eGlobalSpeechContext gCtx, eSp
 }
 
 // 0x4E5F10
-bool CAEPedSpeechAudioEntity::CanWePlayGlobalSpeechContext(eGlobalSpeechContext gCtx) {
+int16 CAEPedSpeechAudioEntity::CanWePlayGlobalSpeechContext(eGlobalSpeechContext gCtx) {
     if (!IsGlobalContextImportantForInterupting(gCtx) && !IsGlobalContextPain(gCtx)) {
         const auto CheckSlot = [](auto slot) {
             return s_PedSpeechSlots[slot].Status == CAEPedSpeechSlot::eStatus::RESERVED
@@ -2128,13 +2128,112 @@ bool CAEPedSpeechAudioEntity::CanWePlayGlobalSpeechContext(eGlobalSpeechContext 
         }
     }
     return GetNextPlayTime(gCtx) < CTimer::GetTimeInMS()
-        ? GetFreeSpeechSlot(5) // s_NextSpeechSlot is set in `GetFreeSpeechSlot`
+        ? GetFreeSpeechSlot() // s_NextSpeechSlot is set in `GetFreeSpeechSlot`
         : -1;
 }
 
 // 0x4E6550
-int16 CAEPedSpeechAudioEntity::AddSayEvent(eAudioEvents audioEvent, int16 phraseId, uint32 a4, float a5, uint8 a6, uint8 a7, uint8 a8) {
-    return plugin::CallMethodAndReturn<int16, 0x4E6550, CAEPedSpeechAudioEntity*, int32, int16, uint32, float, uint8, uint8>(this, audioEvent, phraseId, a4, a5, a6, a7, a8);
+int16 CAEPedSpeechAudioEntity::AddSayEvent(eAudioEvents audioEvent, eGlobalSpeechContext gCtx, uint32 startTimeDelayMs, float probability, bool overrideSilence, bool isForceAudible, bool isFrontEnd) {
+    // tempTimeOffset == 0, so ignore it
+
+    if (!m_IsInitialized || s_bAllSpeechDisabled || m_IsSpeechForScriptsDisabled) {
+        return -1;
+    }
+
+    if (TheCamera.m_bWideScreenOn && !IsGlobalContextImportantForWidescreen(gCtx)) {
+        return -1;
+    }
+
+    if (CGameLogic::GameState == eGameState::GAME_STATE_PLAYING_LOGO) {
+        return -1;
+    }
+
+    if (gCtx == CTX_GLOBAL_CHAT) {
+        if (CTimer::GetFrameCounter() % 64 || s_bPedConversationHappening || s_bPlayerConversationHappening) {
+            return -1;
+        }
+    } else if (gCtx == CTX_GLOBAL_PAIN_CJ_DROWNING && CWeather::UnderWaterness < 0.5f)  {
+        return -1;
+    }
+
+    if (!CAEAudioUtility::ResolveProbability(probability) || audioEvent != AE_SPEECH_PED) {
+        return -1;
+    }
+
+    if (m_IsSpeechDisabled && !overrideSilence) {
+        return -1;
+    }
+
+    const auto IsContextImportant = [](eGlobalSpeechContext c) {
+        return IsGlobalContextPain(c) || IsGlobalContextImportantForInterupting(c);
+    };
+    if (IsContextImportant(gCtx)) {
+        if (m_IsPlayingSpeech && IsContextImportant(GetCurrentSpeech().GCtx)) {
+            return -1;
+        }
+        StopCurrentSpeech();
+    }
+
+    if (!m_pEntity->AsPed()->IsAlive() && !IsGlobalContextPain(gCtx)) {
+        return -1;
+    }
+
+    if (IsGlobalContextImportantForStreaming(gCtx) || isForceAudible || isFrontEnd) {
+        if (CStreaming::ms_numModelsRequested > 15 && CAEVehicleAudioEntity::s_pVehicleAudioSettingsForRadio) {
+            return -1;
+        }
+    } else if (CStreaming::IsVeryBusy()) {
+        return -1;
+    }
+
+    if (m_PedAudioType == PED_TYPE_PLAYER) {
+        if (FindPlayerPed() != m_pEntity || s_bAPlayerSpeaking && !m_IsPlayingSpeech) {
+            return -1;
+        }
+    }
+
+    if (CVector::DistSqr(TheCamera.GetPosition(), m_pEntity->GetPosition()) >= sq(40.f)) {
+        return -1;
+    }
+
+    eSpecificSpeechContext sCtx;
+    const auto soundID = CAEPedSpeechAudioEntity::GetSoundAndBankIDs(gCtx, sCtx);
+    if (soundID == -1) {
+        return -1;
+    }
+
+    const auto speechSlotID = m_PedAudioType == PED_TYPE_PLAYER
+        ? CTimer::GetTimeInMS() >= GetNextPlayTime(gCtx)
+            ? 5
+            : -1
+        : CAEPedSpeechAudioEntity::CanWePlayGlobalSpeechContext(gCtx);
+    if (speechSlotID == -1) {
+        return -1;
+    }
+
+    SetNextPlayTime(gCtx);
+    m_IsFrontend = isFrontEnd;
+    m_IsForcedAudible = isForceAudible;
+    if (const auto veh = m_pEntity->AsPed()->GetVehicleIfInOne()) {
+        m_IsForcedAudible |= veh == FindPlayerVehicle() && gCtx != CTX_GLOBAL_STOMACH_RUMBLE;
+    }
+    
+    m_EventVolume = GetDefaultVolume(AE_SPEECH_PED);
+    if (m_PedAudioType == PED_TYPE_PLAYER) {
+        m_EventVolume += 3.f;
+    }
+    m_EventVolume += GetSpeechContextVolumeOffset(gCtx);
+
+    m_IsPlayingSpeech = true;
+    if (m_PedAudioType == PED_TYPE_PLAYER) {
+        s_bAPlayerSpeaking = true;
+    }
+
+    m_LastGCtx        = gCtx;
+    m_PedSpeechSlotID = speechSlotID;
+    LoadAndPlaySpeech(startTimeDelayMs);
+
+    return soundID;
 }
 
 // 0x4E68D0
@@ -2254,11 +2353,13 @@ bool CAEPedSpeechAudioEntity::IsPedFemaleForAudio() {
         : false;
 }
 
-int32 CAEPedSpeechAudioEntity::GetFreeSpeechSlot(size_t numSlotsToCheck) {
-    for (size_t n = 0; n < numSlotsToCheck; n++) {
-        const auto i = (s_NextSpeechSlot + n) % numSlotsToCheck;
+// notsa
+int32 CAEPedSpeechAudioEntity::GetFreeSpeechSlot() {
+    const auto size = s_PedSpeechSlots.size() - 1;
+    for (size_t n = 0; n < size; n++) {
+        const auto i = (s_NextSpeechSlot + n) % size;
         if (s_PedSpeechSlots[i].Status == CAEPedSpeechSlot::eStatus::FREE) {
-            s_NextSpeechSlot = (i + 1) % numSlotsToCheck;
+            s_NextSpeechSlot = (uint16)((i + 1u) % size);
             return (int32)i;
         }
     }

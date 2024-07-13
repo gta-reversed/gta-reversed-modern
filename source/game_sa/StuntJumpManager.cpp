@@ -178,7 +178,7 @@ void CStuntJumpManager::Update() {
             if (vehicle) {
                 CPed* randomPassenger = vehicle->PickRandomPassenger();
                 if (randomPassenger)
-                    randomPassenger->Say(37);
+                    randomPassenger->Say(CTX_GLOBAL_CAR_JUMP);
             }
         }
 

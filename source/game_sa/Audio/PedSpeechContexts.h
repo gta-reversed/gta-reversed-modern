@@ -216,6 +216,7 @@ enum eGlobalSpeechContext : int16 {
     CTX_GLOBAL_STEALTH_DEF_SIGHTING           = 205, // 0xCD
     CTX_GLOBAL_STEALTH_NOTHING_THERE          = 206, // 0xCE
     CTX_GLOBAL_SURROUNDED                     = 207, // 0xCF
+
     CTX_GLOBAL_TAKE_TURF_LAS_COLINAS          = 208, // 0xD0
     CTX_GLOBAL_TAKE_TURF_LOS_FLORES           = 209, // 0xD1
     CTX_GLOBAL_TAKE_TURF_EAST_BEACH           = 210, // 0xD2
@@ -228,6 +229,7 @@ enum eGlobalSpeechContext : int16 {
     CTX_GLOBAL_TAKE_TURF_WILLOWFIELD          = 217, // 0xD9
     CTX_GLOBAL_TAKE_TURF_PLAYA_DEL_SEVILLE    = 218, // 0xDA
     CTX_GLOBAL_TAKE_TURF_TEMPLE               = 219, // 0xDB
+
     CTX_GLOBAL_TARGET                         = 220, // 0xDC
     CTX_GLOBAL_TAXI_BAIL                      = 221, // 0xDD
     CTX_GLOBAL_TAXI_HAIL                      = 222, // 0xDE

@@ -584,7 +584,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                         CTask* activePrimaryTask = intelligence->GetActivePrimaryTask();
                         if (!activePrimaryTask || activePrimaryTask->GetTaskType() != TASK_COMPLEX_REACT_TO_GUN_AIMED_AT) {
                             if (activeWeapon->m_Type != WEAPON_PISTOL_SILENCED) {
-                                player->Say(176);
+                                player->Say(CTX_GLOBAL_PULL_GUN);
                             }
                             CPedGroup* pedGroup = CPedGroups::GetPedsGroup(targetedEntity);
                             if (pedGroup) {
@@ -752,7 +752,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
             gLastTouchTimeDelta = touchTimeDelta;
             gLastRandomNumberForIdleAnimationID = randomNumber;
             if (CStats::GetStatValue(STAT_MANAGEMENT_ISSUES_MISSION_ACCOMPLISHED) != 0.0f && CTimer::GetTimeInMS() > 1200000) {
-                player->Say(336, 0, 0.2f, 0, 0, 0);
+                player->Say(CTX_GLOBAL_SINGING, 0, 0.2f, 0, 0, 0);
             }
         }
     }
