@@ -147,7 +147,8 @@ public:
 public:
     static void InjectHooks();
 
-    CAEPedSpeechAudioEntity() = default;
+    CAEPedSpeechAudioEntity() noexcept;
+    CAEPedSpeechAudioEntity(CPed* ped) noexcept;
     ~CAEPedSpeechAudioEntity() = default;
 
     static bool __stdcall IsGlobalContextImportantForInterupting(int16 gCtx); // typo: Interrupting
@@ -210,7 +211,7 @@ public:
     void EnablePedSpeechForScriptSpeech();
     void StopCurrentSpeech();
     int8 GetSoundAndBankIDsForScriptedSpeech(int32 a2);
-    int8 GetSexFromModel(int32);
+    bool GetSexFromModel(eModelID model);
     bool GetPedTalking();
     int8 GetVoiceAndTypeForSpecialPed(uint32 modelNameHash);
     ePainSpeechVoices GetPainVoice() const;

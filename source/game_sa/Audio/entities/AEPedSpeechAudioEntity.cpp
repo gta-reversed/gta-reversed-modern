@@ -1331,7 +1331,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(GetSoundAndBankIDs, 0x4E5920);
     RH_ScopedInstall(CanWePlayGlobalSpeechContext, 0x4E5F10);
     RH_ScopedInstall(AddSayEvent, 0x4E6550);
-    RH_ScopedInstall(Initialise, 0x4E68D0, { .reversed = false });
+    RH_ScopedInstall(Initialise, 0x4E68D0);
     RH_ScopedInstall(CanPedHoldConversation, 0x4E69E0, { .reversed = false });
     RH_ScopedInstall(IsGlobalContextImportantForStreaming, 0x4E4510, { .reversed = false });
     RH_ScopedInstall(EnablePedSpeech, 0x4E3F70);
@@ -1349,6 +1349,32 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedVMTInstall(WillPedChatAboutTopic, 0x4E5800);
     RH_ScopedVMTInstall(GetPedType, 0x4E4130);
     RH_ScopedVMTInstall(IsPedFemaleForAudio, 0x4E4150);
+}
+
+CAEPedSpeechAudioEntity::CAEPedSpeechAudioEntity() noexcept {
+    m_NextTimeCanSayPain.fill(0);
+}
+
+CAEPedSpeechAudioEntity::CAEPedSpeechAudioEntity(CPed* ped) noexcept :
+    CAEPedSpeechAudioEntity{}
+{
+    m_pEntity = ped;
+    if (ped->GetModelID() != MODEL_INVALID) {
+        auto* const mi = ped->GetPedModelInfo();
+        if (mi->m_nPedAudioType == PED_TYPE_SPC) {
+            if (!GetVoiceAndTypeForSpecialPed(mi->m_nKey)) {
+                return;
+            }
+        } else {
+            m_VoiceID = mi->m_nVoiceId;
+            if (m_VoiceID == -1) {
+                return;
+            }
+            mi->IncrementVoice();
+        }
+        VERIFY(GetSexFromModel(ped->GetModelID()));
+        m_IsInitialized = true;
+    }
 }
 
 // 0x4E4600
@@ -2238,7 +2264,7 @@ int16 CAEPedSpeechAudioEntity::AddSayEvent(eAudioEvents audioEvent, eGlobalSpeec
 
 // 0x4E68D0
 void CAEPedSpeechAudioEntity::Initialise(CEntity* ped) {
-    plugin::CallMethod<0x4E68D0, CAEPedSpeechAudioEntity*, CEntity*>(this, ped);
+    *this = CAEPedSpeechAudioEntity{ped->AsPed()};
 }
 
 // 0x4E69E0
@@ -2274,8 +2300,14 @@ int8 CAEPedSpeechAudioEntity::GetSoundAndBankIDsForScriptedSpeech(int32 a2) {
 }
 
 // 0x4E4200
-int8 CAEPedSpeechAudioEntity::GetSexFromModel(int32 a1) {
-    return plugin::CallMethodAndReturn<int8, 0x4E4200, CAEPedSpeechAudioEntity*, int32>(this, a1);
+bool CAEPedSpeechAudioEntity::GetSexFromModel(eModelID model) {
+    const auto* const mi = CModelInfo::GetModelInfo(model)->AsPedModelInfoPtr();
+    assert(mi->m_nPedAudioType < PED_TYPE_NUM);
+    if (mi->m_nPedAudioType == PED_TYPE_SPC) {
+        return true;
+    }
+    m_IsFemale = notsa::contains({PED_TYPE_CIVFEMALE, PED_TYPE_PROSTITUTE}, mi->GetPedType());
+    return true;
 }
 
 // 0x4E3F50
