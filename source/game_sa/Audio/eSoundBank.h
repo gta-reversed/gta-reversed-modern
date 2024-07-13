@@ -3,7 +3,7 @@
 #include <extensions/WEnum.hpp>
 
 // TODO: Make this an enum class
-enum eSoundBank : int32 {
+enum eSoundBank : int16 {
     SND_BANK_UNK                               = -1,
     SND_BANK_FEET_GENERIC                      = 0, // 0x0
     SND_BANK_FEET_GRASS                        = 1, // 0x1

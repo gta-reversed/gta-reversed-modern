@@ -8,8 +8,8 @@
 
 #include <Audio/entities/AEAudioEntity.h>
 #include <Audio/AESound.h>
-#include <Audio/eGlobalSpeechContext.h>
 #include <Audio/eSoundBank.h>
+#include <Audio/PedSpeechContexts.h>
 #include <Audio/PedSpeechVoices.h>
 #include <Audio/ePedAudioType.h>
 
@@ -54,7 +54,7 @@ struct CAEPedSpeechSlot {
     int16                    SoundID{ -1 };
     eSoundBankS16            SoundBankID{ SND_BANK_UNK };
     uint32                   StartPlaybackTime{};
-    eGlobalSpeechContextS16  GCtx{ GCTX_UNK };
+    eGlobalSpeechContextS16  GCtx{ CTX_GLOBAL_UNK };
     eAudioPedType            PedAudioType{ PED_TYPE_UNK };
     bool                     ForceAudible{};
     bool                     IsReservedForPedConversation{};
@@ -68,22 +68,30 @@ struct tPhraseMemory {
 };
 VALIDATE_SIZE(tPhraseMemory, 0x04);
 
-
 /*!
  * @brief Holds context info entries
- * @detail This is just a made up structure, they just used a huge multi-dim array...
- * @detail But it doesn't make a whole lot of sense why they stored the index in
- * @detail the array (GCtx) and did a search, when the index matches the array index
- * @detail perhaps they meant to make this configurable (to be loaded from a file?)
- * @detail but gave up on it? 
+ * @details This is just a made up structure, they just used a huge multi-dim array...
+ * @details But it doesn't make a whole lot of sense why they stored the index in
+ * @details the array (GCtx) and did a search, when the index matches the array index
+ * @details perhaps they meant to make this configurable (to be loaded from a file?)
+ * @details but gave up on it? 
  */
-struct tSpeechContextInfo {
-    eGlobalSpeechContext                               GCtx;                  //!< The global context this entry is for
-    std::array<eGlobalSpeechContext, PED_TYPE_NUM - 1> SpecificSpeechContext; //!< Speech specific context / per type
-    int16                                              RepeatTime;            //!< Not sure
-    int16                                              Zero;                  //!< Not sure, but *always zero*
+struct tGlobalSpeechContextInfo {
+    eGlobalSpeechContext                                 GCtx;                  //!< The global context this entry is for
+    std::array<eSpecificSpeechContext, PED_TYPE_NUM - 1> SpecificSpeechContext; //!< Holds values from enums: `eGenSpeechContexts`, `eEmgSpeechContexts`, `ePlySpeechContexts`, `eGngSpeechContexts`, `eGfdSpeechContexts` (But nothing for the SPC ped type)
+    int16                                                RepeatTime;            //!< Not sure
+    int16                                                Zero;                  //!< Not sure, but *always zero*
 };
-VALIDATE_SIZE(tSpeechContextInfo, sizeof(int16) * 8);
+VALIDATE_SIZE(tGlobalSpeechContextInfo, sizeof(int16) * 8);
+
+/*!
+ * @brief Holds per-type speech context info
+ * @details See `eGenSpeechContexts`, `eEmgSpeechContexts`, `ePlySpeechContexts`, `eGngSpeechContexts`, `eGfdSpeechContexts`
+ */
+struct tSpecificSpeechContextInfo {
+    int16 FirstSoundID, LastSoundID;
+};
+VALIDATE_SIZE(tSpecificSpeechContextInfo, sizeof(int16) * 2);
 
 class NOTSA_EXPORT_VTABLE CAEPedSpeechAudioEntity : public CAEAudioEntity {
 public:
@@ -100,10 +108,10 @@ public:
     CAESound*                                               m_Sound{};
     int16                                                   m_SoundID{ -1 };
     eSoundBankS16                                           m_BankID{ SND_BANK_UNK };
-    int16                                                   m_PedSpeechSlotID{ -1 };
+    int16                                                   m_PedSpeechSlotID{ -1 }; // [0, 5] (See SND_BANK_SLOT_SPEECH1 -> SND_BANK_SLOT_SPEECH6)
     float                                                   m_EventVolume{ -100.f };
-    eGlobalSpeechContextS16                                 m_LastGCtx{ GCTX_UNK };
-    std::array<uint32, GCTX_PAIN_END - GCTX_PAIN_START - 1> m_NextTimeCanSayPain{};
+    eGlobalSpeechContextS16                                 m_LastGCtx{ CTX_GLOBAL_UNK };
+    std::array<uint32, CTX_GLOBAL_PAIN_END - CTX_GLOBAL_PAIN_START - 1> m_NextTimeCanSayPain{};
 
 public:
     static inline auto& s_nCJMoodOverrideTime = StaticRef<uint32>(0xB613E0);  //!< Until when the override is active in [TimeMS]
@@ -130,10 +138,9 @@ public:
 
     static inline auto& s_PhraseMemory                   = StaticRef<std::array<tPhraseMemory, 150>>(0xB61418);
     static inline auto& s_PedSpeechSlots                 = StaticRef<std::array<CAEPedSpeechSlot, PED_TYPE_NUM>>(0xB61C38);
-    static inline auto& gGlobalSpeechContextNextPlayTime = StaticRef<std::array<uint32, GCTX_NUM>>(0xB61670); // PAIN (GCTX_PAIN_START -> GCTX_PAIN_END) is ignored, and `m_NextTimeCanSayPain` is used instead
+    static inline auto& gGlobalSpeechContextNextPlayTime = StaticRef<std::array<uint32, CTX_GLOBAL_NUM>>(0xB61670); // PAIN (CTX_GLOBAL_PAIN_START -> CTX_GLOBAL_PAIN_END) is ignored, and `m_NextTimeCanSayPain` is used instead
 
 public:
-    static const tSpeechContextInfo* GetSpeechContextInfo(eGlobalSpeechContext gCtx);
     static void InjectHooks();
 
     CAEPedSpeechAudioEntity() = default;
@@ -160,6 +167,9 @@ public:
     static eAudioPedType GetAudioPedType(const char* name);
     static ePedSpeechVoiceS16 GetVoice(const char* name, eAudioPedTypeS16 type);
     static void DisableAllPedSpeech();
+    static const tGlobalSpeechContextInfo* GeGlobalSpeechContextInfo(eGlobalSpeechContext gCtx);
+
+
     bool        IsGlobalContextPain(int16 globalCtx);
 
     /*!

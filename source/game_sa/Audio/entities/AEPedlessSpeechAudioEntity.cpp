@@ -13,7 +13,7 @@ void CAEPedlessSpeechAudioEntity::Initialise() {
     m_Entity                     = nullptr;
     m_Sound                      = nullptr;
     m_EventVolume                = -100.0f;
-    m_LastGCtx                   = GCTX_UNK;
+    m_LastGCtx                   = CTX_GLOBAL_UNK;
     m_IsPlayingSpeech            = false;
     m_IsSpeechDisabled           = false;
     m_IsSpeechForScriptsDisabled = false;
