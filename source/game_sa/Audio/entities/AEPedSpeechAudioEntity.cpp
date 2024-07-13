@@ -1332,7 +1332,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(CanWePlayGlobalSpeechContext, 0x4E5F10);
     RH_ScopedInstall(AddSayEvent, 0x4E6550);
     RH_ScopedInstall(Initialise, 0x4E68D0);
-    RH_ScopedInstall(CanPedHoldConversation, 0x4E69E0, { .reversed = false });
+    RH_ScopedInstall(CanPedHoldConversation, 0x4E69E0);
     RH_ScopedInstall(IsGlobalContextImportantForStreaming, 0x4E4510, { .reversed = false });
     RH_ScopedInstall(EnablePedSpeech, 0x4E3F70);
     RH_ScopedInstall(EnablePedSpeechForScriptSpeech, 0x4E3F90);
@@ -2269,7 +2269,7 @@ void CAEPedSpeechAudioEntity::Initialise(CEntity* ped) {
 
 // 0x4E69E0
 bool CAEPedSpeechAudioEntity::CanPedHoldConversation() {
-    return plugin::CallMethodAndReturn<bool, 0x4E69E0, CAEPedSpeechAudioEntity*>(this);
+    return CanPedSayGlobalContext(GCTX_PCONV_QUESTION);
 }
 
 // 0x4E4510
