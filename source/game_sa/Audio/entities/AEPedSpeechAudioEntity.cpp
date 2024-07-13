@@ -1650,10 +1650,8 @@ void CAEPedSpeechAudioEntity::Reset() {
 
 // 0x4E37F0
 bool CAEPedSpeechAudioEntity::ReservePedConversationSpeechSlots() {
-    // Originally they had a loop here that continued (small optimzation)
-    // But I don't care ;) Logic stays the same tho, as it's single threaded.
-    const auto slotA = GetFreeSpeechSlot(),
-               slotB = GetFreeSpeechSlot();
+    const auto slotA = GetFreeSpeechSlot(5);
+    const auto slotB = GetFreeSpeechSlot(5);
 
     if (slotA == -1 || slotB == -1) {
         return false;
@@ -1672,7 +1670,7 @@ bool CAEPedSpeechAudioEntity::ReservePedConversationSpeechSlots() {
 
 // 0x4E3870
 bool CAEPedSpeechAudioEntity::ReservePlayerConversationSpeechSlot() {
-    const auto slot = GetFreeSpeechSlot();
+    const auto slot = GetFreeSpeechSlot(5);
     if (slot == -1) {
         return false;
     }
@@ -2109,8 +2107,29 @@ int16 CAEPedSpeechAudioEntity::GetSoundAndBankIDs(eGlobalSpeechContext gCtx, eSp
 }
 
 // 0x4E5F10
-bool CAEPedSpeechAudioEntity::CanWePlayGlobalSpeechContext(int16 a2) {
-    return plugin::CallMethodAndReturn<bool, 0x4E5F10, CAEPedSpeechAudioEntity*, int16>(this, a2);
+bool CAEPedSpeechAudioEntity::CanWePlayGlobalSpeechContext(eGlobalSpeechContext gCtx) {
+    if (!IsGlobalContextImportantForInterupting(gCtx) && !IsGlobalContextPain(gCtx)) {
+        const auto CheckSlot = [](auto slot) {
+            return s_PedSpeechSlots[slot].Status == CAEPedSpeechSlot::eStatus::RESERVED
+                ? slot
+                : -1;
+        };
+        if (s_bPedConversationHappening) {
+            if (this == &s_pConversationPed1->m_pedSpeech) {
+                return CheckSlot(s_pConversationPedSlot1);
+            }
+            if (this == &s_pConversationPed2->m_pedSpeech) {
+                return CheckSlot(s_pConversationPedSlot2);
+            }
+        } else if (s_bPlayerConversationHappening) {
+            if (this == &s_pPlayerConversationPed->m_pedSpeech) {
+                return CheckSlot(s_pConversationPedSlot1);
+            }    
+        }
+    }
+    return GetNextPlayTime(gCtx) < CTimer::GetTimeInMS()
+        ? GetFreeSpeechSlot(5) // s_NextSpeechSlot is set in `GetFreeSpeechSlot`
+        : -1;
 }
 
 // 0x4E6550
@@ -2235,10 +2254,12 @@ bool CAEPedSpeechAudioEntity::IsPedFemaleForAudio() {
         : false;
 }
 
-int32 CAEPedSpeechAudioEntity::GetFreeSpeechSlot() {
-    for (auto&& [i, ss] : notsa::enumerate(s_PedSpeechSlots)) {
-        if (ss.Status == CAEPedSpeechSlot::eStatus::FREE) {
-            return i;
+int32 CAEPedSpeechAudioEntity::GetFreeSpeechSlot(size_t numSlotsToCheck) {
+    for (size_t n = 0; n < numSlotsToCheck; n++) {
+        const auto i = (s_NextSpeechSlot + n) % numSlotsToCheck;
+        if (s_PedSpeechSlots[i].Status == CAEPedSpeechSlot::eStatus::FREE) {
+            s_NextSpeechSlot = (i + 1) % numSlotsToCheck;
+            return (int32)i;
         }
     }
     return -1;

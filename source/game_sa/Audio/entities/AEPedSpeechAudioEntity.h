@@ -137,7 +137,7 @@ public:
     static inline auto& s_pConversationPedSlot1          = StaticRef<int16>(0xB61408);
     static inline auto& s_pConversationPed2              = StaticRef<CPed*>(0xB6140C);
     static inline auto& s_pConversationPed1              = StaticRef<CPed*>(0xB61410);
-    static inline auto& s_NextSpeechSlot                 = StaticRef<int16>(0xB61414);
+    static inline auto& s_NextSpeechSlot                 = StaticRef<uint16>(0xB61414);
 
     //! A least-recently-used (FILO) cache of phrases used
     static inline auto& s_PhraseMemory                   = StaticRef<std::array<tPhraseMemory, 150>>(0xB61418);
@@ -201,7 +201,7 @@ public:
     bool CanPedSayGlobalContext(eGlobalSpeechContext gCtx) const;
     int8 GetVoiceAndTypeFromModel(eModelID modelId);
     int16 GetSoundAndBankIDs(eGlobalSpeechContext gCtx, eSpecificSpeechContext& outSpecificSpeechContext);
-    bool CanWePlayGlobalSpeechContext(int16 a2);
+    bool CanWePlayGlobalSpeechContext(eGlobalSpeechContext gCtx);
     int16 AddSayEvent(eAudioEvents audioEvent, int16 phraseId, uint32 a4, float a5, uint8 a6, uint8 a7, uint8 a8);
     void Initialise(CEntity* ped);
     bool CanPedHoldConversation();
@@ -227,7 +227,7 @@ public:
     virtual bool IsPedFemaleForAudio();
 
 private:
-    static int32 GetFreeSpeechSlot();
+    static int32 GetFreeSpeechSlot(size_t numSlotsToCheck = 5);
     uint32& GetNextPlayTimeRef(eGlobalSpeechContext gCtx);
 
 private:
