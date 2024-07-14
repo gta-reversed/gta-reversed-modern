@@ -65,6 +65,7 @@ struct CAEPedSpeechSlot {
     bool                     IsReservedForPlayerConversation{};
 };
 VALIDATE_SIZE(CAEPedSpeechSlot, 0x1C);
+using tPedSpeechSlotID = int16;
 
 struct tPhraseMemory {
     int16         SoundID{ -1 };
@@ -148,9 +149,10 @@ public:
     //! Speech slots
     //! Last one is always reserved for the player!
     static inline auto&      s_PedSpeechSlots                 = StaticRef<std::array<CAEPedSpeechSlot, SND_BANK_SLOT_SPEECH6 - SND_BANK_SLOT_SPEECH1 + 1>>(0xB61C38);
-    static inline const auto PLAYER_SPEECH_SLOT               = (int16)(s_PedSpeechSlots.size() - 1);
+    static inline const auto PLAYER_SPEECH_SLOT               = (tPedSpeechSlotID)(s_PedSpeechSlots.size() - 1);
     static inline auto&      gGlobalSpeechContextNextPlayTime = StaticRef<std::array<uint32, CTX_GLOBAL_NUM>>(0xB61670); // PAIN (CTX_GLOBAL_PAIN_START -> CTX_GLOBAL_PAIN_END) is ignored, and `m_NextTimeCanSayPain` is used instead
 
+    static inline const auto SPEECH_SOUND_DEFAULT_VOLUME = 3.f; // 0x8C80EC
 public:
     static void InjectHooks();
 
@@ -161,11 +163,11 @@ public:
     static bool IsGlobalContextUberImportant(int16 gCtx);
     static int16 __stdcall GetNextMoodToUse(eCJMood lastMood);
     static int32 __stdcall GetVoiceForMood(int16 mood);
-    static int16 CanWePlayScriptedSpeech();
+    static tPedSpeechSlotID CanWePlayScriptedSpeech();
     static float GetSpeechContextVolumeOffset(eGlobalSpeechContextS16 gctx);
     static bool RequestPedConversation(CPed* pedA, CPed* pedB);
     static void ReleasePedConversation();
-    static int16 GetCurrentCJMood();
+    static eCJMood GetCurrentCJMood();
     static void StaticInitialise();
     static eSpecificSpeechContext GetSpecificSpeechContext(eGlobalSpeechContext gCtx, eAudioPedType pedAudioType);
     static void Service();
@@ -235,7 +237,7 @@ public:
     virtual bool IsPedFemaleForAudio();
 
 private:
-    static int32 GetFreeSpeechSlot();
+    static tPedSpeechSlotID GetFreeSpeechSlot();
     uint32& GetNextPlayTimeRef(eGlobalSpeechContext gCtx);
 
 private:

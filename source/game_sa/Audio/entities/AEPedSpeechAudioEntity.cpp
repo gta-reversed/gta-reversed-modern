@@ -119,7 +119,7 @@ int32 __stdcall CAEPedSpeechAudioEntity::GetVoiceForMood(int16 mood) {
 }
 
 // 0x4E4950
-int16 CAEPedSpeechAudioEntity::CanWePlayScriptedSpeech() {
+tPedSpeechSlotID CAEPedSpeechAudioEntity::CanWePlayScriptedSpeech() {
     return GetFreeSpeechSlot();
 }
 
@@ -335,28 +335,28 @@ eSpecificSpeechContext CAEPedSpeechAudioEntity::GetSpecificSpeechContext(eGlobal
 // 0x4E3710
 void CAEPedSpeechAudioEntity::Service() { // static
     s_bForceAudible = false;
-    for (auto&& [i, ss] : notsa::enumerate(s_PedSpeechSlots)) {
+    for (auto&& [i, speech] : notsa::enumerate(s_PedSpeechSlots)) {
         // Waiting for sound to load, and has loaded?
-        if (ss.Status == CAEPedSpeechSlot::eStatus::LOADING && AEAudioHardware.IsSoundLoaded(ss.SoundBankID, ss.SoundID, SND_BANK_SLOT_SPEECH1 + i)) {
-            ss.Status = CAEPedSpeechSlot::eStatus::WAITING;
+        if (speech.Status == CAEPedSpeechSlot::eStatus::LOADING && AEAudioHardware.IsSoundLoaded(speech.SoundBankID, speech.SoundID, SND_BANK_SLOT_SPEECH1 + i)) {
+            speech.Status = CAEPedSpeechSlot::eStatus::WAITING;
         }
 
         // Sound is now loaded, waiting to be played
-        if (ss.Status == CAEPedSpeechSlot::eStatus::WAITING) {
-            if (ss.StartPlaybackTime >= CTimer::GetTimeInMS()) {
-                if (const auto ae = ss.AudioEntity) {
+        if (speech.Status == CAEPedSpeechSlot::eStatus::WAITING) {
+            if (speech.StartPlaybackTime >= CTimer::GetTimeInMS()) {
+                if (const auto ae = speech.AudioEntity) {
                     ae->PlayLoadedSound();
                 } else {
-                    ss.Status = CAEPedSpeechSlot::eStatus::FREE;
+                    speech.Status = CAEPedSpeechSlot::eStatus::FREE;
                 }
             }
         }
 
-        // `PlayLoadedSound` above might've modified the status, must check it again (can't use switch for whole code)
-        switch (ss.Status) {
+        // `PlayLoadedSound` above might've modified the status, must check it again
+        switch (speech.Status) {
         case CAEPedSpeechSlot::eStatus::REQUESTED:
         case CAEPedSpeechSlot::eStatus::PLAYING: {
-            s_bForceAudible |= ss.ForceAudible;
+            s_bForceAudible |= speech.ForceAudible;
         }
         }
     }
@@ -1206,7 +1206,7 @@ void CAEPedSpeechAudioEntity::AddScriptSayEvent(eAudioEvents audioEvent, eAudioE
         return;
     }
     const auto speechSlotID = m_PedAudioType == PED_TYPE_PLAYER
-        ? !CAEPedSpeechAudioEntity::s_bAPlayerSpeaking || this->m_IsPlayingSpeech
+        ? !CAEPedSpeechAudioEntity::s_bAPlayerSpeaking || m_IsPlayingSpeech
             ? PLAYER_SPEECH_SLOT
             : -1
         : CanWePlayScriptedSpeech();
@@ -1335,7 +1335,7 @@ bool CAEPedSpeechAudioEntity::WillPedChatAboutTopic(int16 topic) {
 
 // 0x4E4130
 int16 CAEPedSpeechAudioEntity::GetPedType() {
-    return m_IsInitialized
+    return m_IsInitialized 
         ? m_PedAudioType
         : PED_TYPE_UNK;
 }
@@ -1348,13 +1348,13 @@ bool CAEPedSpeechAudioEntity::IsPedFemaleForAudio() {
 }
 
 // notsa
-int32 CAEPedSpeechAudioEntity::GetFreeSpeechSlot() {
+tPedSpeechSlotID CAEPedSpeechAudioEntity::GetFreeSpeechSlot() {
     const auto size = s_PedSpeechSlots.size() - 1; // Last one always reserved for the player
     for (size_t n = 0; n < size; n++) {
         const auto i = (s_NextSpeechSlot + n) % size;
         if (s_PedSpeechSlots[i].Status == CAEPedSpeechSlot::eStatus::FREE) {
             s_NextSpeechSlot = (uint16)((i + 1u) % size);
-            return (int32)i;
+            return (tPedSpeechSlotID)i;
         }
     }
     return -1;
