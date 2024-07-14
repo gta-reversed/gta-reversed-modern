@@ -214,7 +214,7 @@ struct tScriptSearchlight {
     bool m_bUsed{ true };
     bool m_bClipIfColliding{};
     bool m_bEnableShadow{};
-    union {
+    struct {
         eScriptSearchLightState m_nCurrentState : 7;
         bool                    bIsUsed : 1; // ?
     } /* m_Flags */;
