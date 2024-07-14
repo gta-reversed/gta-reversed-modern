@@ -83,39 +83,28 @@ CAEPedSpeechAudioEntity::CAEPedSpeechAudioEntity(CPed* ped) noexcept :
     m_pEntity = ped;
     if (ped->GetModelID() != MODEL_INVALID) {
         auto* const mi = ped->GetPedModelInfo();
-        if (mi->m_nPedAudioType == PED_TYPE_SPC) {
+        m_PedAudioType = mi->m_nPedAudioType;
+        switch (m_PedAudioType) {
+        case PED_TYPE_UNK:
+            return;
+        case PED_TYPE_SPC: {
             if (!GetVoiceAndTypeForSpecialPed(mi->m_nKey)) {
                 return;
             }
-        } else {
+            break;
+        }
+        default: {
             m_VoiceID = mi->m_nVoiceId;
             if (m_VoiceID == -1) {
                 return;
             }
             mi->IncrementVoice();
+            break;
+        }
         }
         VERIFY(GetSexFromModel(ped->GetModelID()));
         m_IsInitialized = true;
     }
-}
-
-// 0x4E4700
-int16 __stdcall CAEPedSpeechAudioEntity::GetNextMoodToUse(eCJMood lastMood) {
-    switch (lastMood) {
-    case MOOD_AG:
-    case MOOD_PR: return MOOD_AR;
-    case MOOD_PG: return MOOD_AG;
-    case MOOD_WG: return MOOD_CG;
-    default:      return MOOD_CR;
-    }
-}
-
-// 0x4E4760
-int32 __stdcall CAEPedSpeechAudioEntity::GetVoiceForMood(int16 mood) {
-    auto rnd = CAEAudioUtility::GetRandomNumberInRange(0, 1);
-    if (mood < 0 || mood >= 10)
-        return rnd + 10;
-    return rnd + 2 * mood;
 }
 
 // 0x4E4950
@@ -194,105 +183,6 @@ void CAEPedSpeechAudioEntity::ReleasePedConversation() {
     s_bPedConversationHappening = false;
 }
 
-// 0x4E53B0
-int16 CAEPedSpeechAudioEntity::GetCurrentCJMood() {
-    const auto* const plyr = FindPlayerPed();
-    if (!plyr) {
-        return MOOD_CR;
-    }
-
-    const auto isMoodOverrideActive = s_nCJMoodOverrideTime >= CTimer::GetTimeInMS();
-    
-    const auto CheckCJIsWellDressed = [&] { // 0x4E53DF
-        if (isMoodOverrideActive && s_nCJWellDressed != -1) {
-            return s_nCJWellDressed != 0;
-        }
-        return CStats::GetStatValue(STAT_CLOTHES_RESPECT) >= 650.f
-            && CStats::GetStatValue(STAT_FASHION_BUDGET) >= 10'000.f;
-    };
-
-    const auto CheckCJIsGangBanging = [&] { // 0x4E5440
-        if (isMoodOverrideActive && s_nCJGangBanging != -1) {
-            return s_nCJGangBanging != 0;
-        }
-        if (IsCJDressedInForGangSpeech()) {
-            return true;
-        }
-        auto& plyrGrp = plyr->GetPlayerGroup();
-        if (plyrGrp.GetMembership().CountMembersExcludingLeader() <= 1) {
-            return true;
-        }
-        const auto& mem = plyrGrp.GetMembership().GetMembers().front(); // The one-and-only member (This isnt the same as `GetMember(0)`!!!)
-        if (mem.m_nPedType == PED_TYPE_GANG2) {
-            return true;
-        }
-        auto& memSpeech = mem.m_pedSpeech;
-        return memSpeech.m_PedAudioType == PED_TYPE_GANG
-            && notsa::contains({ VOICE_GNG_RYDER, VOICE_GNG_SWEET, VOICE_GNG_SMOKE }, (eGngSpeechVoices)memSpeech.m_VoiceID);
-    };
-
-    const auto CheckCJIsFat = [&] { // 0x4E54E0
-        if (isMoodOverrideActive && s_nCJFat != -1) {
-            return s_nCJFat != 0;
-        }
-        return CStats::GetStatValue(STAT_FAT) >= 600.f
-            && CStats::GetStatValue(STAT_FAT) - 200.f > CStats::GetStatValue(STAT_MUSCLE);
-    };
-
-    const auto DeriveMood = [&](eCJMood basicMood) { // 0x4E55CC
-        if (isMoodOverrideActive && s_nCJBasicMood != MOOD_UNK) { // 0x4E5592
-            basicMood = s_nCJBasicMood;
-        }
-        switch (basicMood) {
-        case MOOD_AR:
-            return CheckCJIsFat()
-                ? MOOD_AR
-                : MOOD_AG;
-        case MOOD_CR: {
-            if (CheckCJIsGangBanging()) {
-                return MOOD_CG;
-            }
-            if (CheckCJIsFat()) {
-                return MOOD_CF;
-            }
-            return CheckCJIsWellDressed()
-                ? MOOD_CD
-                : MOOD_CR;
-        }
-        case MOOD_PR:
-            return CheckCJIsGangBanging()
-                ? MOOD_PG
-                : MOOD_PR;
-        case MOOD_WR:
-            return CheckCJIsGangBanging()
-                ? MOOD_WG
-                : MOOD_WR;
-        default:
-            return MOOD_CR;
-        }
-    };
-
-    if (FindPlayerWanted()->GetWantedLevel() > 3) { // 0x4E5537
-        return DeriveMood(MOOD_PR);
-    }
-
-    if (FindPlayerWanted()->GetWantedLevel() > 1) { // 0x4E554B
-        return DeriveMood(MOOD_AR);
-    }
-
-    if (CTheScripts::LastMissionPassedTime == -1) { // 0x4E555C
-        if (CTimer::GetTimeInMS() >= CTheScripts::LastMissionPassedTime) {
-            return CTimer::GetTimeInMS() < CTheScripts::LastMissionPassedTime + 180'000
-                ? DeriveMood(MOOD_WR)
-                : DeriveMood(MOOD_CR);
-        } else {
-            CTheScripts::LastMissionPassedTime = CTimer::GetTimeInMS();
-        }
-    }
-
-    return DeriveMood(MOOD_CR); // 0x4E5579
-}
-
 // 0x5B98C0
 void CAEPedSpeechAudioEntity::StaticInitialise() {
     rng::fill(s_PedSpeechSlots, CAEPedSpeechSlot{});
@@ -319,17 +209,6 @@ void CAEPedSpeechAudioEntity::StaticInitialise() {
     s_bAllSpeechDisabled = false;
     s_bAPlayerSpeaking   = false;
     s_bForceAudible      = false;
-}
-
-// 0x4E4470
-eSpecificSpeechContext CAEPedSpeechAudioEntity::GetSpecificSpeechContext(eGlobalSpeechContext gCtx, eAudioPedType pedAudioType) {
-    // Omitted useless `if`s
-    // NOTE: Original code allowed `PED_TYPE_SPC` as a valid ped type too... but that (technically) caused an out-of-bounds read...
-    //       We won't assert on that, because there are bounds check for the array (as we use std::array)
-    if (const auto* const ctxi = GetGlobalSpeechContextInfo(gCtx)) {
-        return ctxi->SpecificSpeechContext[pedAudioType];
-    }
-    return -1;
 }
 
 // 0x4E3710
@@ -526,50 +405,23 @@ eAudioPedType CAEPedSpeechAudioEntity::GetAudioPedType(const char* name) {
 
 // 0x4E3CD0
 ePedSpeechVoiceS16 CAEPedSpeechAudioEntity::GetVoice(const char* name, eAudioPedTypeS16 type) {
+    const auto DoLookUpIn = [name](auto&& mapping) {
+        return notsa::find_value_or(mapping, name, VOICE_UNK);
+    };
     switch (type) {
-    case PED_TYPE_GEN: {
-        static const auto mapping = notsa::make_mapping<std::string_view, eGenSpeechVoices>({
-            {"VOICE_GEN_BBDYG1", VOICE_GEN_BBDYG1}, {"VOICE_GEN_BBDYG2", VOICE_GEN_BBDYG2}, {"VOICE_GEN_BFORI", VOICE_GEN_BFORI}, {"VOICE_GEN_BFOST", VOICE_GEN_BFOST}, {"VOICE_GEN_BFYBE", VOICE_GEN_BFYBE}, {"VOICE_GEN_BFYBU", VOICE_GEN_BFYBU}, {"VOICE_GEN_BFYCRP", VOICE_GEN_BFYCRP}, {"VOICE_GEN_BFYPRO", VOICE_GEN_BFYPRO}, {"VOICE_GEN_BFYRI", VOICE_GEN_BFYRI}, {"VOICE_GEN_BFYST", VOICE_GEN_BFYST}, {"VOICE_GEN_BIKDRUG", VOICE_GEN_BIKDRUG}, {"VOICE_GEN_BIKERA", VOICE_GEN_BIKERA}, {"VOICE_GEN_BIKERB", VOICE_GEN_BIKERB}, {"VOICE_GEN_BMOCD", VOICE_GEN_BMOCD}, {"VOICE_GEN_BMORI", VOICE_GEN_BMORI}, {"VOICE_GEN_BMOSEC", VOICE_GEN_BMOSEC}, {"VOICE_GEN_BMOST", VOICE_GEN_BMOST}, {"VOICE_GEN_BMOTR1", VOICE_GEN_BMOTR1}, {"VOICE_GEN_BMYAP", VOICE_GEN_BMYAP}, {"VOICE_GEN_BMYBE", VOICE_GEN_BMYBE}, {"VOICE_GEN_BMYBOUN", VOICE_GEN_BMYBOUN}, {"VOICE_GEN_BMYBOX", VOICE_GEN_BMYBOX}, {"VOICE_GEN_BMYBU", VOICE_GEN_BMYBU}, {"VOICE_GEN_BMYCG", VOICE_GEN_BMYCG}, {"VOICE_GEN_BMYCON", VOICE_GEN_BMYCON}, {"VOICE_GEN_BMYCR", VOICE_GEN_BMYCR}, {"VOICE_GEN_BMYDJ", VOICE_GEN_BMYDJ}, {"VOICE_GEN_BMYDRUG", VOICE_GEN_BMYDRUG}, {"VOICE_GEN_BMYMOUN", VOICE_GEN_BMYMOUN}, {"VOICE_GEN_BMYPOL1", VOICE_GEN_BMYPOL1}, {"VOICE_GEN_BMYPOL2", VOICE_GEN_BMYPOL2}, {"VOICE_GEN_BMYRI", VOICE_GEN_BMYRI}, {"VOICE_GEN_BMYST", VOICE_GEN_BMYST}, {"VOICE_GEN_BYMPI", VOICE_GEN_BYMPI}, {"VOICE_GEN_CWFOFR", VOICE_GEN_CWFOFR}, {"VOICE_GEN_CWFOHB", VOICE_GEN_CWFOHB}, {"VOICE_GEN_CWFYFR1", VOICE_GEN_CWFYFR1}, {"VOICE_GEN_CWFYFR2", VOICE_GEN_CWFYFR2}, {"VOICE_GEN_CWFYHB1", VOICE_GEN_CWFYHB1}, {"VOICE_GEN_CWMOFR1", VOICE_GEN_CWMOFR1}, {"VOICE_GEN_CWMOHB1", VOICE_GEN_CWMOHB1}, {"VOICE_GEN_CWMOHB2", VOICE_GEN_CWMOHB2}, {"VOICE_GEN_CWMYFR", VOICE_GEN_CWMYFR}, {"VOICE_GEN_CWMYHB1", VOICE_GEN_CWMYHB1}, {"VOICE_GEN_CWMYHB2", VOICE_GEN_CWMYHB2}, {"VOICE_GEN_DNFOLC1", VOICE_GEN_DNFOLC1}, {"VOICE_GEN_DNFOLC2", VOICE_GEN_DNFOLC2}, {"VOICE_GEN_DNFYLC", VOICE_GEN_DNFYLC}, {"VOICE_GEN_DNMOLC1", VOICE_GEN_DNMOLC1}, {"VOICE_GEN_DNMOLC2", VOICE_GEN_DNMOLC2}, {"VOICE_GEN_DNMYLC", VOICE_GEN_DNMYLC}, {"VOICE_GEN_DWFOLC", VOICE_GEN_DWFOLC}, {"VOICE_GEN_DWFYLC1", VOICE_GEN_DWFYLC1}, {"VOICE_GEN_DWFYLC2", VOICE_GEN_DWFYLC2}, {"VOICE_GEN_DWMOLC1", VOICE_GEN_DWMOLC1}, {"VOICE_GEN_DWMOLC2", VOICE_GEN_DWMOLC2}, {"VOICE_GEN_DWMYLC1", VOICE_GEN_DWMYLC1}, {"VOICE_GEN_DWMYLC2", VOICE_GEN_DWMYLC2}, {"VOICE_GEN_HFORI", VOICE_GEN_HFORI}, {"VOICE_GEN_HFOST", VOICE_GEN_HFOST}, {"VOICE_GEN_HFYBE", VOICE_GEN_HFYBE}, {"VOICE_GEN_HFYPRO", VOICE_GEN_HFYPRO}, {"VOICE_GEN_HFYRI", VOICE_GEN_HFYRI}, {"VOICE_GEN_HFYST", VOICE_GEN_HFYST}, {"VOICE_GEN_HMORI", VOICE_GEN_HMORI}, {"VOICE_GEN_HMOST", VOICE_GEN_HMOST}, {"VOICE_GEN_HMYBE", VOICE_GEN_HMYBE}, {"VOICE_GEN_HMYCM", VOICE_GEN_HMYCM}, {"VOICE_GEN_HMYCR", VOICE_GEN_HMYCR}, {"VOICE_GEN_HMYDRUG", VOICE_GEN_HMYDRUG}, {"VOICE_GEN_HMYRI", VOICE_GEN_HMYRI}, {"VOICE_GEN_HMYST", VOICE_GEN_HMYST}, {"VOICE_GEN_IMYST", VOICE_GEN_IMYST}, {"VOICE_GEN_IRFYST", VOICE_GEN_IRFYST}, {"VOICE_GEN_IRMYST", VOICE_GEN_IRMYST}, {"VOICE_GEN_MAFFA", VOICE_GEN_MAFFA}, {"VOICE_GEN_MAFFB", VOICE_GEN_MAFFB}, {"VOICE_GEN_MALE01", VOICE_GEN_MALE01}, {"VOICE_GEN_NOVOICE", VOICE_GEN_NOVOICE}, {"VOICE_GEN_OFORI", VOICE_GEN_OFORI}, {"VOICE_GEN_OFOST", VOICE_GEN_OFOST}, {"VOICE_GEN_OFYRI", VOICE_GEN_OFYRI}, {"VOICE_GEN_OFYST", VOICE_GEN_OFYST}, {"VOICE_GEN_OMOBOAT", VOICE_GEN_OMOBOAT}, {"VOICE_GEN_OMOKUNG", VOICE_GEN_OMOKUNG}, {"VOICE_GEN_OMORI", VOICE_GEN_OMORI}, {"VOICE_GEN_OMOST", VOICE_GEN_OMOST}, {"VOICE_GEN_OMYRI", VOICE_GEN_OMYRI}, {"VOICE_GEN_OMYST", VOICE_GEN_OMYST}, {"VOICE_GEN_SBFORI", VOICE_GEN_SBFORI}, {"VOICE_GEN_SBFOST", VOICE_GEN_SBFOST}, {"VOICE_GEN_SBFYPRO", VOICE_GEN_SBFYPRO}, {"VOICE_GEN_SBFYRI", VOICE_GEN_SBFYRI}, {"VOICE_GEN_SBFYST", VOICE_GEN_SBFYST}, {"VOICE_GEN_SBFYSTR", VOICE_GEN_SBFYSTR}, {"VOICE_GEN_SBMOCD", VOICE_GEN_SBMOCD}, {"VOICE_GEN_SBMORI", VOICE_GEN_SBMORI}, {"VOICE_GEN_SBMOST", VOICE_GEN_SBMOST}, {"VOICE_GEN_SBMOTR1", VOICE_GEN_SBMOTR1}, {"VOICE_GEN_SBMOTR2", VOICE_GEN_SBMOTR2}, {"VOICE_GEN_SBMYCR", VOICE_GEN_SBMYCR}, {"VOICE_GEN_SBMYRI", VOICE_GEN_SBMYRI}, {"VOICE_GEN_SBMYST", VOICE_GEN_SBMYST}, {"VOICE_GEN_SBMYTR3", VOICE_GEN_SBMYTR3}, {"VOICE_GEN_SFYPRO", VOICE_GEN_SFYPRO}, {"VOICE_GEN_SHFYPRO", VOICE_GEN_SHFYPRO}, {"VOICE_GEN_SHMYCR", VOICE_GEN_SHMYCR}, {"VOICE_GEN_SMYST", VOICE_GEN_SMYST}, {"VOICE_GEN_SMYST2", VOICE_GEN_SMYST2}, {"VOICE_GEN_SOFORI", VOICE_GEN_SOFORI}, {"VOICE_GEN_SOFOST", VOICE_GEN_SOFOST}, {"VOICE_GEN_SOFYBU", VOICE_GEN_SOFYBU}, {"VOICE_GEN_SOFYRI", VOICE_GEN_SOFYRI}, {"VOICE_GEN_SOFYST", VOICE_GEN_SOFYST}, {"VOICE_GEN_SOMOBU", VOICE_GEN_SOMOBU}, {"VOICE_GEN_SOMORI", VOICE_GEN_SOMORI}, {"VOICE_GEN_SOMOST", VOICE_GEN_SOMOST}, {"VOICE_GEN_SOMYAP", VOICE_GEN_SOMYAP}, {"VOICE_GEN_SOMYBU", VOICE_GEN_SOMYBU}, {"VOICE_GEN_SOMYRI", VOICE_GEN_SOMYRI}, {"VOICE_GEN_SOMYST", VOICE_GEN_SOMYST}, {"VOICE_GEN_SWFOPRO", VOICE_GEN_SWFOPRO}, {"VOICE_GEN_SWFORI", VOICE_GEN_SWFORI}, {"VOICE_GEN_SWFOST", VOICE_GEN_SWFOST}, {"VOICE_GEN_SWFYRI", VOICE_GEN_SWFYRI}, {"VOICE_GEN_SWFYST", VOICE_GEN_SWFYST}, {"VOICE_GEN_SWFYSTR", VOICE_GEN_SWFYSTR}, {"VOICE_GEN_SWMOCD", VOICE_GEN_SWMOCD}, {"VOICE_GEN_SWMORI", VOICE_GEN_SWMORI}, {"VOICE_GEN_SWMOST", VOICE_GEN_SWMOST}, {"VOICE_GEN_SWMOTR1", VOICE_GEN_SWMOTR1}, {"VOICE_GEN_SWMOTR2", VOICE_GEN_SWMOTR2}, {"VOICE_GEN_SWMOTR3", VOICE_GEN_SWMOTR3}, {"VOICE_GEN_SWMOTR4", VOICE_GEN_SWMOTR4}, {"VOICE_GEN_SWMOTR5", VOICE_GEN_SWMOTR5}, {"VOICE_GEN_SWMYCR", VOICE_GEN_SWMYCR}, {"VOICE_GEN_SWMYHP1", VOICE_GEN_SWMYHP1}, {"VOICE_GEN_SWMYHP2", VOICE_GEN_SWMYHP2}, {"VOICE_GEN_SWMYRI", VOICE_GEN_SWMYRI}, {"VOICE_GEN_SWMYST", VOICE_GEN_SWMYST}, {"VOICE_GEN_VBFYPRO", VOICE_GEN_VBFYPRO}, {"VOICE_GEN_VBFYST2", VOICE_GEN_VBFYST2}, {"VOICE_GEN_VBMOCD", VOICE_GEN_VBMOCD}, {"VOICE_GEN_VBMYCR", VOICE_GEN_VBMYCR}, {"VOICE_GEN_VBMYELV", VOICE_GEN_VBMYELV}, {"VOICE_GEN_VHFYPRO", VOICE_GEN_VHFYPRO}, {"VOICE_GEN_VHFYST3", VOICE_GEN_VHFYST3}, {"VOICE_GEN_VHMYCR", VOICE_GEN_VHMYCR}, {"VOICE_GEN_VHMYELV", VOICE_GEN_VHMYELV}, {"VOICE_GEN_VIMYELV", VOICE_GEN_VIMYELV}, {"VOICE_GEN_VWFYPRO", VOICE_GEN_VWFYPRO}, {"VOICE_GEN_VWFYST1", VOICE_GEN_VWFYST1}, {"VOICE_GEN_VWFYWAI", VOICE_GEN_VWFYWAI}, {"VOICE_GEN_VWMOTR1", VOICE_GEN_VWMOTR1}, {"VOICE_GEN_VWMOTR2", VOICE_GEN_VWMOTR2}, {"VOICE_GEN_VWMYAP", VOICE_GEN_VWMYAP}, {"VOICE_GEN_VWMYBJD", VOICE_GEN_VWMYBJD}, {"VOICE_GEN_VWMYCD", VOICE_GEN_VWMYCD}, {"VOICE_GEN_VWMYCR", VOICE_GEN_VWMYCR}, {"VOICE_GEN_WFOPJ", VOICE_GEN_WFOPJ}, {"VOICE_GEN_WFORI", VOICE_GEN_WFORI}, {"VOICE_GEN_WFOST", VOICE_GEN_WFOST}, {"VOICE_GEN_WFYBE", VOICE_GEN_WFYBE}, {"VOICE_GEN_WFYBU", VOICE_GEN_WFYBU}, {"VOICE_GEN_WFYCRK", VOICE_GEN_WFYCRK}, {"VOICE_GEN_WFYCRP", VOICE_GEN_WFYCRP}, {"VOICE_GEN_WFYJG", VOICE_GEN_WFYJG}, {"VOICE_GEN_WFYLG", VOICE_GEN_WFYLG}, {"VOICE_GEN_WFYPRO", VOICE_GEN_WFYPRO}, {"VOICE_GEN_WFYRI", VOICE_GEN_WFYRI}, {"VOICE_GEN_WFYRO", VOICE_GEN_WFYRO}, {"VOICE_GEN_WFYST", VOICE_GEN_WFYST}, {"VOICE_GEN_WFYSTEW", VOICE_GEN_WFYSTEW}, {"VOICE_GEN_WMOMIB", VOICE_GEN_WMOMIB}, {"VOICE_GEN_WMOPJ", VOICE_GEN_WMOPJ}, {"VOICE_GEN_WMOPREA", VOICE_GEN_WMOPREA}, {"VOICE_GEN_WMORI", VOICE_GEN_WMORI}, {"VOICE_GEN_WMOSCI", VOICE_GEN_WMOSCI}, {"VOICE_GEN_WMOST", VOICE_GEN_WMOST}, {"VOICE_GEN_WMOTR1", VOICE_GEN_WMOTR1}, {"VOICE_GEN_WMYBE", VOICE_GEN_WMYBE}, {"VOICE_GEN_WMYBMX", VOICE_GEN_WMYBMX}, {"VOICE_GEN_WMYBOUN", VOICE_GEN_WMYBOUN}, {"VOICE_GEN_WMYBOX", VOICE_GEN_WMYBOX}, {"VOICE_GEN_WMYBP", VOICE_GEN_WMYBP}, {"VOICE_GEN_WMYBU", VOICE_GEN_WMYBU}, {"VOICE_GEN_WMYCD1", VOICE_GEN_WMYCD1}, {"VOICE_GEN_WMYCD2", VOICE_GEN_WMYCD2}, {"VOICE_GEN_WMYCH", VOICE_GEN_WMYCH}, {"VOICE_GEN_WMYCON", VOICE_GEN_WMYCON}, {"VOICE_GEN_WMYCONB", VOICE_GEN_WMYCONB}, {"VOICE_GEN_WMYCR", VOICE_GEN_WMYCR}, {"VOICE_GEN_WMYDRUG", VOICE_GEN_WMYDRUG}, {"VOICE_GEN_WMYGAR", VOICE_GEN_WMYGAR}, {"VOICE_GEN_WMYGOL1", VOICE_GEN_WMYGOL1}, {"VOICE_GEN_WMYGOL2", VOICE_GEN_WMYGOL2}, {"VOICE_GEN_WMYJG", VOICE_GEN_WMYJG}, {"VOICE_GEN_WMYLG", VOICE_GEN_WMYLG}, {"VOICE_GEN_WMYMECH", VOICE_GEN_WMYMECH}, {"VOICE_GEN_WMYMOUN", VOICE_GEN_WMYMOUN}, {"VOICE_GEN_WMYPLT", VOICE_GEN_WMYPLT}, {"VOICE_GEN_WMYRI", VOICE_GEN_WMYRI}, {"VOICE_GEN_WMYRO", VOICE_GEN_WMYRO}, {"VOICE_GEN_WMYSGRD", VOICE_GEN_WMYSGRD}, {"VOICE_GEN_WMYSKAT", VOICE_GEN_WMYSKAT}, {"VOICE_GEN_WMYST", VOICE_GEN_WMYST}, {"VOICE_GEN_WMYTX1", VOICE_GEN_WMYTX1}, {"VOICE_GEN_WMYTX2", VOICE_GEN_WMYTX2}, {"VOICE_GEN_WMYVA", VOICE_GEN_WMYVA}
-        });
-        return notsa::find_value_or(mapping, name, -1);
-    }
-    case PED_TYPE_EMG: {
-        static const auto mapping = notsa::make_mapping<std::string_view, eEmgSpeechVoices>({
-            {"VOICE_EMG_ARMY1", VOICE_EMG_ARMY1}, {"VOICE_EMG_ARMY2", VOICE_EMG_ARMY2}, {"VOICE_EMG_ARMY3", VOICE_EMG_ARMY3}, {"VOICE_EMG_EMT1", VOICE_EMG_EMT1}, {"VOICE_EMG_EMT2", VOICE_EMG_EMT2}, {"VOICE_EMG_EMT3", VOICE_EMG_EMT3}, {"VOICE_EMG_EMT4", VOICE_EMG_EMT4}, {"VOICE_EMG_EMT5", VOICE_EMG_EMT5}, {"VOICE_EMG_FBI2", VOICE_EMG_FBI2}, {"VOICE_EMG_FBI3", VOICE_EMG_FBI3}, {"VOICE_EMG_FBI4", VOICE_EMG_FBI4}, {"VOICE_EMG_FBI5", VOICE_EMG_FBI5}, {"VOICE_EMG_FBI6", VOICE_EMG_FBI6}, {"VOICE_EMG_LAPD1", VOICE_EMG_LAPD1}, {"VOICE_EMG_LAPD2", VOICE_EMG_LAPD2}, {"VOICE_EMG_LAPD3", VOICE_EMG_LAPD3}, {"VOICE_EMG_LAPD4", VOICE_EMG_LAPD4}, {"VOICE_EMG_LAPD5", VOICE_EMG_LAPD5}, {"VOICE_EMG_LAPD6", VOICE_EMG_LAPD6}, {"VOICE_EMG_LAPD7", VOICE_EMG_LAPD7}, {"VOICE_EMG_LAPD8", VOICE_EMG_LAPD8}, {"VOICE_EMG_LVPD1", VOICE_EMG_LVPD1}, {"VOICE_EMG_LVPD2", VOICE_EMG_LVPD2}, {"VOICE_EMG_LVPD3", VOICE_EMG_LVPD3}, {"VOICE_EMG_LVPD4", VOICE_EMG_LVPD4}, {"VOICE_EMG_LVPD5", VOICE_EMG_LVPD5}, {"VOICE_EMG_MCOP1", VOICE_EMG_MCOP1}, {"VOICE_EMG_MCOP2", VOICE_EMG_MCOP2}, {"VOICE_EMG_MCOP3", VOICE_EMG_MCOP3}, {"VOICE_EMG_MCOP4", VOICE_EMG_MCOP4}, {"VOICE_EMG_MCOP5", VOICE_EMG_MCOP5}, {"VOICE_EMG_MCOP6", VOICE_EMG_MCOP6}, {"VOICE_EMG_PULASKI", VOICE_EMG_PULASKI}, {"VOICE_EMG_RCOP1", VOICE_EMG_RCOP1}, {"VOICE_EMG_RCOP2", VOICE_EMG_RCOP2}, {"VOICE_EMG_RCOP3", VOICE_EMG_RCOP3}, {"VOICE_EMG_RCOP4", VOICE_EMG_RCOP4}, {"VOICE_EMG_SFPD1", VOICE_EMG_SFPD1}, {"VOICE_EMG_SFPD2", VOICE_EMG_SFPD2}, {"VOICE_EMG_SFPD3", VOICE_EMG_SFPD3}, {"VOICE_EMG_SFPD4", VOICE_EMG_SFPD4}, {"VOICE_EMG_SFPD5", VOICE_EMG_SFPD5}, {"VOICE_EMG_SWAT1", VOICE_EMG_SWAT1}, {"VOICE_EMG_SWAT2", VOICE_EMG_SWAT2}, {"VOICE_EMG_SWAT4", VOICE_EMG_SWAT4}, {"VOICE_EMG_SWAT6", VOICE_EMG_SWAT6},
-        });
-        return notsa::find_value_or(mapping, name, -1);
-    }
-    case PED_TYPE_PLAYER: {
-        static const auto mapping = notsa::make_mapping<std::string_view, ePlySpeechVoices>({
-            {"VOICE_PLY_AG", VOICE_PLY_AG}, {"VOICE_PLY_AG2", VOICE_PLY_AG2}, {"VOICE_PLY_AR", VOICE_PLY_AR}, {"VOICE_PLY_AR2", VOICE_PLY_AR2}, {"VOICE_PLY_CD", VOICE_PLY_CD}, {"VOICE_PLY_CD2", VOICE_PLY_CD2}, {"VOICE_PLY_CF", VOICE_PLY_CF}, {"VOICE_PLY_CF2", VOICE_PLY_CF2}, {"VOICE_PLY_CG", VOICE_PLY_CG}, {"VOICE_PLY_CG2", VOICE_PLY_CG2}, {"VOICE_PLY_CR", VOICE_PLY_CR}, {"VOICE_PLY_CR2", VOICE_PLY_CR2}, {"VOICE_PLY_PG", VOICE_PLY_PG}, {"VOICE_PLY_PG2", VOICE_PLY_PG2}, {"VOICE_PLY_PR", VOICE_PLY_PR}, {"VOICE_PLY_PR2", VOICE_PLY_PR2}, {"VOICE_PLY_WG", VOICE_PLY_WG}, {"VOICE_PLY_WG2", VOICE_PLY_WG2}, {"VOICE_PLY_WR", VOICE_PLY_WR}, {"VOICE_PLY_WR2", VOICE_PLY_WR2},
-        });
-        return notsa::find_value_or(mapping, name, -1);
-    }
-    case PED_TYPE_GANG: {
-        static const auto mapping = notsa::make_mapping<std::string_view, eGngSpeechVoices>({
-            {"VOICE_GNG_BALLAS1", VOICE_GNG_BALLAS1}, {"VOICE_GNG_BALLAS2", VOICE_GNG_BALLAS2}, {"VOICE_GNG_BALLAS3", VOICE_GNG_BALLAS3}, {"VOICE_GNG_BALLAS4", VOICE_GNG_BALLAS4}, {"VOICE_GNG_BALLAS5", VOICE_GNG_BALLAS5}, {"VOICE_GNG_BIG_BEAR", VOICE_GNG_BIG_BEAR}, {"VOICE_GNG_CESAR", VOICE_GNG_CESAR}, {"VOICE_GNG_DNB1", VOICE_GNG_DNB1}, {"VOICE_GNG_DNB2", VOICE_GNG_DNB2}, {"VOICE_GNG_DNB3", VOICE_GNG_DNB3}, {"VOICE_GNG_DNB5", VOICE_GNG_DNB5}, {"VOICE_GNG_DWAINE", VOICE_GNG_DWAINE}, {"VOICE_GNG_FAM1", VOICE_GNG_FAM1}, {"VOICE_GNG_FAM2", VOICE_GNG_FAM2}, {"VOICE_GNG_FAM3", VOICE_GNG_FAM3}, {"VOICE_GNG_FAM4", VOICE_GNG_FAM4}, {"VOICE_GNG_FAM5", VOICE_GNG_FAM5}, {"VOICE_GNG_JIZZY", VOICE_GNG_JIZZY}, {"VOICE_GNG_LSV1", VOICE_GNG_LSV1}, {"VOICE_GNG_LSV2", VOICE_GNG_LSV2}, {"VOICE_GNG_LSV3", VOICE_GNG_LSV3}, {"VOICE_GNG_LSV4", VOICE_GNG_LSV4}, {"VOICE_GNG_LSV5", VOICE_GNG_LSV5}, {"VOICE_GNG_MACCER", VOICE_GNG_MACCER}, {"VOICE_GNG_MAFBOSS", VOICE_GNG_MAFBOSS}, {"VOICE_GNG_OGLOC", VOICE_GNG_OGLOC}, {"VOICE_GNG_RYDER", VOICE_GNG_RYDER}, {"VOICE_GNG_SFR1", VOICE_GNG_SFR1}, {"VOICE_GNG_SFR2", VOICE_GNG_SFR2}, {"VOICE_GNG_SFR3", VOICE_GNG_SFR3}, {"VOICE_GNG_SFR4", VOICE_GNG_SFR4}, {"VOICE_GNG_SFR5", VOICE_GNG_SFR5}, {"VOICE_GNG_SMOKE", VOICE_GNG_SMOKE}, {"VOICE_GNG_STRI1", VOICE_GNG_STRI1}, {"VOICE_GNG_STRI2", VOICE_GNG_STRI2}, {"VOICE_GNG_STRI4", VOICE_GNG_STRI4}, {"VOICE_GNG_STRI5", VOICE_GNG_STRI5}, {"VOICE_GNG_SWEET", VOICE_GNG_SWEET}, {"VOICE_GNG_TBONE", VOICE_GNG_TBONE}, {"VOICE_GNG_TORENO", VOICE_GNG_TORENO}, {"VOICE_GNG_TRUTH", VOICE_GNG_TRUTH}, {"VOICE_GNG_VLA1", VOICE_GNG_VLA1}, {"VOICE_GNG_VLA2", VOICE_GNG_VLA2}, {"VOICE_GNG_VLA3", VOICE_GNG_VLA3}, {"VOICE_GNG_VLA4", VOICE_GNG_VLA4}, {"VOICE_GNG_VLA5", VOICE_GNG_VLA5}, {"VOICE_GNG_VMAFF1", VOICE_GNG_VMAFF1}, {"VOICE_GNG_VMAFF2", VOICE_GNG_VMAFF2}, {"VOICE_GNG_VMAFF3", VOICE_GNG_VMAFF3}, {"VOICE_GNG_VMAFF4", VOICE_GNG_VMAFF4}, {"VOICE_GNG_VMAFF5", VOICE_GNG_VMAFF5}, {"VOICE_GNG_WOOZIE", VOICE_GNG_WOOZIE},
-        });
-        return notsa::find_value_or(mapping, name, -1);
-    }
-    case PED_TYPE_GFD: {
-        static const auto mapping = notsa::make_mapping<std::string_view, eGfdSpeechVoices>({
-            {"VOICE_GFD_BARBARA", VOICE_GFD_BARBARA}, {"VOICE_GFD_BMOBAR", VOICE_GFD_BMOBAR}, {"VOICE_GFD_BMYBARB", VOICE_GFD_BMYBARB}, {"VOICE_GFD_BMYTATT", VOICE_GFD_BMYTATT}, {"VOICE_GFD_CATALINA", VOICE_GFD_CATALINA}, {"VOICE_GFD_DENISE", VOICE_GFD_DENISE}, {"VOICE_GFD_HELENA", VOICE_GFD_HELENA}, {"VOICE_GFD_KATIE", VOICE_GFD_KATIE}, {"VOICE_GFD_MICHELLE", VOICE_GFD_MICHELLE}, {"VOICE_GFD_MILLIE", VOICE_GFD_MILLIE}, {"VOICE_GFD_POL_ANN", VOICE_GFD_POL_ANN}, {"VOICE_GFD_WFYBURG", VOICE_GFD_WFYBURG}, {"VOICE_GFD_WFYCLOT", VOICE_GFD_WFYCLOT}, {"VOICE_GFD_WMYAMMO", VOICE_GFD_WMYAMMO}, {"VOICE_GFD_WMYBARB", VOICE_GFD_WMYBARB}, {"VOICE_GFD_WMYBELL", VOICE_GFD_WMYBELL}, {"VOICE_GFD_WMYCLOT", VOICE_GFD_WMYCLOT}, {"VOICE_GFD_WMYPIZZ", VOICE_GFD_WMYPIZZ},
-        });
-        return notsa::find_value_or(mapping, name, -1);
-    }
-    default:
-        NOTSA_UNREACHABLE();
+    case PED_TYPE_GEN:   return DoLookUpIn(gGenSpeechVoiceLookup);
+    case PED_TYPE_EMG:   return DoLookUpIn(gEmgSpeechVoiceLookup);
+    case PED_TYPE_PLAYER:return DoLookUpIn(gPlySpeechVoiceLookup);
+    case PED_TYPE_GANG:  return DoLookUpIn(gGngSpeechVoiceLookup);
+    case PED_TYPE_GFD:   return DoLookUpIn(gGfdSpeechVoiceLookup);
+    case PED_TYPE_SPC:   return VOICE_UNK;
+    default:             NOTSA_UNREACHABLE();
     }
 }
 
 // 0x4E3EB0
 void CAEPedSpeechAudioEntity::DisableAllPedSpeech() {
     s_bAllSpeechDisabled = true;
-}
-
-// 0x4E44F0
-bool __stdcall CAEPedSpeechAudioEntity::IsGlobalContextPain(eGlobalSpeechContext gCtx) {
-    return CTX_GLOBAL_PAIN_START < gCtx && gCtx < CTX_GLOBAL_PAIN_END;
 }
 
 // 0x4E3ED0
@@ -587,6 +439,135 @@ void CAEPedSpeechAudioEntity::SetCJMood(eCJMood basicMood, uint32 overrideTimeMS
     s_nCJGangBanging = isGangBanging;
     s_nCJFat         = isFat;
     s_nCJWellDressed = isWellDressed;
+}
+
+
+// 0x4E53B0
+eCJMood CAEPedSpeechAudioEntity::GetCurrentCJMood() {
+    const auto* const plyr = FindPlayerPed();
+    if (!plyr) {
+        return MOOD_CR;
+    }
+
+    const auto isMoodOverrideActive = s_nCJMoodOverrideTime >= CTimer::GetTimeInMS();
+    
+    const auto CheckCJIsWellDressed = [&] { // 0x4E53DF
+        if (isMoodOverrideActive && s_nCJWellDressed != -1) {
+            return s_nCJWellDressed != 0;
+        }
+        return CStats::GetStatValue(STAT_CLOTHES_RESPECT) >= 650.f
+            && CStats::GetStatValue(STAT_FASHION_BUDGET) >= 10'000.f;
+    };
+
+    const auto CheckCJIsGangBanging = [&] { // 0x4E5440
+        if (isMoodOverrideActive && s_nCJGangBanging != -1) {
+            return s_nCJGangBanging != 0;
+        }
+        if (IsCJDressedInForGangSpeech()) {
+            return true;
+        }
+        auto& plyrGrp = plyr->GetPlayerGroup();
+        if (plyrGrp.GetMembership().CountMembersExcludingLeader() <= 1) {
+            return true;
+        }
+        const auto& mem = plyrGrp.GetMembership().GetMembers().front(); // The one-and-only member (This isnt the same as `GetMember(0)`!!!)
+        if (mem.m_nPedType == PED_TYPE_GANG2) {
+            return true;
+        }
+        auto& memSpeech = mem.m_pedSpeech;
+        return memSpeech.m_PedAudioType == PED_TYPE_GANG
+            && notsa::contains({ VOICE_GNG_RYDER, VOICE_GNG_SWEET, VOICE_GNG_SMOKE }, (eGngSpeechVoices)memSpeech.m_VoiceID);
+    };
+
+    const auto CheckCJIsFat = [&] { // 0x4E54E0
+        if (isMoodOverrideActive && s_nCJFat != -1) {
+            return s_nCJFat != 0;
+        }
+        return CStats::GetStatValue(STAT_FAT) >= 600.f
+            && CStats::GetStatValue(STAT_FAT) - 200.f > CStats::GetStatValue(STAT_MUSCLE);
+    };
+
+    const auto DeriveMood = [&](eCJMood basicMood) { // 0x4E55CC
+        if (isMoodOverrideActive && s_nCJBasicMood != MOOD_UNK) { // 0x4E5592
+            basicMood = s_nCJBasicMood;
+        }
+        switch (basicMood) {
+        case MOOD_AR:
+            return CheckCJIsFat()
+                ? MOOD_AR
+                : MOOD_AG;
+        case MOOD_CR: {
+            if (CheckCJIsGangBanging()) {
+                return MOOD_CG;
+            }
+            if (CheckCJIsFat()) {
+                return MOOD_CF;
+            }
+            return CheckCJIsWellDressed()
+                ? MOOD_CD
+                : MOOD_CR;
+        }
+        case MOOD_PR:
+            return CheckCJIsGangBanging()
+                ? MOOD_PG
+                : MOOD_PR;
+        case MOOD_WR:
+            return CheckCJIsGangBanging()
+                ? MOOD_WG
+                : MOOD_WR;
+        default:
+            return MOOD_CR;
+        }
+    };
+
+    if (FindPlayerWanted()->GetWantedLevel() > 3) { // 0x4E5537
+        return DeriveMood(MOOD_PR);
+    }
+
+    if (FindPlayerWanted()->GetWantedLevel() > 1) { // 0x4E554B
+        return DeriveMood(MOOD_AR);
+    }
+
+    if (CTheScripts::LastMissionPassedTime == -1) { // 0x4E555C
+        if (CTimer::GetTimeInMS() >= CTheScripts::LastMissionPassedTime) {
+            return CTimer::GetTimeInMS() < CTheScripts::LastMissionPassedTime + 180'000
+                ? DeriveMood(MOOD_WR)
+                : DeriveMood(MOOD_CR);
+        } else {
+            CTheScripts::LastMissionPassedTime = CTimer::GetTimeInMS();
+        }
+    }
+
+    return DeriveMood(MOOD_CR); // 0x4E5579
+}
+
+// 0x4E4700
+eCJMood __stdcall CAEPedSpeechAudioEntity::GetNextMoodToUse(eCJMood currMood) {
+    switch (currMood) {
+    case MOOD_AG:
+    case MOOD_PR: return MOOD_AR;
+    case MOOD_PG: return MOOD_AG;
+    case MOOD_WG: return MOOD_CG;
+    default:      return MOOD_CR;
+    }
+}
+
+// 0x4E4760
+ePedSpeechVoiceS16 __stdcall CAEPedSpeechAudioEntity::GetVoiceForMood(eCJMood mood) {
+    const auto b = CAEAudioUtility::GetRandomNumberInRange(0, 1) != 0;
+    switch (mood) {
+    case MOOD_AG: return b ? VOICE_PLY_AG : VOICE_PLY_AG2;
+    case MOOD_AR: return b ? VOICE_PLY_AR : VOICE_PLY_AR2;
+    case MOOD_CD: return b ? VOICE_PLY_CD : VOICE_PLY_CD2;
+    case MOOD_CF: return b ? VOICE_PLY_CF : VOICE_PLY_CF2;
+    case MOOD_CG: return b ? VOICE_PLY_CG : VOICE_PLY_CG2;
+    case MOOD_CR: return b ? VOICE_PLY_CR : VOICE_PLY_CR2;
+    case MOOD_PG: return b ? VOICE_PLY_PG : VOICE_PLY_PG2;
+    case MOOD_PR: return b ? VOICE_PLY_PR : VOICE_PLY_PR2;
+    case MOOD_WG: return b ? VOICE_PLY_WG : VOICE_PLY_WG2;
+    case MOOD_WR: return b ? VOICE_PLY_WR : VOICE_PLY_WR2;
+    default:      NOTSA_UNREACHABLE();
+    }
 }
 
 // 0x4E3EC0
@@ -632,7 +613,8 @@ bool CAEPedSpeechAudioEntity::IsCJDressedInForGangSpeech() {
 
 // 0x4E4600
 bool __stdcall CAEPedSpeechAudioEntity::IsGlobalContextImportantForInterupting(eGlobalSpeechContext gCtx) {
-    return GetGlobalSpeechContextInfo(gCtx)->IsImportantForInterrupting; // NOTSA: Use context info lookup instead of static switch
+    const auto ctxi = GetGlobalSpeechContextInfo(gCtx);
+    return ctxi && ctxi->IsImportantForInterrupting; // NOTSA: Use context info lookup instead of static switch
     /*
     switch (gCtx) {
     case CTX_GLOBAL_ARREST:
@@ -640,16 +622,21 @@ bool __stdcall CAEPedSpeechAudioEntity::IsGlobalContextImportantForInterupting(e
     case CTX_GLOBAL_JOIN_GANG_NO:
     case CTX_GLOBAL_JOIN_GANG_YES:
     case CTX_GLOBAL_JOIN_ME_ASK:
-    return true;
-    default:
-    return false;
+        return true;
     }
+    return false;
     */
 }
 
 // 0x4E46F0 - unused
 bool CAEPedSpeechAudioEntity::IsGlobalContextUberImportant(int16 gCtx) {
     return false;
+}
+
+// 0x4E44F0
+bool __stdcall CAEPedSpeechAudioEntity::IsGlobalContextPain(eGlobalSpeechContext gCtx) {
+    const auto ctxi = GetGlobalSpeechContextInfo(gCtx);
+    return ctxi && ctxi->IsPain;
 }
 
 // 0x4E46B0
@@ -659,7 +646,8 @@ bool CAEPedSpeechAudioEntity::IsGlobalContextImportantForWidescreen(eGlobalSpeec
     case PED_TYPE_PLAYER:
         return true;
     }
-    return GetGlobalSpeechContextInfo(gCtx)->IsImportantForWidescreen; // NOTSA: Use context info lookup instead of static switch
+    const auto ctxi = GetGlobalSpeechContextInfo(gCtx);
+    return ctxi && ctxi->IsImportantForWidescreen; // NOTSA: Use context info lookup instead of static switch
     /*
     switch (gCtx) {
     case CTX_GLOBAL_ARREST:
@@ -671,15 +659,58 @@ bool CAEPedSpeechAudioEntity::IsGlobalContextImportantForWidescreen(eGlobalSpeec
     */
 }
 
-// 0x4E4260
-int8 CAEPedSpeechAudioEntity::GetSexForSpecialPed(uint32 a1) {
-    return 1;
+// 0x4E4510
+bool CAEPedSpeechAudioEntity::IsGlobalContextImportantForStreaming(eGlobalSpeechContext gCtx) {
+    switch (m_PedAudioType) {
+    case PED_TYPE_GFD:
+    case PED_TYPE_PLAYER:
+        return true;
+    }
+    const auto ctxi = GetGlobalSpeechContextInfo(gCtx);
+    return ctxi && ctxi->IsImportantForStreaming; // NOTSA: Use context info lookup instead of static switch
+    /*
+    switch (gCtx) {
+    case CTX_GLOBAL_ARREST:
+    case CTX_GLOBAL_ARRESTED:
+    case CTX_GLOBAL_CONV_DISL_CAR:
+    case CTX_GLOBAL_CONV_DISL_CLOTHES:
+    case CTX_GLOBAL_CONV_DISL_HAIR:
+    case CTX_GLOBAL_CONV_DISL_PHYS:
+    case CTX_GLOBAL_CONV_DISL_SHOES:
+    case CTX_GLOBAL_CONV_DISL_SMELL:
+    case CTX_GLOBAL_CONV_DISL_TATTOO:
+    case CTX_GLOBAL_CONV_DISL_WEATHER:
+    case CTX_GLOBAL_CONV_IGNORED:
+    case CTX_GLOBAL_CONV_LIKE_CAR:
+    case CTX_GLOBAL_CONV_LIKE_CLOTHES:
+    case CTX_GLOBAL_CONV_LIKE_HAIR:
+    case CTX_GLOBAL_CONV_LIKE_PHYS:
+    case CTX_GLOBAL_CONV_LIKE_SHOES:
+    case CTX_GLOBAL_CONV_LIKE_SMELL:
+    case CTX_GLOBAL_CONV_LIKE_TATTOO:
+    case CTX_GLOBAL_CONV_LIKE_WEATHER:
+    case CTX_GLOBAL_JOIN_GANG_NO:
+    case CTX_GLOBAL_JOIN_GANG_YES:
+    case CTX_GLOBAL_JOIN_ME_ASK:
+    case CTX_GLOBAL_PCONV_AGREE_BAD:
+    case CTX_GLOBAL_PCONV_AGREE_GOOD:
+    case CTX_GLOBAL_PCONV_ANS_NO:
+    case CTX_GLOBAL_PCONV_DISMISS:
+    case CTX_GLOBAL_PCONV_GREET_FEM:
+    case CTX_GLOBAL_PCONV_GREET_MALE:
+    case CTX_GLOBAL_PCONV_PART_FEM:
+    case CTX_GLOBAL_PCONV_PART_MALE:
+    case CTX_GLOBAL_PCONV_QUESTION:
+    case CTX_GLOBAL_PCONV_STATE_BAD:
+    case CTX_GLOBAL_PCONV_STATE_GOOD:
+    return true;
+    }
+    return false;
+    */
 }
 
 // 0x4E47E0
-int16 CAEPedSpeechAudioEntity::GetRepeatTime(eGlobalSpeechContext gCtx) {
-    assert(gCtx < CTX_GLOBAL_NUM); // OG: return 0
-
+int16 CAEPedSpeechAudioEntity::GetRepeatTime(eGlobalSpeechContext gCtx) const {
     if (const auto* const ctxi = GetGlobalSpeechContextInfo(gCtx)) {
         return ctxi->RepeatTime;
     }
@@ -711,17 +742,22 @@ void CAEPedSpeechAudioEntity::LoadAndPlaySpeech(uint32 playbackTimeOffsetMS) {
 }
 
 // 0x4E49B0
-int32 CAEPedSpeechAudioEntity::GetNumSlotsPlayingContext(int16 context) {
-    return rng::count_if(s_PedSpeechSlots, [&](CAEPedSpeechSlot& speech) {
-        return speech.Status != CAEPedSpeechSlot::eStatus::FREE && speech.GCtx == context;
+int32 CAEPedSpeechAudioEntity::GetNumSlotsPlayingContext(eGlobalSpeechContext gCtx) {
+    return rng::count_if(s_PedSpeechSlots, [&](const CAEPedSpeechSlot& speech) {
+        return speech.Status != CAEPedSpeechSlot::eStatus::FREE && speech.GCtx == gCtx;
     });
 }
 
-// 0x4E49E0
-uint32 CAEPedSpeechAudioEntity::GetNextPlayTime(eGlobalSpeechContext gCtx) {
-    assert(gCtx < CTX_GLOBAL_NUM); // OG: `return 0;`
+// I'm sorry mom
+#define GetPlayTimeRef(_gCtx) (\
+    IsGlobalContextPain(_gCtx) \
+        ? m_NextTimeCanSayPain[_gCtx - CTX_GLOBAL_PAIN_START + 1] \
+        : gGlobalSpeechContextNextPlayTime[_gCtx] \
+)\
 
-    return GetNextPlayTimeRef(gCtx);
+// 0x4E49E0
+uint32 CAEPedSpeechAudioEntity::GetNextPlayTime(eGlobalSpeechContext gCtx) const {
+    return GetPlayTimeRef(gCtx);
 }
 
 // 0x4E4A20
@@ -729,7 +765,7 @@ void CAEPedSpeechAudioEntity::SetNextPlayTime(eGlobalSpeechContext gCtx) {
     assert(gCtx < CTX_GLOBAL_NUM); // OG: `return;`
 
     if (const auto* const ctxi = GetGlobalSpeechContextInfo(gCtx)) {
-        GetNextPlayTimeRef(gCtx) = CTimer::GetTimeInMS() + ctxi->RepeatTime + CAEAudioUtility::GetRandomNumberInRange(1, 1000);
+        GetPlayTimeRef(gCtx) = CTimer::GetTimeInMS() + ctxi->RepeatTime + CAEAudioUtility::GetRandomNumberInRange(1, 1000);
     }
 }
 
@@ -761,30 +797,28 @@ bool CAEPedSpeechAudioEntity::CanPedSayGlobalContext(eGlobalSpeechContext gCtx) 
         return false;
     }
     if (const auto* const ctxi = GetSpecificSpeechContextInfo(sCtx, gCtx, m_PedAudioType, m_VoiceID)) {
-        return ctxi->FirstSoundID != -1;
+        return ctxi->IsUseable();
     }
     return false;
 }
 
 // 0x4E58C0
-int8 CAEPedSpeechAudioEntity::GetVoiceAndTypeFromModel(eModelID modelId) {
+bool CAEPedSpeechAudioEntity::GetVoiceAndTypeFromModel(eModelID modelId) {
     auto* const mi = CModelInfo::GetModelInfo(modelId)->AsPedModelInfoPtr();
-    if (mi->m_nPedAudioType == -1 || mi->m_nPedAudioType >= PED_TYPE_NUM) {
-        return 0;
-    }
 
-    if (mi->m_nPedAudioType == PED_TYPE_SPC) {
-        return GetVoiceAndTypeForSpecialPed(mi->m_nKey);
+    switch (mi->m_nPedAudioType) {
+    case PED_TYPE_UNK: return false;
+    case PED_TYPE_SPC: return GetVoiceAndTypeForSpecialPed(mi->m_nKey);
     }
 
     m_VoiceID = mi->m_nVoiceId;
     if (m_VoiceID == -1) {
-        return 0;
+        return false;
     }
 
     mi->IncrementVoice();
 
-    return 1;
+    return true;
 }
 
 // 0x4E5920
@@ -797,19 +831,29 @@ int16 CAEPedSpeechAudioEntity::GetSoundAndBankIDs(eGlobalSpeechContext gCtx, eSp
     }
     outSpecificSpeechContext = sCtx;
 
-    const auto* const ctx = GetSpecificSpeechContextInfo(sCtx, gCtx, m_PedAudioType, m_VoiceID);
-    if (!ctx) {
-        return -1;
-    }
+    const auto voiceID = [&]() -> ePedSpeechVoiceS32 {
+        if (IsGlobalContextPain(gCtx)) {
+            return GetPainVoice();
+        } else if (m_PedAudioType == PED_TYPE_PLAYER) {
+            for (eCJMood mood = GetCurrentCJMood(); ;mood = GetNextMoodToUse(mood)) {
+                const auto voiceID = GetVoiceForMood(mood);
+                if (mood == MOOD_CR || GetSpecificSpeechContextInfo(sCtx, gCtx, m_PedAudioType, voiceID)->IsUseable()) {
+                    return voiceID;
+                }
+            }
+        } else {
+            return m_VoiceID;
+        }
+    }();
+    m_BankID = GetVoiceSoundBank(gCtx, m_PedAudioType, voiceID);
 
-    m_BankID = GetVoiceSoundBank(gCtx, m_PedAudioType, m_VoiceID);
-
-    if (ctx->FirstSoundID == -1) {
+    const auto* const ctx = GetSpecificSpeechContextInfo(sCtx, gCtx, m_PedAudioType, voiceID);
+    if (!ctx || !ctx->IsUseable()) {
         return -1;
     }
     assert(ctx->FirstSoundID <= ctx->LastSoundID);
 
-    const size_t numSounds = ctx->LastSoundID - ctx->FirstSoundID;
+    const size_t numSounds = ctx->GetNumSounds();
     assert(numSounds > 0);
 
     // Find sound ID to use
@@ -869,7 +913,8 @@ int16 CAEPedSpeechAudioEntity::CanWePlayGlobalSpeechContext(eGlobalSpeechContext
             if (this == &s_pConversationPed2->m_pedSpeech) {
                 return CheckSlot(s_pConversationPedSlot2);
             }
-        } else if (s_bPlayerConversationHappening) {
+        }
+        if (s_bPlayerConversationHappening) {
             if (this == &s_pPlayerConversationPed->m_pedSpeech) {
                 return CheckSlot(s_pConversationPedSlot1);
             }    
@@ -996,65 +1041,18 @@ bool CAEPedSpeechAudioEntity::CanPedHoldConversation() const {
     return CanPedSayGlobalContext(CTX_GLOBAL_PCONV_QUESTION);
 }
 
-// 0x4E4510
-bool CAEPedSpeechAudioEntity::IsGlobalContextImportantForStreaming(eGlobalSpeechContext gCtx) {
-    switch (m_PedAudioType) {
-    case PED_TYPE_GFD:
-    case PED_TYPE_PLAYER:
-        return true;
-    }
-    return GetGlobalSpeechContextInfo(gCtx)->IsImportantForStreaming; // NOTSA: Use context info lookup instead of static switch
-    /*
-    switch (gCtx) {
-    case CTX_GLOBAL_ARREST:
-    case CTX_GLOBAL_ARRESTED:
-    case CTX_GLOBAL_CONV_DISL_CAR:
-    case CTX_GLOBAL_CONV_DISL_CLOTHES:
-    case CTX_GLOBAL_CONV_DISL_HAIR:
-    case CTX_GLOBAL_CONV_DISL_PHYS:
-    case CTX_GLOBAL_CONV_DISL_SHOES:
-    case CTX_GLOBAL_CONV_DISL_SMELL:
-    case CTX_GLOBAL_CONV_DISL_TATTOO:
-    case CTX_GLOBAL_CONV_DISL_WEATHER:
-    case CTX_GLOBAL_CONV_IGNORED:
-    case CTX_GLOBAL_CONV_LIKE_CAR:
-    case CTX_GLOBAL_CONV_LIKE_CLOTHES:
-    case CTX_GLOBAL_CONV_LIKE_HAIR:
-    case CTX_GLOBAL_CONV_LIKE_PHYS:
-    case CTX_GLOBAL_CONV_LIKE_SHOES:
-    case CTX_GLOBAL_CONV_LIKE_SMELL:
-    case CTX_GLOBAL_CONV_LIKE_TATTOO:
-    case CTX_GLOBAL_CONV_LIKE_WEATHER:
-    case CTX_GLOBAL_JOIN_GANG_NO:
-    case CTX_GLOBAL_JOIN_GANG_YES:
-    case CTX_GLOBAL_JOIN_ME_ASK:
-    case CTX_GLOBAL_PCONV_AGREE_BAD:
-    case CTX_GLOBAL_PCONV_AGREE_GOOD:
-    case CTX_GLOBAL_PCONV_ANS_NO:
-    case CTX_GLOBAL_PCONV_DISMISS:
-    case CTX_GLOBAL_PCONV_GREET_FEM:
-    case CTX_GLOBAL_PCONV_GREET_MALE:
-    case CTX_GLOBAL_PCONV_PART_FEM:
-    case CTX_GLOBAL_PCONV_PART_MALE:
-    case CTX_GLOBAL_PCONV_QUESTION:
-    case CTX_GLOBAL_PCONV_STATE_BAD:
-    case CTX_GLOBAL_PCONV_STATE_GOOD:
-        return true;
-    }
-    return false;
-    */
-}
-
 // 0x4E3F70
 void CAEPedSpeechAudioEntity::EnablePedSpeech() {
-    if (m_IsInitialized)
+    if (m_IsInitialized) {
         m_IsSpeechDisabled = false;
+    }
 }
 
 // 0x4E3F90
 void CAEPedSpeechAudioEntity::EnablePedSpeechForScriptSpeech() {
-    if (m_IsInitialized)
+    if (m_IsInitialized) {
         m_IsSpeechForScriptsDisabled = false;
+    }
 }
 
 // 0x4E3FB0
@@ -1353,21 +1351,28 @@ tPedSpeechSlotID CAEPedSpeechAudioEntity::GetFreeSpeechSlot() {
     for (size_t n = 0; n < size; n++) {
         const auto i = (s_NextSpeechSlot + n) % size;
         if (s_PedSpeechSlots[i].Status == CAEPedSpeechSlot::eStatus::FREE) {
-            s_NextSpeechSlot = (uint16)((i + 1u) % size);
+            s_NextSpeechSlot = (tPedSpeechSlotID)((i + 1u) % size);
             return (tPedSpeechSlotID)i;
         }
     }
     return -1;
 }
 
-uint32& CAEPedSpeechAudioEntity::GetNextPlayTimeRef(eGlobalSpeechContext gCtx) {
-    return IsGlobalContextPain(gCtx)
-        ? m_NextTimeCanSayPain[gCtx - CTX_GLOBAL_PAIN_START + 1]
-        : gGlobalSpeechContextNextPlayTime[gCtx];
+// 0x4E4470
+eSpecificSpeechContext CAEPedSpeechAudioEntity::GetSpecificSpeechContext(eGlobalSpeechContext gCtx, eAudioPedType pedAudioType) {
+    // Omitted useless `if`s
+    // NOTE: Original code allowed `PED_TYPE_SPC` as a valid ped type too... but that (technically) caused an out-of-bounds read...
+    //       We won't assert on that, because there are bounds check for the array (as we use std::array)
+    if (const auto* const ctxi = GetGlobalSpeechContextInfo(gCtx)) {
+        return ctxi->SpecificSpeechContext[pedAudioType];
+    }
+    return -1;
 }
 
 // notsa
 const tGlobalSpeechContextInfo* CAEPedSpeechAudioEntity::GetGlobalSpeechContextInfo(eGlobalSpeechContext gCtx) {
+    assert(gCtx > 0 && gCtx < CTX_GLOBAL_NUM);
+
     // Must use a loop because there are a few skipped values (TODO: Though I guess we could fix this?)
     for (const auto& e : gSpeechContextLookup) {
         if (e.GCtx == gCtx) {

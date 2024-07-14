@@ -16,6 +16,7 @@
 #include <Enums/eModelID.h>
 
 class CPed;
+class CAEPedSpeechAudioEntity;
 
 enum eCJMood : int16 {
     MOOD_UNK = -1, // notsa
@@ -40,8 +41,7 @@ enum eCJMood : int16 {
     MOOD_END // = 10
 };
 
-class CAEPedSpeechAudioEntity;
-
+using tPedSpeechSlotID = int16;
 struct CAEPedSpeechSlot {
     enum class eStatus : int16 {
         FREE      = 0,
@@ -65,7 +65,6 @@ struct CAEPedSpeechSlot {
     bool                     IsReservedForPlayerConversation{};
 };
 VALIDATE_SIZE(CAEPedSpeechSlot, 0x1C);
-using tPedSpeechSlotID = int16;
 
 struct tPhraseMemory {
     int16         SoundID{ -1 };
@@ -89,6 +88,7 @@ struct tGlobalSpeechContextInfo {
     bool                                                 IsImportantForStreaming : 1;    //!< [NOTSA] (?)
     bool                                                 IsImportantForInterrupting : 1; //!< [NOTSA] (?)
     bool                                                 IsImportantForWidescreen : 1;   //!< [NOTSA] (?)
+    bool                                                 IsPain : 1;                     //!< [NOTSA] Is this context for pain
 };
 
 /*!
@@ -97,61 +97,73 @@ struct tGlobalSpeechContextInfo {
  */
 struct tSpecificSpeechContextInfo {
     int16 FirstSoundID{-1}, LastSoundID{-1};
+
+    bool   IsUseable()    const noexcept { return FirstSoundID != -1; }
+    size_t GetNumSounds() const noexcept { assert(FirstSoundID <= LastSoundID); return LastSoundID - FirstSoundID; }
 };
 VALIDATE_SIZE(tSpecificSpeechContextInfo, sizeof(int16) * 2);
 
 class NOTSA_EXPORT_VTABLE CAEPedSpeechAudioEntity : public CAEAudioEntity {
 public:
-    std::array<CAESound*, 5>                                m_Sounds{};
-    bool                                                    m_IsInitialized{};
-    eAudioPedType                                           m_PedAudioType{PED_TYPE_UNK};
-    ePedSpeechVoiceS16                                      m_VoiceID{VOICE_UNK};  //!< Exact enum to use depends on `m_PedAudioType` (See `PedSpeechVoices.h`)
-    int16                                                   m_IsFemale{};
-    bool                                                    m_IsPlayingSpeech{};
-    bool                                                    m_IsSpeechDisabled{};
-    bool                                                    m_IsSpeechForScriptsDisabled{};
-    bool                                                    m_IsFrontend{};
-    bool                                                    m_IsForcedAudible{};
-    CAESound*                                               m_Sound{};
-    int16                                                   m_SoundID{ -1 };
-    eSoundBankS16                                           m_BankID{ SND_BANK_UNK };
-    int16                                                   m_PedSpeechSlotID{ -1 }; // [0, 5] (See SND_BANK_SLOT_SPEECH1 -> SND_BANK_SLOT_SPEECH6)
-    float                                                   m_EventVolume{ -100.f };
-    eGlobalSpeechContextS16                                 m_LastGCtx{ CTX_GLOBAL_UNK };
-    std::array<uint32, CTX_GLOBAL_PAIN_END - CTX_GLOBAL_PAIN_START - 1> m_NextTimeCanSayPain{};
+    //! Until when the override is active in [TimeMS]
+    static inline auto& s_nCJMoodOverrideTime = StaticRef<uint32>(0xB613E0);
 
-public:
-    static inline auto& s_nCJMoodOverrideTime = StaticRef<uint32>(0xB613E0);  //!< Until when the override is active in [TimeMS]
-    static inline auto& s_nCJWellDressed      = StaticRef<int16>(0xB613D0);   //!< Override as CJ being well dressed (-1 => ignore, 0/1 => false/true)
-    static inline auto& s_nCJFat              = StaticRef<int16>(0xB613D4);   //!< Override as CJ being fat (-1 => ignore, 0/1 => false/true)
-    static inline auto& s_nCJGangBanging      = StaticRef<int16>(0xB613D8);   //!< Override as CJ being with his group (gang) (-1 => ignore, 0/1 => false/true)
-    static inline auto& s_nCJBasicMood        = StaticRef<eCJMood>(0xB613DC); //!< Override the basic mood that is used to calculate the current mood (-1 => ignore, 0/1 => false/true)
+    //!< Override as CJ being well dressed (-1 => ignore, 0/1 => false/true) [Used for mood calculation]
+    static inline auto& s_nCJWellDressed = StaticRef<int16>(0xB613D0);
 
-    static inline auto& s_bForceAudible                  = StaticRef<bool>(0xB613E4);
-    static inline auto& s_bAPlayerSpeaking               = StaticRef<bool>(0xB613E5);
-    static inline auto& s_bAllSpeechDisabled             = StaticRef<bool>(0xB613E6);
+    //!< Override as CJ being fat (-1 => ignore, 0/1 => false/true) [Used for mood calculation]
+    static inline auto& s_nCJFat = StaticRef<int16>(0xB613D4);
 
-    static inline auto& s_ConversationLength             = StaticRef<int16>(0xB613E8);
-    static inline auto& s_Conversation                   = StaticRef<std::array<eGlobalSpeechContextS16, 8>>(0xB613EC);
+    //!< Override as CJ being with his group (gang) (-1 => ignore, 0/1 => false/true) [Used for mood calculation]
+    static inline auto& s_nCJGangBanging = StaticRef<int16>(0xB613D8);
 
-    static inline auto& s_bPlayerConversationHappening   = StaticRef<bool>(0xB613FC);
-    static inline auto& s_bPedConversationHappening      = StaticRef<bool>(0xB613FD);
-    static inline auto& s_pPlayerConversationPed         = StaticRef<CPed*>(0xB61400);
-    static inline auto& s_pConversationPedSlot2          = StaticRef<int16>(0xB61404);
-    static inline auto& s_pConversationPedSlot1          = StaticRef<int16>(0xB61408);
-    static inline auto& s_pConversationPed2              = StaticRef<CPed*>(0xB6140C);
-    static inline auto& s_pConversationPed1              = StaticRef<CPed*>(0xB61410);
-    static inline auto& s_NextSpeechSlot                 = StaticRef<uint16>(0xB61414);
+    //!< Override the basic mood that is used to calculate the current mood (-1 => ignore, 0/1 => false/true) [Used for mood calculation]
+    static inline auto& s_nCJBasicMood = StaticRef<eCJMood>(0xB613DC);
+
+    //! If any currently active speech is "ForceAudible" (Must be heard (?))
+    static inline auto& s_bForceAudible = StaticRef<bool>(0xB613E4);
+
+    //! No speeches should be played
+    static inline auto& s_bAllSpeechDisabled = StaticRef<bool>(0xB613E6);
+
+    //! Is the player speaking
+    static inline auto& s_bAPlayerSpeaking = StaticRef<bool>(0xB613E5);
+
+    //! Current conversation length (Not array size!)
+    static inline auto& s_ConversationLength = StaticRef<int16>(0xB613E8);
+
+    //! Current conversation contexts
+    static inline auto& s_Conversation = StaticRef<std::array<eGlobalSpeechContextS16, 8>>(0xB613EC);
+
+    //! Is the player having a conversation with another ped? (With `s_pPlayerConversationPed`)
+    static inline auto& s_bPlayerConversationHappening = StaticRef<bool>(0xB613FC);
+
+    //! The ped the player is having a conversation with (If any)
+    static inline auto& s_pPlayerConversationPed = StaticRef<CPed*>(0xB61400);
+
+    //! Are 2 peds having a conversation (`s_pConversationPed1` and `s_pConversationPed2`)
+    static inline auto& s_bPedConversationHappening = StaticRef<bool>(0xB613FD);
+
+    //! Conversation peds/slots (Valid if `s_bPedConversationHappening`)
+    static inline auto& s_pConversationPed1     = StaticRef<CPed*>(0xB61410);
+    static inline auto& s_pConversationPedSlot1 = StaticRef<tPedSpeechSlotID>(0xB61408);
+    static inline auto& s_pConversationPed2     = StaticRef<CPed*>(0xB6140C);
+    static inline auto& s_pConversationPedSlot2 = StaticRef<tPedSpeechSlotID>(0xB61404);
+
+    //! Next speech-slot to use. This is merrily a hint, rather than an obligation
+    static inline auto& s_NextSpeechSlot = StaticRef<tPedSpeechSlotID>(0xB61414);
 
     //! A least-recently-used (FILO) cache of phrases used
-    static inline auto& s_PhraseMemory                   = StaticRef<std::array<tPhraseMemory, 150>>(0xB61418);
+    static inline auto& s_PhraseMemory = StaticRef<std::array<tPhraseMemory, 150>>(0xB61418);
 
-    //! Speech slots
-    //! Last one is always reserved for the player!
-    static inline auto&      s_PedSpeechSlots                 = StaticRef<std::array<CAEPedSpeechSlot, SND_BANK_SLOT_SPEECH6 - SND_BANK_SLOT_SPEECH1 + 1>>(0xB61C38);
-    static inline const auto PLAYER_SPEECH_SLOT               = (tPedSpeechSlotID)(s_PedSpeechSlots.size() - 1);
-    static inline auto&      gGlobalSpeechContextNextPlayTime = StaticRef<std::array<uint32, CTX_GLOBAL_NUM>>(0xB61670); // PAIN (CTX_GLOBAL_PAIN_START -> CTX_GLOBAL_PAIN_END) is ignored, and `m_NextTimeCanSayPain` is used instead
+    //! Speech slots (Last one is always reserved for the player!)
+    static inline auto&      s_PedSpeechSlots   = StaticRef<std::array<CAEPedSpeechSlot, SND_BANK_SLOT_SPEECH6 - SND_BANK_SLOT_SPEECH1 + 1>>(0xB61C38);
+    static inline const auto PLAYER_SPEECH_SLOT = (tPedSpeechSlotID)(s_PedSpeechSlots.size() - 1);
 
+    //! Time when a global context can be played again
+    static inline auto& gGlobalSpeechContextNextPlayTime = StaticRef<std::array<uint32, CTX_GLOBAL_NUM>>(0xB61670); // PAIN (CTX_GLOBAL_PAIN_START -> CTX_GLOBAL_PAIN_END) is ignored, and `m_NextTimeCanSayPain` is used instead
+
+    //! Default sound volume of speeches
     static inline const auto SPEECH_SOUND_DEFAULT_VOLUME = 3.f; // 0x8C80EC
 public:
     static void InjectHooks();
@@ -160,85 +172,131 @@ public:
     CAEPedSpeechAudioEntity(CPed* ped) noexcept;
     ~CAEPedSpeechAudioEntity() = default;
 
-    static bool IsGlobalContextUberImportant(int16 gCtx);
-    static int16 __stdcall GetNextMoodToUse(eCJMood lastMood);
-    static int32 __stdcall GetVoiceForMood(int16 mood);
-    static tPedSpeechSlotID CanWePlayScriptedSpeech();
-    static float GetSpeechContextVolumeOffset(eGlobalSpeechContextS16 gctx);
-    static bool RequestPedConversation(CPed* pedA, CPed* pedB);
-    static void ReleasePedConversation();
-    static eCJMood GetCurrentCJMood();
-    static void StaticInitialise();
-    static eSpecificSpeechContext GetSpecificSpeechContext(eGlobalSpeechContext gCtx, eAudioPedType pedAudioType);
-    static void Service();
-    static void Reset();
-    static bool ReservePedConversationSpeechSlots();
-    static bool ReservePlayerConversationSpeechSlot();
-    static bool RequestPlayerConversation(CPed* ped);
-    static void ReleasePlayerConversation();
-    static void SetUpConversation();
-    static eAudioPedType GetAudioPedType(const char* name);
-    static ePedSpeechVoiceS16 GetVoice(const char* name, eAudioPedTypeS16 type);
-    static void DisableAllPedSpeech();
-    static bool __stdcall IsGlobalContextPain(eGlobalSpeechContext gCtx);
-    static const tGlobalSpeechContextInfo* GetGlobalSpeechContextInfo(eGlobalSpeechContext gCtx);
-    static const tSpecificSpeechContextInfo* GetSpecificSpeechContextInfo(eSpecificSpeechContext sCtx, eGlobalSpeechContext gCtx, eAudioPedType pt, ePedSpeechVoiceS16 voice);
-    static eSoundBank GetVoiceSoundBank(eGlobalSpeechContext gCtx, eAudioPedType pt, ePedSpeechVoiceS16 voice);
-
-    /*!
-     * @addr 0x4E3ED0
-     * @brief Set mood override for CJ
-     * @param basicMood Use `-1` to not override
-     * @param overrideTimeMS
-     * @param isGangBanging Use `-1` to not override
-     * @param isFat Use `-1` to not override
-     * @param isWellDressed Use `-1` to not override
-     */
-    static void SetCJMood(eCJMood basicMood, uint32 overrideTimeMS, int16 isGangBanging = -1, int16 isFat = -1, int16 isWellDressed = -1);
-    static void EnableAllPedSpeech();
-    static bool IsCJDressedInForGangSpeech();
-    static bool __stdcall IsGlobalContextImportantForInterupting(eGlobalSpeechContext gCtx); // typo: Interrupting
-
-    bool IsGlobalContextImportantForWidescreen(eGlobalSpeechContext gCtx);
-    bool IsGlobalContextImportantForStreaming(eGlobalSpeechContext gCtx);
-    int8        GetSexForSpecialPed(uint32 a1);
-    int16 GetRepeatTime(eGlobalSpeechContext gCtx);
-    void LoadAndPlaySpeech(uint32 playbackTimeOffsetMS = 0);
-    int32 GetNumSlotsPlayingContext(int16 context);
-    uint32 GetNextPlayTime(eGlobalSpeechContext gCtx);
-    void SetNextPlayTime(eGlobalSpeechContext gCtx);
-    void DisablePedSpeech(int16 a1);
-    void DisablePedSpeechForScriptSpeech(int16 a1);
-    bool CanPedSayGlobalContext(eGlobalSpeechContext gCtx) const;
-    int8 GetVoiceAndTypeFromModel(eModelID modelId);
-    int16 GetSoundAndBankIDs(eGlobalSpeechContext gCtx, eSpecificSpeechContext& outSpecificSpeechContext);
-    int16 CanWePlayGlobalSpeechContext(eGlobalSpeechContext gCtx);
-    int16 AddSayEvent(eAudioEvents audioEvent, eGlobalSpeechContext gCtx, uint32 startTimeDelay, float probability, bool overideSilence, bool isForceAudible, bool isFrontEnd);
     void Initialise(CEntity* ped);
-    bool CanPedHoldConversation() const;
-    void EnablePedSpeech();
-    void EnablePedSpeechForScriptSpeech();
-    void StopCurrentSpeech();
-    bool GetSoundAndBankIDsForScriptedSpeech(eAudioEvents ae);
-    bool GetSexFromModel(eModelID model);
-    bool GetPedTalking() const;
-    bool GetVoiceAndTypeForSpecialPed(uint32 modelNameHash);
+
+    bool  IsGlobalContextImportantForWidescreen(eGlobalSpeechContext gCtx);
+    bool  IsGlobalContextImportantForStreaming(eGlobalSpeechContext gCtx);
+    bool  CanPedSayGlobalContext(eGlobalSpeechContext gCtx) const;
+    int16 CanWePlayGlobalSpeechContext(eGlobalSpeechContext gCtx);
+    bool  CanPedHoldConversation() const;
+
+    uint32 GetNextPlayTime(eGlobalSpeechContext gCtx) const;
+    void   SetNextPlayTime(eGlobalSpeechContext gCtx);
+
+    void  EnablePedSpeech();
+    void  DisablePedSpeech(int16 a1);
+    void  DisablePedSpeechForScriptSpeech(int16 a1);
+    void  EnablePedSpeechForScriptSpeech();
+    bool  IsAllSpeechDisabled() const { return m_IsSpeechDisabled || m_IsSpeechForScriptsDisabled; }
+
+    void  StopCurrentSpeech();
+    void  LoadAndPlaySpeech(uint32 playbackTimeOffsetMS = 0);
+    int16 AddSayEvent(eAudioEvents audioEvent, eGlobalSpeechContext gCtx, uint32 startTimeDelay, float probability, bool overideSilence, bool isForceAudible, bool isFrontEnd);
+
+    bool  GetSexFromModel(eModelID model);
+    bool  GetVoiceAndTypeFromModel(eModelID modelId);
+    bool  GetSoundAndBankIDsForScriptedSpeech(eAudioEvents ae);
+    bool  GetVoiceAndTypeForSpecialPed(uint32 modelNameHash);
+    bool  GetSexForSpecialPed(uint32) const { return true; }
+    int16 GetRepeatTime(eGlobalSpeechContext gCtx) const;
+    int16 GetSoundAndBankIDs(eGlobalSpeechContext gCtx, eSpecificSpeechContext& outSpecificSpeechContext);
+    int32 GetNumSlotsPlayingContext(eGlobalSpeechContext gCtx);
+
+    bool              GetPedTalking() const;
     ePainSpeechVoices GetPainVoice() const;
 
-    bool IsAllSpeechDisabled() const noexcept { return m_IsSpeechDisabled || m_IsSpeechForScriptsDisabled; }
+    void              UpdateParameters(CAESound* sound, int16 playTime) override;
+    virtual void      AddScriptSayEvent(eAudioEvents audioEvent, eAudioEvents scriptID, bool overrideSilence, bool isForceAudible, bool isFrontEnd);
+    virtual void      Terminate();
+    virtual void      PlayLoadedSound();
+    virtual int16     GetAllocatedVoice();
+    virtual bool      WillPedChatAboutTopic(int16 topic);
+    virtual int16     GetPedType();
+    virtual bool      IsPedFemaleForAudio();
 
-    void UpdateParameters(CAESound* sound, int16 playTime) override;
-    virtual void AddScriptSayEvent(eAudioEvents audioEvent, eAudioEvents scriptID, bool overrideSilence, bool isForceAudible, bool isFrontEnd);
-    virtual void Terminate();
-    virtual void PlayLoadedSound();
-    virtual int16 GetAllocatedVoice();
-    virtual bool WillPedChatAboutTopic(int16 topic);
-    virtual int16 GetPedType();
-    virtual bool IsPedFemaleForAudio();
+    static void StaticInitialise();
+    static void Service();
+    static void Reset();
+
+    /*!
+    * @addr 0x4E3ED0
+    * @brief Set mood override for CJ
+    * @param basicMood Use `-1` to not override
+    * @param overrideTimeMS
+    * @param isGangBanging Use `-1` to not override
+    * @param isFat Use `-1` to not override
+    * @param isWellDressed Use `-1` to not override
+    */
+    static void SetCJMood(eCJMood basicMood, uint32 overrideTimeMS, int16 isGangBanging = -1, int16 isFat = -1, int16 isWellDressed = -1);
+
+    /*!
+     * @addr 0x4E53B0
+     * @brief Calculate (derive) CJ's mood from current game state
+     */
+    static eCJMood GetCurrentCJMood();
+
+    /*!
+     * @addr 0x4E4700
+     * @brief Calculate (derive) next mood 
+     * @param currMood The current mood
+     */
+    static eCJMood __stdcall GetNextMoodToUse(eCJMood currMood);
+
+    /*!
+     * @addr 0x4E4760
+     * @brief Get a random voice for CJ's mood
+     * @param mood The mood to get the voice for
+     */
+    static ePedSpeechVoiceS16 __stdcall GetVoiceForMood(eCJMood mood);
+
+    static bool IsCJDressedInForGangSpeech();
+
+    static void  EnableAllPedSpeech();
+    static void  DisableAllPedSpeech();
+
+    static bool __stdcall IsGlobalContextImportantForInterupting(eGlobalSpeechContext gCtx); // typo: Interrupting
+    static bool           IsGlobalContextUberImportant(int16 gCtx);
+    static bool __stdcall IsGlobalContextPain(eGlobalSpeechContext gCtx);
+
+    static bool  RequestPedConversation(CPed* pedA, CPed* pedB);
+    static void  ReleasePedConversation();
+    static bool  ReservePedConversationSpeechSlots();
+    static bool  ReservePlayerConversationSpeechSlot();
+    static bool  RequestPlayerConversation(CPed* ped);
+    static void  ReleasePlayerConversation();
+    static void  SetUpConversation();
+
+    static eAudioPedType      GetAudioPedType(const char* name);
+    static ePedSpeechVoiceS16 GetVoice(const char* name, eAudioPedTypeS16 type);
+
+    static float                             GetSpeechContextVolumeOffset(eGlobalSpeechContextS16 gctx);
+    static eSpecificSpeechContext            GetSpecificSpeechContext(eGlobalSpeechContext gCtx, eAudioPedType pedAudioType);
+    static const tGlobalSpeechContextInfo*   GetGlobalSpeechContextInfo(eGlobalSpeechContext gCtx);
+    static const tSpecificSpeechContextInfo* GetSpecificSpeechContextInfo(eSpecificSpeechContext sCtx, eGlobalSpeechContext gCtx, eAudioPedType pt, ePedSpeechVoiceS16 voice);
+    static eSoundBank                        GetVoiceSoundBank(eGlobalSpeechContext gCtx, eAudioPedType pt, ePedSpeechVoiceS16 voice);
 
 private:
+    static tPedSpeechSlotID CanWePlayScriptedSpeech();
     static tPedSpeechSlotID GetFreeSpeechSlot();
-    uint32& GetNextPlayTimeRef(eGlobalSpeechContext gCtx);
+
+protected:
+    std::array<CAESound*, 5>                                            m_Sounds{};
+    bool                                                                m_IsInitialized{};
+    eAudioPedType                                                       m_PedAudioType{ PED_TYPE_UNK };
+    ePedSpeechVoiceS16                                                  m_VoiceID{ VOICE_UNK }; //!< Exact enum to use depends on `m_PedAudioType` (See `PedSpeechVoices.h`)
+    int16                                                               m_IsFemale{};
+    bool                                                                m_IsPlayingSpeech{};
+    bool                                                                m_IsSpeechDisabled{};
+    bool                                                                m_IsSpeechForScriptsDisabled{};
+    bool                                                                m_IsFrontend{};
+    bool                                                                m_IsForcedAudible{};
+    CAESound*                                                           m_Sound{};
+    int16                                                               m_SoundID{ -1 };
+    eSoundBankS16                                                       m_BankID{ SND_BANK_UNK };
+    tPedSpeechSlotID                                                    m_PedSpeechSlotID{ -1 };
+    float                                                               m_EventVolume{ -100.f };
+    eGlobalSpeechContextS16                                             m_LastGCtx{ CTX_GLOBAL_UNK };
+    std::array<uint32, CTX_GLOBAL_PAIN_END - CTX_GLOBAL_PAIN_START - 1> m_NextTimeCanSayPain{};
 
 private:
     // 0x4E4F10

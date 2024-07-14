@@ -275,24 +275,34 @@ enum eEmgSpeechVoices : int16 {
 enum ePlySpeechVoices : int16 {
     VOICE_PLY_AG  = 0,  // 0x0
     VOICE_PLY_AG2 = 1,  // 0x1
+
     VOICE_PLY_AR  = 2,  // 0x2
     VOICE_PLY_AR2 = 3,  // 0x3
+
     VOICE_PLY_CD  = 4,  // 0x4
     VOICE_PLY_CD2 = 5,  // 0x5
+
     VOICE_PLY_CF  = 6,  // 0x6
     VOICE_PLY_CF2 = 7,  // 0x7
+
     VOICE_PLY_CG  = 8,  // 0x8
     VOICE_PLY_CG2 = 9,  // 0x9
+
     VOICE_PLY_CR  = 10, // 0xA
     VOICE_PLY_CR2 = 11, // 0xB
+
     VOICE_PLY_PG  = 12, // 0xC
     VOICE_PLY_PG2 = 13, // 0xD
+
     VOICE_PLY_PR  = 14, // 0xE
     VOICE_PLY_PR2 = 15, // 0xF
+
     VOICE_PLY_WG  = 16, // 0x10
     VOICE_PLY_WG2 = 17, // 0x11
+
     VOICE_PLY_WR  = 18, // 0x12
     VOICE_PLY_WR2 = 19, // 0x13
+
     VOICE_PLY_END = 20, // 0x14
 };
 
