@@ -760,8 +760,8 @@ void CAEScriptAudioEntity::ReportMissionAudioEvent(eAudioEvents eventId, CVector
 }
 
 // 0x4EC970
-void CAEScriptAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
-    plugin::CallMethod<0x4EC970, CAEScriptAudioEntity*, CAESound*, int16>(this, sound, curPlayPos);
+void CAEScriptAudioEntity::UpdateParameters(CAESound* sound, int16 playTime) {
+    plugin::CallMethod<0x4EC970, CAEScriptAudioEntity*, CAESound*, int16>(this, sound, playTime);
 }
 
 // 0x4EC900

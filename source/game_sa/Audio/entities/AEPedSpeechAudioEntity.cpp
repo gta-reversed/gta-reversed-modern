@@ -63,7 +63,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(GetSexFromModel, 0x4E4200);
     RH_ScopedInstall(GetPedTalking, 0x4E3F50);
     RH_ScopedInstall(GetVoiceAndTypeForSpecialPed, 0x4E4170);
-    RH_ScopedVMTInstall(UpdateParameters, 0x4E3520, { .reversed = false });
+    RH_ScopedVMTInstall(UpdateParameters, 0x4E3520);
     RH_ScopedVMTInstall(AddScriptSayEvent, 0x4E4F70, { .reversed = false });
     RH_ScopedVMTInstall(Terminate, 0x4E5670, { .reversed = false });
     RH_ScopedVMTInstall(PlayLoadedSound, 0x4E5CD0, { .reversed = false });
@@ -1151,8 +1151,46 @@ ePainSpeechVoices CAEPedSpeechAudioEntity::GetPainVoice() const {
 }
 
 // 0x4E3520
-void CAEPedSpeechAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
-    plugin::CallMethod<0x4E3520, CAEPedSpeechAudioEntity*, CAESound*, int16>(this, sound, curPlayPos);
+void CAEPedSpeechAudioEntity::UpdateParameters(CAESound* sound, int16 playTime) {
+    auto* const ped = m_pEntity->AsPed();
+    auto* const speech = GetCurrentSpeech();
+    if (playTime == -1) { // Sound has finished?
+        if (m_PedAudioType == PED_TYPE_PLAYER) {
+            s_bAPlayerSpeaking = false;
+        }
+
+        *speech = {
+            .Status = CAEPedSpeechSlot::eStatus::FREE
+        };
+
+        m_Sound           = nullptr;
+        m_SoundID         = -1;
+        m_BankID          = SND_BANK_UNK;
+        m_PedSpeechSlotID = -1;
+        m_IsForcedAudible = false;
+
+        if (s_bPedConversationHappening) {
+            if (   this == &s_pConversationPed1->m_pedSpeech && m_PedSpeechSlotID == s_pConversationPedSlot1
+                || this == &s_pConversationPed2->m_pedSpeech && m_PedSpeechSlotID == s_pConversationPedSlot2
+            ) {
+                speech->Status = CAEPedSpeechSlot::eStatus::RESERVED;
+            }
+        } else if (s_bPlayerConversationHappening) {
+            if (this == &s_pPlayerConversationPed->m_pedSpeech && m_PedSpeechSlotID == s_pConversationPedSlot1) {
+                speech->Status = CAEPedSpeechSlot::eStatus::RESERVED;
+            }
+        }
+        if (auto* const tFacial = CTask::Cast<CTaskComplexFacial>(m_pEntity->AsPed()->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_FACIAL_COMPLEX))) {
+            tFacial->StopAll();
+        }
+    } else { // Update sound
+        speech->Status = CAEPedSpeechSlot::eStatus::PLAYING;
+        if (ped->bIsTalking && ped->m_nBodypartToRemove == PED_NODE_HEAD) {
+            sound->StopSound();
+        } else if (!m_IsFrontend) {
+            sound->SetPosition(ped->GetPosition());
+        }
+    }
 }
 
 // 0x4E4F70

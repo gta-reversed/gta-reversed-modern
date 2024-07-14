@@ -220,7 +220,7 @@ public:
 
     bool IsAllSpeechDisabled() const noexcept { return m_IsSpeechDisabled || m_IsSpeechForScriptsDisabled; }
 
-    void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
+    void UpdateParameters(CAESound* sound, int16 playTime) override;
     virtual void AddScriptSayEvent(int32, int32, uint8, uint8, uint8);
     virtual void Terminate();
     virtual void PlayLoadedSound();
