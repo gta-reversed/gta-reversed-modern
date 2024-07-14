@@ -65,7 +65,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(GetVoiceAndTypeForSpecialPed, 0x4E4170);
     RH_ScopedVMTInstall(UpdateParameters, 0x4E3520);
     RH_ScopedVMTInstall(AddScriptSayEvent, 0x4E4F70);
-    RH_ScopedVMTInstall(Terminate, 0x4E5670, { .reversed = false });
+    RH_ScopedVMTInstall(Terminate, 0x4E5670);
     RH_ScopedVMTInstall(PlayLoadedSound, 0x4E5CD0, { .reversed = false });
     RH_ScopedVMTInstall(GetAllocatedVoice, 0x4E4120);
     RH_ScopedVMTInstall(WillPedChatAboutTopic, 0x4E5800);
@@ -992,7 +992,7 @@ void CAEPedSpeechAudioEntity::Initialise(CEntity* ped) {
 }
 
 // 0x4E69E0
-bool CAEPedSpeechAudioEntity::CanPedHoldConversation() {
+bool CAEPedSpeechAudioEntity::CanPedHoldConversation() const {
     return CanPedSayGlobalContext(CTX_GLOBAL_PCONV_QUESTION);
 }
 
@@ -1243,7 +1243,8 @@ void CAEPedSpeechAudioEntity::AddScriptSayEvent(eAudioEvents audioEvent, eAudioE
 
 // 0x4E5670
 void CAEPedSpeechAudioEntity::Terminate() {
-    plugin::CallMethod<0x4E5670, CAEPedSpeechAudioEntity*>(this);
+    StopCurrentSpeech();
+    *this = CAEPedSpeechAudioEntity{};
 }
 
 // 0x4E5CD0

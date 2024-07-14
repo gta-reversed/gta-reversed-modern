@@ -9,6 +9,7 @@
 #include <Audio/entities/AEAudioEntity.h>
 #include <Audio/AESound.h>
 #include <Audio/eSoundBank.h>
+#include <Audio/eSoundBankSlot.h>
 #include <Audio/PedSpeechContexts.h>
 #include <Audio/PedSpeechVoices.h>
 #include <Audio/ePedAudioType.h>
@@ -102,8 +103,8 @@ class NOTSA_EXPORT_VTABLE CAEPedSpeechAudioEntity : public CAEAudioEntity {
 public:
     std::array<CAESound*, 5>                                m_Sounds{};
     bool                                                    m_IsInitialized{};
-    eAudioPedType                                           m_PedAudioType{};
-    ePedSpeechVoiceS16                                      m_VoiceID{};  //!< Exact enum to use depends on `m_PedAudioType` (See `PedSpeechVoices.h`)
+    eAudioPedType                                           m_PedAudioType{PED_TYPE_UNK};
+    ePedSpeechVoiceS16                                      m_VoiceID{VOICE_UNK};  //!< Exact enum to use depends on `m_PedAudioType` (See `PedSpeechVoices.h`)
     int16                                                   m_IsFemale{};
     bool                                                    m_IsPlayingSpeech{};
     bool                                                    m_IsSpeechDisabled{};
@@ -146,7 +147,7 @@ public:
 
     //! Speech slots
     //! Last one is always reserved for the player!
-    static inline auto&      s_PedSpeechSlots                 = StaticRef<std::array<CAEPedSpeechSlot, 6>>(0xB61C38);
+    static inline auto&      s_PedSpeechSlots                 = StaticRef<std::array<CAEPedSpeechSlot, SND_BANK_SLOT_SPEECH6 - SND_BANK_SLOT_SPEECH1 + 1>>(0xB61C38);
     static inline const auto PLAYER_SPEECH_SLOT               = (int16)(s_PedSpeechSlots.size() - 1);
     static inline auto&      gGlobalSpeechContextNextPlayTime = StaticRef<std::array<uint32, CTX_GLOBAL_NUM>>(0xB61670); // PAIN (CTX_GLOBAL_PAIN_START -> CTX_GLOBAL_PAIN_END) is ignored, and `m_NextTimeCanSayPain` is used instead
 
@@ -212,7 +213,7 @@ public:
     int16 CanWePlayGlobalSpeechContext(eGlobalSpeechContext gCtx);
     int16 AddSayEvent(eAudioEvents audioEvent, eGlobalSpeechContext gCtx, uint32 startTimeDelay, float probability, bool overideSilence, bool isForceAudible, bool isFrontEnd);
     void Initialise(CEntity* ped);
-    bool CanPedHoldConversation();
+    bool CanPedHoldConversation() const;
     void EnablePedSpeech();
     void EnablePedSpeechForScriptSpeech();
     void StopCurrentSpeech();
