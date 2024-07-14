@@ -66,7 +66,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedVMTInstall(UpdateParameters, 0x4E3520);
     RH_ScopedVMTInstall(AddScriptSayEvent, 0x4E4F70);
     RH_ScopedVMTInstall(Terminate, 0x4E5670);
-    RH_ScopedVMTInstall(PlayLoadedSound, 0x4E5CD0, { .reversed = false });
+    RH_ScopedVMTInstall(PlayLoadedSound, 0x4E5CD0);
     RH_ScopedVMTInstall(GetAllocatedVoice, 0x4E4120);
     RH_ScopedVMTInstall(WillPedChatAboutTopic, 0x4E5800);
     RH_ScopedVMTInstall(GetPedType, 0x4E4130);
@@ -1249,7 +1249,66 @@ void CAEPedSpeechAudioEntity::Terminate() {
 
 // 0x4E5CD0
 void CAEPedSpeechAudioEntity::PlayLoadedSound() {
-    plugin::CallMethod<0x4E5CD0, CAEPedSpeechAudioEntity*>(this);
+    if (!m_pEntity) {
+        return;
+    }
+
+    const auto RequestSound = [&](CVector pos, uint32 flags, float volume, float maxDist) {
+        CAESound s;
+        s.Initialise(
+            SND_BANK_SLOT_SPEECH1 + m_PedSpeechSlotID,
+            m_SoundID,
+            this,
+            pos,
+            volume,
+            maxDist,
+            1.f,
+            1.f,
+            0,
+            (eSoundEnvironment)flags
+        );
+        m_Sound = AESoundManager.RequestNewSound(&s);
+    };
+
+    if (m_IsFrontend) {
+        RequestSound(
+            {0.f, 1.f, 0.f},
+            SOUND_UNCOMPRESSABLE | SOUND_UNDUCKABLE | SOUND_REQUEST_UPDATES | SOUND_UNCANCELLABLE | SOUND_FRONT_END,
+            SPEECH_SOUND_DEFAULT_VOLUME,
+            1.f
+        );
+    } else {
+        RequestSound(
+            m_pEntity->GetPosition(),
+            SOUND_REQUEST_UPDATES | SOUND_UNCANCELLABLE,
+            m_IsForcedAudible ? SPEECH_SOUND_DEFAULT_VOLUME : m_EventVolume,
+            CAEVehicleAudioEntity::s_pVehicleAudioSettingsForRadio ? 3.f : 2.f
+        );
+    }
+
+    auto* const speech = GetCurrentSpeech();
+    if (m_Sound) {
+        speech->Sound = m_Sound;
+        speech->Status = CAEPedSpeechSlot::eStatus::PLAYING;
+        switch (m_LastGCtx) {
+        case CTX_GLOBAL_BREATHING:
+        case CTX_GLOBAL_STOMACH_RUMBLE:
+            break;
+        default: {
+            CTask::Cast<CTaskComplexFacial>(m_pEntity->AsPed()->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_FACIAL_COMPLEX))->SetRequest(
+                eFacialExpression::TALKING,
+                2800
+            );
+        }
+        }
+    } else {
+        *speech = CAEPedSpeechSlot{};
+        if (m_PedAudioType == PED_TYPE_PLAYER) {
+            s_bAPlayerSpeaking = false;
+        }
+        m_IsPlayingSpeech = false;
+        m_PedSpeechSlotID = -1;
+    }
 }
 
 // 0x4E4120
