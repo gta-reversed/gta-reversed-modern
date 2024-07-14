@@ -214,8 +214,8 @@ public:
     void StopCurrentSpeech();
     bool GetSoundAndBankIDsForScriptedSpeech(eAudioEvents ae);
     bool GetSexFromModel(eModelID model);
-    bool GetPedTalking();
-    int8 GetVoiceAndTypeForSpecialPed(uint32 modelNameHash);
+    bool GetPedTalking() const;
+    bool GetVoiceAndTypeForSpecialPed(uint32 modelNameHash);
     ePainSpeechVoices GetPainVoice() const;
 
     bool IsAllSpeechDisabled() const noexcept { return m_IsSpeechDisabled || m_IsSpeechForScriptsDisabled; }

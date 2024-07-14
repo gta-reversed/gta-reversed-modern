@@ -390,7 +390,11 @@ enum ePainSpeechVoices : int16 {
     VOICE_PAIN_MALE       = 2,  // 0x2
     VOICE_PAIN_END        = 3,  // 0x3
 };
- 
+
+enum {
+    VOICE_UNK = -1
+};
+
 /*! 
  * @brief Use any of the enums below for this type:
  * @brief `eGenSpeechVoices`, `eEmgSpeechVoices`, `ePlySpeechVoices`,

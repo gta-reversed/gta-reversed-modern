@@ -1288,4 +1288,107 @@ static constexpr std::array<eSoundBank, VOICE_PAIN_END> gPainVoiceToBankLookup =
 };
 };
 
+namespace {
+constexpr size_t NUM_SPECIAL_PEDS = 45;
+
+// 0x8C65C0
+// NOTE: We're generating the keys here instead of doing it in the function on each call
+static const std::array<uint32, NUM_SPECIAL_PEDS> gSpecialPedVoiceNameLookup{
+    CKeyGen::GetUppercaseKey("GANGRL1"),
+    CKeyGen::GetUppercaseKey("GANGRL2"),
+    CKeyGen::GetUppercaseKey("GANGRL3"),
+    CKeyGen::GetUppercaseKey("MECGRL1"),
+    CKeyGen::GetUppercaseKey("MECGRL2"),
+    CKeyGen::GetUppercaseKey("MECGRL3"),
+    CKeyGen::GetUppercaseKey("GUNGRL1"),
+    CKeyGen::GetUppercaseKey("GUNGRL2"),
+    CKeyGen::GetUppercaseKey("GUNGRL3"),
+    CKeyGen::GetUppercaseKey("COPGRL1"),
+    CKeyGen::GetUppercaseKey("COPGRL2"),
+    CKeyGen::GetUppercaseKey("COPGRL3"),
+    CKeyGen::GetUppercaseKey("NURGRL1"),
+    CKeyGen::GetUppercaseKey("NURGRL2"),
+    CKeyGen::GetUppercaseKey("NURGRL3"),
+    CKeyGen::GetUppercaseKey("CROGRL1"),
+    CKeyGen::GetUppercaseKey("CROGRL2"),
+    CKeyGen::GetUppercaseKey("CROGRL3"),
+    CKeyGen::GetUppercaseKey("maddogg"),
+    CKeyGen::GetUppercaseKey("janitor"),
+    CKeyGen::GetUppercaseKey("paul"),
+    CKeyGen::GetUppercaseKey("macca"),
+    CKeyGen::GetUppercaseKey("claude"),
+    CKeyGen::GetUppercaseKey("pulaski"),
+    CKeyGen::GetUppercaseKey("sindaco"),
+    CKeyGen::GetUppercaseKey("smoke"),
+    CKeyGen::GetUppercaseKey("ogloc"),
+    CKeyGen::GetUppercaseKey("ryder"),
+    CKeyGen::GetUppercaseKey("ryder2"),
+    CKeyGen::GetUppercaseKey("cesar"),
+    CKeyGen::GetUppercaseKey("truth"),
+    CKeyGen::GetUppercaseKey("tbone"),
+    CKeyGen::GetUppercaseKey("tenpen"),
+    CKeyGen::GetUppercaseKey("smokev"),
+    CKeyGen::GetUppercaseKey("rose"),
+    CKeyGen::GetUppercaseKey("hern"),
+    CKeyGen::GetUppercaseKey("dwayne"),
+    CKeyGen::GetUppercaseKey("jethro"),
+    CKeyGen::GetUppercaseKey("sweet"),
+    CKeyGen::GetUppercaseKey("cat"),
+    CKeyGen::GetUppercaseKey("bb"),
+    CKeyGen::GetUppercaseKey("bbthin"),
+    CKeyGen::GetUppercaseKey("jizzy"),
+    CKeyGen::GetUppercaseKey("torino"),
+    CKeyGen::GetUppercaseKey("wuzimu"),
+};
+
+// 0x8C6948
+static constexpr std::array<std::tuple<ePedSpeechVoiceS16, eAudioPedType, bool>, NUM_SPECIAL_PEDS> gSpecialPedVoiceLookup{{
+    //VoiceID            PedType        IsFemale
+    {VOICE_GFD_DENISE,   PED_TYPE_GFD,  true }, // GANGRL1
+    {VOICE_GFD_DENISE,   PED_TYPE_GFD,  true }, // GANGRL2
+    {VOICE_GFD_DENISE,   PED_TYPE_GFD,  true }, // GANGRL3
+    {VOICE_GFD_MICHELLE, PED_TYPE_GFD,  true }, // MECGRL1
+    {VOICE_GFD_MICHELLE, PED_TYPE_GFD,  true }, // MECGRL2
+    {VOICE_GFD_MICHELLE, PED_TYPE_GFD,  true }, // MECGRL3
+    {VOICE_GFD_HELENA,   PED_TYPE_GFD,  true }, // GUNGRL1
+    {VOICE_GFD_HELENA,   PED_TYPE_GFD,  true }, // GUNGRL2
+    {VOICE_GFD_HELENA,   PED_TYPE_GFD,  true }, // GUNGRL3
+    {VOICE_GFD_BARBARA,  PED_TYPE_GFD,  true }, // COPGRL1
+    {VOICE_GFD_BARBARA,  PED_TYPE_GFD,  true }, // COPGRL2
+    {VOICE_GFD_BARBARA,  PED_TYPE_GFD,  true }, // COPGRL3
+    {VOICE_GFD_KATIE,    PED_TYPE_GFD,  true }, // NURGRL1
+    {VOICE_GFD_KATIE,    PED_TYPE_GFD,  true }, // NURGRL2
+    {VOICE_GFD_KATIE,    PED_TYPE_GFD,  true }, // NURGRL3
+    {VOICE_GFD_MILLIE,   PED_TYPE_GFD,  true }, // CROGRL1
+    {VOICE_GFD_MILLIE,   PED_TYPE_GFD,  true }, // CROGRL2
+    {VOICE_GFD_MILLIE,   PED_TYPE_GFD,  true }, // CROGRL3
+    {VOICE_UNK,          PED_TYPE_UNK,  false}, // maddogg
+    {VOICE_UNK,          PED_TYPE_UNK,  false}, // janitor
+    {VOICE_UNK,          PED_TYPE_UNK,  false}, // paul
+    {VOICE_GNG_MACCER,   PED_TYPE_GANG, false}, // macca
+    {VOICE_UNK,          PED_TYPE_UNK,  false}, // claude
+    {VOICE_EMG_PULASKI,  PED_TYPE_EMG,  false}, // pulaski
+    {VOICE_UNK,          PED_TYPE_UNK,  false}, // sindaco
+    {VOICE_GNG_SMOKE,    PED_TYPE_GANG, false}, // smoke
+    {VOICE_GNG_OGLOC,    PED_TYPE_GANG, false}, // ogloc
+    {VOICE_GNG_RYDER,    PED_TYPE_GANG, false}, // ryder
+    {VOICE_GNG_RYDER,    PED_TYPE_GANG, false}, // ryder2
+    {VOICE_GNG_CESAR,    PED_TYPE_GANG, false}, // cesar
+    {VOICE_GNG_TRUTH,    PED_TYPE_GANG, false}, // truth
+    {VOICE_GNG_TBONE,    PED_TYPE_GANG, false}, // tbone
+    {VOICE_UNK,          PED_TYPE_UNK,  false}, // tenpen
+    {VOICE_GNG_SMOKE,    PED_TYPE_GANG, false}, // smokev
+    {VOICE_UNK,          PED_TYPE_UNK,  false}, // rose
+    {VOICE_UNK,          PED_TYPE_UNK,  false}, // hern
+    {VOICE_GNG_DWAINE,   PED_TYPE_GANG, false}, // dwayne
+    {VOICE_UNK,          PED_TYPE_UNK,  false}, // jethro
+    {VOICE_GNG_SWEET,    PED_TYPE_GANG, false}, // sweet
+    {VOICE_GFD_CATALINA, PED_TYPE_GFD,  true }, // cat
+    {VOICE_GNG_BIG_BEAR, PED_TYPE_GANG, false}, // bb
+    {VOICE_GNG_BIG_BEAR, PED_TYPE_GANG, false}, // bbthin
+    {VOICE_GNG_JIZZY,    PED_TYPE_GANG, false}, // jizzy
+    {VOICE_GNG_TORENO,   PED_TYPE_GANG, false}, // torino
+    {VOICE_GNG_WOOZIE,   PED_TYPE_GANG, false}, // wuzimu
+}};
+};
 // clang-format on

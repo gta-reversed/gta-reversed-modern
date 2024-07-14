@@ -62,7 +62,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(GetSoundAndBankIDsForScriptedSpeech, 0x4E4400);
     RH_ScopedInstall(GetSexFromModel, 0x4E4200);
     RH_ScopedInstall(GetPedTalking, 0x4E3F50);
-    RH_ScopedInstall(GetVoiceAndTypeForSpecialPed, 0x4E4170, { .reversed = false });
+    RH_ScopedInstall(GetVoiceAndTypeForSpecialPed, 0x4E4170);
     RH_ScopedVMTInstall(UpdateParameters, 0x4E3520, { .reversed = false });
     RH_ScopedVMTInstall(AddScriptSayEvent, 0x4E4F70, { .reversed = false });
     RH_ScopedVMTInstall(Terminate, 0x4E5670, { .reversed = false });
@@ -1126,15 +1126,21 @@ bool CAEPedSpeechAudioEntity::GetSexFromModel(eModelID model) {
 }
 
 // 0x4E3F50
-bool CAEPedSpeechAudioEntity::GetPedTalking() {
+bool CAEPedSpeechAudioEntity::GetPedTalking() const {
     return m_IsInitialized && m_IsPlayingSpeech;
 }
 
 // 0x4E4170
-int8 CAEPedSpeechAudioEntity::GetVoiceAndTypeForSpecialPed(uint32 modelNameHash) {
-    return plugin::CallMethodAndReturn<int8, 0x4E4170, CAEPedSpeechAudioEntity*, uint32>(this, modelNameHash);
+bool CAEPedSpeechAudioEntity::GetVoiceAndTypeForSpecialPed(uint32 modelNameHash) {
+    const auto idx = notsa::indexof(gSpecialPedVoiceNameLookup, modelNameHash);
+    if (idx == -1) {
+        return false;
+    }
+    std::tie(m_VoiceID, m_PedAudioType, m_IsFemale) = gSpecialPedVoiceLookup[idx];
+    return true;
 }
 
+// notsa
 ePainSpeechVoices CAEPedSpeechAudioEntity::GetPainVoice() const {
     if (m_PedAudioType == PED_TYPE_PLAYER) {
         return VOICE_PAIN_CARL;
