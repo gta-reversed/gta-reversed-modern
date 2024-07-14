@@ -16,7 +16,7 @@ public:
     int16 AddSayEvent(int32 a1, int16 a2, CEntity* entity, uint32 playOffset, float a6, bool a3, bool a8, bool a9);
 
     void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
-    void AddScriptSayEvent(int32, int32, uint8, uint8, uint8) override;
+    void AddScriptSayEvent(eAudioEvents audioEvent, eAudioEvents scriptID, bool overrideSilence, bool isForceAudible, bool isFrontEnd) override { /* NOP */ } // 0x4E6080
     void Terminate() override;
     void PlayLoadedSound() override;
     int16 GetAllocatedVoice() override;

@@ -143,8 +143,12 @@ public:
 
     //! A least-recently-used (FILO) cache of phrases used
     static inline auto& s_PhraseMemory                   = StaticRef<std::array<tPhraseMemory, 150>>(0xB61418);
-    static inline auto& s_PedSpeechSlots                 = StaticRef<std::array<CAEPedSpeechSlot, PED_TYPE_NUM>>(0xB61C38);
-    static inline auto& gGlobalSpeechContextNextPlayTime = StaticRef<std::array<uint32, CTX_GLOBAL_NUM>>(0xB61670); // PAIN (CTX_GLOBAL_PAIN_START -> CTX_GLOBAL_PAIN_END) is ignored, and `m_NextTimeCanSayPain` is used instead
+
+    //! Speech slots
+    //! Last one is always reserved for the player!
+    static inline auto&      s_PedSpeechSlots                 = StaticRef<std::array<CAEPedSpeechSlot, 6>>(0xB61C38);
+    static inline const auto PLAYER_SPEECH_SLOT               = (int16)(s_PedSpeechSlots.size() - 1);
+    static inline auto&      gGlobalSpeechContextNextPlayTime = StaticRef<std::array<uint32, CTX_GLOBAL_NUM>>(0xB61670); // PAIN (CTX_GLOBAL_PAIN_START -> CTX_GLOBAL_PAIN_END) is ignored, and `m_NextTimeCanSayPain` is used instead
 
 public:
     static void InjectHooks();
@@ -196,7 +200,7 @@ public:
     bool IsGlobalContextImportantForStreaming(eGlobalSpeechContext gCtx);
     int8        GetSexForSpecialPed(uint32 a1);
     int16 GetRepeatTime(eGlobalSpeechContext gCtx);
-    void LoadAndPlaySpeech(uint32 offset);
+    void LoadAndPlaySpeech(uint32 playbackTimeOffsetMS = 0);
     int32 GetNumSlotsPlayingContext(int16 context);
     uint32 GetNextPlayTime(eGlobalSpeechContext gCtx);
     void SetNextPlayTime(eGlobalSpeechContext gCtx);
@@ -221,7 +225,7 @@ public:
     bool IsAllSpeechDisabled() const noexcept { return m_IsSpeechDisabled || m_IsSpeechForScriptsDisabled; }
 
     void UpdateParameters(CAESound* sound, int16 playTime) override;
-    virtual void AddScriptSayEvent(int32, int32, uint8, uint8, uint8);
+    virtual void AddScriptSayEvent(eAudioEvents audioEvent, eAudioEvents scriptID, bool overrideSilence, bool isForceAudible, bool isFrontEnd);
     virtual void Terminate();
     virtual void PlayLoadedSound();
     virtual int16 GetAllocatedVoice();

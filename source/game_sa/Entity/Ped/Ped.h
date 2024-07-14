@@ -497,8 +497,8 @@ public:
     void EnablePedSpeech();
     void DisablePedSpeechForScriptSpeech(bool stopCurrentSpeech);
     void EnablePedSpeechForScriptSpeech();
-    bool CanPedHoldConversation();
-    void SayScript(int32 arg0, uint8 arg1, uint8 arg2, uint8 arg3);
+    bool CanPedHoldConversation() const;
+    void SayScript(eAudioEvents scriptID, bool overrideSilence, bool isForceAudible, bool isFrontEnd);
     int16 Say(eGlobalSpeechContext gCtx, uint32 startTimeDelay = 0, float probability = 1.f, bool overrideSilence = false, bool isForceAudible = false, bool isFrontEnd = false);
     void RemoveBodyPart(ePedNode pedNode, char localDir);
     void SpawnFlyingComponent(int32 arg0, char arg1);

@@ -126,13 +126,13 @@ void CAEAudioUtility::StaticInitialise() {
 }
 
 // 0x4D9CC0
-bool CAEAudioUtility::GetBankAndSoundFromScriptSlotAudioEvent(const eAudioEvents& ae, eSoundBankS32& outBankID, int32& outSoundID, int32 slot) {
-    if (ae < AE_SCRIPT_BANK_FIRST) {
+bool CAEAudioUtility::GetBankAndSoundFromScriptSlotAudioEvent(const eAudioEvents& scriptID, eSoundBankS32& outBankID, int32& outSoundID, int32 slot) {
+    if (scriptID < AE_SCRIPT_BANK_FIRST) {
         return false;
     }
-    if (ae < AE_SCRIPT_SLOT_FIRST) {
-        outBankID = gScriptBanksLookup[ae - AE_SCRIPT_BANK_FIRST];
-    } else if (ae == AE_SCRIPT_SLOT_USE_CUSTOM) {
+    if (scriptID < AE_SCRIPT_SLOT_FIRST) {
+        outBankID = gScriptBanksLookup[scriptID - AE_SCRIPT_BANK_FIRST];
+    } else if (scriptID == AE_SCRIPT_SLOT_USE_CUSTOM) {
         outBankID  = SND_BANK_SCRIPT_NULL;
         outSoundID = slot > 3
             ? 0

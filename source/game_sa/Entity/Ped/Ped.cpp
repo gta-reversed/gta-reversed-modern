@@ -3119,15 +3119,15 @@ void CPed::EnablePedSpeechForScriptSpeech() {
 /*!
 * @addr 0x5EFFA0
 */
-bool CPed::CanPedHoldConversation() {
+bool CPed::CanPedHoldConversation() const {
     return m_pedSpeech.CanPedHoldConversation();
 }
 
 /*!
 * @addr 0x5EFFB0
 */
-void CPed::SayScript(int32 arg0, uint8 arg1, uint8 arg2, uint8 arg3) {
-    m_pedSpeech.AddScriptSayEvent(AE_SCRIPT_SPEECH_PED, arg0, arg1, arg2, arg3);
+void CPed::SayScript(eAudioEvents scriptID, bool overrideSilence, bool isForceAudible, bool isFrontEnd) {
+    m_pedSpeech.AddScriptSayEvent(AE_SCRIPT_SPEECH_PED, scriptID, overrideSilence, isForceAudible, isFrontEnd);
 }
 
 /*!
