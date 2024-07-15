@@ -113,7 +113,7 @@ VALIDATE_SIZE(tSpecificSpeechContextInfo, sizeof(int16) * 2);
 
 class NOTSA_EXPORT_VTABLE CAEPedSpeechAudioEntity : public CAEAudioEntity {
 public:
-    //! Until when the override is active in [TimeMS]
+    //!< Until when the override is active in [TimeMS]
     static inline auto& s_nCJMoodOverrideTime = StaticRef<uint32>(0xB613E0);
 
     //!< Override as CJ being well dressed (-1 => ignore, 0/1 => false/true) [Used for mood calculation]
@@ -128,50 +128,50 @@ public:
     //!< Override the basic mood that is used to calculate the current mood (-1 => ignore, 0/1 => false/true) [Used for mood calculation]
     static inline auto& s_nCJBasicMood = StaticRef<eCJMood>(0xB613DC);
 
-    //! If any currently active speech is "ForceAudible" (Must be heard (?))
+    //!< If any currently active speech is "ForceAudible" (Must be heard (?))
     static inline auto& s_bForceAudible = StaticRef<bool>(0xB613E4);
 
-    //! No speeches should be played
+    //!< No speeches should be played
     static inline auto& s_bAllSpeechDisabled = StaticRef<bool>(0xB613E6);
 
-    //! Is the player speaking
+    //!< Is the player speaking
     static inline auto& s_bAPlayerSpeaking = StaticRef<bool>(0xB613E5);
 
-    //! Current conversation length (Not array size!)
+    //!< Current conversation length (Not array size!)
     static inline auto& s_ConversationLength = StaticRef<int16>(0xB613E8);
 
-    //! Current conversation contexts
+    //!< Current conversation contexts
     static inline auto& s_Conversation = StaticRef<std::array<eGlobalSpeechContextS16, 8>>(0xB613EC);
 
-    //! Is the player having a conversation with another ped? (With `s_pPlayerConversationPed`)
+    //!< Is the player having a conversation with another ped? (With `s_pPlayerConversationPed`)
     static inline auto& s_bPlayerConversationHappening = StaticRef<bool>(0xB613FC);
 
-    //! The ped the player is having a conversation with (If any)
+    //!< The ped the player is having a conversation with (If any)
     static inline auto& s_pPlayerConversationPed = StaticRef<CPed*>(0xB61400);
 
-    //! Are 2 peds having a conversation (`s_pConversationPed1` and `s_pConversationPed2`)
+    //!< Are 2 peds having a conversation (`s_pConversationPed1` and `s_pConversationPed2`)
     static inline auto& s_bPedConversationHappening = StaticRef<bool>(0xB613FD);
 
-    //! Conversation peds/slots (Valid if `s_bPedConversationHappening`)
+    //!< Conversation peds/slots (Valid if `s_bPedConversationHappening`)
     static inline auto& s_pConversationPed1     = StaticRef<CPed*>(0xB61410);
     static inline auto& s_pConversationPedSlot1 = StaticRef<tPedSpeechSlotID>(0xB61408);
     static inline auto& s_pConversationPed2     = StaticRef<CPed*>(0xB6140C);
     static inline auto& s_pConversationPedSlot2 = StaticRef<tPedSpeechSlotID>(0xB61404);
 
-    //! Next speech-slot to use. This is merrily a hint, rather than an obligation
+    //!< Next speech-slot to use. This is merrily a hint, rather than an obligation
     static inline auto& s_NextSpeechSlot = StaticRef<tPedSpeechSlotID>(0xB61414);
 
-    //! A least-recently-used (FILO) cache of phrases used
+    //!< A least-recently-used (FILO) cache of phrases used
     static inline auto& s_PhraseMemory = StaticRef<std::array<tPhraseMemory, 150>>(0xB61418);
 
-    //! Speech slots (Last one is always reserved for the player!)
+    //!< Speech slots (Last one is always reserved for the player!)
     static inline auto&      s_PedSpeechSlots   = StaticRef<std::array<CAEPedSpeechSlot, SND_BANK_SLOT_SPEECH6 - SND_BANK_SLOT_SPEECH1 + 1>>(0xB61C38);
     static inline const auto PLAYER_SPEECH_SLOT = (tPedSpeechSlotID)(s_PedSpeechSlots.size() - 1);
 
-    //! Time when a global context can be played again
+    //!< Time when a global context can be played again
     static inline auto& gGlobalSpeechContextNextPlayTime = StaticRef<std::array<uint32, CTX_GLOBAL_NUM>>(0xB61670); // PAIN (CTX_GLOBAL_PAIN_START -> CTX_GLOBAL_PAIN_END) is ignored, and `m_NextTimeCanSayPain` is used instead
 
-    //! Default sound volume of speeches
+    //!< Default sound volume of speeches
     static inline const auto SPEECH_SOUND_DEFAULT_VOLUME = 3.f; // 0x8C80EC
 public:
     static void InjectHooks();
@@ -256,42 +256,108 @@ public:
 
     /*!
      * @addr 0x4E53B0
-     * @brief Calculate (derive) CJ's mood from current game state
+     * @return CJ's current mood derived from the current game state (Like if he's with gang members, etc)
      */
     static eCJMood GetCurrentCJMood();
 
     /*!
      * @addr 0x4E4700
-     * @brief Calculate (derive) next mood 
      * @param currMood The current mood
+     * @return The next mood derived from the current
      */
     static eCJMood __stdcall GetNextMoodToUse(eCJMood currMood);
 
     /*!
      * @addr 0x4E4760
-     * @brief Get a random voice for CJ's mood
      * @param mood The mood to get the voice for
+     * @return A random voice for CJ's mood
      */
     static ePedSpeechVoiceS16 __stdcall GetVoiceForMood(eCJMood mood);
 
+    /*!
+     * @addr 0x4E4270
+     * @return If CJ is in clothes for gang-style voices
+     */
     static bool IsCJDressedInForGangSpeech();
 
-    static void  EnableAllPedSpeech();
-    static void  DisableAllPedSpeech();
+    /*!
+     * @addr 0x4E3EC0
+     * @brief Enable all speech again (Also see `DisableAllPedSpeech`)
+     */
+    static void EnableAllPedSpeech();
 
+    /*!
+    * @addr 0x4E3EB0
+    * @brief Disable absolutely all type of speech (Makes the game lifeless!) (Also see `EnableAllPedSpeech`)
+    */
+    static void DisableAllPedSpeech();
+
+    /*!
+     * @addr 0x4E4600
+     * @param gCtx The context to check
+     * @return If this context shouldn't be interrupted if already playing
+     */
     static bool __stdcall IsGlobalContextImportantForInterupting(eGlobalSpeechContext gCtx); // typo: Interrupting
-    static bool           IsGlobalContextUberImportant(int16 gCtx);
+
+    /*!
+     * @addr 0x4E46F0
+     * @brief Not used
+     * @return If the context is "uber" (very) important
+     */
+    static bool IsGlobalContextUberImportant(int16 gCtx);
+
+    /*!
+     * @addr 0x4E44F0
+     * @param gCtx The context to check
+     * @return If this context is for pain
+     */
     static bool __stdcall IsGlobalContextPain(eGlobalSpeechContext gCtx);
 
-    static bool  RequestPedConversation(CPed* pedA, CPed* pedB);
-    static void  ReleasePedConversation();
-    static bool  ReservePedConversationSpeechSlots();
-    static bool  ReservePlayerConversationSpeechSlot();
-    static bool  RequestPlayerConversation(CPed* ped);
-    static void  ReleasePlayerConversation();
-    static void  SetUpConversation();
+    /*!
+     * @addr 0x4E50E0
+     * @brief Try starting a conversation between 2 peds
+     * @param pedA Conversation ped 1
+     * @param pedB Conversation ped 2
+     * @return If the conversation was started
+     */
+    static bool RequestPedConversation(CPed* pedA, CPed* pedB);
 
-    static eAudioPedType      GetAudioPedType(const char* name);
+    /*!
+     * @addr 0x4E52A0
+     * @brief Stop conversation between 2 peds (Previously started by `RequestPedConversation()`).
+     * @brief Does nothing if there's no conversation.
+     */
+    static void ReleasePedConversation();
+
+    /*!
+    * @addr 0x4E38C0
+    * @brief Try starting a conversation between the player and a ped
+    * @param ped Conversation ped 
+    * @return If the conversation was started
+    */
+    static bool RequestPlayerConversation(CPed* ped);
+
+    /*!
+    * @addr 0x4E3960
+    * @brief Stop conversation between the player and a ped (Previously started by `RequestPlayerConversation()`).
+    * @brief Does nothing if there's no conversation.
+    */
+    static void ReleasePlayerConversation();
+
+    /*!
+     * 0x4E3C60
+     * @brief String => Enum conversion
+     * @return Enum value of the given name
+     */
+    static eAudioPedType GetAudioPedType(const char* name);
+
+    /*!
+     * @addr 0x4E3CD0
+     * @brief String => Enum conversion
+     * @param name 
+     * @param type Enum type
+     * @return Enum value of the given name (But of a transparent type)
+     */
     static ePedSpeechVoiceS16 GetVoice(const char* name, eAudioPedTypeS16 type);
 
     static float                             GetSpeechContextVolumeOffset(eGlobalSpeechContextS16 gctx);
@@ -301,6 +367,10 @@ public:
     static eSoundBank                        GetVoiceSoundBank(eGlobalSpeechContext gCtx, eAudioPedType pt, ePedSpeechVoiceS16 voice);
 
 private:
+    static bool ReservePedConversationSpeechSlots();
+    static bool ReservePlayerConversationSpeechSlot();
+    static void SetUpConversation();
+
     static tPedSpeechSlotID CanWePlayScriptedSpeech();
     static tPedSpeechSlotID GetFreeSpeechSlot();
 
