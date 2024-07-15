@@ -139,11 +139,11 @@ bool CAEPedSpeechAudioEntity::RequestPedConversation(CPed* pedA, CPed* pedB) {
     if (s_bAllSpeechDisabled || s_bPedConversationHappening || s_bPlayerConversationHappening) {
         return false;
     }
-    if (pedA->m_pedSpeech.GetAllocatedVoice() == pedB->m_pedSpeech.GetAllocatedVoice()) {
+    if (pedA->GetSpeechAE().GetAllocatedVoice() == pedB->GetSpeechAE().GetAllocatedVoice()) {
         return false;
     }
     const auto CheckCanPedTalk = [](CPed* p) {
-        return !p->m_pedSpeech.IsAllSpeechDisabled()
+        return !p->GetSpeechAE().IsAllSpeechDisabled()
             && p->CanPedHoldConversation()
             && !p->GetPedTalking()
             && CVector::DistSqr(TheCamera.GetPosition(), p->GetPosition()) <= sq(40.f);
@@ -297,12 +297,12 @@ bool CAEPedSpeechAudioEntity::RequestPlayerConversation(CPed* ped) {
         return false;
     }
 
-    if (ped->m_pedSpeech.m_IsSpeechForScriptsDisabled || ped->m_pedSpeech.m_IsSpeechDisabled) {
+    if (ped->GetSpeechAE().m_IsSpeechForScriptsDisabled || ped->GetSpeechAE().m_IsSpeechDisabled) {
         return false;
     }
 
     const auto player = FindPlayerPed();
-    if (!player || player->m_pedSpeech.m_IsSpeechDisabled || player->m_pedSpeech.m_IsSpeechForScriptsDisabled) {
+    if (!player || player->GetSpeechAE().m_IsSpeechDisabled || player->GetSpeechAE().m_IsSpeechForScriptsDisabled) {
         return false;
     }
 
@@ -915,15 +915,15 @@ int16 CAEPedSpeechAudioEntity::CanWePlayGlobalSpeechContext(eGlobalSpeechContext
                 : -1;
         };
         if (s_bPedConversationHappening) {
-            if (this == &s_pConversationPed1->m_pedSpeech) {
+            if (this == &s_pConversationPed1->GetSpeechAE()) {
                 return CheckSlot(s_pConversationPedSlot1);
             }
-            if (this == &s_pConversationPed2->m_pedSpeech) {
+            if (this == &s_pConversationPed2->GetSpeechAE()) {
                 return CheckSlot(s_pConversationPedSlot2);
             }
         }
         if (s_bPlayerConversationHappening) {
-            if (this == &s_pPlayerConversationPed->m_pedSpeech) {
+            if (this == &s_pPlayerConversationPed->GetSpeechAE()) {
                 return CheckSlot(s_pConversationPedSlot1);
             }    
         }
@@ -1374,13 +1374,13 @@ void CAEPedSpeechAudioEntity::I_UpdateParameters(CAESound* sound, int16 playTime
             }
 
             if (s_bPedConversationHappening) {
-                if (   this == &s_pConversationPed1->m_pedSpeech && m_PedSpeechSlotID == s_pConversationPedSlot1
-                    || this == &s_pConversationPed2->m_pedSpeech && m_PedSpeechSlotID == s_pConversationPedSlot2
+                if (   this == &s_pConversationPed1->GetSpeechAE() && m_PedSpeechSlotID == s_pConversationPedSlot1
+                    || this == &s_pConversationPed2->GetSpeechAE() && m_PedSpeechSlotID == s_pConversationPedSlot2
                 ) {
                     speech->Status = CAEPedSpeechSlot::eStatus::RESERVED;
                 }
             } else if (s_bPlayerConversationHappening) {
-                if (this == &s_pPlayerConversationPed->m_pedSpeech && m_PedSpeechSlotID == s_pConversationPedSlot1) {
+                if (this == &s_pPlayerConversationPed->GetSpeechAE() && m_PedSpeechSlotID == s_pConversationPedSlot1) {
                     speech->Status = CAEPedSpeechSlot::eStatus::RESERVED;
                 }
             }

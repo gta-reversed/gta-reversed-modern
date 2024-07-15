@@ -3692,7 +3692,7 @@ bool SayJacking(CPed* jacker, CPed* jacked, CVehicle* vehicle, uint32 timeDelay)
     if (vehicle->m_vehicleAudio.GetVehicleTypeForAudio())
         return jacker->Say(CTX_GLOBAL_JACKING_GENERIC, timeDelay) != -1;
 
-    if (jacked->m_pedSpeech.IsPedFemaleForAudio())
+    if (jacked->GetSpeechAE().IsPedFemaleForAudio())
         return jacker->Say(CTX_GLOBAL_JACKING_CAR_FEM, timeDelay) != -1;
 
     return jacker->Say(CTX_GLOBAL_JACKING_CAR_MALE, timeDelay) != -1;
