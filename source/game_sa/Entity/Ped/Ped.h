@@ -340,7 +340,7 @@ public:
     CCoverPoint*        m_pCoverPoint;
     CEntryExit*         m_pEnex; // CEnEx *
     float               m_fRemovalDistMultiplier;
-    int16               m_nSpecialModelIndex;
+    int16               m_StreamedScriptBrainToLoad;
     int32               field_798;
 
 public:
