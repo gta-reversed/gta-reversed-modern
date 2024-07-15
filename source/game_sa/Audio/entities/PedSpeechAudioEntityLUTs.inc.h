@@ -18,7 +18,7 @@ namespace {
 // TIP: Disable word-wrap when viewing this array... :D
 // 0x8C6A68
 static constexpr std::array<tGlobalSpeechContextInfo, CTX_GLOBAL_NUM> gSpeechContextLookup{{
-    // GCtx                                                                                         ....SpecificContext....                                                                                               RepeatTime Zero           IsImportantFor...       IsPain
+    // GCtx                                                                                         ....SpecificContext....                                                                                               RepeatTime Zero        ...IsImportantFor...       IsPain
     //                                          PED_TYPE_GEN                   PED_TYPE_EMG             PED_TYPE_PLAYER                      PED_TYPE_GANG                     PED_TYPE_GFD                                               Streaming Interrupting Widescreen                                                       
     {CTX_GLOBAL_NO_SPEECH,                      {CTX_GEN_UNK,                  CTX_EMG_UNK,             CTX_PLY_UNK,                         CTX_GNG_UNK,                      CTX_GFD_UNK,                            }, 7000,      0,   false,    false,       false,     false},
     {CTX_GLOBAL_ABUSE_GANG_BALLAS,              {CTX_GEN_UNK,                  CTX_EMG_UNK,             CTX_PLY_UNK,                         CTX_GNG_ABUSE_GANG_BALLAS,        CTX_GFD_UNK,                            }, 7000,      0,   false,    false,       false,     false},

@@ -904,3 +904,28 @@ void CGameLogic::UpdateSkip() {
         return;
     }
 }
+
+// notsa
+bool CGameLogic::IsAPlayerInFocusOn2PlayerGame() {
+    return n2PlayerPedInFocus == eFocusedPlayer::PLAYER1 || n2PlayerPedInFocus == eFocusedPlayer::PLAYER2;
+}
+
+// notsa
+CPlayerPed* CGameLogic::GetFocusedPlayerPed() {
+    if (!IsAPlayerInFocusOn2PlayerGame()) {
+        return nullptr;
+    } else {
+        return FindPlayerPed((int32)n2PlayerPedInFocus);
+    }
+}
+
+// notsa
+bool CGameLogic::CanPlayerTripSkip() {
+    return SkipState == SKIP_AVAILABLE || SkipState == SKIP_AFTER_MISSION;
+}
+
+// notsa
+void CGameLogic::SetMissionFailed(){
+    GameState = GAMELOGIC_STATE_MISSION_FAILED;
+    TimeOfLastEvent = CTimer::GetTimeInMS();
+}

@@ -6,6 +6,7 @@
 */
 #pragma once
 
+#include <Base.h>
 #include <Audio/entities/AEAudioEntity.h>
 #include <Audio/AESound.h>
 #include <Audio/eSoundBank.h>
@@ -14,9 +15,16 @@
 #include <Audio/PedSpeechVoices.h>
 #include <Audio/ePedAudioType.h>
 #include <Enums/eModelID.h>
+#include <Tasks/TaskTypes/TaskComplexFacial.h>
+#include <Camera.h>
+#include <GameLogic.h>
+#include <AEAudioUtility.h>
+#include <Weather.h>
+#include <Streaming.h>
+#include <World.h>
 
-class CPed;
 class CAEPedSpeechAudioEntity;
+class CPed;
 
 enum eCJMood : int16 {
     MOOD_UNK = -1, // notsa
@@ -99,7 +107,7 @@ struct tSpecificSpeechContextInfo {
     int16 FirstSoundID{-1}, LastSoundID{-1};
 
     bool   IsUseable()    const noexcept { return FirstSoundID != -1; }
-    size_t GetNumSounds() const noexcept { assert(FirstSoundID <= LastSoundID); return LastSoundID - FirstSoundID; }
+    size_t GetNumSounds() const noexcept { assert(FirstSoundID <= LastSoundID); return LastSoundID - FirstSoundID + 1; }
 };
 VALIDATE_SIZE(tSpecificSpeechContextInfo, sizeof(int16) * 2);
 
@@ -168,7 +176,7 @@ public:
 public:
     static void InjectHooks();
 
-    CAEPedSpeechAudioEntity() noexcept;
+    CAEPedSpeechAudioEntity(eAudioPedType pt = PED_TYPE_UNK) noexcept;
     CAEPedSpeechAudioEntity(CPed* ped) noexcept;
     ~CAEPedSpeechAudioEntity() = default;
 
@@ -205,15 +213,32 @@ public:
     bool              GetPedTalking() const;
     ePainSpeechVoices GetPainVoice() const;
 
-    void              UpdateParameters(CAESound* sound, int16 playTime) override;
-    virtual void      AddScriptSayEvent(eAudioEvents audioEvent, eAudioEvents scriptID, bool overrideSilence, bool isForceAudible, bool isFrontEnd);
-    virtual void      Terminate();
-    virtual void      PlayLoadedSound();
-    virtual int16     GetAllocatedVoice();
-    virtual bool      WillPedChatAboutTopic(int16 topic);
-    virtual int16     GetPedType();
-    virtual bool      IsPedFemaleForAudio();
+    void                       UpdateParameters(CAESound* sound, int16 playTime) override { return I_UpdateParameters<false>(sound, playTime); }
+    virtual void               AddScriptSayEvent(eAudioEvents audioEvent, eAudioEvents scriptID, bool overrideSilence, bool isForceAudible, bool isFrontEnd);
+    virtual void               Terminate();
+    virtual void               PlayLoadedSound();
+    virtual ePedSpeechVoiceS16 GetAllocatedVoice();
+    virtual bool               WillPedChatAboutTopic(int16 topic);
+    virtual eAudioPedType      GetPedType();
+    virtual bool               IsPedFemaleForAudio();
 
+protected:
+    // NOTSA
+    CAEPedSpeechSlot* GetCurrentSpeech() const {
+        assert(!m_IsPlayingSpeech || m_PedSpeechSlotID != -1);
+        return m_IsPlayingSpeech
+            ? &s_PedSpeechSlots[m_PedSpeechSlotID]
+            : nullptr;
+    }
+
+private:
+    auto&& GetNextPlayTimeRef(this auto&& self, eGlobalSpeechContext gCtx) {
+        return IsGlobalContextPain(_gCtx)
+            ? m_NextTimeCanSayPain[_gCtx - CTX_GLOBAL_PAIN_START + 1]
+            : gGlobalSpeechContextNextPlayTime[_gCtx]
+    }
+
+public:
     static void StaticInitialise();
     static void Service();
     static void Reset();
@@ -280,6 +305,19 @@ private:
     static tPedSpeechSlotID GetFreeSpeechSlot();
 
 protected:
+    // 0x4E6550 / 0x4E60D0
+    template<bool IsPedless>
+    int16 I_AddSayEvent(CVector pos, eAudioEvents audioEvent, eGlobalSpeechContext gCtx, uint32 startTimeDelayMs, float probability, bool overrideSilence, bool isForceAudible, bool isFrontEnd);
+
+    // 0x4E3520 / 0x4E4D10
+    template<bool IsPedless>
+    void I_UpdateParameters(CAESound* sound, int16 playTime);
+
+    // 0x4E5CD0 / 0x4E6380
+    template<bool IsPedless>
+    void I_PlayLoadedSound(CEntity* attachTo);
+
+protected:
     std::array<CAESound*, 5>                                            m_Sounds{};
     bool                                                                m_IsInitialized{};
     eAudioPedType                                                       m_PedAudioType{ PED_TYPE_UNK };
@@ -303,14 +341,6 @@ private:
     CAEPedSpeechAudioEntity* Constructor() {
         this->CAEPedSpeechAudioEntity::CAEPedSpeechAudioEntity();
         return this;
-    }
-
-    // NOTSA
-    CAEPedSpeechSlot* GetCurrentSpeech() const {
-        assert(!m_IsPlayingSpeech || m_PedSpeechSlotID != -1);
-        return m_IsPlayingSpeech
-            ? &s_PedSpeechSlots[m_PedSpeechSlotID]
-            : nullptr;
     }
 };
 
