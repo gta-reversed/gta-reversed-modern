@@ -5,7 +5,7 @@
 #include "AEAudioUtility.h"
 #include "PedClothesDesc.h"
 #include <AEAudioHardware.h>
-#include <Audio/eSoundBankSlot.h>
+#include <Audio/Enums/eSoundBankSlot.h>
 
 #include "./PedSpeechAudioEntityLUTs.inc.h"
 

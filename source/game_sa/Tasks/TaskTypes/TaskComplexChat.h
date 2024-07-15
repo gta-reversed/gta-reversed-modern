@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TaskComplex.h"
-#include <Audio/PedSpeechContexts.h>
+#include <Audio/Enums/PedSpeechContexts.h>
 
 class CEntity;
 

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <extensions/utility.hpp>
-#include <Audio/PedSpeechContexts.h>
-#include <Audio/PedSpeechVoices.h>
+#include <Audio/Enums/PedSpeechContexts.h>
+#include <Audio/Enums/PedSpeechVoices.h>
 
 //
 // NOTE: Do not include this header anywhere other than `AEPedSpeechAudioEntity.cpp`!

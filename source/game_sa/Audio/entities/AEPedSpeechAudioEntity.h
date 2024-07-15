@@ -9,11 +9,11 @@
 #include <Base.h>
 #include <Audio/entities/AEAudioEntity.h>
 #include <Audio/AESound.h>
-#include <Audio/eSoundBank.h>
-#include <Audio/eSoundBankSlot.h>
-#include <Audio/PedSpeechContexts.h>
-#include <Audio/PedSpeechVoices.h>
-#include <Audio/ePedAudioType.h>
+#include <Audio/Enums/eSoundBank.h>
+#include <Audio/Enums/eSoundBankSlot.h>
+#include <Audio/Enums/PedSpeechContexts.h>
+#include <Audio/Enums/PedSpeechVoices.h>
+#include <Audio/Enums/ePedAudioType.h>
 #include <Enums/eModelID.h>
 #include <Tasks/TaskTypes/TaskComplexFacial.h>
 #include <Camera.h>

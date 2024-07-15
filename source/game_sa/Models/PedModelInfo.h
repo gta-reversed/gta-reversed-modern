@@ -9,8 +9,8 @@
 #include "ClumpModelInfo.h"
 #include "ColModel.h"
 #include <extensions/utility.hpp>
-#include <Audio/ePedAudioType.h>
-#include <Audio/PedSpeechVoices.h>
+#include <Audio/Enums/ePedAudioType.h>
+#include <Audio/Enums/PedSpeechVoices.h>
 
 struct tPedColNodeInfo {
     char    _pad[4];

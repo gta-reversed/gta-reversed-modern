@@ -23,7 +23,7 @@
 #include "Fire.h"
 #include "PedGroups.h"
 
-#include <Audio/PedSpeechContexts.h>
+#include <Audio/Enums/PedSpeechContexts.h>
 #include "AnimationEnums.h"
 #include "eWeaponType.h"
 #include "eWeaponSkill.h"
