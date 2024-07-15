@@ -73,7 +73,7 @@ void CTaskComplexDie::SayDeathSample(CPed* ped) const {
     case WEAPON_FALL:
         ped->Say(CTX_GLOBAL_PAIN_DEATH_HIGH);
         if (CLocalisation::Blood())
-            ped->m_pedAudio.AddAudioEvent(AE_PED_CRUNCH, 0.0f, 1.0f, ped);
+            ped->GetPedAE().AddAudioEvent(AE_PED_CRUNCH, 0.0f, 1.0f, ped);
         break;
     default:
         ped->Say(CTX_GLOBAL_PAIN_DEATH_LOW);

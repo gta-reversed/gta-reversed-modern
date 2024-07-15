@@ -569,6 +569,8 @@ public:
     int32 GetPadNumber() const;
     bool IsCurrentlyUnarmed() { return GetActiveWeapon().m_Type == WEAPON_UNARMED; }
 
+    auto&& GetPedAE(this auto&& self)    { return self.m_pedAudio; }
+
     /*!
      * @notsa
      * @brief Is the ped jogging, running or sprinting
