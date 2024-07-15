@@ -318,23 +318,23 @@ protected:
     void I_PlayLoadedSound(CEntity* attachTo);
 
 protected:
-    std::array<CAESound*, 5>                                            m_Sounds{}; //!< Not actually used
-    bool                                                                m_IsInitialized{};
-    eAudioPedType                                                       m_PedAudioType{ PED_TYPE_UNK };
-    ePedSpeechVoiceS16                                                  m_VoiceID{ VOICE_UNK }; //!< Exact enum to use depends on `m_PedAudioType` (See `PedSpeechVoices.h`)
-    int16                                                               m_IsFemale{};
-    bool                                                                m_IsPlayingSpeech{};
-    bool                                                                m_IsSpeechDisabled{};
-    bool                                                                m_IsSpeechForScriptsDisabled{};
-    bool                                                                m_IsFrontend{};
-    bool                                                                m_IsForcedAudible{};
-    CAESound*                                                           m_Sound{};
-    int16                                                               m_SoundID{ -1 };
-    eSoundBankS16                                                       m_BankID{ SND_BANK_UNK };
-    tPedSpeechSlotID                                                    m_PedSpeechSlotID{ -1 };
-    float                                                               m_EventVolume{ -100.f };
-    eGlobalSpeechContextS16                                             m_LastGCtx{ CTX_GLOBAL_UNK };
-    std::array<uint32, CTX_GLOBAL_PAIN_END - CTX_GLOBAL_PAIN_START - 1> m_NextTimeCanSayPain{};
+    std::array<CAESound*, 5>                                            m_Sounds{};                     //!< Not actually used
+    bool                                                                m_IsInitialized{};              //!< The instance was initialized successfully (!) using `Initialise()`
+    eAudioPedType                                                       m_PedAudioType{ PED_TYPE_UNK }; //!< Audio type of this ped (Usually obtained from the `ModelInfo`)
+    ePedSpeechVoiceS16                                                  m_VoiceID{ VOICE_UNK };         //!< Exact enum to use depends on `m_PedAudioType` (See `PedSpeechVoices.h`)
+    int16                                                               m_IsFemale{};                   //!< Is the ped a female (Thus should use female voices)
+    bool                                                                m_IsPlayingSpeech{};            //!< A speech is currently being played
+    bool                                                                m_IsSpeechDisabled{};           //!< No regular speeches should be played
+    bool                                                                m_IsSpeechForScriptsDisabled{}; //!< No script speeches should be played
+    bool                                                                m_IsFrontend{};                 //!< Should be played directly as a 2D sound
+    bool                                                                m_IsForcedAudible{};            //!< Must be heard (louder volume) (?)
+    CAESound*                                                           m_Sound{};                      //!< The currently playing speech voice
+    int16                                                               m_SoundID{ -1 };                //!< Sound ID of the currently played sound
+    eSoundBankS16                                                       m_BankID{ SND_BANK_UNK };       //!< Sound bank of the currently played sound
+    tPedSpeechSlotID                                                    m_PedSpeechSlotID{ -1 };        //!< Current speech slot: `-1` if none, `< s_PedSpeechSlots.size() - 1` for regular peds, and `PLAYER_SPEECH_SLOT` for the player
+    float                                                               m_EventVolume{ -100.f };        //!< Event's volume
+    eGlobalSpeechContextS16                                             m_LastGCtx{ CTX_GLOBAL_UNK };   //!< Last (played?) speech context
+    std::array<uint32, CTX_GLOBAL_PAIN_END - CTX_GLOBAL_PAIN_START - 1> m_NextTimeCanSayPain{};         //!< Lookup for pain contexts. There's a timeout (`RepeatTime`) for each. The values stored here are TimeMs
 
 private:
     // 0x4E4F10
