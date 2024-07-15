@@ -233,9 +233,9 @@ protected:
 
 private:
     auto&& GetNextPlayTimeRef(this auto&& self, eGlobalSpeechContext gCtx) {
-        return IsGlobalContextPain(_gCtx)
-            ? m_NextTimeCanSayPain[_gCtx - CTX_GLOBAL_PAIN_START + 1]
-            : gGlobalSpeechContextNextPlayTime[_gCtx]
+        return IsGlobalContextPain(gCtx)
+            ? self.m_NextTimeCanSayPain[gCtx - CTX_GLOBAL_PAIN_START + 1]
+            : gGlobalSpeechContextNextPlayTime[gCtx];
     }
 
 public:
@@ -318,7 +318,7 @@ protected:
     void I_PlayLoadedSound(CEntity* attachTo);
 
 protected:
-    std::array<CAESound*, 5>                                            m_Sounds{};
+    std::array<CAESound*, 5>                                            m_Sounds{}; //!< Not actually used
     bool                                                                m_IsInitialized{};
     eAudioPedType                                                       m_PedAudioType{ PED_TYPE_UNK };
     ePedSpeechVoiceS16                                                  m_VoiceID{ VOICE_UNK }; //!< Exact enum to use depends on `m_PedAudioType` (See `PedSpeechVoices.h`)

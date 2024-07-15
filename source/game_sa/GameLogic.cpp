@@ -378,7 +378,7 @@ void CGameLogic::RestorePlayerStuffDuringResurrection(CPlayerPed* player, CVecto
         fire->Extinguish();
         fire = nullptr;
     }
-    player->GetPedAE().TurnOffJetPack();
+    player->GetAE().TurnOffJetPack();
     player->bInVehicle = false;
     if (auto vehicle = player->m_pVehicle) {
         CEntity::CleanUpOldReference(vehicle);

@@ -723,7 +723,7 @@ void CAEScriptAudioEntity::ProcessMissionAudioEvent(eAudioEvents eventId, CVecto
         break;
     case AE_CAS9_AD:
         if (CLocalisation::Blood() && physical && physical->IsPed()) {
-            physical->AsPed()->GetPedAE().AddAudioEvent(AE_PED_CRUNCH, 0.0f, 1.0f, physical, 0, 0, 0);
+            physical->AsPed()->GetAE().AddAudioEvent(AE_PED_CRUNCH, 0.0f, 1.0f, physical, 0, 0, 0);
         }
         break;
     case AE_CAS9_BA: {

@@ -105,9 +105,11 @@ public:
 
     static inline int16 m_sGunFlashBlendStart = 10'000; // 0x8D1370
 
+protected: // Use accessors
     CAEPedAudioEntity       m_pedAudio;
     CAEPedSpeechAudioEntity m_pedSpeech;
     CAEPedWeaponAudioEntity m_weaponAudio;
+public:
     char                    field_43C[36];
     CPed*                   m_roadRageWith;
     char                    field_464[4];
@@ -571,7 +573,8 @@ public:
 
     auto&& GetAE(this auto&& self)    { return self.m_pedAudio; }
     auto&& GetSpeechAE(this auto&& self) { return self.m_pedSpeech; }
-   
+    auto&& GetWeaponAE(this auto&& self) { return self.m_weaponAudio; }
+
     /*!
      * @notsa
      * @brief Is the ped jogging, running or sprinting

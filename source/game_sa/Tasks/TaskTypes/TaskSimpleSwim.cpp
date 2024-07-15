@@ -623,7 +623,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* ped) {
         FxPrtMult_c fxPrtMult(1.0f, 1.0f, 1.0f, 0.2f, 0.4f, 0.0f, 0.5f);
         CVector particleVelocity;
         g_fx.m_Wake->AddParticle(&particlePosition, &particleVelocity, 0.0f, &fxPrtMult, fLimitedRadianAngle, 1.2f, 0.6f, 0);
-        ped->GetPedAE().AddAudioEvent(AE_PED_SWIM_WAKE, 0.0f, 1.0f);
+        ped->GetAE().AddAudioEvent(AE_PED_SWIM_WAKE, 0.0f, 1.0f);
 
         if (m_nSwimState == SWIM_SPRINTING) {
             RpHAnimHierarchy* animHierarchy = GetAnimHierarchyFromSkinClump(ped->m_pRwClump); // todo: almost CPed::GetBoneMatrix
@@ -637,7 +637,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* ped) {
                     auto fx = g_fxMan.CreateFxSystem("water_swim", static_cast<CVector*>(bonePos), nullptr, false);
                     if (fx) {
                         fx->PlayAndKill();
-                        ped->GetPedAE().AddAudioEvent(AE_PED_SWIM_STROKE_SPLASH, 0.0f, 1.0f);
+                        ped->GetAE().AddAudioEvent(AE_PED_SWIM_STROKE_SPLASH, 0.0f, 1.0f);
                     }
                 }
             };
@@ -653,7 +653,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* ped) {
         }
         g_fx.TriggerWaterSplash(particlePosition);
         m_bTriggerWaterSplash = true;
-        ped->GetPedAE().AddAudioEvent(AE_PED_SWIM_DIVE_SPLASH, 0.0f, 1.0f);
+        ped->GetAE().AddAudioEvent(AE_PED_SWIM_DIVE_SPLASH, 0.0f, 1.0f);
         break;
     }
     case SWIM_UNDERWATER_SPRINTING: {

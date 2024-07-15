@@ -484,7 +484,7 @@ eCJMood CAEPedSpeechAudioEntity::GetCurrentCJMood() {
             if (mem.m_nPedType == PED_TYPE_GANG2) {
                 return true;
             }
-            auto& memSpeech = mem.m_pedSpeech;
+            auto& memSpeech = mem.GetSpeechAE();
             return memSpeech.m_PedAudioType == PED_TYPE_GANG
                 && notsa::contains({ VOICE_GNG_RYDER, VOICE_GNG_SWEET, VOICE_GNG_SMOKE }, (eGngSpeechVoices)memSpeech.m_VoiceID);
         }
