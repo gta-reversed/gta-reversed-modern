@@ -48,6 +48,7 @@ project "gta_sa_modern"
             "TRACY_ON_DEMAND",
             "TRACY_CALLSTACK",
         }
+    filter {}
 
     defines { 
         "NOMINMAX", 
