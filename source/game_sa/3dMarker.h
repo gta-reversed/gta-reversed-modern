@@ -48,7 +48,7 @@ public:
     float         m_fStdSize;
     float         m_fSize;
     float         m_fBrightness;
-    float         m_fCameraRange;
+    float         m_DistToCam2D;
     CVector       m_vecNormal;
     uint16        m_nLastMapReadX; // float casted to uint16
     uint16        m_nLastMapReadY; // float casted to uint16
@@ -78,13 +78,13 @@ public:
         m_fStdSize = 1.0f;
         m_fSize = 1.0f;
         m_fBrightness = 1.0f;
-        m_fCameraRange = 0.0f;
+        m_DistToCam2D = 0.0f;
         m_vecNormal = CVector();
         m_nLastMapReadX = 30000;
         m_fRoofHeight = 65535.0f;
     }
 
-    bool AddMarker(uint32 id, uint16 type, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);
+    bool AddMarker(uint32 id, e3dMarkerType type, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);
     void DeleteMarkerObject();
     bool IsZCoordinateUpToDate();
     void Render();
