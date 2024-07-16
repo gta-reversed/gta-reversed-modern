@@ -17,11 +17,14 @@ newoption {
     trigger     = "allow-script-cmd-hooks",
     description = "Whenever script command hooks should be generated (Slows down (full) build by a lot)"
 }
+newoption {
+    trigger     = "with-tracy",
+    description = "Build with the Tracy Profiler"
+}
 
 if not _OPTIONS["outdir"] then
     _OPTIONS["outdir"] = "build"
 end
-
 
 --[[
     The Solution
