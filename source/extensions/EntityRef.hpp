@@ -4,12 +4,17 @@ namespace notsa {
 //! Wrapper for entity references, avoids manual usage of `CleanupOldRef` and `RegisterRef`
 template<typename T>
 struct EntityRef {
-    EntityRef(T* ptr = nullptr) :
+    EntityRef(T* ptr = nullptr) noexcept :
         m_Ptr{ ptr }
     {
         if (m_Ptr) {
             m_Ptr->RegisterReference(reinterpret_cast<CEntity**>(&m_Ptr));
         }
+    }
+
+    EntityRef(const EntityRef<T>& o) noexcept : // We only define a copy constructor, as this class isn't moveable
+        EntityRef{ o.m_Ptr }
+    {
     }
 
     ~EntityRef() {
@@ -18,15 +23,9 @@ struct EntityRef {
         }
     }
 
-    // No need for moving/copying the class itself, but just the pointer directly to it's new address
+    // Assignments should be done without a (possibly) temporary `EntityRef` instance
     // (This way we avoid extra calls to `CleanUpOld/RegisterReference`...)
-    EntityRef<T>& operator=(EntityRef&&) = delete;
-    EntityRef<T>& operator=(const EntityRef&) = delete;
-    EntityRef(EntityRef<T>&&) = delete;
-    EntityRef(const EntityRef<T>&) = delete;
-
-    // This is the only magic we need
-    EntityRef<T>& operator=(T* ptr) {
+    EntityRef<T>& operator=(T* ptr) noexcept {
         if (m_Ptr) {
             m_Ptr->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_Ptr));
         }
@@ -37,20 +36,19 @@ struct EntityRef {
         return *this;
     }
 
-    T* Get()              { return m_Ptr; }
-    const T* Get()  const { return m_Ptr; }
+    decltype(auto) Get(this auto&& self) noexcept { return self.m_Ptr; }
 
-    operator T*()   const { return m_Ptr;  }
-    operator T*()         { return m_Ptr;  }
+    operator T*()   const noexcept { return m_Ptr;  }
+    operator T*()         noexcept { return m_Ptr;  }
 
-    T* operator->() const { return m_Ptr;  }
-    T* operator->()       { return m_Ptr;  }
+    T* operator->() const noexcept { return m_Ptr;  }
+    T* operator->()       noexcept { return m_Ptr;  }
 
-    T& operator*()  const { return *m_Ptr; }
-    T& operator*()        { return *m_Ptr; }
+    T& operator*()  const noexcept { return *m_Ptr; }
+    T& operator*()        noexcept { return *m_Ptr; }
 
-    T* operator&()  const { return &m_Ptr; }
-    T* operator&()        { return &m_Ptr; }
+    T* operator&()  const noexcept { return m_Ptr; }
+    T* operator&()        noexcept { return m_Ptr; }
 
 private:
     T* m_Ptr;
