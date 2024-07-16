@@ -253,7 +253,7 @@ struct tScriptSearchlight {
         m_Tower            = nullptr;
         m_Housing          = nullptr;
         m_Bulb             = nullptr;
-        m_TargetSpot       = nullptr;
+        m_TargetSpot       = CVector{};
         vf64               = CVector{};
         vf70               = CVector{};
     }
