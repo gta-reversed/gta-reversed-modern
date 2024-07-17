@@ -103,7 +103,7 @@ public:
                     float speed = 1.0f,
                     float timeScale = 1.0f,
                     uint8 ignoredServiceCycles = 0,
-                    eSoundEnvironment environmentFlags = static_cast<eSoundEnvironment>(0),
+                    /*eSoundEnvironment*/ uint32 environmentFlags = static_cast<eSoundEnvironment>(0),
                     float speedVariability = 0,
                     int16 currPlayPosn = 0);
 

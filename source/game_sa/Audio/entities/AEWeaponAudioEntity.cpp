@@ -13,6 +13,33 @@
 #include "AEAudioHardware.h"
 #include "AEAudioUtility.h"
 
+void CAEWeaponAudioEntity::InjectHooks() {
+    RH_ScopedClass(CAEWeaponAudioEntity);
+    RH_ScopedCategory("Audio/Entities");
+
+    RH_ScopedInstall(Constructor, 0x5DE990);
+    RH_ScopedInstall(Destructor, 0x507560);
+    RH_ScopedInstall(Initialise, 0x503450);
+    RH_ScopedInstall(Reset, 0x503490);
+    RH_ScopedInstall(Terminate, 0x503480);
+    RH_ScopedInstall(WeaponFire, 0x504F80);
+    RH_ScopedInstall(WeaponReload, 0x503690);
+    RH_ScopedInstall(PlayChainsawStopSound, 0x504AA0);
+    RH_ScopedInstall(PlayMiniGunStopSound, 0x504960);
+    RH_ScopedInstall(PlayMiniGunFireSounds, 0x5047C0);
+    RH_ScopedInstall(PlayCameraSound, 0x5046F0);
+    RH_ScopedInstall(PlayWeaponLoopSound, 0x504610);
+    RH_ScopedInstall(PlayFlameThrowerSounds, 0x504470, { .reversed = false });
+    RH_ScopedInstall(PlayGunSounds, 0x503CE0, { .reversed = false });
+    RH_ScopedInstall(ReportStealthKill, 0x503B20);
+    RH_ScopedInstall(ReportChainsawEvent, 0x503910, { .reversed = false });
+    RH_ScopedInstall(PlayFlameThrowerIdleGasLoop, 0x503870);
+    RH_ScopedInstall(PlayGoggleSound, 0x503500);
+    RH_ScopedInstall(StopFlameThrowerIdleGasLoop, 0x5034E0);
+    RH_ScopedInstall(UpdateParameters, 0x504B70, { .reversed = false });
+
+}
+
 // 0x507560
 CAEWeaponAudioEntity::CAEWeaponAudioEntity() {
     Clear();
@@ -20,8 +47,8 @@ CAEWeaponAudioEntity::CAEWeaponAudioEntity() {
 
 // 0x503450
 void CAEWeaponAudioEntity::Initialise() {
-    m_nState = 3;
-    m_nChainsawSoundState = 4;
+    m_MiniGunState = eMiniGunState::STOPPED;
+    m_ChainsawState = 4;
     if (!AudioEngine.IsLoadingTuneActive()) {
         AEAudioHardware.LoadSoundBank(143, 5);
     }
@@ -40,8 +67,9 @@ void CAEWeaponAudioEntity::Reset() {
 
 // 0x504F80
 void CAEWeaponAudioEntity::WeaponFire(eWeaponType type, CPhysical* entity, eAudioEvents audioEventId) {
-    if (!entity)
+    if (!entity) {
         return;
+    }
 
     switch (type) {
     case WEAPON_PISTOL:
@@ -80,9 +108,9 @@ void CAEWeaponAudioEntity::WeaponFire(eWeaponType type, CPhysical* entity, eAudi
         return PlayGunSounds(entity, 52, 53, 26, 27, 23, audioEventId, 0.0f, 1.0f, 1.0f);
 
     case WEAPON_FLAMETHROWER:
-        if (!m_nFlameThrowerLastPlayedTime)
+        if (!m_FlameThrowerLastPlayedTimeMs)
             PlayFlameThrowerSounds(entity, 83, 26, audioEventId, -14.0f, 1.0f);
-        m_nFlameThrowerLastPlayedTime = CTimer::GetTimeInMS();
+        m_FlameThrowerLastPlayedTimeMs = CTimer::GetTimeInMS();
         break;
 
     case WEAPON_MINIGUN:
@@ -92,17 +120,17 @@ void CAEWeaponAudioEntity::WeaponFire(eWeaponType type, CPhysical* entity, eAudi
         return PlayGunSounds(entity, 49, -1, -1, -1, -1, audioEventId, -14.0f, 1.0f, 1.0f);
 
     case WEAPON_SPRAYCAN:
-        if (!m_nSpraycanLastPlayedTime)
+        if (!m_LastSprayCanFireTimeMs) {
             PlayWeaponLoopSound(entity, 28, audioEventId, -20.0f, 1.0f, AE_FRONTEND_HIGHLIGHT);
-
-        m_nSpraycanLastPlayedTime = CTimer::GetTimeInMS();
+        }
+        m_LastSprayCanFireTimeMs = CTimer::GetTimeInMS();
         break;
 
     case WEAPON_EXTINGUISHER:
-        if (!m_nExtinguisherLastPlayedTime)
+        if (!m_LastFireExtFireTimeMs)
             PlayWeaponLoopSound(entity, 9, audioEventId, -20.0f, 0.79369998f, AE_FRONTEND_ERROR);
 
-        m_nExtinguisherLastPlayedTime = CTimer::GetTimeInMS();
+        m_LastFireExtFireTimeMs = CTimer::GetTimeInMS();
         break;
 
     case WEAPON_CAMERA:
@@ -356,28 +384,28 @@ void CAEWeaponAudioEntity::PlayFlameThrowerSounds(CPhysical* entity, int16 sfx1,
 
 // 0x503870
 void CAEWeaponAudioEntity::PlayFlameThrowerIdleGasLoop(CPhysical* entity) {
-    if (m_FlameThrowerSound != nullptr)
+    if (m_FlameThrowerIdleGasLoopSound != nullptr)
         return;
 
     const auto volume = GetDefaultVolume(AE_FLAMETHROWER_IDLE);
     const auto flags = static_cast<eSoundEnvironment>(SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY | SOUND_REQUEST_UPDATES);
     m_tempSound.Initialise(5, 10, this, entity->GetPosition(), volume, 0.66f, 1.0f, 1.0f, 0, flags);
     m_tempSound.RegisterWithPhysicalEntity(entity);
-    m_FlameThrowerSound = AESoundManager.RequestNewSound(&m_tempSound);
+    m_FlameThrowerIdleGasLoopSound = AESoundManager.RequestNewSound(&m_tempSound);
 }
 
 // 0x5034E0
 void CAEWeaponAudioEntity::StopFlameThrowerIdleGasLoop() {
-    if (m_FlameThrowerSound) {
-        m_FlameThrowerSound->StopSoundAndForget();
-        m_FlameThrowerSound = nullptr;
+    if (m_FlameThrowerIdleGasLoopSound) {
+        m_FlameThrowerIdleGasLoopSound->StopSoundAndForget();
+        m_FlameThrowerIdleGasLoopSound = nullptr;
     }
 }
 
 // 0x504AA0
 void CAEWeaponAudioEntity::PlayChainsawStopSound(CPhysical* entity) {
     if (entity && AEAudioHardware.IsSoundBankLoaded(0x24u, 40)) {
-        if (m_nChainsawSoundState != 3) {
+        if (m_ChainsawState != 3) {
             const auto volume = GetDefaultVolume(AE_WEAPON_CHAINSAW_ACTIVE);
             const auto flags = static_cast<eSoundEnvironment>(SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY | SOUND_REQUEST_UPDATES);
             m_tempSound.Initialise(40, 2, this, entity->GetPosition(), volume, 0.66f, 1.0f, 1.0f, 0, flags);
@@ -385,9 +413,9 @@ void CAEWeaponAudioEntity::PlayChainsawStopSound(CPhysical* entity) {
             m_tempSound.m_nEvent = AE_FRONTEND_PICKUP_DRUGS;
             AESoundManager.RequestNewSound(&m_tempSound);
         }
-        m_nChainsawSoundState = 3;
+        m_ChainsawState = 3;
     } else {
-        m_nChainsawSoundState = 4;
+        m_ChainsawState = 4;
     }
 }
 
@@ -410,33 +438,6 @@ void CAEWeaponAudioEntity::PlayCameraSound(CPhysical* entity, eAudioEvents event
 // 0x504B70
 void CAEWeaponAudioEntity::UpdateParameters(CAESound *sound, int16 curPlayPos) {
     plugin::CallMethod<0x504B70, CAEWeaponAudioEntity*, CAESound*, int16>(this, sound, curPlayPos);
-}
-
-void CAEWeaponAudioEntity::InjectHooks() {
-    RH_ScopedClass(CAEWeaponAudioEntity);
-    RH_ScopedCategory("Audio/Entities");
-
-    RH_ScopedInstall(Constructor, 0x5DE990);
-    RH_ScopedInstall(Destructor, 0x507560);
-    RH_ScopedInstall(Initialise, 0x503450);
-    RH_ScopedInstall(Reset, 0x503490);
-    RH_ScopedInstall(Terminate, 0x503480);
-    RH_ScopedInstall(WeaponFire, 0x504F80);
-    RH_ScopedInstall(WeaponReload, 0x503690);
-    RH_ScopedInstall(PlayChainsawStopSound, 0x504AA0);
-    RH_ScopedInstall(PlayMiniGunStopSound, 0x504960);
-    RH_ScopedInstall(PlayMiniGunFireSounds, 0x5047C0, { .reversed = false });
-    RH_ScopedInstall(PlayCameraSound, 0x5046F0);
-    RH_ScopedInstall(PlayWeaponLoopSound, 0x504610);
-    RH_ScopedInstall(PlayFlameThrowerSounds, 0x504470, { .reversed = false });
-    RH_ScopedInstall(PlayGunSounds, 0x503CE0, { .reversed = false });
-    RH_ScopedInstall(ReportStealthKill, 0x503B20);
-    RH_ScopedInstall(ReportChainsawEvent, 0x503910, { .reversed = false });
-    RH_ScopedInstall(PlayFlameThrowerIdleGasLoop, 0x503870);
-    RH_ScopedInstall(PlayGoggleSound, 0x503500);
-    RH_ScopedInstall(StopFlameThrowerIdleGasLoop, 0x5034E0);
-    RH_ScopedInstall(UpdateParameters, 0x504B70, { .reversed = false });
-
 }
 
 CAEWeaponAudioEntity* CAEWeaponAudioEntity::Constructor() {

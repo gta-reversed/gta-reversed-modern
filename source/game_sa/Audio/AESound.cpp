@@ -298,7 +298,7 @@ void CAESound::CalculateVolume() {
 
 // 0x4EFE50
 void CAESound::Initialise(int16 bankSlotId, int16 sfxId, CAEAudioEntity* baseAudio, CVector posn, float volume, float maxDistance, float speed, float timeScale,
-                          uint8 ignoredServiceCycles, eSoundEnvironment environmentFlags, float speedVariability, int16 currPlayPosn)
+                          uint8 ignoredServiceCycles, uint32 environmentFlags, float speedVariability, int16 currPlayPosn)
 {
     UnregisterWithPhysicalEntity();
 
