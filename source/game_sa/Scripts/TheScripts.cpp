@@ -1910,7 +1910,7 @@ void CTheScripts::HighlightImportantAngledArea(uint32 id, float x1, float y1, fl
     center.x = (inf.x + sup.x) / 2;
     center.y = (inf.y + sup.y) / 2;
     center.z = (z <= MAP_Z_LOW_LIMIT) ? CWorld::FindGroundZForCoord(center.x, center.y) : z;
-    CShadows::RenderIndicatorShadow(id, SHADOW_ADDITIVE, nullptr, &center, sup.x - center.x, 0.0f, 0.0f, center.y - sup.y, 0);
+    CShadows::RenderIndicatorShadow(id, SHADOW_ADDITIVE, nullptr, center, sup.x - center.x, 0.0f, 0.0f, center.y - sup.y, 0);
 }
 
 static uint16 NumScriptDebugLines;

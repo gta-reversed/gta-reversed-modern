@@ -1185,7 +1185,7 @@ void CObject::Explode() {
     if (m_pObjectInfo->m_nFxType == eObjectFxType::PLAY_ON_DESTROYED) {
         auto vecPoint = m_matrix->TransformPoint(m_pObjectInfo->m_vFxOffset);
         vecPoint += GetPosition();
-        auto* fxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, &vecPoint, nullptr, false);
+        auto* fxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, vecPoint, nullptr, false);
         if (fxSystem)
             fxSystem->PlayAndKill();
     }
