@@ -268,8 +268,52 @@ void CAEWeaponAudioEntity::PlayMiniGunStopSound(CPhysical* entity) {
 }
 
 // 0x5047C0
-void CAEWeaponAudioEntity::PlayMiniGunFireSounds(CPhysical* entity, int32 audioEventId) {
-    plugin::CallMethod<0x5047C0, CAEWeaponAudioEntity*, CPhysical*, int32>(this, entity, audioEventId);
+void CAEWeaponAudioEntity::PlayMiniGunFireSounds(CPhysical* entity, eAudioEvents audioEvent) {
+    const auto PlayMiniGunFireSound = [&](eAudioEvents gunFireAE) {
+        m_MiniGunState = eMiniGunState::FIRING;
+        if (!std::exchange(m_IsMiniGunFireActive, true)) {
+            PlayGunSounds(entity, 15, 16, 11, 12, 13, gunFireAE, 0.f, 1.f, 1.f);
+        }
+    };
+    switch (audioEvent) {
+    case AE_WEAPON_FIRE:
+    case AE_WEAPON_FIRE_MINIGUN_AMMO: { // 0x504912
+        return PlayMiniGunFireSound(AE_WEAPON_FIRE_MINIGUN_AMMO);
+    }
+    case AE_WEAPON_FIRE_PLANE: { // 0x5047E6
+        return PlayMiniGunFireSound(AE_WEAPON_FIRE_MINIGUN_PLANE);
+    }
+    case AE_WEAPON_FIRE_MINIGUN_NO_AMMO: { // 0x5048FC
+        if (!m_IsMiniGunSpinActive) {
+            if (!AEAudioHardware.IsSoundBankLoaded(143, 5)) { // SND_BANK_GENRL_WEAPONS, SND_BANK_SLOT_WEAPON_GEN
+                if (!AudioEngine.IsLoadingTuneActive()) {
+                    AEAudioHardware.LoadSoundBank(143, 5);
+                }
+                break;
+            }
+            CAESound s;
+            s.Initialise(
+                5,
+                14,
+                this,
+                entity->GetPosition(),
+                GetDefaultVolume(AE_WEAPON_FIRE_MINIGUN_NO_AMMO),
+                2.f / 3.f,
+                1.f,
+                0.f,
+                0,
+                SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY | SOUND_REQUEST_UPDATES
+            );
+            s.m_nEvent = AE_FRONTEND_NOISE_TEST;
+            s.RegisterWithPhysicalEntity(entity);
+            AESoundManager.RequestNewSound(&s);
+            m_IsMiniGunSpinActive = true;
+        }
+        m_MiniGunState = eMiniGunState::SPINNING;
+        break;
+    }
+    }
+    m_LastMiniGunFireTimeMs = CTimer::GetTimeInMS();
 }
 
 // 0x503CE0
