@@ -484,13 +484,13 @@ void CRunningScript::SetCharCoordinates(CPed& ped, CVector posn, bool warpGang, 
     if (vehicle) {
         posn.z += vehicle->GetDistanceFromCentreOfMassToBaseOfModel();
         vehicle->Teleport(posn, false);
-        CTheScripts::ClearSpaceForMissionEntity(&posn, vehicle);
+        CTheScripts::ClearSpaceForMissionEntity(posn, vehicle);
     } else {
         posn.z += offset ? ped.GetDistanceFromCentreOfMassToBaseOfModel() : 0.0f;
-        CTheScripts::ClearSpaceForMissionEntity(&posn, &ped);
+        CTheScripts::ClearSpaceForMissionEntity(posn, &ped);
         auto* group = CPedGroups::GetPedsGroup(&ped);
         if (group && group->GetMembership().IsLeader(&ped) && warpGang) {
-            group->Teleport(&posn);
+            group->Teleport(posn);
         } else {
             ped.Teleport(posn, false);
         }

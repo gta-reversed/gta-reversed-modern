@@ -64,14 +64,16 @@ enum ePedNode : int32 {
 };
 
 enum ePedPieceTypes {
-    PED_PIECE_UNKNOWN = 0,
-    PED_PIECE_TORSO = 3,
-    PED_PIECE_ASS = 4,
-    PED_PIECE_LEFT_ARM = 5,
-    PED_PIECE_RIGHT_ARM = 6,
-    PED_PIECE_LEFT_LEG = 7,
-    PED_PIECE_RIGHT_LEG = 8,
-    PED_PIECE_HEAD = 9
+    PED_COL_SPHERE_LEG  = 0,
+    PED_COL_SPHERE_MID  = 1,
+    PED_COL_SPHERE_HEAD = 2,
+    PED_PIECE_TORSO     = 3, // AKA CHEST 
+    PED_PIECE_ASS       = 4, // AKA MIDSECTION 
+    PED_PIECE_LEFT_ARM  = 5, // AKA UPPERARM_L 
+    PED_PIECE_RIGHT_ARM = 6, // AKA UPPERARM_R 
+    PED_PIECE_LEFT_LEG  = 7, // AKA LEG_L 
+    PED_PIECE_RIGHT_LEG = 8, // AKA LEG_R 
+    PED_PIECE_HEAD      = 9 
 };
 
 enum ePedCreatedBy : uint8 {
@@ -335,7 +337,7 @@ public:
     CCoverPoint*        m_pCoverPoint;
     CEntryExit*         m_pEnex; // CEnEx *
     float               m_fRemovalDistMultiplier;
-    int16               m_nSpecialModelIndex;
+    int16               m_StreamedScriptBrainToLoad;
     int32               field_798;
 
 public:
@@ -448,7 +450,7 @@ public:
     void ClearLook();
     bool TurnBody();
     bool IsPointerValid();
-    void GetBonePosition(RwV3d& outPosition, eBoneTag boneId, bool updateSkinBones = false);
+    CVector GetBonePosition(eBoneTag boneId, bool updateSkinBones = false);
     void GiveObjectToPedToHold(int32 modelIndex, uint8 replace);
     void SetPedState(ePedState pedState);
     ePedState GetPedState() { return m_nPedState; }
@@ -557,13 +559,12 @@ public:
     CPlayerPed*    AsPlayer()    { return reinterpret_cast<CPlayerPed*>(this); }
 
     bool IsFollowerOfGroup(const CPedGroup& group) const;
-    RwMatrix& GetBoneMatrix(eBoneTag bone) const;
+    RwMatrix* GetBoneMatrix(eBoneTag bone) const;
     void CreateDeadPedPickupCoors(CVector& pickupPos);
     RpHAnimHierarchy& GetAnimHierarchy() const;
     CAnimBlendClumpData& GetAnimBlendData() const;
     bool IsInVehicle() const { return bInVehicle && m_pVehicle; }
     bool IsInVehicle(const CVehicle* veh) const { return bInVehicle && m_pVehicle == veh; }
-    CVector GetBonePosition(eBoneTag boneId, bool updateSkinBones = false);
     int32 GetPadNumber() const;
     bool IsCurrentlyUnarmed() { return GetActiveWeapon().m_Type == WEAPON_UNARMED; }
 

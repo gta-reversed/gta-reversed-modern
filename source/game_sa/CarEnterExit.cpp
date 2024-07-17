@@ -265,9 +265,9 @@ bool CCarEnterExit::GetNearestCarDoor(const CPed* ped, const CVehicle* vehicle, 
 
     if (vehicle->m_pTrailer) {
         if (dir2DToDoorFLeft.SquaredMagnitude() < dir2DToDoorFRight.SquaredMagnitude()) {
-            if (IsPathToDoorBlockedByVehicleCollisionModel(ped, vehicle, &posDoorFRight)) {
+            if (IsPathToDoorBlockedByVehicleCollisionModel(ped, vehicle, posDoorFRight)) {
                 dir2DToDoorFRight = { 999.90002f, 999.90002f };
-            } else if (IsPathToDoorBlockedByVehicleCollisionModel(ped, vehicle, &posDoorFLeft)) {
+            } else if (IsPathToDoorBlockedByVehicleCollisionModel(ped, vehicle, posDoorFLeft)) {
                 dir2DToDoorFLeft = { 999.90002f, 999.90002f };
             }
         }
