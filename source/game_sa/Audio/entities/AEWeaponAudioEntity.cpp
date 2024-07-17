@@ -280,30 +280,21 @@ void CAEWeaponAudioEntity::PlayGunSounds(CPhysical* entity, int16 emptySfxId, in
 
 // 0x503500
 void CAEWeaponAudioEntity::PlayGoggleSound(int16 sfxId, eAudioEvents event) {
-    const auto volume = GetDefaultVolume(event);
     if (!AEAudioHardware.IsSoundBankLoaded(143u, 5)) {
         if (!AudioEngine.IsLoadingTuneActive()) {
             AEAudioHardware.LoadSoundBank(143, 5);
         }
         return;
     }
-
-    const auto [speed0, speed1] = [] {
-        if (CAEAudioUtility::ResolveProbability(0.5f)) {
-            return std::make_pair(1.1892101f, 1.0f);
-        } else {
-            return std::make_pair(1.0f, 1.1892101f);
-        }
-    }();
-    const auto vol = volume - 9.0f;
-
-    m_tempSound.Initialise(5, sfxId, this, { -1.0f, 0.0f, 0.0f }, vol, 1.0f, speed0, 1.0f, 0, SOUND_DEFAULT);
-    m_tempSound.m_nEnvironmentFlags = SOUND_FRONT_END | SOUND_FORCED_FRONT;
-    AESoundManager.RequestNewSound(&m_tempSound);
-
-    m_tempSound.Initialise(5, sfxId, this, { +1.0f, 0.0f, 0.0f }, vol, 1.0f, speed1, 1.0f, 0, SOUND_DEFAULT);
-    m_tempSound.m_nEnvironmentFlags = SOUND_FRONT_END | SOUND_FORCED_FRONT;
-    AESoundManager.RequestNewSound(&m_tempSound);
+    const auto PlaySound = [&](float offsetX, float speed) {
+        CAESound s;
+        s.Initialise(5, sfxId, this, { offsetX, 0.0f, 0.0f }, GetDefaultVolume(event) - 9.f, 1.0f, speed, 1.0f, 0, SOUND_DEFAULT);
+        s.m_nEnvironmentFlags = SOUND_FRONT_END | SOUND_FORCED_FRONT;
+        AESoundManager.RequestNewSound(&s);
+    };
+    const auto r = CAEAudioUtility::ResolveProbability(0.5f);
+    PlaySound(-1.0f, r ? 1.1892101f : 1.f);
+    PlaySound(+1.0f, r ? 1.f : 1.1892101f);
 }
 
 // 0x504470
