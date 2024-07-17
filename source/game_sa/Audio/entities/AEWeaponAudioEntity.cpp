@@ -234,12 +234,11 @@ void CAEWeaponAudioEntity::PlayWeaponLoopSound(CPhysical* entity, int16 sfxId, e
 // 0x504960
 void CAEWeaponAudioEntity::PlayMiniGunStopSound(CPhysical* entity) {
     if (!entity) {
-        m_nState = 3;
+        m_MiniGunState = eMiniGunState::STOPPED;
         return;
     }
 
-    if (m_nState == 2) { // todo: figure out what is that
-        m_nState = 2;
+    if (m_MiniGunState == eMiniGunState::STOPPING) {
         return;
     }
 
@@ -250,21 +249,30 @@ void CAEWeaponAudioEntity::PlayMiniGunStopSound(CPhysical* entity) {
         return;
     }
 
-    const auto [distMult, speed] = [&] {
-         if (entity->IsVehicle() && entity->AsVehicle()->IsSubPlane()) {
-             return std::make_pair(1.8f, 0.7937f);
-         } else {
-             return std::make_pair(1.0f, 1.0f);
-         }
-    }();
-    const auto dist = distMult * 0.66f;
-    const auto volume = CAEAudioEntity::GetDefaultVolume(AE_WEAPON_FIRE_MINIGUN_STOP);
-    const auto flags = static_cast<eSoundEnvironment>(SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY | SOUND_REQUEST_UPDATES);
-    m_tempSound.Initialise(5, 63, this, entity->GetPosition(), volume, dist, speed, 1.0f, 0, flags);
-    m_tempSound.RegisterWithPhysicalEntity(entity);
-    m_tempSound.m_nEvent = AE_FRONTEND_PICKUP_HEALTH;
-    AESoundManager.RequestNewSound(&m_tempSound);
-    m_nState = 2;
+    const auto PlayMiniGunFireStopSound = [&](float speed, float maxDist) {
+        CAESound s;
+        s.Initialise(
+            5,
+            63,
+            this,
+            entity->GetPosition(),
+            GetDefaultVolume(AE_WEAPON_FIRE_MINIGUN_STOP),
+            maxDist * 2.f / 3.f, // *0.66....f
+            speed,
+            1.0f,
+            0,
+            SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY | SOUND_REQUEST_UPDATES
+        );
+        s.RegisterWithPhysicalEntity(entity);
+        s.m_nEvent = AE_FRONTEND_PICKUP_HEALTH; // ???
+        AESoundManager.RequestNewSound(&s);
+    };
+    if (entity->IsVehicle() && entity->AsVehicle()->IsSubPlane()) {
+        PlayMiniGunFireStopSound(1.8f, 0.7937f);
+    } else {
+        PlayMiniGunFireStopSound(1.f, 1.f);
+    }
+    m_MiniGunState = eMiniGunState::STOPPING;
 }
 
 // 0x5047C0
