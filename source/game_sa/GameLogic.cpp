@@ -171,7 +171,7 @@ bool CGameLogic::IsPlayerAllowedToGoInThisDirection(CPed* ped, CVector moveDirec
             return false;
         }
 
-        if (!CWorld::GetIsLineOfSightClear(TheCamera.GetGameCamPosition(), headPos, true, false, false, false, false, true, false)) {
+        if (!CWorld::GetIsLineOfSightClear(*TheCamera.GetGameCamPosition(), headPos, true, false, false, false, false, true, false)) {
             return false;
         }
     }

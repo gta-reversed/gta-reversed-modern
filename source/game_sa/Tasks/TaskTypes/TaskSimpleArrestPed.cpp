@@ -77,7 +77,7 @@ bool CTaskSimpleArrestPed::ProcessPed(CPed* ped) {
         ped->m_fAimingRotation = angle;
         ped->m_fCurrentRotation = angle;
         ped->SetOrientation(0.0f, 0.0f, angle);
-        ped->m_pedIK.PointGunAtPosition(&point, m_Assoc->m_BlendAmount);
+        ped->m_pedIK.PointGunAtPosition(point, m_Assoc->m_BlendAmount);
         return false;
     }
 

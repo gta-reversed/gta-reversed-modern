@@ -191,7 +191,7 @@ bool CPickup::PickUpShouldBeInvisible() {
 
 // Checks if pickup collides with line (origin;target), removes pickup and creates an explosion. Used in previous GTA games for mine pickup
 // 0x4588B0
-void CPickup::ProcessGunShot(CVector* start, CVector* end) {
+void CPickup::ProcessGunShot(const CVector& start, const CVector& end) {
     if (!m_pObject)
         return;
 
