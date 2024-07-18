@@ -33,7 +33,18 @@ public:
     void WeaponFire(eWeaponType type, CPhysical* entity, eAudioEvents audioEventId);
     void WeaponReload(eWeaponType type, CPhysical* entity, eAudioEvents event);
 
-    void PlayGunSounds(CPhysical* entity, int16 emptySfxId, int16 farSfxId2, int16 highPitchSfxId3, int16 lowPitchSfxId4, int16 echoSfxId5, int32 audioEventId, float volumeChange, float speed1, float speed2);
+    void PlayGunSounds(
+        CPhysical*   entity,
+        int16        dryFireSfxID,
+        int16        subSfxID,
+        int16        mainLeftSfxID,
+        int16        mainRightSfxID,
+        int16        tailSfxID,
+        eAudioEvents audioEvent,
+        float        volumeOffsetDecibels,
+        float        primaryFrequencyScalingFactor,
+        float        tailFrequencyScalingFactor
+    );
     void PlayGoggleSound(int16 sfxId, eAudioEvents event);
 
     void ReportStealthKill(eWeaponType type, CPhysical* entity, eAudioEvents event);
