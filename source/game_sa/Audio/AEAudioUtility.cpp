@@ -65,7 +65,9 @@ float CAEAudioUtility::GetPiecewiseLinear(float x, int16 dataCount, float (*data
 
 // 0x4d9e50
 float CAEAudioUtility::AudioLog10(float p) {
-    return 0.00001f <= p ? std::log10f(p) : -5.0f;
+    return p >= 0.00001f
+        ? std::log10f(p)
+        : -5.0f;
 }
 
 // REFACTORED
