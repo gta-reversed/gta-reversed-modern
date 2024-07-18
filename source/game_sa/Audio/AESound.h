@@ -39,7 +39,7 @@ public:
     int16           m_nSoundIdInSlot;
     CAEAudioEntity* m_pBaseAudio;
     CEntity*        m_pPhysicalEntity;
-    eAudioEvents    m_nEvent;
+    int32           m_nEvent; // Not necessarily `eAudioEvents`, for ex. see `CAEWeaponAudioEntity`
     float           m_fMaxVolume;
     float           m_fVolume;
     float           m_fSoundDistance;

@@ -22,6 +22,31 @@ class NOTSA_EXPORT_VTABLE CAEWeaponAudioEntity : public CAEAudioEntity {
         STOPPED = 0x3,
     };
 
+    enum eChainsawState : int8 {
+        IDLE = 0x0,
+        ACTIVE = 0x1,
+        CUTTING = 0x2,
+        STOPPING = 0x3,
+        STOPPED = 0x4,
+    };
+
+    enum eWeaponSoundCategories {
+        AE_WEAPON_SOUND_CAT_TAIL              = 1,  // 0x1
+        AE_WEAPON_SOUND_CAT_FLAME             = 2,  // 0x2
+        AE_WEAPON_SOUND_CAT_SPRAY             = 3,  // 0x3
+        AE_WEAPON_SOUND_CAT_EXT               = 4,  // 0x4
+        AE_WEAPON_SOUND_CAT_MINIGUN_SPIN      = 5,  // 0x5
+        AE_WEAPON_SOUND_CAT_MINIGUN_FIRE      = 6,  // 0x6
+        AE_WEAPON_SOUND_CAT_MINIGUN_TAIL      = 7,  // 0x7
+        AE_WEAPON_SOUND_CAT_MINIGUN_STOP      = 8,  // 0x8
+        AE_WEAPON_SOUND_CAT_CHAINSAW_IDLE     = 9,  // 0x9
+        AE_WEAPON_SOUND_CAT_CHAINSAW_ACTIVE   = 10, // 0xA
+        AE_WEAPON_SOUND_CAT_CHAINSAW_CUTTING  = 11, // 0xB
+        AE_WEAPON_SOUND_CAT_CHAINSAW_STOP     = 12, // 0xC
+        AE_WEAPON_SOUND_CAT_STEALTH_KNIFE_IN  = 13, // 0xD
+        AE_WEAPON_SOUND_CAT_STEALTH_KNIFE_OUT = 14, // 0xE
+    };
+
 public:
     CAEWeaponAudioEntity();
     ~CAEWeaponAudioEntity() = default;
@@ -49,15 +74,15 @@ public:
 
     void ReportStealthKill(eWeaponType type, CPhysical* entity, eAudioEvents event);
 
-    void ReportChainsawEvent(CPhysical* entity, int32 audioEventId);
+    void ReportChainsawEvent(CPhysical* entity, eAudioEvents audioEvent);
     void PlayChainsawStopSound(CPhysical* entity);
 
-    void PlayWeaponLoopSound(CPhysical* entity, int16 sfxId, eAudioEvents startEvent, float audability, float speed, eAudioEvents endEvent);
+    void PlayWeaponLoopSound(CPhysical* entity, int16 sfxId, eAudioEvents startEvent, float audability, float speed, eWeaponSoundCategories endEvent);
 
     void PlayMiniGunFireSounds(CPhysical* entity, eAudioEvents audioEventId);
     void PlayMiniGunStopSound(CPhysical* entity);
 
-    void PlayFlameThrowerSounds(CPhysical* entity, int16 sfx1, int16 sfx2, int32 audioEventId, float audability, float speed);
+    void PlayFlameThrowerSounds(CPhysical* entity, int16 sfx1, int16 sfx2, eAudioEvents audioEventId, float audability, float speed);
     void PlayFlameThrowerIdleGasLoop(CPhysical* entity);
     void StopFlameThrowerIdleGasLoop();
 
@@ -66,7 +91,7 @@ public:
     void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
 
     void Clear() {
-        m_FlameThrowerLastPlayedTimeMs  = 0;
+        m_LastFlameThrowerFireTimeMs  = 0;
         m_LastSprayCanFireTimeMs        = 0;
         m_LastFireExtFireTimeMs         = 0;
         m_FlameThrowerIdleGasLoopSound  = nullptr;
@@ -79,18 +104,18 @@ public:
     }
 
 private:
-    bool          m_IsMiniGunSpinActive;
-    bool          m_IsMiniGunFireActive;           // see PlayMiniGunFireSounds
-    uint8         m_LastWeaponPlaneFrequencyIndex; // see PlayGunSounds, gfWeaponPlaneFrequencyVariations
-    eMiniGunState m_MiniGunState;
-    uint8         m_ChainsawState;
-    uint32        m_FlameThrowerLastPlayedTimeMs;
-    uint32        m_LastSprayCanFireTimeMs;
-    uint32        m_LastFireExtFireTimeMs;
-    uint32        m_LastMiniGunFireTimeMs;
-    uint32        m_LastChainsawEventTimeMs;
-    uint32        m_LastGunFireTimeMs;
-    CAESound*     m_FlameThrowerIdleGasLoopSound;
+    bool           m_IsMiniGunSpinActive;
+    bool           m_IsMiniGunFireActive;           // see PlayMiniGunFireSounds
+    uint8          m_LastWeaponPlaneFrequencyIndex; // see PlayGunSounds, gfWeaponPlaneFrequencyVariations
+    eMiniGunState  m_MiniGunState;
+    eChainsawState m_ChainsawState;
+    uint32         m_LastFlameThrowerFireTimeMs;
+    uint32         m_LastSprayCanFireTimeMs;
+    uint32         m_LastFireExtFireTimeMs;
+    uint32         m_LastMiniGunFireTimeMs;
+    uint32         m_LastChainsawEventTimeMs;
+    uint32         m_LastGunFireTimeMs;
+    CAESound*      m_FlameThrowerIdleGasLoopSound;
 
 private: // Hook stuff
     friend void InjectHooksMain();

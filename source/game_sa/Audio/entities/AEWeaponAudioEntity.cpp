@@ -31,15 +31,14 @@ void CAEWeaponAudioEntity::InjectHooks() {
     RH_ScopedInstall(PlayMiniGunFireSounds, 0x5047C0);
     RH_ScopedInstall(PlayCameraSound, 0x5046F0);
     RH_ScopedInstall(PlayWeaponLoopSound, 0x504610);
-    RH_ScopedInstall(PlayFlameThrowerSounds, 0x504470, { .reversed = false });
+    RH_ScopedInstall(PlayFlameThrowerSounds, 0x504470);
     RH_ScopedInstall(PlayGunSounds, 0x503CE0);
     RH_ScopedInstall(ReportStealthKill, 0x503B20);
-    RH_ScopedInstall(ReportChainsawEvent, 0x503910, { .reversed = false });
+    RH_ScopedInstall(ReportChainsawEvent, 0x503910);
     RH_ScopedInstall(PlayFlameThrowerIdleGasLoop, 0x503870);
     RH_ScopedInstall(PlayGoggleSound, 0x503500);
     RH_ScopedInstall(StopFlameThrowerIdleGasLoop, 0x5034E0);
     RH_ScopedInstall(UpdateParameters, 0x504B70, { .reversed = false });
-
 }
 
 // 0x507560
@@ -50,7 +49,7 @@ CAEWeaponAudioEntity::CAEWeaponAudioEntity() {
 // 0x503450
 void CAEWeaponAudioEntity::Initialise() {
     m_MiniGunState = eMiniGunState::STOPPED;
-    m_ChainsawState = 4;
+    m_ChainsawState = eChainsawState::STOPPED;
     if (!AudioEngine.IsLoadingTuneActive()) {
         AEAudioHardware.LoadSoundBank(143, 5);
     }
@@ -110,9 +109,9 @@ void CAEWeaponAudioEntity::WeaponFire(eWeaponType type, CPhysical* entity, eAudi
         return PlayGunSounds(entity, 52, 53, 26, 27, 23, audioEventId, 0.0f, 1.0f, 1.0f);
 
     case WEAPON_FLAMETHROWER:
-        if (!m_FlameThrowerLastPlayedTimeMs)
+        if (!m_LastFlameThrowerFireTimeMs)
             PlayFlameThrowerSounds(entity, 83, 26, audioEventId, -14.0f, 1.0f);
-        m_FlameThrowerLastPlayedTimeMs = CTimer::GetTimeInMS();
+        m_LastFlameThrowerFireTimeMs = CTimer::GetTimeInMS();
         break;
 
     case WEAPON_MINIGUN:
@@ -123,14 +122,14 @@ void CAEWeaponAudioEntity::WeaponFire(eWeaponType type, CPhysical* entity, eAudi
 
     case WEAPON_SPRAYCAN:
         if (!m_LastSprayCanFireTimeMs) {
-            PlayWeaponLoopSound(entity, 28, audioEventId, -20.0f, 1.0f, AE_FRONTEND_HIGHLIGHT);
+            PlayWeaponLoopSound(entity, 28, audioEventId, -20.0f, 1.0f, AE_WEAPON_SOUND_CAT_SPRAY);
         }
         m_LastSprayCanFireTimeMs = CTimer::GetTimeInMS();
         break;
 
     case WEAPON_EXTINGUISHER:
         if (!m_LastFireExtFireTimeMs)
-            PlayWeaponLoopSound(entity, 9, audioEventId, -20.0f, 0.79369998f, AE_FRONTEND_ERROR);
+            PlayWeaponLoopSound(entity, 9, audioEventId, -20.0f, 0.79369998f, AE_WEAPON_SOUND_CAT_EXT);
 
         m_LastFireExtFireTimeMs = CTimer::GetTimeInMS();
         break;
@@ -222,7 +221,7 @@ void CAEWeaponAudioEntity::ReportStealthKill(eWeaponType type, CPhysical* entity
     }
     m_tempSound.Initialise(5, 81, this, entity->GetPosition(), vol - 6.0f, 1.0f, 0.0f, 1.0f, 0);
     m_tempSound.RegisterWithPhysicalEntity(entity);
-    m_tempSound.m_nEvent = AE_FRONTEND_PICKUP_COLLECTABLE1;
+    m_tempSound.m_nEvent = AE_WEAPON_SOUND_CAT_STEALTH_KNIFE_IN;
     m_tempSound.m_fMaxVolume = (float)CTimer::m_snTimeInMilliseconds;
     AESoundManager.RequestNewSound(&m_tempSound);
 
@@ -234,18 +233,84 @@ void CAEWeaponAudioEntity::ReportStealthKill(eWeaponType type, CPhysical* entity
     }
     m_tempSound.Initialise(2, 47, this, entity->GetPosition(), vol, 1.0f, 0.0f, 1.0f, 0, flags);
     m_tempSound.RegisterWithPhysicalEntity(entity);
-    m_tempSound.m_nEvent = AE_FRONTEND_CAR_NO_CASH;
+    m_tempSound.m_nEvent = AE_WEAPON_SOUND_CAT_STEALTH_KNIFE_OUT;
     m_tempSound.m_fMaxVolume = (float)CTimer::GetTimeInMS();
     AESoundManager.RequestNewSound(&m_tempSound);
 }
 
 // 0x503910
-void CAEWeaponAudioEntity::ReportChainsawEvent(CPhysical* entity, int32 audioEventId) {
-    plugin::CallMethod<0x503910, CAEWeaponAudioEntity*, CPhysical*, int32>(this, entity, audioEventId);
+void CAEWeaponAudioEntity::ReportChainsawEvent(CPhysical* entity, eAudioEvents audioEvent) {
+    if (!AEAudioHardware.IsSoundBankLoaded(36, 40)) {
+        if (AESoundManager.AreSoundsPlayingInBankSlot(40)) {
+            AESoundManager.CancelSoundsInBankSlot(40, false);
+        }
+        AEAudioHardware.LoadSoundBank(36, 40);
+        return;
+    }
+
+    const auto PlaySoundIfNotPlaying = [&](int16 sfxID, float rollOffFactor, eWeaponSoundCategories soundCat) {
+        if (AESoundManager.AreSoundsOfThisEventPlayingForThisEntity(soundCat, this) != SOUND_NOT_PLAYING) {
+            return;
+        }
+        CAESound s;
+        s.Initialise(
+            40,
+            sfxID,
+            this,
+            entity->GetPosition(),
+            GetDefaultVolume(audioEvent),
+            rollOffFactor,
+            1.f,
+            0.f,
+            0,
+            SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY | SOUND_REQUEST_UPDATES
+        );
+        s.m_nEvent = soundCat;
+        s.RegisterWithPhysicalEntity(entity);
+        AESoundManager.RequestNewSound(&s);
+    };
+
+    switch (audioEvent) {
+    case AE_WEAPON_CHAINSAW_IDLE: { // 0x503A6E
+        switch (m_ChainsawState) {
+        case eChainsawState::STOPPED:
+        case eChainsawState::IDLE: {
+            PlaySoundIfNotPlaying(1, 2.f / 3.f, AE_WEAPON_SOUND_CAT_CHAINSAW_IDLE);
+
+            m_ChainsawState           = eChainsawState::IDLE;
+            m_LastChainsawEventTimeMs = CTimer::GetTimeInMS();
+        }
+        }
+        break;
+    }
+    case AE_WEAPON_CHAINSAW_ACTIVE: { // 0x5039C0
+        switch (m_ChainsawState) {
+        case eChainsawState::STOPPING:
+        case eChainsawState::ACTIVE:
+        case eChainsawState::IDLE: {
+            PlaySoundIfNotPlaying(0, 1.25f, AE_WEAPON_SOUND_CAT_CHAINSAW_ACTIVE);
+
+            m_ChainsawState           = eChainsawState::ACTIVE;
+            m_LastChainsawEventTimeMs = CTimer::GetTimeInMS();
+        }
+        }
+        break;
+    }
+    case AE_WEAPON_CHAINSAW_CUTTING: { // 0x503996
+        switch (m_ChainsawState) {
+        case eChainsawState::ACTIVE:
+        case eChainsawState::CUTTING: {
+            m_ChainsawState           = eChainsawState::CUTTING;
+            m_LastChainsawEventTimeMs = CTimer::GetTimeInMS();
+        }
+        }
+        break;
+    }
+    }
 }
 
 // 0x504610
-void CAEWeaponAudioEntity::PlayWeaponLoopSound(CPhysical* entity, int16 sfxId, eAudioEvents startEvent, float audability, float speed, eAudioEvents endEvent) {
+void CAEWeaponAudioEntity::PlayWeaponLoopSound(CPhysical* entity, int16 sfxId, eAudioEvents startEvent, float audability, float speed, eWeaponSoundCategories soundCat) {
     if (!AEAudioHardware.IsSoundBankLoaded(143u, 5)) {
         if (!AudioEngine.IsLoadingTuneActive()) {
             AEAudioHardware.LoadSoundBank(143, 5);
@@ -257,7 +322,7 @@ void CAEWeaponAudioEntity::PlayWeaponLoopSound(CPhysical* entity, int16 sfxId, e
     const auto flags = static_cast<eSoundEnvironment>(SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY | SOUND_START_PERCENTAGE | SOUND_REQUEST_UPDATES);
     m_tempSound.Initialise(5, sfxId, this, entity->GetPosition(), volume, 1.0f, speed, 1.0f, 0, flags);
     m_tempSound.RegisterWithPhysicalEntity(entity);
-    m_tempSound.m_nEvent = endEvent;
+    m_tempSound.m_nEvent = soundCat;
     AESoundManager.RequestNewSound(&m_tempSound);
 }
 
@@ -536,8 +601,56 @@ void CAEWeaponAudioEntity::PlayGoggleSound(int16 sfxId, eAudioEvents event) {
 }
 
 // 0x504470
-void CAEWeaponAudioEntity::PlayFlameThrowerSounds(CPhysical* entity, int16 sfx1, int16 sfx2, int32 audioEventId, float audability, float speed) {
-    plugin::CallMethod<0x504470, CAEWeaponAudioEntity*, CPhysical*, int16, int16, int32, float, float>(this, entity, sfx1, sfx2, audioEventId, audability, speed);
+void CAEWeaponAudioEntity::PlayFlameThrowerSounds(CPhysical* entity, int16 dryFireSfxID, int16 flameSfxID, eAudioEvents audioEvent, float volumeOffsetdB, float speed) {
+    const auto PlaySound = [&](int16 bankSlotID, int16 sfxID, float sfxVolumeOffsetdB, float rollOffFactor, float sfxSpeed, float sfxFreqVariance, eAudioEvents sfxAE) {
+        CAESound s;
+        s.Initialise(
+            bankSlotID,
+            sfxID,
+            this,
+            entity->GetPosition(),
+            GetDefaultVolume(audioEvent) + volumeOffsetdB + sfxVolumeOffsetdB,
+            rollOffFactor,
+            sfxSpeed,
+            1.f,
+            0,
+            SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY|SOUND_REQUEST_UPDATES,
+            sfxFreqVariance
+        );
+        s.m_nEvent = sfxAE;
+        s.RegisterWithPhysicalEntity(entity);
+        AESoundManager.RequestNewSound(&s);
+    };
+
+    if (!AEAudioHardware.IsSoundBankLoaded(143u, 5)) {
+        if (!AudioEngine.IsLoadingTuneActive()) {
+            AEAudioHardware.LoadSoundBank(143, 5);
+        }
+        return;
+    }
+    PlaySound(
+        5,
+        dryFireSfxID,
+        -6.f,
+        2.f / 3.f,
+        speed,
+        0.02f,
+        AE_UNDEFINED
+    );
+
+    if (!AEAudioHardware.IsSoundBankLoaded(138, 19)) {
+        AEAudioHardware.LoadSoundBank(138, 19);
+        return;
+    }
+    PlaySound(
+        19,
+        flameSfxID,
+        -20.f,
+        2.f,
+        speed * 0.79369998f,
+        0.f,
+        AE_FRONTEND_BACK
+    );
 }
 
 // 0x503870
@@ -554,26 +667,34 @@ void CAEWeaponAudioEntity::PlayFlameThrowerIdleGasLoop(CPhysical* entity) {
 
 // 0x5034E0
 void CAEWeaponAudioEntity::StopFlameThrowerIdleGasLoop() {
-    if (m_FlameThrowerIdleGasLoopSound) {
-        m_FlameThrowerIdleGasLoopSound->StopSoundAndForget();
-        m_FlameThrowerIdleGasLoopSound = nullptr;
+    if (auto* const s = std::exchange(m_FlameThrowerIdleGasLoopSound, nullptr)) {
+        s->StopSoundAndForget();
     }
 }
 
 // 0x504AA0
 void CAEWeaponAudioEntity::PlayChainsawStopSound(CPhysical* entity) {
-    if (entity && AEAudioHardware.IsSoundBankLoaded(0x24u, 40)) {
-        if (m_ChainsawState != 3) {
-            const auto volume = GetDefaultVolume(AE_WEAPON_CHAINSAW_ACTIVE);
-            const auto flags = static_cast<eSoundEnvironment>(SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY | SOUND_REQUEST_UPDATES);
-            m_tempSound.Initialise(40, 2, this, entity->GetPosition(), volume, 0.66f, 1.0f, 1.0f, 0, flags);
+    if (entity && AEAudioHardware.IsSoundBankLoaded(36, 40)) {
+        if (m_ChainsawState != eChainsawState::STOPPING) {
+            m_tempSound.Initialise(
+                40,
+                2,
+                this,
+                entity->GetPosition(),
+                GetDefaultVolume(AE_WEAPON_CHAINSAW_ACTIVE),
+                2.f / 3.f,
+                1.0f,
+                1.0f,
+                0,
+                SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY | SOUND_REQUEST_UPDATES
+            );
             m_tempSound.RegisterWithPhysicalEntity(entity);
-            m_tempSound.m_nEvent = AE_FRONTEND_PICKUP_DRUGS;
+            m_tempSound.m_nEvent = AE_WEAPON_SOUND_CAT_CHAINSAW_STOP;
             AESoundManager.RequestNewSound(&m_tempSound);
         }
-        m_ChainsawState = 3;
+        m_ChainsawState = eChainsawState::STOPPING;
     } else {
-        m_ChainsawState = 4;
+        m_ChainsawState = eChainsawState::STOPPED;
     }
 }
 
@@ -607,5 +728,3 @@ CAEWeaponAudioEntity* CAEWeaponAudioEntity::Destructor() {
     this->CAEWeaponAudioEntity::~CAEWeaponAudioEntity();
     return this;
 }
-
-// 0x504B70
