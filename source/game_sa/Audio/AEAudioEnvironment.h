@@ -27,6 +27,3 @@ public:
 
 static constexpr int32 NUM_AUDIO_ENVIRONMENTS = 68;
 extern sReverbEnvironment (&gAudioZoneToReverbEnvironmentMap)[NUM_AUDIO_ENVIRONMENTS];
-
-static constexpr int32 NUM_SOUND_DIST_ATTENUATION_ENTRIES = 1280;
-extern float (&gSoundDistAttenuationTable)[NUM_SOUND_DIST_ATTENUATION_ENTRIES];
