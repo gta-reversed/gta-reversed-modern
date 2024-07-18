@@ -105,6 +105,9 @@ void CAudioEngine::InjectHooks() {
 bool CAudioEngine::Initialise() {
     CLoadingScreen::Pause();
 
+    // NOTSA: Initialize AudioUtility before `AEAudioHardware` to avoid crash (Division by zero in `GetCurrentTimeInMS`)
+    CAEAudioUtility::StaticInitialise();
+
     if (!AEAudioHardware.Initialise()) {
         NOTSA_LOG_ERR("Failed to initialise Audio Hardware");
         return false;
@@ -138,7 +141,7 @@ bool CAudioEngine::Initialise() {
 
     m_FrontendAE.Initialise();
     CAudioEngine::SetEffectsFaderScalingFactor(0.0f);
-    CAEAudioUtility::StaticInitialise();
+    //CAEAudioUtility::StaticInitialise(); // Initialized above
     CAEPedAudioEntity::StaticInitialise();
     CAEPedSpeechAudioEntity::StaticInitialise();
     CAEVehicleAudioEntity::StaticInitialise();
