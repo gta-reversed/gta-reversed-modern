@@ -11,6 +11,8 @@
 class CAEAudioEntity;
 class CEntity;
 
+using tSoundID = int16;
+
 enum eSoundEnvironment : uint16 {
     SOUND_DEFAULT                          = 0x0,
     SOUND_FRONT_END                        = 0x1,
@@ -112,16 +114,6 @@ public:
         float           frequencyVariance = 0.f,
         int16           playTime = 0
     );
-        //int16 bankSlotId,
-        //int16 sfxId,
-        //CAEAudioEntity* baseAudio, CVector posn, float volume,
-        //            float maxDistance = 1.0f,
-        //            float speed = 1.0f,
-        //            float timeScale = 1.0f,
-        //            uint8 ignoredServiceCycles = 0,
-        //            /*eSoundEnvironment*/ uint32 environmentFlags = static_cast<eSoundEnvironment>(0),
-        //            float speedVariability = 0,
-        //            int16 currPlayPosn = 0);
 
     void  UnregisterWithPhysicalEntity();
     void  StopSound();

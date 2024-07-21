@@ -8,6 +8,7 @@
 
 #include "AEAudioEntity.h"
 #include "AESound.h"
+#include <Audio/Enums/SoundIDs.h>
 
 #include "eWeaponType.h"
 
@@ -66,9 +67,9 @@ public:
         int16        mainRightSfxID,
         int16        tailSfxID,
         eAudioEvents audioEvent,
-        float        volumeOffsetDecibels,
-        float        primaryFrequencyScalingFactor,
-        float        tailFrequencyScalingFactor
+        float        volumeOffsetDecibels = 0.f,
+        float        primaryFrequencyScalingFactor = 1.f,
+        float        tailFrequencyScalingFactor = 1.f
     );
     void PlayGoggleSound(int16 sfxId, eAudioEvents event);
 
@@ -90,32 +91,21 @@ public:
 
     void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
 
-    void Clear() {
-        m_LastFlameThrowerFireTimeMs  = 0;
-        m_LastSprayCanFireTimeMs        = 0;
-        m_LastFireExtFireTimeMs         = 0;
-        m_FlameThrowerIdleGasLoopSound  = nullptr;
-        m_LastWeaponPlaneFrequencyIndex = 0;
-        m_LastMiniGunFireTimeMs         = 0;
-        m_IsMiniGunSpinActive           = false;
-        m_IsMiniGunFireActive           = false;
-        m_LastChainsawEventTimeMs       = 0;
-        m_LastGunFireTimeMs             = 0;
-    }
+    void Clear();
 
 private:
-    bool           m_IsMiniGunSpinActive;
-    bool           m_IsMiniGunFireActive;           // see PlayMiniGunFireSounds
-    uint8          m_LastWeaponPlaneFrequencyIndex; // see PlayGunSounds, gfWeaponPlaneFrequencyVariations
-    eMiniGunState  m_MiniGunState;
-    eChainsawState m_ChainsawState;
-    uint32         m_LastFlameThrowerFireTimeMs;
-    uint32         m_LastSprayCanFireTimeMs;
-    uint32         m_LastFireExtFireTimeMs;
-    uint32         m_LastMiniGunFireTimeMs;
-    uint32         m_LastChainsawEventTimeMs;
-    uint32         m_LastGunFireTimeMs;
-    CAESound*      m_FlameThrowerIdleGasLoopSound;
+    bool           m_IsMiniGunSpinActive{};
+    bool           m_IsMiniGunFireActive{};
+    uint8          m_LastWeaponPlaneFrequencyIndex{};
+    eMiniGunState  m_MiniGunState{eMiniGunState::SPINNING};
+    eChainsawState m_ChainsawState{eChainsawState::IDLE};
+    uint32         m_LastFlameThrowerFireTimeMs{};
+    uint32         m_LastSprayCanFireTimeMs{};
+    uint32         m_LastFireExtFireTimeMs{};
+    uint32         m_LastMiniGunFireTimeMs{};
+    uint32         m_LastChainsawEventTimeMs{};
+    uint32         m_LastGunFireTimeMs{};
+    CAESound*      m_FlameThrowerIdleGasLoopSound{};
 
 private: // Hook stuff
     friend void InjectHooksMain();
