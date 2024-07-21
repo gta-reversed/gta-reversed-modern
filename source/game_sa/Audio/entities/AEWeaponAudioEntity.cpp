@@ -38,7 +38,7 @@ void CAEWeaponAudioEntity::InjectHooks() {
     RH_ScopedInstall(PlayFlameThrowerIdleGasLoop, 0x503870);
     RH_ScopedInstall(PlayGoggleSound, 0x503500);
     RH_ScopedInstall(StopFlameThrowerIdleGasLoop, 0x5034E0);
-    RH_ScopedInstall(UpdateParameters, 0x504B70, { .reversed = false });
+    RH_ScopedInstall(UpdateParameters, 0x504B70);
 }
 
 // 0x507560
@@ -222,7 +222,7 @@ void CAEWeaponAudioEntity::ReportStealthKill(eWeaponType type, CPhysical* entity
     m_tempSound.Initialise(5, 81, this, entity->GetPosition(), vol - 6.0f, 1.0f, 0.0f, 1.0f, 0);
     m_tempSound.RegisterWithPhysicalEntity(entity);
     m_tempSound.m_nEvent = AE_WEAPON_SOUND_CAT_STEALTH_KNIFE_IN;
-    m_tempSound.m_fMaxVolume = (float)CTimer::m_snTimeInMilliseconds;
+    m_tempSound.m_ClientVariable = (float)CTimer::GetTimeInMS();
     AESoundManager.RequestNewSound(&m_tempSound);
 
     if (!AEAudioHardware.IsSoundBankLoaded(39, 2)) {
@@ -234,7 +234,7 @@ void CAEWeaponAudioEntity::ReportStealthKill(eWeaponType type, CPhysical* entity
     m_tempSound.Initialise(2, 47, this, entity->GetPosition(), vol, 1.0f, 0.0f, 1.0f, 0, flags);
     m_tempSound.RegisterWithPhysicalEntity(entity);
     m_tempSound.m_nEvent = AE_WEAPON_SOUND_CAT_STEALTH_KNIFE_OUT;
-    m_tempSound.m_fMaxVolume = (float)CTimer::GetTimeInMS();
+    m_tempSound.m_ClientVariable = (float)CTimer::GetTimeInMS();
     AESoundManager.RequestNewSound(&m_tempSound);
 }
 
@@ -715,16 +715,142 @@ void CAEWeaponAudioEntity::PlayCameraSound(CPhysical* entity, eAudioEvents event
 }
 
 // 0x504B70
-void CAEWeaponAudioEntity::UpdateParameters(CAESound *sound, int16 curPlayPos) {
-    plugin::CallMethod<0x504B70, CAEWeaponAudioEntity*, CAESound*, int16>(this, sound, curPlayPos);
+void CAEWeaponAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
+    if (curPlayPos == -1) {
+        if (sound == m_FlameThrowerIdleGasLoopSound) {
+            m_FlameThrowerIdleGasLoopSound = nullptr;
+        } else if (sound->m_nEvent == AE_WEAPON_SOUND_CAT_MINIGUN_STOP && m_MiniGunState == eMiniGunState::STOPPING) {
+            m_MiniGunState = eMiniGunState::STOPPED;
+        }
+        return;
+    }
+     
+    switch (sound->m_nEvent) {
+    case AE_WEAPON_SOUND_CAT_TAIL: { // 0x504BAA
+        if (!CGame::CanSeeOutSideFromCurrArea()) {
+            sound->m_fVolume -= 1.f;
+        }
+        break;
+    }
+    case AE_WEAPON_SOUND_CAT_FLAME: { // 0x504BC3
+        if (m_LastFlameThrowerFireTimeMs + 300 >= CTimer::GetTimeInMS()) {
+            sound->m_fVolume = std::max(GetDefaultVolume(AE_WEAPON_FIRE), sound->m_fVolume + 2.f); // TODO: Use TimeStep
+        } else {
+            sound->StopSoundAndForget();
+            m_LastFlameThrowerFireTimeMs = 0;
+        }
+        break;
+    }
+    case AE_WEAPON_SOUND_CAT_SPRAY: { // 0x504C38
+        if (m_LastSprayCanFireTimeMs + 300 < CTimer::GetTimeInMS()) {
+            sound->StopSoundAndForget();
+            m_LastSprayCanFireTimeMs = 0;
+        }
+        break;
+    }
+    case AE_WEAPON_SOUND_CAT_EXT: { // 0x504C5F
+        if (m_LastFireExtFireTimeMs + 300 >= CTimer::GetTimeInMS()) {
+            sound->m_fSpeed = std::max(0.85f, sound->m_fSpeed + 0.01f); // TODO: Use TimeStep
+        } else {
+            sound->StopSoundAndForget();
+            m_LastFireExtFireTimeMs = 0;
+        }
+        break;
+    }
+    case AE_WEAPON_SOUND_CAT_MINIGUN_SPIN: { // 0x504CBC
+        if (m_LastMiniGunFireTimeMs + 300 < CTimer::GetTimeInMS()) {
+            PlayMiniGunStopSound(sound->m_pPhysicalEntity->AsPhysical());
+        }
+        switch (m_MiniGunState) {
+        case eMiniGunState::STOPPING:
+        case eMiniGunState::STOPPED: {
+            sound->StopSoundAndForget();
+            m_IsMiniGunSpinActive = 0;
+        }
+        }
+        break;
+    }
+    case AE_WEAPON_SOUND_CAT_MINIGUN_FIRE: { // 0x504CFB
+        if (m_LastMiniGunFireTimeMs + 300 < CTimer::GetTimeInMS()) {
+            PlayMiniGunStopSound(sound->m_pPhysicalEntity->AsPhysical());
+        }
+        if (m_MiniGunState != eMiniGunState::FIRING) {
+            sound->StopSoundAndForget();
+            m_IsMiniGunFireActive = 0;
+        }
+        break;
+    }
+    case AE_WEAPON_SOUND_CAT_MINIGUN_TAIL: { // 0x504D31
+        if (m_MiniGunState != eMiniGunState::FIRING) {
+            if (sound->m_fVolume <= -30.0) {
+                sound->StopSoundAndForget();
+            } else {
+                sound->m_fVolume -= 1.5f;
+            }
+        }
+        break;
+    }
+    case AE_WEAPON_SOUND_CAT_CHAINSAW_IDLE: { // 0x504D6B
+        if (m_LastChainsawEventTimeMs + 300 < CTimer::GetTimeInMS()) {
+            m_ChainsawState = eChainsawState::STOPPED;
+        }
+        if (m_ChainsawState != eChainsawState::IDLE) {
+            sound->StopSoundAndForget();
+        }
+        break;
+    }
+    case AE_WEAPON_SOUND_CAT_CHAINSAW_ACTIVE: { // 0x504D9B
+        switch (m_ChainsawState) {
+        case eChainsawState::CUTTING: { // 0x504DA5
+            if (m_LastChainsawEventTimeMs + 400 >= CTimer::m_snTimeInMilliseconds) {
+                sound->m_fSpeed = std::max(0.85f, sound->m_fSpeed - 0.15f); // TODO: Use TimeStep
+            } else {
+                m_LastChainsawEventTimeMs = CTimer::m_snTimeInMilliseconds;
+                m_ChainsawState           = eChainsawState::ACTIVE;
+            }
+            break;
+        }
+        case eChainsawState::ACTIVE: { // 0x504E0E
+            sound->m_fSpeed = std::min(1.f, sound->m_fSpeed + 0.03f); // TODO: Use TimeStep
+            if (m_LastChainsawEventTimeMs + 300 < CTimer::GetTimeInMS()) {
+                PlayChainsawStopSound(sound->m_pPhysicalEntity->AsPhysical());
+            }
+            break;
+        }
+        default: {
+            sound->StopSoundAndForget();
+            break;
+        }
+    }
+    case AE_WEAPON_SOUND_CAT_CHAINSAW_STOP: // 0x504E66
+        if (m_ChainsawState == eChainsawState::STOPPING && curPlayPos > 1'000) {
+            m_ChainsawState = eChainsawState::IDLE;
+        }
+        break;
+    case AE_WEAPON_SOUND_CAT_STEALTH_KNIFE_IN: // 0x504E8B
+        if ((uint32)sound->m_ClientVariable + 820 < CTimer::GetTimeInMS()) {
+            sound->m_fSpeed = 0.84f;
+        }
+        break;
+    case AE_WEAPON_SOUND_CAT_STEALTH_KNIFE_OUT: // 0x504EBF
+        if ((uint32)sound->m_ClientVariable + 2200 < CTimer::GetTimeInMS()) {
+            sound->m_fSpeed = 1.f;
+        }
+        break;
+    }
+    default: { // 0x504ECD
+        sound->m_fVolume = std::max(0.f, sound->m_fVolume - 2.5f);
+        break;
+    }
+    }
 }
 
 CAEWeaponAudioEntity* CAEWeaponAudioEntity::Constructor() {
-    this->CAEWeaponAudioEntity::CAEWeaponAudioEntity();
+    CAEWeaponAudioEntity::CAEWeaponAudioEntity();
     return this;
 }
 
 CAEWeaponAudioEntity* CAEWeaponAudioEntity::Destructor() {
-    this->CAEWeaponAudioEntity::~CAEWeaponAudioEntity();
+    CAEWeaponAudioEntity::~CAEWeaponAudioEntity();
     return this;
 }

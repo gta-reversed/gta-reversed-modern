@@ -40,7 +40,7 @@ public:
     CAEAudioEntity* m_pBaseAudio;
     CEntity*        m_pPhysicalEntity;
     int32           m_nEvent; // Not necessarily `eAudioEvents`, for ex. see `CAEWeaponAudioEntity`
-    float           m_fMaxVolume;
+    float           m_ClientVariable;
     float           m_fVolume;
     float           m_fSoundDistance;
     float           m_fSpeed;
