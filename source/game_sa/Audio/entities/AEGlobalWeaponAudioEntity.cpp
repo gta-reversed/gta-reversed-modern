@@ -100,7 +100,7 @@ void CAEGlobalWeaponAudioEntity::ServiceAmbientGunFire() {
         {-2683.f, 1804.f, 69.f}, // 0x4DF29F
     };
     constexpr int32 FOGHORN_FADE_OUT_DELAY = 5000;
-    constexpr int32 FOGHORN_STOP_DELAY            = 5000; // time to live
+    constexpr int32 FOGHORN_STOP_DELAY     = 5000; // time to live
 
     constexpr CVector s_WaterfallPositions[]{
         {2075.3f, 1925.9f, 13.0f}, // 0x4DF2C9
@@ -114,7 +114,7 @@ void CAEGlobalWeaponAudioEntity::ServiceAmbientGunFire() {
         FOGHORN_0,
         STATE_3,
         FOGHORN_1,
-        WATERFALL, // Only in LV
+        WATERFALL_LV, // Only in LV
     };
     static auto& s_State = StaticRef<eState>(0xB61324);
 
@@ -171,7 +171,7 @@ void CAEGlobalWeaponAudioEntity::ServiceAmbientGunFire() {
             PlayWaterfallSound(1, SPEED_BASE + SPEED_VAR);
             PlayWaterfallSound(2, SPEED_BASE - SPEED_VAR);
 
-            s_State = eState::WATERFALL;
+            s_State = eState::WATERFALL_LV;
 
             break;
         }
@@ -213,24 +213,24 @@ void CAEGlobalWeaponAudioEntity::ServiceAmbientGunFire() {
         if (s_LastTime + s_Delay >= CTimer::GetTimeInMS()) {
             return;
         }
-        if (CVector::DistSqr(FindPlayerCoors(), m_Physical->GetPosition()) >= sq(24.f)) {
-            return;
-        }
 
-        m_Physical->SetType(ENTITY_TYPE_NOTINPOOLS);
-        AudioEngine.ReportWeaponEvent(AE_WEAPON_FIRE, s_WeaponType, m_Physical);
+        if (CVector::DistSqr(FindPlayerCoors(), m_Physical->GetPosition()) <= sq(24.f)) {
+            m_Physical->SetType(ENTITY_TYPE_NOTINPOOLS);
+            AudioEngine.ReportWeaponEvent(AE_WEAPON_FIRE, s_WeaponType, m_Physical);
 
-        if (--s_GunShots) { // 0x4DF862
-            assert(s_WeaponType == WEAPON_PISTOL || s_WeaponType == WEAPON_AK47); // See `PickAmbientGunFire`
-            s_Delay = s_WeaponType == WEAPON_PISTOL
-                ? CAEAudioUtility::GetRandomNumberInRange(500, 1200)
-                : CAEAudioUtility::GetRandomNumberInRange(90, 450);
-        } else if (CGeneral::RandomBool(60.f)) { // 0x4DF7E9
+            if (--s_GunShots) { // 0x4DF862
+                assert(s_WeaponType == WEAPON_PISTOL || s_WeaponType == WEAPON_AK47); // See `PickAmbientGunFire`
+                s_Delay = s_WeaponType == WEAPON_PISTOL
+                    ? CAEAudioUtility::GetRandomNumberInRange(500, 1200)
+                    : CAEAudioUtility::GetRandomNumberInRange(90, 450);
+            } else if (CGeneral::RandomBool(60.f)) { // 0x4DF7E9
+                s_State = eState::INITIAL;
+            } else { // 0x4DF849
+                PickAmbientGunFire(s_GunShots, s_WeaponType, s_Delay);
+            }
+        } else {
             s_State = eState::INITIAL;
-        } else { // 0x4DF849
-            PickAmbientGunFire(s_GunShots, s_WeaponType, s_Delay);
         }
-
         s_LastTime = CTimer::GetTimeInMS();
 
         break;
@@ -260,25 +260,29 @@ void CAEGlobalWeaponAudioEntity::ServiceAmbientGunFire() {
         }
         if (!pFogHorn) {
             pFogHorn = AESoundManager.PlaySound({
-                .BankSlotID = 17,
-                .SoundID = 13,
-                .AudioEntity = this,
-                .Pos = s_FogHornPositions[1],
+                .BankSlotID    = 17,
+                .SoundID       = 13,
+                .AudioEntity   = this,
+                .Pos           = s_FogHornPositions[1],
                 .RollOffFactor = 60.f,
-                .Speed = 1.2f,
-                .Flags = SOUND_REQUEST_UPDATES
+                .Speed         = 1.2f,
+                .Flags         = SOUND_REQUEST_UPDATES
             });
 
-            s_State = eState::FOGHORN_1;
+            s_State    = eState::FOGHORN_1;
             s_LastTime = CTimer::GetTimeInMS();
         }
         break;
     }
-    case eState::WATERFALL: { // 0x4DF9D8
-        if (CWeather::WeatherRegion != eWeatherRegion::WEATHER_REGION_LV || CVector::DistSqr(TheCamera.GetPosition(), s_WaterfallPositions[1]) <= sq(100.f)) {
-            rng::for_each(pWaterfall, &CAESound::StopSound);
+    case eState::WATERFALL_LV: { // 0x4DF9D8
+        if (CWeather::WeatherRegion != eWeatherRegion::WEATHER_REGION_LV || CVector::DistSqr(TheCamera.GetPosition(), s_WaterfallPositions[1]) > sq(100.f)) {
+            for (auto& s : pWaterfall) {
+                if (s) {
+                    std::exchange(s, nullptr)->StopSound();
+                }
+            }
+            s_State = eState::INITIAL;
         }
-        s_State = eState::INITIAL;
         break;
     }
     default:
