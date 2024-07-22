@@ -49,7 +49,7 @@ public:
         float           Volume;                   //!< The volume (in dB)
         float           RollOffFactor{ 1.f };     //!< ??
         float           Speed{ 1.f };             //!< Speed
-        float           Doppler{ 1.f };           //!< ??
+        float           Doppler{ 1.f };           //!< Scales the factor of doppler shift effect, see `CAEAudioEnvironment::GetDopplerRelativeFrequency`
         uint8           FrameDelay{ 0 };          //!< After how many frames the sound will be played
         uint32          Flags{ 0 };               //!< See `eSoundEnvironment`
         float           FrequencyVariance{ 0.f }; //!< Random speed variance (?)

@@ -489,7 +489,7 @@ void CAEWeaponAudioEntity::ReportStealthKill(eWeaponType type, CPhysical* entity
             .SoundID            = soundID,
             .AudioEntity        = this,
             .Pos                = entity->GetPosition(),
-            .Volume             = GetDefaultVolume(event) - volumeOffsetdB,
+            .Volume             = GetDefaultVolume(event) + volumeOffsetdB,
             .Speed              = 0.0f, // ???
             .Flags              = SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY | SOUND_REQUEST_UPDATES,
             .RegisterWithEntity = entity,
