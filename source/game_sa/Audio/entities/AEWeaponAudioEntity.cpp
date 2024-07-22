@@ -16,7 +16,7 @@
 constexpr std::array<float, 2> gfWeaponPlaneFrequencyVariations{ 1.08f, 1.0f };
 
 void CAEWeaponAudioEntity::InjectHooks() {
-    RH_ScopedClass(CAEWeaponAudioEntity);
+    RH_ScopedVirtualClass(CAEWeaponAudioEntity, 0x86C2AC, 2);
     RH_ScopedCategory("Audio/Entities");
 
     RH_ScopedInstall(Constructor, 0x5DE990);
@@ -38,12 +38,7 @@ void CAEWeaponAudioEntity::InjectHooks() {
     RH_ScopedInstall(PlayFlameThrowerIdleGasLoop, 0x503870);
     RH_ScopedInstall(PlayGoggleSound, 0x503500);
     RH_ScopedInstall(StopFlameThrowerIdleGasLoop, 0x5034E0);
-    RH_ScopedInstall(UpdateParameters, 0x504B70);
-}
-
-// 0x507560
-CAEWeaponAudioEntity::CAEWeaponAudioEntity() {
-    Clear();
+    RH_ScopedVMTInstall(UpdateParameters, 0x504B70);
 }
 
 // 0x503450
@@ -945,19 +940,22 @@ void CAEWeaponAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
             sound->StopSoundAndForget();
             break;
         }
+        }
         break;
     }
-    case AE_WEAPON_SOUND_CAT_CHAINSAW_STOP: // 0x504E66
+    case AE_WEAPON_SOUND_CAT_CHAINSAW_STOP: { // 0x504E66
         if (m_ChainsawState == eChainsawState::STOPPING && curPlayPos > 1'000) {
             m_ChainsawState = eChainsawState::IDLE;
         }
         break;
-    case AE_WEAPON_SOUND_CAT_STEALTH_KNIFE_IN: // 0x504E8B
+    }
+    case AE_WEAPON_SOUND_CAT_STEALTH_KNIFE_IN: { // 0x504E8B
         if ((uint32)sound->m_ClientVariable + 820 < CTimer::GetTimeInMS()) {
             sound->m_fSpeed = 0.84f;
         }
         break;
-    case AE_WEAPON_SOUND_CAT_STEALTH_KNIFE_OUT: // 0x504EBF
+    }
+    case AE_WEAPON_SOUND_CAT_STEALTH_KNIFE_OUT: { // 0x504EBF
         if ((uint32)sound->m_ClientVariable + 2200 < CTimer::GetTimeInMS()) {
             sound->m_fSpeed = 1.f;
         }

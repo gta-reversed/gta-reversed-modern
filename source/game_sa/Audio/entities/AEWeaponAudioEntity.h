@@ -49,7 +49,7 @@ class NOTSA_EXPORT_VTABLE CAEWeaponAudioEntity : public CAEAudioEntity {
     };
 
 public:
-    CAEWeaponAudioEntity();
+    CAEWeaponAudioEntity() = default;
     ~CAEWeaponAudioEntity() = default;
 
     void Initialise();
