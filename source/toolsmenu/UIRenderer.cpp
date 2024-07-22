@@ -59,7 +59,7 @@ void UIRenderer::PreRenderUpdate() {
     // A delay of a frame has to be added, otherwise
     // the release of F7 wont be processed and the menu will close
     const auto Shortcut = [](ImGuiKeyChord chord) {
-        return ImGui::Shortcut(chord, ImGuiKeyOwner_Any, ImGuiInputFlags_RouteAlways);
+        return ImGui::IsKeyChordPressed(chord, ImGuiInputFlags_RouteAlways);
     };
     if (Shortcut(ImGuiKey_F7) || Shortcut(ImGuiKey_M | ImGuiMod_Ctrl)) {
         const auto pad = CPad::GetPad(0);
