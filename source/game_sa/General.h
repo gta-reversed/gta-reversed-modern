@@ -7,6 +7,8 @@
 #pragma once
 
 #include <cstdlib> // RAND_MAX
+#include <cassert> // For assetion purposes
+#include <initializer_list> // Required, otherwise the file won't build properly
 
 //! If you see this value USE THE INTEGER VERSION of `GetRandomNumberInRange`
 //! It's very important to do that, because the int version will is exclusive
@@ -120,37 +122,42 @@ namespace CGeneral { // More like `Math` (Or `Meth`, given how bad the code is, 
         return static_cast<T>(GetRandomNumberInRange<float>(static_cast<float>(min), static_cast<float>(max) - 1.f)); // substraction in floating point because integer might underflow (if unsigned)
     }
 
-    /**
-     * @notsa
-     * @param max Maximum value. Must be greater than 0.
-     * @return A pseudo-random number between min and max, exclusive [0, max).
-     */
-    template<std::integral T>
-        requires std::is_unsigned_v<T> // Signed types don't make sense here
-    inline T GetRandomNumberInRange(T max) {
-        return GetRandomNumberInRange<T>(0, max);
+/*!
+* @notsa
+* @param max Maximum value. Must be greater than 0.
+* @return An item from the range chosen randomly. Same as Python's `random.choice`
+*/
+template<rng::random_access_range R>
+inline auto RandomChoice(const R& range) {
+    auto size = rng::size(range);
+    assert(size > 0 && "Warning: Possible dangling reference from an empty range.");
+    if (size == 0) {
+        std::cerr << "Warning: Choosing from an empty range.\n";
     }
+    return range[CGeneral::GetRandomNumberInRange(size)];
+}
 
-    /*!
-    * @notsa
-    * @return An item from the range choosen randomly. Same as Python's `random.choice`
-    */
-    template<rng::random_access_range R>
-    inline auto& RandomChoice(R&& range) { // TODO: Add warning or smth for a possible dangling reference here
-        // If range is empty `GetRandomNumberInRange` will assert
-        return range[CGeneral::GetRandomNumberInRange(rng::size(range))];
-    }
+*!
+* @notsa
+* @return An item from the range choosen randomly. Same as Python's `random.choice`
+*/
+template<typename T>
+static T RandomChoiceFromList(std::initializer_list<T> list) {
+    return RandomChoice(list);
+}
 
-    template<typename T>
-    static T RandomChoiceFromList(std::initializer_list<T> list) {
-        return RandomChoice(rng::subrange{list.begin(), list.end()});
-    }
+/*!
+* @notsa
+* @brief Return a random node (or seed for that matter) heading, or direction as commonly referred to. See `GetNodeHeadingFromVector`
+*/
+inline uint8 RandomNodeHeading() {
+    return static_cast<uint8>(CGeneral::GetRandomNumberInRange(0, 8));
+}
 
-    /*
-    * @notsa
-    * @brief Return a random node heading, or direction as commonly referred to. See `GetNodeHeadingFromVector`
-    */
-    inline auto RandomNodeHeading() {
-        return (uint8)CGeneral::GetRandomNumberInRange(0, 8);
-    }
-};
+/*!
+* @addr unk
+* @brief Set the random seed
+*/
+static void SetRandomSeed(uint32 seed) {
+    srand(seed);
+}
