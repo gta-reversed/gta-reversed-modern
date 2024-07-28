@@ -132,25 +132,33 @@ namespace CGeneral { // More like `Math` (Or `Meth`, given how bad the code is, 
     }
 
     /*!
-    * @notsa
-    * @return An item from the range choosen randomly. Same as Python's `random.choice`
-    */
-    template<rng::random_access_range R>
-    inline auto& RandomChoice(R&& range) { // TODO: Add warning or smth for a possible dangling reference here
-        // If range is empty `GetRandomNumberInRange` will assert
-        return range[CGeneral::GetRandomNumberInRange(rng::size(range))];
-    }
+* @notsa
+* @param max Maximum value. Must be greater than 0.
+* @return An item from the range choosen randomly. Same as Python's `random.choice`
+*/
+template<rng::random_access_range R>
+inline auto RandomChoice(const R& range) {         // "Signed types don't make sense here" not anymore, comment on hold
+    auto size = rng::size(range);
+    return range[CGeneral::GetRandomNumberInRange(size)];
+}
 
-    template<typename T>
-    static T RandomChoiceFromList(std::initializer_list<T> list) {
-        return RandomChoice(rng::subrange{list.begin(), list.end()});
-    }
+template<typename T>
+static T RandomChoiceFromList(std::initializer_list<T> list) {
+    return RandomChoice(list);
+}
 
-    /*
-    * @notsa
-    * @brief Return a random node heading, or direction as commonly referred to. See `GetNodeHeadingFromVector`
-    */
-    inline auto RandomNodeHeading() {
-        return (uint8)CGeneral::GetRandomNumberInRange(0, 8);
-    }
-};
+/*!
+* @notsa
+* @brief Return a random node heading, or direction as commonly referred to. See `GetNodeHeadingFromVector`
+*/
+inline uint8 RandomNodeHeading() {                         // Added the warning for the dangling reference
+    return static_cast<uint8>(CGeneral::GetRandomNumberInRange(0, 8));
+}
+
+/*
+* @notsa        //addr unk
+* @brief Set the random seed/node heading, or direction as commonly referred to. See `GetNodeHeadingFromVector`
+*/
+static void SetRandomSeed(uint32 seed) {
+    srand(seed);
+}
