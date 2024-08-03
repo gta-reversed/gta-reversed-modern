@@ -740,7 +740,7 @@ void CRunningScript::ReadArrayInformation(int32 updateIP, uint16* outArrayBase, 
     *outArrayBase = CTheScripts::Read2BytesFromScript(ip);
 
     const auto varIdx = CTheScripts::Read2BytesFromScript(ip);
-    *outArrayIndex = std::signbit<int16>(CTheScripts::Read2BytesFromScript(ip))
+    *outArrayIndex = CTheScripts::Read2BytesFromScript(ip) < 0 // Check MSB
         ? GetPointerToGlobalVariable(varIdx)->iParam
         : GetPointerToLocalVariable(varIdx)->iParam;
 
