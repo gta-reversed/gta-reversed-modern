@@ -42,16 +42,20 @@ project "gta_sa_modern"
         "../libs/json/include"
     }
     
+    filter { "options:with-tracy" }
+        defines {
+            "TRACY_ENABLE",
+            "TRACY_ON_DEMAND",
+            "TRACY_CALLSTACK",
+        }
+    filter {}
+
     defines { 
         "NOMINMAX", 
         "USE_GTASA_ALLOCATOR", 
         "EXTRA_DEBUG_FEATURES", 
         "FIX_BUGS",
         "_CRT_SECURE_NO_WARNINGS",
-
-        "TRACY_ENABLE",
-        "TRACY_ON_DEMAND",
-        "TRACY_CALLSTACK",
 
         "SPDLOG_USE_STD_FORMAT",
 
