@@ -184,9 +184,14 @@ constexpr auto IsFixBugs() {
 }
 
 /// Predicate to check if `value` is null
-template<typename T>
-    requires(std::is_pointer_v<T>)
-bool IsNull(T value) { return value == nullptr; }
+struct IsNull {
+    template<typename T>
+        requires(std::is_pointer_v<T>)
+    bool operator()(T ptr) { return ptr == nullptr; }
+};
+//template<typename T>
+//    requires(std::is_pointer_v<T>)
+//bool IsNull(T value) { return value == nullptr; }
 
 /// Negate another predicate function
 template<typename T>
