@@ -3253,7 +3253,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight,
             turnDirection = direction;
 
         float force = speed * m_fMass;
-        float turnForce = turnSpeed * GetMass(wheelContactPoint, turnDirection);
+        float turnForce = turnSpeed * GetTurnTorque(wheelContactPoint, turnDirection);
         ApplyMoveForce(force * direction);
         ApplyTurnForce(turnForce * turnDirection, wheelContactPoint);
     }

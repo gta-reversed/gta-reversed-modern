@@ -63,7 +63,7 @@ enum eEntityAltCollision : uint16 {
 
 class NOTSA_EXPORT_VTABLE CPhysical : public CEntity {
 public:
-    float  field_38;
+    float  m_fPrevDistFromCam;
     uint32 m_nLastCollisionTime;
     union {
         struct {
@@ -237,7 +237,7 @@ public:
     void ResetFrictionMoveSpeed() { m_vecFrictionMoveSpeed = CVector(); }
     void ResetFrictionTurnSpeed() { m_vecFrictionTurnSpeed = CVector(); }
 
-    [[nodiscard]] float GetMass(const CVector& pos, const CVector& dir) const {
+    [[nodiscard]] float GetTurnTorque(const CVector& pos, const CVector& dir) const {
         return 1.0f / (CrossProduct(pos, dir).SquaredMagnitude() / m_fTurnMass + 1.0f / m_fMass);
     }
 
@@ -247,6 +247,9 @@ public:
     auto GetCollidingEntities() const { return std::span{ m_apCollidedEntities, m_nNumEntitiesCollided }; }
 
     const auto& GetBoundingBox() { return GetColModel()->m_boundBox; }
+
+// NOTSA
+    void UnstuckAndReposition();
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
