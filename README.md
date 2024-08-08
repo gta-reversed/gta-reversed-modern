@@ -19,7 +19,7 @@ Before you start writing code, please make sure to read the [coding guidelines](
 
 ### Build Instructions
 
-You can either build with **Premake5** or **CMake**; that's up to you, but a C++20 capable compiler [with `<ranges>`, `<format>` support] is required.
+You can either build with **Premake5** or **CMake**; that's up to you, but a C++23 capable compiler [with `<ranges>`, `<format>` support] is required.
 
 First clone the project, including the submodules:
 ```shell
@@ -39,7 +39,7 @@ git clone --recurse-submodules https://github.com/gta-reversed/gta-reversed-mode
 <details>
 <summary>CMake</summary>
 
-0) Sadly CMake requires VS22, because since CMake v3.20.4 `cxx_20` maps to `std=c++20` instead of `std=c++latest`. If you really want to avoid VS22, you can either downgrade your CMake, or change `c++20` to `c++latest` manually in the project settings... Or just use premake5 instead.
+0) Sadly CMake requires VS22, because since CMake v3.20.4 `cxx_23` maps to `std=c++23` instead of `std=c++latest`. If you really want to avoid VS22, you can either downgrade your CMake, or change `c++23` to `c++latest` manually in the project settings... Or just use premake5 instead.
 
 1) Download and install the latest version of CMake for windows from [HERE](https://cmake.org/download/) and make sure to add it to your PATH.
 
