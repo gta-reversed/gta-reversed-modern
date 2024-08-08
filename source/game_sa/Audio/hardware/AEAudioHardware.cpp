@@ -306,10 +306,11 @@ int8 CAEAudioHardware::GetSoundBankLoadingStatus(uint16 bankId, int16 bankSlotId
 }
 
 // 0x4D8ED0
-void CAEAudioHardware::LoadSound(uint16 bank, uint16 sound, int16 slot) {
+bool CAEAudioHardware::LoadSound(uint16 bank, uint16 sound, int16 slot) {
     if (!m_bDisableEffectsLoading) {
-        m_pMP3BankLoader->LoadSound(bank, sound, slot);
+        return m_pMP3BankLoader->LoadSound(bank, sound, slot);
     }
+    return false;
 }
 
 // 0x4D8EF0

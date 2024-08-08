@@ -573,7 +573,7 @@ void CBoat::ProcessControl() {
                 fGivenDamage /= 2.0F;
         } else {
             if (fGivenDamage > 60.0F && m_pDriver) {
-                m_pDriver->Say(68);
+                m_pDriver->Say(CTX_GLOBAL_CRASH_GENERIC);
             }
 
             fGivenDamage -= 25.0F;

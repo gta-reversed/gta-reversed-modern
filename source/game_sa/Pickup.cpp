@@ -574,7 +574,7 @@ bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
                             case PICKUP_MONEY_DOESNTDISAPPEAR:
                                 FindPlayerInfo().m_nMoney += m_nAmmo; // originally player 0
                                 AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_MONEY);
-                                player->Say(172u);
+                                player->Say(CTX_GLOBAL_PICKUP_CASH);
                                 SetRemoved();
                                 break;
                             case PICKUP_ASSET_REVENUE:

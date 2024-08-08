@@ -304,7 +304,7 @@ void CTaskSimpleUseGun::AimGun(CPed* ped) {
         const auto [lookAtPos, lookAtBone] = GetAimLookAtInfo(); // 0x61EDB8
 
         if (!ped->IsPlayer()) {
-            ped->Say(220);
+            ped->Say(CTX_GLOBAL_TARGET);
         }
 
         if (ped->m_pedIK.bUseArm) { // Removed redudant `if` check from here

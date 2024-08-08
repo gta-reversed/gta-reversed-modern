@@ -3118,27 +3118,25 @@ void CPed::EnablePedSpeechForScriptSpeech() {
 /*!
 * @addr 0x5EFFA0
 */
-bool CPed::CanPedHoldConversation() {
+bool CPed::CanPedHoldConversation() const {
     return m_pedSpeech.CanPedHoldConversation();
 }
 
 /*!
 * @addr 0x5EFFB0
 */
-void CPed::SayScript(int32 arg0, uint8 arg1, uint8 arg2, uint8 arg3) {
-    m_pedSpeech.AddScriptSayEvent(eAudioEvents::AE_SCRIPT_SPEECH_PED, arg0, arg1, arg2, arg3);
+void CPed::SayScript(eAudioEvents scriptID, bool overrideSilence, bool isForceAudible, bool isFrontEnd) {
+    m_pedSpeech.AddScriptSayEvent(AE_SCRIPT_SPEECH_PED, scriptID, overrideSilence, isForceAudible, isFrontEnd);
 }
 
 /*!
 * @addr 0x5EFFE0
 * @returns Played soundID - TODO: I'm not sure about this..
 */
-int16 CPed::Say(uint16 phraseId, uint32 offset, float arg2, uint8 arg3, uint8 arg4, uint8 arg5) {
-    if (phraseId) {
-        return m_pedSpeech.AddSayEvent(eAudioEvents::AE_SPEECH_PED, phraseId, offset, arg2, arg3, arg4, arg5);
-    } else {
-        return -1;
-    }
+int16 CPed::Say(eGlobalSpeechContext gCtx, uint32 startTimeDelay, float probability, bool overrideSilence, bool isForceAudible, bool isFrontEnd) {
+    return gCtx != CTX_GLOBAL_NO_SPEECH
+        ? m_pedSpeech.AddSayEvent(AE_SPEECH_PED, gCtx, startTimeDelay, probability, overrideSilence, isForceAudible, isFrontEnd)
+        : -1;
 }
 
 /*!
@@ -3678,25 +3676,25 @@ bool CPed::IsPedStandingInPlace() const {
 }
 
 // 0x6497A0
-bool SayJacked(CPed* jacked, CVehicle* vehicle, uint32 offset) {
+bool SayJacked(CPed* jacked, CVehicle* vehicle, uint32 timeDelay) {
     if (vehicle->m_vehicleAudio.GetVehicleTypeForAudio())
-        return jacked->Say(119u, offset) != -1;
+        return jacked->Say(CTX_GLOBAL_JACKED_GENERIC, timeDelay) != -1;
     else
-        return jacked->Say(118u, offset) != -1;
+        return jacked->Say(CTX_GLOBAL_JACKED_CAR, timeDelay) != -1;
 }
 
 // 0x6497F0
-bool SayJacking(CPed* jacker, CPed* jacked, CVehicle* vehicle, uint32 offset) {
+bool SayJacking(CPed* jacker, CPed* jacked, CVehicle* vehicle, uint32 timeDelay) {
     if (vehicle->m_vehicleAudio.GetVehicleTypeForAudio() == 1)
-        return jacker->Say(121u, offset) != -1;
+        return jacker->Say(CTX_GLOBAL_JACKING_BIKE, timeDelay) != -1;
 
     if (vehicle->m_vehicleAudio.GetVehicleTypeForAudio())
-        return jacker->Say(124u, offset) != -1;
+        return jacker->Say(CTX_GLOBAL_JACKING_GENERIC, timeDelay) != -1;
 
-    if (jacked->m_pedSpeech.IsPedFemaleForAudio())
-        return jacker->Say(122u, offset) != -1;
+    if (jacked->GetSpeechAE().IsPedFemaleForAudio())
+        return jacker->Say(CTX_GLOBAL_JACKING_CAR_FEM, timeDelay) != -1;
 
-    return jacker->Say(123u, offset) != -1;
+    return jacker->Say(CTX_GLOBAL_JACKING_CAR_MALE, timeDelay) != -1;
 }
 
 // NOTSA
