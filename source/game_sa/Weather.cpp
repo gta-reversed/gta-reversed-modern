@@ -324,7 +324,7 @@ void CWeather::UpdateWeatherRegion(CVector* posn) {
         WeatherRegion = WEATHER_REGION_DESERT;
         return;
     }
-    if (camPos.x < -1430.0f && camPos.y > 580.0f && camPos.y < 1430.0f) {
+    if (camPos.x < -1430.0f && camPos.y > -580.0f && camPos.y < 1430.0f) {
         WeatherRegion = WEATHER_REGION_SF;
         return;
     }
