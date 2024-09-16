@@ -5,6 +5,7 @@
 static inline auto& s_ShadowTrianglePointsUnk         = StaticRef<RxVertexIndex*>(0xC6A170);
 static inline auto& s_ShadowTrianglePoints            = StaticRef<CVector*>(0xC6A174);
 static inline auto& s_TransformedShadowTrianglePoints = StaticRef<CVector*>(0xC6A178);
+static inline auto& s_SunPosNrm                       = StaticRef<CVector>(0x8D5244); // CVector(1.0, 1.0, -2.0)
 
 void CStencilShadows::InjectHooks() {
     RH_ScopedClass(CStencilShadows);
@@ -20,6 +21,8 @@ void CStencilShadows::InjectHooks() {
     RH_ScopedInstall(RenderForVehicle, 0x70FAE0, {.reversed=false});
     RH_ScopedInstall(RenderForObject, 0x710310, {.reversed=false});
     RH_ScopedInstall(Render, 0x710D50, {.reversed=false});
+    RH_ScopedInstall(sub_710AF0, 0x710AF0);
+    RH_ScopedInstall(sub_710B50, 0x710B50);
     RH_ScopedInstall(sub_710CC0, 0x710CC0);
 }
 
@@ -89,6 +92,23 @@ void CStencilShadows::Render(const CRGBA& color) {
         }
     }
     */
+}
+
+// 0x710AF0
+void CStencilShadows::sub_710AF0(CEntity* entity) {
+    if (!entity)
+        return;
+
+    CVector in = entity->GetPosition();
+    in.Normalise();
+    s_SunPosNrm = in;
+}
+
+// 0x710B50
+void CStencilShadows::sub_710B50(CVector* pos) {
+    CVector in = *pos;
+    in.Normalise();
+    s_SunPosNrm = in; 
 }
 
 // 0x710CC0
