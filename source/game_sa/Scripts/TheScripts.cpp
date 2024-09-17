@@ -198,7 +198,7 @@ void CTheScripts::Init() {
     rng::fill(IntroTextLines, tScriptText{});
 
     NumberOfIntroTextLinesThisFrame = 0;
-    UseTextCommands                 = false;
+    UseTextCommands                 = eUseTextCommandState::DISABLED;
     bUseMessageFormatting           = false;
     MessageCentre                   = 0;
     MessageWidth                    = 0;
@@ -214,12 +214,15 @@ void CTheScripts::Init() {
     ClearAllVehicleModelsBlockedByScript();
     InitialiseAllConnectLodObjects();
     InitialiseSpecialAnimGroupsAttachedToCharModels();
-    rng::fill(ScriptEffectSystemArray, tScriptEffectSystem{});
-    rng::for_each(ScriptSearchLightArray, &tScriptSearchlight::Clear);
+    ScriptEffectSystemArray.fill(tScriptEffectSystem{});
+
+    ScriptSearchLightArray.fill(tScriptSearchlight{});
     NumberOfScriptSearchLights = 0;
-    rng::fill(ScriptCheckpointArray, tScriptCheckpoint{});
+
+    ScriptCheckpointArray.fill(tScriptCheckpoint{});
     NumberOfScriptCheckpoints = 0;
-    rng::fill(ScriptSequenceTaskArray, tScriptSequence{});
+
+    ScriptSequenceTaskArray.fill(tScriptSequence{});
 
     CScripted2dEffects::Init();
     CTaskSequences::Init();
@@ -355,29 +358,26 @@ uint32 CTheScripts::AddScriptEffectSystem(FxSystem_c* system) {
 // signature changed (CVector)
 // 0x493000
 uint32 CTheScripts::AddScriptSearchLight(CVector start, CEntity* entity, CVector target, float targetRadius, float baseRadius) {
-    const auto ssl = rng::find_if(ScriptSearchLightArray, [](auto& ssl) {
+    const auto it = rng::find_if(ScriptSearchLightArray, [](auto& ssl) {
         return !ssl.IsActive();
     });
-    assert(ssl != ScriptSearchLightArray.end()); // In vanilla game does OOB access.
+    assert(it != ScriptSearchLightArray.end()); // In vanilla game does OOB access.
 
-    const auto idx = std::distance(ScriptSearchLightArray.begin(), ssl);
+    const auto idx = std::distance(ScriptSearchLightArray.begin(), it);
     RemoveScriptSearchLight(idx);
 
-    ssl->m_bClipIfColliding = false;
-    ssl->bIsUsed            = true;
-    ssl->m_bUsed            = true;
-    ssl->m_bEnableShadow    = true;
-    ssl->m_Origin           = start;
-    ssl->m_Target           = target;
-    ssl->m_fBaseRadius      = baseRadius;
-    ssl->m_fTargetRadius    = targetRadius;
-    ssl->m_PathCoord1       = CVector{};
-    ssl->m_PathCoord2       = CVector{};
-    ssl->m_fPathSpeed       = 0.0f;
-
-    ssl->m_AttachedEntity = entity;
-
+    new (&ScriptSearchLightArray[idx]) tScriptSearchlight{
+        .m_bUsed            = true,
+        .m_bEnableShadow    = true,
+        .m_SomethingFlag    = true,
+        .m_Origin           = start,
+        .m_Target           = target,
+        .m_fTargetRadius    = targetRadius,
+        .m_fBaseRadius      = baseRadius,
+        .m_AttachedEntity   = entity,
+    };
     ++NumberOfScriptSearchLights;
+
     return CTheScripts::GetNewUniqueScriptThingIndex(idx, SCRIPT_THING_SEARCH_LIGHT);
 }
 
@@ -527,6 +527,10 @@ void CTheScripts::AttachSearchlightToSearchlightObject(int32 searchLightId, CObj
     if (idx < 0) {
         return;
     }
+    
+    assert(IsEntityPointerValid(bulb));
+    assert(IsEntityPointerValid(tower));
+    assert(IsEntityPointerValid(housing));
 
     auto& sl = ScriptSearchLightArray[idx];
     sl.m_Origin = offset;
@@ -958,7 +962,7 @@ void CTheScripts::RemoveScriptEffectSystem(int32 scriptIndex) {
 void CTheScripts::RemoveScriptSearchLight(int32 scriptIndex) {
     const auto i = GetActualScriptThingIndex(scriptIndex, eScriptThingType::SCRIPT_THING_SEARCH_LIGHT);
     if (i != -1) {
-        ScriptSearchLightArray[i].Clear();
+        ScriptSearchLightArray[i] = tScriptSearchlight{};
         --NumberOfScriptSearchLights;
     }
 }
@@ -1388,14 +1392,19 @@ void CTheScripts::Process() {
         --FailCurrentMission;
     }
 
-    if (UseTextCommands) {
+    if (UseTextCommands != eUseTextCommandState::DISABLED) {
         rng::fill(IntroTextLines, tScriptText{});
         NumberOfIntroTextLinesThisFrame = 0;
 
         rng::fill(IntroRectangles, tScriptRectangle{});
         NumberOfIntroRectanglesThisFrame = 0;
 
-        UseTextCommands = false;
+        if (UseTextCommands == eUseTextCommandState::DISABLE_NEXT_FRAME) {
+            UseTextCommands = eUseTextCommandState::DISABLED;
+        }
+    } else { // Check these, just in case something modifies them: If so, you can place a 'Break when data changes' breakpoint on the variable
+        assert(NumberOfIntroTextLinesThisFrame == 0);
+        assert(NumberOfIntroRectanglesThisFrame == 0);
     }
 
     const auto timeStepMS = (int32)CTimer::GetTimeStepInMS();
@@ -1428,69 +1437,53 @@ void CTheScripts::Process() {
 void CTheScripts::ProcessAllSearchLights() {
     ZoneScoped;
 
-    for (auto& light : ScriptSearchLightArray) {
-        if (!light.IsActive() || !light.bIsUsed) {
+    for (auto& sl : ScriptSearchLightArray) {
+        if (!sl.IsActive() || !sl.m_SomethingFlag) {
             continue;
         }
 
-        switch (light.m_nCurrentState) {
-        case eScriptSearchLightState::STATE_1: {
-            const auto d = light.m_PathCoord1 - light.m_Target;
-            if (d.SquaredMagnitude() > sq(light.m_fPathSpeed)) {
-                light.m_Target *= d.Normalized();
+        const auto dir = sl.m_PathCoord2 - sl.m_Target;
+        if (dir.SquaredMagnitude() > sq(sl.m_fPathSpeed)) { // Originally part of every case, moved it out here...
+            sl.m_Target *= dir.Normalized() * sl.m_fPathSpeed;
+        } else {
+            switch (sl.m_nCurrentState) {
+            case eScriptSearchLightState::STATE_1: {
+                sl.m_Target        = sl.m_PathCoord1;
+                sl.m_SomethingFlag = true;
+                sl.m_nCurrentState = eScriptSearchLightState::STATE_2;
                 break;
             }
-
-            light.m_Target = light.m_PathCoord1;
-            light.m_nCurrentState = eScriptSearchLightState::STATE_2;
-            break;
-        }
-        case eScriptSearchLightState::STATE_2: {
-            const auto d = light.m_PathCoord2 - light.m_Target;
-            if (d.SquaredMagnitude() > sq(light.m_fPathSpeed)) {
-                light.m_Target *= d.Normalized();
+            case eScriptSearchLightState::STATE_2: {
+                sl.m_Target        = sl.m_PathCoord2;
+                sl.m_SomethingFlag = true;
+                sl.m_nCurrentState = eScriptSearchLightState::STATE_1;
                 break;
             }
-
-            light.m_Target        = light.m_PathCoord2;
-            light.m_nCurrentState = eScriptSearchLightState::STATE_1;
-            break;
-        }
-        case eScriptSearchLightState::STATE_3: {
-            const auto d = light.m_FollowingEntity->GetPosition() - light.m_Target;
-            if (d.SquaredMagnitude() > sq(light.m_fPathSpeed)) {
-                light.m_Target *= d.Normalized();
+            case eScriptSearchLightState::STATE_3: {
+                sl.m_Target = sl.m_FollowingEntity->GetPosition();
+                /* flag is not altered */
                 break;
             }
-
-            light.m_Target = light.m_FollowingEntity->GetPosition();
-            /* flag is not altered */
-            break;
-        }
-        case eScriptSearchLightState::STATE_4: {
-            auto d = light.m_PathCoord1 - light.m_FollowingEntity->GetPosition();
-            if (d.SquaredMagnitude() > sq(light.m_fPathSpeed)) {
-                light.m_Target *= d.Normalized();
+            case eScriptSearchLightState::STATE_4: {
+                sl.m_Target        = sl.m_PathCoord1;
+                sl.m_fPathSpeed    = 0.0f;
+                sl.m_PathCoord1    = CVector{};
+                sl.m_SomethingFlag = true;
+                sl.m_nCurrentState = eScriptSearchLightState::STATE_0;
                 break;
             }
-
-            light.m_Target        = light.m_PathCoord1;
-            light.m_fPathSpeed    = 0.0f;
-            light.m_PathCoord1    = CVector{};
-            light.m_nCurrentState = eScriptSearchLightState::STATE_0;
-            break;
-        }
-        default:
-            break;
+            default:
+                NOTSA_UNREACHABLE("Invalid SearchLight State ({})", (int)sl.m_nCurrentState);
+            }
         }
 
-        CEntity* bulb = light.m_Bulb;
+        CEntity* bulb = sl.m_Bulb;
         if (!bulb) {
             continue;
         }
 
         const auto prevPos    = bulb->GetPosition();
-        const auto tgtBulbDir = (light.m_Target - bulb->GetPosition()).Normalized();
+        const auto tgtBulbDir = (sl.m_Target - bulb->GetPosition()).Normalized();
 
         const auto Transform = [&](CEntity* entity) {
             const auto rotX = std::atan2(tgtBulbDir.z, tgtBulbDir.Magnitude2D());
@@ -1504,7 +1497,7 @@ void CTheScripts::ProcessAllSearchLights() {
         };
 
         Transform(bulb);
-        Transform(light.m_Housing);
+        Transform(sl.m_Housing);
     }
 }
 
@@ -1910,7 +1903,7 @@ void CTheScripts::HighlightImportantAngledArea(uint32 id, float x1, float y1, fl
     center.x = (inf.x + sup.x) / 2;
     center.y = (inf.y + sup.y) / 2;
     center.z = (z <= MAP_Z_LOW_LIMIT) ? CWorld::FindGroundZForCoord(center.x, center.y) : z;
-    CShadows::RenderIndicatorShadow(id, SHADOW_ADDITIVE, nullptr, &center, sup.x - center.x, 0.0f, 0.0f, center.y - sup.y, 0);
+    CShadows::RenderIndicatorShadow(id, SHADOW_ADDITIVE, nullptr, center, sup.x - center.x, 0.0f, 0.0f, center.y - sup.y, 0);
 }
 
 static uint16 NumScriptDebugLines;

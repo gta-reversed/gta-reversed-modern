@@ -60,7 +60,7 @@ CTaskSimpleSwim::~CTaskSimpleSwim() {
 // 0x68A9F0
 void CTaskSimpleSwim::CreateFxSystem(CPed* ped, RwMatrix* mat) {
     CVector point{};
-    m_pFxSystem = g_fxMan.CreateFxSystem("water_ripples", &point, mat, false);
+    m_pFxSystem = g_fxMan.CreateFxSystem("water_ripples", point, mat, false);
     if (m_pFxSystem) {
         m_pFxSystem->CopyParentMatrix();
         m_pFxSystem->Play();
@@ -634,7 +634,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* ped) {
 
             const auto AddAudioEvent = [&](RwV3d* bonePos) {
                 if (std::fabs(bonePos->z - pedPos.z) < 0.05f) {
-                    auto fx = g_fxMan.CreateFxSystem("water_swim", static_cast<CVector*>(bonePos), nullptr, false);
+                    auto fx = g_fxMan.CreateFxSystem("water_swim", *bonePos, nullptr, false);
                     if (fx) {
                         fx->PlayAndKill();
                         ped->m_pedAudio.AddAudioEvent(AE_PED_SWIM_STROKE_SPLASH, 0.0f, 1.0f);

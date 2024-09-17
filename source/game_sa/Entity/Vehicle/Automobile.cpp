@@ -3034,7 +3034,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
         // 0x6A7B63
         const auto moveSpeedMagSq = m_vecMoveSpeed.SquaredMagnitude();
         if (moveSpeedMagSq > 0.02f / 50.0f) {
-            dmgDrawCarCollidingParticles(vecCollisionCoors, calcDmgIntensity * collForceMult, weapon);
+            dmgDrawCarCollidingParticles(*vecCollisionCoors, calcDmgIntensity * collForceMult, weapon);
         }
 
         if (m_matrix->GetUp().z > 0.f /*Not flipped on roof*/ || moveSpeedMagSq > 0.3f) {
@@ -3044,7 +3044,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
             // [-oo, 0] - Left side (In bounding box if: [-1, 0] )
             // [0, +oo] - Right side (In bounding box if: [0, 1] )
             const auto GetCollisionPointLocalDirection = [&, this] {
-                const auto collDirDotRight = DotProduct(vecCollisionCoors - GetPosition() , m_matrix->GetRight());
+                const auto collDirDotRight = DotProduct(*vecCollisionCoors - GetPosition() , m_matrix->GetRight());
 
                 // Since the dot product is scaled by the distance of the collision point from us
                 // If we divide it by the width of our bounding box we can determinate how far
@@ -4341,7 +4341,7 @@ void CAutomobile::DoNitroEffect(float power) {
         else if (firstExhaustFxSystem->GetPlayStatus() == eFxSystemPlayStatus::FX_STOPPED && !firstExhaustSubmergedInWater)
             firstExhaustFxSystem->Play();
     } else if (!firstExhaustSubmergedInWater && rwMatrix) {
-        firstExhaustFxSystem = g_fxMan.CreateFxSystem("nitro", &exhaustPosition, rwMatrix, true);
+        firstExhaustFxSystem = g_fxMan.CreateFxSystem("nitro", exhaustPosition, rwMatrix, true);
         m_exhaustNitroFxSystem[0] = firstExhaustFxSystem;
         if (firstExhaustFxSystem) {
             firstExhaustFxSystem->SetLocalParticles(true);
@@ -4358,7 +4358,7 @@ void CAutomobile::DoNitroEffect(float power) {
             else if (secondExhaustFxSystem->GetPlayStatus() == eFxSystemPlayStatus::FX_STOPPED && !secondExhaustSubmergedInWater)
                 secondExhaustFxSystem->Play();
         } else if (!firstExhaustSubmergedInWater && rwMatrix) {
-            secondExhaustFxSystem = g_fxMan.CreateFxSystem("nitro", &secondExhaustPosition, rwMatrix, true);
+            secondExhaustFxSystem = g_fxMan.CreateFxSystem("nitro", secondExhaustPosition, rwMatrix, true);
             m_exhaustNitroFxSystem[1] = secondExhaustFxSystem;
             if (secondExhaustFxSystem) {
                 secondExhaustFxSystem->SetLocalParticles(1);
@@ -4932,9 +4932,12 @@ void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately) {
         auto pos = GetDummyPosition(DUMMY_ENGINE);
         if (const auto mat = GetModellingMatrix()) {
             m_pFireParticle = g_fxMan.CreateFxSystem(
-                typ == 1 ? "fire_car" : "fire_large",
-                &pos,
-                mat);
+                typ == 1
+                    ? "fire_car"
+                    : "fire_large",
+                pos,
+                mat
+            );
         }
         if (m_pFireParticle) {
             m_pFireParticle->Play();
@@ -6053,7 +6056,7 @@ void CAutomobile::DoHeliDustEffect(float timeConstMult, float fxMaxZMult) {
     // Create and play fx if it doesn't exist.
     if (!m_pDustParticle) {
         CVector fxPos{0.f, 0.f, 0.f};
-        m_pDustParticle = g_fxMan.CreateFxSystem("heli_dust", &fxPos, nullptr, true);
+        m_pDustParticle = g_fxMan.CreateFxSystem("heli_dust", CVector{0.f, 0.f, 0.f}, nullptr, true);
         if (!m_pDustParticle) { // Failed, return
             return;
         }

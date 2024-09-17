@@ -211,52 +211,28 @@ enum class eScriptSearchLightState : uint8 {
 };
 
 struct tScriptSearchlight {
-    bool m_bUsed{ true };
-    bool m_bClipIfColliding{};
-    bool m_bEnableShadow{};
-    struct {
-        eScriptSearchLightState m_nCurrentState : 7;
-        bool                    bIsUsed : 1; // ?
-    } /* m_Flags */;
-    int16        m_nId{ 1 };
-    CVector      m_Origin{};
-    CVector      m_Target{};
-    float        m_fTargetRadius{};
-    float        m_fBaseRadius{};
-    CVector      m_PathCoord1{};
-    CVector      m_PathCoord2{};
-    float        m_fPathSpeed{};
-    CEntity::Ref m_AttachedEntity{};
-    CEntity::Ref m_FollowingEntity{};
-    CEntity::Ref m_Tower{};
-    CEntity::Ref m_Housing{};
-    CEntity::Ref m_Bulb{};
-    CVector      m_TargetSpot{};
-    CVector      vf64{};
-    CVector      vf70{};
+    bool                    m_bUsed{};
+    bool                    m_bClipIfColliding{};
+    bool                    m_bEnableShadow{};
+    eScriptSearchLightState m_nCurrentState : 7{};
+    bool                    m_SomethingFlag : 1{};
+    int16                   m_nId{};
+    CVector                 m_Origin{};
+    CVector                 m_Target{};
+    float                   m_fTargetRadius{};
+    float                   m_fBaseRadius{};
+    CVector                 m_PathCoord1{};
+    CVector                 m_PathCoord2{};
+    float                   m_fPathSpeed{};
+    CEntity::Ref            m_AttachedEntity{};
+    CEntity::Ref            m_FollowingEntity{};
+    CEntity::Ref            m_Tower{};
+    CEntity::Ref            m_Housing{};
+    CEntity::Ref            m_Bulb{};
+    CVector                 m_TargetSpot{};
+    CVector                 vf64{};
+    CVector                 vf70{};
 
-    // NOTSA
-    void Clear() {
-        m_bUsed            = true;
-        m_bClipIfColliding = false;
-        m_bEnableShadow    = false;
-        m_nId              = 1;
-        m_Origin           = CVector{};
-        m_Target           = CVector{};
-        m_fTargetRadius    = 0.0f;
-        m_fBaseRadius      = 0.0f;
-        m_PathCoord1       = CVector{};
-        m_PathCoord2       = CVector{};
-        m_fPathSpeed       = 0.0f;
-        m_AttachedEntity   = nullptr;
-        m_FollowingEntity  = nullptr;
-        m_Tower            = nullptr;
-        m_Housing          = nullptr;
-        m_Bulb             = nullptr;
-        m_TargetSpot       = CVector{};
-        vf64               = CVector{};
-        vf70               = CVector{};
-    }
 
     //! Script thing ID
     auto GetId() { return m_nId; }
@@ -431,6 +407,12 @@ public:
     static inline auto&   ScriptCheckpointArray     = *(std::array<tScriptCheckpoint, MAX_NUM_SCRIPT_CHECKPOINTS>*)0xA44070;
     static inline uint16& NumberOfScriptCheckpoints = *reinterpret_cast<uint16*>(0xA44068);
 
+    enum class eUseTextCommandState : uint8 {
+        DISABLED,
+        DISABLE_NEXT_FRAME,
+        ENABLED_BY_SCRIPT
+    };
+    static inline eUseTextCommandState& UseTextCommands = *reinterpret_cast<eUseTextCommandState*>(0xA44B67);
     static inline bool& DbgFlag = *reinterpret_cast<bool*>(0x859CF8);
     static inline int32& SwitchDefaultAddress = *reinterpret_cast<int32*>(0xA43F54);
     static inline bool& SwitchDefaultExists = *reinterpret_cast<bool*>(0xA43F58);
@@ -469,7 +451,6 @@ public:
     static inline uint16& MessageWidth = *reinterpret_cast<uint16*>(0xA44B60);
     static inline uint16& MessageCentre = *reinterpret_cast<uint16*>(0xA44B64);
     static inline bool& bUseMessageFormatting = *reinterpret_cast<bool*>(0xA44B66);
-    static inline bool& UseTextCommands = *reinterpret_cast<bool*>(0xA44B67);
     static inline int32& LastRandomPedId = *reinterpret_cast<int32*>(0xA476A4);
     static inline uint32& LastMissionPassedTime = *reinterpret_cast<uint32*>(0xA476A8);
     static inline int32& OnAMissionFlag = *reinterpret_cast<int32*>(0xA476AC); // Refers to the offset of OM flag in script space.
