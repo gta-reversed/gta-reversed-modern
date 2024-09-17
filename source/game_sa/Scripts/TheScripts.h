@@ -233,7 +233,6 @@ struct tScriptSearchlight {
     CVector                 vf64{};
     CVector                 vf70{};
 
-
     //! Script thing ID
     auto GetId() { return m_nId; }
 
