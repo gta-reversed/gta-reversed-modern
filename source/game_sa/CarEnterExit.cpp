@@ -40,9 +40,9 @@ void CCarEnterExit::InjectHooks() {
     RH_ScopedInstall(IsRoomForPedToLeaveCar, 0x6504C0, { .reversed = false });
     RH_ScopedInstall(IsVehicleHealthy, 0x64EEC0);
     RH_ScopedInstall(IsVehicleStealable, 0x6510D0);
-    RH_ScopedInstall(MakeUndraggedDriverPedLeaveCar, 0x64F600, { .reversed = false });
+    RH_ScopedInstall(MakeUndraggedDriverPedLeaveCar, 0x64F600);
     RH_ScopedInstall(MakeUndraggedPassengerPedsLeaveCar, 0x64F540, { .reversed = false });
-    RH_ScopedInstall(QuitEnteringCar, 0x650130, { .reversed = false });
+    RH_ScopedInstall(QuitEnteringCar, 0x650130);
     RH_ScopedInstall(RemoveCarSitAnim, 0x64F680);
     RH_ScopedInstall(RemoveGetInAnims, 0x64F6E0);
     RH_ScopedInstall(SetAnimOffsetForEnterOrExitVehicle, 0x64F860);
@@ -397,24 +397,26 @@ CVector CCarEnterExit::GetPositionToOpenCarDoor(const CVehicle* vehicle, int32 d
 
 // 0x64EC90
 bool CCarEnterExit::IsCarDoorInUse(const CVehicle* vehicle, int32 firstDoorId, int32 secondDoorId) {
-    auto checkDoor = [vehicle](int door) -> bool {
-        uint8_t flag = 0;
+    const auto CheckIsDoorInUse = [vehicle](int32 door) {
+        const auto CheckInOutFlags = [vehicle](uint32 n) {
+            const auto flag = 1 << n;
+            return (flag & vehicle->m_nGettingInFlags) || (flag & vehicle->m_nGettingOutFlags);
+        };
         switch (door) {
-        case 8: flag = 4; break;
-        case 9: flag = 8; break;
+        case 8: return CheckInOutFlags(2);
+        case 9: return CheckInOutFlags(3);
         case 10:
-        case 18: flag = 1; break;
-        case 11: flag = 2; break;
+        case 18: return CheckInOutFlags(0);
+        case 11: return CheckInOutFlags(1);
         default: return false;
         }
-        return (flag & vehicle->m_nGettingInFlags) || (flag & vehicle->m_nGettingOutFlags);
     };
-
-    return checkDoor(firstDoorId) || checkDoor(secondDoorId);
+    return CheckIsDoorInUse(firstDoorId) || CheckIsDoorInUse(secondDoorId);
 }
 
 // 0x64ED90
 bool CCarEnterExit::IsCarDoorReady(const CVehicle* vehicle, int32 doorId) {
+    // TODO: Make IsDoorReadyU32 a const member function to avoid const_cast
     auto& veh = const_cast<CVehicle&>(*vehicle);
     return veh.IsDoorReadyU32((uint32)doorId)
         || veh.IsDoorFullyOpenU32((uint32)doorId);
@@ -595,8 +597,14 @@ bool CCarEnterExit::IsVehicleStealable(const CVehicle* vehicle, const CPed* ped)
     return true;
 }
 
-void CCarEnterExit::MakeUndraggedDriverPedLeaveCar(const CVehicle* vehicle, const CPed* ped) {
-    plugin::Call<0x0, const CVehicle*, const CPed*>(vehicle, ped);
+// 0x64F600
+void CCarEnterExit::MakeUndraggedDriverPedLeaveCar(const CVehicle* vehicle, const CPed* pedGettingIn) {
+    auto& veh = const_cast<CVehicle&>(*vehicle);
+    auto& ped = const_cast<CPed&>(*pedGettingIn);
+
+    const auto event = CEventDraggedOutCar::CEventDraggedOutCar(&veh, &ped, true);
+    veh.m_pDriver->m_pIntelligence->m_eventGroup.Add(event, false);
+    event.~CEventDraggedOutCar();
 }
 
 // 0x64F540
@@ -605,8 +613,51 @@ void CCarEnterExit::MakeUndraggedPassengerPedsLeaveCar(const CVehicle* targetVeh
 }
 
 // unused
+// 0x650130
 void CCarEnterExit::QuitEnteringCar(CPed* ped, CVehicle* vehicle, int32 doorId, bool bCarWasBeingJacked) {
+    CCarEnterExit::RemoveGetInAnims(ped);
+    ped->RestartNonPartialAnims();
+    if (RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_IDLE)) {
+        CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 1000.0f);
+    }
 
+    if (bCarWasBeingJacked) {
+        vehicle->vehicleFlags.bIsBeingCarJacked = true;
+    }
+    vehicle->m_nNumGettingIn++;
+
+    if (vehicle->IsBike() || vehicle->m_pHandlingData->m_bTandemSeats) {
+        if (doorId == 10 || doorId == 8) {
+            vehicle->SetGettingInFlags(5);
+        } else if (doorId == 11 || doorId == 9) {
+            vehicle->SetGettingInFlags(10);
+        }
+        vehicle->m_nFlags |= 8u;
+    } else {
+        switch (doorId) {
+        case 8:
+            vehicle->SetGettingInFlags(4);
+            break;
+        case 9:
+            vehicle->SetGettingInFlags(8);
+            break;
+        case 10:
+            if (vehicle->m_nMaxPassengers) {
+                vehicle->SetGettingInFlags(1);
+            } else {
+                vehicle->SetGettingInFlags(3);
+            }
+            break;
+        case 11:
+            if (vehicle->m_nMaxPassengers) {
+                vehicle->SetGettingInFlags(2);
+            } else {
+                vehicle->SetGettingInFlags(3);
+            }
+            break;
+        }
+    }
+    ped->m_bUsesCollision = false;
 }
 
 // 0x64F680

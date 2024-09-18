@@ -24,8 +24,9 @@ CRealTimeShadow::~CRealTimeShadow() {
 // 0x705900
 RwFrame* CRealTimeShadow::SetLightProperties(float angle, float unused, bool doSetCamLight) {
     const auto frame = RpLightGetFrame(m_pLight);
-    if (!frame)
+    if (!frame) {
         return nullptr;
+    }
 
     const RwV3d yaxis{ 0.f, 1.f, 0.f };
     RwFrameRotate(frame, &yaxis, angle, rwCOMBINEREPLACE);

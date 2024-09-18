@@ -25,8 +25,8 @@ public:
     static void RenderForVehicle(CStencilShadowObject*);
     static void RenderForObject(CStencilShadowObject*);
     static void Render(const CRGBA& color);
+    static void RenderBuffer(const CVector& pos);
+    static void SunSetPosiitonFromEntity(const CEntity* entity);
 
-    static void sub_710AF0(CEntity* entity);
-    static void sub_710B50(CVector* pos);
     static void sub_710CC0(int32 indices, int32 vertices);
 };

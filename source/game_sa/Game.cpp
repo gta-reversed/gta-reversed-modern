@@ -821,12 +821,11 @@ void CGame::Process() {
         CPlantMgr::Update(TheCamera.GetPosition());
         CCustomBuildingRenderer::Update();
 
-        CVector pos = CVector(
+        CStencilShadows::RenderBuffer({
             CTimeCycle::m_fShadowFrontX[CTimeCycle::m_CurrentStoredValue] * 2.f,
             CTimeCycle::m_fShadowFrontY[CTimeCycle::m_CurrentStoredValue] * 2.f,
             -1.5f
-        );
-        CStencilShadows::sub_710B50(&pos);
+        });
 
         CStencilShadows::Process(TheCamera.GetPosition());
         if (CReplay::Mode != MODE_PLAYBACK) {
