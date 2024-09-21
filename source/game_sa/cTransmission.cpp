@@ -28,11 +28,11 @@ void cTransmission::DisplayGearRatios()
     static constexpr float magic_0 = 1000.0f / 3600.0f;
     static constexpr float magic = magic_0 / 50.0f;
 
-    for (uint8 i = 0; i <= m_nNumberOfGears; i++)
+    for (size_t i = 0; i <= m_nNumberOfGears; i++)
     {
         tTransmissionGear& gear = m_aGears[i];
         DEV_LOG(
-            "{} => max v = {3.2f}, up at = {3.2f}, down at = {3.2f}",
+            "{} => max v = {:03.2f}, up at = {:03.2f}, down at = {:03.2f}",
             i,
             gear.m_maxVelocity / magic,
             gear.m_changeUpVelocity / magic,

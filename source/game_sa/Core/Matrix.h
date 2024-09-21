@@ -21,7 +21,9 @@ enum eMatrixEulerFlags : uint32 {
     ORDER_YXZ = 0x0C,
     ORDER_ZXY = 0x10,
     ORDER_ZYX = 0x14,
-    _ORDER_MASK = 0x1C,
+
+    // Special combined masks, do not use
+    _ORDER_MASK = ORDER_XYZ | ORDER_XZY | ORDER_YZX | ORDER_YXZ | ORDER_ZXY | ORDER_ZYX,
     _ORDER_NEEDS_SWAP = 0x4
 };
 
@@ -37,6 +39,7 @@ public:
     {
         // TODO: Add some kind of `assert` to check validity
     }
+    
     CMatrix(const CMatrix& matrix);
     CMatrix(RwMatrix* matrix, bool temporary = false); // like previous + attach
 
@@ -67,11 +70,11 @@ public:
     }
 private:
     // RwV3d-like:
-    CVector m_right;        // 0x0
+    CVector m_right;        // 0x0  // RW: Right
     uint32  flags;          // 0xC
-    CVector m_forward;      // 0x10
+    CVector m_forward;      // 0x10 // RW: Up
     uint32  pad1;           // 0x1C
-    CVector m_up;           // 0x20
+    CVector m_up;           // 0x20 // RW: At
     uint32  pad2;           // 0x2C
     CVector m_pos;          // 0x30
     uint32  pad3;           // 0x3C
@@ -115,10 +118,10 @@ public:
     void SetRotateX(float angle);
     void SetRotateY(float angle);
     void SetRotateZ(float angle);
-    void SetRotate(float x, float y, float z);  // set rotate on 3 axes
-    void RotateX(float angle);
-    void RotateY(float angle);
-    void RotateZ(float angle);
+    void SetRotate(float x, float y, float z); // set rotate on 3 axes (Values are in radians)
+    void RotateX(float angle, bool bKeepPos = false); // NOTSA bKeepPos
+    void RotateY(float angle, bool bKeepPos = false); // NOTSA bKeepPos
+    void RotateZ(float angle, bool bKeepPos = false); // NOTSA bKeepPos
     void Rotate(CVector rotation); // rotate on 3 axes
     void Reorthogonalise();
     void CopyToRwMatrix(RwMatrix* matrix) const; // similar to UpdateRW(RwMatrixTag *)
@@ -129,12 +132,84 @@ public:
     void ConvertToEulerAngles(float* pX, float* pY, float* pZ, uint32 uiFlags);
     void ConvertFromEulerAngles(float x, float y, float z, uint32 uiFlags);
 
+    /*!
+     * @notsa
+     * @brief Calculate the inverse of this matrix
+     */
+    CMatrix Inverted() const {
+        CMatrix o;
+
+        // Transpose rotation
+        o.m_right   = CVector{ m_right.x, m_forward.x, m_up.x };
+        o.m_forward = CVector{ m_right.y, m_forward.y, m_up.y };
+        o.m_up      = CVector{ m_right.z, m_forward.z, m_up.z };
+
+        // Transform translation using the calculated rotation matrix
+        o.m_pos     = -o.TransformVector(m_pos);
+
+        return o;
+    }
+
+    /*!
+     * @notsa
+     * @brief Transform a point (position) - will take into account translation part of the Matrix.
+     * @brief Use instead of `MultiplyMatrixWithVector` (0x59C890)
+     * @param pt The position (point) to transform
+    */
+    CVector TransformPoint(CVector pt) const {
+        return TransformVector(pt) + m_pos;
+    }
+
+    /*!
+     * @notsa
+     * @brief Transform a direction vector - will not take into account translation part of the Matrix.
+     * @param pt The vector (direction) to transform
+     */
+    CVector TransformVector(CVector v) const {
+        // Inlined:
+        // > m_right.x * v.x + m_forward.x * v.y + m_up.x * v.z,
+        // > m_right.y * v.x + m_forward.y * v.y + m_up.y * v.z,
+        // > m_right.z * v.x + m_forward.z * v.y + m_up.z * v.z,
+        return v.x * m_right + v.y * m_forward + v.z * m_up;
+    }
+
+    /*!
+     * @notsa
+     * @brief Transform a point (position) using the inverse of the matrix - Will take into account translation part of the matrix.
+     * @brief Use this instead of `Multiply3x3(_VM)` (0x59C810)
+     * @param pt The position (point) to transform
+     */
+    CVector InverseTransformPoint(CVector pt) const {
+        return InverseTransformVector(pt - m_pos);
+    }
+
+    /*!
+     * @notsa
+     * @brief Transform the vector using the inverse of this Matrix
+     * @brief Use this instead of `Multiply3x3(_MV)` (0x59C790)
+     * @param pt The vector (direction) to transform
+     */
+    CVector InverseTransformVector(CVector v) const {
+        // I got this by transposing the rotation matrix, and then applying a transform...
+        // So I ended up with dot products (which make sense if you think about it)
+        // `Inverted().TransformPoint(v)`
+
+        return { m_right.Dot(v), m_forward.Dot(v), m_up.Dot(v) }; 
+    }
+
     void operator=(const CMatrix& right);
     void operator+=(const CMatrix& right);
     void operator*=(const CMatrix& right);
 
     static uint8* EulerIndices1;
     static uint8* EulerIndices2;
+
+    ///< Returns an identity matrix
+    static auto Identity() {
+        CMatrix mat;
+        mat.SetScale(1.f);
+        return mat;
+    }
 
     void SetRotate(const CVector& rot) {
         SetRotate(rot.x, rot.y, rot.z);
@@ -146,6 +221,15 @@ public:
         m_pos = pos;
     }
 
+    static auto GetIdentity() {
+        CMatrix mat;
+        mat.m_right   = CVector{ 1.f, 0.f, 0.f };
+        mat.m_forward = CVector{ 0.f, 1.f, 0.f };
+        mat.m_up      = CVector{ 0.f, 0.f, 1.f };
+        mat.m_pos     = CVector{ 0.f, 0.f, 0.f };
+        return mat;
+    }
+    
     // Similar to ::Scale but this also scales the position vector.
     // 0x45AF40
     void ScaleAll(float mult) {
@@ -164,18 +248,13 @@ private:
     friend class CVector; // So Vector methods have access to private fields of matrix whitout accessor methods, for more readable code
     friend class CVector2D;
     friend CMatrix operator*(const CMatrix& a, const CMatrix& b);
-    // static CMatrix* impl_operatorMul(CMatrix* out, const CMatrix& a, const CMatrix& b);
-
     friend CVector operator*(const CMatrix& a, const CVector& b);
-    // static CVector* impl_operatorMul(CVector* out, const CMatrix& a, const CVector& b);
-
     friend CMatrix operator+(const CMatrix& a, const CMatrix& b);
-    // static CMatrix* impl_operatorAdd(CMatrix* out, const CMatrix& a, const CMatrix& b);
 };
 VALIDATE_SIZE(CMatrix, 0x48);
 
 CMatrix operator*(const CMatrix& a, const CMatrix& b);
-CVector operator*(const CMatrix& a, const CVector& b);
+[[deprecated]] CVector operator*(const CMatrix& a, const CVector& b);
 CMatrix operator+(const CMatrix& a, const CMatrix& b);
 
 CMatrix& Invert(CMatrix& in, CMatrix& out);

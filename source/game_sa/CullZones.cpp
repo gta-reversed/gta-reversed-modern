@@ -26,6 +26,8 @@ void CCullZones::InjectHooks() {
 
 // 0x72D6B0
 void CCullZones::Init() {
+    ZoneScoped;
+
     NumAttributeZones = 0;
     CurrentFlags_Player = 0;
     CurrentFlags_Camera = 0;
@@ -171,8 +173,10 @@ eZoneAttributes CCullZones::FindAttributesForCoors(CVector pos) {
 
 // 0x72DEC0
 void CCullZones::Update() {
+    ZoneScoped;
+
     if ((CTimer::GetFrameCounter() & 7) == 2) {
-        CurrentFlags_Camera = FindAttributesForCoors(TheCamera.GetGameCamPosition());
+        CurrentFlags_Camera = FindAttributesForCoors(*TheCamera.GetGameCamPosition());
         return;
     }
 

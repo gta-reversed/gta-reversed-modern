@@ -19,7 +19,9 @@ public:
 
     CColSphere() = default;
 
-    CColSphere(const CSphere& sp) : CSphere(sp) {}
+    CColSphere(const CSphere& sp, const CColSurface& surface = {}) : // TODO: Make this explicit
+        CSphere{ sp }, m_Surface{ surface }
+    { }
 
     constexpr CColSphere(CSphere sp, eSurfaceType material, uint8 pieceType, tColLighting lighting = tColLighting(0xFF)) : CSphere(sp) {
         m_Surface.m_nMaterial = material;
@@ -32,10 +34,14 @@ public:
 
     CColSphere(const CVector& center, float radius) : CSphere(center, radius){};
 
-    void Set(float radius, const CVector& center, eSurfaceType material, uint8 flags, tColLighting lighting = tColLighting(0xFF));
+    void Set(float radius, const CVector& center, eSurfaceType material, uint8 pieceType = 0, tColLighting lighting = tColLighting{0xFF});
     bool IntersectRay(const CVector& rayOrigin, const CVector& direction, CVector& intersectPoint1, CVector& intersectPoint2);
     bool IntersectEdge(const CVector& startPoint, const CVector& endPoint, CVector& intersectPoint1, CVector& intersectPoint2);
     bool IntersectSphere(const CColSphere& right);
     bool IntersectPoint(const CVector& point);
+
+    auto GetSurfaceType() const { return m_Surface.m_nMaterial; }
+
+    friend auto TransformObject(const CColSphere& sp, const CMatrix& mat) -> CColSphere;
 };
 VALIDATE_SIZE(CColSphere, 0x14);

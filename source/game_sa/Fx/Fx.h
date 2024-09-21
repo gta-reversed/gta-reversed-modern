@@ -24,7 +24,7 @@ enum eSparkType : uint8 {
 };
 
 // original name unknown
-struct FxEntitySystem : public ListItem_c {
+struct FxEntitySystem : public ListItem_c<FxEntitySystem> {
     FxSystem_c* m_System;
     CEntity*    m_Entity;
 };
@@ -49,7 +49,8 @@ public:
     FxSystem_c*             m_WheelDirt;
     FxSystem_c*             m_Glass;
     TList_c<FxEntitySystem> m_FxEntities;
-    uint32                  m_nBloodPoolsCount;
+    uint32                  m_Randomizer;
+
     FxQuality_e             m_FxQuality;
     uint32                  m_nVerticesCount2;
     uint32                  m_nVerticesCount;
@@ -76,37 +77,36 @@ public:
     void Exit();
     void Reset();
 
-    void CreateEntityFx(CEntity* entity, char* fxName, CVector* posn, RwMatrix* transform);
+    void CreateEntityFx(CEntity* entity, const char* fxName, const CVector& pos, RwMatrix* transform);
     void DestroyEntityFx(CEntity* entity);
 
     void Update(RwCamera* camera, float timeDelta);
     void Render(RwCamera* camera, bool heatHaze);
-    void CreateMatFromVec(RwMatrix* out, CVector* origin, CVector* direction);
+    void CreateMatFromVec(RwMatrix* out, const CVector* origin, const CVector* direction);
     void SetFxQuality(FxQuality_e quality);
     [[nodiscard]] FxQuality_e GetFxQuality() const;
 
-    void AddBlood(CVector& origin, CVector& direction, int32 amount, float arg3);
+    void AddBlood(const CVector& origin, const CVector& direction, int32 amount, float arg3);
     void AddWood(CVector& origin, CVector& direction, int32 amount, float arg3);
-    void AddSparks(CVector& origin, CVector& direction, float force, int32 amount, CVector across, eSparkType sparksType, float spread, float life);
-    void AddTyreBurst(CVector& posn, CVector& velocity);
-    void AddBulletImpact(CVector& posn, CVector& direction, int32 bulletFxType, int32 amount, float arg4);
+    void AddSparks(const CVector& origin, const CVector& direction, float force, int32 amount, CVector across, eSparkType sparksType, float spread, float life);
+    void AddTyreBurst(const CVector& posn, const CVector& velocity);
+    void AddBulletImpact(const CVector& posn, const CVector& direction, int32 bulletFxType, int32 amount, float arg4);
     void AddPunchImpact(CVector& posn, CVector& velocity, int32 arg2);
     void AddDebris(CVector& posn, RwRGBA& color, float scale, int32 amount);
     void AddGlass(CVector& posn, RwRGBA& color, float scale, int32 amount);
-    void AddWheelSpray(CVehicle* vehicle, CVector posn, uint8 arg2, uint8 arg3, float arg4);
-    void AddWheelGrass(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness);
-    void AddWheelGravel(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness);
-    void AddWheelMud(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness);
-    void AddWheelSand(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness);
-    void AddWheelDust(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness);
+    void AddWheelSpray(CVehicle* vehicle, CVector pos, bool bWheelsSpinning, bool bInWater, float lightMult);
+    void AddWheelGrass(CVehicle* vehicle, CVector pos, bool bWheelsSpinning, float lightMult);
+    void AddWheelGravel(CVehicle* vehicle, CVector pos, bool bWheelsSpinning, float lightMult);
+    void AddWheelMud(CVehicle* vehicle, CVector pos, bool bWheelsSpinning, float lightMult);
+    void AddWheelSand(CVehicle* vehicle, CVector pos, bool bWheelsSpinning, float lightMult);
+    void AddWheelDust(CVehicle* vehicle, CVector pos, bool bWheelsSpinning, float lightMult);
     void TriggerWaterHydrant(CVector& posn);
-    void TriggerGunshot(CEntity* entity, CVector& origin, CVector& target, bool doGunflash);
+    void TriggerGunshot(CEntity* entity, const CVector& origin, const CVector& target, bool doGunflash);
     void TriggerTankFire(CVector& origin, CVector& target);
     void TriggerWaterSplash(CVector& posn);
     void TriggerBulletSplash(CVector& posn);
     void TriggerFootSplash(CVector& posn);
 };
-
 VALIDATE_SIZE(Fx_c, 0x70);
 
 void RenderBegin(RwRaster* raster, RwMatrix* transform, uint32 transformRenderFlags);
@@ -128,7 +128,7 @@ void RenderAddTri(
     const CRGBA& color1, const CRGBA& color2, const CRGBA& color3
 );
 void RenderEnd();
-void RotateVecIntoVec(RwV3d* vectorsOut, RwV3d* vectorsIn, RwV3d* dir);
-void RotateVecAboutVec(RwV3d* out, RwV3d* arg1, RwV3d* arg2, float angle);
+void RotateVecIntoVec(RwV3d* vecRes, RwV3d* vec, RwV3d* vecAlign);
+void RotateVecAboutVec(RwV3d* vecRes, RwV3d* vec, RwV3d* axis, float angle);
 
 extern Fx_c& g_fx;

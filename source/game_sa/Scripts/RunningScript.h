@@ -10,14 +10,16 @@
 #include "OpcodeResult.h"
 #include "eWeaponType.h"
 #include "Ped.h"
+#include "CommandParser/Utility.hpp"
 
 enum ePedType : uint32;
 
-enum eScriptParameterType {
-    SCRIPT_PARAM_END_OF_ARGUMENTS,
+enum eScriptParameterType : int8 {
+    SCRIPT_PARAM_END_OF_ARGUMENTS, //< Special type used for vararg stuff
+
     SCRIPT_PARAM_STATIC_INT_32BITS,
-    SCRIPT_PARAM_GLOBAL_NUMBER_VARIABLE,
-    SCRIPT_PARAM_LOCAL_NUMBER_VARIABLE,
+    SCRIPT_PARAM_GLOBAL_NUMBER_VARIABLE, //< Global int32 variable
+    SCRIPT_PARAM_LOCAL_NUMBER_VARIABLE, //< Local int32 variable
     SCRIPT_PARAM_STATIC_INT_8BITS,
     SCRIPT_PARAM_STATIC_INT_16BITS,
     SCRIPT_PARAM_STATIC_FLOAT,
@@ -25,25 +27,25 @@ enum eScriptParameterType {
     // Types below are only available in GTA SA
 
     // Number arrays
-    SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY,
-    SCRIPT_PARAM_LOCAL_NUMBER_ARRAY,
+    SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY, //< Global array of numbers (always int32)
+    SCRIPT_PARAM_LOCAL_NUMBER_ARRAY, //< Local array of numbers (always int32)
 
-    SCRIPT_PARAM_STATIC_SHORT_STRING,
+    SCRIPT_PARAM_STATIC_SHORT_STRING, //< Static 8 byte string
 
-    SCRIPT_PARAM_GLOBAL_SHORT_STRING_VARIABLE,
-    SCRIPT_PARAM_LOCAL_SHORT_STRING_VARIABLE,
+    SCRIPT_PARAM_GLOBAL_SHORT_STRING_VARIABLE, //< Local 8 byte string
+    SCRIPT_PARAM_LOCAL_SHORT_STRING_VARIABLE, //< Local 8 byte string
 
-    SCRIPT_PARAM_GLOBAL_SHORT_STRING_ARRAY,
-    SCRIPT_PARAM_LOCAL_SHORT_STRING_ARRAY,
+    SCRIPT_PARAM_GLOBAL_SHORT_STRING_ARRAY, //< Global 8 byte string array
+    SCRIPT_PARAM_LOCAL_SHORT_STRING_ARRAY,  //< Local 8 byte string array
 
-    SCRIPT_PARAM_STATIC_PASCAL_STRING,
-    SCRIPT_PARAM_STATIC_LONG_STRING,
+    SCRIPT_PARAM_STATIC_PASCAL_STRING, //< Pascal string is a sequence of characters with optional size specification. (So says Google)
+    SCRIPT_PARAM_STATIC_LONG_STRING,    //< 16 byte string
 
-    SCRIPT_PARAM_GLOBAL_LONG_STRING_VARIABLE,
-    SCRIPT_PARAM_LOCAL_LONG_STRING_VARIABLE,
+    SCRIPT_PARAM_GLOBAL_LONG_STRING_VARIABLE, //< Global 16 byte string
+    SCRIPT_PARAM_LOCAL_LONG_STRING_VARIABLE, //< Local 16 byte string
 
-    SCRIPT_PARAM_GLOBAL_LONG_STRING_ARRAY,
-    SCRIPT_PARAM_LOCAL_LONG_STRING_ARRAY,
+    SCRIPT_PARAM_GLOBAL_LONG_STRING_ARRAY, //< Global array of 16 byte strings
+    SCRIPT_PARAM_LOCAL_LONG_STRING_ARRAY, //< Local array of 16 byte strings
 };
 
 enum eScriptVariableType : uint8 {
@@ -82,7 +84,7 @@ union tScriptParam {
     uint16 u16Param;
     int16  i16Param;
 
-    uint32 uParam;
+    uint32 uParam{0u};
     int32  iParam;
 
     float  fParam;
@@ -104,6 +106,7 @@ constexpr auto SHORT_STRING_SIZE = 8;
 constexpr auto LONG_STRING_SIZE = 16;
 
 class CRunningScript {
+public:
     /*!
      * Needed for compound if statements.
      * Basically, an `if` translates to:
@@ -125,7 +128,7 @@ class CRunningScript {
      * result and the ANDOR state is decremented until it reaches the lower bound,
      * meaning that all conditions were tested.
      */
-    enum {
+    enum LogicalOpType {
         ANDOR_NONE = 0,
         ANDS_1 = 1,
         ANDS_2,
@@ -146,36 +149,36 @@ class CRunningScript {
     };
 
 public:
-    CRunningScript* m_pNext;
-    CRunningScript* m_pPrev;
-    char            m_szName[8];
-    uint8*          m_pBaseIP;    // base instruction pointer
-    uint8*          m_pCurrentIP; // current instruction pointer
-    uint8*          m_apStack[MAX_STACK_DEPTH];
-    uint16          m_nSP;        // Stack Pointer
-    tScriptParam    m_aLocalVars[NUM_LOCAL_VARS];
-    int32           m_anTimers[NUM_TIMERS];
-    bool            m_bIsActive;
-    bool            m_bCondResult; ///< Used for `COMMAND_GOTO_IF_FALSE`
-    bool            m_bUseMissionCleanup;
+    CRunningScript *m_pNext, *m_pPrev;              //< Linked list shit
+    char            m_szName[8];                    //< Name of the script
+    uint8*          m_pBaseIP;                      //< Base instruction pointer
+    uint8*          m_IP;                           //< current instruction pointer
+    uint8*          m_IPStack[MAX_STACK_DEPTH];     //< Stack of instruction pointers (Usually saved on function call, then popped on return)
+    uint16          m_StackDepth;                   //< Depth (size) of the stack 
+    tScriptParam    m_aLocalVars[NUM_LOCAL_VARS];   //< This script's local variables (Also see `GetPointerToLocalVariable`)
+    int32           m_anTimers[NUM_TIMERS];         //< Active timers (Unsure) 
+    bool            m_bIsActive;                    //< Is the script active (Unsure)
+    bool            m_bCondResult;                  //< (See `COMMAND_GOTO_IF_FALSE`) (Unsure)
+    bool            m_bUseMissionCleanup;           //< If mission cleanup is needed after this script has finished
     bool            m_bIsExternal;
     bool            m_bTextBlockOverride;
     int8            m_nExternalType;
-    int32           m_nWakeTime;
-    uint16          m_nLogicalOp;
-    bool            m_bNotFlag;
+    int32           m_nWakeTime;                    //< Used for sleep-like comamands (like `COMMAND_WAIT`) - The script halts execution until the time is reached
+    uint16          m_nLogicalOp;                   //< Next logical OP type (See `COMMAND_ANDOR`)
+    bool            m_bNotFlag;                     //< Condition result is to be negated (Unsure)
     bool            m_bDeathArrestEnabled;
     bool            m_bDeathArrestExecuted;
-    uint8*          m_pSceneSkipIP; // scene skip instruction pointer
-    bool            m_bIsMission;
+    uint8*          m_pSceneSkipIP;                 //< Scene skip instruction pointer (Unsure)
+    bool            m_bIsMission;                   //< Is (this script) a mission script
 
+public:
     using CommandHandlerFn_t    = OpcodeResult(__thiscall CRunningScript::*)(int32);
     using CommandHandlerTable_t = std::array<CommandHandlerFn_t, 27>;
 
-    static inline CommandHandlerTable_t& CommandHandlerTable = *(CommandHandlerTable_t*)0x8A6168;
-
+    static inline CommandHandlerTable_t& s_OriginalCommandHandlerTable = *(CommandHandlerTable_t*)0x8A6168;
 public:
     static void InjectHooks();
+    static void InjectCustomCommandHooks();
 
     void Init();
 
@@ -203,18 +206,22 @@ public:
     void ReadArrayInformation(int32 updateIp, uint16* outArrVarOffset, int32* outArrElemIdx);
     void ReadParametersForNewlyStartedScript(CRunningScript* newScript);
     void ReadTextLabelFromScript(char* buffer, uint8 nBufferLength);
-    void GetCorrectPedModelIndexForEmergencyServiceType(ePedType pedType, int32* outModelId);
+    void GetCorrectPedModelIndexForEmergencyServiceType(ePedType pedType, uint32* typeSpecificModelId);
     int16 GetPadState(uint16 playerIndex, eButtonId buttonId);
 
     tScriptParam* GetPointerToLocalVariable(int32 varId);
-    tScriptParam* GetPointerToLocalArrayElement(int32 arrVarOffset, uint16 arrElemIdx, uint8 arrElemSize);
+    tScriptParam* GetPointerToLocalArrayElement(int32 arrVarOffset, uint16 arrElemIdx, uint8 arrayEntriesSizeAsParams);
     tScriptParam* GetPointerToScriptVariable(eScriptVariableType variableType);
+
+    tScriptParam* GetPointerToGlobalArrayElement(int32 arrBase, uint16 arrIdx, uint8 arrayEntriesSizeAsParams);
+    tScriptParam* GetPointerToGlobalVariable(int32 varId);
     uint16        GetIndexOfGlobalVariable();
 
     void DoDeathArrestCheck(); // original name DoDeatharrestCheck
 
-    void SetCharCoordinates(CPed* ped, float x, float y, float z, bool bWarpGang, bool bOffset);
+    static void SetCharCoordinates(CPed& ped, CVector posn, bool warpGang, bool offset);
     void GivePedScriptedTask(int32 pedHandle, CTask* task, int32 opcode);
+    void GivePedScriptedTask(CPed* ped, CTask* task, int32 opcode); // NOTSA overload
 
     void AddScriptToList(CRunningScript** queueList);
     void RemoveScriptFromList(CRunningScript** queueList);
@@ -233,17 +240,32 @@ public:
     void SetName(const char* name)      { strcpy_s(m_szName, name); }
     void SetName(std::string_view name) { assert(name.size() < sizeof(m_szName)); strncpy_s(m_szName, name.data(), name.size()); }
     void SetBaseIp(uint8* ip)           { m_pBaseIP = ip; }
-    void SetCurrentIp(uint8* ip)        { m_pCurrentIP = ip; }
+    void SetCurrentIp(uint8* ip)        { m_IP = ip; }
     void SetActive(bool active)         { m_bIsActive = active; }
     void SetExternal(bool external)     { m_bIsExternal = external; }
 
-    template<eScriptCommands Command>
-    OpcodeResult ProcessCommand() {
-        // By default call original GTA handler
-        return std::invoke(CommandHandlerTable[(size_t)Command / 100], this, Command);
+    //! Highlight an important area 2D
+    void HighlightImportantArea(CVector2D from, CVector2D to, float z = -100.f);
+
+    //! Highlight an important area 2D
+    void HighlightImportantArea(CRect area, float z = -100.f);
+
+    //! Highlight an important area 3D
+    void HighlightImportantArea(CVector from, CVector to);
+
+    //! Refer to `IsPositionWithinQuad2D` for information on how this works
+    void HighlightImportantAngledArea(uint32 id, CVector2D a, CVector2D b, CVector2D c, CVector2D d);
+
+    //! Read a value from at the current IP then increase IP by the number of bytes read.
+    template<typename T>
+    T ReadAtIPAs() {
+        const auto ret = *reinterpret_cast<T*>(m_IP);
+        m_IP += sizeof(T);
+        return ret;
     }
 
-    static void SetCommandHandler(eScriptCommands cmd, OpcodeResult(*handler)(CRunningScript*));
+    //! Return the custom command handler of a function (or null) as a reference
+    static notsa::script::CommandHandlerFunction& CustomCommandHandlerOf(eScriptCommands command); // Returning a ref here for convenience (instead of having to make a `Set` function too)
 };
 
 VALIDATE_SIZE(CRunningScript, 0xE0);

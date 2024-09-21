@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Game.h"
+#include "Enums/eGameState.h"
 
 #define RSEVENT_SUCCEED(x) ((x) ? rsEVENTPROCESSED : rsEVENTERROR)
 
@@ -16,7 +17,16 @@
 void AppInjectHooks();
 
 static inline int32& gGameState = *(int32*)0xC8D4C0;
-static inline bool ForegroundApp = *(bool*)0x8D621C;
+
+//! NOTSA (We wanna have this wrapper for debugging)
+inline void ChangeGameStateTo(eGameState newgs) {
+    if (gGameState != newgs) {
+        DEV_LOG("GS Change: `{}` to `{}`", EnumToString((eGameState)gGameState), EnumToString(newgs));
+        gGameState = newgs;
+    }
+};
+
+static inline bool& ForegroundApp = *(bool*)0x8D621C;
 
 static inline RwRGBA& gColourTop    = *(RwRGBA*)0xB72CA0;
 static inline RwRGBA& gColourBottom = *(RwRGBA*)0xB72CA4;
@@ -120,3 +130,5 @@ float GetDayNightBalance();
 
 // 0x746870
 void MessageLoop();
+
+char* getDvdGamePath();

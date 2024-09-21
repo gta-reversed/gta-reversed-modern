@@ -31,7 +31,14 @@ public:
     * @param color     Color of the lines used
     */
     void DrawWireFrame(CRGBA color, const CMatrix& transform) const;
-    
+
+    //! Is the line vertical
+    bool IsVertical() const { return CVector2D{ m_vecStart } == CVector2D{ m_vecEnd }; }
+
+    friend auto TransformObject(const CColLine& ln, const CMatrix& transform) -> CColLine {
+        return { transform.TransformPoint(ln.m_vecStart), transform.TransformPoint(ln.m_vecEnd) };
+    }
+
 public:
     CVector m_vecStart;
     float   m_fStartSize;

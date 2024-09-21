@@ -1,6 +1,8 @@
 #include "StdInc.h"
-#include "app_game.h"
 
+#include <tracy/Tracy.hpp>
+
+#include "app_game.h"
 #include "LoadingScreen.h"
 #include "PlantMgr.h"
 #include "Shadows.h"
@@ -14,13 +16,16 @@
 #include "Garages.h"
 #include "UIRenderer.h"
 #include "Gamma.h"
-#include <Birds.h>
-#include <Skidmarks.h>
-#include <Ropes.h>
-#include <Glass.h>
-#include <WaterCannons.h>
-#include <VehicleRecording.h>
-#include <PostEffects.h>
+#include "Birds.h"
+#include "Skidmarks.h"
+#include "Ropes.h"
+#include "Glass.h"
+#include "WaterCannons.h"
+#include "VehicleRecording.h"
+#include "PostEffects.h"
+#include "CarFXRenderer.h"
+
+#include "extensions/Configs/FastLoader.hpp"
 
 void AppGameInjectHooks() {
     RH_ScopedCategory("App");
@@ -36,11 +41,11 @@ void AppGameInjectHooks() {
     RH_ScopedGlobalInstall(RenderEffects, 0x53E170);
     RH_ScopedGlobalInstall(RenderScene, 0x53DF40);
     RH_ScopedGlobalInstall(RenderMenus, 0x53E530);
-    RH_ScopedGlobalInstall(Render2dStuff, 0x53E230, {.locked = true});
+    RH_ScopedGlobalInstall(Render2dStuff, 0x53E230, { .locked = true }); // Must be hooked at all times otherwise game locks!
     RH_ScopedGlobalInstall(RenderDebugShit, 0x53E160);
 
-    RH_ScopedGlobalInstall(Idle, 0x53E920);
-    RH_ScopedGlobalInstall(FrontendIdle, 0x53E770);
+    RH_ScopedGlobalInstall(Idle, 0x53E920, { .locked = true }); // Must be hooked at all times otherwise game locks!
+    RH_ScopedGlobalInstall(FrontendIdle, 0x53E770, { .locked = true }); // Must be hooked at all times otherwise imgui stops working!
 }
 
 // 0x5BF3B0
@@ -51,6 +56,8 @@ void GameInit() {
 
 // 0x53E580
 void InitialiseGame() {
+    ZoneScoped;
+
     static int16& version_number = *(int16*)(0xB72C68);
     version_number = 78;
 
@@ -85,6 +92,8 @@ void RwTerminate() {
 
 // 0x53E170
 void RenderEffects() {
+    ZoneScoped;
+
     CBirds::Render();
     CSkidmarks::Render();
     CRopes::Render();
@@ -118,6 +127,8 @@ void RenderEffects() {
 
 // 0x53DF40
 void RenderScene() {
+    ZoneScoped;
+
     const auto underWater = CWeather::UnderWaterness <= 0.0f;
 
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
@@ -197,11 +208,13 @@ void RenderScene() {
         RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLBACK));
     }
 
-    gRenderStencil();
+    CStencilShadows::RenderStencilShadows();
 }
 
 // 0x53E530
 void RenderMenus() {
+    ZoneScoped;
+
     if (FrontEndMenuManager.m_bMenuActive) {
         FrontEndMenuManager.DrawFrontEnd();
     }
@@ -209,13 +222,15 @@ void RenderMenus() {
 
 // 0x53E230
 void Render2dStuff() {
+    ZoneScoped;
+
     RenderDebugShit(); // NOTSA, temp
 
     const auto DrawOuterZoomBox = []() {
         CPed* player = FindPlayerPed();
         eWeaponType weaponType = WEAPON_UNARMED;
         if (player)
-            weaponType = player->GetActiveWeapon().m_nType;
+            weaponType = player->GetActiveWeapon().m_Type;
         eCamMode camMode = CCamera::GetActiveCamera().m_nMode;
         bool firstPersonWeapon = false;
         if (camMode == MODE_SNIPER || camMode == MODE_SNIPER_RUNABOUT || camMode == MODE_ROCKETLAUNCHER || camMode == MODE_ROCKETLAUNCHER_RUNABOUT || camMode == MODE_CAMERA ||
@@ -258,9 +273,6 @@ void Render2dStuff() {
     CDarkel::DrawMessages();
     CGarages::PrintMessages();
     CFont::DrawFonts();
-
-    // NOTSA: ImGui menu draw loop
-    notsa::ui::UIRenderer::GetSingleton().DrawLoop();
 }
 
 // 0x53E160
@@ -278,6 +290,8 @@ void RenderDebugShit() {
 
 // 0x53E920
 void Idle(void* param) {
+    ZoneScoped;
+
     /* FPS lock. Limits to 26 frames per second.
     CTimer::GetCurrentTimeInCycles();
     CTimer::GetCyclesPerMillisecond();
@@ -311,8 +325,10 @@ void Idle(void* param) {
     }
 
     if (!FrontEndMenuManager.m_bMenuActive && TheCamera.GetScreenFadeStatus() != eNameState::NAME_FADE_IN) {
-        CVector2D mousePos{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f};
-        RsMouseSetPos(&mousePos);
+        if (!notsa::ui::UIRenderer::GetSingleton().GetImIO()->NavActive) { // If imgui nav is active don't center the cursor
+            FrontEndMenuManager.CentreMousePointer();
+        }
+
         CRenderer::ConstructRenderList();
         CRenderer::PreRender();
         CWorld::ProcessPedsAfterPreRender();
@@ -357,12 +373,18 @@ void Idle(void* param) {
     CCredits::Render();
     CDebug::DebugDisplayTextBuffer();
     FlushObrsPrintfs();
+
+    // NOTSA: ImGui menu draw loop
+    notsa::ui::UIRenderer::GetSingleton().DrawLoop();
+
     RwCameraEndUpdate(Scene.m_pRwCamera);
     RsCameraShowRaster(Scene.m_pRwCamera);
 }
 
 // 0x53E770
 void FrontendIdle() {
+    ZoneScoped;
+
     CDraw::CalculateAspectRatio();
     CTimer::Update();
     CSprite2d::SetRecipNearClip();
@@ -375,12 +397,17 @@ void FrontendIdle() {
     }
     FrontEndMenuManager.Process();
 
-    if (RsGlobal.quit)
+    if (RsGlobal.quit) {
         return;
+    }
 
     AudioEngine.Service();
     CameraSize(Scene.m_pRwCamera, nullptr, SCREEN_VIEW_WINDOW, SCREEN_ASPECT_RATIO);
     CVisibilityPlugins::SetRenderWareCamera(Scene.m_pRwCamera);
+
+    if (g_FastLoaderConfig.ShouldLoadSaveGame()) {
+        return; // Don't render anything
+    }
 
     RwCameraClear(Scene.m_pRwCamera, &gColourTop, rwCAMERACLEARZ);
     if (RsCameraBeginUpdate(Scene.m_pRwCamera)) {
@@ -403,6 +430,9 @@ void FrontendIdle() {
         CFont::DrawFonts();
         CDebug::DebugDisplayTextBuffer();
         FlushObrsPrintfs();
+
+        // NOTSA: ImGui menu draw loop
+        notsa::ui::UIRenderer::GetSingleton().DrawLoop();
 
         RwCameraEndUpdate(Scene.m_pRwCamera);
         RsCameraShowRaster(Scene.m_pRwCamera);

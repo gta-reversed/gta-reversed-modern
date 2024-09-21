@@ -130,8 +130,7 @@ VALIDATE_SIZE(UpgradePosnDesc, 0x20);
 class NOTSA_EXPORT_VTABLE CVehicleModelInfo : public CClumpModelInfo {
 public:
     RpMaterial*        m_pPlateMaterial;
-    char               m_szPlateText[8];
-    char               field_30;
+    char               m_szPlateText[9];
     uint8              m_nPlateType;
     char               m_szGameName[8];
     eVehicleType       m_nVehicleType;
@@ -278,14 +277,6 @@ public:
     void SetClump(RpClump* clump) override;
 
     // VTable implementations
-    ModelInfoType GetModelType_Reversed();
-    void Init_Reversed();
-    void DeleteRwObject_Reversed();
-    RwObject* CreateInstance_Reversed();
-    void SetAnimFile_Reversed(const char* filename);
-    void ConvertAnimFileIndex_Reversed();
-    int32 GetAnimFileIndex_Reversed();
-    void SetClump_Reversed(RpClump* clump);
 
     // Class methods
     // setup model render callbacks
@@ -330,7 +321,7 @@ public:
     // get num doors in this model
     int32 GetNumDoors();
     // get position of dummy in model-space
-    CVector* GetModelDummyPosition(eVehicleDummy dummy) const { return &m_pVehicleStruct->m_avDummyPos[dummy]; } // NOTSA
+    auto&& GetModelDummyPosition(this auto&& self, eVehicleDummy dummy) { return self.m_pVehicleStruct->m_avDummyPos[dummy]; } // NOTSA
     // Static method's
     // setup lights states for currently rendered vehicle
     static void SetupLightFlags(class CVehicle* vehicle);

@@ -210,7 +210,7 @@ auto CFire::GetFireParticleNameForStrength() const {
 // 0x539360
 void CFire::CreateFxSysForStrength(const CVector& point, RwMatrix* matrix) {
     DestroyFx();
-    m_pFxSystem = g_fxMan.CreateFxSystem(GetFireParticleNameForStrength(), const_cast<CVector*>(&point), matrix, true); // TODO: Make CreateFxSys take const CVector&
+    m_pFxSystem = g_fxMan.CreateFxSystem(GetFireParticleNameForStrength(), point, matrix, true);
     if (m_pFxSystem)
         m_pFxSystem->Play();
 }
@@ -334,7 +334,7 @@ void CFire::ProcessFire() {
             if (vehicle->IsSubBMX()) {
                 player->DoStuffToGoOnFire();
                 gFireManager.StartFire(player, m_pEntityCreator, 0.8f, true, 7000, 100);
-                vehicle->BurstTyre(vehicle->FindTyreNearestPoint(m_vecPosition.x, m_vecPosition.y) + 13, false); // TODO: What's this 13?
+                vehicle->BurstTyre(vehicle->FindTyreNearestPoint(m_vecPosition) + 13, false); // TODO: What's this 13?
             } else {
                 gFireManager.StartFire(vehicle, m_pEntityCreator, 0.8f, true, 7000, 100);
             }

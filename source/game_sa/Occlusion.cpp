@@ -39,8 +39,9 @@ void COcclusion::InjectHooks()
 }
 
 // 0x71DCA0
-void COcclusion::Init()
-{
+void COcclusion::Init() {
+    ZoneScoped;
+
     NumOccludersOnMap         =  0;
     NumInteriorOcculdersOnMap =  0;
     FarAwayList               = -1;
@@ -153,7 +154,7 @@ bool COcclusion::IsPositionOccluded(CVector vecPos, float fRadius)
 
     CVector outPos;
     float screenX, screenY;
-    if (!CalcScreenCoors(vecPos, &outPos, &screenX, &screenY))
+    if (!CalcScreenCoors(vecPos, outPos, screenX, screenY))
         return false;
 
     const auto fLongEdge = std::max(screenX, screenY);

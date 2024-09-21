@@ -11,9 +11,11 @@
 
 class CBox {
 public:
-    static void InjectHooks();
+    CVector m_vecMin{}, m_vecMax{};
 
-public:
+    constexpr CBox() = default;
+    constexpr CBox(CVector min, CVector max) : m_vecMin(min), m_vecMax(max) {}
+
     void Set(const CVector& vecMin, const CVector& vecMax);
 
     //! Updates box corners, like (if left>right then swap(left, right))
@@ -25,6 +27,12 @@ public:
     float   GetHeight() const { return m_vecMax.z - m_vecMin.z; }
     CVector GetCenter() const { return (m_vecMax + m_vecMin) / 2.f; }
 
+    //! Check is point within the box
+    bool IsPointInside(const CVector& point) const;
+
+    //! Stretch the bounding box so that the point `pt` will be inside it
+    void StretchToPoint(const CVector& pt);
+
     /*!
     * @addr notsa
     * @brief Render the box in the 3D world (Be sure to call from a place where 3D stuff is rendered, if called from elsewhere you won't see the lines!)
@@ -35,7 +43,7 @@ public:
     void DrawWireFrame(CRGBA color, const CMatrix& transform = CMatrix::Unity()) const;
 
 public:
-    CVector m_vecMin, m_vecMax;
+    static void InjectHooks();
 };
 
 VALIDATE_SIZE(CBox, 0x18);

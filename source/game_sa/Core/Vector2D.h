@@ -7,14 +7,18 @@
 #pragma once
 
 #include <span>
-
-#include "RenderWare.h"
+#include <rwplcore.h>
+#include <Base.h>
 
 class CVector;
+class CVector2D;
+
+constexpr CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo);
 
 class CVector2D : public RwV2d {
 public:
     constexpr CVector2D() = default;
+    constexpr explicit CVector2D(float XY) : RwV2d{XY, XY} {}
     constexpr CVector2D(float X, float Y) : RwV2d{ X, Y } {}
     constexpr CVector2D(const RwV2d& vec2d)     { x = vec2d.x; y = vec2d.y; }
     constexpr CVector2D(const CVector2D& vec2d) { x = vec2d.x; y = vec2d.y; }
@@ -28,14 +32,26 @@ public:
 
     static void InjectHooks();
 
-    /// Normalize this vector in-place
-    void  Normalise();
+    /*!
+    * @brief Normalize this vector in-place
+    *
+    * @param [opt, out, notsa] outMag The magnitude of the vector
+    */
+    void Normalise(float* outMag = nullptr);
 
-    /// Get a normalized copy of this vector
-    auto Normalized() const {
+    /*!
+    * @brief Get a normalized copy of this vector
+    *
+    * @param [opt, out] mag The magnitude of the vector
+    */
+    auto Normalized(float* outMag = nullptr) const {
         CVector2D cpy = *this;
-        cpy.Normalise();
+        cpy.Normalise(outMag);
         return cpy;
+    }
+
+    [[nodiscard]] constexpr float ComponentwiseSum() const {
+        return x + y;
     }
 
     [[nodiscard]] constexpr inline float SquaredMagnitude() const {
@@ -82,6 +98,11 @@ public:
         y *= multiplier;
     }
 
+    inline void operator*=(CVector2D multiplier) {
+        x *= multiplier.x;
+        y *= multiplier.y;
+    }
+
     inline void operator/=(float divisor) {
         x /= divisor;
         y /= divisor;
@@ -105,36 +126,19 @@ public:
         return { vec.x * multiplier, vec.y * multiplier };
     }
 
-    /// Calculate the dot product with another vector
+    //! Dot product of *this and another vector
     float Dot(const CVector2D& lhs) const {
         return x * lhs.x + y * lhs.y;
     }
 
-    /*!
-    * @notsa
-    * 
-    * @brief Calculate the cross product of *this and `lhs`
-    * 
-    * @param lhs The vector to calculate the cross product with
-    *
-    * @return Magnitude of the vector that would result from a regular 3D cross product of the input vectors taking their Z values implicitly as 0.
-    *
-    * Returns the signed magnitude of the vector that would result
-    * from a regular 3D cross product of the input vectors,
-    * taking their Z values implicitly as 0
-    * (i.e. treating the 2D space as a plane in the 3D space).
-    * The 3D cross product will be perpendicular to that plane,
-    * and thus have 0 X & Y components
-    * (thus the scalar returned is the Z value of the 3D cross product vector).
-    * Copied from (with 1 change): https://stackoverflow.com/a/243977
-    */
-    auto Cross(const CVector2D& lhs) const {
-        return x * lhs.y - y * lhs.x;
+    //! 2D "cross product" of *this and another vector
+    //! See https://stackoverflow.com/a/243977
+    float Cross(const CVector2D& lhs) const {
+        return (x * lhs.y) - (y * lhs.x);
     }
 
-    /*!
-    * @return A copy of this vector projected onto the input vector, which is assumed to be unit length.
-    */
+    //! Get a copy of `*this` vector projected onto `projectOnTo` (which is assumed to be unit length)
+    //! The result will have a magnitude of `sqrt(abs(this->Dot(projectOnTo)))`
     CVector2D ProjectOnToNormal(const CVector2D& projectOnTo) const {
         return projectOnTo * Dot(projectOnTo);
     }
@@ -148,19 +152,60 @@ public:
     //! Get vector perpendicular to `*this` on the right side (Same direction `*this` rotated by -90)
     //! Also see `GetPerpLeft` and `RotatedBy`
     //! (This sometimes is also called a 2D cross product https://stackoverflow.com/questions/243945 )
-    CVector2D GetPerpRight() const;
+    CVector2D GetPerpRight() const { return { y, -x }; }
 
     //! Get vector perpendicular to `*this` on the left side (Same direction `*this` rotated by 90)
     //! Also see `GetPerpRight` and `RotatedBy`
-    CVector2D GetPerpLeft() const;
+    CVector2D GetPerpLeft() const { return { -y, x }; }
+
+    /*!
+    * @notsa
+    * @return Make all component's values absolute (positive).
+    */
+    static friend CVector2D abs(CVector2D v2) {
+        return { std::abs(v2.x), std::abs(v2.y) };
+    }
+
+    static friend CVector2D pow(CVector2D vec, float power) { // todo/note: maybe use operator^?
+        return { std::pow(vec.x, power), std::pow(vec.y, power) };
+    }
+
+    float operator[](size_t i) const {
+        return (&x)[i];
+    }
+
+    float& operator[](size_t i) {
+        return (&x)[i];
+    }
+
+    /*!
+     * @brief Prefer this over (a - b).Magnitude()
+     * @param a Point A
+     * @param b Point B
+     * @return 2D Distance between 2 points
+    */
+    static inline float Dist(CVector2D a, CVector2D b) {
+        return (a - b).Magnitude();
+    }
+
+    /*!
+    * @brief Prefer this over (a - b).SquaredMagnitude()
+    * @param a Point A
+    * @param b Point B
+    * @return 2D Squared distance between 2 points
+    */
+    static inline float DistSqr(CVector2D a, CVector2D b) {
+        return (a - b).SquaredMagnitude();
+    }
 };
+
+/// Negate all components of the vector
+constexpr inline CVector2D operator-(const CVector2D& lhs) {
+    return { -lhs.x, -lhs.y };
+}
 
 constexpr inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {
     return { vecOne.x - vecTwo.x, vecOne.y - vecTwo.y };
-}
-
-constexpr inline CVector2D operator-(const CVector2D& vecOne) {
-    return { -vecOne.x, -vecOne.y };
 }
 
 constexpr inline CVector2D operator+(const CVector2D& vecOne, const CVector2D& vecTwo) {
@@ -221,7 +266,3 @@ constexpr static bool IsPointInRectangle2D(CVector2D rectTopLeft, CVector2D rect
 }
 
 static CVector2D Normalized2D(CVector2D v) { v.Normalise(); return v; }
-
-static auto abs(const CVector2D& v2d) {
-    return CVector2D{ std::abs(v2d.x), std::abs(v2d.y) };
-}

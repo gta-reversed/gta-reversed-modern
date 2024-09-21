@@ -7,14 +7,13 @@
 #pragma once
 
 class CSprite2d;
-
 class CLoadingScreen {
 public:
     static constexpr size_t MAX_SPLASHES = 7u;
 
     static inline char (&m_PopUpMessage)[16] = *(char (*)[16])0xBAB268;
-    static inline char (&m_LoadingGxtMsg1)[80] = *(char (*)[80])0xBAB2C8;
-    static inline char (&m_LoadingGxtMsg2)[80] = *(char (*)[80])0xBAB278;
+    static inline GxtChar (&m_LoadingGxtMsg1)[80] = *(GxtChar (*)[80])0xBAB2C8;
+    static inline GxtChar (&m_LoadingGxtMsg2)[80] = *(GxtChar (*)[80])0xBAB278;
     static inline std::array<CSprite2d, MAX_SPLASHES>& m_aSplashes = *(std::array<CSprite2d, MAX_SPLASHES>*)0xBAB35C;
 
     static inline int32& m_currDisplayedSplash = *(int32*)0x8D093C;
@@ -66,6 +65,9 @@ public:
 
     [[nodiscard]] static bool IsActive() { return m_bActive; } // 0x744DB5
     static CSprite2d& GetCurrentDisplayedSplash() { return m_aSplashes[m_currDisplayedSplash]; }
+
+    //! NOTSA - Skips the copyright splash
+    static void SkipCopyrightSplash();
 };
 
 void LoadingScreen(const char* msg1, const char* msg2 = nullptr, const char* msg3 = nullptr);

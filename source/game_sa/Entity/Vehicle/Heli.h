@@ -57,7 +57,7 @@ VALIDATE_SIZE(tHeliLight, 0x4C);
 
 class FxSystem_c;
 
-class CHeli : public CAutomobile {
+class NOTSA_EXPORT_VTABLE CHeli : public CAutomobile {
 public:
     uint8        m_nHeliFlags;
     float        m_fLeftRightSkid;
@@ -97,6 +97,8 @@ public:
     static inline bool& bHeliControlsCheat                    = *(bool*)0xC1C970;
     static inline std::array<tHeliLight, 4>& HeliSearchLights = *(std::array<tHeliLight, 4>*)0xC1C990;
 
+    static constexpr auto Type = VEHICLE_TYPE_HELI;
+
 public:
     CHeli(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CHeli() override; // 0x6C4340, 0x6C4810
@@ -125,12 +127,20 @@ public:
     static void SpecialHeliPreRender(); // dummy function
     static void SwitchPoliceHelis(bool enable);
     static void SearchLightCone(int32 coronaIndex,
-                                CVector origin, CVector target,
+                                CVector origin,
+                                CVector target,
                                 float targetRadius,
                                 float power,
-                                uint8 unknownFlag, uint8 drawShadow,
-                                CVector* useless0, CVector* useless1, CVector* useless2,
-                                bool a11, float baseRadius, float a13, float a14, float a15);
+                                uint8 clipIfColliding,
+                                uint8 drawShadow,
+                                CVector& useless0,
+                                CVector& useless1,
+                                CVector& useless2,
+                                bool a11,
+                                float baseRadius,
+                                float a13,
+                                float a14,
+                                float a15);
     static CHeli* GenerateHeli(CPed* target, bool newsHeli);
     static void TestSniperCollision(CVector* origin, CVector* target);
     static void UpdateHelis();
@@ -141,16 +151,6 @@ private:
     static void InjectHooks();
 
     CHeli* Constructor(int32 modelIndex, eVehicleCreatedBy createdBy) { this->CHeli::CHeli(modelIndex, createdBy); return this;}
-    void BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion) { return CHeli::BlowUpCar(damager, bHideExplosion); }
-    void Fix_Reversed() { CHeli::Fix(); }
-    bool BurstTyre_Reversed(uint8 tyreComponentId, bool bPhysicalEffect) { return CHeli::BurstTyre(tyreComponentId, bPhysicalEffect); }
-    bool SetUpWheelColModel_Reversed(CColModel* wheelCol) { return CHeli::SetUpWheelColModel(wheelCol); }
-    void ProcessControlInputs_Reversed(uint8 playerNum) { return CHeli::ProcessControlInputs(playerNum); }
-    void Render_Reversed() { CHeli::Render(); }
-    void SetupDamageAfterLoad_Reversed() { CHeli::SetupDamageAfterLoad(); }
-    void ProcessFlyingCarStuff_Reversed() { CHeli::ProcessFlyingCarStuff(); }
-    void PreRender_Reversed() { CHeli::PreRender(); }
-    void ProcessControl_Reversed() { CHeli::ProcessControl(); }
 };
 
 VALIDATE_SIZE(CHeli, 0xA18);

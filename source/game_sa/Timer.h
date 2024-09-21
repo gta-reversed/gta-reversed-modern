@@ -69,6 +69,8 @@ public:
     static void   UpdateVariables(float timeElapsed);
     static void   Update();
 
+    static float GetTimestepPerSecond() { return TIMESTEP_PER_SECOND; }
+
     // Inlined funcs
     // They could have used functions with a longer name, ex:
     // GetTimeInMillisecond, we have shorter GetTimeInMS
@@ -106,6 +108,11 @@ public:
     static bool GetIsUserPaused() { return m_UserPause; }
     static bool GetIsCodePaused() { return m_CodePause; }
     static void SetCodePause(bool pause) { m_CodePause = pause; }
+
+    // NOTSA section
+
+    static bool HasTimePointPassed(uint32 timeMs) { return GetTimeInMS() >= timeMs; }
+    static bool IsTimeInRange(uint32 fromMs, uint32 toMs) { return HasTimePointPassed(fromMs) && !HasTimePointPassed(toMs); }
 };
 
 uint64 GetMillisecondTime();

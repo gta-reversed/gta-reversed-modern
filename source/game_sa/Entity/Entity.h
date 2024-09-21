@@ -11,6 +11,7 @@
 #include "Rect.h"
 #include "ColModel.h"
 #include "Plugins\TwoDEffectPlugin\2dEffect.h"
+#include <extensions/EntityRef.hpp>
 
 #include "eEntityType.h"
 #include "eEntityStatus.h"
@@ -37,6 +38,9 @@ class CBaseModelInfo;
 
 class NOTSA_EXPORT_VTABLE CEntity : public CPlaceable {
 public:
+    using Ref = notsa::EntityRef<CEntity>;
+
+public:
     union {
         struct RwObject* m_pRwObject;
         struct RpClump*  m_pRwClump;
@@ -45,41 +49,41 @@ public:
     union {
         struct {
             /* https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CEntitySA.h */
-            uint32 m_bUsesCollision : 1;               // does entity use collision
-            uint32 m_bCollisionProcessed : 1;          // has object been processed by a ProcessEntityCollision function
-            uint32 m_bIsStatic : 1;                    // is entity static
-            uint32 m_bHasContacted : 1;                // has entity processed some contact forces
-            uint32 m_bIsStuck : 1;                     // is entity stuck
-            uint32 m_bIsInSafePosition : 1;            // is entity in a collision free safe position
-            uint32 m_bWasPostponed : 1;                // was entity control processing postponed
-            uint32 m_bIsVisible : 1;                   // is the entity visible
+            bool m_bUsesCollision : 1;               // does entity use collision
+            bool m_bCollisionProcessed : 1;          // has object been processed by a ProcessEntityCollision function
+            bool m_bIsStatic : 1;                    // is entity static
+            bool m_bHasContacted : 1;                // has entity processed some contact forces
+            bool m_bIsStuck : 1;                     // is entity stuck
+            bool m_bIsInSafePosition : 1;            // is entity in a collision free safe position
+            bool m_bWasPostponed : 1;                // was entity control processing postponed
+            bool m_bIsVisible : 1;                   // is the entity visible
 
-            uint32 m_bIsBIGBuilding : 1;               // Set if this entity is a big building
-            uint32 m_bRenderDamaged : 1;               // use damaged LOD models for objects with applicable damage
-            uint32 m_bStreamingDontDelete : 1;         // Don't let the streaming remove this
-            uint32 m_bRemoveFromWorld : 1;             // remove this entity next time it should be processed
-            uint32 m_bHasHitWall : 1;                  // has collided with a building (changes subsequent collisions)
-            uint32 m_bImBeingRendered : 1;             // don't delete me because I'm being rendered
-            uint32 m_bDrawLast : 1;                    // draw object last
-            uint32 m_bDistanceFade : 1;                // Fade entity because it is far away
+            bool m_bIsBIGBuilding : 1;               // Set if this entity is a big building
+            bool m_bRenderDamaged : 1;               // use damaged LOD models for objects with applicable damage
+            bool m_bStreamingDontDelete : 1;         // Don't let the streaming remove this
+            bool m_bRemoveFromWorld : 1;             // remove this entity next time it should be processed
+            bool m_bHasHitWall : 1;                  // has collided with a building (changes subsequent collisions)
+            bool m_bImBeingRendered : 1;             // don't delete me because I'm being rendered
+            bool m_bDrawLast : 1;                    // draw object last
+            bool m_bDistanceFade : 1;                // Fade entity because it is far away
 
-            uint32 m_bDontCastShadowsOn : 1;           // Don't cast shadows on this object
-            uint32 m_bOffscreen : 1;                   // offscreen flag. This can only be trusted when it is set to true
-            uint32 m_bIsStaticWaitingForCollision : 1; // this is used by script created entities - they are static until the collision is loaded below them
-            uint32 m_bDontStream : 1;                  // tell the streaming not to stream me
-            uint32 m_bUnderwater : 1;                  // this object is underwater change drawing order
-            uint32 m_bHasPreRenderEffects : 1;         // Object has a prerender effects attached to it
-            uint32 m_bIsTempBuilding : 1;              // whether the building is temporary (i.e. can be created and deleted more than once)
-            uint32 m_bDontUpdateHierarchy : 1;         // Don't update the animation hierarchy this frame
+            bool m_bDontCastShadowsOn : 1;           // Don't cast shadows on this object
+            bool m_bOffscreen : 1;                   // offscreen flag. This can only be trusted when it is set to true
+            bool m_bIsStaticWaitingForCollision : 1; // this is used by script created entities - they are static until the collision is loaded below them
+            bool m_bDontStream : 1;                  // tell the streaming not to stream me
+            bool m_bUnderwater : 1;                  // this object is underwater change drawing order
+            bool m_bHasPreRenderEffects : 1;         // Object has a prerender effects attached to it
+            bool m_bIsTempBuilding : 1;              // whether the building is temporary (i.e. can be created and deleted more than once)
+            bool m_bDontUpdateHierarchy : 1;         // Don't update the animation hierarchy this frame
 
-            uint32 m_bHasRoadsignText : 1;             // entity is roadsign and has some 2dEffect text stuff to be rendered
-            uint32 m_bDisplayedSuperLowLOD : 1;
-            uint32 m_bIsProcObject : 1;                // set object has been generated by procedural object generator
-            uint32 m_bBackfaceCulled : 1;              // has backface culling on
-            uint32 m_bLightObject : 1;                 // light object with directional lights
-            uint32 m_bUnimportantStream : 1;           // set that this object is unimportant, if streaming is having problems
-            uint32 m_bTunnel : 1;                      // Is this model part of a tunnel
-            uint32 m_bTunnelTransition : 1;            // This model should be rendered from within and outside the tunnel
+            bool m_bHasRoadsignText : 1;             // entity is roadsign and has some 2dEffect text stuff to be rendered
+            bool m_bDisplayedSuperLowLOD : 1;
+            bool m_bIsProcObject : 1;                // set object has been generated by procedural object generator
+            bool m_bBackfaceCulled : 1;              // has backface culling on
+            bool m_bLightObject : 1;                 // light object with directional lights
+            bool m_bUnimportantStream : 1;           // set that this object is unimportant, if streaming is having problems
+            bool m_bTunnel : 1;                      // Is this model part of a tunnel
+            bool m_bTunnelTransition : 1;            // This model should be rendered from within and outside the tunnel
         };
         uint32 m_nFlags;
     };
@@ -103,8 +107,8 @@ public:
     };
     int8          m_nNumLodChildren;
     uint8         m_nNumLodChildrenRendered;
-    eEntityType   m_nType : 3;
-    eEntityStatus m_nStatus : 5;
+    eEntityType   m_nType : 3;          // Mask: & 0x7  = 7
+    eEntityStatus m_nStatus : 5;        // Mask: & 0xF8 = 248 (Remember: In the original code unless this was left shifted the value it's compared to has to be left shifted by 3!)
 
 public:
     CEntity();
@@ -118,7 +122,7 @@ public:
     virtual void SetModelIndexNoCreate(uint32 index);               // VTab: 6
     virtual void CreateRwObject();                                  // VTab: 7
     virtual void DeleteRwObject();                                  // VTab: 8
-    virtual CRect* GetBoundRect(CRect* pRect);                      // VTab: 9 - TODO: Most likely RVO'd. Should probably return a `CRect`, and take no args.
+    virtual CRect GetBoundRect();                                   // VTab: 9
     virtual void ProcessControl();                                  // VTab: 10
     virtual void ProcessCollision();                                // VTab: 11
     virtual void ProcessShift();                                    // VTab: 12
@@ -174,6 +178,11 @@ public:
     bool IsVisible();
     float GetDistanceFromCentreOfMassToBaseOfModel();
     void CleanUpOldReference(CEntity** entity); // See helper SafeCleanUpOldReference
+
+    /*!
+     * @addr 0x571A40
+     * @brief Clear (set to null) references to `this`
+    */
     void ResolveReferences();
     void PruneReferences();
     void RegisterReference(CEntity** entity);
@@ -192,6 +201,9 @@ public:
     CCollisionData* GetColData() { return GetColModel()->m_pColData; }
 
     auto GetModelID() const { return (eModelID)(m_nModelIndex); }
+
+    //! @notsa
+    bool ProcessScan();
 
     // Wrapper around the mess called `CleanUpOldReference`
     // Takes in `ref` (which is usually a member variable),
@@ -219,6 +231,15 @@ public:
         }
     }
 
+    // Similar to `ChangeEntityReference`, but doesn't clear the old reference
+    template<typename T, typename Y>
+        requires std::is_base_of_v<CEntity, T> && std::is_base_of_v<CEntity, Y> 
+    static void SetEntityReference(T*& inOutRef, Y* entity) {
+        inOutRef = entity;
+        inOutRef->RegisterReference(reinterpret_cast<CEntity**>(&inOutRef));
+    }
+
+    // Register a reference to the entity that is stored in that given reference
     template<typename T>
     static void RegisterReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
         ref->RegisterReference(reinterpret_cast<CEntity**>(&ref));
@@ -273,11 +294,12 @@ public:
     auto AsTrain()            { return reinterpret_cast<CTrain*>(this); }
     auto AsTrain()      const { return reinterpret_cast<const CTrain*>(this); }
     auto AsPed()              { return reinterpret_cast<CPed*>(this); }
+    auto AsPed()        const { return reinterpret_cast<const CPed*>(this); }
     auto AsObject()           { return reinterpret_cast<CObject*>(this); }
     auto AsBuilding()         { return reinterpret_cast<CBuilding*>(this); }
     auto AsDummy()            { return reinterpret_cast<CDummy*>(this); }
 
-    [[nodiscard]] auto GetType() const noexcept { return m_nType; }
+    [[nodiscard]] auto GetType() const noexcept { return (eEntityType)m_nType; }
     void SetType(eEntityType type) { m_nType = type; }
 
     [[nodiscard]] auto GetStatus() const noexcept { return m_nStatus; }
@@ -285,37 +307,9 @@ public:
 
     bool IsScanCodeCurrent() const;
     void SetCurrentScanCode();
-
-    auto GetBoundRect() {
-        CRect r{};
-        GetBoundRect(&r);
-        return r;
-    }
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
-
-    void Add_Reversed();
-    void Add_Reversed(const CRect& rect);
-    void Remove_Reversed();
-    void SetIsStatic_Reversed(bool isStatic);
-    void SetModelIndex_Reversed(uint32 index);
-    void SetModelIndexNoCreate_Reversed(uint32 index);
-    void CreateRwObject_Reversed();
-    void DeleteRwObject_Reversed();
-    CRect* GetBoundRect_Reversed(CRect* pRect);
-    void ProcessControl_Reversed();
-    void ProcessCollision_Reversed();
-    void ProcessShift_Reversed();
-    bool TestCollision_Reversed(bool bApplySpeed);
-    void Teleport_Reversed(CVector destination, bool resetRotation);
-    void SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck);
-    uint8 SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2);
-    void PreRender_Reversed();
-    void Render_Reversed();
-    bool SetupLighting_Reversed();
-    void RemoveLighting_Reversed(bool bRemove);
-    void FlagToDestroyWhenNextProcessed_Reversed();
 };
 
 VALIDATE_SIZE(CEntity, 0x38);

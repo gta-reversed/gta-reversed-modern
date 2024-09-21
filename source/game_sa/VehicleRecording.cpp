@@ -61,6 +61,8 @@ void CVehicleRecording::InjectHooks() {
 
 // 0x459390
 void CVehicleRecording::Init() {
+    ZoneScoped;
+
     rng::fill(bPlaybackGoingOn, false);
     rng::fill(bPlaybackPaused, false);
     rng::fill(pPlaybackBuffer, nullptr);
@@ -87,6 +89,8 @@ void CVehicleRecording::ShutDown() {
 
 // 0x459F70 hook not needed
 void CVehicleRecording::Render() {
+    ZoneScoped;
+
 }
 
 // 0x45A360
@@ -276,7 +280,7 @@ void CVehicleRecording::RenderLineSegment(int32& numVertices) {
             aTempBufferIndices[2 * i] = i;
             aTempBufferIndices[2 * i + 1] = i + 1;
         }
-        if (RwIm3DTransform(aTempBufferVertices, numVertices, nullptr, 0)) {
+        if (RwIm3DTransform(TempBufferVertices.m_3d, numVertices, nullptr, 0)) {
             RwIm3DRenderIndexedPrimitive(rwPRIMTYPELINELIST, aTempBufferIndices, (numVertices - 1) * 2);
             RwIm3DEnd();
         }

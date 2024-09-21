@@ -95,6 +95,8 @@ void C3dMarkers::Shutdown() {
 
 // 0x725040
 void C3dMarkers::Render() {
+    ZoneScoped;
+
     static RwRGBAReal& ambient = *(RwRGBAReal*)0xC80444; // STATICREF
     static RwRGBAReal& directional = *(RwRGBAReal*)0xC80434; // STATICREF
 
@@ -115,7 +117,7 @@ void C3dMarkers::Render3dMarkers() {
 
     for (auto& marker : m_aMarkerArray) {
         if (marker.m_bMustBeRenderedThisFrame) {
-            if (TheCamera.IsSphereVisible(&marker.m_mat.GetPosition(), 2.0f, reinterpret_cast<RwMatrix*>(&TheCamera.m_mMatInverse))) {
+            if (TheCamera.IsSphereVisible(marker.m_mat.GetPosition(), 2.0f, reinterpret_cast<RwMatrix*>(&TheCamera.m_mMatInverse))) {
                 if (marker.m_fCameraRange < 150.0f || IgnoreRenderLimit || marker.m_nType == MARKER3D_TORUS) {
                     marker.Render();
                 }
@@ -382,7 +384,7 @@ void tDirectionArrow::Render(RpClump* clump) {
 }
 
 // Code from (beginning at): 0x7232BF
-void tUser3dMarker::Render(RpClump* clump) {
+void tUser3dMarker::Render(RpClump* clump) const {
     const auto frame = RpClumpGetFrame(clump);
 
     // Reset rotation

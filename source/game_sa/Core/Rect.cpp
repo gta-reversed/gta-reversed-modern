@@ -62,8 +62,13 @@ inline bool CRect::IsPointInside(const CVector2D& point, float tolerance) const
 {
     return left   - tolerance <= point.x
         && right  + tolerance >= point.x
-        && bottom    - tolerance <= point.y
-        && top + tolerance >= point.y;
+        && bottom - tolerance <= point.y
+        && top    + tolerance >= point.y;
+}
+
+bool CRect::IsRectInside(const CRect& rect) const {
+    return rect.left <= right && rect.right >= left
+        && rect.top <= bottom && rect.bottom >= top;
 }
 
 // 0x43E020

@@ -116,6 +116,8 @@ void CMirrors::BuildCamMatrix(CMatrix& mat, CVector pointA, CVector pointB) {
 
 // 0x726090
 void CMirrors::RenderMirrorBuffer() {
+    ZoneScoped;
+
     if (TypeOfMirror == MIRROR_TYPE_NONE)
         return;
 
@@ -351,6 +353,8 @@ void CMirrors::BeforeConstructRenderList() {
 
 // 0x727140
 void CMirrors::BeforeMainRender() {
+    ZoneScoped;
+
     if (TypeOfMirror == MIRROR_TYPE_NONE)
         return;
 
@@ -363,7 +367,7 @@ void CMirrors::BeforeMainRender() {
     TheCamera.SetCameraUpForMirror();
 
     RwRGBA color{ 0, 0, 0, 255 };
-    RwCameraClear(Scene.m_pRwCamera, &color, rwCAMERACLEARZ | rwCAMERACLEARIMAGE | (GraphicsLowQuality() ? rwCAMERACLEARSTENCIL : 0));
+    RwCameraClear(Scene.m_pRwCamera, &color, rwCAMERACLEARZ | rwCAMERACLEARIMAGE | (GraphicsHighQuality() ? rwCAMERACLEARSTENCIL : 0));
     if (RsCameraBeginUpdate(Scene.m_pRwCamera)) {
         bRenderingReflection = true;
         DefinedState();

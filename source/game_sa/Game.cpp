@@ -165,7 +165,7 @@ void CGame::ShutdownRenderWare() {
 }
 
 // 0x53C4A0
-bool CGame::CanSeeOutSideFromCurrArea() {
+bool CGame::CanSeeOutSideFromCurrArea() { // pattern: !CGame::currArea 
     return currArea == AREA_CODE_NORMAL_WORLD;
 }
 
@@ -194,7 +194,7 @@ bool CGame::Shutdown() {
     g_procObjMan.Exit();
     g_waterCreatureMan.Exit();
     D3DResourceSystem::SetUseD3DResourceBuffering(false);
-    CStencilShadowObject::Shutdown();
+    CStencilShadows::Shutdown();
     CPlantMgr::Shutdown();
     CGrassRenderer::Shutdown();
     CRopes::Shutdown();
@@ -285,7 +285,6 @@ void CGame::ShutDownForRestart() {
     CReplay::EmptyReplayBuffer();
     CMovingThings::Shutdown();
     rng::for_each(CWorld::Players, [](auto& info) { info.Clear(); });
-    memset(CTheZones::ZonesVisited, 0, sizeof(CTheZones::ZonesVisited));
     CTheScripts::UndoBuildingSwaps();
     CTheScripts::UndoEntityInvisibilitySettings();
     g_interiorMan.Exit();
@@ -335,6 +334,8 @@ void CGame::GenerateTempPedAtStartOfNetworkGame() {
 
 // 0x5BF840
 bool CGame::Init1(char const *datFile) {
+    ZoneScoped;
+
     CMaths::InitMathsTables();
     strcpy_s(aDatFile, datFile);
     CPools::Initialise();
@@ -425,6 +426,8 @@ bool CGame::Init1(char const *datFile) {
 
 // 0x5BA1A0
 bool CGame::Init2(const char* datFile) {
+    ZoneScoped;
+
     LoadingScreen("Loading the Game", "Add Particles");
     CTheZones::PostZoneCreation();
     CEntryExitManager::PostEntryExitsCreation();
@@ -525,6 +528,8 @@ bool CGame::Init2(const char* datFile) {
 
 // 0x5BA400
 bool CGame::Init3(const char* datFile) {
+    ZoneScoped;
+
     LoadingScreen("Loading the Game", "Load scene");
     CPad::GetPad(PED_TYPE_PLAYER1)->Clear(true, true);
     CPad::GetPad(PED_TYPE_PLAYER2)->Clear(true, true);
@@ -539,6 +544,8 @@ bool CGame::Init3(const char* datFile) {
 
 // 0x53BC80
 void CGame::Initialise(const char* datFile) {
+    ZoneScoped;
+
     Init1(datFile);
     CColAccel::startCache();
     CFileLoader::LoadLevel("DATA\\DEFAULT.DAT");
@@ -707,6 +714,8 @@ void CGame::InitialiseWhenRestarting() {
 
 // 0x53BEE0
 void CGame::Process() {
+    ZoneScoped;
+
     CPad::UpdatePads();
     g_LoadMonitor.BeginFrame();
 
@@ -749,8 +758,7 @@ void CGame::Process() {
 
         if (updateTimeDelta >= 4) {
             CPopulation::Update(false);
-        }
-        else {
+        } else {
             const auto timeBeforePopulationUpdate = GetTime();
             CPopulation::Update(true);
             updateTimeDelta = GetTime() - timeBeforePopulationUpdate;
@@ -794,8 +802,7 @@ void CGame::Process() {
 
         if (CReplay::ShouldStandardCameraBeProcessed()) {
             TheCamera.Process();
-        }
-        else {
+        } else {
             TheCamera.CCamera::ProcessFade();
         }
 

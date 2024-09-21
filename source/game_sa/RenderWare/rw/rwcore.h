@@ -2846,7 +2846,7 @@ RwRaster* RwD3D9RasterStreamReadDDS(RwStream* stream); // 0x81F360
 RwTexture* RwD3D9DDSTextureRead(const RwChar* name, const RwChar* maskname); // 0x820A10
 RwBool RwD3D9RasterIsCompressed(const RwRaster* raster); // 0x820C90
 RwBool RwD3D9DeviceSupportsDXTTexture(); // 0x7F9C30
-void* RwD3D9GetCurrentD3DDevice(); // 0x7F9D50
+IDirect3DDevice9* RwD3D9GetCurrentD3DDevice(); // 0x7F9D50
 RwUInt32 RwD3D9EngineGetMaxMultiSamplingLevels(); // 0x7F84E0
 void RwD3D9EngineSetMultiSamplingLevels(RwUInt32 numLevels); // 0x7F84F0
 void RwD3D9EngineSetRefreshRate(RwUInt32 refreshRate); // 0x7F8580
@@ -2891,7 +2891,7 @@ void RwD3D9DeleteVertexDeclaration(); // 0x7FAC10
 void RwD3D9DeleteVertexShader(); // 0x7FAC90
 RwBool RwD3D9CreatePixelShader(const RwUInt32* function, void* shader); // 0x7FACC0
 void RwD3D9DeletePixelShader(); // 0x7FACF0
-const D3DCAPS9* RwD3D9GetCaps(); // 0x7FAD20
+D3DCAPS9* RwD3D9GetCaps(); // 0x7FAD20
 RwBool RwD3D9CameraIsSphereFullyInsideFrustum(const void* camera, const void* sphere); // 0x7FAD30
 RwBool RwD3D9CameraIsBBoxFullyInsideFrustum(const void* camera, const void* boundingBox); // 0x7FAD90
 void _rwD3D9RasterConvertToNonPalettized(RwRaster* raster); // 0x4CD250
