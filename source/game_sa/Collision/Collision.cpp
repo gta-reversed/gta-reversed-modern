@@ -156,8 +156,8 @@ bool CCollision::TestSphereBox(CSphere const& sphere, CBox const& box) {
 bool CCollision::ProcessSphereBox(CColSphere const& sph, CColBox const& box, CColPoint & colp, float& minDistSq) {
     ZoneScoped;
 
-    // GTA's code is too complicated, uses a huge 3x3x3 if statement
-    // we can simplify the structure a lot
+	// GTA's code is too complicated, uses a huge 3x3x3 if statement
+	// we can simplify the structure a lot
     // Some of the original code, to give you an idea:
     /*
     if (sphere.m_vecCenter.x + sphere.m_fRadius < bb.m_vecMin.x)
@@ -493,12 +493,12 @@ CVector CCollision::GetClosestPtOnLine(const CVector& l0, const CVector& l1, con
     ZoneScoped;
 
     const auto lnMagSq = (l1 - l0).SquaredMagnitude();
-    const auto dot = (point - l0).Dot(l1 - l0);
+	const auto dot = (point - l0).Dot(l1 - l0);
     if (dot <= 0.0f) {
-        return l0;
+		return l0;
     }
     if (dot >= lnMagSq) {
-        return l1;
+		return l1;
     }
     return lerp(l0, l1, dot / lnMagSq);
 }
@@ -1303,16 +1303,16 @@ bool NOTSA_FORCEINLINE ProcessLineTriangle_Internal(
 
     // Check if both points are above or below the plane, if so, no chance of intersection
     if (std::signbit(plNormDotLnOrigin) == std::signbit(plane.GetPtDotNormal(line.m_vecEnd))) {
-        return false;
+		return false;
     }
 
     // Magnitude of line on plane
     const auto plLnMag = -(line.m_vecEnd - line.m_vecStart).Dot(plNorm);
 
 #ifdef FIX_BUGS
-    // Line is lies on plane, no intersection
+	// Line is lies on plane, no intersection
     if (plLnMag == 0.0f) {
-        return false;
+		return false;
     }
 #endif
 
@@ -1323,7 +1323,7 @@ bool NOTSA_FORCEINLINE ProcessLineTriangle_Internal(
         }
     }
 
-    // Find point of intersection
+	// Find point of intersection
     const auto ip = lerp(line.m_vecStart, line.m_vecEnd, t);
     if constexpr (!TestOnly) {
         *outIP = ip;
@@ -1332,12 +1332,12 @@ bool NOTSA_FORCEINLINE ProcessLineTriangle_Internal(
     // Get the points relative to the plane's orientation
     // This way the bound checks can be done in 2D
     const auto [pl_va, pl_vb, pl_vc, pl_ip] = [&]() -> std::tuple<CVector2D, CVector2D, CVector2D, CVector2D> {
-        // We do the test in 2D.
+		// We do the test in 2D.
         // With the plane direction we can figure out how to project the vectors.
-        // normal = (c - a) x (b - a)
+		// normal = (c - a) x (b - a)
         using enum CColTrianglePlane::Orientation;
-        switch (plane.m_orientation){
-        case POS_X: return {
+		switch (plane.m_orientation){
+		case POS_X: return {
             {va.y, va.z},
             {vc.y, vc.z},
             {vb.y, vb.z},
@@ -1368,24 +1368,23 @@ bool NOTSA_FORCEINLINE ProcessLineTriangle_Internal(
             {ip.x, ip.y}
         };
         case NEG_Z: return {
-            {va.x, va.y},
-            {vb.x, vb.y},
-            {vc.x, vc.y},
-            {ip.x, ip.y}
-        };
-        default: NOTSA_UNREACHABLE();
-        }
+			{va.x, va.y},
+			{vb.x, vb.y},
+			{vc.x, vc.y},
+			{ip.x, ip.y}
+		};
+	    default: NOTSA_UNREACHABLE();
+	    }
     }();
 
-    // This is our triangle:
-    // pl_vc---pl_vb
-    //    \     /
-    //     \   /
-    //      \ /
-    //     pl_va
-    // We can use the "2v2 cross product" to check on which side
-    // a vector is of another. Test is true if point is inside of all edges.
-    const auto pl_ip_a = pl_ip - pl_va;
+	// This is our triangle:
+	// pl_vc---pl_vb
+	//    \     /
+	//     \   /
+	//      \ /
+	//     pl_va
+	// We can use the "2v2 cross product" to check on which side
+	// a vector is of another. Test is true if point is inside of all edges.    const auto pl_ip_a = pl_ip - pl_va;
     if ((pl_vb - pl_va).Cross(pl_ip_a) >= 0.0f && (pl_vc - pl_va).Cross(pl_ip_a) <= 0.0f && (pl_vc - pl_vb).Cross(pl_ip - pl_vb) >= 0.0f) {
         if (inOutMaxTouchDist) {
             *inOutMaxTouchDist = t;
