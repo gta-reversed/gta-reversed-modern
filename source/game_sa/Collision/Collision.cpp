@@ -1332,12 +1332,12 @@ bool NOTSA_FORCEINLINE ProcessLineTriangle_Internal(
     // Get the points relative to the plane's orientation
     // This way the bound checks can be done in 2D
     const auto [pl_va, pl_vb, pl_vc, pl_ip] = [&]() -> std::tuple<CVector2D, CVector2D, CVector2D, CVector2D> {
-		// We do the test in 2D.
+	    // We do the test in 2D.
         // With the plane direction we can figure out how to project the vectors.
-		// normal = (c - a) x (b - a)
+	    // normal = (c - a) x (b - a)
         using enum CColTrianglePlane::Orientation;
-		switch (plane.m_orientation){
-		case POS_X: return {
+	    switch (plane.m_orientation){
+	    case POS_X: return {
             {va.y, va.z},
             {vc.y, vc.z},
             {vb.y, vb.z},
@@ -1384,7 +1384,8 @@ bool NOTSA_FORCEINLINE ProcessLineTriangle_Internal(
 	//      \ /
 	//     pl_va
 	// We can use the "2v2 cross product" to check on which side
-	// a vector is of another. Test is true if point is inside of all edges.    const auto pl_ip_a = pl_ip - pl_va;
+	// a vector is of another. Test is true if point is inside of all edges.
+    const auto pl_ip_a = pl_ip - pl_va;
     if ((pl_vb - pl_va).Cross(pl_ip_a) >= 0.0f && (pl_vc - pl_va).Cross(pl_ip_a) <= 0.0f && (pl_vc - pl_vb).Cross(pl_ip - pl_vb) >= 0.0f) {
         if (inOutMaxTouchDist) {
             *inOutMaxTouchDist = t;
