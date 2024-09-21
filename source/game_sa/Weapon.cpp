@@ -573,8 +573,8 @@ void CWeapon::DoBulletImpact(CEntity* firedBy, CEntity* victim, const CVector& s
             const auto DoBulletImpactFx = [&] {
                 if (TheCamera.IsSphereVisible(hitCP.m_vecPoint, 1.f)) {
                     g_fx.AddBulletImpact(
-                        &hitCP.m_vecPoint,
-                        &hitCP.m_vecNormal,
+                        hitCP.m_vecPoint,
+                        hitCP.m_vecNormal,
                         hitCP.m_nSurfaceTypeB,
                         incrementalHit ? 2 : 8,
                         hitCP.m_nLightingA.GetCurrentLighting()
@@ -746,11 +746,11 @@ void CWeapon::DoBulletImpact(CEntity* firedBy, CEntity* victim, const CVector& s
 }
 
 // 0x73C1F0
-bool CWeapon::TakePhotograph(CEntity* owner, CVector* point) {
+bool CWeapon::TakePhotograph(CEntity* owner, const CVector* point) {
     UNUSED(owner);
 
     if (point) {
-        if (const auto fx = g_fxMan.CreateFxSystem("camflash", point, nullptr, false)) {
+        if (const auto fx = g_fxMan.CreateFxSystem("camflash", *point, nullptr, false)) {
             fx->PlayAndKill();
         }
     }
@@ -954,7 +954,7 @@ void CWeapon::FireInstantHitFromCar2(CVector startPoint, CVector endPoint, CVehi
 
     CEntity* victim{};
     CColPoint cpImpact{};
-    CWorld::ProcessLineOfSight(&startPoint, &endPoint, cpImpact, victim, true, true, true, true, true, false, false, true);
+    CWorld::ProcessLineOfSight(startPoint, endPoint, cpImpact, victim, true, true, true, true, true, false, false, true);
     CWorld::ResetLineTestOptions();
     DoBulletImpact(owner, victim, startPoint, endPoint, cpImpact, 0);
 }
@@ -1240,8 +1240,7 @@ void CWeapon::DoWeaponEffect(CVector origin, CVector dir) {
     if (m_FxSystem) {
         m_FxSystem->SetMatrix(mat);
     } else {
-        CVector posn{};
-        m_FxSystem = g_fxMan.CreateFxSystem(fxName, &posn, mat, false);
+        m_FxSystem = g_fxMan.CreateFxSystem(fxName, CVector{}, mat, false);
 
         if (!m_FxSystem) {
             RwMatrixDestroy(mat);
@@ -1613,7 +1612,7 @@ bool CWeapon::FireM16_1stPerson(CPed* owner) {
         }
     }
 
-    DoBulletImpact(owner, shotHitEntity, &camOriginPos, &camTargetPos, shotCP, false);
+    DoBulletImpact(owner, shotHitEntity, camOriginPos, camTargetPos, shotCP, false);
 
     //> 0x741E48 - Visual/physical feedback for the player(s)
     if (owner->IsPlayer()) {
@@ -1700,7 +1699,7 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
                 return {
                     FireProjectile( // 0x742705
                         firedBy,
-                        shotOrigin,
+                        *shotOrigin,
                         targetEnt,
                         targetPosn,
                         std::clamp(((firedBy->GetPosition() - *targetPosn).Magnitude() - 10.f) / 10.f, 0.2f, 1.f)
@@ -1711,7 +1710,7 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
                 return {
                     FireProjectile(
                         firedBy,
-                        shotOrigin,
+                        *shotOrigin,
                         targetEnt,
                         nullptr,
                         firedBy->AsPed()->m_pPlayerData->m_fAttackButtonCounter * 0.0375f
@@ -1722,7 +1721,7 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
             return {
                 FireProjectile( // 0x74274E
                     firedBy,
-                    shotOrigin,
+                    *shotOrigin,
                     targetEnt,
                     nullptr,
                     0.3f
@@ -1801,7 +1800,7 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
                     return (origin - end).SquaredMagnitude() <= sq(8.f) && !firedBy->IsPed();
                 };
                 if (   targetEnt  && !CanFire(firedBy->GetPosition(), targetEnt->GetPosition())
-                    || targetPosn && !CanFire(firedBy->GetPosition(), targetPosn)
+                    || targetPosn && !CanFire(firedBy->GetPosition(), *targetPosn)
                 ) {
                     return { false, true };
                 }
@@ -1809,7 +1808,7 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
             return {
                 FireProjectile(
                     firedBy,
-                    shotOrigin,
+                    *shotOrigin,
                     targetEnt,
                     targetPosn
                 ),
@@ -1822,7 +1821,7 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
             return {
                 FireAreaEffect(
                     firedBy,
-                    shotOrigin,
+                    *shotOrigin,
                     targetEnt,
                     targetPosn
                 ),
