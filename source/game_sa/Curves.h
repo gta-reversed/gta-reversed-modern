@@ -11,6 +11,7 @@ class CCurves {
 public:
     static void InjectHooks();
 
+    static void TestCurves();
     /*!
     * @addr 0x43C610
     * 

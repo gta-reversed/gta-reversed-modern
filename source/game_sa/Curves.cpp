@@ -5,6 +5,7 @@ void CCurves::InjectHooks() {
     RH_ScopedClass(CCurves);
     RH_ScopedCategoryGlobal();
 
+    RH_ScopedGlobalInstall(TestCurves, 0x43C600);
     RH_ScopedGlobalInstall(DistForLineToCrossOtherLine, 0x43C610);
     RH_ScopedGlobalInstall(CalcSpeedVariationInBend, 0x43C660);
     RH_ScopedGlobalInstall(CalcSpeedScaleFactor, 0x43C710);
@@ -12,14 +13,15 @@ void CCurves::InjectHooks() {
     RH_ScopedGlobalInstall(CalcCurvePoint, 0x43C900);
 }
 
+// unused
 // 0x43C610
+void CCurves::TestCurves() {
+    return;
+}
+
 float CCurves::DistForLineToCrossOtherLine(CVector2D lineStart, CVector2D lineDir, CVector2D otherLineStart, CVector2D otherLineDir) {
     const auto t = lineDir.Cross(otherLineDir);
-    if (t == 0.f) {
-        return -1.f;
-    } else {
-        return (lineStart - otherLineStart).Cross(otherLineDir) / -t;
-    }
+    return (t == 0.f) ? -1.f : (lineStart - otherLineStart).Cross(otherLineDir) / -t;
 }
 
 // 0x43C660
@@ -32,7 +34,7 @@ float CCurves::CalcSpeedVariationInBend(CVector2D const& startCoors, CVector2D c
     }
 
     // Points in the same dir with ~45 deg tolerance
-    return CCollision::DistToMathematicalLine2D(endCoors, endDir, startCoors) / (startCoors - endCoors).Magnitude() / 3.f;
+    return CCollision::DistToMathematicalLine2D(endCoors.x, endCoors.y, endDir.x, endDir.y, startCoors.x, startCoors.y) / (startCoors - endCoors).Magnitude() / 3.f;
 }
 
 // 0x43C710
@@ -51,7 +53,7 @@ float CCurves::CalcCorrectedDist(float curr, float total, float variance, float&
     if (total >= 0.00001f) {
         const auto prog = curr / total;
         outT = 0.5f - std::cos(PI * prog) * 0.5f;
-        return std::sin(TWO_PI * prog) * (total / TWO_PI) * variance
+        return std::sin(prog * TWO_PI) * (total / TWO_PI) * variance
              + curr * (1.f - 2.f * variance + 1.f) * 0.5f;
     } else {
         outT = 0.5f;

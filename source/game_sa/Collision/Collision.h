@@ -218,9 +218,6 @@ public:
     static CVector GetClampedBaryCoordsIntoTriangle(CVector a, CVector b, CVector c, CVector p);
     static CVector GetCoordsClampedIntoTriangle(CVector a, CVector b, CVector c, CVector p);
     static float   ClosestPtSegmentSegment(CVector p1, CVector d1, float a, CVector p2, CVector d2, float e, float& s, float& t, CVector& c1, CVector& c2);
-    static float   DistToMathematicalLine2D(CVector2D lineStart, CVector2D lineDir, CVector2D point) {
-        return DistToMathematicalLine2D(lineStart.x, lineStart.y, lineDir.x, lineDir.y, point.x, point.y);
-    }
 };
 
 void CalculateColPointInsideBox(const CBox& box, const CVector& point, CColPoint& colPoint);
