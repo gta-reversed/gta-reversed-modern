@@ -1112,7 +1112,7 @@ bool CVehicle::GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh
     outPos.Set(0.0F, fColRear - 1.0F, 0.0F);
     outPos = m_matrix->TransformPoint(outPos);
     return true;
-}
+ }
 
 // 0x871F80// 0x5D4760
 bool CVehicle::Save() {
@@ -4242,40 +4242,55 @@ void CVehicle::UpdateTrailerLink(bool arg0, bool arg1) {
 }
 
 // 0x6E0050
-void CVehicle::UpdateTractorLink(bool applyForce, bool useAlternativeForce) {
+void CVehicle::UpdateTractorLink(bool applyFullVelocityAtHookUp, bool applyDistToSpeed) {
     if (!m_pTrailer) {
         return;
     }
-
-    CVector towBarPos;
-    CVector hitchPos;
-    if (!m_pTrailer->GetTowHitchPos(hitchPos, true, this) && !GetTowBarPos(towBarPos, true, m_pTrailer)) {
+    CVector hitchPos{};
+    if (!m_pTrailer->GetTowHitchPos(hitchPos, true, this)) {
         return;
     }
+    CVector towBarPos{};
+    if (!GetTowBarPos(towBarPos, true, m_pTrailer)) {
+        return;
+    }
+    switch (m_nModelIndex) {
+    case MODEL_TOWTRUCK:
+    case MODEL_TRACTOR: {
+        if (AsAutomobile()->m_wMiscComponentAngle > TOWTRUCK_HOIST_DOWN_LIMIT - 100) {
+            return;
+        }
+    }
+    }
 
-    auto linkVector = hitchPos - towBarPos;
-    if (GetModelId() != MODEL_TOWTRUCK && GetModelId() != MODEL_TRACTOR
-        || AsAutomobile()->m_wMiscComponentAngle <= TOWTRUCK_HOIST_DOWN_LIMIT - 100)
-    {
-        hitchPos -= m_pTrailer->GetPosition();
-        towBarPos -= GetPosition();
-        auto relativeVelocity = GetSpeed(hitchPos) - GetSpeed(towBarPos);
-        if (!applyForce) {
-            relativeVelocity *= (1.0f - m_fMass / (m_pTrailer->m_fMass + m_fMass)) * 0.5f;
-            if (useAlternativeForce) {
-                relativeVelocity = linkVector * 0.1f / std::max(1.0f, CTimer::ms_fTimeStep);
+    // 0x6E01EF
+    auto trailerAngularForce = m_pTrailer->GetSpeed(hitchPos - m_pTrailer->GetPosition()) - GetSpeed(towBarPos - GetPosition());
+    if (!applyFullVelocityAtHookUp) {
+        trailerAngularForce *= (1.f - m_fMass / (m_pTrailer->m_fMass + m_fMass)) / 2.f;
+        if (applyDistToSpeed) {
+            const auto distVel = (hitchPos - towBarPos) * (0.1f / std::max(1.f, CTimer::ms_fTimeStep));
+            // BUG: //TODO: Pirulax: I'm quite positive this was meant to be +=
+            if constexpr (notsa::IsFixBugs()) {
+                trailerAngularForce += distVel;
+            } else {
+                trailerAngularForce = distVel;
             }
         }
-        if (m_pTrailer->IsTrailer() && m_pTrailer->AsTrailer()->m_fTrailerTowedRatio == -1000.0f) {
-            auto verticalComponent = GetUp().Dot(relativeVelocity);
-            auto verticalVelocity = GetUp() * verticalComponent;
-            relativeVelocity -= verticalVelocity;
-        }
-        auto out = GetMatrix().TransformVector(m_vecCentreOfMass);
-        linkVector = towBarPos - out;
-        ApplyForce(relativeVelocity * GetMass(linkVector, relativeVelocity.Normalized()), towBarPos, true);
-        m_nFakePhysics = 0;
     }
+    if (m_pTrailer->IsSubTrailer() && m_pTrailer->AsTrailer()->m_fTrailerTowedRatio == -1000.f) {
+        trailerAngularForce -= trailerAngularForce.ProjectOnToNormal(m_pTrailer->GetMatrix().GetUp());
+    }
+
+    // 0x6E03EA
+    ApplyForce(
+        trailerAngularForce * GetMass(                                 // 0x6E0354
+            towBarPos - GetMatrix().TransformPoint(m_vecCentreOfMass), // NOTE: Same logic here, but less code
+            trailerAngularForce.Normalized()
+        ),
+        towBarPos,
+        true
+    );
+    m_nFakePhysics = false;
 }
 
 // 0x6E0400

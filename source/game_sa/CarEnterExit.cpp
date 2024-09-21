@@ -599,12 +599,9 @@ bool CCarEnterExit::IsVehicleStealable(const CVehicle* vehicle, const CPed* ped)
 
 // 0x64F600
 void CCarEnterExit::MakeUndraggedDriverPedLeaveCar(const CVehicle* vehicle, const CPed* pedGettingIn) {
-    auto& veh = const_cast<CVehicle&>(*vehicle);
-    auto& ped = const_cast<CPed&>(*pedGettingIn);
-
-    const auto event = CEventDraggedOutCar::CEventDraggedOutCar(&veh, &ped, true);
-    veh.m_pDriver->m_pIntelligence->m_eventGroup.Add(event, false);
-    event.~CEventDraggedOutCar();
+    auto& veh = const_cast<CVehicle&>(*vehicle); // TODO: Fix
+    auto& ped = const_cast<CPed&>(*pedGettingIn); // TODO: Fix
+    veh.m_pDriver->GetEventGroup().Add(CEventDraggedOutCar{ &veh, &ped, true });
 }
 
 // 0x64F540
@@ -617,14 +614,14 @@ void CCarEnterExit::MakeUndraggedPassengerPedsLeaveCar(const CVehicle* targetVeh
 void CCarEnterExit::QuitEnteringCar(CPed* ped, CVehicle* vehicle, int32 doorId, bool bCarWasBeingJacked) {
     CCarEnterExit::RemoveGetInAnims(ped);
     ped->RestartNonPartialAnims();
-    if (RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_IDLE)) {
+    if (!RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_IDLE)) {
         CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 1000.0f);
     }
 
     if (bCarWasBeingJacked) {
         vehicle->vehicleFlags.bIsBeingCarJacked = true;
     }
-    vehicle->m_nNumGettingIn++;
+    vehicle->m_nNumGettingIn--;
 
     if (vehicle->IsBike() || vehicle->m_pHandlingData->m_bTandemSeats) {
         if (doorId == 10 || doorId == 8) {
@@ -632,7 +629,7 @@ void CCarEnterExit::QuitEnteringCar(CPed* ped, CVehicle* vehicle, int32 doorId, 
         } else if (doorId == 11 || doorId == 9) {
             vehicle->SetGettingInFlags(10);
         }
-        vehicle->m_nFlags |= 8u;
+        vehicle->vehicleFlags.bIsBig = false;
     } else {
         switch (doorId) {
         case 8:
@@ -642,18 +639,10 @@ void CCarEnterExit::QuitEnteringCar(CPed* ped, CVehicle* vehicle, int32 doorId, 
             vehicle->SetGettingInFlags(8);
             break;
         case 10:
-            if (vehicle->m_nMaxPassengers) {
-                vehicle->SetGettingInFlags(1);
-            } else {
-                vehicle->SetGettingInFlags(3);
-            }
+            vehicle->m_nMaxPassengers ? vehicle->SetGettingInFlags(1) : vehicle->SetGettingInFlags(3);
             break;
         case 11:
-            if (vehicle->m_nMaxPassengers) {
-                vehicle->SetGettingInFlags(2);
-            } else {
-                vehicle->SetGettingInFlags(3);
-            }
+            vehicle->m_nMaxPassengers ? vehicle->SetGettingInFlags(2) : vehicle->SetGettingInFlags(3);
             break;
         }
     }
