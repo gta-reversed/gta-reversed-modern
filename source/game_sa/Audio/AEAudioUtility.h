@@ -8,10 +8,12 @@ class CAEAudioUtility {
 public:
     static void      StaticInitialise();
 
+    /*!
+    * @brief This and CGeneral differs in that this function returns a number [min, max + 1], while
+    * @brief the other [min, max]. To solve this we do `max + 1`
+    */
     template<std::integral T>
     static T GetRandomNumberInRange(T min, T max) {
-        // This and CGeneral differs in that this function returns a number [min, max + 1], while
-        // the other [min, max]. To solve this we do `max + 1`
         return CGeneral::GetRandomNumberInRange<T>(min, max + 1);
     }
 

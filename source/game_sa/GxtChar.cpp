@@ -16,7 +16,7 @@ void AsciiToGxtChar(const char* src, GxtChar* dst) {
 // FIX_BUGS (sorta): Make caller provide size instead of creating a static buffer.
 char* GxtCharToUTF8(char* out, const GxtChar* src, size_t size, size_t offset) {
     src += offset ? offset : 0;
-    
+
     static const auto gxtUtf8Map = notsa::make_mapping<uint8_t /*GXT code point*/, const char8_t* /*UTF-8 char*/>({
         { 0xb1, u8"´" }, { 0xaf, u8"¿" }, { 0x80, u8"À" }, { 0x81, u8"Á" }, { 0x82, u8"Â" },
         { 0x83, u8"Ä" }, { 0x84, u8"Æ" }, { 0x85, u8"Ç" }, { 0x86, u8"È" }, { 0x87, u8"É" },
