@@ -128,8 +128,8 @@ public:
     CVector GetRelativePosition() const { CVector out; GetRelativePosition(out); return out; } // NOTSA
     void  CalculateFrequency();
     void  UpdateFrequency();
-    float GetRelativePlaybackFrequencyWithDoppler();
-    float GetSlowMoFrequencyScalingFactor();
+    float GetRelativePlaybackFrequencyWithDoppler() const;
+    float GetSlowMoFrequencyScalingFactor() const;
     void  NewVPSLentry();
     void  RegisterWithPhysicalEntity(CEntity* entity);
     void  StopSoundAndForget();

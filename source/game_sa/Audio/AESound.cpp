@@ -193,8 +193,8 @@ void CAESound::UpdatePlayTime(int16 soundLength, int16 loopStartTime, int16 play
 }
 
 // 0x4EF350
-void CAESound::GetRelativePosition(CVector& out) const {
-    out = GetFrontEnd()
+CVector CAESound::GetRelativePosition() const {
+    return GetFrontEnd()
         ? m_vecCurrPosn
         : CAEAudioEnvironment::GetPositionRelativeToCamera(m_vecCurrPosn);
 }
@@ -214,14 +214,14 @@ void CAESound::UpdateFrequency() {
 }
 
 // 0x4EF400
-float CAESound::GetRelativePlaybackFrequencyWithDoppler() {
+float CAESound::GetRelativePlaybackFrequencyWithDoppler() const {
     return GetFrontEnd()
         ? m_fFrequency
         : m_fFrequency * CAEAudioEnvironment::GetDopplerRelativeFrequency(m_fPrevCamDist, m_fCurrCamDist, m_nPrevTimeUpdate, m_nCurrTimeUpdate, m_fTimeScale);
 }
 
 // 0x4EF440
-float CAESound::GetSlowMoFrequencyScalingFactor() {
+float CAESound::GetSlowMoFrequencyScalingFactor() const {
     return GetUnpausable() || !CTimer::GetIsSlowMotionActive() || CCamera::GetActiveCamera().m_nMode == eCamMode::MODE_CAMERA
         ? 1.f
         : fSlowMoFrequencyScalingFactor;
@@ -254,12 +254,12 @@ void CAESound::StopSoundAndForget() {
 }
 
 // 0x4EF880
-void CAESound::SetPosition(CVector vecPos) {
+void CAESound::SetPosition(CVector pos) {
     if (!m_nLastFrameUpdate) {
-        m_vecPrevPosn = vecPos;
-        m_vecCurrPosn = vecPos;
+        m_vecPrevPosn = pos;
+        m_vecCurrPosn = pos;
 
-        auto const fCamDist = DistanceBetweenPoints(vecPos, TheCamera.GetPosition());
+        auto const fCamDist = DistanceBetweenPoints(pos, TheCamera.GetPosition());
         m_fCurrCamDist = fCamDist;
         m_fPrevCamDist = fCamDist;
 
@@ -267,16 +267,16 @@ void CAESound::SetPosition(CVector vecPos) {
         m_nCurrTimeUpdate = CTimer::GetTimeInMS();
         m_nPrevTimeUpdate = CTimer::GetTimeInMS();
     } else if (m_nLastFrameUpdate == CTimer::GetFrameCounter()) {
-        m_vecCurrPosn = vecPos;
-        m_fCurrCamDist = DistanceBetweenPoints(vecPos, TheCamera.GetPosition());
+        m_vecCurrPosn = pos;
+        m_fCurrCamDist = DistanceBetweenPoints(pos, TheCamera.GetPosition());
         m_nCurrTimeUpdate = CTimer::GetTimeInMS();
     } else {
         m_vecPrevPosn = m_vecCurrPosn;
         m_fPrevCamDist = m_fCurrCamDist;
         m_nPrevTimeUpdate = m_nCurrTimeUpdate;
 
-        m_vecCurrPosn = vecPos;
-        m_fCurrCamDist = DistanceBetweenPoints(vecPos, TheCamera.GetPosition());
+        m_vecCurrPosn = pos;
+        m_fCurrCamDist = DistanceBetweenPoints(pos, TheCamera.GetPosition());
         m_nCurrTimeUpdate = CTimer::GetTimeInMS();
         m_nLastFrameUpdate = CTimer::GetFrameCounter();
     }

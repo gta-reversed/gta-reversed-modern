@@ -95,36 +95,26 @@ void CAEAudioEnvironment::GetReverbEnvironmentAndDepth(int8* reverbEnv, int32* d
 }
 
 // 0x4D80B0
-CVector CAEAudioEnvironment::GetPositionRelativeToCamera(const CVector& vecPos) {
-    static const float fFirstPersonMult = 2.0F;
-
-    const auto camMode = CCamera::GetActiveCamera().m_nMode;
-    if (camMode == eCamMode::MODE_SNIPER || camMode == eCamMode::MODE_ROCKETLAUNCHER || camMode == eCamMode::MODE_1STPERSON) {
-        const auto& camMat = TheCamera.m_mCameraMatrix;
-        const auto& camPos = TheCamera.GetPosition();
-        const auto  vecOffset = vecPos - (camPos - camMat.GetForward() * fFirstPersonMult);
-
-        return CVector{
-            -DotProduct(vecOffset, camMat.GetRight()),
-            DotProduct(vecOffset, camMat.GetForward()),
-            DotProduct(vecOffset, camMat.GetUp()),
-        };
-    }
-
-    auto  fMult = 0.0F;
-    auto* player = FindPlayerPed();
-    if (player)
-        fMult = std::clamp(DistanceBetweenPoints(TheCamera.GetPosition(), player->GetPosition()), 0.0F, 0.5F);
-
-    const auto& tempMat = TheCamera.m_mCameraMatrix;
-    const auto& vecCamPos = TheCamera.GetPosition();
-    const auto  vecOffset = vecPos - (vecCamPos + tempMat.GetForward() * fMult);
-
-    return CVector{
-        -DotProduct(vecOffset, tempMat.GetRight()),
-        DotProduct(vecOffset, tempMat.GetForward()),
-        DotProduct(vecOffset, tempMat.GetUp()),
+CVector CAEAudioEnvironment::GetPositionRelativeToCamera(const CVector& pt) {
+    const auto& camMat = TheCamera.m_mCameraMatrix;
+    const auto Calculate = [&](CVector offset) {
+        const auto posOS = pt - TheCamera.GetPosition() + offset;
+        return camMat.InverseTransformVector(CVector{-posOS.x, posOS.y, posOS.z});
     };
+    switch (CCamera::GetActiveCamera().m_nMode) {
+    case eCamMode::MODE_SNIPER:
+    case eCamMode::MODE_ROCKETLAUNCHER:
+    case eCamMode::MODE_1STPERSON: {
+        return Calculate(-camMat.GetForward() * 2.f);
+    }
+    default: {
+        const auto* player = FindPlayerPed();
+        const auto camDist = player
+            ? std::clamp(CVector::Dist(camMat.GetPosition(), player->GetPosition()), 0.0F, 0.5F)
+            : 0.f;
+        return Calculate(camMat.GetForward() * camDist);
+    }
+    }
 }
 
 // 0x4D8340
