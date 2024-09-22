@@ -194,10 +194,9 @@ void CAESound::UpdatePlayTime(int16 soundLength, int16 loopStartTime, int16 play
 
 // 0x4EF350
 void CAESound::GetRelativePosition(CVector& out) const {
-    if (!GetFrontEnd()) {
-        CAEAudioEnvironment::GetPositionRelativeToCamera(&out, &m_vecCurrPosn);
-    }
-    out = m_vecCurrPosn;
+    out = GetFrontEnd()
+        ? m_vecCurrPosn
+        : CAEAudioEnvironment::GetPositionRelativeToCamera(m_vecCurrPosn);
 }
 
 // 0x4EF390
@@ -288,9 +287,8 @@ void CAESound::CalculateVolume() {
     if (GetFrontEnd())
         m_fFinalVolume = m_fVolume - m_fSoundHeadRoom;
     else {
-        CVector relativePos;
-        CAEAudioEnvironment::GetPositionRelativeToCamera(&relativePos, &m_vecCurrPosn);
-        const auto fDist = relativePos.Magnitude() / m_fSoundDistance;
+        const auto relativePos = CAEAudioEnvironment::GetPositionRelativeToCamera(m_vecCurrPosn);
+        const auto fDist = CAEAudioEnvironment::GetPositionRelativeToCamera(m_vecCurrPosn).Magnitude() / m_fSoundDistance;
         const auto fAttenuation = CAEAudioEnvironment::GetDistanceAttenuation(fDist);
         m_fFinalVolume = CAEAudioEnvironment::GetDirectionalMikeAttenuation(relativePos) + fAttenuation + m_fVolume - m_fSoundHeadRoom;
     }
