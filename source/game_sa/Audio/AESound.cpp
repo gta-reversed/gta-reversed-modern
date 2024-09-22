@@ -22,7 +22,7 @@ void CAESound::InjectHooks() {
     RH_ScopedInstall(StopSound, 0x4EF1C0);
     RH_ScopedInstall(SetIndividualEnvironment, 0x4EF2B0);
     RH_ScopedInstall(UpdatePlayTime, 0x4EF2E0);
-    RH_ScopedOverloadedInstall(GetRelativePosition, "OG", 0x4EF350, void(CAESound::*)(CVector&) const);
+    RH_ScopedInstall(GetRelativePosition, 0x4EF350);
     RH_ScopedInstall(CalculateFrequency, 0x4EF390);
     RH_ScopedInstall(UpdateFrequency, 0x4EF3E0);
     RH_ScopedInstall(GetRelativePlaybackFrequencyWithDoppler, 0x4EF400);
