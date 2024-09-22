@@ -17,8 +17,8 @@ void CAEAudioEnvironment::InjectHooks() {
     RH_ScopedInstall(GetDistanceAttenuation, 0x4D7F20);
     RH_ScopedInstall(GetDirectionalMikeAttenuation, 0x4D7F60);
     RH_ScopedInstall(GetReverbEnvironmentAndDepth, 0x4D8010);
-    RH_ScopedOverloadedInstall(GetPositionRelativeToCamera, "vec", 0x4D80B0, void(*)(CVector&, const CVector*));
-    RH_ScopedOverloadedInstall(GetPositionRelativeToCamera, "placeable", 0x4D8340, void(*)(CVector&, CPlaceable*));
+    RH_ScopedOverloadedInstall(GetPositionRelativeToCamera, "vec", 0x4D80B0, CVector(*)(const CVector&));
+    RH_ScopedOverloadedInstall(GetPositionRelativeToCamera, "placeable", 0x4D8340, CVector(*)(CPlaceable*));
 }
 
 // 0x4D7E40
@@ -101,19 +101,11 @@ void CAEAudioEnvironment::GetReverbEnvironmentAndDepth(int8* reverbEnv, int32* d
 }
 
 // 0x4D80B0
-void CAEAudioEnvironment::GetPositionRelativeToCamera(CVector& out, const CVector* vecPos) {
-    assert(vecPos);
-    //if (!vecPos)
-    //    return {0.f, 0.f, 0.f};
-
+CVector CAEAudioEnvironment::GetPositionRelativeToCamera(const CVector& pt) {
     const auto& camMat = TheCamera.m_mCameraMatrix;
     const auto Calculate = [&](CVector offset) {
-        const auto pos = *vecPos - TheCamera.GetPosition() + offset;
-        out = CVector{ // matrix inverse vector transform, with x negated
-            -DotProduct(pos, camMat.GetRight()),
-             DotProduct(pos, camMat.GetForward()),
-             DotProduct(pos, camMat.GetUp())
-        };
+        const auto posOS = pt - TheCamera.GetPosition() + offset;
+        return camMat.InverseTransformVector(CVector{-posOS.x, posOS.y, posOS.z});
     };
     switch (CCamera::GetActiveCamera().m_nMode) {
     case eCamMode::MODE_SNIPER:
@@ -124,7 +116,7 @@ void CAEAudioEnvironment::GetPositionRelativeToCamera(CVector& out, const CVecto
     default: {
         const auto* player = FindPlayerPed();
         const auto camDist = player
-            ? std::clamp(CVector::Dist(TheCamera.GetPosition(), player->GetPosition()), 0.0F, 0.5F)
+            ? std::clamp(CVector::Dist(camMat.GetPosition(), player->GetPosition()), 0.0F, 0.5F)
             : 0.f;
         return Calculate(camMat.GetForward() * camDist);
     }
@@ -132,6 +124,6 @@ void CAEAudioEnvironment::GetPositionRelativeToCamera(CVector& out, const CVecto
 }
 
 // 0x4D8340
-void CAEAudioEnvironment::GetPositionRelativeToCamera(CVector& out, CPlaceable* placeable) {
-    CAEAudioEnvironment::GetPositionRelativeToCamera(out, &placeable->GetPosition());
+CVector CAEAudioEnvironment::GetPositionRelativeToCamera(CPlaceable* placeable) {
+    return CAEAudioEnvironment::GetPositionRelativeToCamera(placeable->GetPosition());
 }

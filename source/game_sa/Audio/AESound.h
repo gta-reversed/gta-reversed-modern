@@ -135,8 +135,8 @@ public:
     CVector GetRelativePosition() const;
     void  CalculateFrequency();
     void  UpdateFrequency();
-    float GetRelativePlaybackFrequencyWithDoppler();
-    float GetSlowMoFrequencyScalingFactor();
+    float GetRelativePlaybackFrequencyWithDoppler() const;
+    float GetSlowMoFrequencyScalingFactor() const;
     void  NewVPSLentry();
     void  RegisterWithPhysicalEntity(CEntity* entity);
     void  StopSoundAndForget();
