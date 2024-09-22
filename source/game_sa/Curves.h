@@ -29,7 +29,7 @@ public:
     static float CalcSpeedVariationInBend(CVector2D const& startCoors, CVector2D const& endCoors, CVector2D startDir, CVector2D endDir); // Same as above
     static float CalcSpeedScaleFactor(CVector2D const& startCoors, CVector2D const& endCoors, CVector2D startDir, CVector2D endDir); // Same as above
     static float CalcCorrectedDist(float curr, float total, float variance, float& outT);
-    void CalcCurvePoint(
+    static void  CalcCurvePoint(
         const CVector& startPos,
         const CVector& endPos,
         const CVector& startDir,
