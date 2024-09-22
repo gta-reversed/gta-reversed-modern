@@ -232,7 +232,7 @@ void CVehicle::InjectHooks() {
     // RH_ScopedGlobalInstall(SetVehicleAtomicVisibilityCB, 0x6D2690);
     // RH_ScopedGlobalInstall(SetVehicleAtomicVisibilityCB, 0x6D26D0);
     // RH_ScopedGlobalInstall(SetCompAlphaCB, 0x6D2950);
-    // RH_ScopedGlobalInstall(IsVehiclePointerValid, 0x6E38F0);
+    RH_ScopedGlobalInstall(IsVehiclePointerValid, 0x6E38F0);
     // RH_ScopedGlobalInstall(RemoveUpgradeCB, 0x6D3300);
     // RH_ScopedGlobalInstall(FindUpgradeCB, 0x6D3370);
     // RH_ScopedGlobalInstall(RemoveObjectsCB, 0x6D33B0);
@@ -2028,9 +2028,14 @@ void CVehicle::AddDamagedVehicleParticles() {
     }
 
     if (!m_pOverheatParticle && matrix) {
-        CVector point = GetVehicleModelInfo()->GetModelDummyPosition(DUMMY_ENGINE);
-        const auto systemName = m_pHandlingData->m_transmissionData.m_nEngineType == 'E' ? "overheat_car_electric" : "overheat_car";
-        m_pOverheatParticle = g_fxMan.CreateFxSystem(systemName, &point, matrix, false);
+        m_pOverheatParticle = g_fxMan.CreateFxSystem(
+            m_pHandlingData->m_transmissionData.m_nEngineType == 'E'
+                ? "overheat_car_electric"
+                : "overheat_car",
+            GetVehicleModelInfo()->GetModelDummyPosition(DUMMY_ENGINE),
+            matrix,
+            false
+        );
         if (m_pOverheatParticle) {
             m_pOverheatParticle->Play();
         }
@@ -2682,8 +2687,8 @@ uint32 CVehicle::GetPlaneGunsRateOfFire() {
 
 // 0x6D4290
 CVector CVehicle::GetPlaneGunsPosition(int32 gunId) {
-    const auto& pos = GetModelInfo()->AsVehicleModelInfoPtr()->GetModelDummyPosition(DUMMY_VEHICLE_GUN);
-    if (!pos->IsZero()) {
+    const auto pos = GetModelInfo()->AsVehicleModelInfoPtr()->GetModelDummyPosition(DUMMY_VEHICLE_GUN);
+    if (!pos.IsZero()) {
         return pos;
     }
 
@@ -2725,7 +2730,7 @@ CVector CVehicle::GetPlaneOrdnancePosition(eOrdnanceType type) {
     // return result;
 
     const auto pos = GetVehicleModelInfo()->GetModelDummyPosition(DUMMY_VEHICLE_GUN);
-    if (!pos->IsZero()) {
+    if (!pos.IsZero()) {
         return pos;
     }
 
@@ -2806,10 +2811,13 @@ void CVehicle::DoPlaneGunFireFX(CWeapon* weapon, CVector& particlePos, CVector& 
         if (parts) {
             auto& part = parts[fxIdx];
             if (!part) {
-                CVector point{ 0.f, 0.f, 0.f };
-                part = g_fxMan.CreateFxSystem("gunflash", &point, RwFrameGetMatrix(RpClumpGetFrame(m_pRwClump)), false);
+                part = g_fxMan.CreateFxSystem(
+                    "gunflash",
+                    CVector{0.f, 0.f, 0.f},
+                    RwFrameGetMatrix(RpClumpGetFrame(m_pRwClump)),
+                    false
+                );
             }
-
             if (part) {
                 part->SetOffsetPos(particlePos);
                 part->Play();
@@ -2960,7 +2968,7 @@ void CVehicle::FireUnguidedMissile(eOrdnanceType type, bool bCheckTime) {
         const auto ordnancePos = m_matrix->TransformPoint(GetPlaneOrdnancePosition(type));
         // This places a point somewhere in front of us, depending on our velocity's direction
         auto origin = ordnancePos + m_matrix->GetForward() * (std::max(0.f, DotProduct(m_matrix->GetForward(), m_vecMoveSpeed)) * CTimer::GetTimeStep());
-        weapon.FireProjectile(this, &origin);
+        weapon.FireProjectile(this, origin);
     }
 
     if (m_pDriver && m_pDriver->IsPlayer()) {
@@ -3954,8 +3962,7 @@ void CVehicle::DoBoatSplashes(float fWaterDamping) {
 
     auto baseVel = CVector{ -GetForward().x, -GetRight().y, -GetRight().z };
 
-    CVector p0 = { colMin.x * X_MULT, colMax.y / 2.0f, colMin.z * Z_MULT };
-    p0 = m_matrix->TransformPoint(&p0);
+    CVector p0 = m_matrix->TransformPoint({ colMin.x * X_MULT, colMax.y / 2.0f, colMin.z * Z_MULT });
     auto vel0 = baseVel * CGeneral::GetRandomNumberInRange(0.8f, 1.2f);
     vel0 -= GetRight() * CGeneral::GetRandomNumberInRange(0.3f, 0.7f); // minus
     vel0 += GetUp() * CGeneral::GetRandomNumberInRange(0.8f, 1.2f);
@@ -3963,7 +3970,7 @@ void CVehicle::DoBoatSplashes(float fWaterDamping) {
     g_fx.m_BoatSplash->AddParticle(&p0, &vel0, 0.0f, &particleData, -1.0f, 1.2f, 0.6f, false);
 
     CVector p1 = { colMax.x * X_MULT, colMax.y / 2.0f, colMin.z * Z_MULT };
-    p1 = m_matrix->TransformPoint(&p1);
+    p1 = m_matrix->TransformPoint(p1);
     auto vel1 = baseVel * CGeneral::GetRandomNumberInRange(0.8f, 1.2f);
     vel1 += GetRight() * CGeneral::GetRandomNumberInRange(0.3f, 0.7f);  // plus
     vel1 += GetUp() * CGeneral::GetRandomNumberInRange(0.8f, 1.2f);
@@ -4312,12 +4319,9 @@ void CVehicle::AddVehicleUpgrade(int32 modelId) {
 // 0x6E3400
 void CVehicle::SetupUpgradesAfterLoad() {
     for (auto& upgrade : m_anUpgrades) {
-        if (upgrade == -1)
-            continue;
-
-        auto savedUpgrade = upgrade;
-        upgrade = -1;
-        AddVehicleUpgrade(savedUpgrade);
+        if (upgrade != -1) {
+            AddVehicleUpgrade(std::exchange(upgrade, -1));
+        }
     }
 }
 
@@ -4331,9 +4335,10 @@ bool IsValidModForVehicle(uint32 modelId, CVehicle* vehicle) {
 }
 
 // 0x6E38F0
-bool IsVehiclePointerValid(CVehicle* vehicle)
-{
-    return ((bool(__cdecl*)(CVehicle*))0x6E38F0)(vehicle);
+bool IsVehiclePointerValid(CVehicle* vehicle) {
+    const auto* const pool = CPools::ms_pVehiclePool;
+    assert(pool);
+    return pool->IsObjectValid(vehicle) && (vehicle->m_nVehicleType == VEHICLE_TYPE_FPLANE || !vehicle->m_pCollisionList.IsEmpty());
 }
 
 // 0x6E3950
@@ -4346,8 +4351,8 @@ void CVehicle::DoFixedMachineGuns() {
     if (CCamera::GetActiveCamera().m_nDirectionWasLooking != eLookingDirection::LOOKING_DIRECTION_FORWARD)
         return;
 
-    auto pad = CPad::GetPad(m_pDriver && m_pDriver->m_nPedType == PED_TYPE_PLAYER2 ? 1 : 0);
-    if (pad->GetCarGunFired() && !vehicleFlags.bGunSwitchedOff) {
+    const auto* const driverPad = CPad::GetPad(m_pDriver && m_pDriver->m_nPedType == PED_TYPE_PLAYER2 ? 1 : 0);
+    if (driverPad->GetCarGunFired() && !vehicleFlags.bGunSwitchedOff) {
         FireFixedMachineGuns();
     } else if (CTimer::GetTimeInMS() > m_nGunFiringTime + 1400) {
         m_nAmmoInClip = 20;

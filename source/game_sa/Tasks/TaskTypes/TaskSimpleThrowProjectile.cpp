@@ -59,7 +59,7 @@ bool CTaskSimpleThrowProjectile::ControlThrow(bool bButtonReleased, CEntity* tar
     }
 
     if (targetPos) {
-        m_TargetPos = targetPos;
+        m_TargetPos = *targetPos;
     }
 
     return false;

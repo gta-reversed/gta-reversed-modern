@@ -622,7 +622,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
             TheCamera.SetNewPlayerWeaponMode(MODE_AIMWEAPON, 0, 0);
 
             if (player->m_pTargetedObject) {
-                TheCamera.UpdateAimingCoors(&player->m_pTargetedObject->GetPosition());
+                TheCamera.UpdateAimingCoors(player->m_pTargetedObject->GetPosition());
             } else {
                 CMatrix* playerMatrix = player->m_matrix;
                 firingPoint = playerMatrix->GetForward();
@@ -632,7 +632,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                 firingPoint.z = (std::sin(player->m_pPlayerData->m_fLookPitch) + firingPoint.z) * 5.0f;
 
                 firingPoint += player->GetPosition();
-                TheCamera.UpdateAimingCoors(&firingPoint);
+                TheCamera.UpdateAimingCoors(firingPoint);
             }
 
             if (taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)) {

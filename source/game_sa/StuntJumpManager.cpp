@@ -130,8 +130,7 @@ void CStuntJumpManager::Update() {
                 }
 
                 CTimer::SetTimeScale(0.3f);
-                CVector rotation{0.0f, 0.0f, 0.0f};
-                TheCamera.SetCamPositionForFixedMode(&mp_Active->camera, &rotation);
+                TheCamera.SetCamPositionForFixedMode(mp_Active->camera, CVector{0.0f, 0.0f, 0.0f});
                 TheCamera.TakeControl(playerVehicle, MODE_FIXED, eSwitchType::JUMPCUT, 1);
             }
         }
