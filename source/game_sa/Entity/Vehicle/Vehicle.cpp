@@ -1112,7 +1112,7 @@ bool CVehicle::GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh
     outPos.Set(0.0F, fColRear - 1.0F, 0.0F);
     outPos = m_matrix->TransformPoint(outPos);
     return true;
- }
+}
 
 // 0x871F80// 0x5D4760
 bool CVehicle::Save() {

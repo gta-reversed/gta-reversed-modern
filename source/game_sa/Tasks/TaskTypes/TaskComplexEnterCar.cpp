@@ -334,6 +334,7 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
         m_bQuitAfterDraggingPedOut = false;
         return C(m_DraggedPed ? TASK_SIMPLE_WAIT_UNTIL_PED_OUT_CAR : TASK_FINISHED);
     }
+    case TASK_SIMPLE_WAIT_UNTIL_PED_OUT_CAR:
     case TASK_COMPLEX_FALL_AND_GET_UP:
     case TASK_SIMPLE_CAR_DRIVE_TIMED:
         return C(TASK_FINISHED);

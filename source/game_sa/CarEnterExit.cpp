@@ -639,10 +639,10 @@ void CCarEnterExit::QuitEnteringCar(CPed* ped, CVehicle* vehicle, int32 doorId, 
             vehicle->SetGettingInFlags(8);
             break;
         case 10:
-            vehicle->m_nMaxPassengers ? vehicle->SetGettingInFlags(1) : vehicle->SetGettingInFlags(3);
+            vehicle->SetGettingInFlags(vehicle->m_nMaxPassengers ? 1 : 3);
             break;
         case 11:
-            vehicle->m_nMaxPassengers ? vehicle->SetGettingInFlags(2) : vehicle->SetGettingInFlags(3);
+            vehicle->SetGettingInFlags(vehicle->m_nMaxPassengers ? 2 : 3);
             break;
         }
     }
