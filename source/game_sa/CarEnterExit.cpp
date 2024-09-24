@@ -97,7 +97,7 @@ bool CCarEnterExit::CarHasOpenableDoor(const CVehicle* vehicle, int32 doorId_Unu
 
 // 0x64EE70
 bool CCarEnterExit::CarHasPartiallyOpenDoor(const CVehicle* vehicle, int32 doorId) {
-    auto& veh = const_cast<CVehicle&>(*vehicle);
+    auto& veh = const_cast<CVehicle&>(*vehicle); // TODO: Fix
     return !veh.IsDoorMissingU32((uint32)doorId)
         && !veh.IsDoorFullyOpenU32((uint32)doorId)
         && !veh.IsDoorClosedU32((uint32)doorId);
@@ -417,7 +417,7 @@ bool CCarEnterExit::IsCarDoorInUse(const CVehicle* vehicle, int32 firstDoorId, i
 // 0x64ED90
 bool CCarEnterExit::IsCarDoorReady(const CVehicle* vehicle, int32 doorId) {
     // TODO: Make IsDoorReadyU32 a const member function to avoid const_cast
-    auto& veh = const_cast<CVehicle&>(*vehicle);
+    auto& veh = const_cast<CVehicle&>(*vehicle); // TODO: Fix
     return veh.IsDoorReadyU32((uint32)doorId)
         || veh.IsDoorFullyOpenU32((uint32)doorId);
 }
@@ -470,7 +470,6 @@ bool CCarEnterExit::IsCarSlowJackRequired(const CVehicle* vehicle, int32 doorId)
             return false;
         }
     }
-
     return false;
 }
 

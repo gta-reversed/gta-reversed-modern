@@ -208,7 +208,7 @@ void CVehicle::InjectHooks() {
     // RH_ScopedInstall(RemoveVehicleUpgrade, 0x6DF930);
     // RH_ScopedInstall(AddUpgrade, 0x6DFA20);
     // RH_ScopedInstall(UpdateTrailerLink, 0x6DFC50);
-    RH_ScopedInstall(UpdateTractorLink, 0x6E0050);
+    // RH_ScopedInstall(UpdateTractorLink, 0x6E0050);
     // RH_ScopedInstall(ScanAndMarkTargetForHeatSeekingMissile, 0x6E0400);
     // RH_ScopedInstall(FireHeatSeakingMissile, 0x6E05C0);
     // RH_ScopedInstall(PossiblyDropFreeFallBombForPlayer, 0x6E07E0);
@@ -4242,55 +4242,8 @@ void CVehicle::UpdateTrailerLink(bool arg0, bool arg1) {
 }
 
 // 0x6E0050
-void CVehicle::UpdateTractorLink(bool applyFullVelocityAtHookUp, bool applyDistToSpeed) {
-    if (!m_pTrailer) {
-        return;
-    }
-    CVector hitchPos{};
-    if (!m_pTrailer->GetTowHitchPos(hitchPos, true, this)) {
-        return;
-    }
-    CVector towBarPos{};
-    if (!GetTowBarPos(towBarPos, true, m_pTrailer)) {
-        return;
-    }
-    switch (m_nModelIndex) {
-    case MODEL_TOWTRUCK:
-    case MODEL_TRACTOR: {
-        if (AsAutomobile()->m_wMiscComponentAngle > TOWTRUCK_HOIST_DOWN_LIMIT - 100) {
-            return;
-        }
-    }
-    }
-
-    // 0x6E01EF
-    auto trailerAngularForce = m_pTrailer->GetSpeed(hitchPos - m_pTrailer->GetPosition()) - GetSpeed(towBarPos - GetPosition());
-    if (!applyFullVelocityAtHookUp) {
-        trailerAngularForce *= (1.f - m_fMass / (m_pTrailer->m_fMass + m_fMass)) / 2.f;
-        if (applyDistToSpeed) {
-            const auto distVel = (hitchPos - towBarPos) * (0.1f / std::max(1.f, CTimer::ms_fTimeStep));
-            // BUG: //TODO: Pirulax: I'm quite positive this was meant to be +=
-            if constexpr (notsa::IsFixBugs()) {
-                trailerAngularForce += distVel;
-            } else {
-                trailerAngularForce = distVel;
-            }
-        }
-    }
-    if (m_pTrailer->IsSubTrailer() && m_pTrailer->AsTrailer()->m_fTrailerTowedRatio == -1000.f) {
-        trailerAngularForce -= trailerAngularForce.ProjectOnToNormal(m_pTrailer->GetMatrix().GetUp());
-    }
-
-    // 0x6E03EA
-    ApplyForce(
-        trailerAngularForce * GetMass(                                 // 0x6E0354
-            towBarPos - GetMatrix().TransformPoint(m_vecCentreOfMass), // NOTE: Same logic here, but less code
-            trailerAngularForce.Normalized()
-        ),
-        towBarPos,
-        true
-    );
-    m_nFakePhysics = false;
+void CVehicle::UpdateTractorLink(bool arg0, bool arg1) {
+    ((void(__thiscall*)(CVehicle*, bool, bool))0x6E0050)(this, arg0, arg1);
 }
 
 // 0x6E0400
