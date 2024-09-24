@@ -75,6 +75,65 @@ void CCurves::CalcCurvePoint(
 ) {
     timeProgress = std::clamp(timeProgress, 0.f, 1.f);
 
+    /*
+    const auto [pos, speedScale] = [&]() -> std::tuple<CVector, float> {
+        const auto startCrossEndDist = DistForLineToCrossOtherLine(startPos, startDir, endPos, endDir);
+        const auto endCrossStartDist = DistForLineToCrossOtherLine(endPos, endDir, startPos, startDir);
+        if (startCrossEndDist > 0.f && endCrossStartDist > 0.f) {
+            const auto minDist = std::min({ startCrossEndDist, endCrossStartDist, 5.f }); // Min. of the 2 distances, but not higher than 5
+            const auto speedScale = 2.f * minDist + (startCrossEndDist - minDist) + (endCrossStartDist - minDist);
+            const auto speedScaleWithTime = speedScale * timeProgress;
+
+
+            if (startCrossEndDist - minDist >= speedScaleWithTime) {
+                return { startPos + startDir * speedScaleWithTime, speedScale };
+            }
+
+            if (speedScaleWithTime >= startCrossEndDist + minDist) {
+                return { endPos + endDir * speedScaleWithTime, speedScale };
+            }
+
+            // NOTE: Seems like some cubic bezier curve thingy? Not sure.
+            const auto t = speedScaleWithTime * (startCrossEndDist - minDist) / (2.f * minDist);
+            const auto d = endCrossStartDist - minDist;
+            return {
+                lerp(
+                    (startPos + (d * startDir)) + (minDist * (t * startDir)),
+                    (endPos + (d * endDir)) - (minDist * (t * endDir)),
+                    t
+                ),
+                speedScale
+            };
+        } else {
+            const auto startEndPosDist2D = (startPos - endPos).Magnitude2D();
+            const auto speedVarianceInBend = CalcSpeedVariationInBend(startPos, endPos, startDir, endDir);
+            const auto CalcSpeed = [&](float t) {
+                return (startEndPosDist2D / (1.f - speedVarianceInBend)) * t;
+            };
+            float correctedDistT{};
+            const auto correctedDist = CalcCorrectedDist(
+                CalcSpeed(timeProgress),
+                CalcSpeed(1.f),
+                speedVarianceInBend,
+                correctedDistT
+            );
+            return {
+                lerp(
+                    startPos + startDir * correctedDist,
+                    endPos + endDir * (correctedDist - startEndPosDist2D),
+                    timeProgress
+                ),
+                startEndPosDist2D
+            };
+        }
+    }();
+
+    outPos = pos;
+    outSpeed = lerp(endDir, startDir, timeProgress) * speedScale / ((float)totalTimeMs / 1000.f);
+    */
+
+    // NOTE: This code (partially?) repeats the code written above.
+    // If the current code is not working properly, the code above will crash the game after a while, so you will have to fix it.
     const auto curveFactor = CalcSpeedVariationInBend(startPos, endPos, startDir, endDir);
     const auto curvePoint = lerp(startPos, endPos, timeProgress);
 
