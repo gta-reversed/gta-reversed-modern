@@ -643,7 +643,7 @@ public:
     bool DoTailLightEffect(int32 lightId, CMatrix& matrix, uint8 arg2, uint8 arg3, uint32 arg4, uint8 arg5);
     void DoVehicleLights(CMatrix& matrix, eVehicleLightsFlags flags);
 
-    int32 FillVehicleWithPeds(bool bSetClothesToAfro);
+    void FillVehicleWithPeds(bool bSetClothesToAfro);
     bool DoBladeCollision(CVector pos, CMatrix& matrix, int16 rotorType, float radius, float damageMult);
     void AddVehicleUpgrade(int32 modelId);
     void SetupUpgradesAfterLoad();

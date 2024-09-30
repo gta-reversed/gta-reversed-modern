@@ -4416,33 +4416,34 @@ void CVehicle::DoVehicleLights(CMatrix& matrix, eVehicleLightsFlags flags) {
 }
 
 // 0x6E2900
-int32 CVehicle::FillVehicleWithPeds(bool setClothesToAfro) {
-    const auto playerPed = FindPlayerPed(PED_TYPE_PLAYER1);
+void CVehicle::FillVehicleWithPeds(bool setClothesToAfro) {
     if (setClothesToAfro) {
+        const auto playerPed = FindPlayerPed(PED_TYPE_PLAYER1);
         CStats::SetStatValue(STAT_FAT, 1000.0);
         playerPed->m_pPlayerData->m_pPedClothesDesc->SetModel("afro", CLOTHES_MODEL_HEAD);
         CClothes::RebuildPlayer(playerPed, false);
     }
-    eModelID modelId = setClothesToAfro ? MODEL_PLAYER : MODEL_WMOST;
-
-    for (int i = -1; i < m_nMaxPassengers; ++i) {
-        if (i != -1 || !m_pDriver->IsPlayer()) {
-            if (CStreaming::ms_aInfoForModel[modelId].m_nLoadState == 1) {
-                auto newPed = CPopulation::AddPed(PED_TYPE_CIVFEMALE, modelId, GetPosition(), false);
-                if (i == -1) {
-                    m_pDriver = nullptr;
-                    CCarEnterExit::SetPedInCarDirect(newPed, this, 0, true);
-                } else {
-                    m_apPassengers[i] = nullptr;
-                    int targetDoor = CCarEnterExit::ComputeTargetDoorToEnterAsPassenger(this, i);
-                    CCarEnterExit::SetPedInCarDirect(newPed, this, targetDoor, true);
-                }
-            } else {
-                CStreaming::RequestModel(modelId, STREAMING_KEEP_IN_MEMORY);
-            }
-        }
+    const eModelID modelId = setClothesToAfro ? MODEL_PLAYER : MODEL_WMOST;
+    if (!CStreaming::IsModelLoaded(modelId)) {
+        CStreaming::RequestModel(modelId, STREAMING_KEEP_IN_MEMORY);
+        return;
     }
-    return m_nMaxPassengers;
+    const auto AddPedToSeat = [modelId, this](int32 seat) {
+        CCarEnterExit::SetPedInCarDirect(
+            CPopulation::AddPed(PED_TYPE_CIVFEMALE, modelId, GetPosition(), false),
+            this,
+            seat,
+            true
+        );
+    };
+    if (!m_pDriver || !m_pDriver->IsPlayer()) { // BUGFIX: Added `!m_pDriver`
+        m_pDriver = nullptr;
+        AddPedToSeat(0);
+    }
+    for (int32 i = 0; i < m_nMaxPassengers; i++) {
+        m_apPassengers[i] = nullptr;
+        AddPedToSeat(CCarEnterExit::ComputeTargetDoorToEnterAsPassenger(this, i));
+    }
 }
 
 // 0x6E2E50
