@@ -22,7 +22,7 @@ void CStencilShadows::InjectHooks() {
     RH_ScopedInstall(RenderForObject, 0x710310, {.reversed=false});
     RH_ScopedInstall(Render, 0x710D50, {.reversed=false});
     RH_ScopedInstall(RenderBuffer, 0x710B50);
-    RH_ScopedInstall(SunSetPosiitonFromEntity, 0x710AF0);
+    RH_ScopedInstall(SunSetPositionFromEntity, 0x710AF0);
     RH_ScopedInstall(sub_710CC0, 0x710CC0);
 }
 
@@ -96,7 +96,7 @@ void CStencilShadows::Render(const CRGBA& color) {
 
 // unused
 // 0x710AF0
-void CStencilShadows::SunSetPosiitonFromEntity(const CEntity* entity) {
+void CStencilShadows::SunSetPositionFromEntity(const CEntity* entity) {
     if (!entity) {
         return;
     }

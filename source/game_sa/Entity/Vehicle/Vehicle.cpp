@@ -2085,46 +2085,46 @@ bool CVehicle::AddWheelDirtAndWater(CColPoint& colPoint, bool isWater, bool isBr
     }
 
     if (isBoat) {
-        g_fx.AddWheelSpray(this, colPoint.m_vecPoint, isBraking, 1, m_fContactSurfaceBrightness);
+        g_fx.AddWheelSpray(this, colPoint.m_vecPoint, isBraking, true, m_fContactSurfaceBrightness);
         return false;
     }
 
-    struct SurfaceEffect {
-        bool (SurfaceInfos_c::*check)(SurfaceId);
-        void (Fx_c::*add)(CVehicle*, CVector, bool, float);
-        bool  returnValue;
+    const auto isDryEnough = []() {
+        return CWeather::WetRoads <= 0.0f || CGeneral::GetRandomNumberInRange(CWeather::WetRoads, 1.01f) <= 0.5f;
     };
 
-    const SurfaceEffect effects[] = {
-        { &SurfaceInfos_c::CreatesWheelGrass,  &Fx_c::AddWheelGrass,  false},
-        { &SurfaceInfos_c::CreatesWheelGravel, &Fx_c::AddWheelGravel, true},
-        { &SurfaceInfos_c::CreatesWheelMud,    &Fx_c::AddWheelMud,    false}
-    };
-
-    for (const auto& effect : effects) {
-        if ((g_surfaceInfos.*effect.check)(colPoint.m_nPieceTypeB)) {
-            (g_fx.*effect.add)(this, colPoint.m_vecPoint, isBraking, m_fContactSurfaceBrightness);
-            return effect.returnValue;
-        }
-    }
-
-    auto addWeatherEffect = [&](bool (SurfaceInfos_c::*check)(SurfaceId), void (Fx_c::*add)(CVehicle*, CVector, bool, float)) {
-        if ((g_surfaceInfos.*check)(colPoint.m_nPieceTypeB) && (CWeather::WetRoads <= 0.0 || CGeneral::GetRandomNumberInRange(CWeather::WetRoads, 1.01f) <= 0.5f)) {
-            (g_fx.*add)(this, colPoint.m_vecPoint, isBraking, m_fContactSurfaceBrightness);
-            return true;
+    const auto handleSurfaceEffect = [&](auto createEffect, auto addEffect, bool returnValue) {
+        if ((g_surfaceInfos.*createEffect)(colPoint.m_nPieceTypeB)) {
+            (g_fx.*addEffect)(this, colPoint.m_vecPoint, isBraking, m_fContactSurfaceBrightness);
+            return returnValue;
         }
         return false;
     };
 
-    if (addWeatherEffect(&SurfaceInfos_c::CreatesWheelDust, &Fx_c::AddWheelDust) || addWeatherEffect(&SurfaceInfos_c::CreatesWheelSand, &Fx_c::AddWheelSand)) {
+    if (handleSurfaceEffect(&SurfaceInfos_c::CreatesWheelGrass, &Fx_c::AddWheelGrass, false)) {
+        return false;
+    }
+    if (handleSurfaceEffect(&SurfaceInfos_c::CreatesWheelGravel, &Fx_c::AddWheelGravel, true)) {
+        return true;
+    }
+    if (handleSurfaceEffect(&SurfaceInfos_c::CreatesWheelMud, &Fx_c::AddWheelMud, false)) {
         return false;
     }
 
-    if (g_surfaceInfos.CreatesWheelSpray(colPoint.m_nPieceTypeB) && CWeather::WetRoads > 0.40000001 && !CCullZones::CamNoRain()) {
-        g_fx.AddWheelSpray(this, colPoint.m_vecPoint, isBraking, 0, m_fContactSurfaceBrightness);
+    if (g_surfaceInfos.CreatesWheelDust(colPoint.m_nPieceTypeB)) {
+        if (isDryEnough()) {
+            g_fx.AddWheelDust(this, colPoint.m_vecPoint, isBraking, m_fContactSurfaceBrightness);
+            return false;
+        }
+    } else if (g_surfaceInfos.CreatesWheelSand(colPoint.m_nPieceTypeB)) {
+        if (isDryEnough()) {
+            g_fx.AddWheelSand(this, colPoint.m_vecPoint, isBraking, m_fContactSurfaceBrightness);
+            return false;
+        }
+    } else if (g_surfaceInfos.CreatesWheelSpray(colPoint.m_nPieceTypeB) && CWeather::WetRoads > 0.4f && !CCullZones::CamNoRain()) {
+        g_fx.AddWheelSpray(this, colPoint.m_vecPoint, isBraking, false, m_fContactSurfaceBrightness);
         return false;
     }
-
     return true;
 }
 
@@ -3326,7 +3326,8 @@ eCarWheel CVehicle::FindTyreNearestPoint(CVector2D point) {
         return isRight ? CAR_WHEEL_FRONT_RIGHT : CAR_WHEEL_FRONT_LEFT;
     }
     const bool isFront = relativePt.Dot(GetRight()) <= 0.f; // TODO: Same here, why is X used for front/rear?
-    return isRight ? isFront ? CAR_WHEEL_FRONT_RIGHT : CAR_WHEEL_REAR_RIGHT
+    return isRight
+        ? isFront ? CAR_WHEEL_FRONT_RIGHT : CAR_WHEEL_REAR_RIGHT
         : isFront ? CAR_WHEEL_REAR_LEFT : CAR_WHEEL_FRONT_LEFT;
 }
 
@@ -4415,49 +4416,51 @@ void CVehicle::DoVehicleLights(CMatrix& matrix, eVehicleLightsFlags flags) {
     ((void(__thiscall*)(CVehicle*, CMatrix&, uint32))0x6E1A60)(this, matrix, flags);
 }
 
+// unused
 // 0x6E2900
-int32 CVehicle::FillVehicleWithPeds(bool setClothesToAfro) {
-    const auto playerPed = FindPlayerPed(PED_TYPE_PLAYER1);
+void CVehicle::FillVehicleWithPeds(bool setClothesToAfro) {
     if (setClothesToAfro) {
-        CStats::SetStatValue(STAT_FAT, 1000.0);
+        const auto playerPed = FindPlayerPed(PED_TYPE_PLAYER1);
+        CStats::SetStatValue(STAT_FAT, 1000.0f);
         playerPed->m_pPlayerData->m_pPedClothesDesc->SetModel("afro", CLOTHES_MODEL_HEAD);
         CClothes::RebuildPlayer(playerPed, false);
     }
-    eModelID modelId = setClothesToAfro ? MODEL_PLAYER : MODEL_WMOST;
-
-    for (int i = -1; i < m_nMaxPassengers; ++i) {
-        if (i != -1 || !m_pDriver->IsPlayer()) {
-            if (CStreaming::ms_aInfoForModel[modelId].m_nLoadState == 1) {
-                auto newPed = CPopulation::AddPed(PED_TYPE_CIVFEMALE, modelId, GetPosition(), false);
-                if (i == -1) {
-                    m_pDriver = nullptr;
-                    CCarEnterExit::SetPedInCarDirect(newPed, this, 0, true);
-                } else {
-                    m_apPassengers[i] = nullptr;
-                    int targetDoor = CCarEnterExit::ComputeTargetDoorToEnterAsPassenger(this, i);
-                    CCarEnterExit::SetPedInCarDirect(newPed, this, targetDoor, true);
-                }
-            } else {
-                CStreaming::RequestModel(modelId, STREAMING_KEEP_IN_MEMORY);
-            }
-        }
+    const eModelID modelId = setClothesToAfro ? MODEL_PLAYER : MODEL_WMOST;
+    if (!CStreaming::IsModelLoaded(modelId)) {
+        CStreaming::RequestModel(modelId, STREAMING_KEEP_IN_MEMORY);
+        return;
     }
-    return m_nMaxPassengers;
+    const auto AddPedToSeat = [modelId, this](int32 seat) {
+        CCarEnterExit::SetPedInCarDirect(
+            CPopulation::AddPed(PED_TYPE_CIVFEMALE, modelId, GetPosition(), false),
+            this,
+            seat,
+            true
+        );
+    };
+    if (!m_pDriver || !m_pDriver->IsPlayer()) { // BUGFIX: Added `!m_pDriver`
+        m_pDriver = nullptr;
+        AddPedToSeat(0);
+    }
+    for (int32 i = 0; i < m_nMaxPassengers; i++) {
+        m_apPassengers[i] = nullptr;
+        AddPedToSeat(CCarEnterExit::ComputeTargetDoorToEnterAsPassenger(this, i));
+    }
 }
 
 // 0x6E2E50
 bool CVehicle::DoBladeCollision(CVector pos, CMatrix& matrix, int16 rotorType, float radius, float damageMult) {
-    CVector a(pos - CVector(radius, radius, radius));
-    CVector b(pos + CVector(radius, radius, radius));
+    CVector bbMin(pos - CVector(radius));
+    CVector bbMax(pos + CVector(radius));
 
     int axis = abs(rotorType) - 1;
     if (axis >= 0 && axis < 3) {
-        a[axis] = b[axis] = pos[axis];
-        b[axis] += ROTOR_SEMI_THICKNESS;
-        a[axis] -= ROTOR_SEMI_THICKNESS;
+        bbMin[axis] = bbMax[axis] = pos[axis];
+        bbMax[axis] += ROTOR_SEMI_THICKNESS;
+        bbMin[axis] -= ROTOR_SEMI_THICKNESS;
     }
 
-    m_aTestBladeCol.m_boundBox.Set(a, b);
+    m_aTestBladeCol.m_boundBox.Set(bbMin, bbMax);
     m_aTestBladeCol.m_boundSphere.Set(radius, pos);
     m_aTestBladeCol.m_pColData = &m_aTestBladeColData;
     m_aTestBladeColSphere.Set(radius, pos, SURFACE_DEFAULT, 0, tColLighting(0xFF));
