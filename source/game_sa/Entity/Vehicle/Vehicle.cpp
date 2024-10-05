@@ -3320,7 +3320,8 @@ eCarWheel CVehicle::FindTyreNearestPoint(CVector2D point) {
         return isRight ? CAR_WHEEL_FRONT_RIGHT : CAR_WHEEL_FRONT_LEFT;
     }
     const bool isFront = relativePt.Dot(GetRight()) <= 0.f; // TODO: Same here, why is X used for front/rear?
-    return isRight ? isFront ? CAR_WHEEL_FRONT_RIGHT : CAR_WHEEL_REAR_RIGHT
+    return isRight
+        ? isFront ? CAR_WHEEL_FRONT_RIGHT : CAR_WHEEL_REAR_RIGHT
         : isFront ? CAR_WHEEL_REAR_LEFT : CAR_WHEEL_FRONT_LEFT;
 }
 
@@ -4335,7 +4336,8 @@ void CVehicle::DoHeadLightReflectionSingle(CMatrix& lightMat, bool bRight) {
     }
     const auto lightFwd2D   = CVector2D{ lightMat.GetForward() }.Normalized();
     const auto lightRight2D = CVector2D{ lightMat.GetRight() }.Normalized();
-    const auto lightSize = IsBike() || GetModelID() == MODEL_QUAD ? 1.25f
+    const auto lightSize = IsBike() || GetModelID() == MODEL_QUAD
+        ? 1.25f
         : std::fabs(vehOffset.x) * 4.0f;
 
     const float offsetDistance = lightSize * 2.f + 1.0f + vehOffset.y;
@@ -4442,27 +4444,25 @@ void CVehicle::FillVehicleWithPeds(bool setClothesToAfro) {
 
 // 0x6E2E50
 bool CVehicle::DoBladeCollision(CVector pos, CMatrix& matrix, int16 rotorType, float radius, float damageMult) {
-    CVector a(pos - CVector(radius, radius, radius));
-    CVector b(pos + CVector(radius, radius, radius));
+    CVector bbMin(pos - CVector(radius, radius, radius));
+    CVector bbMax(pos + CVector(radius, radius, radius));
 
-    int axis = abs(rotorType) - 1;
-    if (axis >= 0 && axis < 3) {
-        a[axis] = b[axis] = pos[axis];
-        b[axis] += ROTOR_SEMI_THICKNESS;
-        a[axis] -= ROTOR_SEMI_THICKNESS;
-    }
+    const auto axis = abs(rotorType) - 1;
+    assert(axis >= 0 && axis < 3);
+    bbMin[axis] = pos[axis] - ROTOR_SEMI_THICKNESS;
+    bbMax[axis] = pos[axis] + ROTOR_SEMI_THICKNESS;
 
-    m_aTestBladeCol.m_boundBox.Set(a, b);
+    m_aTestBladeCol.m_boundBox.Set(bbMin, bbMax);
     m_aTestBladeCol.m_boundSphere.Set(radius, pos);
     m_aTestBladeCol.m_pColData = &m_aTestBladeColData;
     m_aTestBladeColSphere.Set(radius, pos, SURFACE_DEFAULT, 0, tColLighting(0xFF));
     m_aTestBladeColData.m_nNumSpheres = 1;
 
-    CVector outPoint = m_matrix->TransformPoint(pos);
-    bool collision = false;
+    const auto posWS = m_matrix->TransformPoint(pos);
+    bool collided = false;
 
     CWorld::IncrementCurrentScanCode();
-    CWorld::IterateSectorsOverlappedByRect(CRect{ pos, radius }, [&](int32 x, int32 y) {
+    CWorld::IterateSectorsOverlappedByRect(CRect{ posWS, radius }, [&](int32 x, int32 y) {
         const auto ProcessSector = [&](CPtrList& list, float damage) {
             return BladeColSectorList(list, m_aTestBladeCol, matrix, rotorType, damage);
         };
@@ -4470,15 +4470,17 @@ bool CVehicle::DoBladeCollision(CVector pos, CMatrix& matrix, int16 rotorType, f
         auto sector = GetSector(x, y);
         auto repeatSector = GetRepeatSector(x, y);
 
-        collision |= ProcessSector(sector->m_buildings, damageMult);
-        collision |= ProcessSector(repeatSector->GetList(REPEATSECTOR_VEHICLES), damageMult);
-        collision |= ProcessSector(repeatSector->GetList(REPEATSECTOR_PEDS), 0.0);
-        collision |= ProcessSector(repeatSector->GetList(REPEATSECTOR_OBJECTS), damageMult);
+        collided |= ProcessSector(sector->m_buildings, damageMult);
+        collided |= ProcessSector(repeatSector->GetList(REPEATSECTOR_VEHICLES), damageMult);
+        collided |= ProcessSector(repeatSector->GetList(REPEATSECTOR_PEDS), 0.0);
+        collided |= ProcessSector(repeatSector->GetList(REPEATSECTOR_OBJECTS), damageMult);
         return 1;
     });
+
     m_aTestBladeColData.m_nNumSpheres = 0;
     m_aTestBladeCol.m_pColData = nullptr;
-    return collision;
+
+    return collided;
 }
 
 // 0x6E3290
