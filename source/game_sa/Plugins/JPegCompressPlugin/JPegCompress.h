@@ -32,6 +32,7 @@ void JPegCompressScreenToFile(RwCamera* camera, const char* path);
  */
 void JPegCompressScreenToBuffer(RwCamera* camera, uint8*& buffer, uint32& size);
 
+// 0x5D05F0
 void JPegDecompressToRaster(RwRaster* raster, IStream* stream);
 
 // 0x5D07A0
