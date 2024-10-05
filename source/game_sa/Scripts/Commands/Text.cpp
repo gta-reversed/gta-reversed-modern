@@ -64,7 +64,7 @@ void DisplayText(CVector2D pos, const char* gxtKey) {
     line->m_Pos      = pos;
     line->param1     = -1;
     line->param2     = -1;
-    strncpy(line->m_szGxtEntry, gxtKey, sizeof(line->m_szGxtEntry));
+    strcpy_s(line->m_szGxtEntry, gxtKey);
 }
 
 void notsa::script::commands::text::RegisterHandlers() {
