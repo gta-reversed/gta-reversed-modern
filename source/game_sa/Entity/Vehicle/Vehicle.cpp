@@ -2079,52 +2079,46 @@ void CVehicle::MakeDirty(CColPoint& colPoint) {
 }
 
 // 0x6D2D50
-bool CVehicle::AddWheelDirtAndWater(CColPoint& colPoint, bool isWater, bool isBraking, bool isBoat) {
-    if (!isWater && !g_surfaceInfos.IsSand(colPoint.m_nPieceTypeB)) {
+bool CVehicle::AddWheelDirtAndWater(CColPoint& colPoint, bool isProduceWheelDrops, bool isWheelsSpinning, bool isWheelInWater) {
+    if (!isProduceWheelDrops && !g_surfaceInfos.IsSand(colPoint.m_nPieceTypeB)) {
         return false;
     }
 
-    if (isBoat) {
-        g_fx.AddWheelSpray(this, colPoint.m_vecPoint, isBraking, 1, m_fContactSurfaceBrightness);
+    if (isWheelInWater) {
+        g_fx.AddWheelSpray(this, colPoint.m_vecPoint, isWheelsSpinning, 1, m_fContactSurfaceBrightness);
         return false;
     }
 
-    struct SurfaceEffect {
-        bool (SurfaceInfos_c::*check)(SurfaceId);
-        void (Fx_c::*add)(CVehicle*, CVector, bool, float);
-        bool  returnValue;
-    };
-
-    const SurfaceEffect effects[] = {
-        { &SurfaceInfos_c::CreatesWheelGrass,  &Fx_c::AddWheelGrass,  false},
-        { &SurfaceInfos_c::CreatesWheelGravel, &Fx_c::AddWheelGravel, true},
-        { &SurfaceInfos_c::CreatesWheelMud,    &Fx_c::AddWheelMud,    false}
-    };
-
-    for (const auto& effect : effects) {
-        if ((g_surfaceInfos.*effect.check)(colPoint.m_nPieceTypeB)) {
-            (g_fx.*effect.add)(this, colPoint.m_vecPoint, isBraking, m_fContactSurfaceBrightness);
-            return effect.returnValue;
-        }
-    }
-
-    auto addWeatherEffect = [&](bool (SurfaceInfos_c::*check)(SurfaceId), void (Fx_c::*add)(CVehicle*, CVector, bool, float)) {
-        if ((g_surfaceInfos.*check)(colPoint.m_nPieceTypeB) && (CWeather::WetRoads <= 0.0 || CGeneral::GetRandomNumberInRange(CWeather::WetRoads, 1.01f) <= 0.5f)) {
-            (g_fx.*add)(this, colPoint.m_vecPoint, isBraking, m_fContactSurfaceBrightness);
+    const auto CreateFxForSurface = [&](auto CheckSurface, auto AddFx) {
+        if ((g_surfaceInfos.*CheckSurface)(colPoint.m_nSurfaceTypeB)) {
+            (g_fx.*AddFx)(this, colPoint.m_vecPoint, isWheelsSpinning, m_fContactSurfaceBrightness);
             return true;
         }
         return false;
     };
-
-    if (addWeatherEffect(&SurfaceInfos_c::CreatesWheelDust, &Fx_c::AddWheelDust) || addWeatherEffect(&SurfaceInfos_c::CreatesWheelSand, &Fx_c::AddWheelSand)) {
+    if (CreateFxForSurface(&SurfaceInfos_c::CreatesWheelGrass,  &Fx_c::AddWheelGrass)) {
         return false;
     }
-
-    if (g_surfaceInfos.CreatesWheelSpray(colPoint.m_nPieceTypeB) && CWeather::WetRoads > 0.40000001 && !CCullZones::CamNoRain()) {
-        g_fx.AddWheelSpray(this, colPoint.m_vecPoint, isBraking, 0, m_fContactSurfaceBrightness);
+    if (CreateFxForSurface(&SurfaceInfos_c::CreatesWheelGravel, &Fx_c::AddWheelGravel)) {
+        return true;  // The only odd one, wonder why
+    }
+    if (CreateFxForSurface(&SurfaceInfos_c::CreatesWheelMud, &Fx_c::AddWheelMud)) {
         return false;
     }
-
+    if (CWeather::WetRoads <= 0.0 || CGeneral::GetRandomNumberInRange(CWeather::WetRoads, 1.01f) <= 0.5f) {
+        if (CreateFxForSurface(&SurfaceInfos_c::CreatesWheelDust, &Fx_c::AddWheelDust)) {
+            return false;
+        }
+        if (CreateFxForSurface(&SurfaceInfos_c::CreatesWheelSand, &Fx_c::AddWheelSand)) {
+            return false;
+        }
+    }
+    if (CWeather::WetRoads > 0.4f && !CCullZones::CamNoRain()) {
+        if (g_surfaceInfos.CreatesWheelSpray(colPoint.m_nPieceTypeB)) {
+            g_fx.AddWheelSpray(this, colPoint.m_vecPoint, isWheelsSpinning, 0, m_fContactSurfaceBrightness);
+            return false;
+        }
+    }
     return true;
 }
 
