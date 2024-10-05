@@ -61,6 +61,9 @@ void DisplayText(CVector2D pos, const char* gxtKey) {
     assert(CTheScripts::UseTextCommands != CTheScripts::eUseTextCommandState::DISABLED);
 
     auto* const line = &CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame++];
+    line->m_Pos      = pos;
+    line->param1     = -1;
+    line->param2     = -1;
     strcpy_s(line->m_szGxtEntry, gxtKey);
 }
 
