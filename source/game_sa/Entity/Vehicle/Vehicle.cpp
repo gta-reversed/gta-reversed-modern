@@ -4411,11 +4411,12 @@ void CVehicle::DoVehicleLights(CMatrix& matrix, eVehicleLightsFlags flags) {
     ((void(__thiscall*)(CVehicle*, CMatrix&, uint32))0x6E1A60)(this, matrix, flags);
 }
 
+// unused
 // 0x6E2900
 void CVehicle::FillVehicleWithPeds(bool setClothesToAfro) {
     if (setClothesToAfro) {
         const auto playerPed = FindPlayerPed(PED_TYPE_PLAYER1);
-        CStats::SetStatValue(STAT_FAT, 1000.0);
+        CStats::SetStatValue(STAT_FAT, 1000.0f);
         playerPed->m_pPlayerData->m_pPedClothesDesc->SetModel("afro", CLOTHES_MODEL_HEAD);
         CClothes::RebuildPlayer(playerPed, false);
     }
