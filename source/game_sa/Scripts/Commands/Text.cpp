@@ -61,7 +61,10 @@ void DisplayText(CVector2D pos, const char* gxtKey) {
     assert(CTheScripts::UseTextCommands != CTheScripts::eUseTextCommandState::DISABLED);
 
     auto* const line = &CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame++];
-    strcpy_s(line->m_szGxtEntry, gxtKey);
+    line->m_Pos      = pos;
+    line->param1     = -1;
+    line->param2     = -1;
+    strncpy(line->m_szGxtEntry, gxtKey, 8);
 }
 
 void notsa::script::commands::text::RegisterHandlers() {
