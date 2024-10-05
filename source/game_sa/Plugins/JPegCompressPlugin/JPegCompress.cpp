@@ -19,7 +19,6 @@ void JPegPlugin::InjectHooks() {
 
     RH_ScopedGlobalInstall(JPegDecompressToRaster, 0x5D05F0);
     RH_ScopedGlobalInstall(JPegDecompressToVramFromBuffer, 0x5D07A0);
-    
 }
 
 // 0x5D0470
@@ -67,14 +66,13 @@ void JPegCompressScreen(RwCamera* camera, IStream* stream) {
 
         HRCHK(frame->WriteSource(converted, NULL));
 
-        source->Release();
-        converted->Release();
-        fmtConverter->Release();
+        SAFE_RELEASE(source);
+        SAFE_RELEASE(converted);
+        SAFE_RELEASE(fmtConverter);
     }
     HRCHK(frame->Commit());
     HRCHK(encoder->Commit());
 
-    //SAFE_RELEASE(stream);
     SAFE_RELEASE(frame);
     SAFE_RELEASE(encoder);
     SAFE_RELEASE(factory);
