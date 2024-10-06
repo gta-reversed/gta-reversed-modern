@@ -232,7 +232,7 @@ void CVehicle::InjectHooks() {
     // RH_ScopedGlobalInstall(SetVehicleAtomicVisibilityCB, 0x6D2690);
     // RH_ScopedGlobalInstall(SetVehicleAtomicVisibilityCB, 0x6D26D0);
     // RH_ScopedGlobalInstall(SetCompAlphaCB, 0x6D2950);
-    // RH_ScopedGlobalInstall(IsVehiclePointerValid, 0x6E38F0);
+    RH_ScopedGlobalInstall(IsVehiclePointerValid, 0x6E38F0);
     // RH_ScopedGlobalInstall(RemoveUpgradeCB, 0x6D3300);
     // RH_ScopedGlobalInstall(FindUpgradeCB, 0x6D3370);
     // RH_ScopedGlobalInstall(RemoveObjectsCB, 0x6D33B0);
@@ -4319,12 +4319,9 @@ void CVehicle::AddVehicleUpgrade(int32 modelId) {
 // 0x6E3400
 void CVehicle::SetupUpgradesAfterLoad() {
     for (auto& upgrade : m_anUpgrades) {
-        if (upgrade == -1)
-            continue;
-
-        auto savedUpgrade = upgrade;
-        upgrade = -1;
-        AddVehicleUpgrade(savedUpgrade);
+        if (upgrade != -1) {
+            AddVehicleUpgrade(std::exchange(upgrade, -1));
+        }
     }
 }
 
@@ -4338,9 +4335,10 @@ bool IsValidModForVehicle(uint32 modelId, CVehicle* vehicle) {
 }
 
 // 0x6E38F0
-bool IsVehiclePointerValid(CVehicle* vehicle)
-{
-    return ((bool(__cdecl*)(CVehicle*))0x6E38F0)(vehicle);
+bool IsVehiclePointerValid(CVehicle* vehicle) {
+    const auto* const pool = CPools::ms_pVehiclePool;
+    assert(pool);
+    return pool->IsObjectValid(vehicle) && (vehicle->m_nVehicleType == VEHICLE_TYPE_FPLANE || !vehicle->m_pCollisionList.IsEmpty());
 }
 
 // 0x6E3950
@@ -4353,8 +4351,8 @@ void CVehicle::DoFixedMachineGuns() {
     if (CCamera::GetActiveCamera().m_nDirectionWasLooking != eLookingDirection::LOOKING_DIRECTION_FORWARD)
         return;
 
-    auto pad = CPad::GetPad(m_pDriver && m_pDriver->m_nPedType == PED_TYPE_PLAYER2 ? 1 : 0);
-    if (pad->GetCarGunFired() && !vehicleFlags.bGunSwitchedOff) {
+    const auto* const driverPad = CPad::GetPad(m_pDriver && m_pDriver->m_nPedType == PED_TYPE_PLAYER2 ? 1 : 0);
+    if (driverPad->GetCarGunFired() && !vehicleFlags.bGunSwitchedOff) {
         FireFixedMachineGuns();
     } else if (CTimer::GetTimeInMS() > m_nGunFiringTime + 1400) {
         m_nAmmoInClip = 20;

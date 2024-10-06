@@ -2839,13 +2839,13 @@ void CAutomobile::PlayCarHorn()
     if (const auto r = m_nCarHornTimer % 8; r < 4) {
         if (r >= 2) {
             if (m_pDriver && m_autoPilot.carCtrlFlags.bHonkAtCar) {
-                m_pDriver->Say(AE_FRONTEND_FRENZY_ONGOING);
+                m_pDriver->Say(CTX_GLOBAL_BLOCKED);
             }
         }
         m_nHornCounter = 45;
     } else {
         if (m_pDriver) {
-            m_pDriver->Say(AE_FRONTEND_FRENZY_ONGOING);
+            m_pDriver->Say(CTX_GLOBAL_BLOCKED);
         }
     }
 }
@@ -3201,13 +3201,13 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
                             if (&damagedVeh != FindPlayerVehicle() || damagedVeh.IsMissionVehicle()) {
                                 switch (m_vehicleAudio.GetVehicleTypeForAudio()) {
                                 case 1:
-                                    m_pDriver->Say(66);
+                                    m_pDriver->Say(CTX_GLOBAL_CRASH_BIKE);
                                     break;
                                 case 0:
-                                    m_pDriver->Say(67);
+                                    m_pDriver->Say(CTX_GLOBAL_CRASH_CAR);
                                     break;
                                 default:
-                                    m_pDriver->Say(68);
+                                    m_pDriver->Say(CTX_GLOBAL_CRASH_GENERIC);
                                     break;
                                 }
                             }
@@ -3215,7 +3215,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
                     }
                     if (this == FindPlayerVehicle()) {
                         if (const auto p = PickRandomPassenger()) {
-                            p->Say(m_pDamageEntity->IsPed() ? 36 : 29);
+                            p->Say(m_pDamageEntity->IsPed() ? CTX_GLOBAL_CAR_HIT_PED : CTX_GLOBAL_CAR_CRASH);
                         }
                     }
                 }
@@ -3278,7 +3278,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
         CEntity::SafeRegisterRef(m_pLastDamageEntity);
 
         if (const auto passenger = PickRandomPassenger()) {
-            passenger->Say(33, 1500);
+            passenger->Say(CTX_GLOBAL_CAR_FIRE, 1500);
         }
     }
 }
