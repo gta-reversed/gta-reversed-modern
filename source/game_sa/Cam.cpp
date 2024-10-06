@@ -3,6 +3,7 @@
 #include "Cam.h"
 #include "TimeCycle.h"
 #include "Camera.h"
+#include "Shadows.h"
 
 bool& gbFirstPersonRunThisFrame = *reinterpret_cast<bool*>(0xB6EC20);
 
@@ -53,7 +54,7 @@ void CCam::InjectHooks() {
     RH_ScopedInstall(Process_DW_PlaneCam2, 0x51CC30, { .reversed = false });
     RH_ScopedInstall(Process_DW_PlaneCam3, 0x51D100, { .reversed = false });
     RH_ScopedInstall(Process_DW_PlaneSpotterCam, 0x51C250, { .reversed = false });
-    RH_ScopedInstall(Process_Editor, 0x50F3F0, { .reversed = false });
+    RH_ScopedInstall(Process_Editor, 0x50F3F0);
     RH_ScopedInstall(Process_Fixed, 0x51D470);
     RH_ScopedInstall(Process_FlyBy, 0x5B25F0, { .reversed = false });
     RH_ScopedInstall(Process_FollowCar_SA, 0x5245B0, { .reversed = false });
@@ -316,9 +317,92 @@ void CCam::Process_DW_PlaneSpotterCam(bool) {
     NOTSA_UNREACHABLE();
 }
 
-// 0x50F3F0
+// 0x50F3F0 - debug
 void CCam::Process_Editor(const CVector&, float, float, float) {
-    NOTSA_UNREACHABLE();
+    static float& LOOKAT_ANGLE   = StaticRef<float>(0xB6FFE4);
+    static bool&  RENDER_SHADOWS = StaticRef<bool>(0xB7295A);
+
+    if (m_bResetStatics) {
+        m_vecSource.Set(796.0f, -937.0f, 40.0f);
+        CEntity::SafeCleanUpRef(m_pCamTargetEntity);
+        m_pCamTargetEntity = nullptr;
+        m_bResetStatics    = false;
+    }
+    RwCameraSetNearClipPlane(Scene.m_pRwCamera, 0.3f);
+    m_fFOV = 70.0f;
+
+    static constexpr float _90DEG_PER_HOUR_IN_RAD_PER_MIN = 0.02617994f;
+    const auto* pad = CPad::GetPad(1);
+    m_fHorizontalAngle += pad->GetLeftStickX() * _90DEG_PER_HOUR_IN_RAD_PER_MIN / 19.0f;
+    m_fVerticalAngle   += DegreesToRadians(static_cast<float>(pad->GetLeftStickY())) / 50.0f;
+
+    const auto lookAtPos = [&] {
+        return m_pCamTargetEntity ? m_pCamTargetEntity->GetPosition() : m_vecSource;
+    }();
+
+    m_fVerticalAngle = std::max(m_fVerticalAngle, DegreesToRadians(85.0f));
+    if (m_fVerticalAngle >= DegreesToRadians(-85.0f)) {
+        if (pad->IsSquareDown()) {
+            LOOKAT_ANGLE += 0.1f;
+        } else if (pad->IsCrossDown()) {
+            LOOKAT_ANGLE -= 0.1f;
+        } else {
+            LOOKAT_ANGLE = 0.0f;
+        }
+    } else {
+        m_fVerticalAngle = DegreesToRadians(-85.0f);
+    }
+    LOOKAT_ANGLE = std::clamp(LOOKAT_ANGLE, -70.0f, 70.0f);
+
+    m_vecFront = (lookAtPos - m_vecSource).Normalized();
+    m_vecSource += LOOKAT_ANGLE * m_vecFront;
+    m_vecSource.z = std::min(m_vecSource.z, -450.0f);
+
+    if (pad->IsRightShoulder2Pressed()) {
+        if (auto* veh = FindPlayerVehicle()) {
+            veh->Teleport(m_vecSource, false);
+        } else {
+            FindPlayerPed()->Teleport(m_vecSource, false);
+        }
+    }
+
+    const auto ClampByLoop = [](float& value, float min, float max) {
+        while (value > max) {
+            value -= 1.0f;
+        }
+        while (value < min) {
+            value += 1.0f;
+        }
+    };
+    ClampByLoop(m_vecSource.x, 5.0f, 115.0f);
+    ClampByLoop(m_vecSource.y, 5.0f, 115.0f);
+
+    GetVectorsReadyForRW();
+
+    if (!pad->IsLeftShockPressed() && RENDER_SHADOWS) {
+        CShadows::StoreShadowToBeRendered(
+            eShadowType::SHADOW_ADDITIVE,
+            gpShadowExplosionTex,
+            m_vecSource,
+            {12.0f, 0.0f},
+            {0.0f, -12.0f},
+            128,
+            128,
+            128,
+            128,
+            1000.0f,
+            false,
+            1.0f,
+            nullptr,
+            false
+        );
+    }
+
+    if (CHud::m_Wants_To_Draw_Hud) {
+        NOTSA_LOG_DEBUG("CamX: {:0.3f} CamY: {:0.3f}  CamZ:  {:0.3f}", m_vecSource.x, m_vecSource.y, m_vecSource.z);
+        NOTSA_LOG_DEBUG("Frontx: {:0.3f}, Fronty: {:0.3f}, Frontz: {:0.3f} ", m_vecFront.x, m_vecFront.y, m_vecFront.z);
+        NOTSA_LOG_DEBUG("LookAT: {:0.3f}, LookAT: {:0.3f}, LookAT: {:0.3f} ", m_vecSource.x + m_vecFront.x, m_vecSource.y + m_vecFront.y, m_vecSource.z + m_vecFront.z);
+    }
 }
 
 // 0x51D470
