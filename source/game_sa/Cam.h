@@ -143,7 +143,7 @@ public:
     void GetLookFromLampPostPos(CEntity*, CPed*, CVector&, CVector&);
     void GetVectorsReadyForRW();
     void Get_TwoPlayer_AimVector(CVector&);
-    void IsTimeToExitThisDWCineyCamMode(int32, CVector*, CVector*, float, bool);
+    bool IsTimeToExitThisDWCineyCamMode(int32 camId, const CVector& src, const CVector& dst, float t, bool lineOfSightCheck);
     void KeepTrackOfTheSpeed(const CVector&, const CVector&, const CVector&, const float&, const float&, const float&);
     void LookBehind();
     void LookRight(bool bLookRight);
@@ -179,6 +179,26 @@ public:
     bool Process_Rocket(const CVector&, float, float, float, bool);
     bool Process_SpecialFixedForSyphon(const CVector&, float, float, float);
     bool Process_WheelCam(const CVector&, float, float, float);
+
+    // NOTSA: inlined
+    void ApplyUnderwaterBlur() {
+        static constexpr float UNDERWATER_CAM_BLUR      = 20;    // 0x8CC7A4
+        static constexpr float UNDERWATER_CAM_MAG_LIMIT = 10.0f; // 0x8CC7A8
+
+        const auto colorMag = std::sqrt(
+            sq(CTimeCycle::m_CurrentColours.m_fWaterRed) +
+            sq(CTimeCycle::m_CurrentColours.m_fWaterGreen) +
+            sq(CTimeCycle::m_CurrentColours.m_fWaterBlue)
+        );
+
+        const auto factor = (colorMag <= UNDERWATER_CAM_MAG_LIMIT) ? 1.0f : UNDERWATER_CAM_MAG_LIMIT / colorMag;
+
+        TheCamera.m_nBlurRed   = factor * CTimeCycle::m_CurrentColours.m_fWaterRed;
+        TheCamera.m_nBlurGreen = factor * CTimeCycle::m_CurrentColours.m_fWaterGreen;
+        TheCamera.m_nBlurBlue  = factor * CTimeCycle::m_CurrentColours.m_fWaterBlue;
+        TheCamera.m_nBlurType  = 2; // TODO: enum
+        TheCamera.m_nMotionBlur = UNDERWATER_CAM_BLUR;
+    }
 };
 
 VALIDATE_SIZE(CCam, 0x238);

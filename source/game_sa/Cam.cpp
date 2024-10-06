@@ -4,18 +4,28 @@
 
 bool& gbFirstPersonRunThisFrame = *reinterpret_cast<bool*>(0xB6EC20);
 
+static inline std::array<bool, 9> gbExitCam = StaticRef<std::array<bool, 9>>(0xB6EC5C);
+
+static inline CVector& DWCineyCamLastPos = StaticRef<CVector>(0xB6FE8C);
+static inline CVector& DWCineyCamLastUp = StaticRef<CVector>(0xB6FE98);
+static inline CVector& DWCineyCamLastRight = StaticRef<CVector>(0xB6FEA4);
+static inline CVector& DWCineyCamLastFwd = StaticRef<CVector>(0xB6FEB0);
+
+static inline float& DWCineyCamLastNearClip = StaticRef<float>(0xB6EC08);
+static inline float& DWCineyCamLastFov = StaticRef<float>(0xB6EC0C);
+
 void CCam::InjectHooks() {
     RH_ScopedClass(CCam);
     RH_ScopedCategory("Camera");
 
     RH_ScopedInstall(Constructor, 0x517730);
     RH_ScopedInstall(Init, 0x50E490);
-    RH_ScopedInstall(CacheLastSettingsDWCineyCam, 0x50D7A0, { .reversed = false });
+    RH_ScopedInstall(CacheLastSettingsDWCineyCam, 0x50D7A0);
     RH_ScopedInstall(DoCamBump, 0x50CB30);
     RH_ScopedInstall(Finalise_DW_CineyCams, 0x50DD70, { .reversed = false });
     RH_ScopedInstall(GetCoreDataForDWCineyCamMode, 0x517130, { .reversed = false });
     RH_ScopedInstall(GetLookFromLampPostPos, 0x5161A0, { .reversed = false });
-    RH_ScopedInstall(GetVectorsReadyForRW, 0x509CE0, { .reversed = false });
+    RH_ScopedInstall(GetVectorsReadyForRW, 0x509CE0);
     RH_ScopedInstall(Get_TwoPlayer_AimVector, 0x513E40, { .reversed = false });
     RH_ScopedInstall(IsTimeToExitThisDWCineyCamMode, 0x517400, { .reversed = false });
     RH_ScopedInstall(KeepTrackOfTheSpeed, 0x509DF0, { .reversed = false });
@@ -42,7 +52,7 @@ void CCam::InjectHooks() {
     RH_ScopedInstall(Process_DW_PlaneCam3, 0x51D100, { .reversed = false });
     RH_ScopedInstall(Process_DW_PlaneSpotterCam, 0x51C250, { .reversed = false });
     RH_ScopedInstall(Process_Editor, 0x50F3F0, { .reversed = false });
-    RH_ScopedInstall(Process_Fixed, 0x51D470, { .reversed = false });
+    RH_ScopedInstall(Process_Fixed, 0x51D470);
     RH_ScopedInstall(Process_FlyBy, 0x5B25F0, { .reversed = false });
     RH_ScopedInstall(Process_FollowCar_SA, 0x5245B0, { .reversed = false });
     RH_ScopedInstall(Process_FollowPedWithMouse, 0x50F970, { .reversed = false });
@@ -133,7 +143,12 @@ void CCam::Init() {
 
 // 0x50D7A0
 void CCam::CacheLastSettingsDWCineyCam() {
-    assert(0);
+    DWCineyCamLastUp       = m_vecUp;
+    DWCineyCamLastFwd      = m_vecFront;
+    DWCineyCamLastRight    = CrossProduct(m_vecFront, m_vecUp);
+    DWCineyCamLastFov      = m_fFOV;
+    DWCineyCamLastNearClip = RwCameraGetNearClipPlane(Scene.m_pRwCamera);
+    DWCineyCamLastPos      = m_vecSource;
 }
 
 // 0x50CB30
@@ -160,7 +175,12 @@ void CCam::GetLookFromLampPostPos(CEntity*, CPed*, CVector&, CVector&) {
 
 // 0x509CE0
 void CCam::GetVectorsReadyForRW() {
-    assert(0);
+    m_vecFront.Normalise();
+    if (m_vecFront.x == 0.0f && m_vecFront.y == 0.0f) {
+        m_vecFront.x = m_vecFront.y = 0.0001f;
+    }
+    const auto a = CrossProduct(m_vecFront, { 0.0f, 0.0f, 1.0f }).Normalized();
+    m_vecUp = CrossProduct(a, m_vecFront);
 }
 
 // 0x513E40
@@ -169,7 +189,7 @@ void CCam::Get_TwoPlayer_AimVector(CVector& out) {
 }
 
 // 0x517400
-void CCam::IsTimeToExitThisDWCineyCamMode(int32, CVector*, CVector*, float, bool) {
+bool CCam::IsTimeToExitThisDWCineyCamMode(int32 camId, const CVector& src, const CVector& dst, float t, bool lineOfSightCheck) {
     assert(0);
 }
 
@@ -299,8 +319,44 @@ bool CCam::Process_Editor(const CVector&, float, float, float) {
 }
 
 // 0x51D470
-bool CCam::Process_Fixed(const CVector&, float, float, float) {
-    assert(0); return false;
+bool CCam::Process_Fixed(const CVector& target, float orientation, float speedVar, float speedVarWanted) {
+    if (m_nDirectionWasLooking != 3) {
+        m_nDirectionWasLooking = 3; // todo: enum
+    }
+
+    m_vecSource = m_vecCamFixedModeSource;
+    m_vecFront = (target - m_vecSource).Normalized();
+    m_vecTargetCoorsForFudgeInter = target;
+    GetVectorsReadyForRW();
+
+    // inlined?
+    m_vecUp = CrossProduct(
+        CrossProduct(
+            m_vecFront,
+            (m_vecCamFixedModeUpOffSet + CVector{ 0.0f, 0.0f, 1.0f }).Normalized()
+        ).Normalized(),
+        m_vecFront
+    );
+    m_fFOV = 70.0f;
+
+    float waterLevel{};
+    if (CWaterLevel::GetWaterLevel(m_vecSource, waterLevel, true) && m_vecSource.z < waterLevel) {
+        ApplyUnderwaterBlur();
+    }
+
+    if (gAllowScriptedFixedCameraCollision) {
+        const auto savedIgnoreEntity = CWorld::pIgnoreEntity;
+
+        CWorld::pIgnoreEntity = FindPlayerVehicle();
+        CVector out{};
+        float   outDist{1.0f};
+        if (TheCamera.ConeCastCollisionResolve(m_vecSource, target, out, 2.0f, 0.1f, outDist)) {
+            m_vecSource.y = out.y;
+            m_vecSource.z = out.z;
+        }
+
+        CWorld::pIgnoreEntity = savedIgnoreEntity;
+    }
 }
 
 // 0x5B25F0
