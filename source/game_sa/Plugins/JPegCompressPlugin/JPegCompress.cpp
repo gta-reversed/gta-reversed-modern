@@ -4,6 +4,8 @@
 #include <Shlwapi.h>
 #include <Wincodecsdk.h>
 
+#include <wil/com.h>
+
 // Vanilla used the old D3DX library, which requires old the DirectX SDK. Nasty stuff.
 // Implemented with the new WIC API. No Windows XP support.
 
@@ -27,11 +29,9 @@ void JPegCompressScreen(RwCamera* camera, IStream* stream) {
 
     // Some parts are from: https://stackoverflow.com/a/30138664
 
-    // TODO: WIL would be nice.
-    IWICImagingFactory*    factory{};
-    IWICBitmapEncoder*     encoder{};
-    IWICBitmapFrameEncode* frame{};
-    GUID                   format{ GUID_WICPixelFormat24bppBGR };
+    wil::com_ptr<IWICImagingFactory>    factory{};
+    wil::com_ptr<IWICBitmapEncoder>     encoder{};
+    wil::com_ptr<IWICBitmapFrameEncode> frame{};
 
 #define HRCHK(hr) if (FAILED((hr))) { NOTSA_LOG_ERR("Couldn't encode screenshot. Your capture is not saved."); return; }
 
@@ -43,13 +43,15 @@ void JPegCompressScreen(RwCamera* camera, IStream* stream) {
     HRCHK(encoder->CreateNewFrame(&frame, nullptr));
     HRCHK(frame->Initialize(nullptr));
     HRCHK(frame->SetSize(RwImageGetWidth(scr), RwImageGetHeight(scr)));
+
+    GUID format{ GUID_WICPixelFormat24bppBGR };
     HRCHK(frame->SetPixelFormat(&format));
 
     {
         // Convert raw RGBA to JPEG friendly BGR.
-        IWICBitmap*          source{};
-        IWICBitmapSource*    converted{};
-        IWICFormatConverter* fmtConverter{};
+        wil::com_ptr<IWICBitmap>          source{};
+        wil::com_ptr<IWICBitmapSource>    converted{};
+        wil::com_ptr<IWICFormatConverter> fmtConverter{};
 
         HRCHK(factory->CreateBitmapFromMemory(
             RwImageGetWidth(scr),
@@ -61,21 +63,14 @@ void JPegCompressScreen(RwCamera* camera, IStream* stream) {
             &source
         ));
         HRCHK(factory->CreateFormatConverter(&fmtConverter));
-        HRCHK(fmtConverter->Initialize(source, format, WICBitmapDitherTypeNone, NULL, 0.0, WICBitmapPaletteTypeCustom));
-        HRCHK(fmtConverter->QueryInterface(__uuidof(IWICBitmapSource), (void**)&converted));
+        HRCHK(fmtConverter->Initialize(source.get(), format, WICBitmapDitherTypeNone, NULL, 0.0, WICBitmapPaletteTypeCustom));
+        HRCHK(fmtConverter->QueryInterface(__uuidof(IWICBitmapSource), converted.put_void()));
 
-        HRCHK(frame->WriteSource(converted, NULL));
-
-        SAFE_RELEASE(source);
-        SAFE_RELEASE(converted);
-        SAFE_RELEASE(fmtConverter);
+        HRCHK(frame->WriteSource(converted.get(), NULL));
     }
     HRCHK(frame->Commit());
     HRCHK(encoder->Commit());
 
-    SAFE_RELEASE(frame);
-    SAFE_RELEASE(encoder);
-    SAFE_RELEASE(factory);
     CoUninitialize();
 
 #undef HR_FAIL_RET
@@ -87,17 +82,16 @@ void JPegCompressScreenToFile(RwCamera* camera, const char* path) {
     // for passing it to libjpeg callbacks.
     // 
     // I could've done the same thing for the IStream* but it seemed unnecessary.
-    IStream* stream{};
+    wil::com_ptr<IStream> stream{};
     if (SUCCEEDED(SHCreateStreamOnFileEx(
         UTF8ToUnicode(path).c_str(),
         STGM_CREATE | STGM_WRITE,
         FILE_ATTRIBUTE_NORMAL,
         true,
         NULL,
-        &stream)
+        stream.addressof())
     )) {
-        JPegCompressScreen(camera, stream);
-        stream->Release();
+        JPegCompressScreen(camera, stream.get());
     }
 }
 

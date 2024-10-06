@@ -16,6 +16,10 @@ add_subdirectory(spdlog EXCLUDE_FROM_ALL)
 
 add_subdirectory(json EXCLUDE_FROM_ALL)
 
+if (WIN32)
+    add_subdirectory(wil EXCLUDE_FROM_ALL)
+endif()
+
 #############################################################################################
 ############# create the imgui project
 #############################################################################################
