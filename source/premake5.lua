@@ -44,7 +44,6 @@ project "gta_sa_modern"
         "../libs/spdlog/include",
         "../libs/tracy/public",
         "../libs/json/include",
-        "../libs/wil/include",
     }
 
     filter "options:script-tracing"
