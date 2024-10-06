@@ -151,54 +151,37 @@ public:
     bool Using3rdPersonMouseCam();
     bool GetWeaponFirstPersonOn();
 
-    bool Process();
-    bool ProcessArrestCamOne();
-    bool ProcessPedsDeadBaby();
-    bool Process_1rstPersonPedOnPC(const CVector&, float, float, float);
-    bool Process_1stPerson(const CVector&, float, float, float);
-    bool Process_AimWeapon(const CVector&, float, float, float);
-    bool Process_AttachedCam();
-    bool Process_Cam_TwoPlayer();
-    bool Process_Cam_TwoPlayer_InCarAndShooting();
-    bool Process_Cam_TwoPlayer_Separate_Cars();
-    bool Process_Cam_TwoPlayer_Separate_Cars_TopDown();
-    bool Process_DW_BirdyCam(bool);
-    bool Process_DW_CamManCam(bool);
-    bool Process_DW_HeliChaseCam(bool);
-    bool Process_DW_PlaneCam1(bool);
-    bool Process_DW_PlaneCam2(bool);
-    bool Process_DW_PlaneCam3(bool);
-    bool Process_DW_PlaneSpotterCam(bool);
-    bool Process_Editor(const CVector&, float, float, float);
-    bool Process_Fixed(const CVector&, float, float, float);
-    bool Process_FlyBy(const CVector&, float, float, float);
-    bool Process_FollowCar_SA(const CVector&, float, float, float, bool);
-    bool Process_FollowPedWithMouse(const CVector&, float, float, float);
-    bool Process_FollowPed_SA(const CVector&, float, float, float, bool);
-    bool Process_M16_1stPerson(const CVector&, float, float, float);
-    bool Process_Rocket(const CVector&, float, float, float, bool);
-    bool Process_SpecialFixedForSyphon(const CVector&, float, float, float);
-    bool Process_WheelCam(const CVector&, float, float, float);
+    void Process();
+    void ProcessArrestCamOne();
+    void ProcessPedsDeadBaby();
+    void Process_1rstPersonPedOnPC(const CVector&, float, float, float);
+    void Process_1stPerson(const CVector&, float, float, float);
+    void Process_AimWeapon(const CVector&, float, float, float);
+    void Process_AttachedCam();
+    void Process_Cam_TwoPlayer();
+    void Process_Cam_TwoPlayer_InCarAndShooting();
+    void Process_Cam_TwoPlayer_Separate_Cars();
+    void Process_Cam_TwoPlayer_Separate_Cars_TopDown();
+    void Process_DW_BirdyCam(bool);
+    void Process_DW_CamManCam(bool);
+    void Process_DW_HeliChaseCam(bool);
+    void Process_DW_PlaneCam1(bool);
+    void Process_DW_PlaneCam2(bool);
+    void Process_DW_PlaneCam3(bool);
+    void Process_DW_PlaneSpotterCam(bool);
+    void Process_Editor(const CVector&, float, float, float);
+    void Process_Fixed(const CVector&, float, float, float);
+    void Process_FlyBy(const CVector&, float, float, float);
+    void Process_FollowCar_SA(const CVector&, float, float, float, bool);
+    void Process_FollowPedWithMouse(const CVector&, float, float, float);
+    void Process_FollowPed_SA(const CVector&, float, float, float, bool);
+    void Process_M16_1stPerson(const CVector&, float, float, float);
+    void Process_Rocket(const CVector&, float, float, float, bool);
+    void Process_SpecialFixedForSyphon(const CVector&, float, float, float);
+    void Process_WheelCam(const CVector&, float, float, float);
 
     // NOTSA: inlined
-    void ApplyUnderwaterBlur() {
-        static constexpr float UNDERWATER_CAM_BLUR      = 20;    // 0x8CC7A4
-        static constexpr float UNDERWATER_CAM_MAG_LIMIT = 10.0f; // 0x8CC7A8
-
-        const auto colorMag = std::sqrt(
-            sq(CTimeCycle::m_CurrentColours.m_fWaterRed) +
-            sq(CTimeCycle::m_CurrentColours.m_fWaterGreen) +
-            sq(CTimeCycle::m_CurrentColours.m_fWaterBlue)
-        );
-
-        const auto factor = (colorMag <= UNDERWATER_CAM_MAG_LIMIT) ? 1.0f : UNDERWATER_CAM_MAG_LIMIT / colorMag;
-
-        TheCamera.m_nBlurRed   = factor * CTimeCycle::m_CurrentColours.m_fWaterRed;
-        TheCamera.m_nBlurGreen = factor * CTimeCycle::m_CurrentColours.m_fWaterGreen;
-        TheCamera.m_nBlurBlue  = factor * CTimeCycle::m_CurrentColours.m_fWaterBlue;
-        TheCamera.m_nBlurType  = 2; // TODO: enum
-        TheCamera.m_nMotionBlur = UNDERWATER_CAM_BLUR;
-    }
+    void ApplyUnderwaterBlur();
 };
 
 VALIDATE_SIZE(CCam, 0x238);

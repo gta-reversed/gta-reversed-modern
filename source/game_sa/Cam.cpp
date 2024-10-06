@@ -1,6 +1,8 @@
 #include "StdInc.h"
 
 #include "Cam.h"
+#include "TimeCycle.h"
+#include "Camera.h"
 
 bool& gbFirstPersonRunThisFrame = *reinterpret_cast<bool*>(0xB6EC20);
 
@@ -160,17 +162,17 @@ void CCam::DoCamBump(float horizontal, float vertical) {
 
 // 0x50DD70
 void CCam::Finalise_DW_CineyCams(CVector*, CVector*, float, float, float, float) {
-    assert(0);
+    NOTSA_UNREACHABLE();
 }
 
 // 0x517130
 void CCam::GetCoreDataForDWCineyCamMode(CEntity**, CVehicle**, CVector*, CVector*, CVector*, CVector*, CVector*, CVector*, float*, CVector*, float*, CColSphere*) {
-    assert(0);
+    NOTSA_UNREACHABLE();
 }
 
 // 0x5161A0
 void CCam::GetLookFromLampPostPos(CEntity*, CPed*, CVector&, CVector&) {
-    assert(0);
+    NOTSA_UNREACHABLE();
 }
 
 // 0x509CE0
@@ -185,32 +187,33 @@ void CCam::GetVectorsReadyForRW() {
 
 // 0x513E40
 void CCam::Get_TwoPlayer_AimVector(CVector& out) {
-    assert(0);
+    NOTSA_UNREACHABLE();
 }
 
 // 0x517400
 bool CCam::IsTimeToExitThisDWCineyCamMode(int32 camId, const CVector& src, const CVector& dst, float t, bool lineOfSightCheck) {
-    assert(0);
+    NOTSA_UNREACHABLE();
+    return false;
 }
 
 // 0x509DF0
 void CCam::KeepTrackOfTheSpeed(const CVector&, const CVector&, const CVector&, const float&, const float&, const float&) {
-    assert(0);
+    NOTSA_UNREACHABLE();
 }
 
 // 0x520690
 void CCam::LookBehind() {
-    assert(0);
+    NOTSA_UNREACHABLE();
 }
 
 // 0x520E40
 void CCam::LookRight(bool bLookRight) {
-    assert(0);
+    NOTSA_UNREACHABLE();
 }
 
 // 0x50A4F0
 void CCam::RotCamIfInFrontCar(const CVector&, float) {
-    assert(0);
+    NOTSA_UNREACHABLE();
 }
 
 // 0x50A850
@@ -224,102 +227,102 @@ bool CCam::GetWeaponFirstPersonOn() {
 }
 
 // 0x526FC0
-bool CCam::Process() {
-    assert(0); return false;
+void CCam::Process() {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x518500
-bool CCam::ProcessArrestCamOne() {
-    assert(0); return false;
+void CCam::ProcessArrestCamOne() {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x519250
-bool CCam::ProcessPedsDeadBaby() {
-    assert(0); return false;
+void CCam::ProcessPedsDeadBaby() {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x50EB70
-bool CCam::Process_1rstPersonPedOnPC(const CVector&, float, float, float) {
-    assert(0); return false;
+void CCam::Process_1rstPersonPedOnPC(const CVector&, float, float, float) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x517EA0
-bool CCam::Process_1stPerson(const CVector&, float, float, float) {
-    assert(0); return false;
+void CCam::Process_1stPerson(const CVector&, float, float, float) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x521500
-bool CCam::Process_AimWeapon(const CVector&, float, float, float) {
-    assert(0); return false;
+void CCam::Process_AimWeapon(const CVector&, float, float, float) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x512B10
-bool CCam::Process_AttachedCam() {
-    assert(0); return false;
+void CCam::Process_AttachedCam() {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x525E50
-bool CCam::Process_Cam_TwoPlayer() {
-    assert(0); return false;
+void CCam::Process_Cam_TwoPlayer() {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x519810
-bool CCam::Process_Cam_TwoPlayer_InCarAndShooting() {
-    assert(0); return false;
+void CCam::Process_Cam_TwoPlayer_InCarAndShooting() {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x513510
-bool CCam::Process_Cam_TwoPlayer_Separate_Cars() {
-    assert(0); return false;
+void CCam::Process_Cam_TwoPlayer_Separate_Cars() {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x513BE0
-bool CCam::Process_Cam_TwoPlayer_Separate_Cars_TopDown() {
-    assert(0); return false;
+void CCam::Process_Cam_TwoPlayer_Separate_Cars_TopDown() {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x51B850
-bool CCam::Process_DW_BirdyCam(bool) {
-    assert(0); return false;
+void CCam::Process_DW_BirdyCam(bool) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x51B120
-bool CCam::Process_DW_CamManCam(bool) {
-    assert(0); return false;
+void CCam::Process_DW_CamManCam(bool) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x51A740
-bool CCam::Process_DW_HeliChaseCam(bool) {
-    assert(0); return false;
+void CCam::Process_DW_HeliChaseCam(bool) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x51C760
-bool CCam::Process_DW_PlaneCam1(bool) {
-    assert(0); return false;
+void CCam::Process_DW_PlaneCam1(bool) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x51CC30
-bool CCam::Process_DW_PlaneCam2(bool) {
-    assert(0); return false;
+void CCam::Process_DW_PlaneCam2(bool) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x51D100
-bool CCam::Process_DW_PlaneCam3(bool) {
-    assert(0); return false;
+void CCam::Process_DW_PlaneCam3(bool) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x51C250
-bool CCam::Process_DW_PlaneSpotterCam(bool) {
-    assert(0); return false;
+void CCam::Process_DW_PlaneSpotterCam(bool) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x50F3F0
-bool CCam::Process_Editor(const CVector&, float, float, float) {
-    assert(0); return false;
+void CCam::Process_Editor(const CVector&, float, float, float) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x51D470
-bool CCam::Process_Fixed(const CVector& target, float orientation, float speedVar, float speedVarWanted) {
+void CCam::Process_Fixed(const CVector& target, float orientation, float speedVar, float speedVarWanted) {
     if (m_nDirectionWasLooking != 3) {
         m_nDirectionWasLooking = 3; // todo: enum
     }
@@ -360,41 +363,60 @@ bool CCam::Process_Fixed(const CVector& target, float orientation, float speedVa
 }
 
 // 0x5B25F0
-bool CCam::Process_FlyBy(const CVector&, float, float, float) {
-    assert(0); return false;
+void CCam::Process_FlyBy(const CVector&, float, float, float) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x5245B0
-bool CCam::Process_FollowCar_SA(const CVector&, float, float, float, bool) {
-    assert(0); return false;
+void CCam::Process_FollowCar_SA(const CVector&, float, float, float, bool) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x50F970
-bool CCam::Process_FollowPedWithMouse(const CVector&, float, float, float) {
-    assert(0); return false;
+void CCam::Process_FollowPedWithMouse(const CVector&, float, float, float) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x522D40
-bool CCam::Process_FollowPed_SA(const CVector&, float, float, float, bool) {
-    assert(0); return false;
+void CCam::Process_FollowPed_SA(const CVector&, float, float, float, bool) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x5105C0
-bool CCam::Process_M16_1stPerson(const CVector&, float, float, float) {
-    assert(0); return false;
+void CCam::Process_M16_1stPerson(const CVector&, float, float, float) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x511B50
-bool CCam::Process_Rocket(const CVector&, float, float, float, bool) {
-    assert(0); return false;
+void CCam::Process_Rocket(const CVector&, float, float, float, bool) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x517500
-bool CCam::Process_SpecialFixedForSyphon(const CVector&, float, float, float) {
-    assert(0); return false;
+void CCam::Process_SpecialFixedForSyphon(const CVector&, float, float, float) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x512110
-bool CCam::Process_WheelCam(const CVector&, float, float, float) {
-    assert(0); return false;
+void CCam::Process_WheelCam(const CVector&, float, float, float) {
+    NOTSA_UNREACHABLE();
+}
+
+void CCam::ApplyUnderwaterBlur() {
+    static constexpr uint32 UNDERWATER_CAM_BLUR      = 20;    // 0x8CC7A4
+    static constexpr float  UNDERWATER_CAM_MAG_LIMIT = 10.0f; // 0x8CC7A8
+
+    const auto colorMag = std::sqrt(
+        sq(CTimeCycle::m_CurrentColours.m_fWaterRed) +
+        sq(CTimeCycle::m_CurrentColours.m_fWaterGreen) +
+        sq(CTimeCycle::m_CurrentColours.m_fWaterBlue)
+    );
+
+    const auto factor = (colorMag <= UNDERWATER_CAM_MAG_LIMIT) ? 1.0f : UNDERWATER_CAM_MAG_LIMIT / colorMag;
+
+    TheCamera.m_nBlurRed    = static_cast<uint32>(factor * CTimeCycle::m_CurrentColours.m_fWaterRed);
+    TheCamera.m_nBlurGreen  = static_cast<uint32>(factor * CTimeCycle::m_CurrentColours.m_fWaterGreen);
+    TheCamera.m_nBlurBlue   = static_cast<uint32>(factor * CTimeCycle::m_CurrentColours.m_fWaterBlue);
+    TheCamera.m_nBlurType   = 2; // TODO: enum
+    TheCamera.m_nMotionBlur = UNDERWATER_CAM_BLUR;
 }
