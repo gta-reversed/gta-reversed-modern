@@ -2,7 +2,8 @@
 #include "AEAudioEnvironment.h"
 
 sReverbEnvironment (&gAudioZoneToReverbEnvironmentMap)[NUM_AUDIO_ENVIRONMENTS] = *(sReverbEnvironment(*)[NUM_AUDIO_ENVIRONMENTS])0x8AD670;
-float (&gSoundDistAttenuationTable)[NUM_SOUND_DIST_ATTENUATION_ENTRIES] = *(float(*)[NUM_SOUND_DIST_ATTENUATION_ENTRIES])0x8AC270;
+
+#include "data/SoundAttenuationTable.h"
 
 void CAEAudioEnvironment::InjectHooks() {
     RH_ScopedClass(CAEAudioEnvironment);
@@ -17,29 +18,30 @@ void CAEAudioEnvironment::InjectHooks() {
 }
 
 // 0x4D7E40
-float CAEAudioEnvironment::GetDopplerRelativeFrequency(float prevDist, float curDist, uint32 prevTime, uint32 curTime, float timeScale) {
-    const auto fDistDiff = curDist - prevDist;
-    if (TheCamera.Get_Just_Switched_Status())
+float CAEAudioEnvironment::GetDopplerRelativeFrequency(float prevDist, float curDist, uint32 prevTime, uint32 curTime, float dopplerScale) {
+    if (TheCamera.Get_Just_Switched_Status()) {
         return 1.0F;
+    }
 
-    if (timeScale == 0.0F || fDistDiff == 0.0F || curTime <= prevTime)
+    const auto deltaDist = curDist - prevDist;
+    if (dopplerScale == 0.0F || deltaDist == 0.0F || curTime <= prevTime) {
         return 1.0F;
+    }
 
-    const auto fDoppler = fDistDiff * 1000.0F / static_cast<float>(curTime - prevTime) * timeScale;
-    if (std::fabs(fDoppler) >= 340.0F)
+    const auto doppler = deltaDist * 1000.0F / (float)(curTime - prevTime) * dopplerScale;
+    if (std::fabs(doppler) >= 340.0F) {
         return 1.0F;
+    }
 
-    const auto fClamped = std::clamp(fDoppler, -35.0F, 35.0F);
-    return 340.0F / (fClamped + 340.0F);
+    return 340.0F / (std::clamp(doppler, -35.0F, 35.0F) + 340.0F);
 }
 
 // 0x4D7F20
 float CAEAudioEnvironment::GetDistanceAttenuation(float dist) {
-    if (dist >= 128.0F)
-        return -100.0F;
-
-    auto iArrIndex = static_cast<uint32>(std::floor(dist * 10.0F));
-    return gSoundDistAttenuationTable[iArrIndex];
+    assert(dist >= 0.f);
+    return dist < ATTENUATION_TABLE_MAX_DIST
+        ? gSoundDistAttenuationTable[(uint32)std::floor(dist / ATTENUATION_TABLE_RESOLUTION)]
+        : -100.f;
 }
 
 // 0x4D7F60

@@ -40,7 +40,6 @@ public:
     }
 
 private:
-    static uint64& startTimeMs;
     static float (&m_sfLogLookup)[50][2];
 
 private:

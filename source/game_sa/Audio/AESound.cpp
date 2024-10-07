@@ -42,7 +42,7 @@ CAESound::CAESound(CAESound& sound) {
     m_nSoundIdInSlot = sound.m_nSoundIdInSlot;
     m_pBaseAudio = sound.m_pBaseAudio;
     m_nEvent = sound.m_nEvent;
-    m_fMaxVolume = sound.m_fMaxVolume;
+    m_ClientVariable = sound.m_ClientVariable;
     m_fVolume = sound.m_fVolume;
     m_fSoundDistance = sound.m_fSoundDistance;
     m_fSpeed = sound.m_fSpeed;
@@ -80,7 +80,7 @@ CAESound::CAESound(int16 bankSlotId, int16 sfxId, CAEAudioEntity* baseAudio, CVe
     m_pBaseAudio = baseAudio;
     m_vecPrevPosn = CVector(0.0f, 0.0f, 0.0f);
     m_pPhysicalEntity = nullptr;
-    m_fMaxVolume = -1.0F;
+    m_ClientVariable = -1.0F;
     m_nEvent = AE_UNDEFINED;
     m_nLastFrameUpdate = 0;
 
@@ -116,7 +116,7 @@ CAESound& CAESound::operator=(const CAESound& sound) {
     m_nSoundIdInSlot        = sound.m_nSoundIdInSlot;
     m_pBaseAudio            = sound.m_pBaseAudio;
     m_nEvent                = sound.m_nEvent;
-    m_fMaxVolume            = sound.m_fMaxVolume;
+    m_ClientVariable            = sound.m_ClientVariable;
     m_fVolume               = sound.m_fVolume;
     m_fSoundDistance        = sound.m_fSoundDistance;
     m_fSpeed                = sound.m_fSpeed;
@@ -295,34 +295,35 @@ void CAESound::CalculateVolume() {
 }
 
 // 0x4EFE50
-void CAESound::Initialise(int16 bankSlotId, int16 sfxId, CAEAudioEntity* baseAudio, CVector posn, float volume, float maxDistance, float speed, float timeScale,
-                          uint8 ignoredServiceCycles, eSoundEnvironment environmentFlags, float speedVariability, int16 currPlayPosn)
+void CAESound::Initialise(
+    int16 bankSlotId, int16 soundID, CAEAudioEntity* audioEntity, CVector pos, float volume, float rollOffFactor, float relativeFrequency, float doppler,
+                          uint8 frameDelay, uint32 flags, float frequencyVariance, int16 playTime)
 {
     UnregisterWithPhysicalEntity();
 
-    m_nSoundIdInSlot        = sfxId;
+    m_nSoundIdInSlot        = soundID;
     m_nBankSlotId           = bankSlotId;
-    m_pBaseAudio            = baseAudio;
+    m_pBaseAudio            = audioEntity;
     m_fVolume               = volume;
-    m_fSoundDistance        = maxDistance;
-    m_fSpeed                = speed;
-    m_fSpeedVariability     = speedVariability;
+    m_fSoundDistance        = rollOffFactor;
+    m_fSpeed                = relativeFrequency;
+    m_fSpeedVariability     = frequencyVariance;
     m_vecPrevPosn           .Set(0.0F, 0.0F, 0.0F);
     m_nEvent                = AE_UNDEFINED;
-    m_fMaxVolume            = -1.0F;
+    m_ClientVariable            = -1.0F;
     m_nLastFrameUpdate      = 0;
 
-    SetPosition(posn);
+    SetPosition(pos);
 
-    m_fTimeScale            = timeScale;
+    m_fTimeScale            = doppler;
     m_nSoundLength          = -1;
     m_nHasStarted           = 0;
     m_nPlayingState         = eSoundState::SOUND_ACTIVE;
     m_fSoundHeadRoom        = 0.0F;
-    m_nIgnoredServiceCycles = ignoredServiceCycles;
-    m_nEnvironmentFlags     = environmentFlags;
+    m_nIgnoredServiceCycles = frameDelay;
+    m_nEnvironmentFlags     = flags;
     m_nIsUsed               = 1;
-    m_nCurrentPlayPosition  = currPlayPosn;
+    m_nCurrentPlayPosition  = playTime;
     m_fFinalVolume          = -100.0F;
     m_fFrequency            = 1.0F;
 }

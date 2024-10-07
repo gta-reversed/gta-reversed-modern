@@ -4,7 +4,8 @@
 
 #include "AEAudioUtility.h"
 
-uint64& CAEAudioUtility::startTimeMs = *reinterpret_cast<uint64*>(0xb610f8);
+auto& Frequency = StaticRef<LARGE_INTEGER>(0xB610F0);
+uint64& startTimeMs = *reinterpret_cast<uint64*>(0xb610f8);
 float (&CAEAudioUtility::m_sfLogLookup)[50][2] = *reinterpret_cast<float (*)[50][2]>(0xb61100);
 
 // NOTE: For me all values were 0... The below values should be the correct ones:
@@ -84,16 +85,23 @@ float CAEAudioUtility::GetPiecewiseLinear(float x, int16 dataCount, float (*data
 
 // 0x4d9e50
 float CAEAudioUtility::AudioLog10(float p) {
-    return 0.00001f <= p ? std::log10f(p) : -5.0f;
+    return p >= 0.00001f
+        ? std::log10f(p)
+        : -5.0f;
 }
 
 // REFACTORED
 // 0x4d9e80
 uint64 CAEAudioUtility::GetCurrentTimeInMS() {
     using namespace std::chrono;
-    auto nowMs = time_point_cast<milliseconds>(high_resolution_clock::now());
-    auto value = duration_cast<milliseconds>(nowMs.time_since_epoch());
-    return static_cast<uint64>(value.count());
+    const auto nowMs = time_point_cast<milliseconds>(high_resolution_clock::now());
+    const auto value = duration_cast<milliseconds>(nowMs.time_since_epoch());
+    return static_cast<uint64>(value.count()) - startTimeMs;
+
+    //For some reason this doesn't work (original code):
+    //LARGE_INTEGER counter;
+    //QueryPerformanceCounter(&counter);
+    //return counter.QuadPart / Frequency.QuadPart * 1000 - startTimeMs;
 }
 
 // 0x4d9ef0
@@ -122,6 +130,7 @@ void CAEAudioUtility::StaticInitialise() {
         m_sfLogLookup[1][1] = log10f(v);
     }
 
+    VERIFY(QueryPerformanceFrequency(&Frequency));
     startTimeMs = GetCurrentTimeInMS();
 }
 
