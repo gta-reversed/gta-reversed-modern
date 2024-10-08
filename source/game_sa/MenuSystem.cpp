@@ -19,9 +19,9 @@ void CMenuSystem::InjectHooks() {
     RH_ScopedInstall(CheckForAccept, 0x5807C0);
     RH_ScopedInstall(CheckForSelected, 0x5807E0);
     RH_ScopedInstall(Input, 0x5825D0);
-    RH_ScopedInstall(InputStandardMenu, 0x580800, { .reversed = false }); // bad
+    RH_ScopedInstall(InputStandardMenu, 0x580800); // bad?
     RH_ScopedInstall(InputGridMenu, 0x580BD0);
-    RH_ScopedInstall(DisplayStandardMenu, 0x580E00, { .reversed = false }); // bad
+    RH_ScopedInstall(DisplayStandardMenu, 0x580E00); // bad?
     RH_ScopedInstall(DisplayGridMenu, 0x5816E0);
     RH_ScopedInstall(Process, 0x582630);
     RH_ScopedInstall(HighlightOneItem, 0x581C10);
@@ -118,8 +118,6 @@ void CMenuSystem::Input(MenuId id) {
 
 // 0x580800
 void CMenuSystem::InputStandardMenu(MenuId id) {
-    return plugin::Call<0x580800, MenuId>(id);
-
     auto menu = MenuNumber[id];
 
     if (CurrentMenuInUse < 0) {
@@ -259,11 +257,9 @@ void CMenuSystem::Display(MenuId id, uint8 unk) {
 }
 
 // 0x580E00
-void CMenuSystem::DisplayStandardMenu(MenuId id, bool bRightFont /*bBrightFont*/) {
-    return plugin::Call<0x580E00, MenuId, bool>(id, bRightFont);
-
+void CMenuSystem::DisplayStandardMenu(MenuId id, bool bBrightFont) {
     auto menu = MenuNumber[id];
-    uint8 titleDarkness = bRightFont ? 0 : 120;
+    uint8 titleDarkness = bBrightFont ? 0 : 120;
 
     if (menu->m_bColumnBackground) {
         float width = 0, height = 50;
