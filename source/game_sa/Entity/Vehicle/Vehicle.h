@@ -557,7 +557,7 @@ public:
     CPed* PickRandomPassenger();
     void AddDamagedVehicleParticles();
     void MakeDirty(CColPoint& colPoint);
-    bool AddWheelDirtAndWater(CColPoint& colPoint, bool isWater, bool isBraking, bool isBoat);
+    bool AddWheelDirtAndWater(CColPoint& colPoint, bool isProduceWheelDrops, bool isWheelsSpinning, bool isWheelInWater);
     void SetGettingInFlags(uint8 doorId);
     void SetGettingOutFlags(uint8 doorId);
     void ClearGettingInFlags(uint8 doorId);
