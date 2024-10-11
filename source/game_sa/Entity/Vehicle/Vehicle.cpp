@@ -2085,7 +2085,7 @@ bool CVehicle::AddWheelDirtAndWater(CColPoint& colPoint, bool isProduceWheelDrop
     }
 
     if (isWheelInWater) {
-        g_fx.AddWheelSpray(this, colPoint.m_vecPoint, isWheelsSpinning, 1, m_fContactSurfaceBrightness);
+        g_fx.AddWheelSpray(this, colPoint.m_vecPoint, isWheelsSpinning, true, m_fContactSurfaceBrightness);
         return false;
     }
 
@@ -2115,7 +2115,7 @@ bool CVehicle::AddWheelDirtAndWater(CColPoint& colPoint, bool isProduceWheelDrop
     }
     if (CWeather::WetRoads > 0.4f && !CCullZones::CamNoRain()) {
         if (g_surfaceInfos.CreatesWheelSpray(colPoint.m_nPieceTypeB)) {
-            g_fx.AddWheelSpray(this, colPoint.m_vecPoint, isWheelsSpinning, 0, m_fContactSurfaceBrightness);
+            g_fx.AddWheelSpray(this, colPoint.m_vecPoint, isWheelsSpinning, false, m_fContactSurfaceBrightness);
             return false;
         }
     }
