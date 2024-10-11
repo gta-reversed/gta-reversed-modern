@@ -195,7 +195,7 @@ void UIRenderer::DebugCode() {
         }
     }
     if (pad->IsStandardKeyJustPressed('6')) {
-        CMessages::AddBigMessage("PRESS ~k~~PED_ANSWER_PHONE~ TO FUCK"_gxt, 1000, eMessageStyle::STYLE_BOTTOM_RIGHT);
+        FindPlayerPed()->Say(CTX_GLOBAL_JACKED_CAR);
     }
 
     if (pad->IsStandardKeyJustPressed('T')) {

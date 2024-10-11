@@ -1027,7 +1027,7 @@ void CWeapon::Update(CPed* owner) {
     const auto ProcessReloadAudioIf = [&](auto Pred) {
         const auto ProcessOne = [&](uint32 delay, eAudioEvents ae) {
             if (Pred(delay, ae)) {
-                owner->m_weaponAudio.AddAudioEvent(ae);
+                owner->GetWeaponAE().AddAudioEvent(ae);
             }
         };
         ProcessOne(owner->bIsDucking ? ao->CrouchRLoadA : ao->RLoadA, AE_WEAPON_RELOAD_A);
@@ -1362,7 +1362,7 @@ bool CWeapon::FireFromCar(CVehicle* vehicle, bool leftSide, bool rightSide) {
         return notsa::IsFixBugs() ? false : true;
     }
     if (const auto d = vehicle->m_pDriver) {
-        d->m_weaponAudio.AddAudioEvent(AE_WEAPON_FIRE);
+        d->GetWeaponAE().AddAudioEvent(AE_WEAPON_FIRE);
     }
     if (!CCheat::IsActive(CHEAT_INFINITE_AMMO)) {
         if (m_AmmoInClip) { // NOTE: I'm pretty sure this is redundant
@@ -1851,9 +1851,9 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
             if (m_Type != WEAPON_CAMERA) {
                 firedByPed->bFiringWeapon = true;
             }
-            firedByPed->m_weaponAudio.AddAudioEvent(AE_WEAPON_FIRE);
+            firedByPed->GetWeaponAE().AddAudioEvent(AE_WEAPON_FIRE);
             if (isPlayerFiring && targetEnt && targetEnt->IsPed() && m_Type != WEAPON_PISTOL_SILENCED) {
-                firedByPed->Say(182, 200); // 0x74280E
+                firedByPed->Say(CTX_GLOBAL_SHOOT, 200); // 0x74280E
             }
         }
 
