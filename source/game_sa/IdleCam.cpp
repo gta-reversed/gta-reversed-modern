@@ -21,7 +21,7 @@ void CIdleCam::InjectHooks() {
     RH_ScopedInstall(ProcessTargetSelection, 0x517870, { .reversed = false });
     RH_ScopedInstall(ProcessSlerp, 0x5179E0, { .reversed = false });
     RH_ScopedInstall(ProcessFOVZoom, 0x517BF0, { .reversed = false });
-    RH_ScopedInstall(Run, 0x51D3E0, { .reversed = false });
+    RH_ScopedInstall(Run, 0x51D3E0);
     RH_ScopedInstall(Process, 0x522C80, { .reversed = false });
     RH_ScopedInstall(IdleCamGeneralProcess, 0x50E690);
 }
@@ -143,8 +143,8 @@ void CIdleCam::VectorToAnglesRotXRotZ(CVector* posn, float* outA1, float* outA2)
 }
 
 // 0x5179E0
-void CIdleCam::ProcessSlerp(float* outA1, float* outA2) {
-    plugin::CallMethod<0x5179E0, CIdleCam*, float*, float*>(this, outA1, outA2);
+float CIdleCam::ProcessSlerp(float& outX, float& outZ) {
+    return plugin::CallMethodAndReturn<float, 0x5179E0, CIdleCam*, float&, float&>(this, outX, outZ);
 }
 
 // 0x50E760
@@ -154,7 +154,20 @@ void CIdleCam::FinaliseIdleCamera(float a1, float a2, float a3) {
 
 // 0x51D3E0
 void CIdleCam::Run() {
-    plugin::CallMethod<0x51D3E0, CIdleCam*>(this);
+    const auto beginTime = CTimer::GetTimeInMS();
+    ProcessTargetSelection();
+
+    const auto shakeDegree = [&] {
+        if (const auto d = beginTime - m_TimeIdleCamStarted; d < m_ShakeBuildUpTime) {
+            return d / m_ShakeBuildUpTime;
+        }
+        return 1.0f;
+    }();
+
+    float angleX{}, angleZ{};
+    m_SlerpTime = ProcessSlerp(angleX, angleZ);
+    ProcessFOVZoom(m_SlerpTime);
+    FinaliseIdleCamera(angleX, angleZ, shakeDegree);
 }
 
 // 0x522C80
