@@ -302,6 +302,9 @@ public:
     static bool IsMouseRButton() noexcept          { return MOUSE_IS_DOWN(rmb); }                                                   // 0x45AF80
     // MOUSE END
 
+    int16 sub_540BD0(CPed* entity) noexcept;
+    int16 sub_540CC0(CPed* ped) noexcept;
+
     int32 sub_541320() { return AverageWeapon / AverageEntries; } // 0x541320
     int32 sub_541290();
     bool sub_541170() const noexcept;

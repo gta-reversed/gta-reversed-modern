@@ -61,7 +61,7 @@ void CCam::InjectHooks() {
     RH_ScopedInstall(Process_FollowPedWithMouse, 0x50F970, { .reversed = false });
     RH_ScopedInstall(Process_FollowPed_SA, 0x522D40, { .reversed = false });
     RH_ScopedInstall(Process_M16_1stPerson, 0x5105C0, { .reversed = false });
-    RH_ScopedInstall(Process_Rocket, 0x511B50, { .reversed = false });
+    RH_ScopedInstall(Process_Rocket, 0x511B50);
     RH_ScopedInstall(Process_SpecialFixedForSyphon, 0x517500, { .reversed = false });
     RH_ScopedInstall(Process_WheelCam, 0x512110, { .reversed = false });
 }
@@ -222,6 +222,24 @@ bool CCam::GetWeaponFirstPersonOn() {
     return m_pCamTargetEntity && m_pCamTargetEntity->IsPed() && m_pCamTargetEntity->AsPed()->GetActiveWeapon().m_IsFirstPersonWeaponModeSelected;
 }
 
+// inlined -- alpha = vertical angle
+void CCam::ClipAlpha() {
+    m_fVerticalAngle = std::clamp(
+        m_fVerticalAngle,
+        DegreesToRadians(-85.5f),
+        DegreesToRadians(+60.0f)
+    );
+}
+
+// 0x509C50 -- beta = horizontal angle
+void CCam::ClipBeta() {
+    if (m_fHorizontalAngle < DegreesToRadians(-180.0f)) {
+        m_fHorizontalAngle += DegreesToRadians(360.0f);
+    } else {
+        m_fHorizontalAngle -= DegreesToRadians(360.0f);
+    }
+}
+
 // 0x526FC0
 void CCam::Process() {
     NOTSA_UNREACHABLE();
@@ -313,7 +331,7 @@ void CCam::Process_DW_PlaneSpotterCam(bool) {
 }
 
 // 0x50F3F0 - debug
-void CCam::Process_Editor(const CVector&, float, float, float) {
+void CCam::Process_Editor(const CVector& target, float orientation, float speedVar, float speedVarWanted) {
     static float& LOOKAT_ANGLE   = StaticRef<float>(0xB6FFE4);
     static bool&  RENDER_SHADOWS = StaticRef<bool>(0xB7295A);
 
@@ -467,8 +485,135 @@ void CCam::Process_M16_1stPerson(const CVector&, float, float, float) {
 }
 
 // 0x511B50
-void CCam::Process_Rocket(const CVector&, float, float, float, bool) {
-    NOTSA_UNREACHABLE();
+void CCam::Process_Rocket(const CVector& target, float orientation, float speedVar, float speedVarWanted, bool isHeatSeeking) {
+    static uint32 dword_B6FFF8 = StaticRef<uint32>(0xB6FFF8);
+    static uint32 dword_B6FFFC = StaticRef<uint32>(0xB6FFFC);
+    static bool   byte_B70000  = StaticRef<bool>(0xB70000);
+
+    if (!m_pCamTargetEntity->IsPed()) {
+        return;
+    }
+
+    auto* targetPed = m_pCamTargetEntity->AsPed();
+    m_fFOV = 70.0f;
+    if (m_bResetStatics) {
+        if (!CCamera::m_bUseMouse3rdPerson || targetPed->m_pTargetedObject) {
+            m_fVerticalAngle = 0.0f;
+            m_fHorizontalAngle = targetPed->m_fCurrentRotation - DegreesToRadians(90.0f);
+        }
+        m_fInitialPlayerOrientation = m_fHorizontalAngle;
+        m_bResetStatics             = 0;
+        m_bCollisionChecksOn        = true;
+        byte_B70000                 = 0;
+        dword_B6FFFC                = 0;
+        dword_B6FFF8                = 0;
+    }
+    m_pCamTargetEntity->UpdateRW();
+    m_pCamTargetEntity->UpdateRwFrame();
+    CVector headPosition{};
+    targetPed->GetTransformedBonePosition(headPosition, eBoneTag::BONE_HEAD, true);
+    m_vecSource = headPosition + CVector{0.0f, 0.0f, 0.1f};
+
+    auto*      pad1   = CPad::GetPad(0);
+    const auto fov    = m_fFOV / 80.0f;
+    const auto mouseX = pad1->NewMouseControllerState.X, mouseY = pad1->NewMouseControllerState.Y;
+    
+    if (mouseX != 0.0f || mouseY != 0.0f) {
+        m_fHorizontalAngle += -3.0f * mouseX * fov * CCamera::m_fMouseAccelHorzntl;
+        m_fVerticalAngle   += +4.0f * mouseY * fov * CCamera::m_fMouseAccelVertical;
+    } else {
+        const auto hv  = (float)-pad1->sub_540BD0(targetPed);
+        const auto vv  = (float)pad1->sub_540CC0(targetPed);
+
+        m_fHorizontalAngle += sq(hv) / 10000.0f * fov / 17.5f * CTimer::GetTimeStep() * (hv < 0.0f ? -1.0f : 1.0f);
+        m_fVerticalAngle   += sq(vv) / 22500.0f * fov / 14.0f * CTimer::GetTimeStep() * (vv < 0.0f ? -1.0f : 1.0f);
+    }
+    ClipBeta();
+    ClipAlpha();
+
+    m_vecFront.Set(
+        -(std::cos(m_fHorizontalAngle) * std::cos(m_fVerticalAngle)),
+        -(std::sin(m_fHorizontalAngle) * std::cos(m_fVerticalAngle)),
+        std::sin(m_fVerticalAngle)
+    );
+    GetVectorsReadyForRW();
+
+    const auto heading = CGeneral::GetATanOfXY(m_vecFront.x, m_vecFront.y) - DegreesToRadians(90.0f);
+    TheCamera.m_pTargetEntity->AsPed()->m_fCurrentRotation = heading;
+    TheCamera.m_pTargetEntity->AsPed()->m_fAimingRotation  = heading;
+
+    if (isHeatSeeking) {
+        auto* player     = FindPlayerPed();
+        auto* playerData = player->m_pPlayerData;
+        if (!playerData->m_nFireHSMissilePressedTime) {
+            playerData->m_nFireHSMissilePressedTime = CTimer::GetTimeInMS();
+        }
+
+        const auto hsTarget = CWeapon::PickTargetForHeatSeekingMissile(
+            m_vecSource,
+            m_vecFront,
+            1.2f,
+            player,
+            false,
+            playerData->m_LastHSMissileTarget
+        );
+
+        // NOTE: not sure about the second one
+        if (hsTarget && CTimer::GetTimeInMS() - playerData->m_nLastHSMissileLOSTime > 1'000) {
+            playerData->m_nLastHSMissileLOSTime = CTimer::GetTimeInMS();
+
+            const auto targetUsesCollision = hsTarget->m_bUsesCollision;
+            const auto playerUsesCollision = player->m_bUsesCollision;
+            hsTarget->m_bUsesCollision     = false;
+            player->m_bUsesCollision       = false;
+
+            const auto isClear = CWorld::GetIsLineOfSightClear(
+                player->GetPosition(),
+                hsTarget->GetPosition(),
+                true,
+                true,
+                false,
+                true,
+                false,
+                true
+            );
+            player->m_bUsesCollision        = playerUsesCollision;
+            hsTarget->m_bUsesCollision      = targetUsesCollision;
+            playerData->m_bLastHSMissileLOS = isClear;
+        }
+
+        if (!playerData->m_bLastHSMissileLOS || !hsTarget || hsTarget != playerData->m_LastHSMissileTarget) {
+            playerData->m_nFireHSMissilePressedTime = CTimer::GetTimeInMS();
+        }
+
+        if (hsTarget) {
+            CWeaponEffects::MarkTarget(
+                CrossHairId(0),
+                hsTarget->GetPosition(),
+                255,
+                255,
+                255,
+                100,
+                1.3f,
+                true
+            );
+        }
+
+        auto& crosshair = gCrossHair[CrossHairId(0)];
+        const auto time = CTimer::GetTimeInMS() - playerData->m_nFireHSMissilePressedTime;
+
+        crosshair.m_nTimeWhenToDeactivate = 0;
+        crosshair.m_color.Set(
+            255,
+            time <= 1'500 ? 255 : 0,
+            time <= 1'500 ? 255 : 0
+        );
+        crosshair.m_fRotation = time <= 1'500 ? 0.0f : 1.0f;
+        playerData->m_LastHSMissileTarget = hsTarget;
+    }
+
+    constexpr auto ROCKET_CAM_NEARCLIP_PLANE = 0.15f; // 0x8CCC9C
+    RwCameraSetNearClipPlane(Scene.m_pRwCamera, ROCKET_CAM_NEARCLIP_PLANE);
 }
 
 // 0x517500

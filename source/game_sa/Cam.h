@@ -120,7 +120,7 @@ public:
     CVector   m_avecTargetHistoryPos[4];
     uint32    m_anTargetHistoryTime[4];
     uint32    m_nCurrentHistoryPoints;
-    CEntity*  m_pCamTargetEntity;
+    CEntity*  m_pCamTargetEntity; // Owner entity. e.g.: player
     float     m_fCameraDistance;
     float     m_fIdealAlpha;
     float     m_fPlayerVelocity;
@@ -149,6 +149,8 @@ public:
     void RotCamIfInFrontCar(const CVector&, float);
     bool Using3rdPersonMouseCam();
     bool GetWeaponFirstPersonOn();
+    void ClipAlpha();
+    void ClipBeta();
 
     void Process();
     void ProcessArrestCamOne();
@@ -168,16 +170,16 @@ public:
     void Process_DW_PlaneCam2(bool);
     void Process_DW_PlaneCam3(bool);
     void Process_DW_PlaneSpotterCam(bool);
-    void Process_Editor(const CVector&, float, float, float);
-    void Process_Fixed(const CVector&, float, float, float);
-    void Process_FlyBy(const CVector&, float, float, float);
-    void Process_FollowCar_SA(const CVector&, float, float, float, bool);
-    void Process_FollowPedWithMouse(const CVector&, float, float, float);
-    void Process_FollowPed_SA(const CVector&, float, float, float, bool);
-    void Process_M16_1stPerson(const CVector&, float, float, float);
-    void Process_Rocket(const CVector&, float, float, float, bool);
-    void Process_SpecialFixedForSyphon(const CVector&, float, float, float);
-    void Process_WheelCam(const CVector&, float, float, float);
+    void Process_Editor(const CVector& target, float orientation, float speedVar, float speedVarWanted);
+    void Process_Fixed(const CVector& target, float orientation, float speedVar, float speedVarWanted);
+    void Process_FlyBy(const CVector& target, float orientation, float speedVar, float speedVarWanted);
+    void Process_FollowCar_SA(const CVector& target, float orientation, float speedVar, float speedVarWanted, bool);
+    void Process_FollowPedWithMouse(const CVector& target, float orientation, float speedVar, float speedVarWanted);
+    void Process_FollowPed_SA(const CVector& target, float orientation, float speedVar, float speedVarWanted, bool);
+    void Process_M16_1stPerson(const CVector& target, float orientation, float speedVar, float speedVarWanted);
+    void Process_Rocket(const CVector& target, float orientation, float speedVar, float speedVarWanted, bool isHeatSeeking);
+    void Process_SpecialFixedForSyphon(const CVector& target, float orientation, float speedVar, float speedVarWanted);
+    void Process_WheelCam(const CVector& target, float orientation, float speedVar, float speedVarWanted);
 
     // NOTSA: inlined
     void ApplyUnderwaterMotionBlur();
