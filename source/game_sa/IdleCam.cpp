@@ -31,7 +31,24 @@ CIdleCam::CIdleCam() {
 
 // 0x50E6D0
 void CIdleCam::Init() {
-    plugin::CallMethod<0x50E6D0, CIdleCam*>(this);
+    m_DistStartFOVZoom                         = 15.0f;
+    m_ZoomNearest                              = 15.0f;
+    m_SlerpDuration                            = 2000.0f;
+    m_TimeControlsIdleForIdleToKickIn          = 90000.0f;
+    m_TimeToConsiderNonVisibleEntityAsOccluded = 3000.0f;
+    m_DistTooClose                             = 4.0f;
+    m_DistTooFar                               = 80.0f;
+    m_DegreeShakeIdleCam                       = 1.0f;
+    m_ShakeBuildUpTime                         = 3000.0f;
+    m_ZoomFarthest                             = 70.0f;
+    m_DurationFOVZoom                          = 1000.0f;
+    m_TargetLOSFramestoReject                  = 14;
+    m_TimeBeforeNewZoomIn                      = 12000.0f;
+    m_TimeMinimumToLookAtSomething             = 5000.0f;
+    m_IncreaseMinimumTimeFactorForZoomedIn     = 2.0f;
+    m_LastTimePadTouched                       = 0;
+    m_IdleTickerFrames                         = 0;
+    Reset(false);
 }
 
 // 0x50A160
