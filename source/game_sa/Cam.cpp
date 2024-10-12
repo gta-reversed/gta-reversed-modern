@@ -430,17 +430,17 @@ void CCam::Process_Fixed(const CVector& target, float orientation, float speedVa
     GetVectorsReadyForRW();
 
     // inlined?
+    const auto a = CrossProduct(
+        m_vecFront,
+        (m_vecCamFixedModeUpOffSet + CVector{ 0.0f, 0.0f, 1.0f }).Normalized()
+    ).Normalized();
     m_vecUp = CrossProduct(
-        CrossProduct(
-            m_vecFront,
-            (m_vecCamFixedModeUpOffSet + CVector{ 0.0f, 0.0f, 1.0f }).Normalized()
-        ).Normalized(),
+        a,
         m_vecFront
     );
     m_fFOV = 70.0f;
 
-    float waterLevel{};
-    if (CWaterLevel::GetWaterLevel(m_vecSource, waterLevel, true) && m_vecSource.z < waterLevel) {
+    if (float wl{}; CWaterLevel::GetWaterLevel(m_vecSource, wl, true) && m_vecSource.z < wl) {
         ApplyUnderwaterMotionBlur();
     }
 
