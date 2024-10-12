@@ -92,9 +92,9 @@ void CStuntJumpManager::Update() {
     if (!mp_poolStuntJumps || CReplay::Mode == MODE_PLAYBACK)
         return;
 
-    CPlayerPed* playerPed = FindPlayerPed();
-    CVehicle* playerVehicle = playerPed->m_pVehicle;
-    CPlayerInfo* playerInfo = playerPed->GetPlayerInfoForThisPlayerPed();
+    auto* playerPed     = FindPlayerPed();
+    auto* playerInfo    = playerPed->GetPlayerInfoForThisPlayerPed();
+    auto* playerVehicle = playerPed->m_pVehicle;
 
     switch (m_jumpState) {
     case eJumpState::START_POINT_INTERSECTED: {
@@ -115,8 +115,7 @@ void CStuntJumpManager::Update() {
                 if (!jump)
                     continue;
 
-                CVector& point = playerVehicle->GetPosition();
-                if (!jump->start.IsPointWithin(point))
+                if (!jump->start.IsPointWithin(playerVehicle->GetPosition()))
                     continue;
 
                 m_jumpState = eJumpState::IN_FLIGHT;
@@ -142,29 +141,28 @@ void CStuntJumpManager::Update() {
             break;
         }
 
-        bool bFailed = false;
+        bool failed = false;
         if (playerVehicle->m_nNumEntitiesCollided != 0 && m_iTimer >= 100) {
-            bFailed = true;
+            failed = true;
         }
 
         if (playerInfo->m_nPlayerState == PLAYERSTATE_HAS_DIED) {
-            bFailed = true;
+            failed = true;
         }
 
         if (!playerPed->bInVehicle) {
-            bFailed = true;
+            failed = true;
         }
 
         if (playerVehicle->m_nStatus == STATUS_WRECKED || playerVehicle->vehicleFlags.bIsDrowning || playerVehicle->physicalFlags.bSubmergedInWater) {
-            bFailed = true;
+            failed = true;
         }
 
-        CVector& point = playerVehicle->GetPosition();
-        if (mp_Active->end.IsPointWithin(point))
+        if (mp_Active->end.IsPointWithin(playerVehicle->GetPosition()))
             m_bHitReward = true;
 
         uint32 time;
-        if (bFailed) {
+        if (failed) {
             m_jumpState = eJumpState::END_POINT_INTERSECTED;
             time = 0;
         } else {
@@ -172,12 +170,11 @@ void CStuntJumpManager::Update() {
         }
 
         m_iTimer = (uint32)CTimer::GetTimeStepInMS() + time;
-        if (m_iTimer > 1000 && time <= 1000) {
-            auto vehicle = FindPlayerVehicle();
-            if (vehicle) {
-                CPed* randomPassenger = vehicle->PickRandomPassenger();
-                if (randomPassenger)
-                    randomPassenger->Say(CTX_GLOBAL_CAR_JUMP);
+        if (m_iTimer > 1'000 && time <= 1'000) {
+            if (const auto veh = FindPlayerVehicle()) {
+                if (const auto p = veh->PickRandomPassenger()) {
+                    p->Say(CTX_GLOBAL_CAR_JUMP);
+                }
             }
         }
 
@@ -202,25 +199,29 @@ void CStuntJumpManager::Update() {
 
         CStats::IncrementStat(STAT_UNIQUE_JUMPS_DONE, 1.0f);
 
-        int32 reward = m_iNumCompleted == m_iNumJumps ? 10000 : mp_Active->reward;
+        const auto reward = m_iNumCompleted == m_iNumJumps ? 10'000 : mp_Active->reward;
         playerInfo->m_nMoney += reward;
 
         AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PART_MISSION_COMPLETE);
 
-        auto bonusMessage = TheText.Get("USJ"); // UNIQUE STUNT BONUS!
-        if (bonusMessage)
-            CMessages::AddBigMessageQ(bonusMessage, 5000, STYLE_MIDDLE_SMALLER_HIGHER);
-
-        if (m_iNumCompleted == m_iNumJumps) {
-            auto stuntsCompleteMessage = TheText.Get("USJ_ALL"); // ALL UNIQUE STUNTS COMPLETED!
-            if (stuntsCompleteMessage)
-                CHud::SetHelpMessage(stuntsCompleteMessage, false, false, false);
+        if (const auto m = TheText.Get("USJ")) {
+            // UNIQUE STUNT BONUS!
+            CMessages::AddBigMessageQ(m, 5'000, STYLE_MIDDLE_SMALLER_HIGHER);
         }
 
-        auto rewardMessage = TheText.Get("REWARD");
-        if (rewardMessage)
-            CMessages::AddBigMessageWithNumber(rewardMessage, 6000, STYLE_WHITE_MIDDLE_SMALLER, reward, -1, -1, -1, -1, -1);
+        if (m_iNumCompleted == m_iNumJumps) {
+            if (const auto m = TheText.Get("USJ_ALL")) {
+                // ALL UNIQUE STUNTS COMPLETED!
+                CHud::SetHelpMessage(m, false, false, false);
+            }
+        }
 
+        if (const auto m = TheText.Get("REWARD")) {
+            CMessages::AddBigMessageWithNumber(m, 6'000, STYLE_WHITE_MIDDLE_SMALLER, reward);
+        }
+
+        m_jumpState = eJumpState::START_POINT_INTERSECTED;
+        mp_Active   = nullptr;
         break;
     }
     }
