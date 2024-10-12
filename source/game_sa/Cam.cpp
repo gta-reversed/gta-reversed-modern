@@ -261,8 +261,76 @@ void CCam::Process_1rstPersonPedOnPC(const CVector&, float, float, float) {
 }
 
 // 0x517EA0
-void CCam::Process_1stPerson(const CVector&, float, float, float) {
-    NOTSA_UNREACHABLE();
+void CCam::Process_1stPerson(const CVector& target, float orientation, float speedVar, float speedVarWanted) {
+    static uint32 dword_B7004C    = StaticRef<uint32>(0xB7004C);
+    static float  lastWheelieTime = StaticRef<float>(0x8CCD14);
+
+    gbFirstPersonRunThisFrame = true;
+
+    m_fFOV = 70.0f;
+    if (!m_pCamTargetEntity->m_pRwObject) {
+        return;
+    }
+
+    if (m_bResetStatics) {
+        m_fVerticalAngle   = 0.0f;
+        m_fHorizontalAngle = [&] {
+            if (m_pCamTargetEntity->IsPed()) {
+                return m_pCamTargetEntity->AsPed()->m_fCurrentRotation + DegreesToRadians(90.0f);
+            } else {
+                return orientation;
+            }
+        }();
+        m_fInitialPlayerOrientation = m_fHorizontalAngle;
+
+        dword_B7004C                            = false;
+        TheCamera.m_fAvoidTheGeometryProbsTimer = 0.0f;
+    }
+
+    if (m_pCamTargetEntity->IsPed()) {
+        m_bResetStatics = false;
+        return;
+    }
+
+    if (m_pCamTargetEntity->AsVehicle()->IsBike() && m_pCamTargetEntity->AsBike()->bikeFlags.bWheelieForCamera || TheCamera.m_fAvoidTheGeometryProbsTimer > 0.0f) {
+        const auto wheelieTime = CTimer::GetTimeInMS();
+        if (lastWheelieTime > wheelieTime) {
+            lastWheelieTime = 0.0f;
+        }
+
+        if (wheelieTime - lastWheelieTime >= 3000.0f) {
+            lastWheelieTime = CTimer::GetTimeInMS();
+        }
+
+        const auto pad1 = CPad::GetPad();
+        if (!pad1->NewState.LeftShoulder2 && !pad1->NewState.RightShoulder2) {
+            auto* targetBike = m_pCamTargetEntity->AsBike();
+            if (Process_WheelCam(target, orientation, speedVar, speedVarWanted)) {
+                if (targetBike->bikeFlags.bWheelieForCamera) {
+                    TheCamera.m_fAvoidTheGeometryProbsTimer = 50.0f;
+                } else {
+                    TheCamera.m_fAvoidTheGeometryProbsTimer -= CTimer::GetTimeStep();
+                    targetBike->bikeFlags.bWheelieForCamera = true;
+                }
+                return;
+            }
+            TheCamera.m_fAvoidTheGeometryProbsTimer = 0.0f;
+            targetBike->bikeFlags.bWheelieForCamera = false;
+
+            lastWheelieTime = 0.0f;
+        }
+    }
+
+    const auto& entityWorldMat = [&] {
+        if (auto* t = m_pCamTargetEntity->AsBike(); t->IsBike()) {
+            t->CalculateLeanMatrix();
+            return t->m_mLeanMatrix;
+        } else {
+            return m_pCamTargetEntity->GetMatrix();
+        }
+    }();
+
+    // ...
 }
 
 // 0x521500
@@ -614,8 +682,9 @@ void CCam::Process_SpecialFixedForSyphon(const CVector&, float, float, float) {
 }
 
 // 0x512110
-void CCam::Process_WheelCam(const CVector&, float, float, float) {
+bool CCam::Process_WheelCam(const CVector&, float, float, float) {
     NOTSA_UNREACHABLE();
+    return false;
 }
 
 void CCam::ApplyUnderwaterMotionBlur() {

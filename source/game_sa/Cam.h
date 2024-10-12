@@ -179,7 +179,7 @@ public:
     void Process_M16_1stPerson(const CVector& target, float orientation, float speedVar, float speedVarWanted);
     void Process_Rocket(const CVector& target, float orientation, float speedVar, float speedVarWanted, bool isHeatSeeking);
     void Process_SpecialFixedForSyphon(const CVector& target, float orientation, float speedVar, float speedVarWanted);
-    void Process_WheelCam(const CVector& target, float orientation, float speedVar, float speedVarWanted);
+    bool Process_WheelCam(const CVector& target, float orientation, float speedVar, float speedVarWanted);
 
     // NOTSA: inlined
     void ApplyUnderwaterMotionBlur();
