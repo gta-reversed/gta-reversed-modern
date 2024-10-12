@@ -52,8 +52,28 @@ void CIdleCam::Init() {
 }
 
 // 0x50A160
-void CIdleCam::Reset(bool a1) {
-    plugin::CallMethod<0x50A160, CIdleCam*, bool>(this, a1);
+void CIdleCam::Reset(bool resetControls) {
+    m_PositionToSlerpFrom.Reset();
+    m_LastIdlePos.Reset();
+    m_TimeSlerpStarted               = -1.0f;
+    m_TimeIdleCamStarted             = -1.0f;
+    m_TimeLastTargetSelected         = -1.0f;
+    m_ZoomFrom                       = -1.0f;
+    m_ZoomTo                         = -1.0f;
+    m_TimeZoomStarted                = -1.0f;
+    m_TimeTargetEntityWasLastVisible = -1.0f;
+    m_TimeLastZoomIn                 = -1.0f;
+    m_Target                         = 0;
+    m_ZoomState                      = 3;
+    m_nForceAZoomOut                 = 0;
+    m_CurFOV                         = 70.0f;
+    m_TargetLOSCounter               = 0;
+    m_bHasZoomedIn                   = 0;
+    m_SlerpTime                      = 1.0f;
+
+    if (resetControls) {
+        CPad::GetPad()->LastTimeTouched = CTimer::GetTimeInMS();
+    }
 }
 
 // 0x50A200

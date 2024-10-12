@@ -50,7 +50,7 @@ public:
     CIdleCam();
 
     void Init();
-    void Reset(bool a1);
+    void Reset(bool resetControls);
     void ProcessIdleCamTicker();
     bool IsItTimeForIdleCam();
     void IdleCamGeneralProcess();
