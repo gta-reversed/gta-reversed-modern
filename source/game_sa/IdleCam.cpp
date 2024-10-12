@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "IdleCam.h"
+#include "InterestingEvents.h"
 
 CIdleCam& gIdleCam = *(CIdleCam*)0xB6FDA0;
 uint32& gbCineyCamProcessedOnFrame = *(uint32*)0xB6EC40;
@@ -10,8 +11,8 @@ void CIdleCam::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(GetLookAtPositionOnTarget, 0x50EAE0, { .reversed = false });
-    RH_ScopedInstall(Init, 0x50E6D0, { .reversed = false });
-    RH_ScopedInstall(Reset, 0x50A160, { .reversed = false });
+    RH_ScopedInstall(Init, 0x50E6D0);
+    RH_ScopedInstall(Reset, 0x50A160);
     RH_ScopedInstall(ProcessIdleCamTicker, 0x50A200, { .reversed = false });
     RH_ScopedInstall(SetTarget, 0x50A280, { .reversed = false });
     RH_ScopedInstall(FinaliseIdleCamera, 0x50E760, { .reversed = false });
@@ -22,6 +23,7 @@ void CIdleCam::InjectHooks() {
     RH_ScopedInstall(ProcessFOVZoom, 0x517BF0, { .reversed = false });
     RH_ScopedInstall(Run, 0x51D3E0, { .reversed = false });
     RH_ScopedInstall(Process, 0x522C80, { .reversed = false });
+    RH_ScopedInstall(IdleCamGeneralProcess, 0x50E690);
 }
 
 // 0x517760
@@ -90,7 +92,14 @@ bool CIdleCam::IsItTimeForIdleCam() {
 // wrong name?
 // 0x50E690
 void CIdleCam::IdleCamGeneralProcess() {
+    if (gIdleCam.m_IdleTickerFrames <= gIdleCam.m_TimeControlsIdleForIdleToKickIn) {
+        g_InterestingEvents.m_b1 = false;
+    }
 
+    if (TheCamera.GetActiveCam().m_nMode != MODE_FOLLOWPED) {
+        g_InterestingEvents.m_b1    = false;
+        gIdleCam.m_IdleTickerFrames = 0;
+    }
 }
 
 // 0x50EAE0
