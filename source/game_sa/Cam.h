@@ -132,7 +132,6 @@ public:
     static void InjectHooks();
 
     CCam();
-    CCam* Constructor();
 
     void Init();
 
@@ -181,7 +180,13 @@ public:
     void Process_WheelCam(const CVector&, float, float, float);
 
     // NOTSA: inlined
-    void ApplyUnderwaterBlur();
+    void ApplyUnderwaterMotionBlur();
+
+private:
+    CCam* Constructor() {
+        this->CCam::CCam();
+        return this;
+    }
 };
 
 VALIDATE_SIZE(CCam, 0x238);

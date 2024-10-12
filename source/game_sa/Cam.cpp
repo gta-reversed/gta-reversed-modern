@@ -71,11 +71,6 @@ CCam::CCam() {
     Init();
 }
 
-CCam* CCam::Constructor() {
-    this->CCam::CCam();
-    return this;
-}
-
 // 0x50E490
 void CCam::Init() {
     m_vecFront = CVector(0, 0, -1);
@@ -428,7 +423,7 @@ void CCam::Process_Fixed(const CVector& target, float orientation, float speedVa
 
     float waterLevel{};
     if (CWaterLevel::GetWaterLevel(m_vecSource, waterLevel, true) && m_vecSource.z < waterLevel) {
-        ApplyUnderwaterBlur();
+        ApplyUnderwaterMotionBlur();
     }
 
     if (gAllowScriptedFixedCameraCollision) {
@@ -486,7 +481,7 @@ void CCam::Process_WheelCam(const CVector&, float, float, float) {
     NOTSA_UNREACHABLE();
 }
 
-void CCam::ApplyUnderwaterBlur() {
+void CCam::ApplyUnderwaterMotionBlur() {
     static constexpr uint32 UNDERWATER_CAM_BLUR      = 20;    // 0x8CC7A4
     static constexpr float  UNDERWATER_CAM_MAG_LIMIT = 10.0f; // 0x8CC7A8
 
@@ -498,9 +493,11 @@ void CCam::ApplyUnderwaterBlur() {
 
     const auto factor = (colorMag <= UNDERWATER_CAM_MAG_LIMIT) ? 1.0f : UNDERWATER_CAM_MAG_LIMIT / colorMag;
 
-    TheCamera.m_nBlurRed    = static_cast<uint32>(factor * CTimeCycle::m_CurrentColours.m_fWaterRed);
-    TheCamera.m_nBlurGreen  = static_cast<uint32>(factor * CTimeCycle::m_CurrentColours.m_fWaterGreen);
-    TheCamera.m_nBlurBlue   = static_cast<uint32>(factor * CTimeCycle::m_CurrentColours.m_fWaterBlue);
-    TheCamera.m_nBlurType   = 2; // TODO: enum
-    TheCamera.m_nMotionBlur = UNDERWATER_CAM_BLUR;
+    TheCamera.SetMotionBlur(
+        static_cast<uint32>(factor * CTimeCycle::m_CurrentColours.m_fWaterRed),
+        static_cast<uint32>(factor * CTimeCycle::m_CurrentColours.m_fWaterGreen),
+        static_cast<uint32>(factor * CTimeCycle::m_CurrentColours.m_fWaterBlue),
+        UNDERWATER_CAM_BLUR,
+        eMotionBlurType::LIGHT_SCENE
+    );
 }
