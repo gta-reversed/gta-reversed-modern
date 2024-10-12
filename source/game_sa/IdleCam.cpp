@@ -13,7 +13,7 @@ void CIdleCam::InjectHooks() {
     RH_ScopedInstall(GetLookAtPositionOnTarget, 0x50EAE0, { .reversed = false });
     RH_ScopedInstall(Init, 0x50E6D0);
     RH_ScopedInstall(Reset, 0x50A160);
-    RH_ScopedInstall(ProcessIdleCamTicker, 0x50A200, { .reversed = false });
+    RH_ScopedInstall(ProcessIdleCamTicker, 0x50A200);
     RH_ScopedInstall(SetTarget, 0x50A280, { .reversed = false });
     RH_ScopedInstall(FinaliseIdleCamera, 0x50E760, { .reversed = false });
     RH_ScopedInstall(SetTargetPlayer, 0x50EB50, { .reversed = false });
@@ -80,7 +80,12 @@ void CIdleCam::Reset(bool resetControls) {
 
 // 0x50A200
 void CIdleCam::ProcessIdleCamTicker() {
-    plugin::CallMethod<0x50A200, CIdleCam*>(this);
+    if (m_LastTimePadTouched == CPad::GetPad(0)->LastTimeTouched) {
+        m_IdleTickerFrames += static_cast<uint32>(CTimer::ms_fTimeStep * 20.0f);
+    } else {
+        m_LastTimePadTouched = CPad::GetPad(0)->LastTimeTouched;
+        m_IdleTickerFrames   = 0;
+    }
 }
 
 // inlined
