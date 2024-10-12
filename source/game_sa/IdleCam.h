@@ -54,7 +54,7 @@ public:
     void ProcessIdleCamTicker();
     bool IsItTimeForIdleCam();
     void IdleCamGeneralProcess();
-    void GetLookAtPositionOnTarget(CEntity* target, CVector* posn);
+    void GetLookAtPositionOnTarget(CEntity* target, CVector& outPos);
     void ProcessFOVZoom(float a1);
     bool IsTargetValid(CEntity* target);
     void SetTarget(CEntity* target);

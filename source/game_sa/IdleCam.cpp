@@ -108,8 +108,19 @@ void CIdleCam::IdleCamGeneralProcess() {
 }
 
 // 0x50EAE0
-void CIdleCam::GetLookAtPositionOnTarget(CEntity* target, CVector* posn) {
-    plugin::CallMethod<0x50EAE0, CIdleCam*, CEntity*, CVector*>(this, target, posn);
+void CIdleCam::GetLookAtPositionOnTarget(CEntity* target, CVector& outPos) {
+    outPos = target->GetPosition();
+    if (target->IsPed()) {
+        switch (target->AsPed()->m_nPedType) {
+        case PED_TYPE_CIVFEMALE:
+        case PED_TYPE_PROSTITUTE:
+            outPos.z += 0.1f;
+            break;
+        default:
+            outPos.z += 0.5f;
+            break;
+        }
+    }
 }
 
 // 0x517BF0
