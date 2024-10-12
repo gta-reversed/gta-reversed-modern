@@ -332,8 +332,8 @@ void CCam::Process_DW_PlaneSpotterCam(bool) {
 
 // 0x50F3F0 - debug
 void CCam::Process_Editor(const CVector& target, float orientation, float speedVar, float speedVarWanted) {
-    static float& LOOKAT_ANGLE   = StaticRef<float>(0xB6FFE4);
-    static bool&  RENDER_SHADOWS = StaticRef<bool>(0xB7295A);
+    static float& lookAtAngle     = StaticRef<float>(0xB6FFE4);
+    static bool&  doRenderShadows = StaticRef<bool>(0xB7295A);
 
     if (m_bResetStatics) {
         m_vecSource.Set(796.0f, -937.0f, 40.0f);
@@ -349,34 +349,26 @@ void CCam::Process_Editor(const CVector& target, float orientation, float speedV
     m_fHorizontalAngle += pad->GetLeftStickX() * _90DEG_PER_HOUR_IN_RAD_PER_MIN / 19.0f;
     m_fVerticalAngle   += DegreesToRadians(static_cast<float>(pad->GetLeftStickY())) / 50.0f;
 
-    const auto lookAtPos = [&] {
-        return m_pCamTargetEntity ? m_pCamTargetEntity->GetPosition() : m_vecSource;
-    }();
-
     m_fVerticalAngle = std::max(m_fVerticalAngle, DegreesToRadians(85.0f));
     if (m_fVerticalAngle >= DegreesToRadians(-85.0f)) {
         if (pad->IsSquareDown()) {
-            LOOKAT_ANGLE += 0.1f;
+            lookAtAngle += 0.1f;
         } else if (pad->IsCrossDown()) {
-            LOOKAT_ANGLE -= 0.1f;
+            lookAtAngle -= 0.1f;
         } else {
-            LOOKAT_ANGLE = 0.0f;
+            lookAtAngle = 0.0f;
         }
     } else {
         m_fVerticalAngle = DegreesToRadians(-85.0f);
     }
-    LOOKAT_ANGLE = std::clamp(LOOKAT_ANGLE, -70.0f, 70.0f);
+    lookAtAngle = std::clamp(lookAtAngle, -70.0f, 70.0f);
 
-    m_vecFront = (lookAtPos - m_vecSource).Normalized();
-    m_vecSource += LOOKAT_ANGLE * m_vecFront;
+    m_vecFront = (m_pCamTargetEntity ? m_pCamTargetEntity->GetPosition() : m_vecSource - m_vecSource).Normalized();
+    m_vecSource += lookAtAngle * m_vecFront;
     m_vecSource.z = std::min(m_vecSource.z, -450.0f);
 
     if (pad->IsRightShoulder2Pressed()) {
-        if (auto* veh = FindPlayerVehicle()) {
-            veh->Teleport(m_vecSource, false);
-        } else {
-            FindPlayerPed()->Teleport(m_vecSource, false);
-        }
+        FindPlayerEntity()->Teleport(m_vecSource, false);
     }
 
     const auto ClampByLoop = [](float& value, float min, float max) {
@@ -392,7 +384,7 @@ void CCam::Process_Editor(const CVector& target, float orientation, float speedV
 
     GetVectorsReadyForRW();
 
-    if (!pad->IsLeftShockPressed() && RENDER_SHADOWS) {
+    if (!pad->IsLeftShockPressed() && doRenderShadows) {
         CShadows::StoreShadowToBeRendered(
             eShadowType::SHADOW_ADDITIVE,
             gpShadowExplosionTex,
