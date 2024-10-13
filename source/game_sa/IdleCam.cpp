@@ -19,7 +19,7 @@ void CIdleCam::InjectHooks() {
     RH_ScopedInstall(SetTargetPlayer, 0x50EB50);
     RH_ScopedInstall(IsTargetValid, 0x517770);
     RH_ScopedInstall(ProcessTargetSelection, 0x517870, { .reversed = false });
-    RH_ScopedInstall(ProcessSlerp, 0x5179E0, { .reversed = false });
+    RH_ScopedInstall(ProcessSlerp, 0x5179E0);
     RH_ScopedInstall(ProcessFOVZoom, 0x517BF0, { .reversed = false });
     RH_ScopedInstall(Run, 0x51D3E0);
     RH_ScopedInstall(Process, 0x522C80);
@@ -214,7 +214,43 @@ void CIdleCam::VectorToAnglesRotXRotZ(CVector* posn, float* outA1, float* outA2)
 
 // 0x5179E0
 float CIdleCam::ProcessSlerp(float& outX, float& outZ) {
-    return plugin::CallMethodAndReturn<float, 0x5179E0, CIdleCam*, float&, float&>(this, outX, outZ);
+    const auto beginTime = CTimer::GetTimeInMS();
+
+    CVector lookAtPos{};
+    if (m_TargetLOSCounter >= m_TargetLOSFramestoReject) {
+        lookAtPos = m_LastIdlePos;
+    } else {
+        GetLookAtPositionOnTarget(m_Target, lookAtPos);
+    }
+
+    const auto slerpToCam  = m_PositionToSlerpFrom - m_Cam->m_vecSource;
+    const auto lookAtToCam = lookAtPos - m_Cam->m_vecSource;
+
+    const auto slerpAtan = CGeneral::GetATanOfXY(slerpToCam.x, slerpToCam.y) + DegreesToRadians(180.0f);
+    const auto slerpDistAtan = CGeneral::GetATanOfXY(slerpToCam.Magnitude2D(), slerpToCam.z);
+
+    auto lookAtAtan = CGeneral::GetATanOfXY(lookAtToCam.x, lookAtToCam.y) + DegreesToRadians(180.0f);
+    auto lookAtDistAtan = CGeneral::GetATanOfXY(lookAtToCam.Magnitude2D(), lookAtToCam.z);
+
+    const auto ClampAngle = [](float& angle, float compare) {
+        if (compare <= DegreesToRadians(180.0f)) {
+            if (compare < -DegreesToRadians(180.0f)) {
+                angle += DegreesToRadians(360.0f);
+            }
+        } else {
+            angle -= DegreesToRadians(360.0f);
+        }
+    };
+
+    ClampAngle(lookAtDistAtan, lookAtDistAtan - slerpDistAtan);
+    ClampAngle(lookAtAtan, lookAtAtan - slerpAtan);
+
+    const auto slerpT = std::min((beginTime - m_TimeLastTargetSelected) / m_SlerpDuration, 1.0f);
+    const auto lerpT  = (std::sin(DegreesToRadians(270.0f - 180.0f * slerpT)) + 1.0f) / 2.0f;
+
+    outX = lerp(slerpDistAtan, lookAtDistAtan - slerpDistAtan, lerpT);
+    outZ = lerp(slerpAtan, lookAtAtan - slerpAtan, lerpT);
+    return slerpT;
 }
 
 // 0x50E760
