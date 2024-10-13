@@ -258,16 +258,121 @@ void CCam::ProcessPedsDeadBaby() {
 }
 
 // 0x50EB70
-void CCam::Process_1rstPersonPedOnPC(const CVector&, float, float, float) {
-    NOTSA_UNREACHABLE();
+void CCam::Process_1rstPersonPedOnPC(const CVector& target, float orientation, float speedVar, float speedVarWanted) {
+    static CVector& v3d_8CCC54   = StaticRef<CVector>(0x8CCC54);
+    static bool&    byte_B6FFDC  = StaticRef<bool>(0xB6FFDC);
+    static CVector& v3d_B6FFC4   = StaticRef<CVector>(0xB6FFC4);
+    static CVector& v3d_B6FFD0   = StaticRef<CVector>(0xB6FFD0);
+
+    if (m_nMode != MODE_SNIPER_RUNABOUT) {
+        m_fFOV = 70.0f;
+    }
+
+    if (!m_pCamTargetEntity->m_pRwObject) {
+        return;
+    }
+
+    if (!m_pCamTargetEntity->IsPed()) {
+        m_bResetStatics = false;
+        RwCameraSetNearClipPlane(Scene.m_pRwCamera, 0.05f);
+        return;
+    }
+
+    const auto hier = GetAnimHierarchyFromSkinClump(m_pCamTargetEntity->m_pRwClump);
+    const auto aIdx = RpHAnimIDGetIndex(hier, ConvertPedNode2BoneTag(2)); // todo: enum
+    auto&      aMat = RpHAnimHierarchyGetMatrixArray(hier)[aIdx];
+    auto*      targetPed = m_pCamTargetEntity->AsPed();
+
+    CVector pointIn = v3d_8CCC54;
+    RwV3dTransformPoint(&pointIn, &pointIn, &aMat);
+    RwV3d v3dZero{ 0.0f };
+    RwMatrixScale(&aMat, &v3dZero, rwCOMBINEPRECONCAT);
+
+    if (m_bResetStatics) {
+        // unnecessary entity ped check
+        m_fVerticalAngle = 0.0f;
+        byte_B6FFDC      = false;
+        v3d_B6FFD0.Reset();
+        m_fHorizontalAngle            = targetPed->m_fCurrentRotation + DegreesToRadians(90.0f);
+        m_bCollisionChecksOn          = true;
+        m_fInitialPlayerOrientation   = m_fHorizontalAngle;
+        m_vecBufferedPlayerBodyOffset = v3d_B6FFC4 = pointIn;
+    }
+    m_vecBufferedPlayerBodyOffset.y = pointIn.y;
+
+    if (TheCamera.m_bHeadBob) {
+        m_vecBufferedPlayerBodyOffset.x = lerp(
+            pointIn.x,
+            m_vecBufferedPlayerBodyOffset.x,
+            TheCamera.m_fScriptPercentageInterToCatchUp
+        );
+
+        m_vecBufferedPlayerBodyOffset.z = lerp(
+            pointIn.z,
+            m_vecBufferedPlayerBodyOffset.z,
+            TheCamera.m_fScriptPercentageInterToCatchUp
+        );
+
+        m_vecSource = targetPed->GetMatrix().TransformPoint(m_vecBufferedPlayerBodyOffset);
+    } else {
+        const auto targetFwd = targetPed->GetForward().Normalized();
+        const auto mag       = (pointIn - v3d_B6FFC4).Magnitude2D();
+
+        m_vecSource = targetFwd * mag * 1.23f + targetPed->GetPosition() + CVector{ 0.0f, 0.0f, 0.59f };
+    }
+
+    CVector spinePos{};
+    targetPed->GetTransformedBonePosition(spinePos, BONE_SPINE1, true);
+
+    // TODO: Put in a function name e.g. 'HandleFreeMouseControl'?
+    auto*      pad1   = CPad::GetPad(0);
+    const auto fov    = m_fFOV / 80.0f;
+    const auto mouseX = pad1->NewMouseControllerState.X, mouseY = pad1->NewMouseControllerState.Y;
+
+    if (mouseX != 0.0f || mouseY != 0.0f) {
+        m_fHorizontalAngle += -3.0f * mouseX * fov * CCamera::m_fMouseAccelHorzntl;
+        m_fVerticalAngle += +4.0f * mouseY * fov * CCamera::m_fMouseAccelVertical;
+    } else {
+        const auto hv = (float)-pad1->sub_540BD0(targetPed);
+        const auto vv = (float)pad1->sub_540CC0(targetPed);
+
+        m_fHorizontalAngle += sq(hv) / 10000.0f * fov / 17.5f * CTimer::GetTimeStep() * (hv < 0.0f ? -1.0f : 1.0f);
+        m_fVerticalAngle += sq(vv) / 22500.0f * fov / 14.0f * CTimer::GetTimeStep() * (vv < 0.0f ? -1.0f : 1.0f);
+    }
+    ClipBeta();
+    ClipAlpha();
+
+    if (const auto* a = targetPed->m_pAttachedTo; targetPed->IsPlayer() && a) {
+        // enum?
+        switch (targetPed->m_fTurretAngleA) {
+        case 0u:
+            m_fHorizontalAngle -= a->GetHeading() + DegreesToRadians(90.0f);
+            break;
+        case 1u:
+            m_fHorizontalAngle -= a->GetHeading() + DegreesToRadians(180.0f);
+            break;
+        case 2u:
+            m_fHorizontalAngle -= a->GetHeading() + DegreesToRadians(-90.0f);
+            break;
+        case 3u:
+            m_fHorizontalAngle -= a->GetHeading();
+            break;
+        default:
+            // NOTE(yukani): If this is fired, gimme a call. 0x50F0ED
+            NOTSA_UNREACHABLE();
+            break;
+        }
+
+        // ...
+    }
 }
 
 // 0x517EA0
 void CCam::Process_1stPerson(const CVector& target, float orientation, float speedVar, float speedVarWanted) {
-    static float  s_LastWheelieTime = StaticRef<float>(0x8CCD14);
+    static float& s_LastWheelieTime = StaticRef<float>(0x8CCD14);
     // Making sure player doesn't see below ground when flipped.
     // Name is made up cuz I found it funny to name it like that.
-    static float s_GroundFaultProtection = StaticRef<float>(0xB7004C);
+    static float& s_GroundFaultProtection = StaticRef<float>(0xB7004C);
 
     gbFirstPersonRunThisFrame = true;
 
@@ -770,4 +875,29 @@ void CCam::ApplyUnderwaterMotionBlur() {
         UNDERWATER_CAM_BLUR,
         eMotionBlurType::LIGHT_SCENE
     );
+}
+
+// 0x4D58A0
+int32 ConvertPedNode2BoneTag(int32 simpleId) {
+    const auto map = notsa::make_mapping<int32, int32>({
+        { 1,  3 },
+        { 2,  5 },
+        { 3,  32},
+        { 4,  22},
+        { 5,  34},
+        { 6,  24},
+        { 7,  41},
+        { 8,  51},
+        { 9,  43},
+        { 10, 53},
+        { 11, 52},
+        { 12, 42},
+        { 13, 33},
+        { 14, 23},
+        { 15, 31},
+        { 16, 21},
+        { 17, 4 },
+        { 18, 8 },
+    });
+    return notsa::find_value_or(map, simpleId, -1);
 }

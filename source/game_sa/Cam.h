@@ -181,7 +181,7 @@ public:
     void Process_SpecialFixedForSyphon(const CVector& target, float orientation, float speedVar, float speedVarWanted);
     bool Process_WheelCam(const CVector& target, float orientation, float speedVar, float speedVarWanted);
 
-    // NOTSA: inlined
+    // inlined
     void ApplyUnderwaterMotionBlur();
 
 private:
@@ -192,3 +192,5 @@ private:
 };
 
 VALIDATE_SIZE(CCam, 0x238);
+
+int32 ConvertPedNode2BoneTag(int32 simpleId);
