@@ -2,6 +2,7 @@
 
 #include "IdleCam.h"
 #include "InterestingEvents.h"
+#include "HandShaker.h"
 
 CIdleCam& gIdleCam = *(CIdleCam*)0xB6FDA0;
 uint32& gbCineyCamProcessedOnFrame = *(uint32*)0xB6EC40;
@@ -10,12 +11,12 @@ void CIdleCam::InjectHooks() {
     RH_ScopedClass(CIdleCam);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(GetLookAtPositionOnTarget, 0x50EAE0, { .reversed = false });
+    RH_ScopedInstall(GetLookAtPositionOnTarget, 0x50EAE0);
     RH_ScopedInstall(Init, 0x50E6D0);
     RH_ScopedInstall(Reset, 0x50A160);
     RH_ScopedInstall(ProcessIdleCamTicker, 0x50A200);
     RH_ScopedInstall(SetTarget, 0x50A280);
-    RH_ScopedInstall(FinaliseIdleCamera, 0x50E760, { .reversed = false });
+    RH_ScopedInstall(FinaliseIdleCamera, 0x50E760);
     RH_ScopedInstall(SetTargetPlayer, 0x50EB50);
     RH_ScopedInstall(IsTargetValid, 0x517770);
     RH_ScopedInstall(ProcessTargetSelection, 0x517870, { .reversed = false });
@@ -174,7 +175,7 @@ bool CIdleCam::IsTargetValid(CEntity* target) {
 
 // 0x50A280
 void CIdleCam::SetTarget(CEntity* target) {
-    const auto time = CTimer::GetTimeInMS();
+    const auto time = static_cast<float>(CTimer::GetTimeInMS());
     if (m_Target) {
         m_PositionToSlerpFrom = m_LastIdlePos;
     } else {
@@ -254,8 +255,30 @@ float CIdleCam::ProcessSlerp(float& outX, float& outZ) {
 }
 
 // 0x50E760
-void CIdleCam::FinaliseIdleCamera(float a1, float a2, float a3) {
-    plugin::CallMethod<0x50E760, CIdleCam*, float, float, float>(this, a1, a2, a3);
+void CIdleCam::FinaliseIdleCamera(float curAngleX, float curAngleY, float shakeDegree) {
+    auto &vecFwd = m_Cam->m_vecFront, vecUp = m_Cam->m_vecUp;
+
+    vecFwd = CVector{
+        -(std::cos(curAngleY) * std::cos(curAngleX)),
+        -(std::sin(curAngleY) * std::cos(curAngleX)),
+        std::sin(curAngleX)
+    }.Normalized();
+    m_LastIdlePos = vecFwd + m_Cam->m_vecSource;
+
+    auto& hs = gHandShaker[0];
+    hs.Process(shakeDegree);
+    const auto angle = hs.m_ang.z * m_DegreeShakeIdleCam * shakeDegree;
+    vecFwd = hs.m_resultMat.TransformPoint(vecFwd);
+
+    vecUp.Set(std::sin(angle), 0.0f, std::cos(angle));
+    auto a = CrossProduct(vecFwd, vecUp).Normalized();
+    vecUp  = CrossProduct(a, vecFwd);
+    if (vecFwd.x == 0 && vecFwd.y == 0.0f) {
+        vecFwd.x = vecFwd.y = 0.0001f;
+    }
+    a     = CrossProduct(vecFwd, vecUp).Normalized();
+    vecUp = CrossProduct(a, vecFwd);
+    m_Cam->GetVectorsReadyForRW();
 }
 
 // 0x51D3E0

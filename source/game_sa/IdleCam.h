@@ -14,7 +14,7 @@ public:
     float    m_SlerpTime;
     float    m_TimeControlsIdleForIdleToKickIn;
     float    m_TimeIdleCamStarted;
-    int32    m_LastFrameProcessed;
+    uint32   m_LastFrameProcessed;
     float    m_TimeLastTargetSelected;
     float    m_TimeMinimumToLookAtSomething;
     float    m_TimeTargetEntityWasLastVisible;
