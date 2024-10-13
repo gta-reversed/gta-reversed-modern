@@ -14,7 +14,7 @@ void CIdleCam::InjectHooks() {
     RH_ScopedInstall(Init, 0x50E6D0);
     RH_ScopedInstall(Reset, 0x50A160);
     RH_ScopedInstall(ProcessIdleCamTicker, 0x50A200);
-    RH_ScopedInstall(SetTarget, 0x50A280, { .reversed = false });
+    RH_ScopedInstall(SetTarget, 0x50A280);
     RH_ScopedInstall(FinaliseIdleCamera, 0x50E760, { .reversed = false });
     RH_ScopedInstall(SetTargetPlayer, 0x50EB50, { .reversed = false });
     RH_ScopedInstall(IsTargetValid, 0x517770);
@@ -174,7 +174,26 @@ bool CIdleCam::IsTargetValid(CEntity* target) {
 
 // 0x50A280
 void CIdleCam::SetTarget(CEntity* target) {
-    plugin::CallMethod<0x50A280, CIdleCam*, CEntity*>(this, target);
+    const auto time = CTimer::GetTimeInMS();
+    if (m_Target) {
+        m_PositionToSlerpFrom = m_LastIdlePos;
+    } else {
+        m_PositionToSlerpFrom = m_Cam->m_vecSource + m_Cam->m_vecFront;
+    }
+
+    if (target) {
+        CEntity::SafeCleanUpRef(m_Target);
+        m_Target = target;
+        CEntity::SafeRegisterRef(m_Target);
+    } else if (m_Target) {
+        CEntity::SafeCleanUpRef(m_Target);
+        m_Target = nullptr;
+    }
+
+    m_TimeSlerpStarted       = time;
+    m_TimeLastTargetSelected = time;
+    m_TargetLOSCounter       = 0;
+    m_bHasZoomedIn           = false;
 }
 
 // 0x50EB50
