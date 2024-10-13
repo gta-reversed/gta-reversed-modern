@@ -4,6 +4,8 @@
 #include "TimeCycle.h"
 #include "Camera.h"
 #include "Shadows.h"
+#include "IdleCam.h"
+#include "InterestingEvents.h"
 
 bool& gbFirstPersonRunThisFrame = *reinterpret_cast<bool*>(0xB6EC20);
 
@@ -40,7 +42,7 @@ void CCam::InjectHooks() {
     RH_ScopedInstall(ProcessArrestCamOne, 0x518500, { .reversed = false });
     RH_ScopedInstall(ProcessPedsDeadBaby, 0x519250, { .reversed = false });
     RH_ScopedInstall(Process_1rstPersonPedOnPC, 0x50EB70, { .reversed = false });
-    RH_ScopedInstall(Process_1stPerson, 0x517EA0, { .reversed = false });
+    RH_ScopedInstall(Process_1stPerson, 0x517EA0);
     RH_ScopedInstall(Process_AimWeapon, 0x521500, { .reversed = false });
     RH_ScopedInstall(Process_AttachedCam, 0x512B10, { .reversed = false });
     RH_ScopedInstall(Process_Cam_TwoPlayer, 0x525E50, { .reversed = false });
@@ -262,8 +264,10 @@ void CCam::Process_1rstPersonPedOnPC(const CVector&, float, float, float) {
 
 // 0x517EA0
 void CCam::Process_1stPerson(const CVector& target, float orientation, float speedVar, float speedVarWanted) {
-    static uint32 dword_B7004C    = StaticRef<uint32>(0xB7004C);
-    static float  lastWheelieTime = StaticRef<float>(0x8CCD14);
+    static float  s_LastWheelieTime = StaticRef<float>(0x8CCD14);
+    // Making sure player doesn't see below ground when flipped.
+    // Name is made up cuz I found it funny to name it like that.
+    static float s_GroundFaultProtection = StaticRef<float>(0xB7004C);
 
     gbFirstPersonRunThisFrame = true;
 
@@ -283,7 +287,7 @@ void CCam::Process_1stPerson(const CVector& target, float orientation, float spe
         }();
         m_fInitialPlayerOrientation = m_fHorizontalAngle;
 
-        dword_B7004C                            = false;
+        s_GroundFaultProtection                 = 0.0f;
         TheCamera.m_fAvoidTheGeometryProbsTimer = 0.0f;
     }
 
@@ -292,19 +296,20 @@ void CCam::Process_1stPerson(const CVector& target, float orientation, float spe
         return;
     }
 
-    if (m_pCamTargetEntity->AsVehicle()->IsBike() && m_pCamTargetEntity->AsBike()->bikeFlags.bWheelieForCamera || TheCamera.m_fAvoidTheGeometryProbsTimer > 0.0f) {
-        const auto wheelieTime = CTimer::GetTimeInMS();
-        if (lastWheelieTime > wheelieTime) {
-            lastWheelieTime = 0.0f;
-        }
+    const auto wheelieTime = static_cast<float>(CTimer::GetTimeInMS());
+    if (s_LastWheelieTime > wheelieTime) {
+        s_LastWheelieTime = 0.0f;
+    }
 
-        if (wheelieTime - lastWheelieTime >= 3000.0f) {
-            lastWheelieTime = CTimer::GetTimeInMS();
+    auto* targetVeh = m_pCamTargetEntity->AsVehicle();
+    if (targetVeh->IsBike() && targetVeh->AsBike()->bikeFlags.bWheelieForCamera || TheCamera.m_fAvoidTheGeometryProbsTimer > 0.0f) {
+        if (wheelieTime - s_LastWheelieTime >= 3000.0f) {
+            s_LastWheelieTime = static_cast<float>(CTimer::GetTimeInMS());
         }
 
         const auto pad1 = CPad::GetPad();
         if (!pad1->NewState.LeftShoulder2 && !pad1->NewState.RightShoulder2) {
-            auto* targetBike = m_pCamTargetEntity->AsBike();
+            auto* targetBike = targetVeh->AsBike();
             if (Process_WheelCam(target, orientation, speedVar, speedVarWanted)) {
                 if (targetBike->bikeFlags.bWheelieForCamera) {
                     TheCamera.m_fAvoidTheGeometryProbsTimer = 50.0f;
@@ -317,20 +322,79 @@ void CCam::Process_1stPerson(const CVector& target, float orientation, float spe
             TheCamera.m_fAvoidTheGeometryProbsTimer = 0.0f;
             targetBike->bikeFlags.bWheelieForCamera = false;
 
-            lastWheelieTime = 0.0f;
+            s_LastWheelieTime = 0.0f;
         }
     }
 
     const auto& entityWorldMat = [&] {
-        if (auto* t = m_pCamTargetEntity->AsBike(); t->IsBike()) {
+        if (auto* t = targetVeh->AsBike(); t->IsBike()) {
             t->CalculateLeanMatrix();
             return t->m_mLeanMatrix;
         } else {
-            return m_pCamTargetEntity->GetMatrix();
+            return targetVeh->GetMatrix();
         }
     }();
 
-    // ...
+    const auto dummyPos = [&] {
+        const auto* vehStruct = targetVeh->GetVehicleModelInfo()->GetVehicleStruct();
+        return vehStruct->m_avDummyPos[targetVeh->IsBoat() ? DUMMY_LIGHT_FRONT_MAIN : DUMMY_SEAT_FRONT] * CVector{0.0f, 1.0f, 1.0f}; // ignore x
+    }() + CVector{ 0.0f, 0.08f, 0.62f };
+
+    m_fFOV = 60.0f;
+    m_vecSource = entityWorldMat.TransformVector(dummyPos);
+    m_vecSource += targetVeh->GetPosition();
+
+    if (targetVeh->IsBike() && targetVeh->m_pDriver) {
+        auto*   targetBike = targetVeh->AsBike();
+        CVector neckPos{};
+
+        targetVeh->m_pDriver->GetTransformedBonePosition(neckPos, BONE_NECK, true);
+        neckPos += targetBike->GetMoveSpeed() * CTimer::GetTimeStep();
+
+        constexpr auto BIKE_1ST_PERSON_ZOFFSET = 0.15f; // 0x8CC7B4
+        m_vecSource.z = neckPos.z + BIKE_1ST_PERSON_ZOFFSET;
+
+        const auto right = CrossProduct(m_vecFront, m_vecUp);
+        // right *= flt_8CCD0C; (=1.0f)
+
+        if (!CWorld::GetIsLineOfSightClear(
+            CrossProduct(m_vecSource, m_vecSource + right),
+            CrossProduct(m_vecSource, m_vecSource - right),
+            true,
+            false,
+            false,
+            false
+        )) {
+            m_vecSource = targetBike->GetPosition();
+            m_vecSource.z = neckPos.z + BIKE_1ST_PERSON_ZOFFSET + 0.62f;
+        }
+    } else if (targetVeh->IsBoat()) {
+        m_vecSource.z += 0.5f;
+    }
+
+    // todo: refactor
+    if (targetVeh->IsUpsideDown()) {
+        if (s_GroundFaultProtection >= 0.5f) {
+            s_GroundFaultProtection = 0.5f;
+        } else {
+            s_GroundFaultProtection += 0.03f;
+        }
+    } else if (s_GroundFaultProtection >= 0.0f) {
+        s_GroundFaultProtection = 0.0f;
+    } else {
+        s_GroundFaultProtection -= 0.03f;
+    }
+    m_vecSource.z += s_GroundFaultProtection;
+
+    m_vecFront = entityWorldMat.GetForward().Normalized();
+    m_vecUp    = entityWorldMat.GetUp().Normalized();
+    const auto a = CrossProduct(m_vecFront, m_vecUp).Normalized();
+    m_vecUp = CrossProduct(a, m_vecFront).Normalized();
+
+    if (float wl{}; CWaterLevel::GetWaterLevel(m_vecSource, wl, true) && m_vecSource.z < wl - 0.3f) {
+        ApplyUnderwaterMotionBlur();
+    }
+    m_bResetStatics = false;
 }
 
 // 0x521500
@@ -400,8 +464,8 @@ void CCam::Process_DW_PlaneSpotterCam(bool) {
 
 // 0x50F3F0 - debug
 void CCam::Process_Editor(const CVector& target, float orientation, float speedVar, float speedVarWanted) {
-    static float& lookAtAngle     = StaticRef<float>(0xB6FFE4);
-    static bool&  doRenderShadows = StaticRef<bool>(0xB7295A);
+    static float& s_LookAtAngle     = StaticRef<float>(0xB6FFE4);
+    static bool&  s_DoRenderShadows = StaticRef<bool>(0xB7295A);
 
     if (m_bResetStatics) {
         m_vecSource.Set(796.0f, -937.0f, 40.0f);
@@ -420,19 +484,19 @@ void CCam::Process_Editor(const CVector& target, float orientation, float speedV
     m_fVerticalAngle = std::max(m_fVerticalAngle, DegreesToRadians(85.0f));
     if (m_fVerticalAngle >= DegreesToRadians(-85.0f)) {
         if (pad->IsSquareDown()) {
-            lookAtAngle += 0.1f;
+            s_LookAtAngle += 0.1f;
         } else if (pad->IsCrossDown()) {
-            lookAtAngle -= 0.1f;
+            s_LookAtAngle -= 0.1f;
         } else {
-            lookAtAngle = 0.0f;
+            s_LookAtAngle = 0.0f;
         }
     } else {
         m_fVerticalAngle = DegreesToRadians(-85.0f);
     }
-    lookAtAngle = std::clamp(lookAtAngle, -70.0f, 70.0f);
+    s_LookAtAngle = std::clamp(s_LookAtAngle, -70.0f, 70.0f);
 
     m_vecFront = (m_pCamTargetEntity ? m_pCamTargetEntity->GetPosition() : m_vecSource - m_vecSource).Normalized();
-    m_vecSource += lookAtAngle * m_vecFront;
+    m_vecSource += s_LookAtAngle * m_vecFront;
     m_vecSource.z = std::min(m_vecSource.z, -450.0f);
 
     if (pad->IsRightShoulder2Pressed()) {
@@ -452,7 +516,7 @@ void CCam::Process_Editor(const CVector& target, float orientation, float speedV
 
     GetVectorsReadyForRW();
 
-    if (!pad->IsLeftShockPressed() && doRenderShadows) {
+    if (!pad->IsLeftShockPressed() && s_DoRenderShadows) {
         CShadows::StoreShadowToBeRendered(
             eShadowType::SHADOW_ADDITIVE,
             gpShadowExplosionTex,
