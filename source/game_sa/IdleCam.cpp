@@ -19,7 +19,7 @@ void CIdleCam::InjectHooks() {
     RH_ScopedInstall(FinaliseIdleCamera, 0x50E760);
     RH_ScopedInstall(SetTargetPlayer, 0x50EB50);
     RH_ScopedInstall(IsTargetValid, 0x517770);
-    RH_ScopedInstall(ProcessTargetSelection, 0x517870, { .reversed = false });
+    RH_ScopedInstall(ProcessTargetSelection, 0x517870);
     RH_ScopedInstall(ProcessSlerp, 0x5179E0);
     RH_ScopedInstall(ProcessFOVZoom, 0x517BF0, { .reversed = false });
     RH_ScopedInstall(Run, 0x51D3E0);
@@ -67,7 +67,7 @@ void CIdleCam::Reset(bool resetControls) {
     m_TimeTargetEntityWasLastVisible = -1.0f;
     m_TimeLastZoomIn                 = -1.0f;
     m_Target                         = 0;
-    m_ZoomState                      = 3;
+    m_ZoomState                      = eIdleCamZoomState::UNK_3;
     m_nForceAZoomOut                 = 0;
     m_CurFOV                         = 70.0f;
     m_TargetLOSCounter               = 0;
@@ -109,7 +109,7 @@ void CIdleCam::IdleCamGeneralProcess() {
 }
 
 // 0x50EAE0
-void CIdleCam::GetLookAtPositionOnTarget(CEntity* target, CVector& outPos) {
+void CIdleCam::GetLookAtPositionOnTarget(const CEntity* target, CVector& outPos) {
     outPos = target->GetPosition();
     if (target->IsPed()) {
         switch (target->AsPed()->m_nPedType) {
@@ -205,7 +205,51 @@ void CIdleCam::SetTargetPlayer() {
 
 // 0x517870
 void CIdleCam::ProcessTargetSelection() {
-    plugin::CallMethod<0x517870, CIdleCam*>(this);
+    auto timeDelta = static_cast<float>(CTimer::GetTimeInMS()) - m_TimeLastTargetSelected;
+    if (m_ZoomState != eIdleCamZoomState::UNK_3 && m_TargetLOSCounter <= 0) {
+        timeDelta /= m_IncreaseMinimumTimeFactorForZoomedIn;
+    }
+
+    if (timeDelta > m_TimeMinimumToLookAtSomething) {
+        g_InterestingEvents.InvalidateNonVisibleEvents();
+        auto* event = g_InterestingEvents.GetInterestingEvent();
+
+        if (event) {
+            auto* eventEntity = event->entity;
+            if (m_Target != eventEntity) {
+                if (IsTargetValid(eventEntity)) {
+                    if (m_ZoomState == eIdleCamZoomState::UNK_3) {
+                        SetTarget(eventEntity);
+                    } else {
+                        m_nForceAZoomOut = true;
+                    }
+                }
+            } else if (!IsTargetValid(eventEntity)) {
+                g_InterestingEvents.InvalidateEvent(event);
+            }
+        } else if (!m_Target || !IsTargetValid(m_Target) && m_Target != FindPlayerPed()) {
+            if (m_ZoomState == eIdleCamZoomState::UNK_3) {
+                SetTargetPlayer();
+            } else {
+                m_nForceAZoomOut = true;
+            }
+        }
+    }
+
+    if (!m_Target) {
+        SetTargetPlayer();
+    }
+
+    if (!IsTargetValid(m_Target) && timeDelta > m_TimeMinimumToLookAtSomething) {
+        m_nForceAZoomOut = true;
+        if (m_ZoomState == eIdleCamZoomState::UNK_3 || m_TargetLOSCounter > 0) {
+            SetTargetPlayer();
+        }
+    }
+
+    if (m_TargetLOSCounter > m_TargetLOSFramestoReject) {
+        SetTargetPlayer();
+    }
 }
 
 // inlined, see ProcessSlerp
