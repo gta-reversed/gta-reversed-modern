@@ -64,7 +64,7 @@ public:
     float ProcessSlerp(float& outX, float& outZ);
     void FinaliseIdleCamera(float a1, float a2, float a3);
     void Run();
-    void Process();
+    bool Process();
 };
 
 VALIDATE_SIZE(CIdleCam, 0x9C);

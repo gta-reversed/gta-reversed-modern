@@ -17,12 +17,12 @@ void CIdleCam::InjectHooks() {
     RH_ScopedInstall(SetTarget, 0x50A280, { .reversed = false });
     RH_ScopedInstall(FinaliseIdleCamera, 0x50E760, { .reversed = false });
     RH_ScopedInstall(SetTargetPlayer, 0x50EB50, { .reversed = false });
-    RH_ScopedInstall(IsTargetValid, 0x517770, { .reversed = false });
+    RH_ScopedInstall(IsTargetValid, 0x517770);
     RH_ScopedInstall(ProcessTargetSelection, 0x517870, { .reversed = false });
     RH_ScopedInstall(ProcessSlerp, 0x5179E0, { .reversed = false });
     RH_ScopedInstall(ProcessFOVZoom, 0x517BF0, { .reversed = false });
     RH_ScopedInstall(Run, 0x51D3E0);
-    RH_ScopedInstall(Process, 0x522C80, { .reversed = false });
+    RH_ScopedInstall(Process, 0x522C80);
     RH_ScopedInstall(IdleCamGeneralProcess, 0x50E690);
 }
 
@@ -90,14 +90,14 @@ void CIdleCam::ProcessIdleCamTicker() {
 
 // inlined
 bool CIdleCam::IsItTimeForIdleCam() {
-    // return (float)field_94 <= field_28;
-    return false; // Android
+    // Always false in Android
+    return static_cast<float>(m_IdleTickerFrames) > m_TimeControlsIdleForIdleToKickIn;
 }
 
 // wrong name?
 // 0x50E690
 void CIdleCam::IdleCamGeneralProcess() {
-    if (gIdleCam.m_IdleTickerFrames <= gIdleCam.m_TimeControlsIdleForIdleToKickIn) {
+    if (!IsItTimeForIdleCam()) {
         g_InterestingEvents.m_b1 = false;
     }
 
@@ -130,7 +130,46 @@ void CIdleCam::ProcessFOVZoom(float a1) {
 
 // 0x517770
 bool CIdleCam::IsTargetValid(CEntity* target) {
-    return plugin::CallMethodAndReturn<bool, 0x517770, CIdleCam*, CEntity*>(this, target);
+    if (!target) {
+        return false;
+    }
+
+    if (target == FindPlayerPed()) {
+        return true;
+    }
+    CVector lookAtPos{};
+    GetLookAtPositionOnTarget(target, lookAtPos);
+
+    const auto dist = DistanceBetweenPoints(m_Cam->m_vecSource, lookAtPos);
+    if (dist < m_DistTooClose || dist > m_DistTooFar) {
+        return false;
+    }
+
+    if (m_SlerpTime < 1.0f) {
+        return true;
+    }
+
+    // NOTE: What about:
+    // CWorld::IgnoreGuard _(target)
+    const auto oldIgnore  = CWorld::pIgnoreEntity;
+    CWorld::pIgnoreEntity = target;
+    notsa::ScopeGuard _([&]{ CWorld::pIgnoreEntity = oldIgnore; });
+
+    if (CWorld::GetIsLineOfSightClear(
+        m_Cam->m_vecSource,
+        lookAtPos,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+    )) {
+        return true;
+    }
+
+    return m_TargetLOSCounter++ < m_TargetLOSFramestoReject;
 }
 
 // 0x50A280
@@ -182,6 +221,22 @@ void CIdleCam::Run() {
 }
 
 // 0x522C80
-void CIdleCam::Process() {
-    plugin::CallMethod<0x522C80, CIdleCam*>(this);
+bool CIdleCam::Process() {
+    ProcessIdleCamTicker();
+    if (!IsItTimeForIdleCam()) {
+        return false;
+    }
+
+    m_Cam = &TheCamera.GetActiveCam();
+    if (m_LastFrameProcessed < CTimer::GetFrameCounter() - 1) {
+        g_InterestingEvents.m_b1 = true;
+        Reset(false);
+        m_TimeIdleCamStarted = static_cast<float>(CTimer::GetTimeInMS());
+        SetTarget(FindPlayerPed());
+        m_nForceAZoomOut = true;
+    }
+    m_LastFrameProcessed = CTimer::GetFrameCounter();
+    Run();
+    gbCineyCamProcessedOnFrame = m_LastFrameProcessed;
+    return true;
 }
