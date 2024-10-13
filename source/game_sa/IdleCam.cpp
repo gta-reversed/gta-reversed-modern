@@ -16,7 +16,7 @@ void CIdleCam::InjectHooks() {
     RH_ScopedInstall(ProcessIdleCamTicker, 0x50A200);
     RH_ScopedInstall(SetTarget, 0x50A280);
     RH_ScopedInstall(FinaliseIdleCamera, 0x50E760, { .reversed = false });
-    RH_ScopedInstall(SetTargetPlayer, 0x50EB50, { .reversed = false });
+    RH_ScopedInstall(SetTargetPlayer, 0x50EB50);
     RH_ScopedInstall(IsTargetValid, 0x517770);
     RH_ScopedInstall(ProcessTargetSelection, 0x517870, { .reversed = false });
     RH_ScopedInstall(ProcessSlerp, 0x5179E0, { .reversed = false });
@@ -198,7 +198,8 @@ void CIdleCam::SetTarget(CEntity* target) {
 
 // 0x50EB50
 void CIdleCam::SetTargetPlayer() {
-    plugin::CallMethod<0x50EB50, CIdleCam*>(this);
+    SetTarget(FindPlayerPed());
+    m_nForceAZoomOut = true;
 }
 
 // 0x517870
