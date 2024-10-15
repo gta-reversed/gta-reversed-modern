@@ -125,8 +125,8 @@ void CIdleCam::GetLookAtPositionOnTarget(const CEntity* target, CVector& outPos)
 }
 
 // 0x517BF0
-void CIdleCam::ProcessFOVZoom(float a1) {
-    plugin::CallMethod<0x517BF0, CIdleCam*, float>(this, a1);
+void CIdleCam::ProcessFOVZoom(float time) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x517770
@@ -252,11 +252,6 @@ void CIdleCam::ProcessTargetSelection() {
     }
 }
 
-// inlined, see ProcessSlerp
-void CIdleCam::VectorToAnglesRotXRotZ(CVector* posn, float* outA1, float* outA2) {
-    assert(false);
-}
-
 // 0x5179E0
 float CIdleCam::ProcessSlerp(float& outX, float& outZ) {
     const auto beginTime = CTimer::GetTimeInMS();
@@ -268,14 +263,8 @@ float CIdleCam::ProcessSlerp(float& outX, float& outZ) {
         GetLookAtPositionOnTarget(m_Target, lookAtPos);
     }
 
-    const auto slerpToCam  = m_PositionToSlerpFrom - m_Cam->m_vecSource;
-    const auto lookAtToCam = lookAtPos - m_Cam->m_vecSource;
-
-    const auto slerpAtan = CGeneral::GetATanOfXY(slerpToCam.x, slerpToCam.y) + DegreesToRadians(180.0f);
-    const auto slerpDistAtan = CGeneral::GetATanOfXY(slerpToCam.Magnitude2D(), slerpToCam.z);
-
-    auto lookAtAtan = CGeneral::GetATanOfXY(lookAtToCam.x, lookAtToCam.y) + DegreesToRadians(180.0f);
-    auto lookAtDistAtan = CGeneral::GetATanOfXY(lookAtToCam.Magnitude2D(), lookAtToCam.z);
+    auto [slerpAtan, slerpDistAtan]   = VectorToAnglesRotXRotZ(m_PositionToSlerpFrom - m_Cam->m_vecSource);
+    auto [lookAtAtan, lookAtDistAtan] = VectorToAnglesRotXRotZ(lookAtPos - m_Cam->m_vecSource);
 
     const auto ClampAngle = [](float& angle, float compare) {
         if (compare <= DegreesToRadians(180.0f)) {

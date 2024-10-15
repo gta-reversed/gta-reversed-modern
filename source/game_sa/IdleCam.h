@@ -5,6 +5,7 @@
 class CEntity;
 
 enum class eIdleCamZoomState {
+    UNK_2 = 2,
     UNK_3 = 3,
 };
 
@@ -53,22 +54,29 @@ public:
 
     CIdleCam();
 
-    void Init();
-    void Reset(bool resetControls);
-    void ProcessIdleCamTicker();
-    bool IsItTimeForIdleCam();
-    void IdleCamGeneralProcess();
-    void GetLookAtPositionOnTarget(const CEntity* target, CVector& outPos);
-    void ProcessFOVZoom(float a1);
-    bool IsTargetValid(CEntity* target);
-    void SetTarget(CEntity* target);
-    void SetTargetPlayer();
-    void ProcessTargetSelection();
-    void VectorToAnglesRotXRotZ(CVector* posn, float* outA1, float* outA2);
+    void  Init();
+    void  Reset(bool resetControls);
+    void  ProcessIdleCamTicker();
+    bool  IsItTimeForIdleCam();
+    void  IdleCamGeneralProcess();
+    void  GetLookAtPositionOnTarget(const CEntity* target, CVector& outPos);
+    void  ProcessFOVZoom(float time);
+    bool  IsTargetValid(CEntity* target);
+    void  SetTarget(CEntity* target);
+    void  SetTargetPlayer();
+    void  ProcessTargetSelection();
     float ProcessSlerp(float& outX, float& outZ);
-    void FinaliseIdleCamera(float a1, float a2, float a3);
-    void Run();
-    bool Process();
+    void  FinaliseIdleCamera(float curAngleX, float curAngleY, float shakeDegree);
+    void  Run();
+    bool  Process();
+
+    // Inlined: ProcessSlerp, return type is NOTSA
+    auto VectorToAnglesRotXRotZ(const CVector& pos) {
+        return std::make_pair(
+            CGeneral::GetATanOfXY(pos.x, pos.y) + DegreesToRadians(180.0f),
+            CGeneral::GetATanOfXY(pos.Magnitude2D(), pos.z)
+        );
+    }
 };
 
 VALIDATE_SIZE(CIdleCam, 0x9C);
