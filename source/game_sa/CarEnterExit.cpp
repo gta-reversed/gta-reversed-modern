@@ -451,9 +451,10 @@ bool CCarEnterExit::IsCarSlowJackRequired(const CVehicle* vehicle, int32 doorId)
 
     int group = vehicle->GetAnimGroupId();
     if (group == ANIM_GROUP_COACHCARANIMS || group == ANIM_GROUP_BUSCARANIMS) {
-        if (doorId == 8) {
+        switch (doorId) {
+        case 8:
             return false;
-        } else if (doorId == 10) {
+        case 10:
             return vehicle->m_pDriver != nullptr;
         }
     } else {
@@ -611,7 +612,7 @@ void CCarEnterExit::MakeUndraggedPassengerPedsLeaveCar(const CVehicle* targetVeh
 // unused
 // 0x650130
 void CCarEnterExit::QuitEnteringCar(CPed* ped, CVehicle* vehicle, int32 doorId, bool bCarWasBeingJacked) {
-    CCarEnterExit::RemoveGetInAnims(ped);
+    RemoveGetInAnims(ped);
     ped->RestartNonPartialAnims();
     if (!RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_IDLE)) {
         CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 1000.0f);
@@ -623,10 +624,15 @@ void CCarEnterExit::QuitEnteringCar(CPed* ped, CVehicle* vehicle, int32 doorId, 
     vehicle->m_nNumGettingIn--;
 
     if (vehicle->IsBike() || vehicle->m_pHandlingData->m_bTandemSeats) {
-        if (doorId == 10 || doorId == 8) {
+        switch (doorId) {
+        case 8:
+        case 10:
             vehicle->SetGettingInFlags(5);
-        } else if (doorId == 11 || doorId == 9) {
+            break;
+        case 9:
+        case 11:
             vehicle->SetGettingInFlags(10);
+            break;
         }
         vehicle->vehicleFlags.bIsBig = false;
     } else {

@@ -234,13 +234,13 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(GetRopeHeightForHeli, 0x6D3D10);
     RH_ScopedInstall(SetRopeHeightForHeli, 0x6D3D30);
 
-    RH_ScopedGlobalOverloadedInstall(SetVehicleAtomicVisibilityCB, "Atomic", 0x6D2690, RwObject*(*)(RwObject*, void*), { .reversed = false });
+    RH_ScopedGlobalOverloadedInstall(SetVehicleAtomicVisibilityCB, "Object", 0x6D2690, RwObject*(*)(RwObject*, void*), { .reversed = false });
     RH_ScopedGlobalOverloadedInstall(SetVehicleAtomicVisibilityCB, "Frame", 0x6D26D0, RwFrame*(*)(RwFrame*, void*));
     // RH_ScopedGlobalInstall(SetCompAlphaCB, 0x6D2950);
     RH_ScopedGlobalInstall(IsVehiclePointerValid, 0x6E38F0);
     // RH_ScopedGlobalInstall(RemoveUpgradeCB, 0x6D3300);
     // RH_ScopedGlobalInstall(FindUpgradeCB, 0x6D3370);
-    RH_ScopedGlobalOverloadedInstall(RemoveObjectsCB, "Atomic", 0x6D33B0, RwObject*(*)(RwObject*, void*), { .reversed = false });
+    RH_ScopedGlobalOverloadedInstall(RemoveObjectsCB, "Object", 0x6D33B0, RwObject*(*)(RwObject*, void*), { .reversed = false });
     RH_ScopedGlobalOverloadedInstall(RemoveObjectsCB, "Frame", 0x6D3420, RwFrame*(*)(RwFrame*, void*));
     RH_ScopedGlobalInstall(CopyObjectsCB, 0x6D3450);
     // RH_ScopedGlobalInstall(FindReplacementUpgradeCB, 0x6D3490);
@@ -4332,17 +4332,17 @@ void CVehicle::DoHeadLightBeam(eVehicleDummy dummyId, CMatrix& matrix, bool arg2
 void CVehicle::DoHeadLightReflectionSingle(CMatrix& lightMat, bool bRight) {
     auto vehOffset = GetDummyPositionObjSpace(DUMMY_LIGHT_FRONT_MAIN);
     if (!bRight) {
-        vehOffset.x = -vehOffset.x;
+        vehOffset.x *= -1.f;
     }
-    const auto lightFwd2D   = CVector2D{ lightMat.GetForward() }.Normalized();
-    const auto lightRight2D = CVector2D{ lightMat.GetRight() }.Normalized();
-    const auto lightSize = IsBike() || GetModelID() == MODEL_QUAD
+    const auto lightFwd2D = CVector2D(lightMat.GetForward()).Normalized();
+    const auto lightRight2D = CVector2D(lightMat.GetRight()).Normalized();
+    const auto lightSize = (IsBike() || GetModelID() == MODEL_QUAD)
         ? 1.25f
         : std::fabs(vehOffset.x) * 4.0f;
 
-    const float offsetDistance = lightSize * 2.f + 1.0f + vehOffset.y;
+    const float offsetDistance = lightSize * 2.0f + 1.0f + vehOffset.y;
 
-    const auto shdwFront = lightSize * 2.f * lightFwd2D;
+    const auto shdwFront = lightFwd2D * (lightSize * 2.0f);
     const auto shdwSide  = (lightFwd2D * lightSize).GetPerpRight();
 
     CShadows::StoreCarLightShadow(
@@ -4364,12 +4364,12 @@ void CVehicle::DoHeadLightReflectionSingle(CMatrix& lightMat, bool bRight) {
 // 0x6E1600
 void CVehicle::DoHeadLightReflectionTwin(CMatrix& matrix) {
     const auto& vehOffset = GetDummyPositionObjSpace(DUMMY_LIGHT_FRONT_MAIN);
-    const auto lightFwd2D = CVector2D{ matrix.GetForward() }.Normalized();
+    const auto lightFwd2D = CVector2D(matrix.GetForward()).Normalized();
     const auto lightSize  = vehOffset.x * 4.0f;
 
-    const auto offsetDistance = lightSize * 2.f + 1.0f + vehOffset.y;
+    const auto offsetDistance = lightSize * 2.0f + 1.0f + vehOffset.y;
 
-    const auto shdwFront = lightSize * 2.f * lightFwd2D;
+    const auto shdwFront = lightFwd2D * (lightSize * 2.0f);
     const auto shdwSide  = (lightFwd2D * lightSize).GetPerpRight();
 
     CShadows::StoreCarLightShadow(
