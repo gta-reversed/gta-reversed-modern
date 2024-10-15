@@ -557,7 +557,7 @@ public:
     CPed* PickRandomPassenger();
     void AddDamagedVehicleParticles();
     void MakeDirty(CColPoint& colPoint);
-    bool AddWheelDirtAndWater(CColPoint& colPoint, uint32 arg1, uint8 arg2, uint8 arg3);
+    bool AddWheelDirtAndWater(CColPoint& colPoint, bool isProduceWheelDrops, bool isWheelsSpinning, bool isWheelInWater);
     void SetGettingInFlags(uint8 doorId);
     void SetGettingOutFlags(uint8 doorId);
     void ClearGettingInFlags(uint8 doorId);
@@ -610,7 +610,7 @@ public:
                       float adhesion, int8 wheelId, float* wheelSpeed, tWheelState* wheelState, uint16 wheelStatus);
     void ProcessBikeWheel(CVector& wheelFwd, CVector& wheelRight, CVector& wheelContactSpeed, CVector& wheelContactPoint, int32 wheelsOnGround, float thrust, float brake,
                           float adhesion, float destabTraction, int8 wheelId, float* wheelSpeed, tWheelState* wheelState, eBikeWheelSpecial special, uint16 wheelStatus);
-    int32 FindTyreNearestPoint(CVector2D point);
+    eCarWheel FindTyreNearestPoint(CVector2D point);
     void InflictDamage(CEntity* damager, eWeaponType weapon, float intensity, CVector coords);
     void KillPedsGettingInVehicle();
     bool UsesSiren();
@@ -637,14 +637,14 @@ public:
 
     bool DoHeadLightEffect(eVehicleDummy dummyId, CMatrix& vehicleMatrix, uint8 lightId, uint8 lightState);
     void DoHeadLightBeam(eVehicleDummy dummyId, CMatrix& matrix, bool arg2);
-    void DoHeadLightReflectionSingle(CMatrix& matrix, uint8 lightId);
+    void DoHeadLightReflectionSingle(CMatrix& matrix, bool isRight);
     void DoHeadLightReflectionTwin(CMatrix& matrix);
-    void DoHeadLightReflection(CMatrix& matrix, uint32 flags, uint8 left, uint8 right);
+    void DoHeadLightReflection(CMatrix& matrix, uint32 flags, bool left, bool right);
     bool DoTailLightEffect(int32 lightId, CMatrix& matrix, uint8 arg2, uint8 arg3, uint32 arg4, uint8 arg5);
     void DoVehicleLights(CMatrix& matrix, eVehicleLightsFlags flags);
 
     void FillVehicleWithPeds(bool bSetClothesToAfro);
-    void DoBladeCollision(CVector pos, CMatrix& matrix, int16 rotorType, float radius, float damageMult);
+    bool DoBladeCollision(CVector pos, CMatrix& matrix, int16 rotorType, float radius, float damageMult);
     void AddVehicleUpgrade(int32 modelId);
     void SetupUpgradesAfterLoad();
     void GetPlaneWeaponFiringStatus(bool& status, eOrdnanceType& ordnanceType);

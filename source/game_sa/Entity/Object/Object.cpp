@@ -629,7 +629,7 @@ void CObject::ProcessGarageDoorBehaviour() {
 
     const auto& vecDummyPos = m_pDummyObject->GetPosition();
     auto* mi = GetModelInfo();
-    const auto fHeight = mi->GetColModel()->GetBoundingBox().GetHeight();
+    const auto fHeight = mi->GetColModel()->GetBoundingBox().GetHeight() - 0.1f;
     const auto& garage = CGarages::GetGarage(m_nGarageDoorGarageIndex);
     if (garage.m_bDoorOpensUp) {
         m_matrix->GetPosition().z = vecDummyPos.z + fHeight * garage.m_fDoorPosition * 0.48F;
