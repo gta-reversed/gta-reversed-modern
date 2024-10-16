@@ -6,8 +6,11 @@
 #include "Shadows.h"
 #include "IdleCam.h"
 #include "InterestingEvents.h"
+#include "ModelIndices.h"
+#include "HandShaker.h"
 
-bool& gbFirstPersonRunThisFrame = *reinterpret_cast<bool*>(0xB6EC20);
+bool& gbFirstPersonRunThisFrame = StaticRef<bool>(0xB6EC20);
+uint32& gLastFrameProcessedDWCineyCam = StaticRef<uint32>(0x8CCB9C);
 
 static inline std::array<bool, 9> gbExitCam = StaticRef<std::array<bool, 9>>(0xB6EC5C);
 
@@ -27,7 +30,7 @@ void CCam::InjectHooks() {
     RH_ScopedInstall(Init, 0x50E490);
     RH_ScopedInstall(CacheLastSettingsDWCineyCam, 0x50D7A0);
     RH_ScopedInstall(DoCamBump, 0x50CB30);
-    RH_ScopedInstall(Finalise_DW_CineyCams, 0x50DD70, { .reversed = false });
+    RH_ScopedInstall(Finalise_DW_CineyCams, 0x50DD70);
     RH_ScopedInstall(GetCoreDataForDWCineyCamMode, 0x517130, { .reversed = false });
     RH_ScopedInstall(GetLookFromLampPostPos, 0x5161A0, { .reversed = false });
     RH_ScopedInstall(GetVectorsReadyForRW, 0x509CE0);
@@ -159,17 +162,47 @@ void CCam::DoCamBump(float horizontal, float vertical) {
 }
 
 // 0x50DD70
-void CCam::Finalise_DW_CineyCams(CVector*, CVector*, float, float, float, float) {
-    NOTSA_UNREACHABLE();
+void CCam::Finalise_DW_CineyCams(const CVector& src, const CVector& dest, float roll, float fov, float nearClip, float shakeDegree) {
+    m_vecFront  = (src - dest).Normalized();
+    m_vecSource = src;
+
+    // What is this thing?
+    {
+        const auto a = CrossProduct(m_vecFront, { std::sin(roll), 0.0f, std::cos(roll) }).Normalized();
+        m_vecUp      = CrossProduct(a, m_vecFront);
+        if (m_vecFront.x == 0.0f && m_vecFront.y == 0.0f) {
+            m_vecFront.x = m_vecFront.y = 0.0001f;
+        }
+        const auto b = CrossProduct(m_vecFront, m_vecUp).Normalized();
+        m_vecUp      = CrossProduct(b, m_vecFront);
+    }
+
+    m_fFOV = fov;
+    RwCameraSetNearClipPlane(Scene.m_pRwCamera, 0.4f); // meant to use nearClip here?
+    CacheLastSettingsDWCineyCam();
+    gLastFrameProcessedDWCineyCam = CTimer::GetFrameCounter();
+    gHandShaker[0].Process(shakeDegree);
+
+    m_vecFront = gHandShaker[0].m_resultMat.TransformVector(m_vecFront);
+
+    {
+        const auto a = CrossProduct(m_vecFront, { std::sin(roll), 0.0f, std::cos(roll) }).Normalized();
+        m_vecUp      = CrossProduct(a, m_vecFront);
+        if (m_vecFront.x == 0.0f && m_vecFront.y == 0.0f) {
+            m_vecFront.x = m_vecFront.y = 0.0001f;
+        }
+        const auto b = CrossProduct(m_vecFront, m_vecUp).Normalized();
+        m_vecUp      = CrossProduct(b, m_vecFront);
+    }
 }
 
 // 0x517130
-void CCam::GetCoreDataForDWCineyCamMode(CEntity**, CVehicle**, CVector*, CVector*, CVector*, CVector*, CVector*, CVector*, float*, CVector*, float*, CColSphere*) {
+void CCam::GetCoreDataForDWCineyCamMode(CEntity*&, CVehicle*&, CVector&, CVector&, CVector&, CVector&, CVector*, CVector*, float*, CVector*, float*, CColSphere*) {
     NOTSA_UNREACHABLE();
 }
 
 // 0x5161A0
-void CCam::GetLookFromLampPostPos(CEntity*, CPed*, CVector&, CVector&) {
+void CCam::GetLookFromLampPostPos(CEntity* target, CPed* cop, const CVector& vecTarget, const CVector& vecSource) {
     NOTSA_UNREACHABLE();
 }
 
@@ -900,4 +933,29 @@ int32 ConvertPedNode2BoneTag(int32 simpleId) {
         { 18, 8 },
     });
     return notsa::find_value_or(map, simpleId, -1);
+}
+
+// 0x509A30
+bool bIsLampPost(eModelID modelId) {
+    using namespace ModelIndices;
+
+    return notsa::contains(
+        {
+            MI_SINGLESTREETLIGHTS1,
+            MI_SINGLESTREETLIGHTS2,
+            MI_SINGLESTREETLIGHTS3,
+            MI_BOLLARDLIGHT,
+            MI_MLAMPPOST,
+            MI_STREETLAMP1,
+            MI_STREETLAMP2,
+            MI_TELPOLE02,
+            MI_TRAFFICLIGHTS_MIAMI,
+            MI_TRAFFICLIGHTS_TWOVERTICAL,
+            MI_TRAFFICLIGHTS_3,
+            MI_TRAFFICLIGHTS_4,
+            MI_TRAFFICLIGHTS_GAY,
+            MI_TRAFFICLIGHTS_5,
+        },
+        (ModelIndex)modelId
+    );
 }

@@ -137,9 +137,9 @@ public:
 
     void CacheLastSettingsDWCineyCam();
     void DoCamBump(float horizontal, float vertical);
-    void Finalise_DW_CineyCams(CVector*, CVector*, float, float, float, float);
-    void GetCoreDataForDWCineyCamMode(CEntity**, CVehicle**, CVector*, CVector*, CVector*, CVector*, CVector*, CVector*, float*, CVector*, float*, CColSphere*);
-    void GetLookFromLampPostPos(CEntity*, CPed*, CVector&, CVector&);
+    void Finalise_DW_CineyCams(const CVector& src, const CVector& dest, float roll, float fov, float nearClip, float shakeDegree);
+    void GetCoreDataForDWCineyCamMode(CEntity*&, CVehicle*&, CVector&, CVector&, CVector&, CVector&, CVector*, CVector*, float*, CVector*, float*, CColSphere*);
+    void GetLookFromLampPostPos(CEntity* target, CPed* cop, const CVector& vecTarget, const CVector& vecSource);
     void GetVectorsReadyForRW();
     void Get_TwoPlayer_AimVector(CVector&);
     bool IsTimeToExitThisDWCineyCamMode(int32 camId, const CVector& src, const CVector& dst, float t, bool lineOfSightCheck);
@@ -194,3 +194,4 @@ private:
 VALIDATE_SIZE(CCam, 0x238);
 
 int32 ConvertPedNode2BoneTag(int32 simpleId);
+bool  bIsLampPost(eModelID modelId);
