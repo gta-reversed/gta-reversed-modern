@@ -969,7 +969,7 @@ bool bIsLampPost(eModelID modelId) {
     using namespace ModelIndices;
 
     return notsa::contains(
-        {
+        std::initializer_list<eModelID>{
             MI_SINGLESTREETLIGHTS1,
             MI_SINGLESTREETLIGHTS2,
             MI_SINGLESTREETLIGHTS3,
@@ -985,6 +985,6 @@ bool bIsLampPost(eModelID modelId) {
             MI_TRAFFICLIGHTS_GAY,
             MI_TRAFFICLIGHTS_5,
         },
-        (ModelIndex)modelId
+        modelId
     );
 }
