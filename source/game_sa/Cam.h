@@ -138,7 +138,7 @@ public:
     void CacheLastSettingsDWCineyCam();
     void DoCamBump(float horizontal, float vertical);
     void Finalise_DW_CineyCams(const CVector& src, const CVector& dest, float roll, float fov, float nearClip, float shakeDegree);
-    void GetCoreDataForDWCineyCamMode(CEntity*&, CVehicle*&, CVector&, CVector&, CVector&, CVector&, CVector*, CVector*, float*, CVector*, float*, CColSphere*);
+    void GetCoreDataForDWCineyCamMode(CEntity*& entity, CVehicle*& vehicle, CVector& dest, CVector& src, CVector& targetUp, CVector& targetRight, CVector& targetFwd, CVector& targetVel, float& targetSpeed, CVector& targetAngVel, float& targetAngSpeed, CColSphere& colSphere);
     void GetLookFromLampPostPos(CEntity* target, CPed* cop, const CVector& vecTarget, const CVector& vecSource);
     void GetVectorsReadyForRW();
     void Get_TwoPlayer_AimVector(CVector&);

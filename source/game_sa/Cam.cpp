@@ -31,7 +31,7 @@ void CCam::InjectHooks() {
     RH_ScopedInstall(CacheLastSettingsDWCineyCam, 0x50D7A0);
     RH_ScopedInstall(DoCamBump, 0x50CB30);
     RH_ScopedInstall(Finalise_DW_CineyCams, 0x50DD70);
-    RH_ScopedInstall(GetCoreDataForDWCineyCamMode, 0x517130, { .reversed = false });
+    RH_ScopedInstall(GetCoreDataForDWCineyCamMode, 0x517130);
     RH_ScopedInstall(GetLookFromLampPostPos, 0x5161A0, { .reversed = false });
     RH_ScopedInstall(GetVectorsReadyForRW, 0x509CE0);
     RH_ScopedInstall(Get_TwoPlayer_AimVector, 0x513E40, { .reversed = false });
@@ -197,8 +197,37 @@ void CCam::Finalise_DW_CineyCams(const CVector& src, const CVector& dest, float 
 }
 
 // 0x517130
-void CCam::GetCoreDataForDWCineyCamMode(CEntity*&, CVehicle*&, CVector&, CVector&, CVector&, CVector&, CVector*, CVector*, float*, CVector*, float*, CColSphere*) {
-    NOTSA_UNREACHABLE();
+void CCam::GetCoreDataForDWCineyCamMode(
+    CEntity*& entity,
+    CVehicle*& vehicle,
+    CVector& dest,
+    CVector& src,
+    CVector& targetUp,
+    CVector& targetRight,
+    CVector& targetFwd,
+    CVector& targetVel,
+    float& targetSpeed,
+    CVector& targetAngVel,
+    float& targetAngSpeed,
+    CColSphere& colSphere
+) {
+    entity         = m_pCamTargetEntity;
+    vehicle        = entity->AsVehicle();
+    dest           = entity->GetPosition();
+    src            = DWCineyCamLastPos;
+    targetUp       = entity->GetUpVector();
+    targetRight    = entity->GetRightVector();
+    targetFwd      = entity->GetForwardVector();
+    targetVel      = entity->AsPhysical()->GetMoveSpeed();
+    targetSpeed    = targetVel.Magnitude();
+    targetAngVel   = entity->AsPhysical()->GetTurnSpeed();
+    targetAngSpeed = targetAngVel.Magnitude();
+
+    colSphere.Set(
+        entity->GetModelInfo()->GetColModel()->GetBoundRadius(),
+        entity->GetBoundCentre(),
+        eSurfaceType::SURFACE_DEFAULT
+    );
 }
 
 // 0x5161A0
