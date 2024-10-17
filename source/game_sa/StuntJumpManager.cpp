@@ -107,7 +107,7 @@ void CStuntJumpManager::Update() {
             playerVehicle->GetVehicleAppearance() != VEHICLE_APPEARANCE_BOAT &&
             playerVehicle->GetVehicleAppearance() != VEHICLE_APPEARANCE_PLANE &&
             playerVehicle->GetVehicleAppearance() != VEHICLE_APPEARANCE_HELI &&
-            playerVehicle->m_nNumEntitiesCollided != 0 &&
+            playerVehicle->m_nNumEntitiesCollided != 0 && // FIXME: https://discord.com/channels/874507673943539752/880913138004938774/1294699278979039264
             playerVehicle->m_vecMoveSpeed.Magnitude() * 50.0f >= 20.0f
         ) {
             for (auto jumpIndex = 0; jumpIndex < STUNT_JUMP_COUNT; jumpIndex++) {
@@ -135,40 +135,25 @@ void CStuntJumpManager::Update() {
         }
         break;
     }
-    case eJumpState::IN_FLIGHT: {
-        if (!mp_Active) {
-            m_jumpState = eJumpState::START_POINT_INTERSECTED;
-            break;
-        }
-
+    case eJumpState::IN_FLIGHT: { // 0x49C665
         bool failed = false;
         if (playerVehicle->m_nNumEntitiesCollided != 0 && m_iTimer >= 100) {
-            failed = true;
+            failed = playerInfo->m_nPlayerState == PLAYERSTATE_HAS_DIED ||
+                !playerPed->bInVehicle ||
+                playerVehicle->m_nStatus == STATUS_WRECKED ||
+                playerVehicle->vehicleFlags.bIsDrowning ||
+                playerVehicle->physicalFlags.bSubmergedInWater;
+
+            if (mp_Active->end.IsPointWithin(playerVehicle->GetPosition())) {
+                m_bHitReward = true;
+            }
         }
 
-        if (playerInfo->m_nPlayerState == PLAYERSTATE_HAS_DIED) {
-            failed = true;
-        }
-
-        if (!playerPed->bInVehicle) {
-            failed = true;
-        }
-
-        if (playerVehicle->m_nStatus == STATUS_WRECKED || playerVehicle->vehicleFlags.bIsDrowning || playerVehicle->physicalFlags.bSubmergedInWater) {
-            failed = true;
-        }
-
-        if (mp_Active->end.IsPointWithin(playerVehicle->GetPosition()))
-            m_bHitReward = true;
-
-        uint32 time;
         if (failed) {
             m_jumpState = eJumpState::END_POINT_INTERSECTED;
-            time = 0;
-        } else {
-            time = m_iTimer;
         }
 
+        const auto time = failed ? 0 : m_iTimer;
         m_iTimer = (uint32)CTimer::GetTimeStepInMS() + time;
         if (m_iTimer > 1'000 && time <= 1'000) {
             if (const auto veh = FindPlayerVehicle()) {
